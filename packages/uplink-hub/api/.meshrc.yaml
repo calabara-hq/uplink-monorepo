@@ -1,0 +1,6 @@
+sources:
+  - name: authors
+    handler:
+      grpc:
+        endpoint: localhost:3001
+        source: ../foo-service/src/proto/authors_service.proto

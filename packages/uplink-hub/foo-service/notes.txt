@@ -1,0 +1,4 @@
+proto build steps
+
+buf generate
+yarn mesh build
