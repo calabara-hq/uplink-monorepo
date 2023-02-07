@@ -4,3 +4,7 @@ subgraphs:
     routing_url: http://localhost:4001
     schema:
       file: ../organizations/schema.graphql
+  contests:
+    routing_url: http://localhost:4002
+    schema:
+      file: ../contests/schema.graphql

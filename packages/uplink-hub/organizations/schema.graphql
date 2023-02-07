@@ -1,4 +1,12 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.0",
+        import: ["@key"])
 
+type Query {
+  organizations: [Organization!]!
+  organizationByEns(ens: String): Organization
+}
+        
 type Organization @key(fields: "id") {
   id: ID!
   name: String!
@@ -8,8 +16,3 @@ type Organization @key(fields: "id") {
   website: String
 }
 
-
-extend type Query {
-  organizations: [Organization!]!
-  organizationByEns(ens: String): Organization
-}

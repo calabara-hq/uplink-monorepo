@@ -12,6 +12,7 @@
   "dependencies": {
     "@apollo/federation": "^0.38.1",
     "@apollo/server": "^4.3.3",
+    "@apollo/subgraph": "^2.3.1",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6"
   },

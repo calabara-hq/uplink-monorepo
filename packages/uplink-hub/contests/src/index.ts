@@ -10,7 +10,7 @@ const typeDefs = gql(readFileSync("./schema.graphql").toString('utf-8'));
 const server = new ApolloServer({ schema: buildSubgraphSchema({ typeDefs, resolvers }) });
 
 const { url } = await startStandaloneServer(server, {
-  listen: { port: 4001 },
+  listen: { port: 4002 },
 });
 
 console.log(`🚀  Server ready at: ${url}`);

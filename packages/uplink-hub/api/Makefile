@@ -1,5 +1,4 @@
-build:
-	docker build . -t uplink/api
-
+supergraph:
+	rover supergraph compose --config ./supergraph-config.yaml > supergraph.graphql
 run:
-	docker run -p 3000:3000 -d uplink/api
+	./router --dev --supergraph supergraph.graphql
