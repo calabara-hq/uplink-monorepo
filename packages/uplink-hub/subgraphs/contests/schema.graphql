@@ -6,9 +6,9 @@ type Space @key(fields: "id") {
   spaceContests: [Contest]!
 }
 
-type Contest {
+type Contest @key(fields: "id"){
   id: ID!
-  space_id: Int!
+  spaceId: Int!
   ens: String!
 }
 

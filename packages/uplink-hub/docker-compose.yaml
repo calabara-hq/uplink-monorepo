@@ -14,3 +14,10 @@ services:
       - "4002:4000"
     volumes:
       - ./subgraphs/contests:/usr/src/app
+  submissions:
+    container_name: submissions
+    build: ./subgraphs/submissions
+    ports:
+      - "4003:4000"
+    volumes:
+      - ./subgraphs/submissions:/usr/src/app

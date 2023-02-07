@@ -20,9 +20,17 @@ const spaces = [
         id: "1",
         name: "sharkdao",
         ens: "sharkdao.eth",
-        members: 0,
-        logo: "test.png",
+        members: 634,
+        logo: "sharkdao.png",
         website: "sharks.wtf",
+    },
+    {
+        id: "2",
+        name: "nouns",
+        ens: "nouns.eth",
+        members: 999,
+        logo: "nouns.png",
+        website: "nouns.wtf",
     },
 ];
 

@@ -16,18 +16,21 @@ directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boole
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
 type Contest
-  @join__type(graph: CONTESTS)
+  @join__type(graph: CONTESTS, key: "id")
+  @join__type(graph: SUBMISSIONS, key: "id")
 {
   id: ID!
-  space_id: Int!
-  ens: String!
+  spaceId: Int! @join__field(graph: CONTESTS)
+  ens: String! @join__field(graph: CONTESTS)
+  contestSubmissions: [Submission]! @join__field(graph: SUBMISSIONS)
 }
 
 scalar join__FieldSet
 
 enum join__Graph {
-  CONTESTS @join__graph(name: "contests", url: "http://spaces:4000/graphql")
+  CONTESTS @join__graph(name: "contests", url: "http://contests:4000/graphql")
   SPACES @join__graph(name: "spaces", url: "http://spaces:4000/graphql")
+  SUBMISSIONS @join__graph(name: "submissions", url: "http://submissions:4000/graphql")
 }
 
 scalar link__Import
@@ -47,10 +50,12 @@ enum link__Purpose {
 type Query
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
+  @join__type(graph: SUBMISSIONS)
 {
   contests: [Contest!]! @join__field(graph: CONTESTS)
   spaces: [Space!]! @join__field(graph: SPACES)
   spaceByEns(ens: String): Space @join__field(graph: SPACES)
+  submissions: [Submission!]! @join__field(graph: SUBMISSIONS)
 }
 
 type Space
@@ -64,4 +69,14 @@ type Space
   members: Int! @join__field(graph: SPACES)
   logo: String! @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
+}
+
+type Submission
+  @join__type(graph: SUBMISSIONS)
+{
+  id: ID!
+  contestId: Int!
+  author: String!
+  url: String!
+  created: String!
 }

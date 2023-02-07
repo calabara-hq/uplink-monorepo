@@ -1,0 +1,23 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.0",
+        import: ["@key"])
+
+
+type Contest @key(fields: "id") {
+  id: ID!
+  contestSubmissions: [Submission]!
+}
+
+
+type Submission {
+  id: ID!
+  contestId: Int!
+  author: String!
+  url: String!
+  created: String!
+}
+
+
+extend type Query {
+  submissions: [Submission!]!
+}
