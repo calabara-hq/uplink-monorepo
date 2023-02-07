@@ -1,9 +1,9 @@
 version: '3.9'
 services:
-  organizations:
-    container_name: organizations
-    build: ./subgraphs/organizations
+  spaces:
+    container_name: spaces
+    build: ./subgraphs/spaces
     ports:
       - "4001:4000"
     volumes:
-      - ./subgraphs/organizations:/usr/src/app
+      - ./subgraphs/spaces:/usr/src/app

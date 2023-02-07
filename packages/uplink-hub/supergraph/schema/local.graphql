@@ -18,7 +18,7 @@ directive @link(url: String, as: String, for: link__Purpose, import: [link__Impo
 scalar join__FieldSet
 
 enum join__Graph {
-  ORGANIZATIONS @join__graph(name: "organizations", url: "http://localhost:4001/graphql")
+  SPACES @join__graph(name: "spaces", url: "http://localhost:4001/graphql")
 }
 
 scalar link__Import
@@ -35,8 +35,15 @@ enum link__Purpose {
   EXECUTION
 }
 
-type Organization
-  @join__type(graph: ORGANIZATIONS, key: "id")
+type Query
+  @join__type(graph: SPACES)
+{
+  spaces: [Space!]!
+  spaceByEns(ens: String): Space
+}
+
+type Space
+  @join__type(graph: SPACES, key: "id")
 {
   id: ID!
   name: String!
@@ -44,11 +51,4 @@ type Organization
   members: Int!
   logo: String!
   website: String
-}
-
-type Query
-  @join__type(graph: ORGANIZATIONS)
-{
-  organizations: [Organization!]!
-  organizationByEns(ens: String): Organization
 }

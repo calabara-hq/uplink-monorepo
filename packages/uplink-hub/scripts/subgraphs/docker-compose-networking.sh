@@ -1,7 +1,7 @@
 #!/bin/bash
 
-subgraphs=("organizations")
+subgraphs=("spaces")
 
-url_organizations="http://organizations:4000/graphql"
+url_spaces="http://spaces:4000/graphql"
 
-schema_organizations="subgraphs/organizations/schema.graphql"
+schema_spaces="subgraphs/spaces/schema.graphql"

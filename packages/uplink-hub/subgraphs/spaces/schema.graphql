@@ -3,11 +3,11 @@ extend schema
         import: ["@key"])
 
 type Query {
-  organizations: [Organization!]!
-  organizationByEns(ens: String): Organization
+  spaces: [Space!]!
+  spaceByEns(ens: String): Space
 }
         
-type Organization @key(fields: "id") {
+type Space @key(fields: "id") {
   id: ID!
   name: String!
   ens: String!
