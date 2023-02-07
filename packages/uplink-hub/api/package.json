@@ -5,7 +5,9 @@
   "author": "nick",
   "license": "MIT",
   "scripts": {
-    "start": "tsc && node dist/app.js"
+    "dev": "npx nodemon src/index.ts",
+    "build": "rm -rf ./dist && tsc",
+    "start": "tsc && node dist/index.js"
   },
   "dependencies": {
     "@graphql-mesh/cli": "^0.82.13",
