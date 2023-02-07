@@ -1,14 +1,9 @@
-version: '2'
+version: '3.9'
 services:
-  api:
-    build: .
+  organizations:
+    container_name: organizations
+    build: ./subgraphs/organizations
     ports:
-      - "3000:3000"
+      - "4001:4000"
     volumes:
-      - ./api:/usr/src/api
-
-
-
-
-
-
+      - ./subgraphs/organizations:/usr/src/app

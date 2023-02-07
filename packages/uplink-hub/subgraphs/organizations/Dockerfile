@@ -1,7 +1,7 @@
 from node:alpine
 workdir /usr/src/app
-copy ["package.json", "yarn.lock", "./"]
+copy package.json .
 run yarn install
-copy . .
-expose 4001
+copy . /usr/src/app
+expose 4000
 CMD ["yarn", "dev"]

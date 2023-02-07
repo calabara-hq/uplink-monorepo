@@ -1,0 +1,6 @@
+federation_version: 2
+subgraphs:
+  organizations:
+    routing_url: http://organizations:4000/graphql
+    schema:
+      file: ../../subgraphs/organizations/schema.graphql

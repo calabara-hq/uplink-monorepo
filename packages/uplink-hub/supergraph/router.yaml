@@ -1,0 +1,18 @@
+supergraph:
+  listen: 0.0.0.0:4000
+cors:
+  allow_any_origin: true
+
+# --------------------
+# note: `router --dev` has these default settings and enables the --hot-reload flag
+# --------------------
+# supergraph:
+#   introspection: true
+# sandbox:
+#   enabled: true
+# homepage:
+#   enabled: false
+# include_subgraph_errors:
+#   all: true # Propagate errors from all subgraphs
+# plugins:
+#   experimental.expose_query_plan: true

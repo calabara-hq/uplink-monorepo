@@ -15,19 +15,10 @@ directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boole
 
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
-type Contest
-  @join__type(graph: CONTESTS)
-{
-  id: ID!
-  org_id: Int!
-  ens: String!
-}
-
 scalar join__FieldSet
 
 enum join__Graph {
-  CONTESTS @join__graph(name: "contests", url: "http://localhost:4002")
-  ORGANIZATIONS @join__graph(name: "organizations", url: "http://localhost:4001")
+  ORGANIZATIONS @join__graph(name: "organizations", url: "http://organizations:4000/graphql")
 }
 
 scalar link__Import
@@ -45,23 +36,19 @@ enum link__Purpose {
 }
 
 type Organization
-  @join__type(graph: CONTESTS, key: "id")
   @join__type(graph: ORGANIZATIONS, key: "id")
 {
   id: ID!
-  orgContests: [Contest]! @join__field(graph: CONTESTS)
-  name: String! @join__field(graph: ORGANIZATIONS)
-  ens: String! @join__field(graph: ORGANIZATIONS)
-  members: Int! @join__field(graph: ORGANIZATIONS)
-  logo: String! @join__field(graph: ORGANIZATIONS)
-  website: String @join__field(graph: ORGANIZATIONS)
+  name: String!
+  ens: String!
+  members: Int!
+  logo: String!
+  website: String
 }
 
 type Query
-  @join__type(graph: CONTESTS)
   @join__type(graph: ORGANIZATIONS)
 {
-  contests: [Contest!]! @join__field(graph: CONTESTS)
-  organizations: [Organization!]! @join__field(graph: ORGANIZATIONS)
-  organizationByEns(ens: String): Organization @join__field(graph: ORGANIZATIONS)
+  organizations: [Organization!]!
+  organizationByEns(ens: String): Organization
 }
