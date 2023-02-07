@@ -16,7 +16,9 @@ compose:
 	@set -x; cd supergraph/schema; \
 	  rover supergraph compose --elv2-license=accept --config docker.yaml > docker.graphql
 
-
+.PHONY: integration
+integration:
+	scripts/integration-tests.sh
 
 .PHONY: up-subgraphs
 up-subgraphs:
