@@ -7,3 +7,10 @@ services:
       - "4001:4000"
     volumes:
       - ./subgraphs/spaces:/usr/src/app
+  contests:
+    container_name: contests
+    build: ./subgraphs/contests
+    ports:
+      - "4002:4000"
+    volumes:
+      - ./subgraphs/contests:/usr/src/app

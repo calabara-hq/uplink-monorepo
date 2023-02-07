@@ -1,14 +1,14 @@
 extend schema
   @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key"])
 
-type Organization @key(fields: "id") {
+type Space @key(fields: "id") {
   id: ID!
-  orgContests: [Contest]!
+  spaceContests: [Contest]!
 }
 
 type Contest {
   id: ID!
-  org_id: Int!
+  space_id: Int!
   ens: String!
 }
 

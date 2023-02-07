@@ -15,9 +15,18 @@ directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boole
 
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
+type Contest
+  @join__type(graph: CONTESTS)
+{
+  id: ID!
+  space_id: Int!
+  ens: String!
+}
+
 scalar join__FieldSet
 
 enum join__Graph {
+  CONTESTS @join__graph(name: "contests", url: "http://spaces:4000/graphql")
   SPACES @join__graph(name: "spaces", url: "http://spaces:4000/graphql")
 }
 
@@ -36,19 +45,23 @@ enum link__Purpose {
 }
 
 type Query
+  @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
 {
-  spaces: [Space!]!
-  spaceByEns(ens: String): Space
+  contests: [Contest!]! @join__field(graph: CONTESTS)
+  spaces: [Space!]! @join__field(graph: SPACES)
+  spaceByEns(ens: String): Space @join__field(graph: SPACES)
 }
 
 type Space
+  @join__type(graph: CONTESTS, key: "id")
   @join__type(graph: SPACES, key: "id")
 {
   id: ID!
-  name: String!
-  ens: String!
-  members: Int!
-  logo: String!
-  website: String
+  spaceContests: [Contest]! @join__field(graph: CONTESTS)
+  name: String! @join__field(graph: SPACES)
+  ens: String! @join__field(graph: SPACES)
+  members: Int! @join__field(graph: SPACES)
+  logo: String! @join__field(graph: SPACES)
+  website: String @join__field(graph: SPACES)
 }

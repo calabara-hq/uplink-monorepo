@@ -10,12 +10,12 @@ const queries = {
         },
         */
     },
-    Organization: {
+    Space: {
         __resolveReference(object) {
             return object
         },
-        orgContests: ({ id }) => {
-            return contests.filter(contest => contest.org_id == id);
+        spaceContests: ({ id }) => {
+            return contests.filter(contest => contest.space_id == id);
         }
     }
 };
@@ -23,7 +23,7 @@ const queries = {
 const contests = [
     {
         id: "1",
-        org_id: 1,
+        space_id: 1,
         ens: "sharkdao.eth",
     },
 ];

@@ -4,3 +4,7 @@ subgraphs:
     routing_url: http://spaces:4000/graphql
     schema:
       file: ../../subgraphs/spaces/schema.graphql
+  contests:
+    routing_url: http://spaces:4000/graphql
+    schema:
+      file: ../../subgraphs/contests/schema.graphql
