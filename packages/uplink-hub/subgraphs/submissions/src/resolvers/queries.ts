@@ -6,9 +6,6 @@ const queries = {
         },
     },
     Contest: {
-        __resolveReference(object) {
-            return object
-        },
         contestSubmissions: ({ id }) => {
             return submissions.filter(sub => sub.contestId === id)
         }

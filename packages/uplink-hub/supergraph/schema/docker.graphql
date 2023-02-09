@@ -15,14 +15,31 @@ directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boole
 
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
+type ActiveContest
+  @join__type(graph: CONTESTS)
+{
+  id: ID!
+  spaceId: ID!
+  tag: String!
+  start: String!
+  vote: String!
+  end: String!
+  created: String!
+  spaceLink: Space!
+}
+
 type Contest
   @join__type(graph: CONTESTS, key: "id")
   @join__type(graph: SUBMISSIONS, key: "id")
 {
   id: ID!
-  spaceId: Int! @join__field(graph: CONTESTS)
-  ens: String! @join__field(graph: CONTESTS)
-  contestSubmissions: [Submission]! @join__field(graph: SUBMISSIONS)
+  spaceId: ID! @join__field(graph: CONTESTS)
+  tag: String! @join__field(graph: CONTESTS)
+  start: String! @join__field(graph: CONTESTS)
+  vote: String! @join__field(graph: CONTESTS)
+  end: String! @join__field(graph: CONTESTS)
+  created: String! @join__field(graph: CONTESTS)
+  submissions: [Submission]! @join__field(graph: SUBMISSIONS)
 }
 
 scalar join__FieldSet
@@ -52,10 +69,20 @@ type Query
   @join__type(graph: SPACES)
   @join__type(graph: SUBMISSIONS)
 {
-  contests: [Contest!]! @join__field(graph: CONTESTS)
+  contest(contestId: ID!): Contest! @join__field(graph: CONTESTS)
+  spaceContests(spaceId: ID!): [Contest!]! @join__field(graph: CONTESTS)
+  activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
+  space(id: ID!): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
-  spaceByEns(ens: String): Space @join__field(graph: SPACES)
   submissions: [Submission!]! @join__field(graph: SUBMISSIONS)
+}
+
+type Socials
+  @join__type(graph: SPACES)
+{
+  web: String
+  twitter: String
+  discord: String
 }
 
 type Space
@@ -63,12 +90,10 @@ type Space
   @join__type(graph: SPACES, key: "id")
 {
   id: ID!
-  spaceContests: [Contest]! @join__field(graph: CONTESTS)
   name: String! @join__field(graph: SPACES)
-  ens: String! @join__field(graph: SPACES)
   members: Int! @join__field(graph: SPACES)
   logo: String! @join__field(graph: SPACES)
-  website: String @join__field(graph: SPACES)
+  socials: Socials @join__field(graph: SPACES)
 }
 
 type Submission

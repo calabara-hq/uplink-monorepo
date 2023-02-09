@@ -1,30 +1,45 @@
 
 const queries = {
     Query: {
-        contests(parent, args, contextValue, info) {
-            return contests;
+        contest(_, { contestId }) {
+            return contests.find(contest => contest.id === contestId);
         },
-        /*
-        organizationByEns(parent, args, contextValue, info) {
-            return organizations.find(organization => organization.ens === args.ens);
+        spaceContests(_, { spaceId }) {
+            return contests.filter(contest => contest.spaceId === spaceId)
         },
-        */
+        activeContests() {
+            return contests.filter(contest => contest.start > '0')
+        }
+
     },
+    /*
+    // used to resolve contests to spaces
     Space: {
-        __resolveReference(object) {
-            return object
-        },
-        spaceContests: ({ id }) => {
-            return contests.filter(contest => contest.spaceId == id);
+        contests(space) {
+            return contests.filter(contest => contest.spaceId === space.id)
+        }
+    },
+    */
+
+    ActiveContest: {
+        spaceLink(contest) {
+            return {
+                id: contest.spaceId
+            }
         }
     }
+
 };
 
 const contests = [
     {
         id: "1",
-        spaceId: 1,
-        ens: "sharkdao.eth",
+        spaceId: "sharkdao",
+        tag: "test",
+        start: "1",
+        vote: "1",
+        end: "1",
+        created: "1",
     },
 ];
 

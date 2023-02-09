@@ -1,18 +1,24 @@
-extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.0",
-        import: ["@key"])
-
-type Query {
-  spaces: [Space!]!
-  spaceByEns(ens: String): Space
-}
-        
 type Space @key(fields: "id") {
-  id: ID!
+  id: ID! 
   name: String!
-  ens: String!
   members: Int!
   logo: String!
-  website: String
+  socials: Socials
 }
 
+type Socials {
+  web: String
+  twitter: String
+  discord: String
+}
+
+type Query {
+  space(id: ID!): Space
+  spaces: [Space!]!
+}
+
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.0"
+    import: ["@key", "@shareable"]
+  )

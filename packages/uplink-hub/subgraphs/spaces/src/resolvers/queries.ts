@@ -4,30 +4,32 @@ const queries = {
         spaces() {
             return spaces;
         },
-        spaceByEns(parent, args, contextValue, info) {
-            return spaces.find(space => space.ens === args.ens);
+        space(parent, args, contextValue, info) {
+            return spaces.find(space => space.id === args.id);
         },
     },
+
     Space: {
-        __resolveReference(object) {
-            return spaces.find(space => space.id === object.id);
+        __resolveReference(space) {
+            return spaces.find(_space => _space.id === space.id);
         }
     }
 };
 
 const spaces = [
     {
-        id: "1",
-        name: "sharkdao",
-        ens: "sharkdao.eth",
+        id: "sharkdao",
+        name: "Shark DAO",
         members: 634,
         logo: "sharkdao.png",
-        website: "sharks.wtf",
+        socials: {
+            web: "sharks.wtf",
+            twitter: "@sharkdao"
+        }
     },
     {
-        id: "2",
-        name: "nouns",
-        ens: "nouns.eth",
+        id: "nouns",
+        name: "nouns dao",
         members: 999,
         logo: "nouns.png",
         website: "nouns.wtf",

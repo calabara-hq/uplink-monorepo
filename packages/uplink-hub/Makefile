@@ -28,7 +28,6 @@ up-subgraphs:
 	@set -x; sleep $$SUBGRAPH_BOOT_TIME
 	docker compose logs
 
-
 .PHONY: run-router-local
 run-router-local:
 	@set -x; \
