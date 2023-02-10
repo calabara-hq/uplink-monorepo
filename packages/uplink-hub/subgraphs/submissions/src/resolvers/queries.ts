@@ -1,15 +1,13 @@
 
 const queries = {
     Query: {
-        submissions() {
-            return submissions;
+        submissions(_, { contestId }) {
+            return submissions.filter(sub => sub.contestId === contestId);
         },
-    },
-    Contest: {
-        contestSubmissions: ({ id }) => {
-            return submissions.filter(sub => sub.contestId === id)
+        submission(_, { submissionId }) {
+            return submissions.find(sub => sub.id === submissionId)
         }
-    }
+    },
 };
 
 const submissions = [

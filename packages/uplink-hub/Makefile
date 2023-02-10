@@ -39,3 +39,7 @@ run-router-local:
 
 .PHONY: run-supergraph-local
 run-supergraph-local: up-subgraphs config compose run-router-local
+
+.PHONY: test
+run-test: 
+	node test.js

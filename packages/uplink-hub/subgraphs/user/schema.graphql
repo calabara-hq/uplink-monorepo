@@ -1,0 +1,33 @@
+type User @key(fields: "address") {
+  address: ID!
+  isAuthenticated: Boolean!
+}
+
+type NonceResult {
+  nonce: Int!
+}
+
+type Query {
+  me: User!
+  generateNonce: NonceResult!
+}
+
+input authDataInput {
+  message: String!
+  signature: String!
+}
+
+
+type signInResponse{
+  code: Int!
+  success: Boolean!
+  message: String!
+}
+
+
+type Mutation {
+  signIn(authData: authDataInput): signInResponse!
+}
+
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key"])
