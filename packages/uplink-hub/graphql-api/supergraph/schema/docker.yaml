@@ -1,0 +1,14 @@
+federation_version: 2
+subgraphs:
+  spaces:
+    routing_url: http://spaces:4000/graphql
+    schema:
+      file: ../../subgraphs/spaces/schema.graphql
+  contests:
+    routing_url: http://contests:4000/graphql
+    schema:
+      file: ../../subgraphs/contests/schema.graphql
+  submissions:
+    routing_url: http://submissions:4000/graphql
+    schema:
+      file: ../../subgraphs/submissions/schema.graphql

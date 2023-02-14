@@ -1,0 +1,23 @@
+#type Contest @key(fields: "id") {
+#  id: ID!
+#  submissions: [Submission]!
+#}
+
+type Submission @key(fields: "id") {
+  id: ID!
+  contestId: Int!
+  author: String!
+  url: String!
+  created: String!
+}
+
+extend type Query {
+  submissions(contestId: ID!): [Submission!]!
+  submission(submissionId: ID!): Submission!
+}
+
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.0"
+    import: ["@key", "@external", "@shareable"]
+  )
