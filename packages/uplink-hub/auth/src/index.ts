@@ -3,12 +3,8 @@ import { readFileSync } from "fs";
 const app = express();
 const port = 5000
 
-app.get('/', (req, res) => {
-  res.send('hello from the auth server!')
-})
-
 app.get('/auth', (req, res) => {
-  res.send('hello from auth!')
+  res.send({ auth: { version: "1.0.0" } })
 })
 
 

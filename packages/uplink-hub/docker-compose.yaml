@@ -5,6 +5,11 @@ services:
     build: ./proxy
     ports:
       - "8080:80"
+  auth:
+    container_name: auth
+    build: ./auth
+    ports: 
+      - "5000:5000"
   graphql:
     container_name: graphql
     build: ./graphql-api
