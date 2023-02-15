@@ -5,6 +5,7 @@ export const getNonce = function (_, res) {
 }
 
 export const verifySignature = async (req, res) => {
+    console.log(req.body)
     try {
         const { message, signature } = req.body;
         console.log(message, signature)
@@ -22,3 +23,4 @@ export const verifySignature = async (req, res) => {
 export const signOut = function (req, res, next) {
     res.send('NOT IMPLEMENTED')
 }
+

@@ -1,7 +1,7 @@
 import express from 'express';
-import * as authController from './controllers/index'
-import bodyParser from 'body-parser';
+import * as authController from './controllers/index.js'
 const auth = express();
+import bodyParser from 'body-parser';
 auth.use(bodyParser.json())
 
 auth.get('/', (req, res) => {
@@ -12,6 +12,6 @@ auth.get('/generate_nonce', authController.getNonce)
 
 auth.post('/sign_in', authController.verifySignature)
 
-auth.post('/sign_out', authController.signOut)
+auth.get('/sign_out', authController.signOut)
 
 export default auth

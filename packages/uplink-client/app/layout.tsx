@@ -1,9 +1,10 @@
-import './globals.css'
+import "./globals.css";
+import WalletProvider from "./providers/wallet";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -13,8 +14,8 @@ export default function RootLayout({
       */}
       <head />
       <body>
-        {children}
+        <WalletProvider>{children}</WalletProvider>;
       </body>
     </html>
-  )
+  );
 }
