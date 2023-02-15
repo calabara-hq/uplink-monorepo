@@ -1,6 +1,5 @@
-import "./globals.css";
-import WalletProvider from "./providers/wallet";
-
+import WalletProvider from "@/providers/wallet";
+import "@/styles/globals.css"
 export default function RootLayout({
   children,
 }: {
@@ -14,7 +13,7 @@ export default function RootLayout({
       */}
       <head />
       <body>
-        <WalletProvider>{children}</WalletProvider>;
+        <WalletProvider>{children}</WalletProvider>
       </body>
     </html>
   );
