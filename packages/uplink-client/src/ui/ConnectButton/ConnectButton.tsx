@@ -3,20 +3,6 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function WalletConnectButton() {
-  
-  return (
-    
-    <ConnectButton
-      accountStatus={{
-        smallScreen: "address",
-        largeScreen: "full",
-      }}
-      showBalance={false}
-    />
-  );
-  
- /*
-  console.log('IM BEGINNING TO RENDER!!')
   return (
     <ConnectButton.Custom>
       {({
@@ -25,28 +11,37 @@ export default function WalletConnectButton() {
         openAccountModal,
         openChainModal,
         openConnectModal,
+        authenticationStatus,
         mounted,
       }) => {
+        // Note: If your app doesn't use authentication, you
+        // can remove all 'authenticationStatus' checks
+        const ready = mounted && authenticationStatus !== "loading";
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus || authenticationStatus === "authenticated");
+
         return (
           <div
-            {...(!mounted && {
+            {...(!ready && {
               "aria-hidden": true,
               style: {
-                opacity: 1,
+                opacity: 0,
                 pointerEvents: "none",
                 userSelect: "none",
               },
             })}
           >
             {(() => {
-              if (!mounted || !account || !chain) {
+              if (!connected) {
                 return (
                   <button
-                    className={"btn"}
+                    className="btn bg-purple-600"
                     onClick={openConnectModal}
-                    type="button"
                   >
-                    {"Connect Wallet"}
+                    Connect Wallet
                   </button>
                 );
               }
@@ -54,19 +49,18 @@ export default function WalletConnectButton() {
               if (chain.unsupported) {
                 return (
                   <button
-                    className={"btn"}
+                    className="btn bg-purple-600"
                     onClick={openChainModal}
-                    type="button"
                   >
-                    {"Wrong network"}
+                    Wrong network
                   </button>
                 );
               }
+
               return (
                 <button
-                  className={"btn"}
+                  className="btn bg-purple-600"
                   onClick={openAccountModal}
-                  type="button"
                 >
                   {account.displayName}
                 </button>
@@ -77,5 +71,4 @@ export default function WalletConnectButton() {
       }}
     </ConnectButton.Custom>
   );
-  */
 }

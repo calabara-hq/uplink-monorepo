@@ -34,8 +34,6 @@ export const authOptions: AuthOptions = {
                         body: JSON.stringify(credentials),
                     });
                     const user = await res.json();
-                    console.log('WE ARE HERE!!!!!')
-                    console.log(user)
                     if (res.ok && user) {
                         console.log(user)
                         return user.data.address;
@@ -81,8 +79,8 @@ export const authOptions: AuthOptions = {
                 session.user.name = token.sub
                 session.user.image = "https://www.fillmurray.com/128/128"
             }
-            console.log(session)
             return session
         },
+
     }
 }
