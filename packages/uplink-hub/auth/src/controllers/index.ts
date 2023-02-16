@@ -5,16 +5,16 @@ export const getNonce = function (_, res) {
 }
 
 export const verifySignature = async (req, res) => {
-    console.log(req.body)
+    //console.log(req.body)
     try {
         const { message, signature } = req.body;
-        console.log(message, signature)
-        const siweMessage = new SiweMessage(message);
+        //console.log(message, signature)
+        const siweMessage = new SiweMessage(JSON.parse(message));
+        console.log('MESSAGE', siweMessage)
         const result = await siweMessage.verify({ signature })
-        console.log(result)
-        res.send(true)
+        res.send(result)
     } catch (err) {
-        console.log(err)
+        console.error(err)
         res.send(false)
     }
 

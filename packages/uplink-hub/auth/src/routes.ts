@@ -14,4 +14,5 @@ auth.post('/sign_in', authController.verifySignature)
 
 auth.get('/sign_out', authController.signOut)
 
+
 export default auth

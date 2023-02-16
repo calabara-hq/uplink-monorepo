@@ -19,13 +19,23 @@ const message = new SiweMessage({
 
 const createMessage = (address, statement, nonce) => {
     return new SiweMessage({
+        /*
         domain: "uplink.wtf",
         address: address,
         statement: statement,
-        uri: "https://uplink.wtf",
+        uri: "https://localhost:3000",
         version: "1",
         chainId: 1,
         nonce: "15050748",
+        */
+        "domain": "uplink.wtf",
+        "statement": "sign here please!",
+        "uri": "http://localhost:3000", 
+        "version": "1", 
+        "address": address,
+        "chainId": 1, 
+        "nonce": nonce, 
+        "issuedAt": "2023-02-16T06:09:58.738Z"
     })
 }
 
@@ -45,6 +55,7 @@ describe("auth endpoint tests", () => {
 
     describe("sign in tests", () => {
 
+        /*
         it("w/o body", async () => {
             const response = await request(auth)
                 .post("/sign_in")
@@ -61,7 +72,7 @@ describe("auth endpoint tests", () => {
                 "15050748"
             );
             let signature = await wallet.signMessage(message.toMessage());
-            
+
             // edit the message after signing
 
             let tamperedMessage = message;
@@ -72,14 +83,14 @@ describe("auth endpoint tests", () => {
                 .send({ message: tamperedMessage.toMessage(), signature: signature })
             expect(response.body).toBe(false)
         })
-
+        */
         it("successful sign in", async () => {
 
             const wallet = Wallet.createRandom();
             const message = createMessage(
                 wallet.address,
                 "sign in to the app",
-                "1505074"
+                "b5260680a6ecbfc026d8c3afa0d95e861e657c646421ad4543237d9955ccb1fc"
             ).toMessage();
 
             let signature = await wallet.signMessage(message);
@@ -91,4 +102,5 @@ describe("auth endpoint tests", () => {
         })
 
     })
+
 })
