@@ -8,11 +8,14 @@ auth.get('/', (req, res) => {
     res.send({ auth: { version: "1.0.0" } })
 })
 
-auth.get('/generate_nonce', authController.getNonce)
+
+auth.get('/session', authController.getSession)
+
+auth.get('/csrf', authController.getCsrfToken)
 
 auth.post('/sign_in', authController.verifySignature)
 
-auth.get('/sign_out', authController.signOut)
+auth.post('/sign_out', authController.signOut)
 
 
 export default auth

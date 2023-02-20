@@ -117,7 +117,7 @@ export type GetSessionParams = CtxOrReq & {
 // fetch the current session from the server
 
 export const getSession = async (params?: GetSessionParams) => {
-  const session = await fetchData<Session>("/auth/session", params);
+  const session = await fetchData<Session>("/auth/session");
   if (params?.broadcast ?? true) {
     broadcast.post({ event: "session", data: { trigger: "getSession" } });
   }
@@ -127,7 +127,7 @@ export const getSession = async (params?: GetSessionParams) => {
 // fetch a csrf from the server
 
 export const getCsrfToken = async (params?: CtxOrReq) => {
-  const response = await fetchData<{ csrfToken: string }>("/auth/csrf", params);
+  const response = await fetchData<{ csrfToken: string }>("/auth/csrf");
   return response?.csrfToken;
 };
 

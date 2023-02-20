@@ -5,16 +5,21 @@ export interface CtxOrReq {
     ctx?: { req: IncomingMessage };
 }
 
+
 export async function fetchData<T = any>(
     path: string,
-    { ctx, req = ctx?.req }: CtxOrReq = {}
+    cookie?: string | null //IncomingHeaders
 ): Promise<T | any> {
     const url = process.env.NEXT_PUBLIC_HUB_URL + path;
     try {
-        //const options = req?.headers.cookie ? { headers: { cookie: req.headers.cookie } } : {};
-        console.log('fetching data', url)
+        console.log('HELLO FROM FETCH DATA')
+        console.log(cookie)
+        const options = cookie ? { headers: { cookie: cookie } } : {};
+        //console.log(options)
+        //console.log('REQ', req)
         const res = await fetch(url, {
-            credentials: 'include'
+            credentials: 'include',
+            ...options,
         })
         const data = await res.json()
         if (!res.ok) throw data
