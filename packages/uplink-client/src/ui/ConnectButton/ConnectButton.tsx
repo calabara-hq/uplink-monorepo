@@ -1,73 +1,41 @@
 "use client";
-
+import { formatAddress } from "@/configs/wallet";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+//import { useSession } from "next-auth/react";
+import { useSession } from "@/providers/SessionProvider";
+import React from "react";
+import { useEnsName } from "wagmi";
 
 export default function WalletConnectButton() {
+  const { data: session, status } = useSession();
+  const _getSession = () => {
+    return { session, status };
+  };
+
+  return <ConnectButton />;
+
   return (
     <ConnectButton.Custom>
-      {({
-        account,
-        chain,
-        openAccountModal,
-        openChainModal,
-        openConnectModal,
-        authenticationStatus,
-        mounted,
-      }) => {
-        // Note: If your app doesn't use authentication, you
-        // can remove all 'authenticationStatus' checks
-        const ready = mounted && authenticationStatus !== "loading";
-        const connected =
-          ready &&
-          account &&
-          chain &&
-          (!authenticationStatus || authenticationStatus === "authenticated");
-
-        return (
-          <div
-            {...(!ready && {
-              "aria-hidden": true,
-              style: {
-                opacity: 0,
-                pointerEvents: "none",
-                userSelect: "none",
-              },
-            })}
-          >
-            {(() => {
-              if (!connected) {
-                return (
-                  <button
-                    className="btn bg-purple-600"
-                    onClick={openConnectModal}
-                  >
-                    Connect Wallet
-                  </button>
-                );
-              }
-
-              if (chain.unsupported) {
-                return (
-                  <button
-                    className="btn bg-purple-600"
-                    onClick={openChainModal}
-                  >
-                    Wrong network
-                  </button>
-                );
-              }
-
-              return (
-                <button
-                  className="btn bg-purple-600"
-                  onClick={openAccountModal}
-                >
-                  {account.displayName}
-                </button>
-              );
-            })()}
-          </div>
-        );
+      {({ openAccountModal, openConnectModal }) => {
+        const { session, status } = _getSession();
+        console.log(session);
+        switch (status) {
+          case "unauthenticated":
+            return (
+              <button
+                className="btn lowercase bg-red-600"
+                onClick={openConnectModal}
+              >
+                connect
+              </button>
+            );
+          case "authenticated":
+            return (
+              <button className="btn bg-blue-600" onClick={openAccountModal}>
+                {/*formatAddress(session?.user?.name || "")*/ "test"}
+              </button>
+            );
+        }
       }}
     </ConnectButton.Custom>
   );

@@ -1,8 +1,9 @@
 import Nav from "@/ui/Nav/Nav";
 import "@/styles/globals.css";
-import WalletContext from "./WalletContext";
+import WalletProvider from "../providers/WalletProvider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getSession } from "@/providers/SessionProvider";
 
 export default async function RootLayout({
   children,
@@ -10,14 +11,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
+  //console.log("SESSION FROM LAYOUT", session);
   return (
     <html lang="en">
       <head />
-      <body className="text">
-        <WalletContext session={session}>
+      <body>
+        <WalletProvider session={session}>
           <Nav />
           {children}
-        </WalletContext>
+        </WalletProvider>
       </body>
     </html>
   );
