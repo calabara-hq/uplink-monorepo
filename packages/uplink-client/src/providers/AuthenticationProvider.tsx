@@ -33,13 +33,10 @@ export function AuthenticationProvider({
   getSiweMessageOptions,
 }: RainbowKitSiweNextAuthProviderProps) {
   const { data, status } = useSession();
-  console.log(status);
-  console.log(data);
   const adapter = useMemo(
     () =>
       createAuthenticationAdapter({
         createMessage: ({ address, chainId, nonce }) => {
-          console.log("CREATING THE MESSAGE!!!");
           const defaultConfigurableOptions: ConfigurableMessageOptions = {
             domain: window.location.host,
             statement: "Sign in with Ethereum to the app.",
@@ -59,7 +56,6 @@ export function AuthenticationProvider({
             ...unconfigurableOptions,
           });
 
-          console.log(msg);
           return msg;
         },
 
@@ -68,7 +64,6 @@ export function AuthenticationProvider({
         getNonce: async () => {
           const nonce = await getCsrfToken();
           if (!nonce) throw new Error();
-          console.log(nonce);
           return nonce;
         },
 
@@ -81,7 +76,6 @@ export function AuthenticationProvider({
             message: JSON.stringify(message),
             signature,
           });
-          console.log(response);
           return response?.ok ?? false;
         },
       }),

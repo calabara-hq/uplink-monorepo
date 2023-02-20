@@ -84,8 +84,6 @@ export function useSession<R extends boolean>(options?: UseSessionOptions<R>) {
     throw new Error("`useSession` must be wrapped in a <SessionProvider />");
   }
 
-  console.log("VALUE", value);
-
   const { required, onUnauthenticated } = options ?? {};
 
   const requiredAndNotLoading = required && value.status === "unauthenticated";
@@ -119,8 +117,6 @@ export type GetSessionParams = CtxOrReq & {
 // fetch the current session from the server
 
 export const getSession = async (params?: GetSessionParams) => {
-  console.log("attempting to get session");
-
   const session = await fetchData<Session>("/auth/session", params);
   if (params?.broadcast ?? true) {
     broadcast.post({ event: "session", data: { trigger: "getSession" } });
@@ -155,13 +151,10 @@ export const signIn = async (credentials: SignInParams) => {
       // TODO pass csrfToken
     }),
   });
-  console.log(res);
   const data = await res.json();
-  console.log(data);
 
   //const error = new URL(data.url).searchParams.get("error");
 
-  console.log(_SessionStore);
   if (res.ok) await _SessionStore._getSession({ event: "storage" });
   return {
     //error,
@@ -215,26 +208,19 @@ export function SessionProvider(props: SessionProviderProps) {
 
   // on initial mount
   useEffect(() => {
-    _SessionStore._getSession = async ({ event }: any = {}) => {
-      console.log("entering getSession");
-
+    _SessionStore._getSession = async ({ event } = {}) => {
       try {
         const storageEvent = event === "storage";
 
         // update if client session not present or if there are events from other tabs
 
         if (storageEvent || _SessionStore._session === undefined) {
-          try {
-            const data = await getSession();
-            console.log(data);
-            _SessionStore._lastSync = unixNow();
-            _SessionStore._session = data;
-            setSession(_SessionStore._session);
-            return;
-          } catch (err) {
-            console.log("ERROR", err);
-            throw err;
-          }
+          _SessionStore._lastSync = unixNow();
+          _SessionStore._session = await getSession({
+            broadcast: !storageEvent,
+          });
+          setSession(_SessionStore._session);
+          return;
         }
         // If there is no time defined for when a session should be considered
         // stale, then it's okay to use the value we have until an event is
@@ -254,9 +240,7 @@ export function SessionProvider(props: SessionProviderProps) {
         // en event was triggered or the session is stale, so we need to update the session
 
         _SessionStore._lastSync = unixNow();
-        _SessionStore._session = await getSession({
-          broadcast: !storageEvent,
-        });
+        _SessionStore._session = await getSession();
 
         setSession(_SessionStore._session);
       } catch (error) {

@@ -1,24 +1,17 @@
 "use client";
 import { formatAddress } from "@/configs/wallet";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-//import { useSession } from "next-auth/react";
 import { useSession } from "@/providers/SessionProvider";
 import React, { useEffect } from "react";
 import { useEnsName } from "wagmi";
 
 export default function WalletConnectButton() {
   const { data: session, status } = useSession();
-  const _getSession = () => {
-    return { session, status };
-  };
-
-  //return <ConnectButton />;
-
+  console.log("session", session);
+  console.log("status", status)
   return (
     <ConnectButton.Custom>
       {({ openAccountModal, openConnectModal }) => {
-        console.log("session", session);
-        console.log("status", status);
         switch (status) {
           case "unauthenticated":
             return (

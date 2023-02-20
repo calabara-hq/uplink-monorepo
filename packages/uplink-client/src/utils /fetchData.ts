@@ -12,6 +12,7 @@ export async function fetchData<T = any>(
     const url = process.env.NEXT_PUBLIC_HUB_URL + path;
     try {
         //const options = req?.headers.cookie ? { headers: { cookie: req.headers.cookie } } : {};
+        console.log('fetching data', url)
         const res = await fetch(url, {
             credentials: 'include'
         })
