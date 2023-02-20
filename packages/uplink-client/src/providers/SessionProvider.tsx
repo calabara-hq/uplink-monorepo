@@ -180,6 +180,7 @@ export const signOut = async () => {
     }
   );
   const data = await response.json();
+  await _SessionStore._getSession({ event: "storage" });
   return data;
 };
 
