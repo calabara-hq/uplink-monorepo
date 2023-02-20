@@ -3,7 +3,7 @@ import { formatAddress } from "@/configs/wallet";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 //import { useSession } from "next-auth/react";
 import { useSession } from "@/providers/SessionProvider";
-import React from "react";
+import React, { useEffect } from "react";
 import { useEnsName } from "wagmi";
 
 export default function WalletConnectButton() {
@@ -12,13 +12,13 @@ export default function WalletConnectButton() {
     return { session, status };
   };
 
-  return <ConnectButton />;
+  //return <ConnectButton />;
 
   return (
     <ConnectButton.Custom>
       {({ openAccountModal, openConnectModal }) => {
-        const { session, status } = _getSession();
-        console.log(session);
+        console.log("session", session);
+        console.log("status", status);
         switch (status) {
           case "unauthenticated":
             return (
@@ -32,7 +32,7 @@ export default function WalletConnectButton() {
           case "authenticated":
             return (
               <button className="btn bg-blue-600" onClick={openAccountModal}>
-                {/*formatAddress(session?.user?.name || "")*/ "test"}
+                {formatAddress(session?.user?.address || "test")}
               </button>
             );
         }

@@ -1,7 +1,6 @@
 "use client";
 import { unixNow } from "@/utils /time";
 import { createContext, useEffect, useState, useMemo, useContext } from "react";
-import { IncomingMessage } from "http";
 import { BroadcastChannel } from "next-auth/client/_utils";
 import { CtxOrReq, fetchData } from "@/utils /fetchData";
 
@@ -136,9 +135,14 @@ export const getCsrfToken = async (params?: CtxOrReq) => {
   return response?.csrfToken;
 };
 
+export type SignInParams = {
+  message: string;
+  signature: string;
+};
+
 // attempt to sign in with the message + signature
 
-export const signIn = async (credentials: any) => {
+export const signIn = async (credentials: SignInParams) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/auth/sign_in`, {
     method: "POST",
     headers: {
@@ -148,6 +152,7 @@ export const signIn = async (credentials: any) => {
     body: JSON.stringify({
       ...credentials,
       //csrfToken: await getCsrfToken(),
+      // TODO pass csrfToken
     }),
   });
   console.log(res);
@@ -177,6 +182,7 @@ export const signOut = async () => {
         "Content-Type": "application/json",
       },
       credentials: "include",
+      // TODO pass csrf
     }
   );
   const data = await response.json();
@@ -198,6 +204,7 @@ export function SessionProvider(props: SessionProviderProps) {
   const hasInitialSession = props.session !== undefined;
   _SessionStore._lastSync = hasInitialSession ? unixNow() : 0;
 
+  // TODO refine any type here
   const [session, setSession] = useState<any>(() => {
     if (hasInitialSession) _SessionStore._session = props.session;
     return props.session;
