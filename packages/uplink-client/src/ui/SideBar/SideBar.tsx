@@ -10,7 +10,9 @@ export default function Sidebar() {
                         text-green-500 hover:text-white
                         hover:rounded-xl rounded-3xl
                         transition-all duration-300 ease-linear
-                        cursor-pointer shadow-lg"
+                        cursor-pointer shadow-lg
+                        tooltip"
+        data-tip="New Org"
       >
         <p>+</p>
       </div>
