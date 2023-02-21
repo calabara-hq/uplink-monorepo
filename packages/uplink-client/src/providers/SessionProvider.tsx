@@ -165,10 +165,11 @@ export const signOut = async () => {
     {
       method: "POST",
       headers: {
+        "X-Hub-Csrf": await getCsrfToken(),
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ csrfToken: await getCsrfToken() }),
+      //body: JSON.stringify({ csrfToken: await getCsrfToken() }),
     }
   );
   const data = await response.json();

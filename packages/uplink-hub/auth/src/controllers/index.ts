@@ -37,7 +37,6 @@ export const verifySignature = async (req, res) => {
         const siweMessage = new SiweMessage(JSON.parse(message));
         const session = req.session;
         const result = await siweMessage.verify({ signature, nonce: session.csrfToken })
-        // TODO on successful verification generate an access token for the user
         req.session.user = { address: result.data.address }
         const user = { address: result.data.address }
         res.send({ user: user, expires: req.session.cookie.expires })
@@ -49,19 +48,13 @@ export const verifySignature = async (req, res) => {
 }
 
 export const signOut = async (req, res, next) => {
-
-    const { csrfToken } = req.body;
-    if (csrfToken !== req.session.csrfToken) {
-        // bail early if csrf token is invalid
-        return res.send(false)
-    }
+    const csrfToken = req.get('x-hub-csrf');
+    if (csrfToken !== req.session.csrfToken) return res.send(false)
 
     req.session.destroy((err) => {
-        if (err) {
-            return res.send(false)
-        } else {
-            return res.send(true)
-        }
+        if (err) return res.send(false)
+        return res.send(true)
+
     })
 }
 
