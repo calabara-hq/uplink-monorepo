@@ -2,18 +2,11 @@
 import "@rainbow-me/rainbowkit/styles.css";
 import { WagmiConfig } from "wagmi";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import {
-  RainbowKitSiweNextAuthProvider,
-  GetSiweMessageOptions,
-} from "@rainbow-me/rainbowkit-siwe-next-auth";
+import { GetSiweMessageOptions } from "@rainbow-me/rainbowkit-siwe-next-auth";
 import { wagmiClient, chains } from "@/configs/wallet";
-import { Session } from "next-auth";
 import { SessionProvider } from "./SessionProvider";
 import { AuthenticationProvider } from "./AuthenticationProvider";
-//import { SessionProvider } from "next-auth/react";
-
-//import { SessionProvider, Session } from "@/providers/Session";
-
+import { Session } from "./SessionProvider";
 export interface IWalletProviderProps {
   children: React.ReactNode;
   session: Session | null;
@@ -34,20 +27,4 @@ export default function WalletProvider({ children, session }: any) {
       </SessionProvider>
     </WagmiConfig>
   );
-
-  /*
-  return (
-    <WagmiConfig client={wagmiClient}>
-      <SessionProvider session={session}>
-        <RainbowKitSiweNextAuthProvider>
-          <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
-        </RainbowKitSiweNextAuthProvider>
-      </SessionProvider>
-    </WagmiConfig>
-  );
-
-*/
-  /*
-
-  */
 }

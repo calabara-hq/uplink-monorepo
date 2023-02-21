@@ -1,10 +1,9 @@
 import Nav from "@/ui/Nav/Nav";
 import "@/styles/globals.css";
 import WalletProvider from "../providers/WalletProvider";
-import { getSession } from "@/providers/SessionProvider";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { fetchData } from "@/utils /fetchData";
-import { CtxOrReq } from "next-auth/client/_utils";
+
 // pass cookies from request to the hub api and return a seession object
 // this forces the top level layout to become a dynamic route, which may not be ideal
 // https://beta.nextjs.org/docs/rendering/static-and-dynamic-rendering#dynamic-rendering

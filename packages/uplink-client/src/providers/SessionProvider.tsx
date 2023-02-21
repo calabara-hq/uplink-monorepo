@@ -1,7 +1,7 @@
 "use client";
 import { unixNow } from "@/utils /time";
 import { createContext, useEffect, useState, useMemo, useContext } from "react";
-import { BroadcastChannel } from "next-auth/client/_utils";
+import { BroadcastChannel } from "@/utils /broadcast";
 import { CtxOrReq, fetchData } from "@/utils /fetchData";
 
 export type ISODateString = string;
