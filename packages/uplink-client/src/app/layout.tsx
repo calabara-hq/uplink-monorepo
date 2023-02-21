@@ -27,11 +27,13 @@ export default async function RootLayout({
       <head />
       <body>
         <WalletProvider session={session}>
-          {/*}
-          <Nav />
-          */}
-          <Sidebar />
-          {children}
+          <div className="flex flex-row">
+            <Sidebar />
+            <div className="flex-1">
+              <Nav />
+              {children}
+            </div>
+          </div>
         </WalletProvider>
       </body>
     </html>
