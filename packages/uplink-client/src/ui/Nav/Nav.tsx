@@ -1,17 +1,18 @@
 import Image from "next/image";
+import uplinkLogo from "../../../public/uplink-logo.svg";
 import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
 
-export interface INav { }
+export interface INav {}
 
 const Nav: React.FC<INav> = () => {
   return (
     <div className="navbar bg-neutral">
       <div className="flex-1">
         <Image
-          src={"/uplink-logo.svg"}
-          alt={"uplink logo"}
-          height={150}
-          width={200}
+          src={uplinkLogo}
+          alt="uplink logo"
+          width={20}
+          height={20}
         />
       </div>
       <div>
