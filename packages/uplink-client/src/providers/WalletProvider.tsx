@@ -20,7 +20,7 @@ const getSiweMessageOptions: GetSiweMessageOptions = () => ({
 export default function WalletProvider({ children, session }: any) {
   return (
     <WagmiConfig client={wagmiClient}>
-      <SessionProvider refetchInterval={0} session={session}>
+      <SessionProvider refetchInterval={3} session={session}>
         <AuthenticationProvider getSiweMessageOptions={getSiweMessageOptions}>
           <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
         </AuthenticationProvider>
