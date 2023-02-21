@@ -1,6 +1,7 @@
 import Image from "next/image";
 import uplinkLogo from "../../../public/uplink-logo.svg";
 import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
+import Sidebar from "../SideBar/SideBar";
 
 export interface INav {}
 
@@ -19,6 +20,7 @@ const Nav: React.FC<INav> = () => {
         <button className="btn btn-primary">FAQ/About</button>
         <div className="p-2" />
         <WalletConnectButton />
+        <Sidebar />
       </div>
     </div>
   );
