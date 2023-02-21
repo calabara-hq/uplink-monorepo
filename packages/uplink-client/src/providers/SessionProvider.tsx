@@ -147,20 +147,13 @@ export const signIn = async (credentials: SignInParams) => {
     credentials: "include",
     body: JSON.stringify({
       ...credentials,
-      //csrfToken: await getCsrfToken(),
-      // TODO pass csrfToken
     }),
   });
   const data = await res.json();
-
-  //const error = new URL(data.url).searchParams.get("error");
-
   if (res.ok) await _SessionStore._getSession({ event: "storage" });
   return {
-    //error,
     status: res.status,
     ok: res.ok,
-    //url: error ? null : data.url,
   } as any;
 };
 
@@ -175,7 +168,7 @@ export const signOut = async () => {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      // TODO pass csrf
+      body: JSON.stringify({ csrfToken: await getCsrfToken() }),
     }
   );
   const data = await response.json();

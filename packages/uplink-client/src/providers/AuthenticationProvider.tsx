@@ -62,9 +62,9 @@ export function AuthenticationProvider({
         getMessageBody: ({ message }) => message.prepareMessage(),
 
         getNonce: async () => {
-          const nonce = await getCsrfToken();
-          if (!nonce) throw new Error();
-          return nonce;
+          const csrf = await getCsrfToken();
+          if (!csrf) throw new Error();
+          return csrf;
         },
 
         signOut: async () => {

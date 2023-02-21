@@ -5,18 +5,18 @@ export interface CtxOrReq {
     ctx?: { req: IncomingMessage };
 }
 
-
+// fetch data from api and forward cookies if this is called from the server
 export async function fetchData<T = any>(
     path: string,
     cookie?: string | null //IncomingHeaders
 ): Promise<T | any> {
+
+
+
+    console.log('window for path', path, 'is', typeof window === 'undefined' ? 'server' : 'client')
     const url = process.env.NEXT_PUBLIC_HUB_URL + path;
     try {
-        console.log('HELLO FROM FETCH DATA')
-        console.log(cookie)
         const options = cookie ? { headers: { cookie: cookie } } : {};
-        //console.log(options)
-        //console.log('REQ', req)
         const res = await fetch(url, {
             credentials: 'include',
             ...options,
