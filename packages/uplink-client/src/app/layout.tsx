@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import WalletProvider from "../providers/WalletProvider";
 import { headers } from "next/headers";
 import { fetchData } from "@/utils /fetchData";
+import Sidebar from "@/ui/SideBar/SideBar";
 
 // pass cookies from request to the hub api and return a seession object
 // this forces the top level layout to become a dynamic route, which may not be ideal
@@ -26,7 +27,10 @@ export default async function RootLayout({
       <head />
       <body>
         <WalletProvider session={session}>
+          {/*}
           <Nav />
+          */}
+          <Sidebar />
           {children}
         </WalletProvider>
       </body>
