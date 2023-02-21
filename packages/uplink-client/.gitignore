@@ -4,10 +4,10 @@
 /node_modules
 /.pnp
 .pnp.js
-
+.vscode
 # testing
 /coverage
-
+/storybook-static
 # next.js
 /.next/
 /out/
