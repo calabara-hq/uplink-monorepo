@@ -2,7 +2,8 @@
 const queries = {
     Query: {
         spaces() {
-            return spaces;
+            //return [spaces.at(Math.floor(Math.random() * spaces.length - 1))];
+            return spaces
         },
         space(parent, args, contextValue, info) {
             return spaces.find(space => space.id === args.id);
@@ -27,6 +28,7 @@ const spaces = [
             twitter: "@sharkdao"
         }
     },
+    
     {
         id: "nouns",
         name: "nouns dao",
@@ -34,6 +36,28 @@ const spaces = [
         logo: "nouns.png",
         website: "nouns.wtf",
     },
+    {
+        id: "uplink",
+        name: "uplink",
+        members: 11111111,
+        logo: "uplink.png",
+        website: "nouns.wtf",
+    },
+    {
+        id: "TNS",
+        name: "TNS dao",
+        members: 26,
+        logo: "tns.png",
+        website: "tns.wtf",
+    },
+    {
+        id: "Links",
+        name: "Links dao",
+        members: 32,
+        logo: "links.png",
+        website: "links.wtf",
+    },
+    
 ];
 
 

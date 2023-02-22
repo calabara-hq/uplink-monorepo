@@ -1,9 +1,8 @@
 import Nav from "@/ui/Nav/Nav";
 import "@/styles/globals.css";
-import WalletProvider from "../providers/WalletProvider";
+import WalletProvider from "@/providers/WalletProvider";
 import { headers } from "next/headers";
 import { fetchData } from "@/utils /fetchData";
-
 // pass cookies from request to the hub api and return a seession object
 // this forces the top level layout to become a dynamic route, which may not be ideal
 // https://beta.nextjs.org/docs/rendering/static-and-dynamic-rendering#dynamic-rendering
@@ -21,6 +20,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getInitialSession();
+  console.log("layout re-render");
+
   return (
     <html lang="en">
       <head />
