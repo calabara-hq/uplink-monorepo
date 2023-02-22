@@ -11,9 +11,6 @@ export async function fetchData<T = any>(
     cookie?: string | null //IncomingHeaders
 ): Promise<T | any> {
 
-
-
-    console.log('window for path', path, 'is', typeof window === 'undefined' ? 'server' : 'client')
     const url = process.env.NEXT_PUBLIC_HUB_URL + path;
     try {
         const options = cookie ? { headers: { cookie: cookie } } : {};

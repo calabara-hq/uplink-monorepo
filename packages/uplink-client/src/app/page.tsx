@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import weeklySub from "../../public/9999-winner.jpeg";
 import TabGroup from "@/ui/TabGroup/TabGroup";
 export default async function Page() {

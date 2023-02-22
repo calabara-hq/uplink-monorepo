@@ -1,8 +1,9 @@
 import Nav from "@/ui/Nav/Nav";
 import "@/styles/globals.css";
-import WalletProvider from "../providers/WalletProvider";
+import WalletProvider from "@/providers/WalletProvider";
 import { headers } from "next/headers";
 import { fetchData } from "@/utils /fetchData";
+
 import Sidebar from "@/ui/SideBar/SideBar";
 
 // pass cookies from request to the hub api and return a seession object
@@ -22,6 +23,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getInitialSession();
+  console.log("layout re-render");
+
   return (
     <html lang="en">
       <head />

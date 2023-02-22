@@ -38,8 +38,8 @@ export function AuthenticationProvider({
       createAuthenticationAdapter({
         createMessage: ({ address, chainId, nonce }) => {
           const defaultConfigurableOptions: ConfigurableMessageOptions = {
-            domain: window.location.host,
-            statement: "Sign in with Ethereum to the app.",
+            statement: "sign here please!",
+            domain: "uplink.wtf",
             uri: window.location.origin,
             version: "1",
           };
