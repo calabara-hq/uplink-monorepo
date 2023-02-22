@@ -4,8 +4,9 @@ import uplinkLogo from "../../../public/uplink-logo.svg";
 export default function Sidebar() {
   return (
     <div className="flex flex-col bg-neutral x-0 y-0">
-      <div className="py-6 pl-4">
+      <div className="py-6 pl-2 text-white text-center text-xl">
         <Image src={uplinkLogo} alt="uplink logo" width={100}/>
+        <p>uplink</p>
       </div>
       <div className="flex flex-col h-full w-fit m-auto mt-4 text-3xl">
         <div
