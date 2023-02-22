@@ -6,16 +6,8 @@ export interface INav {}
 
 const Nav: React.FC<INav> = () => {
   return (
-    <div className="navbar bg-neutral">
-      <div className="flex-1">
-        <Image
-          src={uplinkLogo}
-          alt="uplink logo"
-          width={20}
-          height={20}
-        />
-      </div>
-      <div>
+    <div className="navbar justify-end bg-neutral">
+      <div className="">
         <button className="btn btn-primary">FAQ/About</button>
         <div className="p-2" />
         <WalletConnectButton />
