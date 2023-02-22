@@ -1,20 +1,29 @@
 import Image from "next/image";
+import weeklySub from "../../public/9999-winner.jpeg";
 
 export default async function Page() {
   return (
     <>
-      <div className="hero bg-landing bg-center bg-scroll">
-        <div className="hero-content flex-col lg:flex-row-reverse">
-          <div className="flex flex-col">
-            <Image
-              src={"/9999-winner.jpeg"}
-              alt={"weekly sub"}
-              height={500}
-              width={500}
-            />
-            <p>dadddy</p>
+      <div className="hero h-3/5 bg-landing bg-cover bg-center">
+        <div className="hero-content flex-col justify-evenly lg:flex-row-reverse">
+          <div className="card card-compact w-96 align-center rounded-2xl bg-neutral">
+            <figure>
+              <Image
+                className="rounded-t-2xl"
+                src={weeklySub}
+                alt={"weekly sub"}
+              />
+            </figure>
+            <div className="card-body grid grid-rows-2 grid-flow-col gap-2 text-white">
+              <p>Artist:</p>
+              <p>Contest:</p>
+              <p className="text-end font-bold">Messhup</p>
+              <p className="text-end font-bold">
+                The Noun Square - 9999 PFP
+              </p>
+            </div>{" "}
           </div>
-          <div>
+          <div className="w-1/2">
             <h1 className="text-5xl font-bold text-white">Creator Contests!</h1>
             <p className="py-6 text-white">
               Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda

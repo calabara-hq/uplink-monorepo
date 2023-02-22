@@ -25,9 +25,9 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body>
+      <body className="bg-[#202225]">
         <WalletProvider session={session}>
-          <div className="flex flex-row">
+          <div className="flex flex-row h-full">
             <Sidebar />
             <div className="flex-1">
               <Nav />

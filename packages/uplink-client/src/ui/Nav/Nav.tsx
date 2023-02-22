@@ -6,7 +6,7 @@ export interface INav {}
 
 const Nav: React.FC<INav> = () => {
   return (
-    <div className="navbar justify-end bg-neutral">
+    <div className="navbar justify-end bg-[#202225]">
       <div className="">
         <button className="btn btn-primary">FAQ/About</button>
         <div className="p-2" />
