@@ -1,6 +1,6 @@
 import Image from "next/image";
 import weeklySub from "../../public/9999-winner.jpeg";
-
+import TabGroup from "@/ui/TabGroup/TabGroup";
 export default async function Page() {
   return (
     <>
@@ -18,9 +18,7 @@ export default async function Page() {
               <p>Artist:</p>
               <p>Contest:</p>
               <p className="text-end font-bold">Messhup</p>
-              <p className="text-end font-bold">
-                The Noun Square - 9999 PFP
-              </p>
+              <p className="text-end font-bold">The Noun Square - 9999 PFP</p>
             </div>{" "}
           </div>
           <div className="w-1/2">
@@ -35,15 +33,11 @@ export default async function Page() {
         </div>
       </div>
 
-      <div className="flex flex-row w-full p-6 bg-neutral">
+      <div className="flex flex-row w-full p-6 text-white">
         <div className="flex-1">
           <p className="text-2xl">Active Contests</p>
         </div>
-        <div tabIndex={0} className="tabs tabs-boxed">
-          <a className="tab">Submitting</a>
-          <a className="tab tab-active">All Active</a>
-          <a className="tab">Voting</a>
-        </div>
+        <TabGroup />
       </div>
 
       <div className="h-96 w-full p-6 bg-purple-300">
