@@ -3,6 +3,13 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
 
+  theme: {
+    extend: {
+      backgroundImage: {
+        'landing': "url('/landing-bg-1.svg')",
+      }
+    }
+  },
   
   
   daisyui: {
@@ -18,7 +25,7 @@ module.exports = {
 
           "neutral": "#202225",
 
-          "base-100": "#303339",
+          "base": "#303339",
 
           "info": "#3ABFF8",
 
@@ -27,10 +34,6 @@ module.exports = {
           "warning": "#FBBD23",
 
           "error": "#F87272",
-
-          backgroundImage: {
-            'landing': "url('/landing-bg-1.svg')",
-          },
 
         },
       },

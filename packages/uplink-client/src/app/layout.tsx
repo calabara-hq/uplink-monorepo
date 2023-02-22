@@ -3,6 +3,9 @@ import "@/styles/globals.css";
 import WalletProvider from "@/providers/WalletProvider";
 import { headers } from "next/headers";
 import { fetchData } from "@/utils /fetchData";
+
+import Sidebar from "@/ui/SideBar/SideBar";
+
 // pass cookies from request to the hub api and return a seession object
 // this forces the top level layout to become a dynamic route, which may not be ideal
 // https://beta.nextjs.org/docs/rendering/static-and-dynamic-rendering#dynamic-rendering
@@ -25,10 +28,15 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body>
+      <body className="bg-[#202225]">
         <WalletProvider session={session}>
-          <Nav />
-          {children}
+          <div className="flex flex-row h-full">
+            <Sidebar />
+            <div className="flex-1">
+              <Nav />
+              {children}
+            </div>
+          </div>
         </WalletProvider>
       </body>
     </html>
