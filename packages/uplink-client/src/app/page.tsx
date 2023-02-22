@@ -35,7 +35,7 @@ export default async function Page() {
         </div>
       </div>
 
-      <div className="flex flex-row h-fit w-full p-6 bg-neutral">
+      <div className="flex flex-row w-full p-6 bg-neutral">
         <div className="flex-1">
           <p className="text-2xl">Active Contests</p>
         </div>
