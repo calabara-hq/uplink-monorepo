@@ -17,8 +17,8 @@ export default function TabGroup () {
     return (
       <div tabIndex={0} className="tabs tabs-boxed content-center h-12 p-2 bg-[#303339] text-white font-bold">
         {tabSelect.map((tab, index) => {
-            if (index === activeTab) return <a className="tab tab-active">{tab}</a>
-            return <a className="tab text-white font-bold" onClick={() => setActiveTab(index)}>{tab}</a>
+            if (index === activeTab) return <a key={index} className="tab tab-active">{tab}</a>
+            return <a key={index} className="tab text-white font-bold" onClick={() => setActiveTab(index)}>{tab}</a>
         }            
         )}
       </div>

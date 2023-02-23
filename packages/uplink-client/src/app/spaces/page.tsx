@@ -17,16 +17,28 @@ const getSpaces = async () => {
 };
 
 export default async function Page() {
-  console.log("entering page");
   const spaces = await getSpaces();
   return (
     <div>
-      <p>hello from route2</p>
-      <Link href="/route1">back to route 1</Link>
+      <Link className="btn" href="/">
+        go home
+      </Link>
 
-      <pre>{JSON.stringify(spaces.data, null, 2)}</pre>
-      <pre>key: {JSON.stringify(spaces.operation.key, null, 2)}</pre>
-      <pre>{JSON.stringify(spaces.operation.context.meta, null, 2)}</pre>
+      {spaces.data.spaces.map((space, index) => {
+        return (
+          <div key={index}>
+            <div className="card card-compact w-96 bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h2 className="card-title">{space.name}</h2>
+                <p></p>
+                <div className="card-actions justify-end">
+                  <button className="btn btn-primary">Take me there</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
