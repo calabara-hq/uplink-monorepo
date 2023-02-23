@@ -70,59 +70,64 @@ export default function Sidebar() {
     <div className="w-1/10 h-screen sticky flex flex-col top-0 left-0 py-1 px-1 bg-blue-500">
       <div className="p-6 text-white text-center text-xl">
         <Link href={"/"}>
-          <Image src={uplinkLogo} alt="uplink logo" width={100} />
+          <Image src={uplinkLogo} alt="uplink logo" />
           <p>uplink</p>
         </Link>
       </div>
       <div className="left-10 top-24 w-fit m-auto mt-4 text-3xl">
+
         <div
           className="flex items-center justify-center 
-                        h-16 w-16 mt-2 mb-2 
-                        bg-transparent hover:bg-[#303339]
-                        text-white border-2 border-gray-200
+                        h-12 w-12 mt-2 mb-2 
+                        bg-[#303339] hover:bg-primary
+                        text-white border-1 border-gray-200
                         hover:rounded-xl rounded-3xl
                         transition-all duration-300 ease-linear
                         cursor-pointer shadow-lg
-                        tooltip tooltip-info"
+                        tooltip tooltip-primary"
           data-tip="New Org"
         >
           <p>+</p>
         </div>
         <hr className="bg-gray-200 border border-gray-200 rounded-full mx-2" />
-        <div
-          className="avatar flex items-center justify-center 
-                        h-16 w-16 mt-2 mb-2  
+        <Link href={"/orgs"}>
+          <div
+            className="avatar flex items-center justify-center 
+                        h-12 w-12 mt-2 mb-2  
                     bg-gray-400 
                     text-green-500
                         hover:rounded-xl rounded-3xl
                         transition-all duration-300 ease-linear
                         cursor-pointer shadow-lg"
-        >
-          <Image
-            src={"/noun-47.png"}
-            alt={"org avatar"}
-            height={50}
-            width={50}
-          />
-        </div>
+          >
+            <Image
+              src={"/noun-47.png"}
+              alt={"org avatar"}
+              height={50}
+              width={50}
+            />
+          </div>
+        </Link>
         <hr className="bg-gray-200 border border-gray-200 rounded-full mx-2" />
 
-        <div
-          className="avatar flex items-center justify-center 
-                        h-16 w-16 mt-2 mb-2  
+        <Link href={"/orgs"}>
+          <div
+            className="avatar flex items-center justify-center 
+                        h-12 w-12 mt-2 mb-2  
                     bg-gray-400 
                     text-green-500
                         hover:rounded-xl rounded-3xl
                         transition-all duration-300 ease-linear
                         cursor-pointer shadow-lg"
-        >
-          <Image
-            src={"/noun-47.png"}
-            alt={"org avatar"}
-            height={50}
-            width={50}
-          />
-        </div>
+          >
+            <Image
+              src={"/noun-47.png"}
+              alt={"org avatar"}
+              height={50}
+              width={50}
+            />
+          </div>
+        </Link>
       </div>
     </div>
   );
