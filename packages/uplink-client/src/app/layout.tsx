@@ -31,6 +31,9 @@ export default async function RootLayout({
       <body className="bg-base min-h-screen">
         <WalletProvider session={session}>
           <Nav />
+
+         
+
           {/*<Sidebar />*/}
           <main className="">{children}</main>
         </WalletProvider>

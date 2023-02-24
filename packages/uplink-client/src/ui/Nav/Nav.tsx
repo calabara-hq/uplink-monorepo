@@ -1,12 +1,13 @@
 import Image from "next/image";
 import uplinkLogo from "../../../public/uplink-logo.svg";
+import Logo from "../Logo/Logo";
 import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
 import Link from "next/link";
-export interface INav {};
+export interface INav {}
 
 const Nav: React.FC<INav> = () => {
   return (
-    <nav className="top-0 z-50 w-full">
+    <nav className="top-0 z-50 w-11/12 ml-auto mr-auto">
       <div className="px-3 py-3 lg:px-5 lg:pl-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-start">
@@ -32,9 +33,8 @@ const Nav: React.FC<INav> = () => {
                 ></path>
               </svg>
             </button>
-            <Link href="/" className="flex ml-0 md:mr-24">
-              <Image src={uplinkLogo} className="h-8 mr-3" alt="Uplink Logo" />
-              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap"></span>
+            <Link href="/" className="flex ml-0 md:mr-24 w-28">
+              <Logo />
             </Link>
           </div>
           <div className="flex items-center">
