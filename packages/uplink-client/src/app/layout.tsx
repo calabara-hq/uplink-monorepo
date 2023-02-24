@@ -28,11 +28,11 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body className="bg-[#202225]">
+      <body className="bg-base min-h-screen">
         <WalletProvider session={session}>
           <Nav />
-          <Sidebar />
-          <main className="p-0 sm:ml-20">{children}</main>
+          {/*<Sidebar />*/}
+          <main className="">{children}</main>
         </WalletProvider>
       </body>
     </html>

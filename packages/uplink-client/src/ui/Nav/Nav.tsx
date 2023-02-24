@@ -2,7 +2,7 @@ import Image from "next/image";
 import uplinkLogo from "../../../public/uplink-logo.svg";
 import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
 import Link from "next/link";
-export interface INav {}
+export interface INav {};
 
 const Nav: React.FC<INav> = () => {
   return (
@@ -38,7 +38,7 @@ const Nav: React.FC<INav> = () => {
             </Link>
           </div>
           <div className="flex items-center">
-            <div className="flex items-center ml-3">
+            <div className="flex items-center mr-20">
               <WalletConnectButton />
             </div>
           </div>

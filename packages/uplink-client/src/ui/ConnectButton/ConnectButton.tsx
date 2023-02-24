@@ -12,16 +12,13 @@ export default function WalletConnectButton() {
         switch (status) {
           case "unauthenticated":
             return (
-              <button
-                className="btn lowercase bg-red-600"
-                onClick={openConnectModal}
-              >
+              <button className="btn lowercase" onClick={openConnectModal}>
                 connect
               </button>
             );
           case "authenticated":
             return (
-              <button className="btn bg-blue-600" onClick={openAccountModal}>
+              <button className="btn" onClick={openAccountModal}>
                 {formatAddress(session?.user?.address || "test")}
               </button>
             );

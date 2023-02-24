@@ -23,22 +23,28 @@ export default async function Page() {
       <Link className="btn" href="/">
         go home
       </Link>
-
-      {spaces.data.spaces.map((space, index) => {
-        return (
-          <div key={index}>
-            <div className="card card-compact w-96 bg-base-100 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title">{space.name}</h2>
-                <p></p>
-                <div className="card-actions justify-end">
-                  <button className="btn btn-primary">Take me there</button>
+      <div className="grid grid-cols-4 gap-4 mt-10">
+        {spaces.data.spaces.map((space, index) => {
+          return (
+            <div key={index}>
+              <div className="card card-compact w-96 bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h2 className="card-title">{space.name}</h2>
+                  <p></p>
+                  <div className="card-actions justify-end">
+                    <Link
+                      className="btn btn-primary"
+                      href={`/space/${space.id}`}
+                    >
+                      Take me there
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
