@@ -32,8 +32,6 @@ export default async function RootLayout({
         <WalletProvider session={session}>
           <Nav />
 
-         
-
           {/*<Sidebar />*/}
           <main className="">{children}</main>
         </WalletProvider>

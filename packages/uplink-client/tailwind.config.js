@@ -7,7 +7,10 @@ module.exports = {
     extend: {
       backgroundImage: {
         'landing': "url('/landing-bg.svg')",
-      }
+      },
+      fontFamily: {
+        'virgil': ['Virgil', 'sans-serif'],
+      },
     }
   },
 

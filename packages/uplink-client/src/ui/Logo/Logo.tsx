@@ -7,7 +7,7 @@ export default function Logo() {
       fill="none"
       viewBox="0 0 166 50"
     >
-      <g clip-path="url(#a)">
+      <g clipPath="url(#a)">
         <path
           fill="#FF638D"
           d="M67.5 3h-45v7.5h45V3Z"

@@ -5,7 +5,7 @@ export default async function Page() {
   return (
     <>
       <div className="relative">
-        <div className="flex flex-col lg:flex-row justify-center items-center ml-auto mr-auto z-10 top-6 left-0 right-0 gap-20 px-10  w-8/12">
+        <div className="flex flex-col lg:flex-row justify-center items-center ml-auto mr-auto z-10 top-6 left-0 right-0 gap-20 px-10  w-8/12 ">
           <div className="w-1/2">
             <h1 className="text-5xl font-bold text-white">Uplink</h1>
             <p className="py-6 text-white">
@@ -15,6 +15,7 @@ export default async function Page() {
             </p>
             <button className="btn">Get Started</button>
           </div>
+          {/*}
           <div className="card card-compact w-64 bg-neutral text-white shadow-xl z-10">
             <figure>
               <Image src={weeklySub} alt="Shoes" />
@@ -25,6 +26,19 @@ export default async function Page() {
               <p className="text-end font-bold">Messhup</p>
               <p className="text-end font-bold">The Noun Square - 9999 PFP</p>
             </div>{" "}
+          </div>
+          */}
+          <div className="bg-neutral flex-col z-10 rounded-lg font-virgil shadow-lg ">
+            <Image
+              src={weeklySub}
+              alt="Shoes"
+              width={300}
+              className="rounded-t-lg"
+            />
+            <div className="p-6">
+              <p className="text-end font-bold">The Noun Square 9999 PFP</p>
+              <p className="text-end font-bold">- Messhup</p>
+            </div>
           </div>
         </div>
         <div className="relative z-0 pointer-events-none">
@@ -60,8 +74,8 @@ export default async function Page() {
           </svg>
           {/*<div className="h-16 bg-[#c62368]">test</div>*/}
         </div>
-        <div className="relative flex flex-col w-7/12 mr-auto ml-auto -mt-48 backdrop-blur-md bg-white/30 text-white px-2 py-2 rounded-md">
-          <div className="pb-10">
+        <div className="relative flex flex-col w-7/12 mr-auto ml-auto -mt-48 backdrop-blur-md bg-white/30 text-white px-2 py-2 rounded-lg">
+          <div className="p-5">
             <h1 className="text-2xl font-bold">Active Contests</h1>
           </div>
 
@@ -72,7 +86,6 @@ export default async function Page() {
             <div className="bg-base-100 rounded-md p-4">contest1</div>
             <div className="bg-base-100 rounded-md p-4">contest1</div>
             <div className="bg-base-100 rounded-md p-4">contest1</div>
-
           </div>
         </div>
       </div>

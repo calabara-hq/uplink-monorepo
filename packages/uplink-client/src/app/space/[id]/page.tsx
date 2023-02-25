@@ -18,6 +18,6 @@ export default async function Page({ params }: { params: { id: string } }) {
     return <pre className="text-white">{JSON.stringify(spaceData, null, 2)}</pre>;
   } catch (e) {
     console.log(e);
-    return <h1 className="text-white">oops, we couldn't find that space!</h1>;
+    return <h1 className="text-white">oops, we couldnt find that space!</h1>;
   }
 }

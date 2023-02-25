@@ -23,8 +23,11 @@ export default async function Page() {
       <Link className="btn" href="/">
         go home
       </Link>
+      <Link className="btn" href="/spacebuilder/create">
+        create
+      </Link>
       <div className="grid grid-cols-4 gap-4 mt-10">
-        {spaces.data.spaces.map((space, index) => {
+        {spaces.data.spaces.map((space: any, index: any) => {
           return (
             <div key={index}>
               <div className="card card-compact w-96 bg-base-100 shadow-xl">

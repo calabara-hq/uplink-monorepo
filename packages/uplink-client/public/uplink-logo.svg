@@ -5,7 +5,7 @@
             fill="none"
             viewBox="0 0 166 50"
           >
-            <g clip-path="url(#a)">
+            <g clipPath="url(#a)">
               <path fill="#FF638D" d="M67.5 3h-45v7.5h45V3Z" shapeRendering="crispEdges"/>
               <path fill="#CC0595" d="M120 3H75v7.5h45V3Z" shapeRendering="crispEdges"/>
               <path fill="#FF638D" d="M30 10.5h-7.5V18H30v-7.5Z" shapeRendering="crispEdges"/>
