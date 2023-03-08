@@ -9,12 +9,13 @@ import { Session } from "./SessionProvider";
 export interface IWalletProviderProps {
   children: React.ReactNode;
   session: Session | null;
+  refetchInterval: number;
 }
 
-export default function WalletProvider({ children, session }: any) {
+export default function WalletProvider({ children, session, refetchInterval }: any) {
   return (
     <WagmiConfig client={wagmiClient}>
-      <SessionProvider refetchInterval={3} session={session}>
+      <SessionProvider refetchInterval={refetchInterval ? refetchInterval : 0} session={session}>
         <AuthenticationProvider>
           <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
         </AuthenticationProvider>

@@ -14,6 +14,7 @@ const getInitialSession = async () => {
   const headersInstance = headers();
   const cookie = headersInstance.get("cookie");
   const session = await fetchData("/auth/session", cookie);
+  console.log(session)
   return session;
 };
 
@@ -31,7 +32,6 @@ export default async function RootLayout({
       <body className="bg-base min-h-screen">
         <WalletProvider session={session}>
           <Nav />
-
           {/*<Sidebar />*/}
           <main className="">{children}</main>
         </WalletProvider>
