@@ -26,11 +26,17 @@ export default async function Page() {
       <Link className="btn" href="/spacebuilder/create">
         create
       </Link>
-      <div className="grid grid-cols-4 gap-4 mt-10">
+      <div
+        className="grid gap-6 m-auto w-fit
+      grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-items-center
+     "
+      >
         {spaces.data.spaces.map((space: any, index: any) => {
           return (
             <div key={index}>
-              <div className="card card-compact w-96 bg-base-100 shadow-xl">
+              <div className="card card-compact w-64 bg-base-100 shadow-xl
+              transition-all duration-300 ease-linear
+              cursor-pointer hover:rounded-xl rounded-3xl">
                 <div className="card-body">
                   <h2 className="card-title">{space.name}</h2>
                   <p></p>
