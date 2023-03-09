@@ -1,16 +1,16 @@
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
-import { SpaceMap } from "./page";
+import { AllSpaces } from "./page";
 import Layout from "./layout";
 
 export default {
   title: "ui/explore",
-  component: SpaceMap,
+  component: AllSpaces,
   decorators: [SessionDecorator],
 };
 
 const Template = (args: any) => (
   <Layout>
-    <SpaceMap {...args} />
+    <AllSpaces {...args} />
   </Layout>
 );
 

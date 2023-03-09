@@ -9,7 +9,7 @@ import graphqlClient from "@/lib/graphql/initUrql";
 //export const dynamic = "force-static";
 //export const revalidate = 10;
 
-export function SpaceMap({ spaces }: any) {
+export function AllSpaces({ spaces }: any) {
   return (
     <div
       className="grid gap-6 py-6
@@ -66,7 +66,7 @@ export default async function Page() {
       <Link className="btn" href="/spacebuilder/create">
         create
       </Link>
-      <SpaceMap spaces={spaces} />
+      <AllSpaces spaces={spaces} />
     </div>
   );
 }
