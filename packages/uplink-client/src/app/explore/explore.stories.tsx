@@ -1,5 +1,5 @@
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
-import { AllSpaces } from "./page";
+import { AllSpaces } from "./data";
 import Layout from "./layout";
 
 export default {
