@@ -2,93 +2,51 @@
 import { useState } from "react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
+import { useSession } from "@/providers/SessionProvider";
 
-interface FormElements extends HTMLFormControlsCollection {
-  spaceName: HTMLInputElement;
-  idHyphen: HTMLInputElement;
-  idSmoosh: HTMLInputElement;
-}
-
-interface SpaceFormData extends HTMLFormElement {
-  readonly elements: FormElements;
-}
-
-type ValidatedFormData = {
-  spaceName: string;
-  identifier: string | null;
-};
-
-type Admin = {
-  id: number;
-  address: string | null;
-};
-
-type SpaceBuilderProps = {
-  spaceName: string;
-  spaceNameError: string | null;
-  spaceIdentifier: string;
-  admins: Admin[];
-};
-
-const reducer = (state: any, action: any) => {
-  switch (action.type) {
-    case "setSpaceName":
-      return { ...state, spaceName: action.payload };
-    case "setSpaceNameError":
-      return { ...state, spaceNameError: action.payload };
-    case "addAdmin":
-      return {
-        ...state,
-        admins: [
-          ...state.admins,
-          { id: state.admins.length, address: null }, // add unique ID to new admin object
-        ],
-      };
-    case "removeAdmin":
-        console.log('deleteing', action.payload)
-      return {
-        ...state,
-        admins: state.admins.filter(
-          (admin: Admin) => admin.id !== action.payload
-        ),
-      };
-    case "setAdmin":
-      return {
-        ...state,
-        admins: state.admins.map((admin: Admin) =>
-          admin.id === action.payload.id
-            ? { ...admin, address: action.payload.address }
-            : admin
-        ),
-      };
-
-    default:
-      return state;
-  }
-};
+import {
+  reducer,
+  sanitizeSpaceData,
+  SpaceBuilderProps,
+  SpaceBuilderErrors,
+  Admin,
+} from "@/app/spacebuilder/data";
 
 export default function Page() {
-  const [state, dispatch] = useReducer(reducer, {
-    spaceName: "",
-    spaceIdentifier: "",
-    spaceNameError: null,
-    admins: [{ id: 0, address: null }],
-  } as SpaceBuilderProps);
+  const { data: session, status } = useSession();
 
+  /*
   const [spaceIdentifier, setSpaceIdentifier] = useState<string[] | null>(null);
-  const [admins, setAdmins] = useState<string[]>([""]);
-
-  const handleSubmit = () => {
-    console.log(state);
-  };
-
-  useEffect(() => {}, [state.admins]);
-
   const updateSpaceIdentifier = (spaceName: string) => {
     setSpaceIdentifier([
       spaceName.replace(/ +/g, "-").toLowerCase(),
       spaceName.replace(/ +/g, "").toLowerCase(),
     ]);
+  };
+  */
+ 
+  const [state, dispatch] = useReducer(reducer, {
+    spaceName: "",
+    spaceIdentifier: "",
+    website: "",
+    twitter: "",
+    admins: [
+      { id: 0, address: session?.user?.address || "me" },
+      { id: 1, address: "" },
+    ],
+    errors: {
+      spaceNameError: null,
+    },
+  } as SpaceBuilderProps);
+
+  const handleSubmit = () => {
+    const result = sanitizeSpaceData(state);
+    // bail early and flag the errors by setting the state
+    if (result.isError)
+      return dispatch({ type: "setErrors", payload: result.errors });
+
+    // no errors. data is sanitzed and ready to be sent to the server
+    console.log("no errors! here is your sanitized data: ", result.sanitized);
   };
 
   return (
@@ -109,17 +67,72 @@ export default function Page() {
             }} // clear the error when the user starts typing
             placeholder="Nouns"
             className={`input input-bordered w-full max-w-xs ${
-              state.spaceNameError ? "input-error" : "input-primary"
+              state.errors.spaceNameError ? "input-error" : "input-primary"
             }`}
           />
-          {state.spaceNameError && (
+          {state.errors.spaceNameError && (
             <label className="label">
               <span className="label-text-alt text-error">
-                {state.spaceNameError}
+                {state.errors.spaceNameError}
               </span>
             </label>
           )}
         </div>
+
+        <div>
+          <label className="label">
+            <span className="label-text">Website</span>
+          </label>
+          <input
+            type="text"
+            autoComplete="off"
+            onChange={(e) => {
+              dispatch({
+                type: "setWebsite",
+                payload: e.target.value,
+              });
+            }} // clear the error when the user starts typing
+            placeholder="nouns.wtf"
+            className={`input input-bordered w-full max-w-xs ${
+              state.errors.websiteError ? "input-error" : "input-primary"
+            }`}
+          />
+          {state.errors.websiteError && (
+            <label className="label">
+              <span className="label-text-alt text-error">
+                {state.errors.websiteError}
+              </span>
+            </label>
+          )}
+        </div>
+
+        <div>
+          <label className="label">
+            <span className="label-text">Twitter</span>
+          </label>
+          <input
+            type="text"
+            autoComplete="off"
+            onChange={(e) => {
+              dispatch({
+                type: "setTwitter",
+                payload: e.target.value,
+              });
+            }} // clear the error when the user starts typing
+            placeholder="@nounsdao"
+            className={`input input-bordered w-full max-w-xs ${
+              state.errors.twitterError ? "input-error" : "input-primary"
+            }`}
+          />
+          {state.errors.twitterError && (
+            <label className="label">
+              <span className="label-text-alt text-error">
+                {state.errors.twitterError}
+              </span>
+            </label>
+          )}
+        </div>
+
         {/*spaceIdentifier && (
             <div>
               <label htmlFor="identifier" className="label">
@@ -155,16 +168,24 @@ export default function Page() {
           )
           */}
 
-        <label htmlFor="admins" className="label">
+        <label className="label">
           <span className="label-text">Admins</span>
         </label>
         {state.admins.map((admin: Admin) => {
           return (
-            <div key={admin.id} className="flex justify-center items-center gap-2">
+            <div
+              key={admin.id}
+              className="flex justify-center items-center gap-2"
+            >
               <input
                 type="text"
-                placeholder="nickdodson.eth"
+                placeholder={
+                  admin.id === 0
+                    ? session?.user?.address || "me"
+                    : "vitalik.eth"
+                }
                 className="input input-bordered w-full max-w-xs"
+                disabled={admin.id === 0}
                 onChange={(e) =>
                   dispatch({
                     type: "setAdmin",
@@ -172,14 +193,16 @@ export default function Page() {
                   })
                 }
               />{" "}
-              <button
-                onClick={() => {
-                  dispatch({ type: "removeAdmin", payload: admin.id });
-                }}
-                className="btn bg-transparent border-none"
-              >
-                <XCircleIcon className="w-8" />
-              </button>
+              {admin.id > 0 && (
+                <button
+                  onClick={() => {
+                    dispatch({ type: "removeAdmin", payload: admin.id });
+                  }}
+                  className="btn bg-transparent border-none"
+                >
+                  <XCircleIcon className="w-8" />
+                </button>
+              )}
             </div>
           );
         })}
