@@ -35,6 +35,14 @@ export const CreateSpaceDocument = gql`
                     value
                     error
                 }
+                twitter{
+                    value
+                    error
+                }
+                website{
+                    value
+                    error
+                }
             }
         }
     }

@@ -21,7 +21,9 @@ type ResponseField {
 }
 
 type SpaceResponse {
-  name: ResponseField! 
+  name: ResponseField!
+  website: ResponseField!
+  twitter: ResponseField!
 }
 
 type SpaceMutationResponse {
@@ -31,6 +33,8 @@ type SpaceMutationResponse {
 
 input SpaceInput {
   name: String!
+  website: String
+  twitter: String
 }
 
 type Mutation {

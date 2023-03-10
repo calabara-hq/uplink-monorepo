@@ -23,6 +23,8 @@ const createSpace = async (state: any) => {
     .mutation(CreateSpaceDocument, {
       spaceData: {
         name: state.name.value,
+        website: state.website.value,
+        twitter: state.twitter.value,
       },
     })
     .toPromise();
@@ -56,8 +58,8 @@ export default function SpaceForm() {
     website: { value: "", error: null },
     twitter: { value: "", error: null },
     admins: [
-      { id: nanoid(), address: userAddress, error: null },
-      { id: nanoid(), address: "", error: null },
+      { id: nanoid(), value: userAddress, error: null },
+      { id: nanoid(), value: "", error: null },
     ],
   } as SpaceBuilderProps);
 
@@ -220,7 +222,7 @@ export default function SpaceForm() {
                   onChange={(e) =>
                     dispatch({
                       type: "setAdmin",
-                      payload: { id: admin.id, address: e.target.value },
+                      payload: { id: admin.id, value: e.target.value },
                     })
                   }
                 />

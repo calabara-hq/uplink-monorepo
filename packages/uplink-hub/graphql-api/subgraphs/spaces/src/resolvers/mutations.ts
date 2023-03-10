@@ -14,17 +14,31 @@ const validateSpaceName = (name: string) => {
     return fields;
 }
 
+const validateSpaceWebsite = (website: string) => {
+    const fields = { value: website, error: null };
+    // TODO: check that website is valid
+    return fields;
+}
+
+const validateSpaceTwitter = (twitter: string) => {
+    const fields = { value: twitter, error: null };
+    // TODO: check that website is valid
+    return fields;
+}
 
 const processSpaceData = async (spaceData) => {
-    const { name } = spaceData;
+    const { name, website, twitter } = spaceData;
     const nameResult = validateSpaceName(name);
+    const websiteResult = validateSpaceWebsite(website);
+    const twitterResult = validateSpaceTwitter(twitter);
 
-
-    let isSuccess = !nameResult.error;
+    let isSuccess = !nameResult.error && !websiteResult.error && !twitterResult.error;
     return {
         success: isSuccess,
         spaceResponse: {
-            name: nameResult
+            name: nameResult,
+            website: websiteResult,
+            twitter: twitterResult,
         }
     }
 }

@@ -111,6 +111,8 @@ input SpaceInput
   @join__type(graph: SPACES)
 {
   name: String!
+  website: String
+  twitter: String
 }
 
 type SpaceMutationResponse
@@ -124,6 +126,8 @@ type SpaceResponse
   @join__type(graph: SPACES)
 {
   name: ResponseField!
+  website: ResponseField!
+  twitter: ResponseField!
 }
 
 type Submission
