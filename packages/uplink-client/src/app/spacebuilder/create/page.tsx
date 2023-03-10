@@ -3,17 +3,18 @@ import { useState } from "react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
+import { nanoid } from "nanoid";
 
 import {
   reducer,
   sanitizeSpaceData,
   SpaceBuilderProps,
-  SpaceBuilderErrors,
   Admin,
 } from "@/app/spacebuilder/data";
 
 export default function Page() {
   const { data: session, status } = useSession();
+  const userAddress = session?.user?.address || "you";
 
   /*
   const [spaceIdentifier, setSpaceIdentifier] = useState<string[] | null>(null);
@@ -24,29 +25,33 @@ export default function Page() {
     ]);
   };
   */
- 
+
   const [state, dispatch] = useReducer(reducer, {
-    spaceName: "",
-    spaceIdentifier: "",
-    website: "",
-    twitter: "",
+    spaceName: { value: "", error: null },
+    spaceIdentifier: { value: "", error: null },
+    website: { value: "", error: null },
+    twitter: { value: "", error: null },
     admins: [
-      { id: 0, address: session?.user?.address || "me" },
-      { id: 1, address: "" },
+      { id: nanoid(), address: userAddress, error: null },
+      { id: nanoid(), address: "", error: null },
     ],
-    errors: {
-      spaceNameError: null,
-    },
   } as SpaceBuilderProps);
 
   const handleSubmit = () => {
     const result = sanitizeSpaceData(state);
+    console.log(result.spaceData);
+    dispatch({ type: "setTotalState", payload: result.spaceData });
+
     // bail early and flag the errors by setting the state
-    if (result.isError)
-      return dispatch({ type: "setErrors", payload: result.errors });
+    /*
+    if (result.isError) {
+      //console.log("failed with errors", result.space);
+      return dispatch({ type: "setTotalState", payload: result.spaceData });
+    }
 
     // no errors. data is sanitzed and ready to be sent to the server
-    console.log("no errors! here is your sanitized data: ", result.sanitized);
+    console.log("no errors! here is your sanitized data: ", result.spaceData);
+    */
   };
 
   return (
@@ -64,16 +69,16 @@ export default function Page() {
                 type: "setSpaceName",
                 payload: e.target.value,
               });
-            }} // clear the error when the user starts typing
+            }}
             placeholder="Nouns"
             className={`input input-bordered w-full max-w-xs ${
-              state.errors.spaceNameError ? "input-error" : "input-primary"
+              state.spaceName.error ? "input-error" : "input-primary"
             }`}
           />
-          {state.errors.spaceNameError && (
+          {state.spaceName.error && (
             <label className="label">
               <span className="label-text-alt text-error">
-                {state.errors.spaceNameError}
+                {state.spaceName.error}
               </span>
             </label>
           )}
@@ -91,16 +96,16 @@ export default function Page() {
                 type: "setWebsite",
                 payload: e.target.value,
               });
-            }} // clear the error when the user starts typing
+            }}
             placeholder="nouns.wtf"
             className={`input input-bordered w-full max-w-xs ${
-              state.errors.websiteError ? "input-error" : "input-primary"
+              state.website.error ? "input-error" : "input-primary"
             }`}
           />
-          {state.errors.websiteError && (
+          {state.website.error && (
             <label className="label">
               <span className="label-text-alt text-error">
-                {state.errors.websiteError}
+                {state.website.error}
               </span>
             </label>
           )}
@@ -118,16 +123,16 @@ export default function Page() {
                 type: "setTwitter",
                 payload: e.target.value,
               });
-            }} // clear the error when the user starts typing
+            }}
             placeholder="@nounsdao"
             className={`input input-bordered w-full max-w-xs ${
-              state.errors.twitterError ? "input-error" : "input-primary"
+              state.twitter.error ? "input-error" : "input-primary"
             }`}
           />
-          {state.errors.twitterError && (
+          {state.twitter.error && (
             <label className="label">
               <span className="label-text-alt text-error">
-                {state.errors.twitterError}
+                {state.twitter.error}
               </span>
             </label>
           )}
@@ -171,37 +176,39 @@ export default function Page() {
         <label className="label">
           <span className="label-text">Admins</span>
         </label>
-        {state.admins.map((admin: Admin) => {
+        {state.admins.map((admin: Admin, index: number) => {
           return (
-            <div
-              key={admin.id}
-              className="flex justify-center items-center gap-2"
-            >
-              <input
-                type="text"
-                placeholder={
-                  admin.id === 0
-                    ? session?.user?.address || "me"
-                    : "vitalik.eth"
-                }
-                className="input input-bordered w-full max-w-xs"
-                disabled={admin.id === 0}
-                onChange={(e) =>
-                  dispatch({
-                    type: "setAdmin",
-                    payload: { id: admin.id, address: e.target.value },
-                  })
-                }
-              />{" "}
-              {admin.id > 0 && (
-                <button
-                  onClick={() => {
-                    dispatch({ type: "removeAdmin", payload: admin.id });
-                  }}
-                  className="btn bg-transparent border-none"
-                >
-                  <XCircleIcon className="w-8" />
-                </button>
+            <div key={admin.id}>
+              <div className="flex justify-center items-center gap-2">
+                <input
+                  type="text"
+                  placeholder={index === 0 ? userAddress : "vitalik.eth"}
+                  className="input input-bordered w-full max-w-xs"
+                  disabled={index === 0}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "setAdmin",
+                      payload: { id: admin.id, address: e.target.value },
+                    })
+                  }
+                />
+                {index > 0 && (
+                  <button
+                    onClick={() => {
+                      dispatch({ type: "removeAdmin", payload: admin.id });
+                    }}
+                    className="btn bg-transparent border-none"
+                  >
+                    <XCircleIcon className="w-8" />
+                  </button>
+                )}
+              </div>
+              {admin.error && (
+                <label className="label">
+                  <span className="label-text-alt text-error">
+                    {admin.error}
+                  </span>
+                </label>
               )}
             </div>
           );
