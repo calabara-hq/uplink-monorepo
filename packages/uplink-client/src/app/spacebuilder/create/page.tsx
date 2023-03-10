@@ -4,13 +4,21 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import { nanoid } from "nanoid";
+import {
+  CreateSpaceDocument,
+  AllSpacesDocument,
+} from "@/lib/graphql/spaces.gql";
+import graphqlClient from "@/lib/graphql/initUrql";
 
 import {
   reducer,
   sanitizeSpaceData,
   SpaceBuilderProps,
   Admin,
+  createSpace,
 } from "@/app/spacebuilder/data";
+
+
 
 export default function Page() {
   const { data: session, status } = useSession();
@@ -37,10 +45,12 @@ export default function Page() {
     ],
   } as SpaceBuilderProps);
 
-  const handleSubmit = () => {
-    const result = sanitizeSpaceData(state);
-    console.log(result.spaceData);
-    dispatch({ type: "setTotalState", payload: result.spaceData });
+  const handleSubmit = async () => {
+    const result = await createSpace(state);
+
+    //sanitizeSpaceData(state);
+    //console.log(result.spaceData);
+    //dispatch({ type: "setTotalState", payload: result.spaceData });
 
     // bail early and flag the errors by setting the state
     /*

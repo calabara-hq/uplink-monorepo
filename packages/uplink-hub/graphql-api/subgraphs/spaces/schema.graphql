@@ -1,5 +1,5 @@
 type Space @key(fields: "id") {
-  id: ID! 
+  id: ID!
   name: String!
   members: Int!
   logo: String!
@@ -15,6 +15,24 @@ type Socials {
 type Query {
   space(id: ID!): Space
   spaces: [Space!]!
+}
+
+type Mutation {
+  createSpace(
+    name: String!
+    members: Int!
+  ): Space
+
+
+  updateSpace(
+    id: ID!
+    name: String
+    members: Int
+    logo: String
+  ): Space
+
+
+  deleteSpace(id: ID!): Space
 }
 
 extend schema

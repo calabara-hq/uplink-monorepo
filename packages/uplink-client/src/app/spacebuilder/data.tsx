@@ -1,4 +1,9 @@
 import { nanoid } from "nanoid";
+import {
+  CreateSpaceDocument,
+  AllSpacesDocument,
+} from "@/lib/graphql/spaces.gql";
+import graphqlClient from "@/lib/graphql/initUrql";
 
 export type Admin = {
   id: string;
@@ -71,8 +76,7 @@ export const sanitizeSpaceData = (spaceData: SpaceBuilderProps) => {
       continue;
     }
 
-    // check if address is ens or hex
-    const isEns = trimmedAddress.match(/\.eth$/);
+    const isEns = trimmedAddress.match(/\.eth$/); // check if address is ens or hex
 
     if (isEns) {
       // check if ens is valid
@@ -149,4 +153,29 @@ export const reducer = (state: any, action: any) => {
     default:
       return state;
   }
+};
+
+export const createSpace = async (state: any) => {
+  const results = await graphqlClient.query(AllSpacesDocument, {}).toPromise();
+  if (results.error) {
+    throw new Error(results.error.message);
+  }
+  console.log(results);
+  return results;
+
+  //console.log(state)
+  /*
+  const result = await graphqlClient
+    .mutation(CreateSpaceDocument, {
+      space: {
+        name: state.spaceName.value,
+        members: 0,
+      },
+    })
+    .toPromise();
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+  return result;
+  */
 };

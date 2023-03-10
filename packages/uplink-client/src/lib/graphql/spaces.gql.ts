@@ -24,3 +24,14 @@ export const SpaceDocument = gql`
         }
     }
 `;
+
+
+// create a space
+export const CreateSpaceDocument = gql`
+    mutation CreateSpace($space: SpaceInput!){
+        createSpace(space: $space){
+            name
+            members
+        }
+    }
+`;
