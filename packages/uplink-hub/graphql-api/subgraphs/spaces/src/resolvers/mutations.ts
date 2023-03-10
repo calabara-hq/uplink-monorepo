@@ -1,8 +1,14 @@
 
 
+type InputProps = {
+    id?: string;
+    value: string;
+    error: string;
+}
+
 // validate space name
 const validateSpaceName = (name: string) => {
-    const fields = { value: name, error: null };
+    const fields: InputProps = { value: name, error: null };
     fields.value = fields.value.trim();
     if (fields.value.length < 3) {
         fields.error = "Space name must be at least 3 characters";
@@ -15,30 +21,76 @@ const validateSpaceName = (name: string) => {
 }
 
 const validateSpaceWebsite = (website: string) => {
-    const fields = { value: website, error: null };
+    const fields: InputProps = { value: website, error: null };
     // TODO: check that website is valid
     return fields;
 }
 
 const validateSpaceTwitter = (twitter: string) => {
-    const fields = { value: twitter, error: null };
+    const fields: InputProps = { value: twitter, error: null };
     // TODO: check that website is valid
     return fields;
 }
 
+const validateAdmins = (admins: InputProps[]) => {
+    let isAdminError = false;
+    for (const [index, admin] of admins.entries()) {
+        const { id: adminId, value: adminAddress } = admin;
+        // skip the first admin since it's not editable
+        if (index === 0) continue;
+        // trim whitespace
+        const trimmedAddress = adminAddress.trim();
+
+        // check if address is empty
+        if (trimmedAddress.length === 0) {
+            // remove admin from array if it is
+            admins = admins.filter(
+                (admin) => admin.id !== adminId
+            );
+            console.log("to remove", adminId);
+            continue;
+        }
+
+        const isEns = trimmedAddress.match(/\.eth$/); // check if address is ens or hex
+
+        if (isEns) {
+            // check if ens is valid
+            const isValidEns = trimmedAddress.match(
+                /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/
+            );
+            if (!isValidEns) {
+                isAdminError = true;
+                admin.error = "Address is not valid";
+            }
+        } else {
+            // check if address is valid hex
+            const isValidAddress = trimmedAddress.match(/^(0x)?[0-9a-f]{40}$/i);
+            if (!isValidAddress) {
+                isAdminError = true;
+                admin.error = "Address is not valid";
+            }
+        }
+        admin.value = trimmedAddress;
+    }
+    return { isAdminError, admins }
+}
+
+
 const processSpaceData = async (spaceData) => {
-    const { name, website, twitter } = spaceData;
+    const { name, website, twitter, admins } = spaceData;
     const nameResult = validateSpaceName(name);
     const websiteResult = validateSpaceWebsite(website);
     const twitterResult = validateSpaceTwitter(twitter);
+    const { isAdminError, admins: adminsResult } = validateAdmins(spaceData.admins);
 
-    let isSuccess = !nameResult.error && !websiteResult.error && !twitterResult.error;
+    let isSuccess = !nameResult.error && !websiteResult.error && !twitterResult.error && !isAdminError;
     return {
         success: isSuccess,
         spaceResponse: {
             name: nameResult,
             website: websiteResult,
             twitter: twitterResult,
+            admins: adminsResult
         }
     }
 }

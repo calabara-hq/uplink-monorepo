@@ -25,6 +25,7 @@ const createSpace = async (state: any) => {
         name: state.name.value,
         website: state.website.value,
         twitter: state.twitter.value,
+        admins: state.admins,
       },
     })
     .toPromise();
