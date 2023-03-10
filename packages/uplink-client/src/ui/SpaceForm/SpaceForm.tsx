@@ -4,19 +4,37 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import { nanoid } from "nanoid";
+
 import {
   CreateSpaceDocument,
   AllSpacesDocument,
 } from "@/lib/graphql/spaces.gql";
-import graphqlClient from "@/lib/graphql/initUrql";
+import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 
 import {
   reducer,
-  sanitizeSpaceData,
   SpaceBuilderProps,
   Admin,
-  createSpace,
-} from "@/app/spacebuilder/data";
+} from "@/app/spacebuilder/spaceHandler";
+
+const createSpace = async (state: any) => {
+  console.log(state);
+  const result = await graphqlClient
+    .mutation(CreateSpaceDocument, {
+      spaceData: {
+        name: state.name.value,
+      },
+    })
+    .toPromise();
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+  const { success, spaceResponse } = stripTypenames(result.data.createSpace);
+  return {
+    success,
+    spaceResponse,
+  };
+};
 
 export default function SpaceForm() {
   const { data: session, status } = useSession();
@@ -33,8 +51,8 @@ export default function SpaceForm() {
   */
 
   const [state, dispatch] = useReducer(reducer, {
-    spaceName: { value: "", error: null },
-    spaceIdentifier: { value: "", error: null },
+    name: { value: "", error: null },
+    systemName: { value: "", error: null },
     website: { value: "", error: null },
     twitter: { value: "", error: null },
     admins: [
@@ -44,11 +62,17 @@ export default function SpaceForm() {
   } as SpaceBuilderProps);
 
   const handleSubmit = async () => {
-    const result = await createSpace(state);
+    const { success, spaceResponse } = await createSpace(state);
+
+    console.log(success, spaceResponse);
 
     //sanitizeSpaceData(state);
     //console.log(result.spaceData);
-    //dispatch({ type: "setTotalState", payload: result.spaceData });
+    dispatch({ type: "setTotalState", payload: spaceResponse });
+
+    if (!success) {
+      return;
+    }
 
     // bail early and flag the errors by setting the state
     /*
@@ -80,13 +104,13 @@ export default function SpaceForm() {
             }}
             placeholder="Nouns"
             className={`input input-bordered w-full max-w-xs ${
-              state.spaceName.error ? "input-error" : "input-primary"
+              state.name.error ? "input-error" : "input-primary"
             }`}
           />
-          {state.spaceName.error && (
+          {state.name.error && (
             <label className="label">
               <span className="label-text-alt text-error">
-                {state.spaceName.error}
+                {state.name.error}
               </span>
             </label>
           )}

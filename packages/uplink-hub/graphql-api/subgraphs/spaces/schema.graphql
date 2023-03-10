@@ -3,13 +3,8 @@ type Space @key(fields: "id") {
   name: String!
   members: Int!
   logo: String!
-  socials: Socials
-}
-
-type Socials {
-  web: String
   twitter: String
-  discord: String
+  website: String
 }
 
 type Query {
@@ -17,22 +12,29 @@ type Query {
   spaces: [Space!]!
 }
 
+## mutations
+
+type ResponseField {
+  id: ID
+  value: String!
+  error: String
+}
+
+type SpaceResponse {
+  name: ResponseField! 
+}
+
+type SpaceMutationResponse {
+  success: Boolean!
+  spaceResponse: SpaceResponse!
+}
+
+input SpaceInput {
+  name: String!
+}
+
 type Mutation {
-  createSpace(
-    name: String!
-    members: Int!
-  ): Space
-
-
-  updateSpace(
-    id: ID!
-    name: String
-    members: Int
-    logo: String
-  ): Space
-
-
-  deleteSpace(id: ID!): Space
+  createSpace(spaceData: SpaceInput!): SpaceMutationResponse!
 }
 
 extend schema
