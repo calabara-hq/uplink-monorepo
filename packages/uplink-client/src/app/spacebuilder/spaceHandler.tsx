@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 
 export type Admin = {
   id: string;
-  address: string;
+  value: string;
   error: string | null;
 };
 
@@ -51,7 +51,7 @@ export const reducer = (state: any, action: any) => {
         ...state,
         admins: [
           ...state.admins,
-          { id: nanoid(), address: "", error: null }, // add unique ID to new admin object
+          { id: nanoid(), value: "", error: null }, // add unique ID to new admin object
         ],
       };
     case "removeAdmin":
@@ -66,14 +66,14 @@ export const reducer = (state: any, action: any) => {
         ...state,
         admins: state.admins.map((admin: Admin) =>
           admin.id === action.payload.id
-            ? { ...admin, address: action.payload.address, error: null }
+            ? { ...admin, value: action.payload.value, error: null }
             : admin
         ),
       };
 
     case "setTotalState":
       console.log(action.payload);
-      return { ...state, ...action.payload };
+      return { ...action.payload };
     default:
       return state;
   }
