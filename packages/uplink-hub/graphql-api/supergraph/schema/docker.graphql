@@ -3,6 +3,7 @@ schema
   @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
 {
   query: Query
+  mutation: Mutation
 }
 
 directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
@@ -66,6 +67,12 @@ enum link__Purpose {
   EXECUTION
 }
 
+type Mutation
+  @join__type(graph: SPACES)
+{
+  createSpace(spaceData: SpaceInput!): SpaceMutationResponse!
+}
+
 type Query
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
@@ -80,12 +87,12 @@ type Query
   submission(submissionId: ID!): Submission! @join__field(graph: SUBMISSIONS)
 }
 
-type Socials
+type ResponseField
   @join__type(graph: SPACES)
 {
-  web: String
-  twitter: String
-  discord: String
+  id: ID
+  value: String!
+  error: String
 }
 
 type Space
@@ -96,7 +103,27 @@ type Space
   name: String! @join__field(graph: SPACES)
   members: Int! @join__field(graph: SPACES)
   logo: String! @join__field(graph: SPACES)
-  socials: Socials @join__field(graph: SPACES)
+  twitter: String @join__field(graph: SPACES)
+  website: String @join__field(graph: SPACES)
+}
+
+input SpaceInput
+  @join__type(graph: SPACES)
+{
+  name: String!
+}
+
+type SpaceMutationResponse
+  @join__type(graph: SPACES)
+{
+  success: Boolean!
+  spaceResponse: SpaceResponse!
+}
+
+type SpaceResponse
+  @join__type(graph: SPACES)
+{
+  name: ResponseField!
 }
 
 type Submission

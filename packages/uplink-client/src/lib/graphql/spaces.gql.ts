@@ -15,12 +15,27 @@ export const SpaceDocument = gql`
     query Query($id: ID!){
         space(id: $id){
             name
-            members
         }
         spaceContests(spaceId: $id){
             start
             end
             tag
+        }
+    }
+`;
+
+
+// create a space
+export const CreateSpaceDocument = gql`
+    mutation CreateSpace($spaceData: SpaceInput!){
+        createSpace(spaceData: $spaceData){
+            success
+            spaceResponse{
+                name{
+                    value
+                    error
+                }
+            }
         }
     }
 `;

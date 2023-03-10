@@ -8,6 +8,9 @@ const queries = {
         space(parent, args, contextValue, info) {
             return spaces.find(space => space.id === args.id);
         },
+        random() {
+            console.log('hehehe')
+        }
     },
 
     Space: {

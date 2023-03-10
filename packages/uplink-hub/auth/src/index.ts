@@ -2,19 +2,10 @@ import express from 'express';
 import auth from './routes.js';
 import bodyParser from 'body-parser';
 import session from 'express-session';
-import cors from 'cors';
 const port = 5000
 const app = express();
 
 app.use(bodyParser.json())
-
-//app.set("trust proxy", 1)
-/*
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true,
-}))
-*/
 
 app.use(session({
   name: "uplink-hub",

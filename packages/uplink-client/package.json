@@ -11,6 +11,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.16",
     "@next/font": "13.1.6",
     "@rainbow-me/rainbowkit": "^0.10.0",
     "@types/node": "18.11.18",
@@ -25,6 +26,7 @@
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "lokijs": "^1.5.12",
+    "nanoid": "^4.0.1",
     "next": "^13.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
