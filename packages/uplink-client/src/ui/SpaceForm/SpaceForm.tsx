@@ -16,6 +16,7 @@ import {
   SpaceBuilderProps,
   FormField,
 } from "@/app/spacebuilder/spaceHandler";
+import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 
 const createSpace = async (state: any) => {
   console.log(state);
@@ -43,15 +44,25 @@ export default function SpaceForm() {
   const { data: session, status } = useSession();
   const userAddress = session?.user?.address || "you";
 
-  /*
-  const [spaceIdentifier, setSpaceIdentifier] = useState<string[] | null>(null);
-  const updateSpaceIdentifier = (spaceName: string) => {
-    setSpaceIdentifier([
-      spaceName.replace(/ +/g, "-").toLowerCase(),
-      spaceName.replace(/ +/g, "").toLowerCase(),
-    ]);
-  };
-  */
+  useEffect(() => {
+    if (status === "authenticated") {
+      return dispatch({
+        type: "setAdmin",
+        payload: {
+          index: 0,
+          value: userAddress,
+        },
+      });
+    }
+
+    return dispatch({
+      type: "setAdmin",
+      payload: {
+        index: 0,
+        value: "you",
+      },
+    });
+  }, [status]);
 
   const [state, dispatch] = useReducer(reducer, {
     name: { value: "", error: null },
@@ -70,17 +81,6 @@ export default function SpaceForm() {
     if (!success) {
       return;
     }
-
-    // bail early and flag the errors by setting the state
-    /*
-    if (result.isError) {
-      //console.log("failed with errors", result.space);
-      return dispatch({ type: "setTotalState", payload: result.spaceData });
-    }
-
-    // no errors. data is sanitzed and ready to be sent to the server
-    console.log("no errors! here is your sanitized data: ", result.spaceData);
-    */
   };
 
   return (
@@ -170,41 +170,6 @@ export default function SpaceForm() {
           )}
         </div>
 
-        {/*spaceIdentifier && (
-            <div>
-              <label htmlFor="identifier" className="label">
-                <span className="label-text">Identifier</span>
-              </label>
-
-              <div className="bg-base">
-                <label className="label cursor-pointer">
-                  <span className="label-text">
-                    uplink.wtf / {spaceIdentifier[0]}
-                  </span>
-                  <input
-                    id="idHyphen"
-                    type="radio"
-                    name="identifier"
-                    className="radio checked:bg-red-500"
-                    defaultChecked
-                  />
-                </label>
-                <label className="label cursor-pointer">
-                  <span className="label-text">
-                    uplink.wtf / {spaceIdentifier[1]}
-                  </span>
-                  <input
-                    id="idSmoosh"
-                    type="radio"
-                    name="identifier"
-                    className="radio checked:bg-blue-500"
-                  />
-                </label>
-              </div>
-            </div>
-          )
-          */}
-
         <label className="label">
           <span className="label-text">Admins</span>
         </label>
@@ -214,8 +179,8 @@ export default function SpaceForm() {
               <div className="flex justify-center items-center gap-2">
                 <input
                   type="text"
-                  placeholder={index === 0 ? userAddress : "vitalik.eth"}
-                  className="input input-bordered w-full max-w-xs"
+                  placeholder="vitalik.eth"
+                  className="input input-bordered w-full max-w-xs disabled:text-gray-400"
                   disabled={index === 0}
                   value={admin.value}
                   onChange={(e) =>
@@ -256,10 +221,7 @@ export default function SpaceForm() {
         >
           add
         </button>
-
-        <button className="btn" onClick={handleSubmit}>
-          submit
-        </button>
+        <ConnectWithCallback callback={handleSubmit} buttonLabel="submit" />
       </div>
     </div>
   );

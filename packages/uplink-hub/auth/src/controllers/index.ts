@@ -48,6 +48,7 @@ export const verifySignature = async (req, res) => {
 }
 
 export const signOut = async (req, res, next) => {
+    console.log(req)
     const csrfToken = req.get('x-hub-csrf');
     if (csrfToken !== req.session.csrfToken) return res.send(false)
 

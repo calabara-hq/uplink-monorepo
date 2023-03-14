@@ -1,5 +1,13 @@
 import { describe, expect, test } from '@jest/globals';
-import { validateSpaceName, validateAdmins } from '../src/resolvers/mutations';
+import {
+    validateSpaceName,
+    validateAdmins,
+    validateSpaceWebsite,
+    validateSpaceTwitter
+} from '../src/resolvers/mutations';
+
+
+// space name
 
 describe('validateSpaceName', () => {
     test('should return error if name is empty string', () => {
@@ -20,14 +28,100 @@ describe('validateSpaceName', () => {
     });
 });
 
-// admins tests
+// website
 
-// null admins
-// empty admins
-// invalid admins
-// valid admins
-// duplicate admins
+describe('validateSpaceWebsite', () => {
 
+    test('should ignore entry if website is null', () => {
+        const result = validateSpaceWebsite(null);
+        expect(result.error).toBe(null);
+    });
+
+    test('should ignore entry if website is empty string', () => {
+        const result = validateSpaceWebsite('');
+        expect(result.error).toBe(null);
+    });
+
+    test('should return error if website is too long', () => {
+        const result = validateSpaceWebsite('a'.repeat(51));
+        expect(result.error).toBe("Website is too long");
+    });
+
+    test('should fail validation #1', () => {
+        const result = validateSpaceWebsite('calabara');
+        expect(result.error).toBe("Website is not valid");
+    });
+
+    test('should fail validation #2', () => {
+        const result = validateSpaceWebsite('https://nouns');
+        expect(result.error).toBe("Website is not valid");
+    });
+
+
+    test('should pass validation #1', () => {
+        const result = validateSpaceWebsite('calabara.com');
+        expect(result.error).toBe(null);
+    });
+
+    test('should pass validation #2', () => {
+        const result = validateSpaceWebsite('nouns.wtf');
+        expect(result.error).toBe(null);
+    });
+
+    test('should pass validation #3', () => {
+        const result = validateSpaceWebsite('https://uplink.wtf');
+        expect(result.error).toBe(null);
+    });
+
+    test('should pass validation #4', () => {
+        const result = validateSpaceWebsite('http://nouns.com');
+        expect(result.error).toBe(null);
+    });
+});
+
+
+
+// twitter 
+
+describe('validateSpaceTwitter', () => {
+    test('should ignore entry if twitter is null', () => {
+        const result = validateSpaceTwitter(null);
+        expect(result.error).toBe(null);
+    });
+
+    test('should ignore entry if twitter is empty string', () => {
+        const result = validateSpaceTwitter('');
+        expect(result.error).toBe(null);
+    });
+
+    test('should ignore entry if twitter is too long', () => {
+        const result = validateSpaceTwitter('@mynameisnickandthisisaverylongtwitterhandle');
+        expect(result.error).toBe("Twitter handle is too long");
+    });
+
+    test('should fail validation #1', () => {
+        const result = validateSpaceTwitter("nick");
+        expect(result.error).toBe("Twitter handle is not valid");
+    });
+
+    test('should fail validation #1', () => {
+        const result = validateSpaceTwitter("@ni-)ck");
+        expect(result.error).toBe("Twitter handle is not valid");
+    });
+
+    test('should pass validation #1', () => {
+        const result = validateSpaceTwitter("@nick");
+        expect(result.error).toBe(null);
+    });
+
+    test('should pass validation #1', () => {
+        const result = validateSpaceTwitter("@calabarahq");
+        expect(result.error).toBe(null);
+    });
+})
+
+
+// admins
 
 describe('validateAdmins', () => {
     test('should return error if passed admins are null', async () => {
@@ -37,23 +131,21 @@ describe('validateAdmins', () => {
         expect(filteredAdmins.length).toEqual(0);
     });
 
-    /*
-    // TODO - fix these tests
-    test('should return error if passed admins are empty string', () => {
-        const result = validateAdmins(['']);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe(null);
-        expect(filteredAdmins.length).toEqual(null);
-    });
-    
 
-    test('should return error if passed admins are empty array', () => {
-        const result = validateAdmins([]);
+    test('should return error if passed admins are empty string', async () => {
+        const result = await validateAdmins(['']);
         const { adminError, filteredAdmins } = result;
         expect(adminError).toBe(null);
         expect(filteredAdmins.length).toEqual(0);
     });
-    */
+
+
+    test('should return error if passed admins are empty array', async () => {
+        const result = await validateAdmins([]);
+        const { adminError, filteredAdmins } = result;
+        expect(adminError).toBe(null);
+        expect(filteredAdmins.length).toEqual(0);
+    });
 
 
     test('should return error if passed admins are invalid', async () => {

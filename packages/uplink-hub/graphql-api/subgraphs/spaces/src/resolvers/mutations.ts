@@ -1,4 +1,6 @@
 import { validateEthAddress } from "../utils/ethAddress.js";
+import getUser from "../utils/authorize.js";
+
 
 export type FieldResponse = {
     value: string;
@@ -28,16 +30,39 @@ export const validateSpaceName = (name: string): FieldResponse => {
 export const validateSpaceWebsite = (website: string) => {
     const fields: FieldResponse = { value: website, error: null };
     // TODO: check that website is valid
+    // valid websites include https://, http://, and no protocol
+    if (!fields.value) return fields;
+    fields.value = fields.value.trim();
+
+    if (fields.value.length > 50) {
+        fields.error = "Website is too long";
+        return fields
+    }
+
+    if (fields.value.length > 0) {
+        const isWebsite = fields.value.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/);
+        if (!isWebsite) {
+            fields.error = "Website is not valid";
+        }
+    }
+
     return fields;
 }
 
 export const validateSpaceTwitter = (twitter: string) => {
     const fields: FieldResponse = { value: twitter, error: null };
+    if (!fields.value) return fields;
     fields.value = fields.value.trim();
+
+    if (fields.value.length > 15) {
+        fields.error = "Twitter handle is too long";
+        return fields
+    }
+
     if (fields.value.length > 0) {
-        const isTwitter = fields.value.match(/^@/);
+        const isTwitter = fields.value.match(/^@(\w){1,15}$/);
         if (!isTwitter) {
-            fields.error = "Twitter handle must start with @";
+            fields.error = "Twitter handle is not valid";
         }
     }
     return fields;
@@ -107,8 +132,11 @@ export const processSpaceData = async (spaceData) => {
 const mutations = {
     Mutation: {
         createSpace: async (_: any, args: any, context: any) => {
+            const user = await getUser(context);
+            if (!user) throw new Error('Unauthorized');
             const { spaceData } = args;
             const result = await processSpaceData(spaceData);
+            // TODO handle the space slug and db writes
             return {
                 success: result.success,
                 spaceResponse: result.spaceResponse
