@@ -15,9 +15,11 @@
     "@apollo/federation": "^0.38.1",
     "@apollo/server": "^4.3.3",
     "@apollo/subgraph": "^2.3.1",
+    "dotenv": "^16.0.3",
     "ethers": "5.7.2",
     "graphql": "^16.6.0",
-    "graphql-tag": "^2.12.6"
+    "graphql-tag": "^2.12.6",
+    "lib": "^1.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",

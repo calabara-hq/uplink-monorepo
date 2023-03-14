@@ -1,19 +1,20 @@
 import { ethers } from 'ethers';
-
-// TODO implement ethAddress conversion
-
-const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+import provider from './provider';
 
 export const validateEthAddress = async (address: string) => {
+
     const isEns = address.match(/\.eth$/); // check if address is ens or hex
     let resolvedAddress: string | null = null;
-    if (isEns) resolvedAddress = await provider.resolveName(address);
 
-    if (!resolvedAddress) return null;
+    if (isEns) {
+        resolvedAddress = await provider.resolveName(address);
+        if (!resolvedAddress) return null;
+        return resolvedAddress;
+    }
 
     try {
         resolvedAddress = ethers.utils.getAddress(address);
-        return resolvedAddress;
+        return resolvedAddress as string;
     } catch (error) {
         return null;
     }

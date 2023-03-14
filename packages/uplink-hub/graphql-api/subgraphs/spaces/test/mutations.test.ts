@@ -97,5 +97,5 @@ describe('validateAdmins', () => {
         expect(filteredAdmins.length).toEqual(1);
     });
 
-    
+
 });
