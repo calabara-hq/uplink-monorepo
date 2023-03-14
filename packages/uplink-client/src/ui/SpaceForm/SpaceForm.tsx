@@ -14,7 +14,7 @@ import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import {
   reducer,
   SpaceBuilderProps,
-  Admin,
+  FormField,
 } from "@/app/spacebuilder/spaceHandler";
 
 const createSpace = async (state: any) => {
@@ -25,7 +25,7 @@ const createSpace = async (state: any) => {
         name: state.name.value,
         website: state.website.value,
         twitter: state.twitter.value,
-        admins: state.admins,
+        admins: state.admins.map((admin: FormField) => admin.value),
       },
     })
     .toPromise();
@@ -59,20 +59,14 @@ export default function SpaceForm() {
     website: { value: "", error: null },
     twitter: { value: "", error: null },
     admins: [
-      { id: nanoid(), value: userAddress, error: null },
-      { id: nanoid(), value: "", error: null },
+      { value: userAddress, error: null },
+      { value: "", error: null },
     ],
   } as SpaceBuilderProps);
 
   const handleSubmit = async () => {
     const { success, spaceResponse } = await createSpace(state);
-
-    console.log(success, spaceResponse);
-
-    //sanitizeSpaceData(state);
-    //console.log(result.spaceData);
     dispatch({ type: "setTotalState", payload: spaceResponse });
-
     if (!success) {
       return;
     }
@@ -99,6 +93,7 @@ export default function SpaceForm() {
           <input
             type="text"
             autoComplete="off"
+            value={state.name.value}
             onChange={(e) => {
               dispatch({
                 type: "setSpaceName",
@@ -126,6 +121,7 @@ export default function SpaceForm() {
           <input
             type="text"
             autoComplete="off"
+            value={state.website.value}
             onChange={(e) => {
               dispatch({
                 type: "setWebsite",
@@ -153,6 +149,7 @@ export default function SpaceForm() {
           <input
             type="text"
             autoComplete="off"
+            value={state.twitter.value}
             onChange={(e) => {
               dispatch({
                 type: "setTwitter",
@@ -211,26 +208,27 @@ export default function SpaceForm() {
         <label className="label">
           <span className="label-text">Admins</span>
         </label>
-        {state.admins.map((admin: Admin, index: number) => {
+        {state.admins.map((admin: FormField, index: number) => {
           return (
-            <div key={admin.id}>
+            <div key={index}>
               <div className="flex justify-center items-center gap-2">
                 <input
                   type="text"
                   placeholder={index === 0 ? userAddress : "vitalik.eth"}
                   className="input input-bordered w-full max-w-xs"
                   disabled={index === 0}
+                  value={admin.value}
                   onChange={(e) =>
                     dispatch({
                       type: "setAdmin",
-                      payload: { id: admin.id, value: e.target.value },
+                      payload: { index: index, value: e.target.value },
                     })
                   }
                 />
                 {index > 0 && (
                   <button
                     onClick={() => {
-                      dispatch({ type: "removeAdmin", payload: admin.id });
+                      dispatch({ type: "removeAdmin", payload: index });
                     }}
                     className="btn bg-transparent border-none"
                   >

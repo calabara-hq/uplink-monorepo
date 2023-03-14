@@ -43,11 +43,10 @@ export const CreateSpaceDocument = gql`
                     value
                     error
                 }
-                admins
-                    {
-                        value
-                        error
-                    }
+                admins{
+                    value
+                    error
+                }
             }
         }
     }
