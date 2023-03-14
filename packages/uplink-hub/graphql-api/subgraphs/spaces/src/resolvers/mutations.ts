@@ -1,5 +1,4 @@
-//import {validateAddress} from 'lib'
-
+import { validateEthAddress } from "../utils/ethAddress.js";
 
 export type FieldResponse = {
     value: string;
@@ -45,55 +44,32 @@ export const validateSpaceTwitter = (twitter: string) => {
 }
 
 
-export const validateAdmins = (admins: string[]) => {
+export const validateAdmins = async (admins: string[]) => {
     let adminError = null; // top level admin error
 
     if (!admins) return { adminError: 'admins cannot be empty', filteredAdmins: [] }
 
 
-    const filteredAdmins = admins.reduce((result, value, index) => {
-        const field: FieldResponse = { value: value, error: null };
+    const promises = admins.map(async (admin) => {
+        const field: FieldResponse = { value: admin, error: null };
 
-        // TODO convert ens to hex
+        if (!field.value || field.value.length === 0) return undefined; // remove empty fields
 
+        const cleanAddress = await validateEthAddress(field.value);
 
-        // trim whitespace
-        // TODO this can be handled by my ethers library
-        field.value = value.trim();
-
-        if (field.value.length === 0 || result.some((item) => item.value === field.value)) {
-            // remove admin from array if it is empty or if it is a duplicate
-            return result;
+        if (!cleanAddress) {
+            field.error = "invalid address";
+            adminError = "1 or more admin fields are invalid"
+            return field
         }
 
-        const isEns = field.value.match(/\.eth$/); // check if address is ens or hex
+        field.value = cleanAddress;
+        return field;
+    })
 
-        if (isEns) {
-
-            // check if ens is valid
-            const isValidEns = field.value.match(
-                /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/
-            );
-            if (!isValidEns) {
-                adminError = true;
-                field.error = "Invalid ENS";
-                adminError = "1 or more admin fields are invalid"
-            }
-        } else {
-            // check if hex address is valid
-            const isValidHex = field.value.match(
-                /^0x[a-fA-F0-9]{40}$/
-            );
-            if (!isValidHex) {
-                adminError = true;
-                field.error = "Invalid address";
-                adminError = "1 or more admin fields are invalid"
-            }
-        }
-        result.push(field);
-
-        return result;
-    }, []);
+    const filteredAdmins = await (await Promise.all(promises)).filter((value, index, self) => {
+        return value !== undefined && self.findIndex(v => v && v.value === value.value) === index;
+    });
 
     return { adminError, filteredAdmins }
 }
@@ -104,7 +80,7 @@ export const processSpaceData = async (spaceData) => {
     const nameResult = validateSpaceName(name);
     const websiteResult = validateSpaceWebsite(website);
     const twitterResult = validateSpaceTwitter(twitter);
-    const { adminError, filteredAdmins: adminsResult } = validateAdmins(admins);
+    const { adminError, filteredAdmins: adminsResult } = await validateAdmins(admins);
 
     // if there are errors, push them to the top level errors array
     const errors = [];

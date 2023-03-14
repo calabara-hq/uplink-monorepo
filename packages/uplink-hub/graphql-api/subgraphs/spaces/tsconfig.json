@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "rootDirs": ["src"],
-    "baseUrl": ".",
     "outDir": "dist",
     "lib": ["es2022"],
     "target": "es2022",
@@ -9,9 +8,6 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "types": ["node"],
-    "paths": {
-      "@/*": ["src/*"]
-    }
   },
   // ignore tests in build
   "exclude": ["test"]

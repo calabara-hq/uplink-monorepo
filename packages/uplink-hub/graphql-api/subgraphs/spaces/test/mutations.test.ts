@@ -30,8 +30,8 @@ describe('validateSpaceName', () => {
 
 
 describe('validateAdmins', () => {
-    test('should return error if passed admins are null', () => {
-        const result = validateAdmins(null);
+    test('should return error if passed admins are null', async () => {
+        const result = await validateAdmins(null);
         const { adminError, filteredAdmins } = result;
         expect(adminError).toBe('admins cannot be empty');
         expect(filteredAdmins.length).toEqual(0);
@@ -55,43 +55,44 @@ describe('validateAdmins', () => {
     });
     */
 
-    test('should return error if passed admins are invalid', () => {
-        const result = validateAdmins(['a', 'b', 'c']);
+
+    test('should return error if passed admins are invalid', async () => {
+        const result = await validateAdmins(['a', 'b', 'c']);
         const { adminError, filteredAdmins } = result;
         expect(adminError).toBe('1 or more admin fields are invalid');
         expect(filteredAdmins.length).toEqual(3);
     })
 
-    test('should remove address if empty string is passed #1', () => {
-        const result = validateAdmins(['a', '', 'c']);
+    test('should remove address if empty string is passed #1', async () => {
+        const result = await validateAdmins(['a', '', 'c']);
         const { adminError, filteredAdmins } = result;
         expect(adminError).toBe('1 or more admin fields are invalid');
         expect(filteredAdmins.length).toEqual(2);
     })
 
-    test('should remove address if empty string is passed #2', () => {
-        const result = validateAdmins(['nick.eth', '', 'yungweez.eth']);
+    test('should remove address if empty string is passed #2', async () => {
+        const result = await validateAdmins(['nick.eth', '', 'yungweez.eth']);
         const { adminError, filteredAdmins } = result;
         expect(adminError).toBe(null);
         expect(filteredAdmins.length).toEqual(2);
     })
 
-    test('should remove address if empty string is passed #3', () => {
-        const result = validateAdmins(['', '', '', 'nick.eth', '', 'yungweez.eth', '']);
+    test('should remove address if empty string is passed #3', async () => {
+        const result = await validateAdmins(['', '', '', 'nick.eth', '', 'yungweez.eth', '']);
         const { adminError, filteredAdmins } = result;
         expect(adminError).toBe(null);
         expect(filteredAdmins.length).toEqual(2);
     })
 
-    test('should remove duplicate ens', () => {
-        const result = validateAdmins(['nick.eth', 'nick.eth']);
+    test('should remove duplicate ens', async () => {
+        const result = await validateAdmins(['nick.eth', 'nick.eth']);
         const { adminError, filteredAdmins } = result;
         expect(adminError).toBe(null);
         expect(filteredAdmins.length).toEqual(1);
     });
 
-    test('should remove duplicate address', () => {
-        const result = validateAdmins(['0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C', '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C']);
+    test('should remove duplicate address', async () => {
+        const result = await validateAdmins(['0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C', '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C']);
         const { adminError, filteredAdmins } = result;
         expect(adminError).toBe(null);
         expect(filteredAdmins.length).toEqual(1);

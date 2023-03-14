@@ -1,7 +1,10 @@
 import { ethers } from 'ethers';
-import provider from './provider';
+import provider from './provider.js';
 
 export const validateEthAddress = async (address: string) => {
+
+    if (!address) return null
+    address = address.trim();
 
     const isEns = address.match(/\.eth$/); // check if address is ens or hex
     let resolvedAddress: string | null = null;

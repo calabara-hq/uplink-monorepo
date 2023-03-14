@@ -1,5 +1,5 @@
-import queries from '@/resolvers/queries';
-import mutations from '@/resolvers/mutations';
+import queries from './queries.js';
+import mutations from './mutations.js';
 
 // Note this "Resolvers" type isn't strictly necessary because we are already
 // separately type checking our queries and resolvers. However, the "Resolvers"
