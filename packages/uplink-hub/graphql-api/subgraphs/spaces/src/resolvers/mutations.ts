@@ -1,14 +1,22 @@
+import { validateEthAddress } from "../utils/ethAddress.js";
+import getUser from "../utils/authorize.js";
+import { spaces } from './index.js'
+import { randomUUID } from "crypto";
 
-
-type InputProps = {
-    id?: string;
+export type FieldResponse = {
     value: string;
     error: string;
 }
 
 // validate space name
-const validateSpaceName = (name: string) => {
-    const fields: InputProps = { value: name, error: null };
+export const validateSpaceName = (name: string): FieldResponse => {
+    const fields: FieldResponse = { value: name, error: null };
+
+    if (!fields.value) {
+        fields.error = "Space name cannot be empty"
+        return fields
+    }
+
     fields.value = fields.value.trim();
     if (fields.value.length < 3) {
         fields.error = "Space name must be at least 3 characters";
@@ -20,72 +28,98 @@ const validateSpaceName = (name: string) => {
     return fields;
 }
 
-const validateSpaceWebsite = (website: string) => {
-    const fields: InputProps = { value: website, error: null };
+export const validateSpaceWebsite = (website: string) => {
+    const fields: FieldResponse = { value: website, error: null };
     // TODO: check that website is valid
-    return fields;
-}
+    // valid websites include https://, http://, and no protocol
+    if (!fields.value) return fields;
+    fields.value = fields.value.trim();
 
-const validateSpaceTwitter = (twitter: string) => {
-    const fields: InputProps = { value: twitter, error: null };
-    // TODO: check that website is valid
-    return fields;
-}
-
-const validateAdmins = (admins: InputProps[]) => {
-    let isAdminError = false;
-    for (const [index, admin] of admins.entries()) {
-        const { id: adminId, value: adminAddress } = admin;
-        // skip the first admin since it's not editable
-        if (index === 0) continue;
-        // trim whitespace
-        const trimmedAddress = adminAddress.trim();
-
-        // check if address is empty
-        if (trimmedAddress.length === 0) {
-            // remove admin from array if it is
-            admins = admins.filter(
-                (admin) => admin.id !== adminId
-            );
-            console.log("to remove", adminId);
-            continue;
-        }
-
-        const isEns = trimmedAddress.match(/\.eth$/); // check if address is ens or hex
-
-        if (isEns) {
-            // check if ens is valid
-            const isValidEns = trimmedAddress.match(
-                /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/
-            );
-            if (!isValidEns) {
-                isAdminError = true;
-                admin.error = "Address is not valid";
-            }
-        } else {
-            // check if address is valid hex
-            const isValidAddress = trimmedAddress.match(/^(0x)?[0-9a-f]{40}$/i);
-            if (!isValidAddress) {
-                isAdminError = true;
-                admin.error = "Address is not valid";
-            }
-        }
-        admin.value = trimmedAddress;
+    if (fields.value.length > 50) {
+        fields.error = "Website is too long";
+        return fields
     }
-    return { isAdminError, admins }
+
+    if (fields.value.length > 0) {
+        const isWebsite = fields.value.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/);
+        if (!isWebsite) {
+            fields.error = "Website is not valid";
+        }
+    }
+
+    return fields;
+}
+
+export const validateSpaceTwitter = (twitter: string) => {
+    const fields: FieldResponse = { value: twitter, error: null };
+    if (!fields.value) return fields;
+    fields.value = fields.value.trim();
+
+    if (fields.value.length > 15) {
+        fields.error = "Twitter handle is too long";
+        return fields
+    }
+
+    if (fields.value.length > 0) {
+        const isTwitter = fields.value.match(/^@(\w){1,15}$/);
+        if (!isTwitter) {
+            fields.error = "Twitter handle is not valid";
+        }
+    }
+    return fields;
 }
 
 
-const processSpaceData = async (spaceData) => {
+export const validateAdmins = async (admins: string[]) => {
+    let adminError = null; // top level admin error
+
+    if (!admins) return { adminError: 'admins cannot be empty', filteredAdmins: [] }
+
+
+    const promises = admins.map(async (admin) => {
+        const field: FieldResponse = { value: admin, error: null };
+
+        if (!field.value || field.value.length === 0) return undefined; // remove empty fields
+
+        const cleanAddress = await validateEthAddress(field.value);
+
+        if (!cleanAddress) {
+            field.error = "invalid address";
+            adminError = "1 or more admin fields are invalid"
+            return field
+        }
+
+        field.value = cleanAddress;
+        return field;
+    })
+
+    const filteredAdmins = await (await Promise.all(promises)).filter((value, index, self) => {
+        return value !== undefined && self.findIndex(v => v && v.value === value.value) === index;
+    });
+
+    return { adminError, filteredAdmins }
+}
+
+
+export const processSpaceData = async (spaceData) => {
     const { name, website, twitter, admins } = spaceData;
     const nameResult = validateSpaceName(name);
     const websiteResult = validateSpaceWebsite(website);
     const twitterResult = validateSpaceTwitter(twitter);
-    const { isAdminError, admins: adminsResult } = validateAdmins(spaceData.admins);
+    const { adminError, filteredAdmins: adminsResult } = await validateAdmins(admins);
 
-    let isSuccess = !nameResult.error && !websiteResult.error && !twitterResult.error && !isAdminError;
+    // if there are errors, push them to the top level errors array
+    const errors = [];
+    if (nameResult.error) errors.push(nameResult.error);
+    if (websiteResult.error) errors.push(websiteResult.error);
+    if (twitterResult.error) errors.push(twitterResult.error);
+    if (adminError) errors.push(adminError);
+
+
+
     return {
-        success: isSuccess,
+        success: errors.length === 0,
+        errors: errors,
         spaceResponse: {
             name: nameResult,
             website: websiteResult,
@@ -93,14 +127,29 @@ const processSpaceData = async (spaceData) => {
             admins: adminsResult
         }
     }
+
 }
 
 const mutations = {
     Mutation: {
         createSpace: async (_: any, args: any, context: any) => {
+            const user = await getUser(context);
+            if (!user) throw new Error('Unauthorized');
             const { spaceData } = args;
             const result = await processSpaceData(spaceData);
-            console.log(result)
+            // TODO handle the space slug and db writes
+            if (result.success) {
+                // push the correct fields to the spaces array
+                const { name, website, twitter, admins } = result.spaceResponse;
+                spaces.push({
+                    id: randomUUID().toString(),
+                    logo: 'dummy',
+                    name: name.value,
+                    website: website.value,
+                    members: 0,
+                    admins: admins.map(admin => admin.value)
+                })
+            }
             return {
                 success: result.success,
                 spaceResponse: result.spaceResponse
@@ -110,60 +159,3 @@ const mutations = {
 };
 
 export default mutations;
-
-
-
-/*
-// parse spaceData and return errors + sanitized data
-export const sanitizeSpaceData = (spaceData: SpaceBuilderProps) => {
-  let isError: boolean = false;
-  // handle space name errors
-  if (spaceData.name.value.length < 3) {
-    isError = true;
-    spaceData.name.error = "Space name must be at least 3 characters";
-  }
-
-
-  for (const [index, admin] of spaceData.admins.entries()) {
-    const { id: adminId, address: adminAddress } = admin;
-    // skip the first admin since it's not editable
-    if (index === 0) continue;
-    // trim whitespace
-    const trimmedAddress = adminAddress.trim();
-
-    // check if address is empty
-    if (trimmedAddress.length === 0) {
-      // remove admin from array if it is
-      spaceData.admins = spaceData.admins.filter(
-        (admin) => admin.id !== adminId
-      );
-      console.log("to remove", adminId);
-      continue;
-    }
-
-    const isEns = trimmedAddress.match(/\.eth$/); // check if address is ens or hex
-
-    if (isEns) {
-      // check if ens is valid
-      const isValidEns = trimmedAddress.match(
-        /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/
-      );
-      if (!isValidEns) {
-        isError = true;
-        admin.error = "Address is not valid";
-      }
-    } else {
-      // check if address is valid hex
-      const isValidAddress = trimmedAddress.match(/^(0x)?[0-9a-f]{40}$/i);
-      if (!isValidAddress) {
-        isError = true;
-        admin.error = "Address is not valid";
-      }
-    }
-    admin.address = trimmedAddress;
-  }
-
-  return { spaceData: spaceData, isError: isError };
-};
-
-*/

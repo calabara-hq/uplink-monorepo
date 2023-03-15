@@ -52,10 +52,9 @@ type Contest
   created: String!
 }
 
-input FormInputField
+type FieldResponse
   @join__type(graph: SPACES)
 {
-  id: ID
   value: String!
   error: String
 }
@@ -114,14 +113,6 @@ type Query
   generateNonce: NonceResult! @join__field(graph: USER)
 }
 
-type ResponseField
-  @join__type(graph: SPACES)
-{
-  id: ID
-  value: String!
-  error: String
-}
-
 type signInResponse
   @join__type(graph: USER)
 {
@@ -145,26 +136,27 @@ type Space
 input SpaceInput
   @join__type(graph: SPACES)
 {
-  name: String!
+  name: String
   website: String
   twitter: String
-  admins: [FormInputField!]
+  admins: [String!]!
 }
 
 type SpaceMutationResponse
   @join__type(graph: SPACES)
 {
   success: Boolean!
+  errors: [String!]
   spaceResponse: SpaceResponse!
 }
 
 type SpaceResponse
   @join__type(graph: SPACES)
 {
-  name: ResponseField!
-  website: ResponseField!
-  twitter: ResponseField!
-  admins: [ResponseField!]!
+  name: FieldResponse!
+  website: FieldResponse!
+  twitter: FieldResponse!
+  admins: [FieldResponse!]!
 }
 
 type Submission

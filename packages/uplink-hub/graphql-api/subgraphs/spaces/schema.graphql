@@ -14,35 +14,29 @@ type Query {
 
 ## mutations
 
-input FormInputField {
-  id: ID
-  value: String!
-  error: String
-}
-
-type ResponseField {
-  id: ID
+type FieldResponse {
   value: String!
   error: String
 }
 
 type SpaceResponse {
-  name: ResponseField!
-  website: ResponseField!
-  twitter: ResponseField!
-  admins: [ResponseField!]!
+  name: FieldResponse!
+  website: FieldResponse!
+  twitter: FieldResponse!
+  admins: [FieldResponse!]!
 }
 
 type SpaceMutationResponse {
   success: Boolean!
+  errors: [String!]
   spaceResponse: SpaceResponse!
 }
 
 input SpaceInput {
-  name: String!
+  name: String
   website: String
   twitter: String
-  admins: [FormInputField!]
+  admins: [String!]!
 }
 
 type Mutation {

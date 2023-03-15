@@ -1,27 +1,14 @@
-import { nanoid } from "nanoid";
-
-export type Admin = {
-  id: string;
+export type FormField = {
   value: string;
   error: string | null;
-};
-
-export type StandardInput = {
-  value: string;
-  error: string | null;
-};
-
-export type AdminError = {
-  id: string;
-  addressError: string | null;
 };
 
 export type SpaceBuilderProps = {
-  name: StandardInput;
-  systemName: StandardInput;
-  website: StandardInput;
-  twitter: StandardInput;
-  admins: Admin[];
+  name: FormField;
+  systemName: FormField;
+  website: FormField;
+  twitter: FormField;
+  admins: FormField[];
 };
 
 export const reducer = (state: any, action: any) => {
@@ -51,21 +38,21 @@ export const reducer = (state: any, action: any) => {
         ...state,
         admins: [
           ...state.admins,
-          { id: nanoid(), value: "", error: null }, // add unique ID to new admin object
+          { value: "", error: null }, // add unique ID to new admin object
         ],
       };
     case "removeAdmin":
       return {
         ...state,
         admins: state.admins.filter(
-          (admin: Admin) => admin.id !== action.payload
+          (admin: FormField, index: number) => index !== action.payload
         ),
       };
     case "setAdmin":
       return {
         ...state,
-        admins: state.admins.map((admin: Admin) =>
-          admin.id === action.payload.id
+        admins: state.admins.map((admin: FormField, index: number) =>
+          index === action.payload.index
             ? { ...admin, value: action.payload.value, error: null }
             : admin
         ),
