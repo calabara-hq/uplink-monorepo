@@ -1,6 +1,7 @@
 import { validateEthAddress } from "../utils/ethAddress.js";
 import getUser from "../utils/authorize.js";
-
+import { spaces } from './index.js'
+import { randomUUID } from "crypto";
 
 export type FieldResponse = {
     value: string;
@@ -137,6 +138,18 @@ const mutations = {
             const { spaceData } = args;
             const result = await processSpaceData(spaceData);
             // TODO handle the space slug and db writes
+            if (result.success) {
+                // push the correct fields to the spaces array
+                const { name, website, twitter, admins } = result.spaceResponse;
+                spaces.push({
+                    id: randomUUID().toString(),
+                    logo: 'dummy',
+                    name: name.value,
+                    website: website.value,
+                    members: 0,
+                    admins: admins.map(admin => admin.value)
+                })
+            }
             return {
                 success: result.success,
                 spaceResponse: result.spaceResponse
