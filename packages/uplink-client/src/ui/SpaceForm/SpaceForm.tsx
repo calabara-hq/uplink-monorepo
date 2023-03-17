@@ -5,7 +5,6 @@ import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import {
   CreateSpaceDocument,
-  AllSpacesDocument,
 } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import handleImageUpload from "@/lib/imageUpload";
@@ -125,8 +124,6 @@ export default function SpaceForm() {
             accept="image/*"
             className="hidden"
             onChange={async (event) => {
-              // const handleImageUpload = (await import("../../lib/imageUpload"))
-              //   .default;
 
               handleImageUpload(
                 event,
@@ -148,11 +145,15 @@ export default function SpaceForm() {
           />
           <div className="avatar">
             <div
-              className="w-24 rounded-full cursor-pointer"
+              className="w-24 rounded-full cursor-pointer flex justify-center items-center"
               onClick={() => imageUploader.current.click()}
             >
               {state.logo_blob.value && <img src={state.logo_blob.value} />}
-              {!state.logo_blob.value && <p>logo</p>}
+              {!state.logo_blob.value && (
+                <div className="flex justify-center items-center w-full h-full rounded-full bg-gray-500">
+                  <p>logo</p>
+                </div>
+              )}
             </div>
           </div>
           {state.logo_url.error && (

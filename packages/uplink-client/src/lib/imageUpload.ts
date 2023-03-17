@@ -14,7 +14,6 @@ const IpfsUpload = async (file: any) => {
     })
         .then((response) => response.json())
         .then((data) => {
-            console.log(data)
             return `https://calabara.mypinata.cloud/ipfs/${data.IpfsHash}`;
         })
         .catch((error) => {
@@ -30,7 +29,6 @@ const handleImageUpload = async (event: any, readerCallback: (data: any) => void
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-        console.log(reader.result)
         readerCallback(reader.result)
     };
     const ipfsUri = await IpfsUpload(file);
