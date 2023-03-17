@@ -28,8 +28,8 @@ RUN curl -sSL https://router.apollo.dev/download/nix/${ROUTER_RELEASE}/ | sh
 RUN mkdir config schema
 
 # Copy configuration for docker image
-COPY ./supergraph/router.yaml config
-COPY supergraph/schema/docker.graphql /dist/schema
+COPY ./packages/graphql-api/supergraph/router.yaml config
+COPY ./packages/graphql-api/supergraph/schema/docker.graphql /dist/schema
 LABEL org.opencontainers.image.authors="Apollo Graph, Inc. https://github.com/apollographql/router"
 LABEL org.opencontainers.image.source="https://github.com/apollographql/router"
 
