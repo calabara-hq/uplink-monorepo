@@ -9,7 +9,7 @@ const graphqlClient = createClient({
         credentials: 'include',
     },
     requestPolicy: 'cache-and-network',
-    exchanges: [dedupExchange, cacheExchange, multipartFetchExchange],
+    //exchanges: [dedupExchange, cacheExchange, multipartFetchExchange],
 });
 
 export const stripTypenames: any = (obj: any) => {
