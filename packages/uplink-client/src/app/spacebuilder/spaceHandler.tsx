@@ -3,8 +3,14 @@ export type FormField = {
   error: string | null;
 };
 
+export type ImageField = {
+  value: string;
+  error: string | null;
+};
+
 export type SpaceBuilderProps = {
   name: FormField;
+  logo: ImageField;
   systemName: FormField;
   website: FormField;
   twitter: FormField;
@@ -17,6 +23,11 @@ export const reducer = (state: any, action: any) => {
       return {
         ...state,
         name: { value: action.payload, error: null },
+      };
+    case "setLogo":
+      return {
+        ...state,
+        logo: { value: action.payload, error: null },
       };
     case "setWebsite":
       return {

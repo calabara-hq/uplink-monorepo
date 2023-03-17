@@ -3,5 +3,5 @@ workdir /usr/src/app
 copy package*.json .
 run yarn install
 copy . .
-expose 4000
+expose 5000
 CMD ["yarn", "dev"]

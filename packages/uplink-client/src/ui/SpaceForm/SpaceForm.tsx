@@ -1,16 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
-import { nanoid } from "nanoid";
-
 import {
   CreateSpaceDocument,
   AllSpacesDocument,
 } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
-
+import handleImageUpload from "@/lib/imageUpload";
 import {
   reducer,
   SpaceBuilderProps,
@@ -19,7 +17,6 @@ import {
 import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 
 const createSpace = async (state: any) => {
-  console.log(state);
   const result = await graphqlClient
     .mutation(CreateSpaceDocument, {
       spaceData: {
@@ -43,6 +40,7 @@ const createSpace = async (state: any) => {
 export default function SpaceForm() {
   const { data: session, status } = useSession();
   const userAddress = session?.user?.address || "you";
+  const imageUploader = useRef(null);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -67,6 +65,7 @@ export default function SpaceForm() {
   const [state, dispatch] = useReducer(reducer, {
     name: { value: "", error: null },
     systemName: { value: "", error: null },
+    logo: { value: "", error: null },
     website: { value: "", error: null },
     twitter: { value: "", error: null },
     admins: [
@@ -112,6 +111,43 @@ export default function SpaceForm() {
               </span>
             </label>
           )}
+        </div>
+
+        <div>
+          <label className="label">
+            <span className="label-text">Logo</span>
+          </label>
+          <input
+            placeholder="Logo"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (event) => {
+              // const handleImageUpload = (await import("../../lib/imageUpload"))
+              //   .default;
+
+              handleImageUpload(
+                event,
+                (base64) => {
+                  dispatch({
+                    type: "setLogo",
+                    payload: base64,
+                  });
+                },
+                (data) => {}
+              );
+            }}
+            ref={imageUploader}
+          />
+          <div className="avatar">
+            <div
+              className="w-24 rounded-full cursor-pointer"
+              onClick={() => imageUploader.current.click()}
+            >
+              {state.logo.value && <img src={state.logo.value} />}
+              {!state.logo.value && <p>logo</p>}
+            </div>
+          </div>
         </div>
 
         <div>

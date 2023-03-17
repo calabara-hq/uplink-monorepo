@@ -12,6 +12,13 @@ services:
       - "5000:5000"
     volumes:
       - ./auth:/usr/src/app
+  media:
+    container_name: media
+    build: ./media
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./media:/usr/src/app
   graphql:
     container_name: graphql
     build: ./graphql-api
