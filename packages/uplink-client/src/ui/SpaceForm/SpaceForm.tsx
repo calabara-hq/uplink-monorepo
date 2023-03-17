@@ -3,11 +3,9 @@ import { useRef, useState } from "react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
-import {
-  CreateSpaceDocument,
-} from "@/lib/graphql/spaces.gql";
+import { CreateSpaceDocument } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
-import handleImageUpload from "@/lib/imageUpload";
+import handleMediaUpload from "@/lib/mediaUpload";
 import {
   reducer,
   SpaceBuilderProps,
@@ -124,9 +122,9 @@ export default function SpaceForm() {
             accept="image/*"
             className="hidden"
             onChange={async (event) => {
-
-              handleImageUpload(
+              handleMediaUpload(
                 event,
+                ["image"],
                 (base64) => {
                   dispatch({
                     type: "setLogoBlob",

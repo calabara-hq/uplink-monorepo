@@ -1,6 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 import {
     validateSpaceName,
+    validateSpaceLogo,
     validateAdmins,
     validateSpaceWebsite,
     validateSpaceTwitter
@@ -25,6 +26,19 @@ describe('validateSpaceName', () => {
     test('should return error if name is too long', () => {
         const result = validateSpaceName('a'.repeat(31));
         expect(result.error).toBe('Space name is too long');
+    });
+});
+
+// logo
+
+describe('validateSpaceLogo', () => {
+    test('should return error if logo is empty string', () => {
+        const result = validateSpaceLogo('');
+        expect(result.error).toBe('Space logo cannot be empty');
+    });
+    test('should return error if logo is null', () => {
+        const result = validateSpaceLogo(null);
+        expect(result.error).toBe('Space logo cannot be empty');
     });
 });
 
