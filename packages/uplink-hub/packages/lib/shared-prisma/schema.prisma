@@ -1,0 +1,31 @@
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Space {
+  id       Int     @id @default(autoincrement())
+  name     String
+  members  Int
+  logo_url String
+  twitter  String?
+  website  String?
+  admins   Admin[]
+
+  // mark id and name as unique
+  @@unique([name])
+}
+
+model Admin {
+  id      Int    @id @default(autoincrement())
+  address String
+  space   Space  @relation(fields: [spaceId], references: [id])
+  spaceId Int
+
+  @@index([spaceId])
+}

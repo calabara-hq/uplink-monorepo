@@ -1,4 +1,6 @@
-import { createClient } from '@urql/core';
+import { createClient, dedupExchange, cacheExchange } from '@urql/core';
+import { multipartFetchExchange } from '@urql/exchange-multipart-fetch';
+
 
 const graphqlClient = createClient({
     url: `${process.env.NEXT_PUBLIC_HUB_URL}/graphql`,
@@ -7,6 +9,7 @@ const graphqlClient = createClient({
         credentials: 'include',
     },
     requestPolicy: 'cache-and-network',
+    exchanges: [dedupExchange, cacheExchange, multipartFetchExchange],
 });
 
 export const stripTypenames: any = (obj: any) => {

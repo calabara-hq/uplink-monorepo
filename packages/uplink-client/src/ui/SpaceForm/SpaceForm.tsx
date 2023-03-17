@@ -1,16 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
-import { nanoid } from "nanoid";
-
-import {
-  CreateSpaceDocument,
-  AllSpacesDocument,
-} from "@/lib/graphql/spaces.gql";
+import { CreateSpaceDocument } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
-
+import handleMediaUpload from "@/lib/mediaUpload";
 import {
   reducer,
   SpaceBuilderProps,
@@ -19,12 +14,12 @@ import {
 import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 
 const createSpace = async (state: any) => {
-  console.log(state);
   const result = await graphqlClient
     .mutation(CreateSpaceDocument, {
       spaceData: {
         name: state.name.value,
         website: state.website.value,
+        logo_url: state.logo_url.value,
         twitter: state.twitter.value,
         admins: state.admins.map((admin: FormField) => admin.value),
       },
@@ -43,6 +38,7 @@ const createSpace = async (state: any) => {
 export default function SpaceForm() {
   const { data: session, status } = useSession();
   const userAddress = session?.user?.address || "you";
+  const imageUploader = useRef(null);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -67,6 +63,8 @@ export default function SpaceForm() {
   const [state, dispatch] = useReducer(reducer, {
     name: { value: "", error: null },
     systemName: { value: "", error: null },
+    logo_blob: { value: "", error: null },
+    logo_url: { value: "", error: null },
     website: { value: "", error: null },
     twitter: { value: "", error: null },
     admins: [
@@ -109,6 +107,57 @@ export default function SpaceForm() {
             <label className="label">
               <span className="label-text-alt text-error">
                 {state.name.error}
+              </span>
+            </label>
+          )}
+        </div>
+
+        <div>
+          <label className="label">
+            <span className="label-text">Logo</span>
+          </label>
+          <input
+            placeholder="Logo"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (event) => {
+              handleMediaUpload(
+                event,
+                ["image"],
+                (base64) => {
+                  dispatch({
+                    type: "setLogoBlob",
+                    payload: base64,
+                  });
+                },
+                (ipfsUrl) => {
+                  dispatch({
+                    type: "setLogoUrl",
+                    payload: ipfsUrl,
+                  });
+                }
+              );
+            }}
+            ref={imageUploader}
+          />
+          <div className="avatar">
+            <div
+              className="w-24 rounded-full cursor-pointer flex justify-center items-center"
+              onClick={() => imageUploader.current.click()}
+            >
+              {state.logo_blob.value && <img src={state.logo_blob.value} />}
+              {!state.logo_blob.value && (
+                <div className="flex justify-center items-center w-full h-full rounded-full bg-gray-500">
+                  <p>logo</p>
+                </div>
+              )}
+            </div>
+          </div>
+          {state.logo_url.error && (
+            <label className="label">
+              <span className="label-text-alt text-error">
+                {state.logo_url.error}
               </span>
             </label>
           )}

@@ -35,6 +35,10 @@ export const CreateSpaceDocument = gql`
                     value
                     error
                 }
+                logo_url{
+                    value
+                    error
+                }
                 twitter{
                     value
                     error

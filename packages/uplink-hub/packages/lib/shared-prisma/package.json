@@ -1,0 +1,13 @@
+{
+  "name": "shared-prisma",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "nick",
+  "license": "MIT",
+  "devDependencies": {
+    "prisma": "^4.11.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.11.0"
+  }
+}
