@@ -128,7 +128,7 @@ type Space
   id: ID!
   name: String! @join__field(graph: SPACES)
   members: Int! @join__field(graph: SPACES)
-  logo: String! @join__field(graph: SPACES)
+  logo_url: String! @join__field(graph: SPACES)
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
 }
@@ -136,7 +136,8 @@ type Space
 input SpaceInput
   @join__type(graph: SPACES)
 {
-  name: String
+  name: String!
+  logo_url: String!
   website: String
   twitter: String
   admins: [String!]!
@@ -154,6 +155,7 @@ type SpaceResponse
   @join__type(graph: SPACES)
 {
   name: FieldResponse!
+  logo_url: FieldResponse!
   website: FieldResponse!
   twitter: FieldResponse!
   admins: [FieldResponse!]!

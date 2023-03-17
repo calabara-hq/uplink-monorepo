@@ -22,6 +22,7 @@ const createSpace = async (state: any) => {
       spaceData: {
         name: state.name.value,
         website: state.website.value,
+        logo_url: state.logo_url.value,
         twitter: state.twitter.value,
         admins: state.admins.map((admin: FormField) => admin.value),
       },
@@ -65,7 +66,8 @@ export default function SpaceForm() {
   const [state, dispatch] = useReducer(reducer, {
     name: { value: "", error: null },
     systemName: { value: "", error: null },
-    logo: { value: "", error: null },
+    logo_blob: { value: "", error: null },
+    logo_url: { value: "", error: null },
     website: { value: "", error: null },
     twitter: { value: "", error: null },
     admins: [
@@ -130,11 +132,16 @@ export default function SpaceForm() {
                 event,
                 (base64) => {
                   dispatch({
-                    type: "setLogo",
+                    type: "setLogoBlob",
                     payload: base64,
                   });
                 },
-                (data) => {}
+                (ipfsUrl) => {
+                  dispatch({
+                    type: "setLogoUrl",
+                    payload: ipfsUrl,
+                  });
+                }
               );
             }}
             ref={imageUploader}
@@ -144,10 +151,17 @@ export default function SpaceForm() {
               className="w-24 rounded-full cursor-pointer"
               onClick={() => imageUploader.current.click()}
             >
-              {state.logo.value && <img src={state.logo.value} />}
-              {!state.logo.value && <p>logo</p>}
+              {state.logo_blob.value && <img src={state.logo_blob.value} />}
+              {!state.logo_blob.value && <p>logo</p>}
             </div>
           </div>
+          {state.logo_url.error && (
+            <label className="label">
+              <span className="label-text-alt text-error">
+                {state.logo_url.error}
+              </span>
+            </label>
+          )}
         </div>
 
         <div>

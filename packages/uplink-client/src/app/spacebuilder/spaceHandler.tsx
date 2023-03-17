@@ -3,14 +3,10 @@ export type FormField = {
   error: string | null;
 };
 
-export type ImageField = {
-  value: string;
-  error: string | null;
-};
-
 export type SpaceBuilderProps = {
   name: FormField;
-  logo: ImageField;
+  logo_url: FormField;
+  logo_blob: FormField;
   systemName: FormField;
   website: FormField;
   twitter: FormField;
@@ -24,10 +20,15 @@ export const reducer = (state: any, action: any) => {
         ...state,
         name: { value: action.payload, error: null },
       };
-    case "setLogo":
+    case "setLogoBlob":
       return {
         ...state,
-        logo: { value: action.payload, error: null },
+        logo_blob: { value: action.payload, error: null },
+      };
+    case "setLogoUrl":
+      return {
+        ...state,
+        logo_url: { value: action.payload, error: null },
       };
     case "setWebsite":
       return {
@@ -70,8 +71,10 @@ export const reducer = (state: any, action: any) => {
       };
 
     case "setTotalState":
-      console.log(action.payload);
-      return { ...action.payload };
+      return {
+        ...state,
+        ...action.payload,
+      };
     default:
       return state;
   }

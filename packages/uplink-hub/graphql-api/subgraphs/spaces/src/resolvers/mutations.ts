@@ -28,6 +28,18 @@ export const validateSpaceName = (name: string): FieldResponse => {
     return fields;
 }
 
+// validate space logo
+export const validateSpaceLogo = (logo_url: string): FieldResponse => {
+    const fields: FieldResponse = { value: logo_url, error: null };
+
+    if (!fields.value) {
+        fields.error = "Space logo cannot be empty"
+        return fields
+    }
+
+    return fields;
+}
+
 export const validateSpaceWebsite = (website: string) => {
     const fields: FieldResponse = { value: website, error: null };
     // TODO: check that website is valid
@@ -102,8 +114,9 @@ export const validateAdmins = async (admins: string[]) => {
 
 
 export const processSpaceData = async (spaceData) => {
-    const { name, website, twitter, admins } = spaceData;
+    const { name, logo_url, website, twitter, admins } = spaceData;
     const nameResult = validateSpaceName(name);
+    const logoResult = validateSpaceLogo(logo_url);
     const websiteResult = validateSpaceWebsite(website);
     const twitterResult = validateSpaceTwitter(twitter);
     const { adminError, filteredAdmins: adminsResult } = await validateAdmins(admins);
@@ -111,6 +124,7 @@ export const processSpaceData = async (spaceData) => {
     // if there are errors, push them to the top level errors array
     const errors = [];
     if (nameResult.error) errors.push(nameResult.error);
+    if (logoResult.error) errors.push(logoResult.error);
     if (websiteResult.error) errors.push(websiteResult.error);
     if (twitterResult.error) errors.push(twitterResult.error);
     if (adminError) errors.push(adminError);
@@ -122,6 +136,7 @@ export const processSpaceData = async (spaceData) => {
         errors: errors,
         spaceResponse: {
             name: nameResult,
+            logo_url: logoResult,
             website: websiteResult,
             twitter: twitterResult,
             admins: adminsResult
@@ -140,10 +155,10 @@ const mutations = {
             // TODO handle the space slug and db writes
             if (result.success) {
                 // push the correct fields to the spaces array
-                const { name, website, twitter, admins } = result.spaceResponse;
+                const { name, logo_url, website, twitter, admins } = result.spaceResponse;
                 spaces.push({
                     id: randomUUID().toString(),
-                    logo: 'dummy',
+                    logo_url: logo_url.value,
                     name: name.value,
                     website: website.value,
                     members: 0,

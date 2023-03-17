@@ -2,7 +2,7 @@ type Space @key(fields: "id") {
   id: ID!
   name: String!
   members: Int!
-  logo: String!
+  logo_url: String!
   twitter: String
   website: String
 }
@@ -21,6 +21,7 @@ type FieldResponse {
 
 type SpaceResponse {
   name: FieldResponse!
+  logo_url: FieldResponse!
   website: FieldResponse!
   twitter: FieldResponse!
   admins: [FieldResponse!]!
@@ -33,7 +34,8 @@ type SpaceMutationResponse {
 }
 
 input SpaceInput {
-  name: String
+  name: String!
+  logo_url: String!
   website: String
   twitter: String
   admins: [String!]!
