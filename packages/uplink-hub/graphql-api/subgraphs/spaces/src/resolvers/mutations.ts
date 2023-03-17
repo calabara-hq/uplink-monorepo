@@ -2,7 +2,7 @@ import { validateEthAddress } from "../utils/ethAddress.js";
 import getUser from "../utils/authorize.js";
 import { spaces } from './index.js'
 import { randomUUID } from "crypto";
-
+import prisma from 'shared-prisma';
 export type FieldResponse = {
     value: string;
     error: string;
@@ -25,6 +25,13 @@ export const validateSpaceName = (name: string): FieldResponse => {
     if (fields.value.length > 30) {
         fields.error = "Space name is too long";
     }
+
+    // check name is alphanumeric
+    const isAlphaNumeric = fields.value.match(/^[a-zA-Z0-9]+$/);
+    if (!isAlphaNumeric) {
+        fields.error = "Space name must be alphanumeric";
+    }
+
     return fields;
 }
 

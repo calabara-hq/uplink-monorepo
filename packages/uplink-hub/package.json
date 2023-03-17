@@ -1,0 +1,17 @@
+{
+  "name": "uplink-hub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "nick",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/**/*"
+  ],
+  "constraints": {
+    "rootIsolation": [
+      "*"
+    ]
+  },
+  "packageManager": "yarn@3.5.0"
+}
