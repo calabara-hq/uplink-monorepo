@@ -1,20 +1,36 @@
+import prisma from 'shared-prisma';
 
-import { spaces } from './index.js';
+
+const findSpaceById = async (id: number) => {
+    return await prisma.space.findUnique({
+        where: {
+            id: id
+        },
+        include: {
+            admins: true
+        }
+    });
+}
+
 
 const queries = {
     Query: {
-        spaces() {
-            //return [spaces.at(Math.floor(Math.random() * spaces.length - 1))];
+        async spaces() {
+            const spaces = await prisma.space.findMany({
+                include: {
+                    admins: true
+                }
+            });
             return spaces
         },
-        space(parent, args, contextValue, info) {
-            return spaces.find(space => space.id === args.id);
+        async space(parent, args, contextValue, info) {
+            return await findSpaceById(args.id);
         },
     },
 
     Space: {
-        __resolveReference(space) {
-            return spaces.find(_space => _space.id === space.id);
+        async __resolveReference(space) {
+            return await findSpaceById(space.id);
         }
     }
 };

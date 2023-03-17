@@ -4,7 +4,7 @@
 #}
 
 type Submission @key(fields: "id") {
-  id: ID!
+  id: Int!
   contestId: Int!
   author: String!
   url: String!
@@ -12,8 +12,8 @@ type Submission @key(fields: "id") {
 }
 
 extend type Query {
-  submissions(contestId: ID!): [Submission!]!
-  submission(submissionId: ID!): Submission!
+  submissions(contestId: Int!): [Submission!]!
+  submission(submissionId: Int!): Submission!
 }
 
 extend schema

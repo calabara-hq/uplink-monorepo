@@ -13,7 +13,7 @@ export type FieldResponse = {
 }
 
 // validate space name
-export const validateSpaceName = (name: string): FieldResponse => {
+export const validateSpaceName = async (name: string): Promise<FieldResponse> => {
     const fields: FieldResponse = { value: name, error: null };
 
     if (!fields.value) {
@@ -34,6 +34,17 @@ export const validateSpaceName = (name: string): FieldResponse => {
     const isAlphaNumeric = fields.value.match(/^[a-zA-Z0-9]+$/);
     if (!isAlphaNumeric) {
         fields.error = "Space name must be alphanumeric";
+    }
+
+    // check name is not taken  from db
+    const isNameTaken = await prisma.space.findUnique({
+        where: {
+            name: fields.value
+        }
+    })
+
+    if (isNameTaken) {
+        fields.error = "Space name is already taken";
     }
 
     return fields;
@@ -60,7 +71,6 @@ export const validateSpaceLogo = (logo_url: string): FieldResponse => {
 
 export const validateSpaceWebsite = (website: string) => {
     const fields: FieldResponse = { value: website, error: null };
-    // TODO: check that website is valid
     // valid websites include https://, http://, and no protocol
     if (!fields.value) return fields;
     fields.value = fields.value.trim();
@@ -133,7 +143,7 @@ export const validateAdmins = async (admins: string[]) => {
 
 export const processSpaceData = async (spaceData) => {
     const { name, logo_url, website, twitter, admins } = spaceData;
-    const nameResult = validateSpaceName(name);
+    const nameResult = await validateSpaceName(name);
     const logoResult = validateSpaceLogo(logo_url);
     const websiteResult = validateSpaceWebsite(website);
     const twitterResult = validateSpaceTwitter(twitter);
@@ -163,6 +173,38 @@ export const processSpaceData = async (spaceData) => {
 
 }
 
+const createDbSpace = async (spaceData) => {
+    const { name, logo_url, website, twitter, admins } = spaceData;
+
+    const newSpace = await prisma.space.create({
+        data: {
+            name: name.value,
+            logo_url: logo_url.value,
+            website: website.value,
+            twitter: twitter.value,
+            members: 0,
+            admins: {
+                create: admins.map(admin => {
+                    return {
+                        address: admin.value
+                    }
+                })
+
+            }
+
+        }
+    })
+
+    console.log('new space', newSpace)
+
+    const spaces = await prisma.space.findMany({
+        include: {
+            admins: true
+        }
+    })
+    console.log('spaces', spaces)
+}
+
 const mutations = {
     Mutation: {
         createSpace: async (_: any, args: any, context: any) => {
@@ -173,15 +215,7 @@ const mutations = {
             // TODO handle the space slug and db writes
             if (result.success) {
                 // push the correct fields to the spaces array
-                const { name, logo_url, website, twitter, admins } = result.spaceResponse;
-                spaces.push({
-                    id: randomUUID().toString(),
-                    logo_url: logo_url.value,
-                    name: name.value,
-                    website: website.value,
-                    members: 0,
-                    admins: admins.map(admin => admin.value)
-                })
+                await createDbSpace(result.spaceResponse);
             }
             return {
                 success: result.success,

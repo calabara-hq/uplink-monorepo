@@ -17,12 +17,14 @@ model Space {
   website  String?
   admins   Admin[]
 
-  @@unique([id])
+  // mark id and name as unique
+  @@unique([name])
 }
 
 model Admin {
-  id      Int   @id @default(autoincrement())
-  space   Space @relation(fields: [spaceId], references: [id])
+  id      Int    @id @default(autoincrement())
+  address String
+  space   Space  @relation(fields: [spaceId], references: [id])
   spaceId Int
 
   @@index([spaceId])

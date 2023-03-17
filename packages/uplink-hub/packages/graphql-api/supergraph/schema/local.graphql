@@ -23,8 +23,8 @@ directive @link(url: String, as: String, for: link__Purpose, import: [link__Impo
 type ActiveContest
   @join__type(graph: CONTESTS)
 {
-  id: ID!
-  spaceId: ID!
+  id: Int!
+  spaceId: Int!
   tag: String!
   start: String!
   vote: String!
@@ -43,8 +43,8 @@ input authDataInput
 type Contest
   @join__type(graph: CONTESTS, key: "id")
 {
-  id: ID!
-  spaceId: ID!
+  id: Int!
+  spaceId: Int!
   tag: String!
   start: String!
   vote: String!
@@ -102,13 +102,13 @@ type Query
   @join__type(graph: SUBMISSIONS)
   @join__type(graph: USER)
 {
-  contest(contestId: ID!): Contest! @join__field(graph: CONTESTS)
-  spaceContests(spaceId: ID!): [Contest!]! @join__field(graph: CONTESTS)
+  contest(contestId: Int!): Contest! @join__field(graph: CONTESTS)
+  spaceContests(spaceId: Int!): [Contest!]! @join__field(graph: CONTESTS)
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
-  space(id: ID!): Space @join__field(graph: SPACES)
+  space(id: Int!): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
-  submissions(contestId: ID!): [Submission!]! @join__field(graph: SUBMISSIONS)
-  submission(submissionId: ID!): Submission! @join__field(graph: SUBMISSIONS)
+  submissions(contestId: Int!): [Submission!]! @join__field(graph: SUBMISSIONS)
+  submission(submissionId: Int!): Submission! @join__field(graph: SUBMISSIONS)
   me: User! @join__field(graph: USER)
   generateNonce: NonceResult! @join__field(graph: USER)
 }
@@ -125,12 +125,13 @@ type Space
   @join__type(graph: CONTESTS, key: "id")
   @join__type(graph: SPACES, key: "id")
 {
-  id: ID!
+  id: Int!
   name: String! @join__field(graph: SPACES)
   members: Int! @join__field(graph: SPACES)
   logo_url: String! @join__field(graph: SPACES)
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
+  admins: [String!]! @join__field(graph: SPACES)
 }
 
 input SpaceInput
@@ -164,7 +165,7 @@ type SpaceResponse
 type Submission
   @join__type(graph: SUBMISSIONS, key: "id")
 {
-  id: ID!
+  id: Int!
   contestId: Int!
   author: String!
   url: String!
