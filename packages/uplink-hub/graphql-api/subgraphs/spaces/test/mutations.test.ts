@@ -40,6 +40,15 @@ describe('validateSpaceLogo', () => {
         const result = validateSpaceLogo(null);
         expect(result.error).toBe('Space logo cannot be empty');
     });
+    test('should pass validation #1', () => {
+        const result = validateSpaceLogo('https://calabara.mypinata.cloud/ipfs/Qmdu6zwZqY6XtLUPigE7hsqcEPTwbeon5j9SCXYiBekei4');
+        expect(result.error).toBe(null);
+    });
+
+    test('should pass validation #2', () => {
+        const result = validateSpaceLogo('    https://calabara.mypinata.cloud/ipfs/Qmdu6zwZqY6XtLUPigE7hsqcEPTwbeon5j9SCXYiBekei4     ');
+        expect(result.error).toBe(null);
+    });
 });
 
 // website

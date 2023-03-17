@@ -37,6 +37,13 @@ export const validateSpaceLogo = (logo_url: string): FieldResponse => {
         return fields
     }
 
+    fields.value = fields.value.trim();
+    const isIpfsLogo = fields.value.match(/https:\/\/calabara.mypinata.cloud\/ipfs\/Qm[a-zA-Z0-9]{44}/);
+
+    if (!isIpfsLogo) {
+        fields.error = "Space logo is not valid";
+    }
+
     return fields;
 }
 
