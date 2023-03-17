@@ -1,4 +1,5 @@
 *.env
+.yarn/cache
 *.log
 *.dockerignore
 node_modules/
