@@ -12,6 +12,17 @@ const findSpaceById = async (id: number) => {
     });
 }
 
+const findSpaceByName = async (name: string) => {
+    return await prisma.space.findUnique({
+        where: {
+            name: name
+        },
+        include: {
+            admins: true
+        }
+    });
+}
+
 
 const queries = {
     Query: {
@@ -23,8 +34,10 @@ const queries = {
             });
             return spaces
         },
-        async space(parent, args, contextValue, info) {
-            return await findSpaceById(args.id);
+        async space(parent, { id, name }, contextValue, info) {
+            if (id) return await findSpaceById(id);
+            else if (name) return await findSpaceByName(name);
+            else throw new Error("You must provide either an ID or a name to find a space.");
         },
     },
 

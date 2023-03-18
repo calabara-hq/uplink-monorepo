@@ -21,19 +21,24 @@ export const validateSpaceName = async (name: string): Promise<FieldResponse> =>
         return fields
     }
 
-    fields.value = fields.value.trim();
+    fields.value = fields.value.trim()
+
+
     if (fields.value.length < 3) {
         fields.error = "Space name must be at least 3 characters";
+        return fields
     }
 
     if (fields.value.length > 30) {
         fields.error = "Space name is too long";
+        return fields
     }
 
     // check name is alphanumeric
     const isAlphaNumeric = fields.value.match(/^[a-zA-Z0-9]+$/);
     if (!isAlphaNumeric) {
         fields.error = "Space name must be alphanumeric";
+        return fields
     }
 
     // check name is not taken  from db
@@ -45,6 +50,7 @@ export const validateSpaceName = async (name: string): Promise<FieldResponse> =>
 
     if (isNameTaken) {
         fields.error = "Space name is already taken";
+        return fields
     }
 
     return fields;

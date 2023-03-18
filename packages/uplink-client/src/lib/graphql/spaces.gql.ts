@@ -10,16 +10,14 @@ export const AllSpacesDocument = gql`
     }
 `;
 
-// get a space by id
+// get a space by id r
 export const SpaceDocument = gql`
-    query Query($id: ID!){
-        space(id: $id){
+    query Query($name: String!){
+        space(name: $name){
             name
-        }
-        spaceContests(spaceId: $id){
-            start
-            end
-            tag
+            contests{
+                id
+            }
         }
     }
 `;

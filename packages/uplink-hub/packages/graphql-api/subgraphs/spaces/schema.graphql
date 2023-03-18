@@ -1,4 +1,4 @@
-type Space @key(fields: "id") {
+type Space @key(fields: "id") @key(fields: "name") {
   id: Int!
   name: String!
   members: Int!
@@ -9,7 +9,7 @@ type Space @key(fields: "id") {
 }
 
 type Query {
-  space(id: Int!): Space
+  space(id: Int, name: String): Space
   spaces: [Space!]!
 }
 

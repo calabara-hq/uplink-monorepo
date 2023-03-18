@@ -1,10 +1,13 @@
-type Space @key(fields: "id") {
+type Space @key(fields: "id") @key(fields: "name") {
   id: Int!
+  name: String!
+  contests: [Contest!]!
 }
 
 type Contest @key(fields: "id") {
   id: Int!
   spaceId: Int!
+  spaceName: String!
   tag: String!
   start: String!
   vote: String!
@@ -25,7 +28,7 @@ type ActiveContest {
 
 extend type Query {
   contest(contestId: Int!): Contest!
-  spaceContests(spaceId: Int!): [Contest!]!
+  #spaceContests(spaceId: Int, spaceName: String): [Contest!]!
   activeContests: [ActiveContest!]!
 }
 

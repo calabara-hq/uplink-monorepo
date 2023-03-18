@@ -45,6 +45,7 @@ type Contest
 {
   id: Int!
   spaceId: Int!
+  spaceName: String!
   tag: String!
   start: String!
   vote: String!
@@ -103,9 +104,8 @@ type Query
   @join__type(graph: USER)
 {
   contest(contestId: Int!): Contest! @join__field(graph: CONTESTS)
-  spaceContests(spaceId: Int!): [Contest!]! @join__field(graph: CONTESTS)
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
-  space(id: Int!): Space @join__field(graph: SPACES)
+  space(id: Int, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
   submissions(contestId: Int!): [Submission!]! @join__field(graph: SUBMISSIONS)
   submission(submissionId: Int!): Submission! @join__field(graph: SUBMISSIONS)
@@ -123,10 +123,13 @@ type signInResponse
 
 type Space
   @join__type(graph: CONTESTS, key: "id")
+  @join__type(graph: CONTESTS, key: "name")
   @join__type(graph: SPACES, key: "id")
+  @join__type(graph: SPACES, key: "name")
 {
   id: Int!
-  name: String! @join__field(graph: SPACES)
+  name: String!
+  contests: [Contest!]! @join__field(graph: CONTESTS)
   members: Int! @join__field(graph: SPACES)
   logo_url: String! @join__field(graph: SPACES)
   twitter: String @join__field(graph: SPACES)

@@ -11,21 +11,37 @@ import {
 // space name
 
 describe('validateSpaceName', () => {
-    test('should return error if name is empty string', () => {
-        const result = validateSpaceName('');
+    test('should return error if name is empty string', async () => {
+        const result = await validateSpaceName('');
         expect(result.error).toBe('Space name cannot be empty');
     });
-    test('should return error if name is null', () => {
-        const result = validateSpaceName(null as any);
+    test('should return error if name is null', async () => {
+        const result = await validateSpaceName(null as any);
         expect(result.error).toBe('Space name cannot be empty');
     });
-    test('should return error if name is < 3 characters', () => {
-        const result = validateSpaceName('ab');
+    test('should return error if name is < 3 characters', async () => {
+        const result = await validateSpaceName('ab');
         expect(result.error).toBe('Space name must be at least 3 characters');
     });
-    test('should return error if name is too long', () => {
-        const result = validateSpaceName('a'.repeat(31));
+    test('should return error if name is too long', async () => {
+        const result = await validateSpaceName('a'.repeat(31));
         expect(result.error).toBe('Space name is too long');
+    });
+    test('should return error if name contains hyphens', async () => {
+        const result = await validateSpaceName('shark-dao');
+        expect(result.error).toBe('Space name must be alphanumeric');
+    });
+    test('should return error if name exists in database', async () => {
+        const result = await validateSpaceName('SHARKDAO');
+        expect(result.error).toBe('Space name is already taken');
+    });
+    test('should pass validation #1', async () => {
+        const result = await validateSpaceName('nouns');
+        expect(result.error).toBe(null);
+    });
+    test('should pass validation #2', async () => {
+        const result = await validateSpaceName('  nouns  ');
+        expect(result.error).toBe(null);
     });
 });
 

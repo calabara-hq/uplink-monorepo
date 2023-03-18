@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AllSpacesDocument } from "@/lib/graphql/spaces.gql";
 import graphqlClient from "@/lib/graphql/initUrql";
+import { nameToSlug } from "@/lib/slug";
 
 //console.log('revalidating')
 
@@ -9,9 +10,7 @@ import graphqlClient from "@/lib/graphql/initUrql";
 //export const revalidate = 10;
 
 const getSpaces = async () => {
-  console.log('entering getSpaces')
   const results = await graphqlClient.query(AllSpacesDocument, {}).toPromise();
-  console.log(results)
   if (results.error) {
     throw new Error(results.error.message);
   }
@@ -39,7 +38,10 @@ export default async function Page() {
                   <div className="card-actions justify-end">
                     <Link
                       className="btn btn-primary"
-                      href={`/space/${space.id}`}
+                      href={{
+                        pathname: `/space/${nameToSlug(space.name)}`,
+                        query: { test: nameToSlug(space.name) },
+                      }}
                     >
                       Take me there
                     </Link>

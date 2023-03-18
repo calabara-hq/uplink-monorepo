@@ -12,6 +12,8 @@ import {
   FormField,
 } from "@/app/spacebuilder/spaceHandler";
 import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
+import { useRouter } from "next/navigation";
+import { nameToSlug } from "@/lib/slug";
 
 const createSpace = async (state: any) => {
   const result = await graphqlClient
@@ -39,6 +41,7 @@ export default function SpaceForm() {
   const { data: session, status } = useSession();
   const userAddress = session?.user?.address || "you";
   const imageUploader = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -78,6 +81,10 @@ export default function SpaceForm() {
     dispatch({ type: "setTotalState", payload: spaceResponse });
     if (!success) {
       return;
+    }
+    if (success) {
+      router.refresh();
+      router.push(`/space/${nameToSlug(spaceResponse.name.value)}`);
     }
   };
 
