@@ -19,6 +19,7 @@ const getSpaces = async () => {
 
 export default async function Page() {
   const spaces = await getSpaces();
+  console.log(spaces.data.spaces);
   return (
     <div>
       <Link className="btn" href="/">
@@ -38,10 +39,7 @@ export default async function Page() {
                   <div className="card-actions justify-end">
                     <Link
                       className="btn btn-primary"
-                      href={{
-                        pathname: `/space/${nameToSlug(space.name)}`,
-                        query: { test: nameToSlug(space.name) },
-                      }}
+                      href={`/space/${space.id}`}
                     >
                       Take me there
                     </Link>

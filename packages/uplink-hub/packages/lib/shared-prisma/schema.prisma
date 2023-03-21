@@ -9,7 +9,7 @@ generator client {
 }
 
 model Space {
-  id       Int     @id @default(autoincrement())
+  id       String  @id
   name     String
   members  Int
   logo_url String
@@ -18,14 +18,14 @@ model Space {
   admins   Admin[]
 
   // mark id and name as unique
-  @@unique([name])
+  @@unique([id])
 }
 
 model Admin {
   id      Int    @id @default(autoincrement())
   address String
   space   Space  @relation(fields: [spaceId], references: [id])
-  spaceId Int
+  spaceId String
 
   @@index([spaceId])
 }

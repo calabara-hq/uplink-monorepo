@@ -6,29 +6,40 @@ export const AllSpacesDocument = gql`
             id
             name
             members
-        }
-    }
-`;
-
-// get a space by id r
-export const SpaceDocument = gql`
-    query Query($name: String!){
-        space(name: $name){
-            name
-            contests{
-                id
+            admins{
+                address
             }
         }
     }
 `;
 
+export const SpaceDocument = gql`
+    query Query($id: ID!){
+        space(id: $id){
+            id
+            name
+            logo_url
+            twitter
+            website
+            admins{
+                address
+            }
+        }
+    }
+`;
 
-// create a space
+/*
+// upsert a space
 export const CreateSpaceDocument = gql`
-    mutation CreateSpace($spaceData: SpaceInput!){
+    mutation CreateSpace($spaceData: CreateSpaceInput!){
         createSpace(spaceData: $spaceData){
+            id
             success
             spaceResponse{
+                ens{
+                    value
+                    error
+                }
                 name{
                     value
                     error
@@ -53,3 +64,60 @@ export const CreateSpaceDocument = gql`
         }
     }
 `;
+*/
+
+
+// upsert a space
+export const CreateSpaceDocument = gql`
+    mutation CreateSpace($spaceData: CreateSpaceInput!){
+        createSpace(spaceData: $spaceData){
+            success
+            errors{
+                ens
+                name
+                logo_url
+                twitter
+                website
+                admins
+                topLevelAdminsError
+            }
+            spaceResponse{
+                id
+                ens
+                name
+                logo_url
+                twitter
+                website
+                admins
+            }
+        }
+    }
+`;
+
+export const EditSpaceDocument = gql`
+    mutation EditSpace($spaceData: CreateSpaceInput!){
+        editSpace(spaceData: $spaceData){
+            success
+            errors{
+                ens
+                name
+                logo_url
+                twitter
+                website
+                admins
+                topLevelAdminsError
+            }
+            spaceResponse{
+                id
+                ens
+                name
+                logo_url
+                twitter
+                website
+                admins
+            }
+        }
+    }
+`;
+
+

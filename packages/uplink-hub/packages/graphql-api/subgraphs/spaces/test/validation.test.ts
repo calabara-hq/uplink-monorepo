@@ -2,11 +2,41 @@ import { describe, expect, test } from '@jest/globals';
 import {
     validateSpaceName,
     validateSpaceLogo,
-    validateAdmins,
+    validateSpaceAdmins,
     validateSpaceWebsite,
-    validateSpaceTwitter
-} from '../src/resolvers/mutations';
+    validateSpaceTwitter,
+    validateSpaceEns
+} from '../src/utils/validateFormData';
 
+
+// space ens
+
+describe('validateSpaceEns', () => {
+    test('should return error if ens is empty string', async () => {
+        const result = await validateSpaceEns('');
+        expect(result.error).toBe('Space ens cannot be empty');
+    });
+
+    test('should return error if ens is null', async () => {
+        const result = await validateSpaceEns(null as any);
+        expect(result.error).toBe('Space ens cannot be empty');
+    });
+
+    test('should return error if ens is invalid', async () => {
+        const result = await validateSpaceEns('nick');
+        expect(result.error).toBe('Invalid ens');
+    });
+    test('should return error if ens is taken', async () => {
+        const result = await validateSpaceEns('sharkdao.eth');
+        expect(result.error).toBe('Ens is already taken');
+    });
+
+    test('should pass validation', async () => {
+        const result = await validateSpaceEns('nickdodson.eth');
+        expect(result.error).toBe(null);
+        expect(result.value).toBe('nickdodson.eth');
+    });
+});
 
 // space name
 
@@ -26,14 +56,6 @@ describe('validateSpaceName', () => {
     test('should return error if name is too long', async () => {
         const result = await validateSpaceName('a'.repeat(31));
         expect(result.error).toBe('Space name is too long');
-    });
-    test('should return error if name contains hyphens', async () => {
-        const result = await validateSpaceName('shark-dao');
-        expect(result.error).toBe('Space name must be alphanumeric');
-    });
-    test('should return error if name exists in database', async () => {
-        const result = await validateSpaceName('SHARKDAO');
-        expect(result.error).toBe('Space name is already taken');
     });
     test('should pass validation #1', async () => {
         const result = await validateSpaceName('nouns');
@@ -56,11 +78,14 @@ describe('validateSpaceLogo', () => {
         const result = validateSpaceLogo(null as any);
         expect(result.error).toBe('Space logo cannot be empty');
     });
+    test('should return error if logo is not ipfs', () => {
+        const result = validateSpaceLogo('https://google.com');
+        expect(result.error).toBe('Space logo is not valid');
+    });
     test('should pass validation #1', () => {
         const result = validateSpaceLogo('https://calabara.mypinata.cloud/ipfs/Qmdu6zwZqY6XtLUPigE7hsqcEPTwbeon5j9SCXYiBekei4');
         expect(result.error).toBe(null);
     });
-
     test('should pass validation #2', () => {
         const result = validateSpaceLogo('    https://calabara.mypinata.cloud/ipfs/Qmdu6zwZqY6XtLUPigE7hsqcEPTwbeon5j9SCXYiBekei4     ');
         expect(result.error).toBe(null);
@@ -162,72 +187,78 @@ describe('validateSpaceTwitter', () => {
 
 // admins
 
-describe('validateAdmins', () => {
+describe('validateSpaceAdmins', () => {
     test('should return error if passed admins are null', async () => {
-        const result = await validateAdmins(null as any);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe('admins cannot be empty');
-        expect(filteredAdmins.length).toEqual(0);
+        const result = await validateSpaceAdmins(null as any);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe('Admins cannot be empty');
+        expect(addresses.length).toEqual(0);
     });
-
-
-    test('should return error if passed admins are empty string', async () => {
-        const result = await validateAdmins(['']);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe(null);
-        expect(filteredAdmins.length).toEqual(0);
-    });
-
 
     test('should return error if passed admins are empty array', async () => {
-        const result = await validateAdmins([]);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe(null);
-        expect(filteredAdmins.length).toEqual(0);
+        const result = await validateSpaceAdmins([]);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe('Admins cannot be empty');
+        expect(addresses.length).toEqual(0);
     });
 
+    test('should return error if no valid admins are passed', async () => {
+        const result = await validateSpaceAdmins(['']);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe('Admins cannot be empty');
+        expect(addresses.length).toEqual(0);
+    });
 
     test('should return error if passed admins are invalid', async () => {
-        const result = await validateAdmins(['a', 'b', 'c']);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe('1 or more admin fields are invalid');
-        expect(filteredAdmins.length).toEqual(3);
+        const result = await validateSpaceAdmins(['a', 'b', 'c']);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe('1 or more admin fields are invalid');
+        expect(addresses.length).toEqual(3);
+        expect(errors.length).toEqual(3);
+
     })
 
     test('should remove address if empty string is passed #1', async () => {
-        const result = await validateAdmins(['a', '', 'c']);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe('1 or more admin fields are invalid');
-        expect(filteredAdmins.length).toEqual(2);
+        const result = await validateSpaceAdmins(['a', '', 'c']);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe('1 or more admin fields are invalid');
+        expect(addresses.length).toEqual(2);
+        expect(errors.length).toEqual(2);
     })
 
     test('should remove address if empty string is passed #2', async () => {
-        const result = await validateAdmins(['nick.eth', '', 'yungweez.eth']);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe(null);
-        expect(filteredAdmins.length).toEqual(2);
+        const result = await validateSpaceAdmins(['nick.eth', '', 'yungweez.eth']);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe(null);
+        expect(addresses.length).toEqual(2);
+        expect(errors.length).toEqual(2);
     })
 
     test('should remove address if empty string is passed #3', async () => {
-        const result = await validateAdmins(['', '', '', 'nick.eth', '', 'yungweez.eth', '']);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe(null);
-        expect(filteredAdmins.length).toEqual(2);
+        const result = await validateSpaceAdmins(['', '', '', 'nick.eth', '', 'yungweez.eth', '']);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe(null);
+        expect(addresses.length).toEqual(2);
+        expect(errors.length).toEqual(2);
     })
 
+
     test('should remove duplicate ens', async () => {
-        const result = await validateAdmins(['nick.eth', 'nick.eth']);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe(null);
-        expect(filteredAdmins.length).toEqual(1);
+        const result = await validateSpaceAdmins(['nick.eth', 'nick.eth']);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe(null);
+        expect(addresses.length).toEqual(1);
+        expect(errors.length).toEqual(1);
     });
 
     test('should remove duplicate address', async () => {
-        const result = await validateAdmins(['0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C', '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C']);
-        const { adminError, filteredAdmins } = result;
-        expect(adminError).toBe(null);
-        expect(filteredAdmins.length).toEqual(1);
+        const result = await validateSpaceAdmins(['0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C', '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C']);
+        const { topLevelAdminsError, addresses, errors } = result;
+        expect(topLevelAdminsError).toBe(null);
+        expect(addresses.length).toEqual(1);
+        expect(errors.length).toEqual(1);
     });
 
 
 });
+

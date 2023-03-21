@@ -1,15 +1,21 @@
-type Space @key(fields: "id") @key(fields: "name") {
-  id: Int!
+type Space @key(fields: "id") {
+  id: ID!
   name: String!
   members: Int!
   logo_url: String!
   twitter: String
   website: String
-  admins: [String!]!
+  admins: [Admin!]!
+}
+
+type Admin {
+  id: Int!
+  spaceId: Int!
+  address: String!
 }
 
 type Query {
-  space(id: Int, name: String): Space
+  space(id: ID!): Space
   spaces: [Space!]!
 }
 
@@ -21,6 +27,8 @@ type FieldResponse {
 }
 
 type SpaceResponse {
+  id: ID!
+  ens: FieldResponse!
   name: FieldResponse!
   logo_url: FieldResponse!
   website: FieldResponse!
@@ -28,13 +36,34 @@ type SpaceResponse {
   admins: [FieldResponse!]!
 }
 
-type SpaceMutationResponse {
-  success: Boolean!
-  errors: [String!]
-  spaceResponse: SpaceResponse!
+type SpaceResponse2 {
+  id: ID
+  ens: String!
+  name: String!
+  logo_url: String!
+  website: String!
+  twitter: String!
+  admins: [String!]!
 }
 
-input SpaceInput {
+type ErrorData {
+  ens: String
+  name: String
+  logo_url: String
+  website: String
+  twitter: String
+  admins: [String]
+  topLevelAdminsError: String
+}
+
+type SpaceMutationResponse {
+  success: Boolean!
+  errors: ErrorData
+  spaceResponse: SpaceResponse2!
+}
+
+input CreateSpaceInput {
+  ens: String!
   name: String!
   logo_url: String!
   website: String
@@ -43,7 +72,8 @@ input SpaceInput {
 }
 
 type Mutation {
-  createSpace(spaceData: SpaceInput!): SpaceMutationResponse!
+  createSpace(spaceData: CreateSpaceInput!): SpaceMutationResponse!
+  editSpace(spaceData: CreateSpaceInput!): SpaceMutationResponse!
 }
 
 extend schema

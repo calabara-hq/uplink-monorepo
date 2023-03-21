@@ -1,6 +1,5 @@
-type Space @key(fields: "id") @key(fields: "name") {
-  id: Int!
-  name: String!
+type Space @key(fields: "id") {
+  id: ID!
   contests: [Contest!]!
 }
 
