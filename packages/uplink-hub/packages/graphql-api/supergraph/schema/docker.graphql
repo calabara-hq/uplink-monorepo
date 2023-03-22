@@ -41,6 +41,17 @@ type Admin
   address: String!
 }
 
+input AlterSpaceInput
+  @join__type(graph: SPACES)
+{
+  ens: String!
+  name: String!
+  logo_url: String!
+  website: String
+  twitter: String
+  admins: [String!]!
+}
+
 type Contest
   @join__type(graph: CONTESTS, key: "id")
 {
@@ -52,17 +63,6 @@ type Contest
   vote: String!
   end: String!
   created: String!
-}
-
-input CreateSpaceInput
-  @join__type(graph: SPACES)
-{
-  ens: String!
-  name: String!
-  logo_url: String!
-  website: String
-  twitter: String
-  admins: [String!]!
 }
 
 type ErrorData
@@ -109,8 +109,8 @@ enum link__Purpose {
 type Mutation
   @join__type(graph: SPACES)
 {
-  createSpace(spaceData: CreateSpaceInput!): SpaceMutationResponse!
-  editSpace(spaceData: CreateSpaceInput!): SpaceMutationResponse!
+  createSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
+  editSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
 }
 
 type Query
@@ -145,22 +145,10 @@ type SpaceMutationResponse
 {
   success: Boolean!
   errors: ErrorData
-  spaceResponse: SpaceResponse2!
+  spaceResponse: SpaceResponse!
 }
 
 type SpaceResponse
-  @join__type(graph: SPACES)
-{
-  id: ID!
-  ens: FieldResponse!
-  name: FieldResponse!
-  logo_url: FieldResponse!
-  website: FieldResponse!
-  twitter: FieldResponse!
-  admins: [FieldResponse!]!
-}
-
-type SpaceResponse2
   @join__type(graph: SPACES)
 {
   id: ID

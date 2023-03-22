@@ -1,15 +1,12 @@
 import { SpaceDocument } from "@/lib/graphql/spaces.gql";
 import graphqlClient from "@/lib/graphql/initUrql";
-import { nameToSlug, slugToName } from "@/lib/slug";
 import Link from "next/link";
 
 // return the space data and contests
 
 const getSpace = async (id: string) => {
-  console.log('ID is', id);
-  const results = await graphqlClient
-    .query(SpaceDocument, { id })
-    .toPromise();
+  console.log("ID is", id);
+  const results = await graphqlClient.query(SpaceDocument, { id }).toPromise();
   if (results.error) throw new Error(results.error.message);
   if (!results.data.space) throw new Error("Space not found");
   return results.data;

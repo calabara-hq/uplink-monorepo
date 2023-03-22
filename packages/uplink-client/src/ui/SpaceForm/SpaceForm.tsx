@@ -9,14 +9,11 @@ import {
 } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import handleMediaUpload from "@/lib/mediaUpload";
-import {
-  reducer,
-  SpaceBuilderProps,
-  FormField,
-} from "@/app/spacebuilder/spaceHandler";
+import { reducer, SpaceBuilderProps } from "@/app/spacebuilder/spaceHandler";
 import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 import { useRouter } from "next/navigation";
-
+import useHandleMutation from "@/hooks/useHandleMutation";
+import toast from "react-hot-toast";
 const postData = async ({
   state,
   isNewSpace,
@@ -24,7 +21,6 @@ const postData = async ({
   state: SpaceBuilderProps;
   isNewSpace: boolean;
 }) => {
-  console.log("THIS IS THE STATE", state);
   const result = await graphqlClient
     .mutation(isNewSpace ? CreateSpaceDocument : EditSpaceDocument, {
       spaceData: {
@@ -61,26 +57,49 @@ export default function SpaceForm({
   const [progress, setProgress] = useState(isNewSpace ? 0 : 1);
   const router = useRouter();
 
-  useEffect(() => {
-    console.log("State change", state);
-  }, [state]);
+  const handleMutation = useHandleMutation(
+    isNewSpace ? CreateSpaceDocument : EditSpaceDocument
+  );
 
   const onFormSubmit = async (state: SpaceBuilderProps) => {
-    const { errors, success, spaceResponse } = await postData({
-      state,
-      isNewSpace,
+    const result = await handleMutation({
+      spaceData: {
+        ens: state.ens,
+        name: state.name,
+        website: state.website,
+        logo_url: state.logo_url,
+        twitter: state.twitter,
+        admins: state.admins,
+      },
     });
 
-    console.log("errors from server", errors);
+    if (!result) return;
+
+    const { errors, success, spaceResponse } = isNewSpace
+      ? result.data.createSpace
+      : result.data.editSpace;
+
+    if (!success)
+      toast.error(
+        "Oops, something went wrong. Please check your inputs and try again."
+      );
+
     // set the parsed data and errors
+
     dispatch({
       type: "setTotalState",
       payload: { ...spaceResponse, errors: errors },
     });
 
-    console.log(success);
-
     if (success) {
+      toast.success(
+        isNewSpace
+          ? "Space created successfully!"
+          : "Successfully saved your changes",
+        {
+          icon: "🚀",
+        }
+      );
       router.refresh();
       router.push(`/space/${spaceResponse.id}`);
     }
@@ -119,6 +138,13 @@ export default function SpaceForm({
           }}
           buttonLabel="submit"
         />
+        <button
+          onClick={() => {
+            onFormSubmit(state);
+          }}
+        >
+          test
+        </button>
       </div>
     </div>
   );

@@ -15,7 +15,16 @@ auth.get('/csrf', authController.getCsrfToken)
 
 auth.post('/sign_in', authController.verifySignature)
 
-auth.post('/sign_out', authController.signOut)
+/*
+auth.post('/sign_out',
+    async (req, res) => {
+        console.log(req.session)
+        res.send('hello from sign_out').status(200)
+    })
+*/
 
+
+
+auth.post('/sign_out', authController.signOut)
 
 export default auth

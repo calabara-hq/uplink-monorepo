@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { AllSpacesDocument } from "@/lib/graphql/spaces.gql";
 import graphqlClient from "@/lib/graphql/initUrql";
-import { nameToSlug } from "@/lib/slug";
 
 //console.log('revalidating')
 

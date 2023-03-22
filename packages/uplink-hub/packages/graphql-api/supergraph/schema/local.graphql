@@ -41,6 +41,17 @@ type Admin
   address: String!
 }
 
+input AlterSpaceInput
+  @join__type(graph: SPACES)
+{
+  ens: String!
+  name: String!
+  logo_url: String!
+  website: String
+  twitter: String
+  admins: [String!]!
+}
+
 input authDataInput
   @join__type(graph: USER)
 {
@@ -59,17 +70,6 @@ type Contest
   vote: String!
   end: String!
   created: String!
-}
-
-input CreateSpaceInput
-  @join__type(graph: SPACES)
-{
-  ens: String!
-  name: String!
-  logo_url: String!
-  website: String
-  twitter: String
-  admins: [String!]!
 }
 
 type ErrorData
@@ -118,8 +118,8 @@ type Mutation
   @join__type(graph: SPACES)
   @join__type(graph: USER)
 {
-  createSpace(spaceData: CreateSpaceInput!): SpaceMutationResponse! @join__field(graph: SPACES)
-  editSpace(spaceData: CreateSpaceInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  createSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  editSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   signIn(authData: authDataInput): signInResponse! @join__field(graph: USER)
 }
 
@@ -172,22 +172,10 @@ type SpaceMutationResponse
 {
   success: Boolean!
   errors: ErrorData
-  spaceResponse: SpaceResponse2!
+  spaceResponse: SpaceResponse!
 }
 
 type SpaceResponse
-  @join__type(graph: SPACES)
-{
-  id: ID!
-  ens: FieldResponse!
-  name: FieldResponse!
-  logo_url: FieldResponse!
-  website: FieldResponse!
-  twitter: FieldResponse!
-  admins: [FieldResponse!]!
-}
-
-type SpaceResponse2
   @join__type(graph: SPACES)
 {
   id: ID

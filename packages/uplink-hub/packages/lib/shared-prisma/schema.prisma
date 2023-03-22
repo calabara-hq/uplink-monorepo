@@ -8,6 +8,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.VarChar(1000)
+  expiresAt DateTime
+
+  @@index([id])
+}
+
 model Space {
   id       String  @id
   name     String

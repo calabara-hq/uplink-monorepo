@@ -29,8 +29,9 @@ type SessionContextValue<R extends boolean = false> = R extends true
       | { data: Session; status: "authenticated" }
       | { data: null; status: "unauthenticated" | "loading" };
 
-export const SessionContext =
-  createContext?.<SessionContextValue | undefined>(undefined);
+export const SessionContext = createContext?.<SessionContextValue | undefined>(
+  undefined
+);
 
 // in-memory client session store
 
@@ -165,11 +166,11 @@ export const signOut = async () => {
     {
       method: "POST",
       headers: {
-        "X-Hub-Csrf": await getCsrfToken(),
         "Content-Type": "application/json",
       },
       credentials: "include",
-      //body: JSON.stringify({ csrfToken: await getCsrfToken() }),
+      //body: JSON.stringify({ csrfToken: 'hello thisis a test' }),
+      body: JSON.stringify({ csrfToken: await getCsrfToken() }),
     }
   );
   const data = await response.json();

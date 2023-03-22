@@ -6,7 +6,7 @@ import { describe, expect, test } from "@jest/globals";
 describe('validateEthAddress', () => {
 
     test('should return null if address is null', async () => {
-        const result = await validateEthAddress(null);
+        const result = await validateEthAddress(null as any);
         expect(result).toBe(null);
     })
 

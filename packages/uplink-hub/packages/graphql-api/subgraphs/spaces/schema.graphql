@@ -27,16 +27,6 @@ type FieldResponse {
 }
 
 type SpaceResponse {
-  id: ID!
-  ens: FieldResponse!
-  name: FieldResponse!
-  logo_url: FieldResponse!
-  website: FieldResponse!
-  twitter: FieldResponse!
-  admins: [FieldResponse!]!
-}
-
-type SpaceResponse2 {
   id: ID
   ens: String!
   name: String!
@@ -59,10 +49,10 @@ type ErrorData {
 type SpaceMutationResponse {
   success: Boolean!
   errors: ErrorData
-  spaceResponse: SpaceResponse2!
+  spaceResponse: SpaceResponse!
 }
 
-input CreateSpaceInput {
+input AlterSpaceInput {
   ens: String!
   name: String!
   logo_url: String!
@@ -72,8 +62,8 @@ input CreateSpaceInput {
 }
 
 type Mutation {
-  createSpace(spaceData: CreateSpaceInput!): SpaceMutationResponse!
-  editSpace(spaceData: CreateSpaceInput!): SpaceMutationResponse!
+  createSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
+  editSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
 }
 
 extend schema

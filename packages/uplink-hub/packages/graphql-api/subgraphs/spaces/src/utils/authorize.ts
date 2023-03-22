@@ -1,14 +1,24 @@
-
+import prisma from 'shared-prisma';
 
 const getUser = async (context: any) => {
     const { token } = context;
-    if (!token['uplink-hub']) return null;
-    //const user = await prisma.user.findUnique({ where: { token } });
-    const user = {
-        address: '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C'
+    const { 'uplink-hub': uplinkHub } = token;
+  
+    if (!uplinkHub) return null;
+  
+    const sid = uplinkHub.split('.')[0]?.split(':')[1];
+    const data = await prisma.session.findUnique({ where: { sid } });
+  
+    if (!data || !data.data) return null;
+  
+    try {
+      const userData = JSON.parse(data.data);
+      const user = userData.user?.address;
+      return user;
+    } catch (err) {
+      console.error('Error parsing user data:', err);
+      return null;
     }
-    return user;
-}
-
+  };
 
 export default getUser;

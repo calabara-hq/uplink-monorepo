@@ -69,7 +69,7 @@ export const CreateSpaceDocument = gql`
 
 // upsert a space
 export const CreateSpaceDocument = gql`
-    mutation CreateSpace($spaceData: CreateSpaceInput!){
+    mutation CreateSpace($spaceData: AlterSpaceInput!){
         createSpace(spaceData: $spaceData){
             success
             errors{
@@ -95,7 +95,7 @@ export const CreateSpaceDocument = gql`
 `;
 
 export const EditSpaceDocument = gql`
-    mutation EditSpace($spaceData: CreateSpaceInput!){
+    mutation EditSpace($spaceData: AlterSpaceInput!){
         editSpace(spaceData: $spaceData){
             success
             errors{
