@@ -6,11 +6,15 @@ copy ./.yarnrc.yml ./.yarnrc.yml
 copy ./.yarn ./.yarn
 copy ./yarn.lock ./
 
-# Copy shared-prisma
-copy ./packages/lib/shared-prisma ./packages/lib/shared-prisma
+copy ./packages/lib ./packages/lib
 
 copy ./packages/auth ./packages/auth
 run yarn install
+
+run yarn workspace lib generate-prisma
+
+run yarn workspace lib build
+
 workdir /usr/src/app/packages/auth
 expose 5000
 CMD ["yarn", "dev"]

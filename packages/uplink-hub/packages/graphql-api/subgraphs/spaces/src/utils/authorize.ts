@@ -1,4 +1,4 @@
-import prisma from 'shared-prisma';
+import prisma from 'prisma-client';
 
 const getUser = async (context: any) => {
     const { token } = context;

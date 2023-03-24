@@ -1,11 +1,9 @@
-import prisma from 'shared-prisma';
-
-
+import { _prismaClient } from "lib";
 
 export const createDbSpace = async (spaceData) => {
     const { ens, name, logo_url, website, twitter, admins } = spaceData;
 
-    const newSpace = await prisma.space.create({
+    const newSpace = await _prismaClient.space.create({
         data: {
             id: ens,
             name: name,
@@ -31,7 +29,7 @@ export const createDbSpace = async (spaceData) => {
 export const updateDbSpace = async (id, spaceData) => {
     const { name, logo_url, website, twitter, admins } = spaceData;
     // 1. Get space with admins
-    const spaceWithAdmins = await prisma.space.findUnique({
+    const spaceWithAdmins = await _prismaClient.space.findUnique({
         where: { id: id },
         include: { admins: true },
     });
@@ -39,14 +37,14 @@ export const updateDbSpace = async (id, spaceData) => {
     // 2. Delete all existing admins
     await Promise.all(
         spaceWithAdmins.admins.map((admin) =>
-            prisma.admin.delete({
+            _prismaClient.admin.delete({
                 where: { id: admin.id },
             })
         )
     );
 
     // 3. update the space
-    const result = await prisma.space.update({
+    const result = await _prismaClient.space.update({
         where: {
             id: id
         },

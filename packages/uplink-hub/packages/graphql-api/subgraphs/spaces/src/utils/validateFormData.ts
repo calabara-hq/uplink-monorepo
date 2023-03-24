@@ -1,6 +1,5 @@
 import { validateEthAddress } from "../utils/ethAddress.js";
-import prisma from 'shared-prisma';
-
+import { _prismaClient } from "lib";
 export type FieldResponse = {
     value: string;
     error: string;
@@ -21,7 +20,7 @@ export const validateSpaceEns = async (ens: string): Promise<FieldResponse> => {
         return fields
     }
 
-    const isEnsTaken = await prisma.space.findFirst({
+    const isEnsTaken = await _prismaClient.space.findFirst({
         where: {
             id: fields.value,
         }

@@ -1,8 +1,7 @@
-import prisma from 'shared-prisma';
+import { _prismaClient } from "lib";
 
-
-const findSpaceById = async (id: number) => {
-    return await prisma.space.findUnique({
+const findSpaceById = async (id: string) => {
+    return await _prismaClient.space.findUnique({
         where: {
             id: id
         },
@@ -12,22 +11,12 @@ const findSpaceById = async (id: number) => {
     });
 }
 
-const findSpaceByName = async (name: string) => {
-    return await prisma.space.findUnique({
-        where: {
-            name: name
-        },
-        include: {
-            admins: true
-        }
-    });
-}
 
 
 const queries = {
     Query: {
         async spaces() {
-            const spaces = await prisma.space.findMany({
+            const spaces = await _prismaClient.space.findMany({
                 include: {
                     admins: true
                 }
@@ -35,9 +24,7 @@ const queries = {
             return spaces
         },
         async space(parent, { id, name }, contextValue, info) {
-            if (id) return await findSpaceById(id);
-            else if (name) return await findSpaceByName(name);
-            else throw new Error("You must provide either an ID or a name to find a space.");
+            return await findSpaceById(id);
         },
     },
 

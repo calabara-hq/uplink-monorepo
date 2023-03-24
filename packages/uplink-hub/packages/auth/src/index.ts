@@ -2,7 +2,7 @@ import express from 'express';
 import auth from './routes.js';
 import bodyParser from 'body-parser';
 import session from 'express-session';
-import prisma from 'shared-prisma';
+import {_prismaClient} from 'lib';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 const port = 5000
 const app = express();
@@ -17,7 +17,7 @@ app.use(session({
   // memory store
   //store: new session.MemoryStore(),
 
-  store: new PrismaSessionStore(prisma, {
+  store: new PrismaSessionStore(_prismaClient, {
     checkPeriod: 5 * 60 * 1000, // 5 minutes
     dbRecordIdIsSessionId: true,
     dbRecordIdFunction: undefined,
