@@ -5,6 +5,9 @@
   "author": "nick",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "clean": "yarn workspaces foreach 'echo $(pwd)/node_modules' | xargs rm -rf"
+  },
   "workspaces": [
     "packages/*",
     "packages/graphql-api/subgraphs/*"

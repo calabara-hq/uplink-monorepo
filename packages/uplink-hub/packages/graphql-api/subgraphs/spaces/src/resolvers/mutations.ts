@@ -1,5 +1,5 @@
 //import getUser from "../utils/authorize.js";
-import { getUser } from "lib";
+import { Authorization } from "lib";
 import {
     validateSpaceEns,
     validateSpaceName,
@@ -50,7 +50,7 @@ const processSpaceData = async (spaceData, isNewSpace) => {
 const mutations = {
     Mutation: {
         createSpace: async (_: any, args: any, context: any) => {
-            const user = await getUser(context);
+            const user = await Authorization.getUser(context);
             if (!user) throw new Error('Unauthorized');
 
             const { spaceData } = args;
@@ -70,7 +70,7 @@ const mutations = {
         editSpace: async (_: any, args: any, context: any) => {
 
 
-            const user = await getUser(context);
+            const user = await Authorization.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'

@@ -1,23 +1,24 @@
-import {_prismaClient} from '../prisma-client/index.js';
-export const getUser = async (context: any) => {
-    const { token } = context;
-    const { 'uplink-hub': uplinkHub } = token;
+import { _prismaClient } from '../prisma-client/index.js';
 
-    if (!uplinkHub) return null;
+export class Authorization {
+    static async getUser(context: any) {
+        const { token } = context;
+        const { 'uplink-hub': uplinkHub } = token;
 
-    const sid = uplinkHub.split('.')[0]?.split(':')[1];
-    const data = await _prismaClient.session.findUnique({ where: { sid } });
+        if (!uplinkHub) return null;
 
-    if (!data || !data.data) return null;
+        const sid = uplinkHub.split('.')[0]?.split(':')[1];
+        const data = await _prismaClient.session.findUnique({ where: { sid } });
 
-    try {
-        const userData = JSON.parse(data.data);
-        const user = userData.user?.address;
-        return user;
-    } catch (err) {
-        console.error('Error parsing user data:', err);
-        return null;
+        if (!data || !data.data) return null;
+
+        try {
+            const userData = JSON.parse(data.data);
+            const user = userData.user?.address;
+            return user;
+        } catch (err) {
+            console.error('Error parsing user data:', err);
+            return null;
+        }
     }
-};
-
-
+}
