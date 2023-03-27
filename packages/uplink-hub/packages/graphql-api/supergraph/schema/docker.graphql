@@ -33,16 +33,56 @@ type ActiveContest
   spaceLink: Space!
 }
 
+type Admin
+  @join__type(graph: SPACES)
+{
+  id: Int!
+  spaceId: Int!
+  address: String!
+}
+
+input AlterSpaceInput
+  @join__type(graph: SPACES)
+{
+  ens: String!
+  name: String!
+  logo_url: String!
+  website: String
+  twitter: String
+  admins: [String!]!
+}
+
 type Contest
   @join__type(graph: CONTESTS, key: "id")
 {
   id: Int!
   spaceId: Int!
+  spaceName: String!
   tag: String!
   start: String!
   vote: String!
   end: String!
   created: String!
+}
+
+type EnsResponse
+  @join__type(graph: SPACES)
+{
+  success: Boolean!
+  errors: ErrorData
+  ens: String!
+}
+
+type ErrorData
+  @join__type(graph: SPACES)
+{
+  ens: String
+  name: String
+  logo_url: String
+  website: String
+  twitter: String
+  admins: [String]
+  topLevelAdminsError: String
 }
 
 type FieldResponse
@@ -77,7 +117,8 @@ enum link__Purpose {
 type Mutation
   @join__type(graph: SPACES)
 {
-  createSpace(spaceData: SpaceInput!): SpaceMutationResponse!
+  createSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
+  editSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
 }
 
 type Query
@@ -86,10 +127,10 @@ type Query
   @join__type(graph: SUBMISSIONS)
 {
   contest(contestId: Int!): Contest! @join__field(graph: CONTESTS)
-  spaceContests(spaceId: Int!): [Contest!]! @join__field(graph: CONTESTS)
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
-  space(id: Int!): Space @join__field(graph: SPACES)
+  space(id: ID!): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
+  isEnsValid(ens: String!): EnsResponse! @join__field(graph: SPACES)
   submissions(contestId: Int!): [Submission!]! @join__field(graph: SUBMISSIONS)
   submission(submissionId: Int!): Submission! @join__field(graph: SUBMISSIONS)
 }
@@ -98,41 +139,34 @@ type Space
   @join__type(graph: CONTESTS, key: "id")
   @join__type(graph: SPACES, key: "id")
 {
-  id: Int!
+  id: ID!
+  contests: [Contest!]! @join__field(graph: CONTESTS)
   name: String! @join__field(graph: SPACES)
   members: Int! @join__field(graph: SPACES)
   logo_url: String! @join__field(graph: SPACES)
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
-  admins: [String!]! @join__field(graph: SPACES)
-}
-
-input SpaceInput
-  @join__type(graph: SPACES)
-{
-  name: String!
-  logo_url: String!
-  website: String
-  twitter: String
-  admins: [String!]!
+  admins: [Admin!]! @join__field(graph: SPACES)
 }
 
 type SpaceMutationResponse
   @join__type(graph: SPACES)
 {
   success: Boolean!
-  errors: [String!]
+  errors: ErrorData
   spaceResponse: SpaceResponse!
 }
 
 type SpaceResponse
   @join__type(graph: SPACES)
 {
-  name: FieldResponse!
-  logo_url: FieldResponse!
-  website: FieldResponse!
-  twitter: FieldResponse!
-  admins: [FieldResponse!]!
+  id: ID
+  ens: String!
+  name: String!
+  logo_url: String!
+  website: String!
+  twitter: String!
+  admins: [String!]!
 }
 
 type Submission

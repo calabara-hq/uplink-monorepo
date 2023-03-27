@@ -15,7 +15,8 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./packages/auth:/usr/src/app
+      - ./packages/auth:/usr/src/app/packages/auth
+        # - auth_node_modules:/usr/src/app/packages/auth/node_modules
   media:
     container_name: media
     build:
@@ -40,8 +41,7 @@ services:
     ports:
       - "4002:4000"
     volumes:
-      - ./packages/graphql-api/subgraphs/spaces:/usr/src/app/packages/spaces
-      - spaces_node_modules:/usr/src/app/packages/spaces/node_modules
+        - ./packages/graphql-api/subgraphs/spaces/src:/usr/src/app/packages/spaces/src
 
   contests:
     container_name: contests
@@ -51,8 +51,8 @@ services:
     ports:
       - "4003:4000"
     volumes:
-      - ./packages/graphql-api/subgraphs/contests:/usr/src/app/packages/contests
-      - contests_node_modules:/usr/src/app/packages/contests/node_modules
+      - ./packages/graphql-api/subgraphs/contests/src:/usr/src/app/packages/contests/src
+        #- contests_node_modules:/usr/src/app/packages/contests/node_modules
   submissions:
     container_name: submissions
     build:
@@ -61,10 +61,11 @@ services:
     ports:
       - "4004:4000"
     volumes:
-      - ./packages/graphql-api/subgraphs/submissions:/usr/src/app/packages/submissions
-      - submissions_node_modules:/usr/src/app/packages/submissions/node_modules
+      - ./packages/graphql-api/subgraphs/submissions/src:/usr/src/app/packages/submissions/src
+        #- submissions_node_modules:/usr/src/app/packages/submissions/node_modules
 
 volumes:
   spaces_node_modules:
+    #auth_node_modules:
   contests_node_modules:
   submissions_node_modules:

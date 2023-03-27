@@ -47,15 +47,17 @@ export const verifySignature = async (req, res) => {
 
 }
 
-export const signOut = async (req, res, next) => {
-    console.log(req)
-    const csrfToken = req.get('x-hub-csrf');
+
+// TODO handle csrf
+
+export const signOut = async (req, res) => {
+
+    const { csrfToken } = req.body
     if (csrfToken !== req.session.csrfToken) return res.send(false)
 
     req.session.destroy((err) => {
         if (err) return res.send(false)
+        console.log('AFTER DESTROY', req.session)
         return res.send(true)
-
     })
 }
-

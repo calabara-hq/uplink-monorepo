@@ -1,16 +1,29 @@
 type Space @key(fields: "id") {
-  id: Int!
+  id: ID!
   name: String!
   members: Int!
   logo_url: String!
   twitter: String
   website: String
-  admins: [String!]!
+  admins: [Admin!]!
+}
+
+type Admin {
+  id: Int!
+  spaceId: Int!
+  address: String!
+}
+
+type EnsResponse {
+  success: Boolean!
+  errors: ErrorData
+  ens: String!
 }
 
 type Query {
-  space(id: Int!): Space
+  space(id: ID!): Space
   spaces: [Space!]!
+  isEnsValid(ens: String!): EnsResponse!
 }
 
 ## mutations
@@ -21,20 +34,33 @@ type FieldResponse {
 }
 
 type SpaceResponse {
-  name: FieldResponse!
-  logo_url: FieldResponse!
-  website: FieldResponse!
-  twitter: FieldResponse!
-  admins: [FieldResponse!]!
+  id: ID
+  ens: String!
+  name: String!
+  logo_url: String!
+  website: String!
+  twitter: String!
+  admins: [String!]!
+}
+
+type ErrorData {
+  ens: String
+  name: String
+  logo_url: String
+  website: String
+  twitter: String
+  admins: [String]
+  topLevelAdminsError: String
 }
 
 type SpaceMutationResponse {
   success: Boolean!
-  errors: [String!]
+  errors: ErrorData
   spaceResponse: SpaceResponse!
 }
 
-input SpaceInput {
+input AlterSpaceInput {
+  ens: String!
   name: String!
   logo_url: String!
   website: String
@@ -43,7 +69,8 @@ input SpaceInput {
 }
 
 type Mutation {
-  createSpace(spaceData: SpaceInput!): SpaceMutationResponse!
+  createSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
+  editSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
 }
 
 extend schema

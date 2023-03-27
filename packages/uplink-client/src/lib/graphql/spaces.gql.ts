@@ -6,52 +6,93 @@ export const AllSpacesDocument = gql`
             id
             name
             members
-        }
-    }
-`;
-
-// get a space by id
-export const SpaceDocument = gql`
-    query Query($id: ID!){
-        space(id: $id){
-            name
-        }
-        spaceContests(spaceId: $id){
-            start
-            end
-            tag
-        }
-    }
-`;
-
-
-// create a space
-export const CreateSpaceDocument = gql`
-    mutation CreateSpace($spaceData: SpaceInput!){
-        createSpace(spaceData: $spaceData){
-            success
-            spaceResponse{
-                name{
-                    value
-                    error
-                }
-                logo_url{
-                    value
-                    error
-                }
-                twitter{
-                    value
-                    error
-                }
-                website{
-                    value
-                    error
-                }
-                admins{
-                    value
-                    error
-                }
+            admins{
+                address
             }
         }
     }
 `;
+
+export const SpaceDocument = gql`
+    query Query($id: ID!){
+        space(id: $id){
+            id
+            name
+            logo_url
+            twitter
+            website
+            admins{
+                address
+            }
+        }
+    }
+`;
+
+
+export const IsEnsValidDocument = gql`
+    query IsEnsValid($ens: String!){
+        isEnsValid(ens: $ens){
+            success
+            errors{
+                ens
+            }
+            ens
+        }
+    }
+`;
+
+
+// upsert a space
+export const CreateSpaceDocument = gql`
+    mutation CreateSpace($spaceData: AlterSpaceInput!){
+        createSpace(spaceData: $spaceData){
+            success
+            errors{
+                ens
+                name
+                logo_url
+                twitter
+                website
+                admins
+                topLevelAdminsError
+            }
+            spaceResponse{
+                id
+                ens
+                name
+                logo_url
+                twitter
+                website
+                admins
+            }
+        }
+    }
+`;
+
+export const EditSpaceDocument = gql`
+    mutation EditSpace($spaceData: AlterSpaceInput!){
+        editSpace(spaceData: $spaceData){
+            success
+            errors{
+                ens
+                name
+                logo_url
+                twitter
+                website
+                admins
+                topLevelAdminsError
+            }
+            spaceResponse{
+                id
+                ens
+                name
+                logo_url
+                twitter
+                website
+                admins
+            }
+        }
+    }
+`;
+
+

@@ -9,9 +9,7 @@ import graphqlClient from "@/lib/graphql/initUrql";
 //export const revalidate = 10;
 
 const getSpaces = async () => {
-  console.log('entering getSpaces')
   const results = await graphqlClient.query(AllSpacesDocument, {}).toPromise();
-  console.log(results)
   if (results.error) {
     throw new Error(results.error.message);
   }
@@ -20,6 +18,7 @@ const getSpaces = async () => {
 
 export default async function Page() {
   const spaces = await getSpaces();
+  console.log(spaces.data.spaces);
   return (
     <div>
       <Link className="btn" href="/">

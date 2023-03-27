@@ -19,7 +19,7 @@
     "ethers": "5.7.2",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
-    "shared-prisma": "workspace:*"
+    "lib": "workspace:*"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",

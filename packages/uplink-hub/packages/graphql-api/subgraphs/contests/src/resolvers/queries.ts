@@ -1,30 +1,40 @@
 
+
+
+
+
+
 const queries = {
     Query: {
-        contest(_, { contestId }) {
+        async contest(_, { contestId }, contextValue, info) {
             return contests.find(contest => contest.id === contestId);
         },
-        spaceContests(_, { spaceId }) {
-            return contests.filter(contest => contest.spaceId === spaceId)
+        /*
+        spaceContests(_, { spaceId, spaceName }) {
+            if (spaceId) return contests.filter(contest => contest.spaceId === spaceId)
+            else if (spaceName) return contests.filter(contest => contest.spaceName === spaceName)
+            else throw new Error("You must provide either a spaceId or a spaceName");
         },
+        */
         activeContests() {
             return contests.filter(contest => contest.start > '0')
         }
 
     },
-    /*
+    
     // used to resolve contests to spaces
     Space: {
         contests(space) {
             return contests.filter(contest => contest.spaceId === space.id)
         }
     },
-    */
+    
 
     ActiveContest: {
         spaceLink(contest) {
             return {
-                id: contest.spaceId
+                id: contest.spaceId,
+                name: contest.spaceName
             }
         }
     }
@@ -34,7 +44,7 @@ const queries = {
 const contests = [
     {
         id: "1",
-        spaceId: "sharkdao",
+        spaceId: 7,
         tag: "test",
         start: "1",
         vote: "1",

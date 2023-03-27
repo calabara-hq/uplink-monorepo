@@ -1160,11 +1160,11 @@ __metadata:
   linkType: hard
 
 "@graphql-typed-document-node/core@npm:^3.1.1":
-  version: 3.1.2
-  resolution: "@graphql-typed-document-node/core@npm:3.1.2"
+  version: 3.2.0
+  resolution: "@graphql-typed-document-node/core@npm:3.2.0"
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: a61afa025acdabd7833e4f654a5802fc1a526171f81e0c435c8e651050a5a0682499a2c7a51304ceb61fde36cd69fc7975ce5e1b16b9ba7ea474c649f33eea8b
+  checksum: fa44443accd28c8cf4cb96aaaf39d144a22e8b091b13366843f4e97d19c7bfeaf609ce3c7603a4aeffe385081eaf8ea245d078633a7324c11c5ec4b2011bb76d
   languageName: node
   linkType: hard
 
@@ -1627,6 +1627,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@quixo3/prisma-session-store@npm:^3.1.10":
+  version: 3.1.10
+  resolution: "@quixo3/prisma-session-store@npm:3.1.10"
+  dependencies:
+    cuid: ^2.1.8
+    ts-dedent: ^2.2.0
+    type-fest: ^2.5.2
+  peerDependencies:
+    "@prisma/client": ">=2.16.1"
+    express-session: ">=1.17.1"
+  checksum: 025ccdd86508acdba176bb6495807fb1c657094f3dd79bd9c920d5a3e015f10cb4afc7dcf574e6508ec39e1d293676454464a7eeddadceaa5feeba0e2cd70d87
+  languageName: node
+  linkType: hard
+
 "@sinclair/typebox@npm:^0.25.16":
   version: 0.25.24
   resolution: "@sinclair/typebox@npm:0.25.24"
@@ -1884,9 +1898,9 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*, @types/node@npm:^18.11.19":
-  version: 18.15.3
-  resolution: "@types/node@npm:18.15.3"
-  checksum: 31b1d92475a82c30de29aa6c0771b18a276552d191283b4423ba2d61b3f01159bf0d02576c0b7cc834b043997893800db6bb47f246083ed85aa45e79c80875d7
+  version: 18.15.5
+  resolution: "@types/node@npm:18.15.5"
+  checksum: 5fbf3453bd5ce1402bb2964e55d928fc8a8a7de5451b1b0fe66587fecb8a3eb86854ca9cefa5076a5971e2cff00e1773ceeb5d872a54f6c6ddfbbc1064b4e91a
   languageName: node
   linkType: hard
 
@@ -1950,11 +1964,11 @@ __metadata:
   linkType: hard
 
 "@types/yargs@npm:^17.0.8":
-  version: 17.0.22
-  resolution: "@types/yargs@npm:17.0.22"
+  version: 17.0.23
+  resolution: "@types/yargs@npm:17.0.23"
   dependencies:
     "@types/yargs-parser": "*"
-  checksum: 0773523fda71bafdc52f13f5970039e535a353665a60ba9261149a5c9c2b908242e6e77fbb7a8c06931ec78ce889d64d09673c68ba23eb5f5742d5385d0d1982
+  checksum: c5f787d7a9a36ea94ba5d3f340fc5d93d2860eff8fa9731cd614ed23212e4fca75637e2386e37e376a720e4bf088ceed6f39050f1c3638fc1b75bce5c70b1ad4
   languageName: node
   linkType: hard
 
@@ -2185,6 +2199,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "auth@workspace:packages/auth"
   dependencies:
+    "@quixo3/prisma-session-store": ^3.1.10
     "@types/jest": ^29.4.0
     "@types/node": ^18.11.19
     cors: ^2.8.5
@@ -2192,6 +2207,7 @@ __metadata:
     express: ^4.18.2
     express-session: ^1.17.3
     jest: ^29.4.2
+    lib: "workspace:*"
     nodemon: ^2.0.20
     siwe: 2.1.3
     supertest: ^6.3.3
@@ -2544,9 +2560,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001449":
-  version: 1.0.30001467
-  resolution: "caniuse-lite@npm:1.0.30001467"
-  checksum: c7df36ddb8050fb366a4bedd278f4b639c1dde94b6ba62bacf960f26d488395632a0630b7932ebc52d3d04b57940d12dcb4a7d3bb744ff64c249b61fb3e0c238
+  version: 1.0.30001469
+  resolution: "caniuse-lite@npm:1.0.30001469"
+  checksum: 8e496509d7e9ff189c72205675b5db0c5f1b6a09917027441e835efae0848a468a8c4e7d2b409ffc202438fcd23ae53e017f976a03c22c04d12d3c0e1e33e5de
   languageName: node
   linkType: hard
 
@@ -2780,8 +2796,8 @@ __metadata:
     "@types/node": ^18.11.19
     graphql: ^16.6.0
     graphql-tag: ^2.12.6
+    lib: "workspace:*"
     nodemon: ^2.0.20
-    shared-prisma: "workspace:*"
     ts-node: ^10.9.1
     typescript: ^4.9.5
   languageName: unknown
@@ -2854,6 +2870,13 @@ __metadata:
     shebang-command: ^2.0.0
     which: ^2.0.1
   checksum: 671cc7c7288c3a8406f3c69a3ae2fc85555c04169e9d611def9a675635472614f1c0ed0ef80955d5b6d4e724f6ced67f0ad1bb006c2ea643488fcfef994d7f52
+  languageName: node
+  linkType: hard
+
+"cuid@npm:^2.1.8":
+  version: 2.1.8
+  resolution: "cuid@npm:2.1.8"
+  checksum: 12b85b3f5150a6f0b9e4f345c8d98299d74647419151751fa1132f6702fe2b5388ceceb1c9b49bad7cab1b3ac033c7cedea8ffc034930f90005b8a4345025288
   languageName: node
   linkType: hard
 
@@ -2975,9 +2998,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.284":
-  version: 1.4.332
-  resolution: "electron-to-chromium@npm:1.4.332"
-  checksum: d65870e47b41dce95ca246ddd27179539de1af34a2f79cdb892b70c8bd6c2ed751aeb937bffd1fbd22e1d63b5c6bf4ce67430f208e6970a51c81e98e0beea1f4
+  version: 1.4.337
+  resolution: "electron-to-chromium@npm:1.4.337"
+  checksum: b7da59afa5e3239f222c3e146d27757cef10bdcb4180f3f77d7a7d339d1ee7c99d0e281807fe47a865426995a3d1c06809743ca71dddc0aaf65e749e66a8be40
   languageName: node
   linkType: hard
 
@@ -4426,6 +4449,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lib@workspace:*, lib@workspace:packages/lib":
+  version: 0.0.0-use.local
+  resolution: "lib@workspace:packages/lib"
+  dependencies:
+    "@jest/globals": ^29.5.0
+    "@prisma/client": ^4.11.0
+    "@types/node": ^18.11.19
+    jest: ^29.5.0
+    nodemon: ^2.0.20
+    prisma: ^4.11.0
+    ts-jest: ^29.0.5
+    ts-node: ^10.9.1
+    typescript: ^4.9.5
+  languageName: unknown
+  linkType: soft
+
 "lines-and-columns@npm:^1.1.6":
   version: 1.2.4
   resolution: "lines-and-columns@npm:1.2.4"
@@ -4955,8 +4994,8 @@ __metadata:
   linkType: hard
 
 "nodemon@npm:^2.0.20":
-  version: 2.0.21
-  resolution: "nodemon@npm:2.0.21"
+  version: 2.0.22
+  resolution: "nodemon@npm:2.0.22"
   dependencies:
     chokidar: ^3.5.2
     debug: ^3.2.7
@@ -4970,7 +5009,7 @@ __metadata:
     undefsafe: ^2.0.5
   bin:
     nodemon: bin/nodemon.js
-  checksum: 0b9fe2d11fd95c51b66d61bd1ee85cddf579c9e674c9429752a74f445f1b98576235ae860858783728baa3666c87e4ef938ab67167cc34fe4bb8fcec74d6885b
+  checksum: 9c987e139748f5b5c480c6c9080bdc97304ee7d29172b7b3da1a7db590b1323ad57b96346304e9b522b0e445c336dc393ccd3f9f45c73b20d476d2347890dcd0
   languageName: node
   linkType: hard
 
@@ -5579,15 +5618,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shared-prisma@workspace:*, shared-prisma@workspace:packages/lib/shared-prisma":
-  version: 0.0.0-use.local
-  resolution: "shared-prisma@workspace:packages/lib/shared-prisma"
-  dependencies:
-    "@prisma/client": ^4.11.0
-    prisma: ^4.11.0
-  languageName: unknown
-  linkType: soft
-
 "shebang-command@npm:^2.0.0":
   version: 2.0.0
   resolution: "shebang-command@npm:2.0.0"
@@ -5718,8 +5748,8 @@ __metadata:
     graphql: ^16.6.0
     graphql-tag: ^2.12.6
     jest: ^29.5.0
+    lib: "workspace:*"
     nodemon: ^2.0.20
-    shared-prisma: "workspace:*"
     supertest: ^6.3.3
     ts-jest: ^29.0.5
     ts-node: ^10.9.1
@@ -5837,7 +5867,6 @@ __metadata:
     graphql: ^16.6.0
     graphql-tag: ^2.12.6
     nodemon: ^2.0.20
-    shared-prisma: "workspace:*"
     ts-node: ^10.9.1
     typescript: ^4.9.5
   languageName: unknown
@@ -5978,6 +6007,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ts-dedent@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "ts-dedent@npm:2.2.0"
+  checksum: 93ed8f7878b6d5ed3c08d99b740010eede6bccfe64bce61c5a4da06a2c17d6ddbb80a8c49c2d15251de7594a4f93ffa21dd10e7be75ef66a4dc9951b4a94e2af
+  languageName: node
+  linkType: hard
+
 "ts-jest@npm:^29.0.5":
   version: 29.0.5
   resolution: "ts-jest@npm:29.0.5"
@@ -6067,6 +6103,13 @@ __metadata:
   version: 0.21.3
   resolution: "type-fest@npm:0.21.3"
   checksum: e6b32a3b3877f04339bae01c193b273c62ba7bfc9e325b8703c4ee1b32dc8fe4ef5dfa54bf78265e069f7667d058e360ae0f37be5af9f153b22382cd55a9afe0
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:^2.5.2":
+  version: 2.19.0
+  resolution: "type-fest@npm:2.19.0"
+  checksum: a4ef07ece297c9fba78fc1bd6d85dff4472fe043ede98bd4710d2615d15776902b595abf62bd78339ed6278f021235fb28a96361f8be86ed754f778973a0d278
   languageName: node
   linkType: hard
 

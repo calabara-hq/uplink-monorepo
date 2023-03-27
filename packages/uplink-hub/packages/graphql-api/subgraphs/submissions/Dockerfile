@@ -7,9 +7,6 @@ COPY ./.yarnrc.yml ./.yarnrc.yml
 COPY ./.yarn ./.yarn
 COPY ./yarn.lock ./ 
 
-# Copy shared-prisma
-COPY ./packages/lib/shared-prisma ./packages/lib/shared-prisma
-
 # Copy submissions service
 COPY ./packages/graphql-api/subgraphs/submissions ./packages/submissions
 
