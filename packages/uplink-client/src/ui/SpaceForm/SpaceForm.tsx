@@ -129,12 +129,22 @@ export default function SpaceForm({
     }
   };
 
+  useEffect(() => {
+    if (state.errors.ens) {
+      setProgress(0);
+    }
+  }, [state.errors.ens]);
+
   if (progress === 0) {
     return (
       <div className="flex w-6/12 bbackdrop-blur-md bg-black/30 text-white px-2 py-2 rounded-lg justify-center items-center ml-auto mr-auto">
         <div className=" flex flex-col gap-2 w-full max-w-xs">
           <SpaceEns state={state} dispatch={dispatch} />
-          <button className="btn" onClick={onEnsSubmit}>
+          <button
+            className="btn"
+            disabled={state.errors.ens}
+            onClick={onEnsSubmit}
+          >
             next
           </button>
         </div>
