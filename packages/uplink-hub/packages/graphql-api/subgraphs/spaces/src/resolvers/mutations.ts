@@ -68,8 +68,6 @@ const mutations = {
         },
 
         editSpace: async (_: any, args: any, context: any) => {
-
-
             const user = await Authorization.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {

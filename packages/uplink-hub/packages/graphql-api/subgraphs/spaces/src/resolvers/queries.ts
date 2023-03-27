@@ -1,4 +1,5 @@
 import { _prismaClient } from "lib";
+import { validateSpaceEns } from "../utils/validateFormData.js";
 
 const findSpaceById = async (id: string) => {
     return await _prismaClient.space.findUnique({
@@ -25,6 +26,16 @@ const queries = {
         },
         async space(parent, { id, name }, contextValue, info) {
             return await findSpaceById(id);
+        },
+        async isEnsValid(parent, { ens }, contextValue, info) {
+            const result = await validateSpaceEns(ens);
+            const isSuccess = !result.error;
+            const errors = { ens: result.error }
+            return {
+                success: isSuccess,
+                errors: errors,
+                ens: result.value
+            }
         },
     },
 

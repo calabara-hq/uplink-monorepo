@@ -6,6 +6,7 @@ import { useSession } from "@/providers/SessionProvider";
 import {
   CreateSpaceDocument,
   EditSpaceDocument,
+  IsEnsValidDocument,
 } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import handleMediaUpload from "@/lib/mediaUpload";
@@ -62,6 +63,7 @@ export default function SpaceForm({
   );
 
   const onFormSubmit = async (state: SpaceBuilderProps) => {
+    console.log(state);
     const result = await handleMutation({
       spaceData: {
         ens: state.ens,
@@ -106,9 +108,25 @@ export default function SpaceForm({
   };
 
   const onEnsSubmit = async () => {
-    // todo validate ens
-    // todo check if ens is available
-    setProgress(1);
+    const { ens } = state;
+    const result = await graphqlClient
+      .query(IsEnsValidDocument, { ens })
+      .toPromise();
+    if (result.error) throw new Error(result.error.message);
+    const {
+      success,
+      errors,
+      ens: ensResult,
+    } = stripTypenames(result.data.isEnsValid);
+
+    dispatch({
+      type: "setTotalState",
+      payload: { ens: ensResult, errors: { ...state.errors, ens: errors.ens } },
+    });
+
+    if (success) {
+      setProgress(1);
+    }
   };
 
   if (progress === 0) {

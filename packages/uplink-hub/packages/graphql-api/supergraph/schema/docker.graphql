@@ -65,6 +65,14 @@ type Contest
   created: String!
 }
 
+type EnsResponse
+  @join__type(graph: SPACES)
+{
+  success: Boolean!
+  errors: ErrorData
+  ens: String!
+}
+
 type ErrorData
   @join__type(graph: SPACES)
 {
@@ -122,6 +130,7 @@ type Query
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
   space(id: ID!): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
+  isEnsValid(ens: String!): EnsResponse! @join__field(graph: SPACES)
   submissions(contestId: Int!): [Submission!]! @join__field(graph: SUBMISSIONS)
   submission(submissionId: Int!): Submission! @join__field(graph: SUBMISSIONS)
 }

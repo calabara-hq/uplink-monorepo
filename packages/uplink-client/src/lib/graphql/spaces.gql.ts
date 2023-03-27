@@ -28,43 +28,18 @@ export const SpaceDocument = gql`
     }
 `;
 
-/*
-// upsert a space
-export const CreateSpaceDocument = gql`
-    mutation CreateSpace($spaceData: CreateSpaceInput!){
-        createSpace(spaceData: $spaceData){
-            id
+
+export const IsEnsValidDocument = gql`
+    query IsEnsValid($ens: String!){
+        isEnsValid(ens: $ens){
             success
-            spaceResponse{
-                ens{
-                    value
-                    error
-                }
-                name{
-                    value
-                    error
-                }
-                logo_url{
-                    value
-                    error
-                }
-                twitter{
-                    value
-                    error
-                }
-                website{
-                    value
-                    error
-                }
-                admins{
-                    value
-                    error
-                }
+            errors{
+                ens
             }
+            ens
         }
     }
 `;
-*/
 
 
 // upsert a space

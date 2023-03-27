@@ -14,9 +14,16 @@ type Admin {
   address: String!
 }
 
+type EnsResponse {
+  success: Boolean!
+  errors: ErrorData
+  ens: String!
+}
+
 type Query {
   space(id: ID!): Space
   spaces: [Space!]!
+  isEnsValid(ens: String!): EnsResponse!
 }
 
 ## mutations
