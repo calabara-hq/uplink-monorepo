@@ -125,6 +125,13 @@ export default function SpaceForm({
     });
 
     if (success) {
+      dispatch({
+        type: "setAdmin",
+        payload: {
+          index: 1,
+          value: ensResult,
+        }
+      })
       setProgress(1);
     }
   };
@@ -429,7 +436,7 @@ const SpaceAdmins = ({
                 type="text"
                 placeholder="vitalik.eth"
                 className="input input-bordered w-full max-w-xs disabled:text-gray-400"
-                disabled={index === 0}
+                disabled={index < 2}
                 value={admin}
                 onChange={(e) =>
                   dispatch({
@@ -438,7 +445,7 @@ const SpaceAdmins = ({
                   })
                 }
               />
-              {index > 0 && (
+              {index > 1 && (
                 <button
                   onClick={() => {
                     dispatch({ type: "removeAdmin", payload: index });
