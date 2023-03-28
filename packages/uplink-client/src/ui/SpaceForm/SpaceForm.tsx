@@ -130,8 +130,8 @@ export default function SpaceForm({
         payload: {
           index: 1,
           value: ensResult,
-        }
-      })
+        },
+      });
       setProgress(1);
     }
   };
@@ -264,7 +264,7 @@ const SpaceLogo = ({
   state: SpaceBuilderProps;
   dispatch: any;
 }) => {
-  const imageUploader = useRef(null);
+  const imageUploader = useRef<HTMLInputElement>(null);
   return (
     <div>
       <label className="label">
@@ -298,7 +298,7 @@ const SpaceLogo = ({
       <div className="avatar">
         <div
           className="w-24 rounded-full cursor-pointer flex justify-center items-center"
-          onClick={() => imageUploader.current.click()}
+          onClick={() => imageUploader.current?.click()}
         >
           {state.logo_blob && <img src={state.logo_blob} />}
           {!state.logo_blob && (

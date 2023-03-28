@@ -22,6 +22,10 @@ export default async function Page({ params }: { params: { id: string } }) {
         <Link href={`/spacebuilder/edit/${spaceData.space.id}`}>
           edit space
         </Link>
+        <br></br>
+        <Link href={'/contestbuilder/create'}>
+          create contest
+        </Link>
         <pre className="text-white">{JSON.stringify(spaceData, null, 2)}</pre>
       </div>
     );
