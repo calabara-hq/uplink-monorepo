@@ -9,12 +9,8 @@ import DateTimeSelector from "../DateTime/DateTime";
 
 const initialState = {
   startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
-  voteTime:
-    new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, -5) +
-    "Z",
-  endTime:
-    new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().slice(0, -5) +
-    "Z",
+  voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
+  endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
   errors: {
     startTime: null,
     voteTime: null,
