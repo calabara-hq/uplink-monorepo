@@ -1,85 +1,87 @@
 import Image from "next/image";
 import { useState } from "react";
 import contestImage from "public/tns-sketch-contest.jpeg";
-import winner from "public/9999-winner.jpeg";
+import SubmissionCard from "@/ui/SubmissionCard/SubmissionCard";
 
 export default async function Page({ params }: { params: { id: string } }) {
   return (
     <div className="flex flex-col items-center w-[90vw] m-auto justify-evenly p-4 gap-4 bg-neutral">
-      <div className="stats stats-horizontal w-full bg-base-100">
-        <div className="stat justify-items-center p-2">
-          <div className="stat-title">Eligibility</div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-16 h-16"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"
-            />
-          </svg>
-        </div>
-
-        <div className="stat justify-items-center p-2">
-          <div className="stat-title pb-2">Progress</div>
-          <div
-            className="radial-progress"
-            style={{ "--value": 70, "--size": "4rem" }}
-          >
-            70%
+      <div className="flex flex-row w-full h-40 bg-base-100 rounded-xl">
+        <div className="flex flex-col justify-evenly items-center w-1/3 p-2">
+          <p className="text-2xl">Status</p>
+          <div className="flex flex-col lg:flex-row w-full items-center justify-evenly">
+            <div
+              className="radial-progress bg-secondary text-primary-content border-4 border-secondary"
+              style={{ "--value": 20, "--size": "4rem" }}
+            >
+              70%
+            </div>
+            <p className=" bg-primary p-2 h-fit rounded-lg text-primary-content font-bold">
+              Submitting
+            </p>
           </div>
         </div>
-
-        <div className="stat justify-items-center p-2">
-          <div className="stat-title">Status</div>
-          <p className=" bg-purple-600 p-2 h-fit rounded-lg font-bold">
-            Submitting
-          </p>
-        </div>
-
+        <div className="divider divider-horizontal w-0 m-0" />
         <label
           htmlFor="my-modal-5"
-          className="hidden lg:stat justify-items-center p-2 hover:cursor-pointer hover:bg-neutral"
+          className="flex flex-col justify-evenly items-center w-1/3 p-2 hover:cursor-pointer hover:bg-neutral"
         >
-          <div className="stat-title">Submitter Rewards</div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-16 h-16"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"
-            />
-          </svg>
+          <p className="text-2xl mb-2">Rewards</p>
+          <div className="flex flex-col lg:flex-row w-full justify-evenly">
+            <div className="flex flex-col items-center">
+              <p>Submitter Rewards</p>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6 lg:w-16 lg:h-16"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"
+                />
+              </svg>
+            </div>
+            <div className="flex flex-col items-center">
+              <p>Voter Rewards</p>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6 lg:w-16 lg:h-16"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"
+                />
+              </svg>
+            </div>
+          </div>
         </label>
-
+        <div className="divider divider-horizontal w-0 m-0" />
         <label
           htmlFor="my-modal-5"
-          className="hidden lg:stat justify-items-center p-2 hover:cursor-pointer hover:bg-neutral"
+          className="flex flex-col justify-evenly items-center w-1/3 p-2 hover:cursor-pointer hover:bg-neutral"
         >
-          <div className="stat-title">Voter Rewards</div>
+          <p className="text-2xl">More Details</p>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="w-16 h-16"
+            className="w-6 h-6 lg:w-16 lg:h-16"
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
             />
           </svg>
         </label>
@@ -135,9 +137,9 @@ export default async function Page({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      <div className="lg:flex lg:flex-row w-full items-center gap-4 bg-neutral">
-        <div className="lg:flex-row flex flex-col-reverse items-center lg:w-3/4 bg-base-100 shadow-xl rounded-xl">
-          <div className="flex flex-col lg:flex-auto lg:w-1/2 gap-4 p-4">
+      <div className="lg:flex lg:flex-row lg:h-max w-full items-center gap-4 bg-neutral">
+        <div className="lg:flex-row flex flex-col-reverse items-center lg:h-96 lg:w-3/4 bg-base-100 rounded-t-xl lg:rounded-xl">
+          <div className="flex flex-col lg:flex-auto lg:h-96 lg:w-1/2 gap-4 p-4">
             <div className="avatar">
               <div className="w-20 lg:w-24 rounded-full bg-white mr-6">
                 <Image
@@ -155,13 +157,8 @@ export default async function Page({ params }: { params: { id: string } }) {
               Contest Closes: 2/17 @ 10pm est 🤝 Follow + Tag 🔖 @thenounsquare
               + some friends
             </p>
-            <div className="card-actions justify-end">
-              <label htmlFor="my-modal-3" className="btn btn-primary">
-                Submit
-              </label>
-            </div>
           </div>
-          <div className="max-w-screen-sm lg:h-96">
+          <div className="max-w-screen-sm lg:h-80 lg:pr-4">
             <Image
               src={contestImage}
               alt="contest image"
@@ -169,10 +166,10 @@ export default async function Page({ params }: { params: { id: string } }) {
             />
           </div>
         </div>
-        <div className="flex flex-col justify-start lg:h-96 w-1/4 gap-4">
-          <div className="hidden lg:flex lg:flex-col gap-4 p-4 bg-base-100 rounded-xl">
+        <div className="flex flex-col lg:h-96 lg:w-1/4 gap-4">
+          <div className="lg:flex lg:flex-col gap-4 p-4 bg-base-100 rounded-b-xl lg:rounded-xl">
             <div className="flex flex-row justify-between items-center">
-              <p className="text-xl">Details</p>
+              <p className="text-xl">Submit</p>
               <div className="btn btn-sm btn-circle">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -190,13 +187,13 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </svg>
               </div>
             </div>
-            <div className="flex flex-row justify-between items-center">
-              <p>Voting Begins</p>
-              <p>3/11/23</p>
-            </div>
-            <div className="flex flex-row justify-between items-center">
-              <p>Contest End</p>
-              <p>3/13/23</p>
+            <div className="flex justify-center">
+              <label
+                htmlFor="my-modal-3"
+                className="btn lg:btn-wide btn-primary"
+              >
+                Submit
+              </label>
             </div>
           </div>
           <div className="hidden lg:flex lg:flex-col gap-4 p-4 bg-base-100 rounded-xl">
@@ -246,11 +243,11 @@ export default async function Page({ params }: { params: { id: string } }) {
               <div className="flex flex-row items-center gap-2 ml-auto">
                 <div className="dropdown">
                   <label tabIndex={0} className="hover:cursor-pointer">
-                    Eligible
+                    <button className="btn btn-sm btn-outline">Eligible</button>
                   </label>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content menu p-2 shadow bg-neutral rounded-box w-48"
+                    className="dropdown-content menu p-2 shadow bg-neutral border-2 border-base-100 rounded-box w-48"
                   >
                     <li>
                       <a>1 TNS</a>
@@ -307,141 +304,54 @@ export default async function Page({ params }: { params: { id: string } }) {
       <h1 className="text-5xl">Submissions</h1>
 
       <div className="flex flex-col w-full gap-8 lg:flex-row lg:flex-wrap justify-center bg-neutral border-2 border-base-100 p-8 rounded-xl">
-        <div
-          className="card card-compact lg:w-[325px] h-[450px] bg-base-100 shadow-xl transition-all duration-300 ease-linear hover:scale-110
-                        cursor-pointer"
-        >
-          <figure className="">
-            <Image
-              src={winner}
-              alt="submission image"
-              height={300}
-              width={300}
-              className="rounded-t-xl w-full "
-            />
-          </figure>
-          <div className="card-body">
-            <h2 className="card-title">Submission #1</h2>
-            <p>If a dog chews shoes whose shoes does he choose?</p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Vote</button>
-            </div>
-          </div>
-        </div>
-        <div className="card card-compact lg:w-[325px] h-[450px] bg-base-100 shadow-xl">
-          <figure className="">
-            <Image
-              src={winner}
-              alt="submission image"
-              height={300}
-              width={300}
-              className="rounded-t-xl w-full "
-            />
-          </figure>
-          <div className="card-body">
-            <h2 className="card-title">Submission #1</h2>
-            <p>If a dog chews shoes whose shoes does he choose?</p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Vote</button>
-            </div>
-          </div>
-        </div>
-        <div className="card card-compact lg:w-[325px] h-[450px] bg-base-100 shadow-xl">
-          <figure className="">
-            <Image
-              src={winner}
-              alt="submission image"
-              height={300}
-              width={300}
-              className="rounded-t-xl w-full "
-            />
-          </figure>
-          <div className="card-body">
-            <h2 className="card-title">Submission #1</h2>
-            <p>If a dog chews shoes whose shoes does he choose?</p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Vote</button>
-            </div>
-          </div>
-        </div>
-        <div className="card card-compact lg:w-[325px] h-[450px] bg-base-100 shadow-xl">
-          <figure>
-            <Image
-              src={winner}
-              alt="submission image"
-              height={300}
-              width={300}
-              className="rounded-t-xl w-full"
-            />
-          </figure>
-          <div className="card-body">
-            <h2 className="card-title">Submission #1</h2>
-            <p>I made a new PFP for you @lastpunk9999 @thenounsquare </p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Vote</button>
-            </div>
-          </div>
-        </div>
+        <SubmissionCard />
+        <SubmissionCard />
+        <SubmissionCard />
+        <SubmissionCard />
+        <SubmissionCard />
+        <SubmissionCard />
 
-        <div className="card card-compact lg:w-[325px] h-[450px] bg-base-100 shadow-xl">
-          <figure>
-            <Image
-              src={winner}
-              alt="submission image"
-              height={300}
-              width={300}
-              className="rounded-t-xl w-full"
-            />
-          </figure>
-          <div className="card-body">
-            <h2 className="card-title">Submission #2</h2>
-            <p>If a dog chews shoes whose shoes does he choose?</p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Vote</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <input type="checkbox" id="my-modal-3" className="modal-toggle" />
-      <div className="modal">
-        <div className="modal-box flex flex-col justify-between items-center w-11/12 max-w-4xl h-[500px] gap-4 ">
-          <label
-            htmlFor="my-modal-3"
-            className="btn btn-sm btn-circle absolute right-3 top-3"
-          >
-            ✕
-          </label>
-          <h2 className="text-3xl font-bold">Submit</h2>
-          <div className="flex flex-row mr-auto gap-4">
-            <div className="avatar">
-              <div className="w-12 lg:w-16 rounded-full bg-white">
-                <Image
-                  src={"/noun-47.png"}
-                  alt={"org avatar"}
-                  height={300}
-                  width={300}
-                />
+        <input type="checkbox" id="my-modal-3" className="modal-toggle" />
+        <div className="modal">
+          <div className="modal-box flex flex-col justify-between items-center w-11/12 max-w-4xl h-[500px] gap-4 ">
+            <label
+              htmlFor="my-modal-3"
+              className="btn btn-sm btn-circle absolute right-3 top-3"
+            >
+              ✕
+            </label>
+            <h2 className="text-3xl font-bold">Submit</h2>
+            <div className="flex flex-row mr-auto gap-4">
+              <div className="avatar">
+                <div className="w-12 lg:w-16 rounded-full bg-white">
+                  <Image
+                    src={"/noun-47.png"}
+                    alt={"org avatar"}
+                    height={300}
+                    width={300}
+                  />
+                </div>
               </div>
+
+              <h2 className="card-title text-lg lg:text-xl">@yungweez703</h2>
             </div>
 
-            <h2 className="card-title text-lg lg:text-xl">@yungweez703</h2>
-          </div>
-
-          <textarea
-            placeholder="..."
-            className="textarea textarea-bordered textarea-lg w-full h-full bg-neutral"
-          ></textarea>
-          <div className="flex flex-col lg:flex-row">
-            <input
-              type="file"
-              className="file-input file-input-bordered file-input-primary w-full max-w-xs"
-            />{" "}
-          </div>
-          <div className="flex flex-col lg:flex-row gap-4">
-            <button className="btn btn-primary">Submit & tweet for me</button>
-            <button className="btn btn-secondary">
-              Generate a link for me
-            </button>
+            <textarea
+              placeholder="..."
+              className="textarea textarea-bordered textarea-lg w-full h-full bg-neutral"
+            ></textarea>
+            <div className="flex flex-col lg:flex-row">
+              <input
+                type="file"
+                className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+              />{" "}
+            </div>
+            <div className="flex flex-col lg:flex-row gap-4">
+              <button className="btn btn-primary">Submit & tweet for me</button>
+              <button className="btn btn-secondary">
+                Generate a link for me
+              </button>
+            </div>
           </div>
         </div>
       </div>
