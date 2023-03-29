@@ -1,7 +1,8 @@
 export type ContestBuilderProps = {
-    startTime: Date;
-    voteTime: Date;
-    endTime: Date;
+    startTime: string;
+    voteTime: string;
+    endTime: string;
+    errors: ContestBuilderErrors;
 }
 
 export type ContestBuilderErrors = {
@@ -30,6 +31,11 @@ export const reducer = (state: any, action: any) => {
                 endTime: action.payload,
                 errors: { ...state.errors, endTime: null },
             };
+        case "setErrors":
+            return {
+                ...state,
+                errors: { ...state.errors, ...action.payload },
+            }
         default:
             return state;
     }

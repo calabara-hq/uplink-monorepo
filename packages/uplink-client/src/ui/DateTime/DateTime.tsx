@@ -1,17 +1,71 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 
 import "react-day-picker/dist/style.css";
 
-export default function DateTimeSelector() {
+const deconstructIsoString = (isoString: string) => {
+  const date = new Date(isoString);
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const meridiem = hour >= 12 ? "PM" : "AM";
+  const adjustedHour = hour % 12 || 12;
+  const adjustedMinute = minute < 10 ? "0" + minute : minute;
+  return {
+    iDate: date,
+    iHour: adjustedHour.toString(),
+    iMinute: adjustedMinute.toString(),
+    iMeridiem: meridiem,
+  };
+};
+
+const constructIsoString = (
+  date: Date,
+  hour: string,
+  minute: string,
+  meridiem: string
+) => {
+  const dateObj = new Date(date);
+  const adjustedHours = (parseInt(hour) % 12) + (meridiem === "PM" ? 12 : 0);
+  dateObj.setHours(adjustedHours, parseInt(minute));
+  return dateObj.toISOString().slice(0, -5) + "Z";
+};
+
+export default function DateTimeSelector({
+  isoString,
+  label,
+  error,
+  callback,
+}: {
+  isoString: string;
+  label: string;
+  error: string | null;
+  callback: (isoString: string) => void;
+}) {
+  const { iDate, iHour, iMinute, iMeridiem } = deconstructIsoString(isoString);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selected, setSelected] = useState<Date>();
-  const [hour, setHour] = useState("");
-  const [minute, setMinute] = useState("");
-  const [meridiem, setMeridiem] = useState("AM");
+  const [selectedDay, setSelectedDay] = useState<Date>(iDate);
+  const [hour, setHour] = useState(iHour);
+  const [minute, setMinute] = useState(iMinute);
+  const [meridiem, setMeridiem] = useState(iMeridiem);
   const [progress, setProgress] = useState<number>(0);
+  const createReadableDate = () => {
+    return format(
+      new Date(
+        selectedDay.getFullYear(),
+        selectedDay.getMonth(),
+        selectedDay.getDate(),
+        (parseInt(hour) % 12) + (meridiem === "PM" ? 12 : 0),
+        parseInt(minute)
+      ),
+      "MMM d, yyyy h:mm aa"
+    );
+  };
+  const [readableDate, setReadableDate] = useState<string>(() =>
+    createReadableDate()
+  );
+
   const modalRef = useRef<HTMLDivElement>(null);
 
   const minDate = new Date();
@@ -46,45 +100,54 @@ export default function DateTimeSelector() {
     setProgress(0);
   };
 
-  const handleSubmitDay = () => {
-    if (selected) {
-      console.log(format(selected, "yyyy-MM-dd"));
-      setProgress(1);
-    }
-  };
-
   const handleModalConfirm = () => {
-    if (progress < 1 && selected) {
+    if (progress < 1 && selectedDay) {
       setProgress(1);
     } else {
-      console.log("date is", selected, "time is", hour, minute, meridiem);
-      const date = new Date(selected);
-      const adjustedHours =
-        (parseInt(hour) % 12) + (meridiem === "PM" ? 12 : 0);
-      date.setHours(adjustedHours, parseInt(minute));
-
-      console.log(date.toISOString().slice(0, -5) + "Z");
-      //handleCloseAndReset();
+      setReadableDate(createReadableDate());
+      const isoString = constructIsoString(selectedDay, hour, minute, meridiem);
+      callback(isoString);
+      handleCloseAndReset();
     }
   };
 
   return (
     <div>
-      <button onClick={() => setIsModalOpen(true)} className="btn btn-primary">
-        Open Modal
-      </button>
+      <div className="w-full max-w-xs">
+        <label className="label">
+          <span className="label-text">{label} date</span>
+        </label>
 
+        <input
+          type="text"
+          readOnly
+          value={readableDate}
+          className={`input input-bordered w-full max-w-xs disabled:text-gray-300 cursor-pointer ${
+            error ? "input-error" : "input-primary"
+          }`}
+          onClick={() => setIsModalOpen(true)}
+        />
+        {error && (
+          <label className="label">
+            <span className="label-text-alt text-error">{error}</span>
+          </label>
+        )}
+      </div>
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 w-fit">
           <div className="modal modal-open">
             <div ref={modalRef} className="modal-box">
-              <h2 className="text-xl">Pick the day!</h2>
-              <div className="w-full px-1 flex items-center justify-center">
+              <div className="w-full px-1 flex flex-col gap-2 items-center justify-center">
+                <h2 className="text-xl">
+                  {progress < 1
+                    ? `select ${label} date`
+                    : `select ${label} time`}
+                </h2>
                 {progress === 0 && (
                   <DayPicker
                     mode="single"
-                    selected={selected}
-                    onSelect={setSelected}
+                    selected={selectedDay}
+                    onSelect={(day) => setSelectedDay(day as Date)}
                     disabled={disabledDays}
                     showOutsideDays
                   />
@@ -105,7 +168,7 @@ export default function DateTimeSelector() {
                   Cancel
                 </button>
                 <button
-                  disabled={progress < 1 ? !selected : !hour && !minute}
+                  disabled={progress < 1 ? !selectedDay : !hour || !minute}
                   onClick={handleModalConfirm}
                   className="btn"
                 >
@@ -159,7 +222,7 @@ const TimeSelector = ({
   };
 
   return (
-    <div className="flex items-center ">
+    <div className="flex items-center m-4">
       <input
         type="text"
         value={hour}
