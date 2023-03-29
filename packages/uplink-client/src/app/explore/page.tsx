@@ -20,6 +20,7 @@ const getSpaces = async () => {
 
 export default async function Page() {
   const spaces = await getSpaces();
+  console.log(spaces.data.spaces);
   return (
     <div>
       <div className="flex flex-col md:flex-row p-1 gap-4">

@@ -1,0 +1,80 @@
+type Space @key(fields: "id") {
+  id: ID!
+  name: String!
+  members: Int!
+  logo_url: String!
+  twitter: String
+  website: String
+  admins: [Admin!]!
+}
+
+type Admin {
+  id: Int!
+  spaceId: Int!
+  address: String!
+}
+
+type EnsResponse {
+  success: Boolean!
+  errors: ErrorData
+  ens: String!
+}
+
+type Query {
+  space(id: ID!): Space
+  spaces: [Space!]!
+  isEnsValid(ens: String!): EnsResponse!
+}
+
+## mutations
+
+type FieldResponse {
+  value: String!
+  error: String
+}
+
+type SpaceResponse {
+  id: ID
+  ens: String!
+  name: String!
+  logo_url: String!
+  website: String!
+  twitter: String!
+  admins: [String!]!
+}
+
+type ErrorData {
+  ens: String
+  name: String
+  logo_url: String
+  website: String
+  twitter: String
+  admins: [String]
+  topLevelAdminsError: String
+}
+
+type SpaceMutationResponse {
+  success: Boolean!
+  errors: ErrorData
+  spaceResponse: SpaceResponse!
+}
+
+input AlterSpaceInput {
+  ens: String!
+  name: String!
+  logo_url: String!
+  website: String
+  twitter: String
+  admins: [String!]!
+}
+
+type Mutation {
+  createSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
+  editSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
+}
+
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.0"
+    import: ["@key", "@shareable"]
+  )

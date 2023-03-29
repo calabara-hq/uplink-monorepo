@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import { fetchData } from "@/utils /fetchData";
 
 import Sidebar from "@/ui/SideBar/SideBar";
+import ToastProvider from "@/providers/ToastProvider";
+import { Toaster } from "react-hot-toast";
 
 // pass cookies from request to the hub api and return a seession object
 // this forces the top level layout to become a dynamic route, which may not be ideal
@@ -14,7 +16,7 @@ const getInitialSession = async () => {
   const headersInstance = headers();
   const cookie = headersInstance.get("cookie");
   const session = await fetchData("/auth/session", cookie);
-  console.log(session)
+  console.log(session);
   return session;
 };
 
@@ -33,7 +35,9 @@ export default async function RootLayout({
         <WalletProvider session={session}>
           <Nav />
           {/*<Sidebar />*/}
-          <main className="">{children}</main>
+          <ToastProvider>
+            <main className="">{children}</main>
+          </ToastProvider>
         </WalletProvider>
       </body>
     </html>

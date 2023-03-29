@@ -1,0 +1,38 @@
+type Space @key(fields: "id") {
+  id: ID!
+  contests: [Contest!]!
+}
+
+type Contest @key(fields: "id") {
+  id: Int!
+  spaceId: Int!
+  spaceName: String!
+  tag: String!
+  start: String!
+  vote: String!
+  end: String!
+  created: String!
+}
+
+type ActiveContest {
+  id: Int!
+  spaceId: Int!
+  tag: String!
+  start: String!
+  vote: String!
+  end: String!
+  created: String!
+  spaceLink: Space!
+}
+
+extend type Query {
+  contest(contestId: Int!): Contest!
+  #spaceContests(spaceId: Int, spaceName: String): [Contest!]!
+  activeContests: [ActiveContest!]!
+}
+
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.0"
+    import: ["@key", "@external", "@shareable"]
+  )
