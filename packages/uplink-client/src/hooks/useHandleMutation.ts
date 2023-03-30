@@ -67,7 +67,7 @@ export default function useHandleMutation(query: DocumentNode) {
                 })
                 return null
             }
-        }, []);
+        }, [handleErrors, query]);
 
 
 

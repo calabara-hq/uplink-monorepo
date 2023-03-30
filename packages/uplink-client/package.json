@@ -11,6 +11,9 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@editorjs/editorjs": "^2.26.5",
+    "@editorjs/list": "^1.8.0",
+    "@editorjs/paragraph": "^2.9.0",
     "@heroicons/react": "^2.0.16",
     "@next/font": "13.1.6",
     "@rainbow-me/rainbowkit": "^0.10.0",
@@ -34,6 +37,7 @@
     "react": "18.2.0",
     "react-day-picker": "^8.6.0",
     "react-dom": "18.2.0",
+    "react-editor-js": "^2.1.0",
     "react-hot-toast": "^2.4.0",
     "server-only": "^0.0.1",
     "sharp": "^0.31.3",

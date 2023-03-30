@@ -1,18 +1,31 @@
 export type ContestBuilderProps = {
+    type: string | null;
     startTime: string;
     voteTime: string;
     endTime: string;
+    contestPromptTitle: string;
+    contestPromptBody: string;
     errors: ContestBuilderErrors;
 }
 
 export type ContestBuilderErrors = {
+    type: string | null;
     startTime: string | null;
     voteTime: string | null;
     endTime: string | null;
+    contestPromptTitle: string | null;
+    contestPromptBody: string | null;
 }
 
 export const reducer = (state: any, action: any) => {
     switch (action.type) {
+
+        case "setType":
+            return {
+                ...state,
+                type: action.payload,
+                errors: { ...state.errors, type: null },
+            };
         case "setStartTime":
             return {
                 ...state,
