@@ -1,8 +1,10 @@
 
 export interface IToken {
     type: string;
-    name: string;
+    address: string;
     decimals: number;
+    name?: string;
+    symbol?: string;
 }
 
 export interface RewardOption extends IToken {

@@ -44,7 +44,7 @@ const MenuSelect = ({
       </div>
 
       {isOpen && (
-        <ul className="absolute menu bg-base-100 w-full p-2 rounded-box z-10 mt-2">
+        <ul className="absolute menu bg-base-200 w-fit p-2 rounded-box z-10 mt-2">
           {options.map((option, index) => (
             <li
               key={index}
