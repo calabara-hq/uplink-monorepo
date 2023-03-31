@@ -11,12 +11,21 @@ import {
 } from "@heroicons/react/24/solid";
 import DateTimeSelector from "../DateTime/DateTime";
 import { createReactEditorJS } from "react-editor-js";
-import EDITOR_JS_TOOLS from "@/lib/editorTools";
-import { ReactEditorJS } from "@react-editor-js/core";
-import EditorJS from "@editorjs/editorjs";
-import EditorWrap from "../EditorWrap/EditorWrap";
+import EditorJS, { OutputData } from "@editorjs/editorjs";
 import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
 import handleMediaUpload from "@/lib/mediaUpload";
+import dynamic from "next/dynamic";
+let Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
+
+interface EditorCore {
+  destroy(): Promise<void>;
+
+  clear(): Promise<void>;
+
+  save(): Promise<OutputData>;
+
+  render(data: OutputData): Promise<void>;
+}
 
 const initialState = {
   type: null,
@@ -225,14 +234,7 @@ const StandardPrompt = ({
         </div>
         <div className="flex flex-col w-full xl:w-8/12">
           <label className="text-sm p-1">Body</label>
-          <EditorWrap>
-            <ReactEditorJS
-              defaultValue={null}
-              ref={editorCore}
-              onInitialize={handleInitialize}
-              tools={EDITOR_JS_TOOLS}
-            />
-          </EditorWrap>
+          <Editor data={null} onInitialize={handleInitialize} />
         </div>
       </div>
       <div className="flex flex-col w-full lg:w-1/2"></div>

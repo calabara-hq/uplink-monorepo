@@ -1,3 +1,5 @@
+
+/*
 declare module "@editorjs/paragraph" {
     import { BlockTool, BlockToolConstructorOptions } from "@editorjs/editorjs";
 
@@ -23,3 +25,29 @@ declare module "@editorjs/list" {
 
     export default List;
 }
+
+
+declare module "@editorjs/image" {
+    import { BlockTool, BlockToolConstructorOptions } from "@editorjs/editorjs";
+
+    class Image implements BlockTool {
+        constructor(config?: BlockToolConstructorOptions);
+
+        render(): HTMLElement;
+        save(blockContent: HTMLElement): object;
+    }
+    export default Image;
+}
+
+declare module "@editorjs/simple-image" {
+    import { BlockTool, BlockToolConstructorOptions } from "@editorjs/editorjs";
+
+    class SimpleImage implements BlockTool {
+        constructor(config?: BlockToolConstructorOptions);
+
+        render(): HTMLElement;
+        save(blockContent: HTMLElement): object;
+    }
+    export default SimpleImage;
+}
+*/

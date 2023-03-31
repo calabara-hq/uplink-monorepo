@@ -3,7 +3,7 @@
 // the function takes an input event, reader callback function, and ipfs callback function
 
 
-const IpfsUpload = async (file: any) => {
+export const IpfsUpload = async (file: File) => {
 
     const formData = new FormData();
     formData.append('file', file);
