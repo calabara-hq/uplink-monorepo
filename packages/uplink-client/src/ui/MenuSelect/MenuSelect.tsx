@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ArrowDownIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
+
 export interface Option {
-  label: string;
   value: string;
 }
 
@@ -39,7 +39,7 @@ const MenuSelect = ({
         className="flex bg-base-100 rounded-lg p-3 cursor-pointer hover:bg-base-200"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <p>{selected.label}</p>
+        <p>{selected.value}</p>
         <ChevronDownIcon className="w-4 ml-auto" />
       </div>
 
@@ -56,7 +56,7 @@ const MenuSelect = ({
                 selected.value === option.value ? "bg-primary" : ""
               }`}
             >
-              <a>{option.label}</a>
+              <a>{option.value}</a>
             </li>
           ))}
           {/*

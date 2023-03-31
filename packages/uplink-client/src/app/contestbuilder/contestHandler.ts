@@ -5,6 +5,8 @@ export type ContestBuilderProps = {
     endTime: string;
     contestPromptTitle: string;
     contestPromptBody: string;
+    media_blob: string;
+    media_url: string;
     errors: ContestBuilderErrors;
 }
 
@@ -15,6 +17,8 @@ export type ContestBuilderErrors = {
     endTime: string | null;
     contestPromptTitle: string | null;
     contestPromptBody: string | null;
+    media_url: string | null;
+
 }
 
 export const reducer = (state: any, action: any) => {
@@ -43,6 +47,30 @@ export const reducer = (state: any, action: any) => {
                 ...state,
                 endTime: action.payload,
                 errors: { ...state.errors, endTime: null },
+            };
+        case "setContestPromptTitle":
+            return {
+                ...state,
+                contestPromptTitle: action.payload,
+                errors: { ...state.errors, contestPromptTitle: null },
+            };
+        case "setContestPromptBody":
+            return {
+                ...state,
+                contestPromptBody: action.payload,
+                errors: { ...state.errors, contestPromptBody: null },
+            };
+        case "setMediaBlob":
+            return {
+                ...state,
+                media_blob: action.payload,
+                errors: { ...state.errors, media_blob: null },
+            };
+        case "setMediaUrl":
+            return {
+                ...state,
+                media_url: action.payload,
+                errors: { ...state.errors, media_url: null },
             };
         case "setErrors":
             return {

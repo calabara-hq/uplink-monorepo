@@ -23,12 +23,15 @@ const IpfsUpload = async (file: any) => {
 };
 
 
+/* 
+* accepted formats looks like this: ['image', 'video']
+* if image is passed in, then we want to accept image/* and svg formats
+* if video is passed in, then we want to accept video/* formats
+* if both are passed in, then we want to accept image/*, video/*, and svg formats
+*/
 
 const handleMediaUpload = async (event: any, acceptedFormats: string[], readerCallback: (data: any) => void, ipfsCallback: (uri: string) => void) => {
-    // accepted formats looks like this: ['image', 'video']
-    // if image is passed in, then we want to accept image/* and svg formats
-    // if video is passed in, then we want to accept video/* formats
-    // if both are passed in, then we want to accept image/*, video/*, and svg formats
+
     const acceptedMimeTypes = acceptedFormats.reduce((acc: string[], format: string) => {
         if (format === 'image') {
             return [...acc, 'image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
