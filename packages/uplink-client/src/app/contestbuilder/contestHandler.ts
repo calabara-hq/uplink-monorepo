@@ -1,12 +1,24 @@
-export type ContestBuilderProps = {
+
+export interface IToken {
+    type: string;
+    name: string;
+    decimals: number;
+}
+
+export interface RewardOption extends IToken {
+    selected: boolean;
+}
+
+export interface ContestBuilderProps {
     type: string | null;
     startTime: string;
     voteTime: string;
     endTime: string;
     contestPromptTitle: string;
     contestPromptBody: string;
-    media_blob: string;
-    media_url: string;
+    media_blob: string | null;
+    media_url: string | null;
+    submitterRewardOptions: RewardOption[];
     errors: ContestBuilderErrors;
 }
 
@@ -72,6 +84,37 @@ export const reducer = (state: any, action: any) => {
                 media_url: action.payload,
                 errors: { ...state.errors, media_url: null },
             };
+
+        case "addSubmitterRewardOption":
+            return {
+                ...state,
+                submitterRewardOptions: [...state.submitterRewardOptions, action.payload],
+            };
+
+        case "swapSubmitterRewardOption":
+            // swap the reward with same type as payload
+            return {
+                ...state,
+                submitterRewardOptions: state.submitterRewardOptions.map((reward: RewardOption) => {
+                    if (reward.type === action.payload.type) {
+                        return action.payload;
+                    }
+                    return reward;
+                }),
+            };
+
+        case "toggleSubmitterRewardOption":
+            // set selet for reward with same type as payload
+            return {
+                ...state,
+                submitterRewardOptions: state.submitterRewardOptions.map((reward: RewardOption) => {
+                    if (reward.type === action.payload.type) {
+                        return { ...reward, selected: action.payload.selected };
+                    }
+                    return reward;
+                }),
+            };
+
         case "setErrors":
             return {
                 ...state,
@@ -81,3 +124,13 @@ export const reducer = (state: any, action: any) => {
             return state;
     }
 }
+
+
+/**
+ * submitter reward options -> add / swap
+ * selected submitter rewards -> add / swap / remove
+ * 
+ * OR
+ * 
+ * submitter reward options -> add / swap
+ */

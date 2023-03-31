@@ -1,7 +1,15 @@
 "use client";
-import { useReducer, useState, useEffect, useRef, useCallback } from "react";
+import {
+  useReducer,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  ReactNode,
+} from "react";
 import {
   ContestBuilderProps,
+  IToken,
   reducer,
 } from "@/app/contestbuilder/contestHandler";
 import {
@@ -12,20 +20,25 @@ import {
 import DateTimeSelector from "../DateTime/DateTime";
 import { createReactEditorJS } from "react-editor-js";
 import EditorJS, { OutputData } from "@editorjs/editorjs";
-import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
-import handleMediaUpload from "@/lib/mediaUpload";
-import dynamic from "next/dynamic";
-let Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
+import StandardPrompt from "./StandardPrompt";
+import Deadlines from "./Deadlines";
+import ContestType from "./ContestType";
 
-interface EditorCore {
-  destroy(): Promise<void>;
-
-  clear(): Promise<void>;
-
-  save(): Promise<OutputData>;
-
-  render(data: OutputData): Promise<void>;
-}
+export const BlockWrapper = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div className="bg-black/30 p-6 rounded-lg">
+      <h1 className="text-2xl font-bold">{title}</h1>
+      <div className="p-2" />
+      <div className="flex flex-col items-center p-6">{children}</div>
+    </div>
+  );
+};
 
 const initialState = {
   type: null,
@@ -40,36 +53,35 @@ const initialState = {
   },
   contestPromptTitle: "",
   contestPromptBody: "",
+  media_blob: null,
+  media_url: null,
+  submitterRewardOptions: [
+    {
+      type: "ETH",
+      name: "Ethereum",
+      decimals: 18,
+      selected: false,
+    },
+  ],
   /*
   submitterRewards: [],
   voterRewards: [],
   submitterRestrictions: [],
   voterRestrictions: [],
-  contestPromptTitle: "",
-  contestPromptBody: "",
   votingPolicy: "",
   */
 } as ContestBuilderProps;
-
-const labelOptions: Option[] = [
-  { value: "art" },
-  { value: "design" },
-  { value: "misc" },
-];
 
 export default function ContestForm() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState(0);
   const [steps, setSteps] = useState(["Choose a template", "Dates"]);
-  const ReactEditorJS = createReactEditorJS();
-  const editorCore = useRef<EditorJS | null>(null);
 
   const handleSave = async () => {
     const contest = {
       ...state,
-      contestPromptBody: await editorCore.current?.save(),
     };
-    console.log(contest);
+    console.log(contest.submitterRewardOptions);
   };
 
   return (
@@ -92,14 +104,11 @@ export default function ContestForm() {
         </ul>
       </div>
       <div className="flex flex-col w-full lg:w-4/5 gap-2">
-        <Template type={state.type} dispatch={dispatch} />
-        {state.type && <DateTimes state={state} dispatch={dispatch} />}
-        <Prompt
-          state={state}
-          dispatch={dispatch}
-          ReactEditorJS={ReactEditorJS}
-          editorCore={editorCore}
-        />
+        <ContestType type={state.type} dispatch={dispatch} />
+        {state.type && <Deadlines state={state} dispatch={dispatch} />}
+        <StandardPrompt state={state} dispatch={dispatch} />
+        <SubmitterRewards state={state} dispatch={dispatch} />
+        {/*<TweetThread state={state} dispatch={dispatch} />*/}
       </div>
       <button className="btn btn-primary" onClick={handleSave}>
         save
@@ -108,271 +117,92 @@ export default function ContestForm() {
   );
 }
 
-const Prompt = ({
+/**
+ * submitter rewards should first allow the user to select from a list of space tokens or add new ones
+ * after choosing the proper tokens, the user should be able to select the amount of tokens to be distributed to each rank
+ * the user must choose at least 1 token to be distributed to each rank (eth, erc20, erc721, erc1155)
+ * more than 1 token can be distributed to each rank, but not more than 1 token type
+ */
+
+const SubmitterRewards = ({
   state,
   dispatch,
-  ReactEditorJS,
-  editorCore,
 }: {
   state: ContestBuilderProps;
   dispatch: React.Dispatch<any>;
-  ReactEditorJS: any;
-  editorCore: any;
 }) => {
   return (
-    <BlockWrapper title="Contest Prompt">
+    <BlockWrapper title="Submitter Rewards">
+      <div className="flex flex-col w-full">
+        {state.submitterRewardOptions.map((token, index) => {
+          return <TokenCard key={index} token={token} dispatch={dispatch} />;
+        })}
+      </div>
+    </BlockWrapper>
+  );
+};
+
+const TokenCard = ({
+  token,
+  dispatch,
+}: {
+  token: IToken;
+  dispatch: React.Dispatch<any>;
+}) => {
+  const onSelectCallback = (isSelected: boolean) => {
+    dispatch({
+      type: "toggleSubmitterRewardOption",
+      payload: { type: token.type, selected: isSelected },
+    });
+  };
+  return (
+    <div className="card w-96 bg-base-100 shadow-xl">
+      <div className="card-body">
+        <h2 className="card-title">{token.name}</h2>
+        <p>If a dog chews shoes whose shoes does he choose?</p>
+        <div className="card-actions justify-end">
+          <Toggle defaultState={false} onSelectCallback={onSelectCallback} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Toggle = ({
+  defaultState,
+  onSelectCallback,
+}: {
+  defaultState: boolean;
+  onSelectCallback: (isSelected: boolean) => void;
+}) => {
+  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSelectCallback(e.target.checked);
+  };
+  return (
+    <input
+      type="checkbox"
+      className="toggle toggle-accent border-2"
+      defaultChecked={defaultState}
+      onChange={handleToggle}
+    />
+  );
+};
+
+/**
+ * first tweet should be the title + cover image and rewards
+ * 2nd tweet should be instructions
+ */
+
+const TweetThread = ({
+  state,
+  dispatch,
+}: {
+  state: ContestBuilderProps;
+  dispatch: React.Dispatch<any>;
+}) => {
+  return (
+    <BlockWrapper title="Tweet">
       <div className="flex flex-col w-full lg:flex-row"></div>
-      {state.type === "standard" && (
-        <StandardPrompt
-          state={state}
-          dispatch={dispatch}
-          ReactEditorJS={ReactEditorJS}
-          editorCore={editorCore}
-        />
-      )}
     </BlockWrapper>
   );
 };
-
-const StandardPrompt = ({
-  state,
-  dispatch,
-  ReactEditorJS,
-  editorCore,
-}: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
-  ReactEditorJS: any;
-  editorCore: any;
-}) => {
-  const [selectedLabel, setSelectedLabel] = useState<Option>(labelOptions[0]);
-  const imageUploader = useRef<HTMLInputElement>(null);
-  const handleInitialize = useCallback(async (instance: any) => {
-    editorCore.current = instance;
-  }, []);
-
-  return (
-    <div className="flex flex-col w-10/12">
-      <div className="flex flex-col w-full gap-6">
-        <div className="flex flex-row w-full">
-          <div className="flex flex-col gap-6 w-full">
-            <div className="flex flex-row w-full xl:w-8/12 gap-6">
-              <div className="flex flex-col w-full">
-                <div className="flex flex-col w-1/3">
-                  <label className="text-sm p-1">Label</label>
-                  <MenuSelect
-                    options={labelOptions}
-                    selected={selectedLabel}
-                    setSelected={setSelectedLabel}
-                  />
-                </div>
-                <div className="flex flex-col mt-auto">
-                  <label className="text-sm p-1">Title</label>
-                  <input
-                    className="input"
-                    type="text"
-                    value={state.contestPromptTitle}
-                    onChange={(e) =>
-                      dispatch({
-                        type: "setContestPromptTitle",
-                        payload: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col ml-auto">
-                <label className="text-sm p-1">Cover Image</label>
-                <input
-                  placeholder="Logo"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (event) => {
-                    handleMediaUpload(
-                      event,
-                      ["image"],
-                      (base64) => {
-                        dispatch({
-                          type: "setMediaBlob",
-                          payload: base64,
-                        });
-                      },
-                      (ipfsUrl) => {
-                        dispatch({
-                          type: "setMediaUrl",
-                          payload: ipfsUrl,
-                        });
-                      }
-                    );
-                  }}
-                  ref={imageUploader}
-                />
-                <div className="avatar">
-                  <div
-                    className="w-36 rounded-lg cursor-pointer flex justify-center items-center"
-                    onClick={() => imageUploader.current?.click()}
-                  >
-                    {state.media_blob && <img src={state.media_blob} />}
-                    {!state.media_blob && (
-                      <div className="flex justify-center items-center w-full h-full rounded-lg bg-gray-500">
-                        <p>cover image</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {state.errors?.media_url && (
-                  <label className="label">
-                    <span className="label-text-alt text-error">
-                      {state.errors.media_url}
-                    </span>
-                  </label>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col w-full xl:w-8/12">
-          <label className="text-sm p-1">Body</label>
-          <Editor data={null} onInitialize={handleInitialize} />
-        </div>
-      </div>
-      <div className="flex flex-col w-full lg:w-1/2"></div>
-    </div>
-  );
-};
-
-const BlockWrapper = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => {
-  return (
-    <div className="bg-black/30 p-6 rounded-lg">
-      <h1 className="text-2xl font-bold">{title}</h1>
-      <div className="p-2" />
-      <div className="flex flex-col items-center p-6">{children}</div>
-    </div>
-  );
-};
-
-const Template = ({
-  type,
-  dispatch,
-}: {
-  type: string | null;
-  dispatch: React.Dispatch<any>;
-}) => {
-  return (
-    <BlockWrapper title="Choose a template">
-      <div className="flex flex-col w-full lg:flex-row">
-        <div className="indicator grid flex-grow w-full h-32">
-          <span
-            className={`indicator-item badge bg-transparent border-none ${
-              type === "standard" ? "visible" : "hidden"
-            }`}
-          >
-            <CheckBadgeIcon className="w-8 text-green-400" />
-          </span>
-          <button
-            onClick={() => {
-              dispatch({ type: "setType", payload: "standard" });
-            }}
-            className={`btn h-full card bg-base-300 border-2 rounded-box place-items-center ${
-              type === "standard" ? "border-green-400" : ""
-            }`}
-          >
-            standard contest
-          </button>
-        </div>
-        <div className="divider lg:divider-horizontal">OR</div>
-        <div className="indicator grid flex-grow w-full h-32">
-          <span
-            className={`indicator-item badge bg-transparent border-none ${
-              type === "twitter" ? "visible" : "hidden"
-            }`}
-          >
-            <CheckBadgeIcon className="w-8 text-blue-400" />
-          </span>
-          <button
-            onClick={() => {
-              dispatch({ type: "setType", payload: "twitter" });
-            }}
-            className={`btn h-full card bg-base-300 border-2 rounded-box place-items-center ${
-              type === "twitter" ? "border-blue-400" : ""
-            }`}
-          >
-            twitter contest
-          </button>
-        </div>
-      </div>
-    </BlockWrapper>
-  );
-};
-
-const DateTimes = ({
-  state,
-  dispatch,
-}: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
-}) => {
-  const { startTime, voteTime, endTime, errors } = state;
-  useEffect(() => {
-    // set errors if
-    // voteTime < startTime || voteTime === startTime
-    // endtime < voteTime || endTime === voteTime
-    // endtime < startTime || endTime === startTime
-
-    if (voteTime < startTime || voteTime === startTime) {
-      dispatch({
-        type: "setErrors",
-        payload: { voteTime: "vote date must be after start date" },
-      });
-    }
-    if (endTime < voteTime || endTime === voteTime) {
-      dispatch({
-        type: "setErrors",
-        payload: { endTime: "end date must be after vote date" },
-      });
-    }
-    if (endTime < startTime || endTime === startTime) {
-      dispatch({
-        type: "setErrors",
-        payload: { endTime: "end date must be after start date" },
-      });
-    }
-  }, [startTime, voteTime, endTime]);
-  return (
-    <BlockWrapper title="Contest Dates">
-      <DateTimeSelector
-        isoString={startTime}
-        label="start"
-        error={errors.startTime}
-        callback={(isoString) => {
-          dispatch({ type: "setStartTime", payload: isoString });
-        }}
-      />
-      <DateTimeSelector
-        isoString={voteTime}
-        label="vote"
-        error={errors.voteTime}
-        callback={(isoString) => {
-          dispatch({ type: "setVoteTime", payload: isoString });
-        }}
-      />
-      <DateTimeSelector
-        isoString={endTime}
-        label="end"
-        error={errors.endTime}
-        callback={(isoString) => {
-          dispatch({ type: "setEndTime", payload: isoString });
-        }}
-      />
-    </BlockWrapper>
-  );
-};
-
-const Rewards = () => {};
