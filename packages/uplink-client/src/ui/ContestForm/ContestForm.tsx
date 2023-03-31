@@ -23,6 +23,7 @@ import EditorJS, { OutputData } from "@editorjs/editorjs";
 import StandardPrompt from "./StandardPrompt";
 import Deadlines from "./Deadlines";
 import ContestType from "./ContestType";
+import TokenModal from "../TokenModal/TokenModal";
 
 export const BlockWrapper = ({
   title,
@@ -131,6 +132,8 @@ const SubmitterRewards = ({
   state: ContestBuilderProps;
   dispatch: React.Dispatch<any>;
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
   return (
     <BlockWrapper title="Submitter Rewards">
       <div className="flex flex-col w-full">
@@ -138,6 +141,10 @@ const SubmitterRewards = ({
           return <TokenCard key={index} token={token} dispatch={dispatch} />;
         })}
       </div>
+      <button className="btn" onClick={() => setIsModalOpen(true)}>
+        add reward
+      </button>
+      <TokenModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
     </BlockWrapper>
   );
 };
