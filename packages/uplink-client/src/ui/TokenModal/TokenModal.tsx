@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect, useReducer } from "react";
 import MenuSelect from "../MenuSelect/MenuSelect";
-import { IToken } from "@/app/contestbuilder/contestHandler";
-import { tokenGetSymbolAndDecimal } from "@/lib/contract";
+import {
+  isValidERC1155TokenId,
+  tokenGetSymbolAndDecimal,
+  verifyTokenStandard,
+} from "@/lib/contract";
 
 const tokenOptions = [
   { value: "ERC20" },
@@ -9,28 +12,90 @@ const tokenOptions = [
   { value: "ERC1155" },
 ];
 
-const initialTokenState: IToken = {
+interface IERCToken {
+  type: "ERC20" | "ERC721" | "ERC1155";
+  address: string;
+  symbol: string;
+  decimals: number;
+  tokenId: number | null;
+  errors: {
+    address: string | null;
+    tokenId: string | null;
+  };
+}
+
+const initialTokenState: IERCToken = {
   type: "ERC20",
   address: "",
   symbol: "",
   decimals: 0,
+  tokenId: null,
+  errors: {
+    address: null,
+    tokenId: null,
+  },
 };
 
-type TokenAction = {
+type SetTokenTypeAction = {
+  type: "setTokenType";
+  payload: IERCToken["type"];
+};
+
+type SetTokenAction = {
   type: "setToken";
-  payload: Partial<IToken>;
+  payload: Partial<IERCToken>;
 };
 
-const tokenReducer = (state: IToken, action: TokenAction): IToken => {
-  return action.type === "setToken" ? { ...state, ...action.payload } : state;
-  /*
+type SetTokenErrorsAction = {
+  type: "setTokenErrors";
+  payload: Partial<IERCToken["errors"]>;
+};
+
+type TokenAction = SetTokenTypeAction | SetTokenAction | SetTokenErrorsAction;
+
+const tokenReducer = (state: IERCToken, action: TokenAction): IERCToken => {
   switch (action.type) {
+    case "setTokenType":
+      return {
+        ...initialTokenState,
+        type: action.payload,
+      };
     case "setToken":
-      return { ...state, ...action.payload };
+      // remove all the errors
+      const { errors, ...rest } = state;
+      return {
+        ...rest,
+        ...action.payload,
+        errors: {
+          address: null,
+          tokenId: null,
+        },
+      };
+    case "setTokenErrors":
+      return {
+        ...state,
+        errors: {
+          ...state.errors,
+          ...action.payload,
+        },
+      };
     default:
       return state;
   }
-  */
+};
+
+const fetchSymbolAndDecimals = async (
+  address: IERCToken["address"],
+  type: IERCToken["type"]
+) => {
+  try {
+    return await tokenGetSymbolAndDecimal({
+      contractAddress: address,
+      tokenStandard: type,
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const TokenModal = ({
@@ -65,23 +130,57 @@ const TokenModal = ({
     };
   }, [modalRef]);
 
-  const attemptAutofill = async () => {
-    const [symbol, decimals] = await tokenGetSymbolAndDecimal({
-      contractAddress: token.address,
-      tokenStandard: token.type,
-    });
-    dispatch({ type: "setToken", payload: { symbol, decimals } });
-  };
-
-  // if address looks like an eth address, try to get the other fields
   useEffect(() => {
-    if (token.address.length === 42 && token.address.startsWith("0x")) {
-      attemptAutofill();
+    const isValidAddress =
+      token.address.length === 42 && token.address.startsWith("0x");
+
+    // attempt to autofill the symbol and decimals if the address is valid
+    if (isValidAddress)
+      fetchSymbolAndDecimals(token.address, token.type).then((res) => {
+        res ? dispatch({ type: "setToken", payload: res }) : null;
+      });
+    // reset the other fields if the address switched from valid to invalid
+    else if (!isValidAddress && token.symbol && token.decimals) {
+      dispatch({ type: "setToken", payload: { symbol: "", decimals: 0 } });
     }
   }, [token.address]);
 
-  const handleModalConfirm = () => {
-    console.log(token);
+  const handleModalConfirm = async () => {
+    const isValidContract = await verifyTokenStandard({
+      contractAddress: token.address,
+      expectedStandard: token.type,
+    });
+    if (!isValidContract) {
+      dispatch({
+        type: "setTokenErrors",
+        payload: {
+          address: `This doesn't appear to be a valid ${token.type} address`,
+        },
+      });
+    }
+    if (token.type === "ERC1155") {
+      if (!token.tokenId) {
+        dispatch({
+          type: "setTokenErrors",
+          payload: {
+            tokenId: "Please enter a valid token ID",
+          },
+        });
+      } else {
+        const isValidId = await isValidERC1155TokenId({
+          contractAddress: token.address,
+          tokenId: token.tokenId,
+        });
+        if (!isValidId) {
+          dispatch({
+            type: "setTokenErrors",
+            payload: {
+              tokenId: "Not a valid token ID for this contract",
+            },
+          });
+        }
+      }
+    }
   };
 
   if (isModalOpen) {
@@ -100,8 +199,8 @@ const TokenModal = ({
                       selected={{ value: token.type }}
                       setSelected={(data) => {
                         dispatch({
-                          type: "setToken",
-                          payload: { type: data.value },
+                          type: "setTokenType",
+                          payload: data.value as IERCToken["type"],
                         });
                       }}
                     />
@@ -109,6 +208,12 @@ const TokenModal = ({
                 </div>
                 {token.type === "ERC20" && (
                   <ERC20FormElement token={token} dispatch={dispatch} />
+                )}
+                {token.type === "ERC721" && (
+                  <ERC721FormElement token={token} dispatch={dispatch} />
+                )}
+                {token.type === "ERC1155" && (
+                  <ERC1155FormElement token={token} dispatch={dispatch} />
                 )}
               </div>
             )}
@@ -137,46 +242,212 @@ const ERC20FormElement = ({
   token,
   dispatch,
 }: {
-  token: IToken;
+  token: IERCToken;
   dispatch: React.Dispatch<TokenAction>;
 }) => {
   return (
     <div className="flex flex-col mt-auto w-full gap-4">
-      <label className="text-sm p-1">Address</label>
-      <input
-        className="input"
-        type="text"
-        placeholder="0x"
-        value={token.address}
-        onChange={(e) =>
-          dispatch({ type: "setToken", payload: { address: e.target.value } })
-        }
-      />
-      <label className="text-sm p-1">Symbol</label>
-      <input
-        className="input w-1/3"
-        type="text"
-        disabled
-        value={token.symbol}
-        placeholder="SHARK"
-        onChange={(e) =>
-          dispatch({ type: "setToken", payload: { symbol: e.target.value } })
-        }
-      />
-      <label className="text-sm p-1">Decimal</label>
-      <input
-        className="input w-1/3"
-        type="number"
-        disabled
-        value={token.decimals}
-        placeholder="18"
-        onChange={(e) =>
-          dispatch({
-            type: "setToken",
-            payload: { decimals: Number(e.target.value) },
-          })
-        }
-      />
+      <div className="flex flex-col">
+        <label className="text-sm p-1">Address</label>
+        <input
+          className={`input ${
+            token.errors.address ? "input-error" : "input-primary"
+          }`}
+          type="text"
+          placeholder="0x"
+          value={token.address}
+          onChange={(e) =>
+            dispatch({ type: "setToken", payload: { address: e.target.value } })
+          }
+        />
+        {token.errors.address && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {token.errors.address}
+            </span>
+          </label>
+        )}
+      </div>
+      <div className="flex flex-col">
+        <label className="text-sm p-1">Symbol</label>
+        <input
+          className="input w-1/3"
+          type="text"
+          disabled
+          placeholder={token.symbol || "SHARK"}
+          onChange={(e) =>
+            dispatch({ type: "setToken", payload: { symbol: e.target.value } })
+          }
+        />
+      </div>
+      <div className="flex flex-col">
+        <label className="text-sm p-1">Decimal</label>
+        <input
+          className="input w-1/3"
+          type="number"
+          disabled
+          placeholder={token.decimals.toString()}
+          onChange={(e) =>
+            dispatch({
+              type: "setToken",
+              payload: { decimals: Number(e.target.value) },
+            })
+          }
+        />
+      </div>
+    </div>
+  );
+};
+
+const ERC721FormElement = ({
+  token,
+  dispatch,
+}: {
+  token: IERCToken;
+  dispatch: React.Dispatch<TokenAction>;
+}) => {
+  return (
+    <div className="flex flex-col mt-auto w-full gap-4">
+      <div className="flex flex-col">
+        <label className="text-sm p-1">Address</label>
+        <input
+          className={`input ${
+            token.errors.address ? "input-error" : "input-primary"
+          }`}
+          type="text"
+          placeholder="0x"
+          value={token.address}
+          onChange={(e) =>
+            dispatch({ type: "setToken", payload: { address: e.target.value } })
+          }
+        />
+        {token.errors.address && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {token.errors.address}
+            </span>
+          </label>
+        )}
+      </div>
+      <div className="flex flex-col w-1/3">
+        <label className="text-sm p-1">Symbol</label>
+        <input
+          className="input"
+          type="text"
+          disabled
+          placeholder={token.symbol || "NOUNS"}
+          onChange={(e) =>
+            dispatch({ type: "setToken", payload: { symbol: e.target.value } })
+          }
+        />
+      </div>
+      <div className="flex flex-col w-1/3">
+        <label className="text-sm p-1">Decimal</label>
+        <input
+          className="input"
+          type="number"
+          disabled
+          placeholder={token.decimals.toString()}
+          onChange={(e) =>
+            dispatch({
+              type: "setToken",
+              payload: { decimals: Number(e.target.value) },
+            })
+          }
+        />
+      </div>
+    </div>
+  );
+};
+
+const ERC1155FormElement = ({
+  token,
+  dispatch,
+}: {
+  token: IERCToken;
+  dispatch: React.Dispatch<TokenAction>;
+}) => {
+  return (
+    <div className="flex flex-col mt-auto w-full gap-4">
+      <div className="flex flex-col">
+        <label className="text-sm p-1">Address</label>
+        <input
+          className={`input ${
+            token.errors.address ? "input-error" : "input-primary"
+          }`}
+          type="text"
+          placeholder="0x"
+          value={token.address}
+          onChange={(e) =>
+            dispatch({ type: "setToken", payload: { address: e.target.value } })
+          }
+        />
+        {token.errors.address && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {token.errors.address}
+            </span>
+          </label>
+        )}
+      </div>
+      <div className="flex flex-row w-full gap-4">
+        <div className="flex flex-col w-1/3">
+          <label className="text-sm p-1">Symbol</label>
+          <input
+            className="input"
+            type="text"
+            value={token.symbol}
+            placeholder="SHARK"
+            onChange={(e) =>
+              dispatch({
+                type: "setToken",
+                payload: { symbol: e.target.value },
+              })
+            }
+          />
+        </div>
+        <div className="flex flex-col w-1/3">
+          <label className="text-sm p-1">Decimal</label>
+          <input
+            className="input"
+            type="number"
+            disabled
+            placeholder="0"
+            onChange={(e) =>
+              dispatch({
+                type: "setToken",
+                payload: { decimals: Number(e.target.value) },
+              })
+            }
+          />
+        </div>
+      </div>
+      <div className="flex flex-col w-1/3">
+        <label className="text-sm p-1">Token Id</label>
+        <input
+          className={`input ${
+            token.errors.tokenId ? "input-error" : "input-primary"
+          }`}
+          type="number"
+          value={token.tokenId === null ? "" : token.tokenId}
+          placeholder="18"
+          onChange={(e) =>
+            dispatch({
+              type: "setToken",
+              payload: {
+                tokenId: e.target.value === "" ? null : Number(e.target.value),
+              },
+            })
+          }
+        />
+        {token.errors.tokenId && (
+          <label className="label">
+            <span className="label-text-alt text-error">
+              {token.errors.tokenId}
+            </span>
+          </label>
+        )}
+      </div>
     </div>
   );
 };

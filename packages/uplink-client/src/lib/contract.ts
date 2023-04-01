@@ -28,46 +28,32 @@ const validateInterface = async (address: string, interfaceId: '0x80ac58cd' | '0
     }
 };
 
-export const verifyTokenStandard = async ({ address, expectedStandard }: { address: string; expectedStandard: string; }) => {
+export const verifyTokenStandard = async ({ contractAddress, expectedStandard }: { contractAddress: string; expectedStandard: "ERC20" | "ERC721" | "ERC1155" }) => {
     switch (expectedStandard) {
         case "ERC20":
             try {
                 const [isERC20, isERC721] = await Promise.all([
-                    validateERC20(address),
-                    validateInterface(address, ERC721Interface),
+                    validateERC20(contractAddress),
+                    validateInterface(contractAddress, ERC721Interface),
                 ]);
                 return isERC20 && !isERC721;
             } catch (err) {
                 return false;
             }
         case "ERC721":
-            return await validateInterface(address, ERC721Interface);
+            return await validateInterface(contractAddress, ERC721Interface);
         case "ERC1155":
-            return await validateInterface(address, ERC1155Interface);
+            return await validateInterface(contractAddress, ERC1155Interface);
         default:
             return false;
     }
 };
 
 
-export const tokenGetSymbolAndDecimal = async ({ contractAddress, tokenStandard }: { contractAddress: string, tokenStandard: string }) => {
-    let tokenAbi: any[];
+export const tokenGetSymbolAndDecimal = async ({ contractAddress, tokenStandard }: { contractAddress: string, tokenStandard: "ERC20" | "ERC721" | "ERC1155" }) => {
 
-    switch (tokenStandard) {
-        case 'ERC20':
-            tokenAbi = ERC20ABI;
-            break;
-        case 'ERC721':
-            tokenAbi = ERC721ABI;
-            break;
-        case 'ERC1155':
-            tokenAbi = ERC1155ABI;
-            break;
-        default:
-            throw new Error('Invalid token standard');
-    }
-
-    const tokenContract = new ethers.Contract(contractAddress, tokenAbi, provider);
+    // use the erc20 abi since we only want symbol and decimals
+    const tokenContract = new ethers.Contract(contractAddress, ERC20ABI, provider);
 
     let symbol = '';
     let decimals = 0;
@@ -75,7 +61,7 @@ export const tokenGetSymbolAndDecimal = async ({ contractAddress, tokenStandard 
         symbol = await tokenContract.functions.symbol().then(res => res[0]);
     } catch (err) {
         if (tokenStandard !== 'ERC1155') {
-            throw new Error('Failed to fetch symbol');
+            console.log('Failed to fetch symbol');
         }
     }
 
@@ -83,9 +69,25 @@ export const tokenGetSymbolAndDecimal = async ({ contractAddress, tokenStandard 
         try {
             decimals = await tokenContract.functions.decimals();
         } catch (err) {
-            throw new Error('Failed to fetch decimals');
+            console.log('Failed to fetch decimals');
         }
     }
 
-    return [symbol, Number(decimals)];
+    return { symbol, decimals };
+}
+
+
+export const isValidERC1155TokenId = async ({ contractAddress, tokenId }: {
+    contractAddress: string, tokenId: number
+}) => {
+    try {
+        const tokenContract = new ethers.Contract(contractAddress, ERC1155ABI, provider);
+        const uri = await tokenContract.uri(tokenId);
+
+        // Check if the URI is valid
+        const uriRegex = new RegExp('^(https?|ipfs):\\/\\/[^\\s/$.?#].[^\\s]*$', 'i');
+        return uriRegex.test(uri);
+    } catch (err) {
+        return false;
+    }
 }
