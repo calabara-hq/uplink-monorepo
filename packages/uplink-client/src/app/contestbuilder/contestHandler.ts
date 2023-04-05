@@ -1,13 +1,6 @@
+import { IToken, IERCToken, INativeToken } from "@/types/token";
 
-export interface IToken {
-    type: string;
-    address: string;
-    decimals: number;
-    name?: string;
-    symbol?: string;
-}
-
-export interface RewardOption extends IToken {
+export type RewardOption = IToken & {
     selected: boolean;
 }
 

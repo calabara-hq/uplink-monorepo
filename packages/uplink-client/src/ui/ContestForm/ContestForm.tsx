@@ -9,7 +9,6 @@ import {
 } from "react";
 import {
   ContestBuilderProps,
-  IToken,
   reducer,
 } from "@/app/contestbuilder/contestHandler";
 import {
@@ -24,7 +23,7 @@ import StandardPrompt from "./StandardPrompt";
 import Deadlines from "./Deadlines";
 import ContestType from "./ContestType";
 import TokenModal from "../TokenModal/TokenModal";
-
+import { IToken } from "@/types/token";
 export const BlockWrapper = ({
   title,
   children,
@@ -59,7 +58,7 @@ const initialState = {
   submitterRewardOptions: [
     {
       type: "ETH",
-      name: "Ethereum",
+      symbol: "ETH",
       decimals: 18,
       selected: false,
     },
@@ -133,10 +132,15 @@ const SubmitterRewards = ({
   dispatch: React.Dispatch<any>;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
+  const handleSaveCallback = (data: IToken, actionType: "add" | "swap") => {
+    if (actionType === "add")
+      return dispatch({ type: "addSubmitterRewardOption", payload: data });
+    else if (actionType === "swap")
+      return dispatch({ type: "swapSubmitterRewardOption", payload: data });
+  };
   return (
     <BlockWrapper title="Submitter Rewards">
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full gap-2">
         {state.submitterRewardOptions.map((token, index) => {
           return <TokenCard key={index} token={token} dispatch={dispatch} />;
         })}
@@ -144,7 +148,13 @@ const SubmitterRewards = ({
       <button className="btn" onClick={() => setIsModalOpen(true)}>
         add reward
       </button>
-      <TokenModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+      <TokenModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        callback={handleSaveCallback}
+        existingTokens={state.submitterRewardOptions}
+        strictStandard={true}
+      />
     </BlockWrapper>
   );
 };
@@ -165,7 +175,7 @@ const TokenCard = ({
   return (
     <div className="card w-96 bg-base-100 shadow-xl">
       <div className="card-body">
-        <h2 className="card-title">{token.name}</h2>
+        <h2 className="card-title">{token.symbol}</h2>
         <p>If a dog chews shoes whose shoes does he choose?</p>
         <div className="card-actions justify-end">
           <Toggle defaultState={false} onSelectCallback={onSelectCallback} />
