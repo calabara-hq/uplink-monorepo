@@ -11,19 +11,10 @@ import {
   ContestBuilderProps,
   reducer,
 } from "@/app/contestbuilder/contestHandler";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  CheckBadgeIcon,
-} from "@heroicons/react/24/solid";
-import DateTimeSelector from "../DateTime/DateTime";
-import { createReactEditorJS } from "react-editor-js";
-import EditorJS, { OutputData } from "@editorjs/editorjs";
 import StandardPrompt from "./StandardPrompt";
 import Deadlines from "./Deadlines";
 import ContestType from "./ContestType";
-import TokenModal from "../TokenModal/TokenModal";
-import { IToken } from "@/types/token";
+import SubmitterRewardsComponent from "./SubmitterRewards";
 export const BlockWrapper = ({
   title,
   children,
@@ -55,14 +46,38 @@ const initialState = {
   contestPromptBody: "",
   media_blob: null,
   media_url: null,
-  submitterRewardOptions: [
+  rewardOptions: [
     {
       type: "ETH",
       symbol: "ETH",
       decimals: 18,
-      selected: false,
+    },
+    {
+      type: "ERC1155",
+      address: "0x0",
+      symbol: "MemSzr",
+      decimals: 0,
+    },
+    {
+      type: "ERC20",
+      address: "0x0",
+      symbol: "USDC",
+      decimals: 18,
+    },
+    {
+      type: "ERC721",
+      address: "0x0",
+      symbol: "Nouns",
+      decimals: 0,
     },
   ],
+  submitterRewards: {
+    payouts: [
+      {
+        rank: 1,
+      },
+    ],
+  },
   /*
   submitterRewards: [],
   voterRewards: [],
@@ -81,7 +96,7 @@ export default function ContestForm() {
     const contest = {
       ...state,
     };
-    console.log(contest.submitterRewardOptions);
+    console.log(contest.submitterRewards);
   };
 
   return (
@@ -107,7 +122,7 @@ export default function ContestForm() {
         <ContestType type={state.type} dispatch={dispatch} />
         {state.type && <Deadlines state={state} dispatch={dispatch} />}
         <StandardPrompt state={state} dispatch={dispatch} />
-        <SubmitterRewards state={state} dispatch={dispatch} />
+        <SubmitterRewardsComponent state={state} dispatch={dispatch} />
         {/*<TweetThread state={state} dispatch={dispatch} />*/}
       </div>
       <button className="btn btn-primary" onClick={handleSave}>
@@ -116,94 +131,6 @@ export default function ContestForm() {
     </div>
   );
 }
-
-/**
- * submitter rewards should first allow the user to select from a list of space tokens or add new ones
- * after choosing the proper tokens, the user should be able to select the amount of tokens to be distributed to each rank
- * the user must choose at least 1 token to be distributed to each rank (eth, erc20, erc721, erc1155)
- * more than 1 token can be distributed to each rank, but not more than 1 token type
- */
-
-const SubmitterRewards = ({
-  state,
-  dispatch,
-}: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
-}) => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleSaveCallback = (data: IToken, actionType: "add" | "swap") => {
-    if (actionType === "add")
-      return dispatch({ type: "addSubmitterRewardOption", payload: data });
-    else if (actionType === "swap")
-      return dispatch({ type: "swapSubmitterRewardOption", payload: data });
-  };
-  return (
-    <BlockWrapper title="Submitter Rewards">
-      <div className="flex flex-col w-full gap-2">
-        {state.submitterRewardOptions.map((token, index) => {
-          return <TokenCard key={index} token={token} dispatch={dispatch} />;
-        })}
-      </div>
-      <button className="btn" onClick={() => setIsModalOpen(true)}>
-        add reward
-      </button>
-      <TokenModal
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-        callback={handleSaveCallback}
-        existingTokens={state.submitterRewardOptions}
-        strictStandard={true}
-      />
-    </BlockWrapper>
-  );
-};
-
-const TokenCard = ({
-  token,
-  dispatch,
-}: {
-  token: IToken;
-  dispatch: React.Dispatch<any>;
-}) => {
-  const onSelectCallback = (isSelected: boolean) => {
-    dispatch({
-      type: "toggleSubmitterRewardOption",
-      payload: { type: token.type, selected: isSelected },
-    });
-  };
-  return (
-    <div className="card w-96 bg-base-100 shadow-xl">
-      <div className="card-body">
-        <h2 className="card-title">{token.symbol}</h2>
-        <p>If a dog chews shoes whose shoes does he choose?</p>
-        <div className="card-actions justify-end">
-          <Toggle defaultState={false} onSelectCallback={onSelectCallback} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Toggle = ({
-  defaultState,
-  onSelectCallback,
-}: {
-  defaultState: boolean;
-  onSelectCallback: (isSelected: boolean) => void;
-}) => {
-  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSelectCallback(e.target.checked);
-  };
-  return (
-    <input
-      type="checkbox"
-      className="toggle toggle-accent border-2"
-      defaultChecked={defaultState}
-      onChange={handleToggle}
-    />
-  );
-};
 
 /**
  * first tweet should be the title + cover image and rewards

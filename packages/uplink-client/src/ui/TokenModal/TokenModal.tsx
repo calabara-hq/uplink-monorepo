@@ -18,7 +18,6 @@ const tokenOptions = [
 ];
 
 type ERCTokenOption = IERCToken & {
-  tokenId: number | null;
   errors: {
     address: string | null;
     tokenId: string | null;
@@ -30,7 +29,6 @@ const initialTokenState: ERCTokenOption = {
   address: "",
   symbol: "",
   decimals: 0,
-  tokenId: null,
   errors: {
     address: null,
     tokenId: null,
@@ -282,11 +280,7 @@ const TokenModal = ({
             )}
             {progress === 1 && (
               // cases where we need to swap out the token standard
-              <TokenSwap
-                token={token}
-                existingTokens={existingTokens}
-                dispatch={dispatch}
-              />
+              <TokenSwap token={token} existingTokens={existingTokens} />
             )}
             <div className="modal-action mt-8">
               <button onClick={handleCloseAndReset} className="btn mr-auto">
@@ -312,11 +306,9 @@ const TokenModal = ({
 const TokenSwap = ({
   token,
   existingTokens,
-  dispatch,
 }: {
   token: ERCTokenOption;
   existingTokens: IToken[] | null;
-  dispatch: React.Dispatch<TokenAction>;
 }) => {
   return (
     <div className="w-full px-1 flex flex-col gap-4">
@@ -336,7 +328,7 @@ const TokenSwap = ({
           <div className="absolute top-0 left-0 bg-info text-xs text-black px-1 py-0.5 rounded-br-md rounded-tl-md">
             Existing
           </div>
-          <h2>
+          <h2 className="font-bold">
             {existingTokens?.find((el) => el.type === token.type)?.symbol}
           </h2>
         </div>
@@ -347,7 +339,7 @@ const TokenSwap = ({
           <div className="absolute top-0 left-0 bg-success text-xs text-black px-1 py-0.5 rounded-br-md rounded-tl-md">
             Proposed
           </div>
-          <h2>{token.symbol}</h2>
+          <h2 className="font-bold">{token.symbol}</h2>
         </div>
       </div>
     </div>
@@ -529,7 +521,7 @@ const ERC1155FormElement = ({
         dispatch({
           type: "setToken",
           payload: {
-            tokenId: value === "" ? null : Number(value),
+            tokenId: Number(value),
           },
         })
       }

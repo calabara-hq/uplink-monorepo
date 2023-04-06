@@ -1,8 +1,30 @@
 import { IToken, IERCToken, INativeToken } from "@/types/token";
 
-export type RewardOption = IToken & {
-    selected: boolean;
+export interface SubmitterRewards {
+    ETH?: IToken;
+    ERC20?: IToken;
+    ERC721?: IToken;
+    ERC1155?: IToken;
+    payouts: [
+        {
+            rank: number;
+            ETH?: {
+                amount: number;
+            };
+            ERC20?: {
+                amount: number;
+            };
+            ERC721?: {
+                tokenId: number;
+            }
+            ERC1155?: {
+                amount: number;
+            };
+        }
+    ]
 }
+
+
 
 export interface ContestBuilderProps {
     type: string | null;
@@ -13,7 +35,8 @@ export interface ContestBuilderProps {
     contestPromptBody: string;
     media_blob: string | null;
     media_url: string | null;
-    submitterRewardOptions: RewardOption[];
+    rewardOptions: IToken[];//RewardOption[];
+    submitterRewards: SubmitterRewards;
     errors: ContestBuilderErrors;
 }
 
@@ -80,35 +103,107 @@ export const reducer = (state: any, action: any) => {
                 errors: { ...state.errors, media_url: null },
             };
 
-        case "addSubmitterRewardOption":
+        case "addRewardOption":
             return {
                 ...state,
-                submitterRewardOptions: [...state.submitterRewardOptions, action.payload],
+                rewardOptions: [...state.rewardOptions, action.payload],
             };
 
-        case "swapSubmitterRewardOption":
+        case "swapRewardOption": {
             // swap the reward with same type as payload
             return {
                 ...state,
-                submitterRewardOptions: state.submitterRewardOptions.map((reward: RewardOption) => {
+                rewardOptions: state.rewardOptions.map((reward: IToken) => {
                     if (reward.type === action.payload.type) {
                         return action.payload;
                     }
                     return reward;
                 }),
             };
+        }
 
-        case "toggleSubmitterRewardOption":
-            // set selet for reward with same type as payload
+        case "toggleRewardOption": {
+            // pluck the selected reward from the state
+            const { [action.payload.token.type]: _, ...updatedSubmitterRewards } = state.submitterRewards;
+
             return {
                 ...state,
-                submitterRewardOptions: state.submitterRewardOptions.map((reward: RewardOption) => {
-                    if (reward.type === action.payload.type) {
-                        return { ...reward, selected: action.payload.selected };
-                    }
-                    return reward;
-                }),
+                submitterRewards: {
+                    // keep the existing rewards - the one we plucked
+                    ...updatedSubmitterRewards,
+                    // add the new reward if selected
+                    ...(action.payload.selected ? { [action.payload.token.type]: action.payload.token } : {}),
+
+                    // add the type to each payout
+                    payouts: state.submitterRewards.payouts.map((payout: any) => {
+                        return {
+                            ...payout,
+                            [action.payload.token.type]: action.payload.selected ? { amount: 0 } : undefined,
+                        };
+                    }),
+
+                }
             };
+        }
+
+        case "addSubRank": {
+            return {
+                ...state,
+                submitterRewards: {
+                    ...state.submitterRewards,
+                    payouts: [
+                        ...state.submitterRewards.payouts,
+                        {
+                            rank: state.submitterRewards.payouts.length + 1,
+                            ...(state.submitterRewards.ETH ? { ETH: { amount: 0 } } : {}),
+                            ...(state.submitterRewards.ERC20 ? { ERC20: { amount: 0 } } : {}),
+                            ...(state.submitterRewards.ERC721 ? { ERC721: { tokenId: 0 } } : {}),
+                            ...(state.submitterRewards.ERC1155 ? { ERC1155: { amount: 0 } } : {}),
+
+                        },
+                    ],
+                },
+            };
+        }
+
+        case "removeSubRank": {
+            return {
+                ...state,
+                submitterRewards: {
+                    ...state.submitterRewards,
+                    payouts: state.submitterRewards.payouts.filter((_: any, index: number) => index !== action.payload),
+                },
+            };
+        }
+
+        case "updateSubRank": {
+            const updatedPayouts = [...state.submitterRewards.payouts];
+            if (!isNaN(action.payload.rank)) {
+                updatedPayouts[action.payload.index].rank = Number(action.payload.rank);
+            } else {
+                updatedPayouts[action.payload.index].rank = 0;
+            }
+            return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedPayouts } };
+        }
+
+        case "updateSubRewardAmount": {
+            console.log(action.payload)
+            const updatedPayouts = [...state.submitterRewards.payouts];
+            if (!updatedPayouts[action.payload.index][action.payload.tokenType]) {
+                updatedPayouts[action.payload.index][action.payload.tokenType] = { amount: 0 };
+            }
+            updatedPayouts[action.payload.index][action.payload.tokenType].amount = Number(action.payload.amount);
+            return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedPayouts } };
+        }
+
+        case "updateERC721TokenId": {
+            const updatedERC721Payouts = [...state.submitterRewards.payouts];
+            if (!updatedERC721Payouts[action.payload.index].erc721) {
+                updatedERC721Payouts[action.payload.index].erc721 = { tokenId: 0 };
+            }
+            updatedERC721Payouts[action.payload.index].erc721.tokenId = Number(action.payload.tokenId);
+            return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedERC721Payouts } };
+        }
 
         case "setErrors":
             return {
@@ -121,11 +216,29 @@ export const reducer = (state: any, action: any) => {
 }
 
 
-/**
- * submitter reward options -> add / swap
- * selected submitter rewards -> add / swap / remove
- * 
- * OR
- * 
- * submitter reward options -> add / swap
- */
+export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
+    const cleanedSubmitterRewards = {
+        ETH: submitterRewards.ETH,
+        ERC20: submitterRewards.ERC20,
+        ERC721: submitterRewards.ERC721,
+        ERC1155: submitterRewards.ERC1155,
+        payouts: submitterRewards.payouts.map((payout: any) => {
+            const cleanedPayout: any = { rank: payout.rank };
+            if (payout.ETH && payout.ETH.amount > 0) {
+                cleanedPayout.ETH = payout.ETH;
+            }
+            if (payout.ERC20 && payout.ERC20.amount > 0) {
+                cleanedPayout.ERC20 = payout.ERC20;
+            }
+            if (payout.ERC721 && payout.ERC721.tokenId > 0) {
+                cleanedPayout.ERC721 = payout.ERC721;
+            }
+            if (payout.ERC1155 && payout.ERC1155.amount > 0) {
+                cleanedPayout.ERC1155 = payout.ERC1155;
+            }
+            return cleanedPayout;
+        }),
+    };
+    return cleanedSubmitterRewards as SubmitterRewards;
+
+}

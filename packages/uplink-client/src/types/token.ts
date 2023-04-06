@@ -4,7 +4,7 @@ export interface IERCToken {
     address: string;
     decimals: number;
     symbol: string;
-    tokenId: number | null;
+    tokenId?: number;
 }
 
 export interface INativeToken {
