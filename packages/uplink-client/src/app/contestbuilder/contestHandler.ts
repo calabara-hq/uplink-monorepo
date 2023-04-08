@@ -9,16 +9,16 @@ export interface SubmitterRewards {
         {
             rank: number;
             ETH?: {
-                amount: number;
+                amount: string;
             };
             ERC20?: {
-                amount: number;
+                amount: string;
             };
             ERC721?: {
-                tokenId: number;
+                tokenId: number | null;
             }
             ERC1155?: {
-                amount: number;
+                amount: string;
             };
         }
     ]
@@ -138,7 +138,7 @@ export const reducer = (state: any, action: any) => {
                     payouts: state.submitterRewards.payouts.map((payout: any) => {
                         return {
                             ...payout,
-                            [action.payload.token.type]: action.payload.selected ? { amount: 0 } : undefined,
+                            [action.payload.token.type]: action.payload.selected ? (action.payload.token.type === 'ERC721' ? { tokenId: null } : { amount: "0" }) : undefined,
                         };
                     }),
 
@@ -155,10 +155,10 @@ export const reducer = (state: any, action: any) => {
                         ...state.submitterRewards.payouts,
                         {
                             rank: state.submitterRewards.payouts.length + 1,
-                            ...(state.submitterRewards.ETH ? { ETH: { amount: 0 } } : {}),
-                            ...(state.submitterRewards.ERC20 ? { ERC20: { amount: 0 } } : {}),
-                            ...(state.submitterRewards.ERC721 ? { ERC721: { tokenId: 0 } } : {}),
-                            ...(state.submitterRewards.ERC1155 ? { ERC1155: { amount: 0 } } : {}),
+                            ...(state.submitterRewards.ETH ? { ETH: { amount: "0" } } : {}),
+                            ...(state.submitterRewards.ERC20 ? { ERC20: { amount: "0" } } : {}),
+                            ...(state.submitterRewards.ERC721 ? { ERC721: { tokenId: null } } : {}),
+                            ...(state.submitterRewards.ERC1155 ? { ERC1155: { amount: "0" } } : {}),
 
                         },
                     ],
@@ -187,21 +187,22 @@ export const reducer = (state: any, action: any) => {
         }
 
         case "updateSubRewardAmount": {
-            console.log(action.payload)
+            console.log(action.payload);
             const updatedPayouts = [...state.submitterRewards.payouts];
             if (!updatedPayouts[action.payload.index][action.payload.tokenType]) {
-                updatedPayouts[action.payload.index][action.payload.tokenType] = { amount: 0 };
+                updatedPayouts[action.payload.index][action.payload.tokenType] = { amount: "0" };
             }
-            updatedPayouts[action.payload.index][action.payload.tokenType].amount = Number(action.payload.amount);
+            updatedPayouts[action.payload.index][action.payload.tokenType].amount = action.payload.amount;
             return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedPayouts } };
         }
 
         case "updateERC721TokenId": {
+            console.log(action.payload)
             const updatedERC721Payouts = [...state.submitterRewards.payouts];
-            if (!updatedERC721Payouts[action.payload.index].erc721) {
-                updatedERC721Payouts[action.payload.index].erc721 = { tokenId: 0 };
+            if (!updatedERC721Payouts[action.payload.index].ERC721) {
+                updatedERC721Payouts[action.payload.index].ERC721 = { tokenId: null };
             }
-            updatedERC721Payouts[action.payload.index].erc721.tokenId = Number(action.payload.tokenId);
+            updatedERC721Payouts[action.payload.index].ERC721.tokenId = action.payload.tokenId === null ? null : Number(action.payload.tokenId);
             return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedERC721Payouts } };
         }
 

@@ -120,7 +120,6 @@ describe("Contest Builder Reducer", () => {
                 symbol: "ETH",
                 decimals: 18,
             },
-            //ERC1155: undefined,
 
             ERC20: {
                 type: "ERC20",
@@ -128,8 +127,6 @@ describe("Contest Builder Reducer", () => {
                 symbol: "USDC",
                 decimals: 18,
             },
-
-            //ERC721: undefined,
             payouts: [
                 {
                     rank: 1,
@@ -162,7 +159,6 @@ describe("Contest Builder Reducer", () => {
 
         const action = { type: "cleanSubRewards" };
         const newState = cleanSubmitterRewards(dirtyRewards);
-        console.log(JSON.stringify(newState, null, 2))
         expect(newState).toEqual(cleanRewards);
     })
 
