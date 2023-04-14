@@ -150,8 +150,6 @@ const TokenModal = ({
 
   initialTokenState.customToken.type = tokenMenuOptions[0].value;
 
-  console.log(initialTokenState);
-
   const [state, dispatch] = useReducer(tokenReducer, initialTokenState);
 
   const handleCloseAndReset = () => {

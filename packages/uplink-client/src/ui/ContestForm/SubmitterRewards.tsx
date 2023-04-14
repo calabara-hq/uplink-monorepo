@@ -172,10 +172,12 @@ const SubmitterRewardMatrix = ({
   };
 
   const updateERC721TokenId = (index: number, tokenId: string) => {
-    console.log(tokenId);
+    let roundedTokenId =
+      tokenId.trim() === "" ? null : Math.round(Number(tokenId));
+
     dispatch({
       type: "updateERC721TokenId",
-      payload: { index, tokenId: tokenId === "" ? null : Number(tokenId) },
+      payload: { index, tokenId: tokenId === "" ? null : roundedTokenId },
     });
   };
 
@@ -199,7 +201,7 @@ const SubmitterRewardMatrix = ({
                 <th className="text-center">ERC20 Payout</th>
               ) : null}
               {submitterRewards.ERC721 ? (
-                <th className="text-center">ERC721 Payout</th>
+                <th className="text-center">ERC721 Token ID</th>
               ) : null}
               {submitterRewards.ERC1155 ? (
                 <th className="text-center">ERC1155 Payout</th>
