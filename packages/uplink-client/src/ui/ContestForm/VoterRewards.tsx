@@ -54,7 +54,8 @@ const VoterRewardsComponent = ({
           rewardsObjectToArray(state.voterRewards),
           ["ETH", "ERC20"]
         )}
-        strictStandard={true}
+        uniqueStandard={true}
+        strictTypes={["ERC20"]}
       />
     </BlockWrapper>
   );

@@ -93,11 +93,6 @@ const SubmitterRewardsComponent = ({
         submitterRewards={state.submitterRewards}
         dispatch={dispatch}
       />
-      {/*<VoterRewardComponent
-        spaceTokens={state.spaceTokens}
-        voterRewards={state.voterRewards}
-        dispatch={dispatch}
-    />*/}
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -107,7 +102,7 @@ const SubmitterRewardsComponent = ({
           state.spaceTokens,
           rewardsObjectToArray(state.submitterRewards)
         )}
-        strictStandard={true}
+        uniqueStandard={true}
       />
     </BlockWrapper>
   );

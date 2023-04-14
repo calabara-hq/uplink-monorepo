@@ -11,7 +11,14 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/solid";
 
-const tokenOptions = [
+type ERCOptions = "ERC20" | "ERC721" | "ERC1155";
+
+type MenuOption = {
+  value: ERCOptions;
+  label: ERCOptions;
+};
+
+const defaultTokenOptions: MenuOption[] = [
   { value: "ERC20", label: "ERC20" },
   { value: "ERC721", label: "ERC721" },
   { value: "ERC1155", label: "ERC1155" },
@@ -48,7 +55,7 @@ const initialTokenState: TokenState = {
 };
 
 type TokenAction =
-  | { type: "setCustomTokenType"; payload: "ERC20" | "ERC721" | "ERC1155" }
+  | { type: "setCustomTokenType"; payload: ERCOptions }
   | { type: "setCustomToken"; payload: Partial<CustomTokenOption> }
   | { type: "setQuickAddToken"; payload: QuickAddTokenOption }
   | { type: "setCustomTokenErrors"; payload: Partial<CustomTokenOptionErrors> }
@@ -103,10 +110,7 @@ const tokenReducer = (
   }
 };
 
-const fetchSymbolAndDecimals = async (
-  address: string,
-  type: "ERC20" | "ERC721" | "ERC1155"
-) => {
+const fetchSymbolAndDecimals = async (address: string, type: ERCOptions) => {
   try {
     return await tokenGetSymbolAndDecimal({
       contractAddress: address,
@@ -123,24 +127,37 @@ const TokenModal = ({
   callback,
   existingTokens,
   quickAddTokens,
-  strictStandard,
+  uniqueStandard,
+  strictTypes,
 }: {
   isModalOpen: boolean;
   setIsModalOpen: (isModalOpen: boolean) => void;
   callback: (token: IToken, actionType: "add" | "swap") => void;
   existingTokens: IToken[] | null;
   quickAddTokens: IToken[] | null;
-  strictStandard: boolean;
+  uniqueStandard: boolean;
+  strictTypes?: ERCOptions[];
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState<number>(0);
-  const [state, dispatch] = useReducer(tokenReducer, initialTokenState);
   const [conflictingToken, setConflictingToken] = useState<IToken | null>(null);
+  const tokenMenuOptions: MenuOption[] = strictTypes
+    ? strictTypes.map((type) => ({
+        value: type,
+        label: type,
+      }))
+    : defaultTokenOptions;
+
+  initialTokenState.customToken.type = tokenMenuOptions[0].value;
+
+  console.log(initialTokenState);
+
+  const [state, dispatch] = useReducer(tokenReducer, initialTokenState);
 
   const handleCloseAndReset = () => {
     setIsModalOpen(false);
     setProgress(0);
-
+    setConflictingToken(null);
     dispatch({ type: "reset" });
   };
 
@@ -231,7 +248,8 @@ const TokenModal = ({
    * when existing tokens are passed in, conflicts occur in 2 forms
    * 1. the user is trying to add a token that already exists
    * 2. the user tries to add a token with the same type as an existing token.
-   * case 2 is only checked when the strictStandard flag is set to true
+   * case 2 is only checked when the uniqueStandard flag is set to true
+   *
    */
 
   const handleTokenConflicts = () => {
@@ -254,7 +272,7 @@ const TokenModal = ({
       }
 
       // handle case 2
-      if (strictStandard) {
+      if (uniqueStandard) {
         const tokenTypeAlreadyExists = existingTokens.some((el) => {
           if (isERCToken(el)) {
             return el.type === currentToken?.type;
@@ -295,7 +313,9 @@ const TokenModal = ({
                   <div className="divider lg:divider-horizontal">
                     <ArrowPathIcon className="w-24" />
                   </div>
-                  <button className="text-2xl">Manual Add</button>
+                  <button className="text-2xl" onClick={() => setProgress(1)}>
+                    Manual Add
+                  </button>
                 </div>
               </div>
             )}
@@ -305,7 +325,7 @@ const TokenModal = ({
                   <h2 className="text-2xl">Add a token</h2>
                   <div className="ml-auto">
                     <MenuSelect
-                      options={tokenOptions}
+                      options={tokenMenuOptions}
                       selected={{
                         value: state.customToken.type,
                         label: state.customToken.type,
