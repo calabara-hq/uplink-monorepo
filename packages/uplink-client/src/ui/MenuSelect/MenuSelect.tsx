@@ -3,6 +3,7 @@ import { ArrowDownIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 
 export interface Option {
   value: string;
+  label: string;
 }
 
 const MenuSelect = ({

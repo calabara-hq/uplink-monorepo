@@ -12,83 +12,100 @@ import {
 } from "@heroicons/react/24/solid";
 
 const tokenOptions = [
-  { value: "ERC20" },
-  { value: "ERC721" },
-  { value: "ERC1155" },
+  { value: "ERC20", label: "ERC20" },
+  { value: "ERC721", label: "ERC721" },
+  { value: "ERC1155", label: "ERC1155" },
 ];
 
-type ERCTokenOption = IERCToken & {
+type CustomTokenOption = IERCToken & {
   errors: {
     address: string | null;
     tokenId: string | null;
   };
 };
 
-const initialTokenState: ERCTokenOption = {
-  type: "ERC20",
-  address: "",
-  symbol: "",
-  decimals: 0,
-  errors: {
-    address: null,
-    tokenId: null,
+type QuickAddTokenOption = IToken | null;
+
+type TokenState = {
+  customToken: CustomTokenOption;
+  quickAddToken: QuickAddTokenOption;
+};
+
+type CustomTokenOptionErrors = CustomTokenOption["errors"];
+
+const initialTokenState: TokenState = {
+  customToken: {
+    type: "ERC20",
+    symbol: "",
+    decimals: 0,
+    address: "",
+    errors: {
+      address: null,
+      tokenId: null,
+    },
   },
+  quickAddToken: null,
 };
 
-type SetTokenTypeAction = {
-  type: "setTokenType";
-  payload: ERCTokenOption["type"];
-};
-
-type SetTokenAction = {
-  type: "setToken";
-  payload: Partial<ERCTokenOption>;
-};
-
-type SetTokenErrorsAction = {
-  type: "setTokenErrors";
-  payload: Partial<ERCTokenOption["errors"]>;
-};
-
-type TokenAction = SetTokenTypeAction | SetTokenAction | SetTokenErrorsAction;
+type TokenAction =
+  | { type: "setCustomTokenType"; payload: "ERC20" | "ERC721" | "ERC1155" }
+  | { type: "setCustomToken"; payload: Partial<CustomTokenOption> }
+  | { type: "setQuickAddToken"; payload: QuickAddTokenOption }
+  | { type: "setCustomTokenErrors"; payload: Partial<CustomTokenOptionErrors> }
+  | { type: "reset" };
 
 const tokenReducer = (
-  state: ERCTokenOption,
+  state: TokenState = initialTokenState,
   action: TokenAction
-): ERCTokenOption => {
+): TokenState => {
   switch (action.type) {
-    case "setTokenType":
-      return {
-        ...initialTokenState,
-        type: action.payload,
-      };
-    case "setToken":
-      // remove all the errors
-      const { errors, ...rest } = state;
-      return {
-        ...rest,
-        ...action.payload,
-        errors: {
-          address: null,
-          tokenId: null,
-        },
-      };
-    case "setTokenErrors":
+    case "setCustomTokenType":
       return {
         ...state,
-        errors: {
-          ...state.errors,
-          ...action.payload,
+        customToken: {
+          ...initialTokenState.customToken,
+          type: action.payload,
         },
       };
+    case "setCustomToken":
+      return {
+        ...state,
+        customToken: {
+          ...state.customToken,
+          ...action.payload,
+          errors: {
+            address: null,
+            tokenId: null,
+          },
+        },
+      };
+    case "setQuickAddToken":
+      return {
+        ...state,
+        quickAddToken: action.payload,
+      };
+    case "setCustomTokenErrors":
+      return {
+        ...state,
+        customToken: {
+          ...state.customToken,
+          errors: {
+            ...state.customToken.errors,
+            ...action.payload,
+          },
+        },
+      };
+    case "reset": {
+      return initialTokenState;
+    }
     default:
       return state;
   }
 };
 
 const fetchSymbolAndDecimals = async (
-  address: ERCTokenOption["address"],
-  type: ERCTokenOption["type"]
+  address: string,
+  type: "ERC20" | "ERC721" | "ERC1155"
 ) => {
   try {
     return await tokenGetSymbolAndDecimal({
@@ -105,22 +122,26 @@ const TokenModal = ({
   setIsModalOpen,
   callback,
   existingTokens,
+  quickAddTokens,
   strictStandard,
 }: {
   isModalOpen: boolean;
   setIsModalOpen: (isModalOpen: boolean) => void;
   callback: (token: IToken, actionType: "add" | "swap") => void;
   existingTokens: IToken[] | null;
+  quickAddTokens: IToken[] | null;
   strictStandard: boolean;
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState<number>(0);
-  const [token, dispatch] = useReducer(tokenReducer, initialTokenState);
+  const [state, dispatch] = useReducer(tokenReducer, initialTokenState);
+  const [conflictingToken, setConflictingToken] = useState<IToken | null>(null);
 
   const handleCloseAndReset = () => {
     setIsModalOpen(false);
     setProgress(0);
-    dispatch({ type: "setToken", payload: initialTokenState });
+
+    dispatch({ type: "reset" });
   };
 
   useEffect(() => {
@@ -141,52 +162,65 @@ const TokenModal = ({
 
   useEffect(() => {
     const isValidAddress =
-      token.address.length === 42 && token.address.startsWith("0x");
+      state.customToken.address.length === 42 &&
+      state.customToken.address.startsWith("0x");
 
     // attempt to autofill the symbol and decimals if the address is valid
     if (isValidAddress)
-      fetchSymbolAndDecimals(token.address, token.type).then((res) => {
-        res ? dispatch({ type: "setToken", payload: res }) : null;
+      fetchSymbolAndDecimals(
+        state.customToken.address,
+        state.customToken.type
+      ).then((res) => {
+        res ? dispatch({ type: "setCustomToken", payload: res }) : null;
       });
     // reset the other fields if the address switched from valid to invalid
-    else if (!isValidAddress && token.symbol && token.decimals) {
-      dispatch({ type: "setToken", payload: { symbol: "", decimals: 0 } });
-    }
-  }, [token.address]);
-
-  const handleModalConfirm = async () => {
-    const isValidContract = await verifyTokenStandard({
-      contractAddress: token.address,
-      expectedStandard: token.type,
-    });
-    if (!isValidContract) {
-      return dispatch({
-        type: "setTokenErrors",
-        payload: {
-          address: `This doesn't appear to be a valid ${token.type} address`,
-        },
+    else if (
+      !isValidAddress &&
+      state.customToken.symbol &&
+      state.customToken.decimals
+    ) {
+      dispatch({
+        type: "setCustomToken",
+        payload: { symbol: "", decimals: 0 },
       });
     }
-    if (token.type === "ERC1155") {
-      if (!token.tokenId) {
+  }, [state.customToken.address]);
+
+  const handleModalConfirm = async () => {
+    if (progress === 1) {
+      const isValidContract = await verifyTokenStandard({
+        contractAddress: state.customToken.address,
+        expectedStandard: state.customToken.type,
+      });
+      if (!isValidContract) {
         return dispatch({
-          type: "setTokenErrors",
+          type: "setCustomTokenErrors",
           payload: {
-            tokenId: "Please enter a valid token ID",
+            address: `This doesn't appear to be a valid ${state.customToken.type} address`,
           },
         });
-      } else {
-        const isValidId = await isValidERC1155TokenId({
-          contractAddress: token.address,
-          tokenId: token.tokenId,
-        });
-        if (!isValidId) {
+      }
+      if (state.customToken.type === "ERC1155") {
+        if (!state.customToken.tokenId) {
           return dispatch({
-            type: "setTokenErrors",
+            type: "setCustomTokenErrors",
             payload: {
-              tokenId: "Not a valid token ID for this contract",
+              tokenId: "Please enter a valid token ID",
             },
           });
+        } else {
+          const isValidId = await isValidERC1155TokenId({
+            contractAddress: state.customToken.address,
+            tokenId: state.customToken.tokenId,
+          });
+          if (!isValidId) {
+            return dispatch({
+              type: "setCustomTokenErrors",
+              payload: {
+                tokenId: "Not a valid token ID for this contract",
+              },
+            });
+          }
         }
       }
     }
@@ -199,22 +233,20 @@ const TokenModal = ({
    * 2. the user tries to add a token with the same type as an existing token.
    * case 2 is only checked when the strictStandard flag is set to true
    */
-  const handleTokenConflicts = () => {
-    if (existingTokens) {
-      const ERCTokens = existingTokens.filter((token) => token.type !== "ETH");
 
-      // handle case 1. ignore the ETH token
-      const tokenAlreadyExists = ERCTokens.some((el) => {
+  const handleTokenConflicts = () => {
+    const currentToken = progress < 1 ? state.quickAddToken : state.customToken;
+
+    if (existingTokens) {
+      const tokenAlreadyExists = existingTokens.some((el) => {
         if (isERCToken(el)) {
-          return (
-            el.address.toLowerCase() === token.address.toLowerCase() &&
-            el.tokenId === token.tokenId
-          );
+          return JSON.stringify(el) === JSON.stringify(currentToken);
         }
       });
+
       if (tokenAlreadyExists) {
         return dispatch({
-          type: "setTokenErrors",
+          type: "setCustomTokenErrors",
           payload: {
             address: "This token is already in your list",
           },
@@ -223,25 +255,24 @@ const TokenModal = ({
 
       // handle case 2
       if (strictStandard) {
-        const tokenTypeAlreadyExists = ERCTokens.some((el) => {
+        const tokenTypeAlreadyExists = existingTokens.some((el) => {
           if (isERCToken(el)) {
-            return el.type === token.type;
+            return el.type === currentToken?.type;
           }
         });
         if (tokenTypeAlreadyExists) {
-          return setProgress(1);
+          setConflictingToken(currentToken as IToken);
+          return setProgress(2);
         }
       }
     }
 
-    const { errors, ...rest } = token;
-    callback(rest, "add");
+    callback(currentToken as IToken, "add"); // strip the errors from the token and pass to callback
     handleCloseAndReset();
   };
 
   const handleTokenSwap = () => {
-    const { errors, ...rest } = token;
-    callback(rest, "swap");
+    callback(conflictingToken as IToken, "swap");
     handleCloseAndReset();
   };
 
@@ -252,35 +283,68 @@ const TokenModal = ({
           <div ref={modalRef} className="modal-box bg-black/90">
             {progress === 0 && (
               <div className="w-full px-1 flex flex-col gap-2">
+                <div className="flex flex-row items-center justify-evenly">
+                  <div className="flex flex-col">
+                    <h2 className="text-2xl">Quick Add</h2>
+                    <QuickAddToken
+                      quickAddTokens={quickAddTokens}
+                      state={state}
+                      dispatch={dispatch}
+                    />
+                  </div>
+                  <div className="divider lg:divider-horizontal">
+                    <ArrowPathIcon className="w-24" />
+                  </div>
+                  <button className="text-2xl">Manual Add</button>
+                </div>
+              </div>
+            )}
+            {progress === 1 && (
+              <div className="w-full px-1 flex flex-col gap-2">
                 <div className="flex flex-row items-center">
                   <h2 className="text-2xl">Add a token</h2>
                   <div className="ml-auto">
                     <MenuSelect
                       options={tokenOptions}
-                      selected={{ value: token.type }}
+                      selected={{
+                        value: state.customToken.type,
+                        label: state.customToken.type,
+                      }}
                       setSelected={(data) => {
                         dispatch({
-                          type: "setTokenType",
-                          payload: data.value as ERCTokenOption["type"],
+                          type: "setCustomTokenType",
+                          payload: data.value as CustomTokenOption["type"],
                         });
                       }}
                     />
                   </div>
                 </div>
-                {token.type === "ERC20" && (
-                  <ERC20FormElement token={token} dispatch={dispatch} />
+                {state.customToken.type === "ERC20" && (
+                  <ERC20FormElement
+                    token={state.customToken}
+                    dispatch={dispatch}
+                  />
                 )}
-                {token.type === "ERC721" && (
-                  <ERC721FormElement token={token} dispatch={dispatch} />
+                {state.customToken.type === "ERC721" && (
+                  <ERC721FormElement
+                    token={state.customToken}
+                    dispatch={dispatch}
+                  />
                 )}
-                {token.type === "ERC1155" && (
-                  <ERC1155FormElement token={token} dispatch={dispatch} />
+                {state.customToken.type === "ERC1155" && (
+                  <ERC1155FormElement
+                    token={state.customToken}
+                    dispatch={dispatch}
+                  />
                 )}
               </div>
             )}
-            {progress === 1 && (
+            {progress === 2 && conflictingToken && (
               // cases where we need to swap out the token standard
-              <TokenSwap token={token} existingTokens={existingTokens} />
+              <TokenSwap
+                token={conflictingToken}
+                existingTokens={existingTokens}
+              />
             )}
             <div className="modal-action mt-8">
               <button onClick={handleCloseAndReset} className="btn mr-auto">
@@ -288,7 +352,7 @@ const TokenModal = ({
               </button>
               <button
                 disabled={false}
-                onClick={progress === 0 ? handleModalConfirm : handleTokenSwap}
+                onClick={progress < 2 ? handleModalConfirm : handleTokenSwap}
                 className="btn btn-primary"
               >
                 {progress === 0 ? "Confirm" : "Swap"}
@@ -303,11 +367,71 @@ const TokenModal = ({
   return null;
 };
 
+const QuickAddToken = ({
+  quickAddTokens,
+  state,
+  dispatch,
+}: {
+  quickAddTokens: IToken[] | null;
+  state: TokenState;
+  dispatch: React.Dispatch<TokenAction>;
+}) => {
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Filter the tokens based on the search query
+  const filteredTokens = quickAddTokens?.filter((token) =>
+    token.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="flex flex-col gap-2">
+      <input
+        type="text"
+        className="input input-bordered"
+        placeholder="Search tokens..."
+        value={searchQuery}
+        onChange={(event) => setSearchQuery(event.target.value)}
+      />
+
+      {filteredTokens && filteredTokens.length > 0 ? (
+        <ul className="menu menu-compact lg:menu-normal bg-base-100 w-56 p-2 rounded-box">
+          {filteredTokens.map((el, index) => {
+            return (
+              <li key={index}>
+                <a
+                  className={`flex flex-row justify-between hover:bg-base-200 ${
+                    JSON.stringify(state.quickAddToken) === JSON.stringify(el)
+                      ? "bg-primary"
+                      : "bg-base-100"
+                  }`}
+                  onClick={() => {
+                    dispatch({
+                      type: "setQuickAddToken",
+                      payload: el,
+                    });
+                  }}
+                >
+                  <b>{el.symbol}</b>
+                  {el.type}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <div className="alert alert-warning shadow-lg">
+          <p>hmm.. I couldn't find that token</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const TokenSwap = ({
   token,
   existingTokens,
 }: {
-  token: ERCTokenOption;
+  token: IToken;
   existingTokens: IToken[] | null;
 }) => {
   return (
@@ -387,7 +511,7 @@ const ERC20FormElement = ({
   token,
   dispatch,
 }: {
-  token: ERCTokenOption;
+  token: CustomTokenOption;
   dispatch: React.Dispatch<TokenAction>;
 }) => (
   <div className="flex flex-col mt-auto w-full gap-4">
@@ -398,7 +522,7 @@ const ERC20FormElement = ({
       value={token.address}
       error={token.errors.address}
       onChange={(value) =>
-        dispatch({ type: "setToken", payload: { address: value } })
+        dispatch({ type: "setCustomToken", payload: { address: value } })
       }
     />
     <InputField
@@ -409,7 +533,7 @@ const ERC20FormElement = ({
       placeholder={token.symbol || "SHARK"}
       value={token.symbol}
       onChange={(value) =>
-        dispatch({ type: "setToken", payload: { symbol: value } })
+        dispatch({ type: "setCustomToken", payload: { symbol: value } })
       }
     />
     <InputField
@@ -420,7 +544,10 @@ const ERC20FormElement = ({
       placeholder={token.decimals.toString()}
       value={token.decimals.toString()}
       onChange={(value) =>
-        dispatch({ type: "setToken", payload: { decimals: Number(value) } })
+        dispatch({
+          type: "setCustomToken",
+          payload: { decimals: Number(value) },
+        })
       }
     />
   </div>
@@ -430,7 +557,7 @@ const ERC721FormElement = ({
   token,
   dispatch,
 }: {
-  token: ERCTokenOption;
+  token: CustomTokenOption;
   dispatch: React.Dispatch<TokenAction>;
 }) => (
   <div className="flex flex-col mt-auto w-full gap-4">
@@ -441,7 +568,10 @@ const ERC721FormElement = ({
       value={token.address}
       error={token.errors.address}
       onChange={(value) =>
-        dispatch({ type: "setToken", payload: { address: value } })
+        dispatch({
+          type: "setCustomToken",
+          payload: { address: value },
+        })
       }
     />
     <InputField
@@ -449,10 +579,10 @@ const ERC721FormElement = ({
       label="Symbol"
       type="text"
       disabled
-      placeholder={token.symbol || "NOUNS"}
+      placeholder={token.symbol || "NOUN"}
       value={token.symbol}
       onChange={(value) =>
-        dispatch({ type: "setToken", payload: { symbol: value } })
+        dispatch({ type: "setCustomToken", payload: { symbol: value } })
       }
     />
     <InputField
@@ -463,7 +593,10 @@ const ERC721FormElement = ({
       placeholder={token.decimals.toString()}
       value={token.decimals.toString()}
       onChange={(value) =>
-        dispatch({ type: "setToken", payload: { decimals: Number(value) } })
+        dispatch({
+          type: "setCustomToken",
+          payload: { decimals: Number(value) },
+        })
       }
     />
   </div>
@@ -473,7 +606,7 @@ const ERC1155FormElement = ({
   token,
   dispatch,
 }: {
-  token: ERCTokenOption;
+  token: CustomTokenOption;
   dispatch: React.Dispatch<TokenAction>;
 }) => (
   <div className="flex flex-col mt-auto w-full gap-4">
@@ -484,7 +617,7 @@ const ERC1155FormElement = ({
       value={token.address}
       error={token.errors.address}
       onChange={(value) =>
-        dispatch({ type: "setToken", payload: { address: value } })
+        dispatch({ type: "setCustomToken", payload: { address: value } })
       }
     />
     <div className="flex flex-row w-full gap-4">
@@ -495,7 +628,7 @@ const ERC1155FormElement = ({
         placeholder="SHARK"
         value={token.symbol}
         onChange={(value) =>
-          dispatch({ type: "setToken", payload: { symbol: value } })
+          dispatch({ type: "setCustomToken", payload: { symbol: value } })
         }
       />
       <InputField
@@ -506,7 +639,10 @@ const ERC1155FormElement = ({
         placeholder="0"
         value="0"
         onChange={(value) =>
-          dispatch({ type: "setToken", payload: { decimals: Number(value) } })
+          dispatch({
+            type: "setCustomToken",
+            payload: { decimals: Number(value) },
+          })
         }
       />
     </div>
@@ -519,7 +655,7 @@ const ERC1155FormElement = ({
       error={token.errors.tokenId}
       onChange={(value) =>
         dispatch({
-          type: "setToken",
+          type: "setCustomToken",
           payload: {
             tokenId: Number(value),
           },

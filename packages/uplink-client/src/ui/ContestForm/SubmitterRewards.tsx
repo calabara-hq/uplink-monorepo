@@ -1,11 +1,16 @@
 import {
+  arraysSubtract,
   ContestBuilderProps,
+  rewardsObjectToArray,
   SubmitterRewards,
+  VoterRewards,
 } from "@/app/contestbuilder/contestHandler";
 import { useState, useEffect, useReducer, Fragment } from "react";
 import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
+import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
+import TokenCard from "../TokenCard/TokenCard";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
@@ -65,14 +70,18 @@ const SubmitterRewardsComponent = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const handleSaveCallback = (data: IToken, actionType: "add" | "swap") => {
     if (actionType === "add")
-      return dispatch({ type: "addRewardOption", payload: data });
+      return dispatch({ type: "addSubmitterReward", payload: { token: data } });
     else if (actionType === "swap")
-      return dispatch({ type: "swapRewardOption", payload: data });
+      return dispatch({
+        type: "swapSubmitterReward",
+        payload: { token: data },
+      });
   };
+
   return (
     <BlockWrapper title="Submitter Rewards">
       <div className="flex flex-col w-full gap-2">
-        {state.rewardOptions.map((token, index) => {
+        {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
           return <TokenCard key={index} token={token} dispatch={dispatch} />;
         })}
       </div>
@@ -80,44 +89,27 @@ const SubmitterRewardsComponent = ({
         add reward
       </button>
       <SubmitterRewardMatrix
-        rewardOptions={state.rewardOptions}
+        spaceTokens={state.spaceTokens}
         submitterRewards={state.submitterRewards}
         dispatch={dispatch}
       />
+      {/*<VoterRewardComponent
+        spaceTokens={state.spaceTokens}
+        voterRewards={state.voterRewards}
+        dispatch={dispatch}
+    />*/}
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         callback={handleSaveCallback}
-        existingTokens={state.rewardOptions}
+        existingTokens={rewardsObjectToArray(state.submitterRewards)}
+        quickAddTokens={arraysSubtract(
+          state.spaceTokens,
+          rewardsObjectToArray(state.submitterRewards)
+        )}
         strictStandard={true}
       />
     </BlockWrapper>
-  );
-};
-
-const TokenCard = ({
-  token,
-  dispatch,
-}: {
-  token: IToken;
-  dispatch: React.Dispatch<ToggleRewardAction>;
-}) => {
-  const onSelectCallback = (isSelected: boolean) => {
-    dispatch({
-      type: "toggleRewardOption",
-      payload: { token: token, selected: isSelected },
-    });
-  };
-  return (
-    <div className="card w-96 bg-base-100 shadow-xl">
-      <div className="card-body">
-        <h2 className="card-title">{token.symbol}</h2>
-        <p>If a dog chews shoes whose shoes does he choose?</p>
-        <div className="card-actions justify-end">
-          <Toggle defaultState={false} onSelectCallback={onSelectCallback} />
-        </div>
-      </div>
-    </div>
   );
 };
 
@@ -142,11 +134,11 @@ const Toggle = ({
 };
 
 const SubmitterRewardMatrix = ({
-  rewardOptions,
+  spaceTokens,
   submitterRewards,
   dispatch,
 }: {
-  rewardOptions: IToken[];
+  spaceTokens: IToken[];
   submitterRewards: SubmitterRewards;
   dispatch: React.Dispatch<
     | AddSubRankAction
@@ -178,7 +170,6 @@ const SubmitterRewardMatrix = ({
     tokenType: keyof SubmitterRewards,
     amount: string
   ) => {
-    console.log(typeof amount);
     dispatch({
       type: "updateSubRewardAmount",
       payload: { index, tokenType, amount },
@@ -311,255 +302,6 @@ const SubmitterRewardMatrix = ({
               </th>
             </tr>
           </tbody>
-        </table>
-      </div>
-    );
-
-    return (
-      <div className="w-full overflow-x-auto flex justify-center">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th
-                className={`${submitterRewards.ETH ? "table-cell" : "hidden"}`}
-              >
-                ETH Payout
-              </th>
-              <th
-                className={`${
-                  submitterRewards.ERC20 ? "table-cell" : "hidden"
-                }`}
-              >
-                ERC20 Payout
-              </th>
-              <th
-                className={`${
-                  submitterRewards.ERC721 ? "table-cell" : "hidden"
-                }`}
-              >
-                ERC721 Payout
-              </th>
-              <th
-                className={`${
-                  submitterRewards.ERC1155 ? "table-cell" : "hidden"
-                }`}
-              >
-                ERC1155 Payout
-              </th>
-              <th>{/* the delete header */}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {submitterRewards.payouts.map((payout, index) => (
-              <tr key={index} className="w-full">
-                <th>
-                  <input
-                    className="input input-bordered w-full max-w-full"
-                    type="number"
-                    value={payout.rank || ""}
-                    onChange={(e) => updateRank(index, Number(e.target.value))}
-                  />
-                </th>
-                {payout.ETH && (
-                  <td>
-                    <input
-                      className="input input-bordered w-full max-w-full"
-                      type="number"
-                      value={payout.ETH?.amount || ""}
-                      onChange={(e) =>
-                        updateAmount(index, "ETH", e.target.value)
-                      }
-                    />
-                  </td>
-                )}
-
-                {payout.ERC20 && (
-                  <td>
-                    <input
-                      className="input input-bordered w-full max-w-full"
-                      type="number"
-                      value={payout.ERC20.amount || ""}
-                      onChange={(e) =>
-                        updateAmount(index, "ERC20", e.target.value)
-                      }
-                    />
-                  </td>
-                )}
-                {payout.ERC721 && (
-                  <td>
-                    <input
-                      className="input input-bordered w-full max-w-full"
-                      type="number"
-                      value={payout.ERC721.tokenId || ""}
-                      onChange={(e) =>
-                        updateERC721TokenId(index, e.target.value)
-                      }
-                    />
-                  </td>
-                )}
-                {payout.ERC1155 && (
-                  <td>
-                    <input
-                      className="input input-bordered w-full max-w-full"
-                      type="number"
-                      value={payout.ERC1155.amount || ""}
-                      onChange={(e) =>
-                        updateAmount(index, "ERC1155", e.target.value)
-                      }
-                    />
-                  </td>
-                )}
-                {submitterRewards.payouts.length > 1 ? (
-                  <td className="w-1/6 text-right">
-                    <button
-                      className="btn btn-sm btn-error"
-                      onClick={() => removeRank(index)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                ) : (
-                  <td className="w-1/6 text-right"></td>
-                )}
-              </tr>
-            ))}
-            <tr>
-              <th>
-                <button className="btn btn-sm" onClick={addRank}>
-                  Add Rank
-                </button>
-              </th>
-            </tr>
-          </tbody>
-          <tfoot></tfoot>
-        </table>
-      </div>
-    );
-
-    return (
-      <div className="overflow-x-auto">
-        <table className="table table-compact w-full">
-          <thead>
-            <tr className="w-full">
-              <th className="bg-blue-100">Rank</th>
-              {submitterRewards.ETH ? (
-                <th className="bg-blue-200">ETH Payout</th>
-              ) : (
-                <th className="w-24"></th>
-              )}
-              {submitterRewards.ERC20 ? (
-                <th className="bg-blue-300">ERC20 Payout</th>
-              ) : (
-                ""
-              )}
-              {submitterRewards.ERC721 ? (
-                <th className="bg-blue-400">ERC721 Payout</th>
-              ) : (
-                ""
-              )}
-              {submitterRewards.ERC1155 ? (
-                <th className="bg-blue-500">ERC1155 Payout</th>
-              ) : (
-                ""
-              )}
-              <th className="bg-blue-600">{/* delete header */}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {submitterRewards.payouts.map((payout, index) => (
-              <tr key={index} className="w-full">
-                <td className="bg-blue-100">
-                  <input
-                    className="input input-bordered"
-                    type="number"
-                    value={payout.rank || ""}
-                    onChange={(e) => updateRank(index, Number(e.target.value))}
-                  />
-                </td>
-                <td className="bg-blue-200">
-                  {payout.ETH ? (
-                    <input
-                      className="input input-bordered"
-                      type="number"
-                      value={payout.ETH?.amount || ""}
-                      onChange={(e) =>
-                        updateAmount(index, "ETH", e.target.value)
-                      }
-                    />
-                  ) : (
-                    ""
-                  )}
-                </td>
-
-                <td className="bg-blue-300">
-                  {payout.ERC20 ? (
-                    <input
-                      className="input input-bordered"
-                      type="number"
-                      value={payout.ERC20.amount || ""}
-                      onChange={(e) =>
-                        updateAmount(index, "ERC20", e.target.value)
-                      }
-                    />
-                  ) : (
-                    ""
-                  )}
-                </td>
-
-                <td className="bg-blue-400">
-                  {payout.ERC721 ? (
-                    <input
-                      className="input input-bordered"
-                      type="number"
-                      value={payout.ERC721.tokenId || ""}
-                      onChange={(e) =>
-                        updateERC721TokenId(index, e.target.value)
-                      }
-                    />
-                  ) : (
-                    ""
-                  )}
-                </td>
-                <td className="bg-blue-500">
-                  {payout.ERC1155 ? (
-                    <input
-                      className="input input-bordered"
-                      type="number"
-                      value={payout.ERC1155.amount || ""}
-                      onChange={(e) =>
-                        updateAmount(index, "ERC1155", e.target.value)
-                      }
-                    />
-                  ) : (
-                    ""
-                  )}
-                </td>
-                <td className="bg-blue-600">
-                  {submitterRewards.payouts.length > 1 ? (
-                    <button
-                      className="btn btn-sm btn-error"
-                      onClick={() => removeRank(index)}
-                    >
-                      Delete
-                    </button>
-                  ) : (
-                    ""
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={6}>
-                <button className="btn" onClick={addRank}>
-                  Add Rank
-                </button>
-              </td>
-            </tr>
-          </tfoot>
         </table>
       </div>
     );

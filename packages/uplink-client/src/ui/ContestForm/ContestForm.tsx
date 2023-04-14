@@ -15,6 +15,7 @@ import StandardPrompt from "./StandardPrompt";
 import Deadlines from "./Deadlines";
 import ContestType from "./ContestType";
 import SubmitterRewardsComponent from "./SubmitterRewards";
+import VoterRewardsComponent from "./VoterRewards";
 export const BlockWrapper = ({
   title,
   children,
@@ -46,32 +47,46 @@ const initialState = {
   contestPromptBody: "",
   media_blob: null,
   media_url: null,
-  rewardOptions: [
+  spaceTokens: [
     {
       type: "ETH",
       symbol: "ETH",
       decimals: 18,
     },
+
     {
       type: "ERC1155",
-      address: "0x0",
-      symbol: "MemSzr",
+      address: "0xab0ab2fc1c498942B24278Bbd86bD171a3406A5E",
+      symbol: "MmSzr",
       decimals: 0,
     },
     {
       type: "ERC20",
-      address: "0x0",
+      address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       symbol: "USDC",
+      decimals: 6,
+    },
+    {
+      type: "ERC20",
+      address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      symbol: "USDT",
       decimals: 18,
     },
     {
       type: "ERC721",
-      address: "0x0",
-      symbol: "Nouns",
+      address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+      symbol: "NOUN",
       decimals: 0,
     },
   ],
   submitterRewards: {
+    payouts: [
+      {
+        rank: 1,
+      },
+    ],
+  },
+  voterRewards: {
     payouts: [
       {
         rank: 1,
@@ -96,7 +111,7 @@ export default function ContestForm() {
     const contest = {
       ...state,
     };
-    console.log(contest.submitterRewards);
+    console.log(contest);
   };
 
   return (
@@ -123,6 +138,7 @@ export default function ContestForm() {
         {state.type && <Deadlines state={state} dispatch={dispatch} />}
         <StandardPrompt state={state} dispatch={dispatch} />
         <SubmitterRewardsComponent state={state} dispatch={dispatch} />
+        <VoterRewardsComponent state={state} dispatch={dispatch} />
         {/*<TweetThread state={state} dispatch={dispatch} />*/}
       </div>
       <button className="btn btn-primary" onClick={handleSave}>

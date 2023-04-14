@@ -4,6 +4,7 @@ import ERC721ABI from '@/lib/abi/erc721ABI.json';
 import ERC1155ABI from '@/lib/abi/erc1155ABI.json';
 import ERC165ABI from '@/lib/abi/erc165ABI.json';
 
+
 const ERC721Interface = '0x80ac58cd';
 const ERC1155Interface = '0xd9b67a26';
 
