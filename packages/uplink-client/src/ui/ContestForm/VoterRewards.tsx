@@ -8,7 +8,7 @@ import {
 } from "@/app/contestbuilder/contestHandler";
 import TokenModal from "../TokenModal/TokenModal";
 import { IToken } from "@/types/token";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
 
 const VoterRewardsComponent = ({
@@ -28,6 +28,8 @@ const VoterRewardsComponent = ({
         payload: { token: data },
       });
   };
+  console.log(state.voterRewards ? "yes" : "no");
+  console.log(state.voterRewards);
   return (
     <BlockWrapper title="Voter Rewards">
       <div className="flex flex-col w-full gap-2">
@@ -35,15 +37,13 @@ const VoterRewardsComponent = ({
           return <TokenCard key={index} token={token} dispatch={dispatch} />;
         })}
       </div>
-      <button className="btn" onClick={() => setIsModalOpen(true)}>
-        add reward
-      </button>
 
       <VoterRewardsMatrix
         spaceTokens={state.spaceTokens}
         voterRewards={state.voterRewards}
         dispatch={dispatch}
       />
+
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -57,6 +57,10 @@ const VoterRewardsComponent = ({
         uniqueStandard={true}
         strictTypes={["ERC20"]}
       />
+
+      <button className="btn" onClick={() => setIsModalOpen(true)}>
+        add reward
+      </button>
     </BlockWrapper>
   );
 };
@@ -81,19 +85,22 @@ const VoterRewardsMatrix = ({
     <div className="flex flex-col w-full gap-2">
       {voterRewards && (
         <div className="">
-          {voterRewards.payouts.map((reward, index) => {
-            return (
-              <VoterRewardRow
-                key={index}
-                index={index}
-                reward={reward}
-                availableRewardTokens={Object.entries(voterRewards)
-                  .filter(([key, value]) => key !== "payouts" && value !== null)
-                  .flatMap(([key, value]) => value)}
-                dispatch={dispatch}
-              />
-            );
-          })}
+          {(voterRewards.ERC20 || voterRewards.ETH) &&
+            voterRewards.payouts.map((reward, index) => {
+              return (
+                <VoterRewardRow
+                  key={index}
+                  index={index}
+                  reward={reward}
+                  availableRewardTokens={Object.entries(voterRewards)
+                    .filter(
+                      ([key, value]) => key !== "payouts" && value !== null
+                    )
+                    .flatMap(([key, value]) => value)}
+                  dispatch={dispatch}
+                />
+              );
+            })}
           <button className="btn btn-sm">add</button>
         </div>
       )}
@@ -112,32 +119,47 @@ const VoterRewardRow = ({
   availableRewardTokens: IToken[];
   dispatch: React.Dispatch<any>;
 }) => {
+  console.log(availableRewardTokens);
   const menuSelectOptions = availableRewardTokens.map((token) => {
-    return { value: token.symbol, label: token.type };
+    return { value: token.type, label: token.symbol };
   });
   const [selectedToken, setSelectedToken] = useState<Option>(
     menuSelectOptions[0]
   );
 
   const addRank = () => {
-    dispatch({ type: "addSubRank" });
+    dispatch({ type: "addVoterRank" });
   };
 
   const removeRank = (index: number) => {
-    dispatch({ type: "removeSubRank", payload: index });
+    dispatch({ type: "removeVoterRank", payload: index });
   };
 
   const updateRank = (index: number, rank: number) => {
     if (Number.isInteger(rank)) {
       dispatch({
-        type: "updateVoterRewardRank",
+        type: "updateVoterRank",
         payload: { index, rank: rank },
       });
     }
   };
 
+  const updateTokenType = (option: Option) => {
+    // take the selected token and set the amount for the new option to the amount of the old option and clear the old option
+    dispatch({
+      type: "updateVoterRewardType",
+      payload: {
+        index,
+        oldTokenType: selectedToken.value,
+        newTokenType: option.value,
+      },
+    });
+
+    setSelectedToken(option);
+  };
+
   const updateAmount = (index: number, tokenType: string, amount: string) => {
-    console.log(typeof amount);
+    console.log(typeof amount, amount);
     dispatch({
       type: "updateVoterRewardAmount",
       payload: { index, tokenType, amount },
@@ -159,16 +181,15 @@ const VoterRewardRow = ({
         type="number"
         value={reward.ETH?.amount || ""}
         onChange={(e) =>
-          updateAmount(index, selectedToken.label, e.target.value)
+          updateAmount(index, selectedToken.value, e.target.value)
         }
       />
-      {/*
+
       <MenuSelect
         selected={selectedToken}
-        setSelected={setSelectedToken}
+        setSelected={updateTokenType}
         options={menuSelectOptions}
       />
-    */}
     </div>
   );
 };

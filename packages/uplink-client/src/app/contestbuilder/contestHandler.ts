@@ -27,7 +27,6 @@ export interface SubmitterRewards {
 export interface VoterRewards {
     ETH?: IToken;
     ERC20?: IToken;
-    ERC1155?: IToken;
     payouts: [
         {
             rank: number;
@@ -35,9 +34,6 @@ export interface VoterRewards {
                 amount: string;
             };
             ERC20?: {
-                amount: string;
-            };
-            ERC1155?: {
                 amount: string;
             };
         }
@@ -315,7 +311,6 @@ export const reducer = (state: any, action: any) => {
             return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedERC721Payouts } };
         }
 
-
         case "toggleVoterRewards": {
             return {
                 ...state,
@@ -337,7 +332,36 @@ export const reducer = (state: any, action: any) => {
             }
         }
 
-        case "updateVoterRewardRank": {
+        case "addVoterRank": {
+            return {
+                ...state,
+                voterRewards: {
+                    ...state.voterRewards,
+                    payouts: [
+                        ...state.voterRewards.payouts,
+                        {
+                            rank: state.voterRewards.payouts.length + 1,
+                            ...(state.voterRewards.ETH ? { ETH: { amount: "0" } } : {}),
+                            ...(state.voterRewards.ERC20 ? { ERC20: { amount: "0" } } : {}),
+
+                        },
+                    ],
+                },
+            };
+        }
+
+        case "removeVoterRank": {
+            return {
+                ...state,
+                voterRewards: {
+                    ...state.voterRewards,
+                    payouts: state.voterRewards.payouts.filter((_: any, index: number) => index !== action.payload),
+                },
+            };
+        }
+
+
+        case "updateVoterRank": {
             const updatedPayouts = [...state.voterRewards.payouts];
             if (!isNaN(action.payload.rank)) {
                 updatedPayouts[action.payload.index].rank = Number(action.payload.rank);
@@ -356,6 +380,27 @@ export const reducer = (state: any, action: any) => {
             updatedPayouts[action.payload.index][action.payload.tokenType].amount = action.payload.amount;
             return { ...state, voterRewards: { ...state.voterRewards, payouts: updatedPayouts } };
         }
+
+        case "updateVoterRewardType": {
+            // take the selected token and set the amount for the new option to the amount of the old option and clear the old option
+            // payload looks like this: {index: number, oldTokenType: "ETH | ERC20", newTokenType: "ETH | ERC20"}
+            const updatedPayouts = [...state.voterRewards.payouts];
+            const oldTokenType = action.payload.oldTokenType;
+            const newTokenType = action.payload.newTokenType;
+            const index = action.payload.index;
+            if (oldTokenType === newTokenType) {
+                return state;
+            }
+            if (updatedPayouts[index][oldTokenType]) {
+                updatedPayouts[index][newTokenType] = { amount: updatedPayouts[index][oldTokenType].amount };
+                // set the old token amount to 0
+                updatedPayouts[index][oldTokenType].amount = "0";
+            } else {
+                updatedPayouts[index][newTokenType] = { amount: "0" };
+            }
+            return { ...state, voterRewards: { ...state.voterRewards, payouts: updatedPayouts } };
+        }
+
 
         case "setErrors":
             return {

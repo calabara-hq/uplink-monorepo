@@ -57,7 +57,7 @@ const MenuSelect = ({
                 selected.value === option.value ? "bg-primary" : ""
               }`}
             >
-              <a>{option.value}</a>
+              <a>{option.label}</a>
             </li>
           ))}
           {/*
