@@ -1,0 +1,12 @@
+.ce-popover--opened{
+    color: black;
+}
+.ce-inline-toolbar{
+    color: black;
+}
+.ce-toolbar__settings-btn, .ce-toolbar__plus{
+    background-color: #d3d3d3;
+}
+.ce-toolbar__settings-btn:hover, .ce-toolbar__plus:hover{
+    background-color: white;
+}

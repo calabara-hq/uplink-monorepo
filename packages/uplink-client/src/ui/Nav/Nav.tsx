@@ -38,7 +38,7 @@ const Nav: React.FC<INav> = () => {
             </Link>
           </div>
           <div className="flex items-center">
-            <div className="flex items-center mr-20">
+            <div className="flex items-center">
               <WalletConnectButton />
             </div>
           </div>
