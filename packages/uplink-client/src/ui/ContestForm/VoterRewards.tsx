@@ -132,7 +132,7 @@ const VoterRewardRow = ({
     menuSelectOptions[0]
   );
 
-  const removeRank = (index: number) => {
+  const removeRank = () => {
     dispatch({ type: "removeVoterRank", payload: index });
   };
 
@@ -190,6 +190,9 @@ const VoterRewardRow = ({
         setSelected={updateTokenType}
         options={menuSelectOptions}
       />
+      <button className="btn btn-sm" onClick={removeRank}>
+        delete
+      </button>
     </div>
   );
 };
