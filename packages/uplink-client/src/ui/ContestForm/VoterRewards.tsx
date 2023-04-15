@@ -81,10 +81,13 @@ const VoterRewardsMatrix = ({
     });
   };
 
+  const addRank = () => {
+    dispatch({ type: "addVoterRank" });
+  };
   return (
     <div className="flex flex-col w-full gap-2">
       {voterRewards && (
-        <div className="">
+        <div className="flex flex-col gap-2">
           {(voterRewards.ERC20 || voterRewards.ETH) &&
             voterRewards.payouts.map((reward, index) => {
               return (
@@ -101,7 +104,9 @@ const VoterRewardsMatrix = ({
                 />
               );
             })}
-          <button className="btn btn-sm">add</button>
+          <button className="btn btn-sm" onClick={addRank}>
+            add
+          </button>
         </div>
       )}
     </div>
@@ -127,10 +132,6 @@ const VoterRewardRow = ({
     menuSelectOptions[0]
   );
 
-  const addRank = () => {
-    dispatch({ type: "addVoterRank" });
-  };
-
   const removeRank = (index: number) => {
     dispatch({ type: "removeVoterRank", payload: index });
   };
@@ -145,7 +146,6 @@ const VoterRewardRow = ({
   };
 
   const updateTokenType = (option: Option) => {
-    // take the selected token and set the amount for the new option to the amount of the old option and clear the old option
     dispatch({
       type: "updateVoterRewardType",
       payload: {
@@ -179,7 +179,7 @@ const VoterRewardRow = ({
       <input
         className="input input-bordered w-32"
         type="number"
-        value={reward.ETH?.amount || ""}
+        value={reward[selectedToken.value].amount || ""}
         onChange={(e) =>
           updateAmount(index, selectedToken.value, e.target.value)
         }
