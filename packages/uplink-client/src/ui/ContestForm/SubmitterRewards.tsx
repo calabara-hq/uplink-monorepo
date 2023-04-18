@@ -11,6 +11,7 @@ import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
 import TokenCard from "../TokenCard/TokenCard";
+import Modal from "../Modal/Modal";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
@@ -96,13 +97,14 @@ const SubmitterRewardsComponent = ({
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        callback={handleSaveCallback}
+        saveCallback={handleSaveCallback}
         existingTokens={rewardsObjectToArray(state.submitterRewards)}
         quickAddTokens={arraysSubtract(
           state.spaceTokens,
           rewardsObjectToArray(state.submitterRewards)
         )}
         uniqueStandard={true}
+        continuous={false}
       />
     </BlockWrapper>
   );

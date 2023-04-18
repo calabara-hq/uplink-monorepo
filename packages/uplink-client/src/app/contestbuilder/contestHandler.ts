@@ -40,7 +40,9 @@ export interface VoterRewards {
     ]
 };
 
-
+export type SubmitterRestriction = IToken & {
+    threshold: string;
+}
 
 export interface ContestBuilderProps {
     type: string | null;
@@ -54,6 +56,7 @@ export interface ContestBuilderProps {
     spaceTokens: IToken[];
     submitterRewards: SubmitterRewards;
     voterRewards: VoterRewards;
+    submitterRestrictions: SubmitterRestriction[] | [];
     errors: ContestBuilderErrors;
 }
 
@@ -401,6 +404,33 @@ export const reducer = (state: any, action: any) => {
             return { ...state, voterRewards: { ...state.voterRewards, payouts: updatedPayouts } };
         }
 
+        case "addSubmitterRestriction": {
+            return {
+                ...state,
+                submitterRestrictions: [
+                    ...state.submitterRestrictions,
+                    action.payload.token,
+                ],
+            };
+        }
+
+        case "removeSubmitterRestriction": {
+            return {
+                ...state,
+                submitterRestrictions: state.submitterRestrictions.filter((_: any, index: number) => index !== action.payload),
+            };
+        }
+
+
+        case "updateSubRestrictionThreshold": {
+            const updatedSubRestrictions = [...state.submitterRestrictions];
+            if (!isNaN(action.payload.threshold)) {
+                updatedSubRestrictions[action.payload.index].threshold = action.payload.threshold;
+            } else {
+                updatedSubRestrictions[action.payload.index].threshold = "";
+            }
+            return { ...state, submitterRestrictions: updatedSubRestrictions };
+        }
 
         case "setErrors":
             return {

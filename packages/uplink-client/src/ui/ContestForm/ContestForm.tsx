@@ -16,6 +16,8 @@ import Deadlines from "./Deadlines";
 import ContestType from "./ContestType";
 import SubmitterRewardsComponent from "./SubmitterRewards";
 import VoterRewardsComponent from "./VoterRewards";
+import SubmitterRestrictions from "./SubmitterRestrictions";
+import VotingPolicy from "./VotingPolicy";
 export const BlockWrapper = ({
   title,
   children,
@@ -93,6 +95,7 @@ const initialState = {
       },
     ],
   },
+  submitterRestrictions: [],
   /*
   submitterRewards: [],
   voterRewards: [],
@@ -139,6 +142,8 @@ export default function ContestForm() {
         <StandardPrompt state={state} dispatch={dispatch} />
         <SubmitterRewardsComponent state={state} dispatch={dispatch} />
         <VoterRewardsComponent state={state} dispatch={dispatch} />
+        <SubmitterRestrictions state={state} dispatch={dispatch} />
+        <VotingPolicy state={state} dispatch={dispatch} />
         {/*<TweetThread state={state} dispatch={dispatch} />*/}
       </div>
       <button className="btn btn-primary" onClick={handleSave}>
