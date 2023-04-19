@@ -55,11 +55,24 @@ const SubmitterRewardsComponent = ({
     return dispatch({ type: "addSubmitterReward", payload: { token: data } });
   };
 
+  const handleRemove = (token: IToken) => {
+    dispatch({
+      type: "removeSubmitterReward",
+      payload: { token: token },
+    });
+  };
+
   return (
     <BlockWrapper title="Submitter Rewards">
       <div className="flex flex-col w-full gap-2">
         {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
-          return <TokenCard key={index} token={token} dispatch={dispatch} />;
+          return (
+            <TokenCard
+              key={index}
+              token={token}
+              handleRemove={() => handleRemove(token)}
+            />
+          );
         })}
       </div>
       <button className="btn" onClick={() => setIsModalOpen(true)}>

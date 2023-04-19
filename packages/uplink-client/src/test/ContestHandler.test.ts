@@ -243,7 +243,7 @@ describe("Submitter Rewards", () => {
 })
 
 describe("Voter Rewards", () => {
-    test("addVoterReward", () => {
+    test("addVoterReward ETH", () => {
         const initialState = {
             voterRewards: {
                 ERC20: sampleERC20Token,
@@ -261,7 +261,7 @@ describe("Voter Rewards", () => {
         expect(reducer(initialState, action)).toEqual(expectedState);
     });
 
-    test("addVoterReward", () => {
+    test("addVoterReward ERC20", () => {
         const initialState = {
             voterRewards: {
                 ERC20: sampleERC20Token,

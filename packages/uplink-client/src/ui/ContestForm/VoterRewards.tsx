@@ -22,13 +22,25 @@ const VoterRewardsComponent = ({
   const handleSaveCallback = (data: IToken) => {
     return dispatch({ type: "addVoterReward", payload: { token: data } });
   };
-  console.log(state.voterRewards ? "yes" : "no");
-  console.log(state.voterRewards);
+
+  const handleRemove = (token: IToken) => {
+    dispatch({
+      type: "removeVoterReward",
+      payload: { token: token },
+    });
+  };
+
   return (
     <BlockWrapper title="Voter Rewards">
       <div className="flex flex-col w-full gap-2">
         {rewardsObjectToArray(state.voterRewards).map((token, index) => {
-          return <TokenCard key={index} token={token} dispatch={dispatch} />;
+          return (
+            <TokenCard
+              key={index}
+              token={token}
+              handleRemove={() => handleRemove(token)}
+            />
+          );
         })}
       </div>
 

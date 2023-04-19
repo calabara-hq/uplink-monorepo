@@ -278,6 +278,27 @@ export const reducer = (state: any, action: any) => {
             }
         };
 
+        case "removeVoterReward": {
+            const { [action.payload.token.type]: _, ...updatedVoterRewards } = state.voterRewards;
+
+            const updatedPayouts = [];
+            for (let i = 0; i < state.voterRewards.payouts.length; i++) {
+                const payout = state.voterRewards.payouts[i];
+                const { [action.payload.token.type]: _, ...updatedPayout } = payout;
+                if (Object.keys(updatedPayout).length > 0) {
+                    updatedPayouts.push(updatedPayout);
+                }
+            }
+
+            return {
+                ...state,
+                voterRewards: {
+                    ...updatedVoterRewards,
+                    payouts: updatedPayouts
+                }
+            };
+        }
+
         case "addVoterRank": {
             return {
                 ...state,
