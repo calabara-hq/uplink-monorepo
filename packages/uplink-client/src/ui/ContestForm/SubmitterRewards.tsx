@@ -3,15 +3,12 @@ import {
   ContestBuilderProps,
   rewardsObjectToArray,
   SubmitterRewards,
-  VoterRewards,
 } from "@/app/contestbuilder/contestHandler";
 import { useState, useEffect, useReducer, Fragment } from "react";
 import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
-import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
 import TokenCard from "../TokenCard/TokenCard";
-import Modal from "../Modal/Modal";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
@@ -21,21 +18,6 @@ import Modal from "../Modal/Modal";
  */
 
 // type the reducer functions
-
-type AddRewardAction = {
-  type: "addRewardOption";
-  payload: IToken;
-};
-
-type SwapRewardAction = {
-  type: "swapRewardOption";
-  payload: IToken;
-};
-
-type ToggleRewardAction = {
-  type: "toggleRewardOption";
-  payload: { token: IToken; selected: boolean };
-};
 
 type AddSubRankAction = {
   type: "addSubRank";
@@ -69,14 +51,8 @@ const SubmitterRewardsComponent = ({
   dispatch: React.Dispatch<any>;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleSaveCallback = (data: IToken, actionType: "add" | "swap") => {
-    if (actionType === "add")
-      return dispatch({ type: "addSubmitterReward", payload: { token: data } });
-    else if (actionType === "swap")
-      return dispatch({
-        type: "swapSubmitterReward",
-        payload: { token: data },
-      });
+  const handleSaveCallback = (data: IToken) => {
+    return dispatch({ type: "addSubmitterReward", payload: { token: data } });
   };
 
   return (

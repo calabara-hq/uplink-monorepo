@@ -96,6 +96,7 @@ const initialState = {
     ],
   },
   submitterRestrictions: [],
+  votingPolicy: [],
   /*
   submitterRewards: [],
   voterRewards: [],

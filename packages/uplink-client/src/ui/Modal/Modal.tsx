@@ -44,4 +44,25 @@ const Modal = ({
   return null;
 };
 
+export const ModalActions = ({
+  onCancel,
+  onConfirm,
+  confirmLabel,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+  confirmLabel: string;
+}) => {
+  return (
+    <div className="modal-action mt-8">
+      <button onClick={onCancel} className="btn mr-auto">
+        Cancel
+      </button>
+      <button disabled={false} onClick={onConfirm} className="btn btn-primary">
+        {confirmLabel}
+      </button>
+    </div>
+  );
+};
+
 export default Modal;

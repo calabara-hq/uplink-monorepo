@@ -19,14 +19,8 @@ const VoterRewardsComponent = ({
   dispatch: React.Dispatch<any>;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleSaveCallback = (data: IToken, actionType: "add" | "swap") => {
-    if (actionType === "add")
-      return dispatch({ type: "addVoterReward", payload: { token: data } });
-    else if (actionType === "swap")
-      return dispatch({
-        type: "swapVoterReward",
-        payload: { token: data },
-      });
+  const handleSaveCallback = (data: IToken) => {
+    return dispatch({ type: "addVoterReward", payload: { token: data } });
   };
   console.log(state.voterRewards ? "yes" : "no");
   console.log(state.voterRewards);
@@ -47,7 +41,7 @@ const VoterRewardsComponent = ({
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        callback={handleSaveCallback}
+        saveCallback={handleSaveCallback}
         existingTokens={rewardsObjectToArray(state.voterRewards)}
         quickAddTokens={arraysSubtract(
           state.spaceTokens,
@@ -56,6 +50,7 @@ const VoterRewardsComponent = ({
         )}
         uniqueStandard={true}
         strictTypes={["ERC20"]}
+        continuous={false}
       />
 
       <button className="btn" onClick={() => setIsModalOpen(true)}>
@@ -74,13 +69,6 @@ const VoterRewardsMatrix = ({
   voterRewards: VoterRewards;
   dispatch: React.Dispatch<any>;
 }) => {
-  const onSelectCallback = (isSelected: boolean) => {
-    dispatch({
-      type: "toggleVoterRewards",
-      payload: { selected: isSelected },
-    });
-  };
-
   const addRank = () => {
     dispatch({ type: "addVoterRank" });
   };

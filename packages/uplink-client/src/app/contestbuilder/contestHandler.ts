@@ -44,6 +44,24 @@ export type SubmitterRestriction = IToken & {
     threshold: string;
 }
 
+export type VotingStrategyType = "arcade" | "weighted";
+
+export type ArcadeStrategy = {
+    type: "arcade";
+    votingPower: string;
+}
+
+export type WeightedStrategy = {
+    type: "weighted";
+    multiplier: string;
+}
+
+
+export type VotingPolicyType = {
+    token?: IToken;
+    strategy?: ArcadeStrategy | WeightedStrategy;
+}
+
 export interface ContestBuilderProps {
     type: string | null;
     startTime: string;
@@ -57,6 +75,7 @@ export interface ContestBuilderProps {
     submitterRewards: SubmitterRewards;
     voterRewards: VoterRewards;
     submitterRestrictions: SubmitterRestriction[] | [];
+    votingPolicy: VotingPolicyType[] | [];
     errors: ContestBuilderErrors;
 }
 
@@ -123,30 +142,10 @@ export const reducer = (state: any, action: any) => {
                 errors: { ...state.errors, media_url: null },
             };
 
-        case "addRewardOption":
-            return {
-                ...state,
-                rewardOptions: [...state.rewardOptions, action.payload],
-            };
-
-        /*
-    case "swapRewardOption": {
-        // swap the reward with same type as payload
-        return {
-            ...state,
-            rewardOptions: state.rewardOptions.map((reward: IToken) => {
-                if (reward.type === action.payload.type) {
-                    return action.payload;
-                }
-                return reward;
-            }),
-        };
-    }
-    */
+        // submitter rewards
 
         case "addSubmitterReward": {
             const { [action.payload.token.type]: _, ...updatedSubmitterRewards } = state.submitterRewards;
-            console.log(action.payload.token)
             return {
                 ...state,
                 submitterRewards: {
@@ -160,23 +159,17 @@ export const reducer = (state: any, action: any) => {
                     payouts: state.submitterRewards.payouts.map((payout: any) => {
                         return {
                             ...payout,
-                            [action.payload.token.type]: (action.payload.token.type === 'ERC721' ? { tokenId: null } : { amount: "0" }),
+                            // we also use this for swapping, so check if payout for type is already there otherwise set to 0 / null
+                            [action.payload.token.type]:
+                                action.payload.token.type === 'ERC721' ?
+                                    { tokenId: payout[action.payload.token.type]?.tokenId || null }
+                                    :
+                                    { amount: payout[action.payload.token.type]?.amount || "0" }
                         };
                     }),
                 }
             }
         };
-
-        case "swapSubmitterReward": {
-            // swap the reward with same type as payload
-            return {
-                ...state,
-                submitterRewards: {
-                    ...state.submitterRewards,
-                    [action.payload.token.type]: action.payload.token,
-                }
-            };
-        }
 
         case "removeSubmitterReward": {
             const { [action.payload.token.type]: _, ...updatedSubmitterRewards } = state.submitterRewards;
@@ -199,62 +192,6 @@ export const reducer = (state: any, action: any) => {
             };
         }
 
-        case "addVoterReward": {
-            const { [action.payload.token.type]: _, ...updatedVoterRewards } = state.voterRewards;
-            console.log(action.payload.token)
-            return {
-                ...state,
-                voterRewards: {
-                    // keep the existing rewards - the one we plucked
-                    ...updatedVoterRewards,
-                    [action.payload.token.type]: action.payload.token,
-
-
-                    // add the type to each payout
-                    payouts: state.voterRewards.payouts.map((payout: any) => {
-                        return {
-                            ...payout,
-                            [action.payload.token.type]: { amount: "0" },
-                        };
-                    }),
-                }
-            }
-        };
-
-        case "swapVoterReward": {
-            // swap the reward with same type as payload
-            return {
-                ...state,
-                voterRewards: {
-                    ...state.voterRewards,
-                    [action.payload.token.type]: action.payload.token,
-                }
-            };
-        }
-
-        case "toggleRewardOption": {
-            // pluck the selected reward from the state
-            const { [action.payload.token.type]: _, ...updatedSubmitterRewards } = state.submitterRewards;
-
-            return {
-                ...state,
-                submitterRewards: {
-                    // keep the existing rewards - the one we plucked
-                    ...updatedSubmitterRewards,
-                    // add the new reward if selected
-                    ...(action.payload.selected ? { [action.payload.token.type]: action.payload.token } : {}),
-
-                    // add the type to each payout
-                    payouts: state.submitterRewards.payouts.map((payout: any) => {
-                        return {
-                            ...payout,
-                            [action.payload.token.type]: action.payload.selected ? (action.payload.token.type === 'ERC721' ? { tokenId: null } : { amount: "0" }) : undefined,
-                        };
-                    }),
-
-                }
-            };
-        }
 
         case "addSubRank": {
             return {
@@ -298,42 +235,48 @@ export const reducer = (state: any, action: any) => {
 
         case "updateSubRewardAmount": {
             const updatedPayouts = [...state.submitterRewards.payouts];
-            if (!updatedPayouts[action.payload.index][action.payload.tokenType]) {
-                updatedPayouts[action.payload.index][action.payload.tokenType] = { amount: "0" };
+            const payout = updatedPayouts[action.payload.index];
+            const tokenType = action.payload.tokenType;
+            if (!payout[tokenType]) {
+                payout[tokenType] = { amount: "0" };
             }
-            updatedPayouts[action.payload.index][action.payload.tokenType].amount = action.payload.amount;
+            payout[tokenType].amount = action.payload.amount;
             return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedPayouts } };
         }
 
         case "updateERC721TokenId": {
-            const updatedERC721Payouts = [...state.submitterRewards.payouts];
-            if (!updatedERC721Payouts[action.payload.index].ERC721) {
-                updatedERC721Payouts[action.payload.index].ERC721 = { tokenId: null };
+            const updatedPayouts = [...state.submitterRewards.payouts];
+            const payout = updatedPayouts[action.payload.index];
+            if (!payout.ERC721) {
+                payout.ERC721 = { tokenId: null };
             }
-            updatedERC721Payouts[action.payload.index].ERC721.tokenId = action.payload.tokenId === null ? null : Number(action.payload.tokenId);
-            return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedERC721Payouts } };
+            payout.ERC721.tokenId = action.payload.tokenId === null ? null : Number(action.payload.tokenId);
+            return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedPayouts } };
         }
 
-        case "toggleVoterRewards": {
+        // voter rewards
+
+        case "addVoterReward": {
+            const { [action.payload.token.type]: _, ...updatedVoterRewards } = state.voterRewards;
             return {
                 ...state,
-                // if toggle is on, set the default voter rewards to the submitter rewards
-                // if toggle is off, clear the voter rewards
-                voterRewards: action.payload.selected ? {
-                    ...(state.submitterRewards.ETH ? { ETH: state.submitterRewards.ETH } : {}),
-                    ...(state.submitterRewards.ERC20 ? { ERC20: state.submitterRewards.ERC20 } : {}),
-                    ...(state.submitterRewards.ERC1155 ? { ERC721: state.submitterRewards.ERC1155 } : {}),
-                    payouts: [
-                        {
-                            rank: 1,
-                            ...(state.submitterRewards.ETH ? { ETH: { amount: "0" } } : {}),
-                            ...(state.submitterRewards.ERC20 ? { ERC20: { amount: "0" } } : {}),
-                            ...(state.submitterRewards.ERC1155 ? { ERC1155: { amount: "0" } } : {}),
-                        }
-                    ]
-                } : null,
+                voterRewards: {
+                    // keep the existing rewards - the one we plucked
+                    ...updatedVoterRewards,
+                    [action.payload.token.type]: action.payload.token,
+
+
+                    // add the type to each payout
+                    payouts: state.voterRewards.payouts.map((payout: any) => {
+                        return {
+                            ...payout,
+                            // we also use this for swapping, so check if payout for type is already there otherwise set to 0
+                            [action.payload.token.type]: { amount: payout[action.payload.token.type]?.amount || "0" },
+                        };
+                    }),
+                }
             }
-        }
+        };
 
         case "addVoterRank": {
             return {
@@ -374,13 +317,14 @@ export const reducer = (state: any, action: any) => {
             return { ...state, voterRewards: { ...state.voterRewards, payouts: updatedPayouts } };
         }
 
-
         case "updateVoterRewardAmount": {
             const updatedPayouts = [...state.voterRewards.payouts];
-            if (!updatedPayouts[action.payload.index][action.payload.tokenType]) {
-                updatedPayouts[action.payload.index][action.payload.tokenType] = { amount: "0" };
+            const payout = updatedPayouts[action.payload.index];
+            const tokenType = action.payload.tokenType;
+            if (!payout[tokenType]) {
+                payout[tokenType] = { amount: "0" };
             }
-            updatedPayouts[action.payload.index][action.payload.tokenType].amount = action.payload.amount;
+            payout[tokenType].amount = action.payload.amount;
             return { ...state, voterRewards: { ...state.voterRewards, payouts: updatedPayouts } };
         }
 
@@ -403,6 +347,8 @@ export const reducer = (state: any, action: any) => {
             }
             return { ...state, voterRewards: { ...state.voterRewards, payouts: updatedPayouts } };
         }
+
+        // submitter restrictions
 
         case "addSubmitterRestriction": {
             return {
@@ -432,6 +378,25 @@ export const reducer = (state: any, action: any) => {
             return { ...state, submitterRestrictions: updatedSubRestrictions };
         }
 
+        // voting policy
+
+        case "addVotingPolicy": {
+            return {
+                ...state,
+                votingPolicy: [
+                    ...state.votingPolicy,
+                    action.payload,
+                ],
+            };
+        }
+
+        case "removeVotingPolicy": {
+            return {
+                ...state,
+                votingPolicy: state.votingPolicy.filter((_: any, index: number) => index !== action.payload),
+            };
+        }
+
         case "setErrors":
             return {
                 ...state,
@@ -442,6 +407,8 @@ export const reducer = (state: any, action: any) => {
     }
 }
 
+
+// helper functions
 
 export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
     const cleanedSubmitterRewards = {

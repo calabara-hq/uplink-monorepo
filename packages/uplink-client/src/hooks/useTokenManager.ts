@@ -39,7 +39,7 @@ export type CustomTokenOptionErrors = CustomTokenOption["errors"];
 interface UseTokenManagerOptions {
     existingTokens: IToken[] | null;
     uniqueStandard: boolean;
-    saveCallback: (token: IToken, actionType: "add" | "swap") => void;
+    saveCallback: (token: IToken) => void;
     handleClose: () => void;
     continuous: boolean;
     strictTypes?: ERCOptions[];
@@ -143,7 +143,6 @@ export const useTokenManager = ({
     strictTypes,
 }: UseTokenManagerOptions) => {
     const [progress, setProgress] = useState<number>(0);
-    const [conflictingToken, setConflictingToken] = useState<IToken | null>(null);
     const tokenMenuOptions: MenuOption[] = strictTypes
         ? strictTypes.map((type) => ({
             value: type,
@@ -234,7 +233,7 @@ export const useTokenManager = ({
      */
 
     const handleTokenConflicts = () => {
-        const currentToken = progress < 1 ? state.quickAddToken : state.customToken;
+        const currentToken = state.quickAddToken || state.customToken;
 
         if (existingTokens) {
             const tokenAlreadyExists = existingTokens.some((el) => {
@@ -260,18 +259,17 @@ export const useTokenManager = ({
                     }
                 });
                 if (tokenTypeAlreadyExists) {
-                    setConflictingToken(currentToken as IToken);
                     return setProgress(2);
                 }
             }
         }
 
-        saveCallback(currentToken as IToken, "add"); // strip the errors from the token and pass to callback
-        if (!continuous) return handleClose();
+        handleAddToken();
     };
 
-    const handleTokenSwap = () => {
-        saveCallback(conflictingToken as IToken, "swap");
+    const handleAddToken = () => {
+        const currentToken = state.quickAddToken || state.customToken;
+        saveCallback(currentToken as IToken);
         if (!continuous) return handleClose();
     };
 
@@ -279,13 +277,11 @@ export const useTokenManager = ({
     return {
         progress,
         setProgress,
-        conflictingToken,
-        setConflictingToken,
         tokenMenuOptions,
         state,
         dispatch,
         handleModalConfirm,
         handleTokenConflicts,
-        handleTokenSwap,
+        handleAddToken,
     };
 };

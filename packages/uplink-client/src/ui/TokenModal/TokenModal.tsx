@@ -6,7 +6,7 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/solid";
 import { useTokenManager } from "@/hooks/useTokenManager";
-import Modal from "../Modal/Modal";
+import Modal, { ModalActions } from "../Modal/Modal";
 
 import {
   ERCOptions,
@@ -28,7 +28,7 @@ const TokenModal = ({
 }: {
   isModalOpen: boolean;
   setIsModalOpen: (isModalOpen: boolean) => void;
-  saveCallback: (token: IToken, actionType: "add" | "swap") => void;
+  saveCallback: (token: IToken) => void;
   existingTokens: IToken[] | null;
   quickAddTokens: IToken[] | null;
   continuous: boolean;
@@ -62,7 +62,7 @@ export const TokenManager = ({
   strictTypes,
 }: {
   setIsModalOpen: (isModalOpen: boolean) => void;
-  saveCallback: (token: IToken, actionType: "add" | "swap") => void;
+  saveCallback: (token: IToken) => void;
   existingTokens: IToken[] | null;
   quickAddTokens: IToken[] | null;
   continuous: boolean;
@@ -82,12 +82,11 @@ export const TokenManager = ({
   const {
     progress,
     setProgress,
-    conflictingToken,
     tokenMenuOptions,
     state,
     dispatch,
     handleModalConfirm,
-    handleTokenSwap,
+    handleAddToken,
   } = useTokenManager({
     existingTokens: existingTokens,
     uniqueStandard: uniqueStandard,
@@ -129,40 +128,22 @@ export const TokenManager = ({
       </>
     );
 
-  if (progress === 2 && conflictingToken)
+  if (progress === 2)
     return (
       <>
-        <TokenSwap token={conflictingToken} existingTokens={existingTokens} />
+        <TokenSwap
+          token={state.quickAddToken || state.customToken}
+          existingTokens={existingTokens}
+        />
         <ModalActions
           onCancel={handleCloseAndReset}
-          onConfirm={handleTokenSwap}
+          onConfirm={handleAddToken}
           confirmLabel="Swap"
         />
       </>
     );
 
   return null;
-};
-
-const ModalActions = ({
-  onCancel,
-  onConfirm,
-  confirmLabel,
-}: {
-  onCancel: () => void;
-  onConfirm: () => void;
-  confirmLabel: string;
-}) => {
-  return (
-    <div className="modal-action mt-8">
-      <button onClick={onCancel} className="btn mr-auto">
-        Cancel
-      </button>
-      <button disabled={false} onClick={onConfirm} className="btn btn-primary">
-        {confirmLabel}
-      </button>
-    </div>
-  );
 };
 
 const QuickAddToken = ({
