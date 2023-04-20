@@ -283,8 +283,290 @@ describe("Voter Rewards", () => {
         };
         expect(reducer(initialState, action)).toEqual(expectedState);
     });
+
+    test("removeVoterReward", () => {
+        const initialState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } }],
+            },
+        };
+
+        const action = { type: "removeVoterReward", payload: { token: sampleERC20Token } };
+        const expectedState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                payouts: [{ rank: 1, ETH: { amount: "10" } }],
+            },
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+
+    });
+
+    test("addVoterRank", () => {
+        const initialState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } }],
+            },
+        };
+
+        const action = { type: "addVoterRank" };
+        const expectedState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [
+                    { rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } },
+                    { rank: 2, ERC20: { amount: "0" }, ETH: { amount: "0" } },
+                ],
+            },
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    test("removeVoterRank", () => {
+        const initialState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [
+                    { rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } },
+                    { rank: 2, ERC20: { amount: "0" }, ETH: { amount: "0" } },
+                ],
+            },
+        };
+        const action = { type: "removeVoterRank", payload: 0 };
+        const expectedState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 2, ERC20: { amount: "0" }, ETH: { amount: "0" } }],
+            },
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    test("updateVoterRank", () => {
+        const initialState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } }],
+            },
+        };
+        const action = { type: "updateVoterRank", payload: { index: 0, rank: 2 } };
+        const expectedState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 2, ERC20: { amount: "100" }, ETH: { amount: "10" } }],
+            },
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    test("updateVoterRewardAmount", () => {
+        const initialState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } }],
+            },
+        };
+        const action = { type: "updateVoterRewardAmount", payload: { index: 0, tokenType: "ERC20", amount: "200" } };
+        const expectedState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "200" }, ETH: { amount: "10" } }],
+            },
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    test("updateVoterRewardType change type", () => {
+        const initialState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "10" } }],
+            },
+        };
+        const action = { type: "updateVoterRewardType", payload: { index: 0, oldTokenType: "ERC20", newTokenType: "ETH" } };
+        const expectedState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ETH: { amount: "10" } }],
+            },
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    test("updateVoterRewardType same type", () => {
+        const initialState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "10" } }],
+            },
+        };
+        const action = { type: "updateVoterRewardType", payload: { index: 0, oldTokenType: "ERC20", newTokenType: "ERC20" } };
+        const expectedState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "10" } }],
+            },
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    test("updateVoterRewardType no initial payouts", () => {
+        const initialState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1 }],
+            },
+        };
+        const action = { type: "updateVoterRewardType", payload: { index: 0, oldTokenType: "ETH", newTokenType: "ERC20" } };
+        const expectedState = {
+            voterRewards: {
+                ETH: sampleETHToken,
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "0" } }],
+            },
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
 });
 
+describe("Submitter Restrictions", () => {
+    test("addSubmitterRestriction", () => {
+        const initialState = {
+            submitterRestrictions: [],
+        };
+        const action = { type: "addSubmitterRestriction", payload: { token: sampleETHToken } };
+        const expectedState = {
+            submitterRestrictions: [{
+                ...sampleETHToken,
+            }],
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    test("removeSubmitterRestriction", () => {
+        const initialState = {
+            submitterRestrictions: [{ ...sampleETHToken }],
+        };
+        const action = { type: "removeSubmitterRestriction", payload: 0 };
+        const expectedState = {
+            submitterRestrictions: [],
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    })
+
+    test("updateSubRestrictionThreshold", () => {
+        const initialState = {
+            submitterRestrictions: [{ ...sampleETHToken }],
+        };
+        const action = { type: "updateSubRestrictionThreshold", payload: { index: 0, threshold: "20" } };
+        const expectedState = {
+            submitterRestrictions: [{ ...sampleETHToken, threshold: "20" }],
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    })
+
+});
+
+describe("Voting Policy", () => {
+
+    test("addVotingPolicy", () => {
+        const initialState = {
+            votingPolicy: [],
+        };
+        const action = {
+            type: "addVotingPolicy", payload: {
+                policy: {
+                    token: sampleETHToken,
+                    strategy: {
+                        type: "arcade",
+                        votingPower: "100",
+                    }
+                }
+            }
+        };
+        const expectedState = {
+            votingPolicy: [{
+                token: sampleETHToken,
+                strategy: {
+                    type: "arcade",
+                    votingPower: "100",
+                }
+            }],
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    test("removeVotingPolicy", () => {
+        const initialState = {
+            votingPolicy: [{
+                token: sampleETHToken,
+                strategy: {
+                    type: "arcade",
+                    votingPower: "100",
+                }
+            }],
+        };
+        const action = { type: "removeVotingPolicy", payload: 0 };
+        const expectedState = {
+            votingPolicy: [],
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    })
+
+
+    test("updateVotingPolicy", () => {
+        const initialState = {
+            votingPolicy: [{
+                token: sampleETHToken,
+                strategy: {
+                    type: "arcade",
+                    votingPower: "100",
+                }
+            }],
+        };
+        const action = {
+            type: "updateVotingPolicy", payload: {
+                index: 0,
+                policy: {
+                    token: sampleERC20Token,
+                    strategy: {
+                        type: "weighted",
+                        votingPower: "600",
+                    }
+                }
+            }
+        };
+        const expectedState = {
+            votingPolicy: [{
+                token: sampleERC20Token,
+                strategy: {
+                    type: "weighted",
+                    votingPower: "600",
+                }
+            }],
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+
+});
 
 
 /*

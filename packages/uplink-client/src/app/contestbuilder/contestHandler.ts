@@ -46,20 +46,14 @@ export type SubmitterRestriction = IToken & {
 
 export type VotingStrategyType = "arcade" | "weighted";
 
-export type ArcadeStrategy = {
-    type: "arcade";
-    votingPower: string;
-}
-
-export type WeightedStrategy = {
-    type: "weighted";
-    multiplier: string;
-}
-
 
 export type VotingPolicyType = {
     token?: IToken;
-    strategy?: ArcadeStrategy | WeightedStrategy;
+    strategy?: {
+        type: VotingStrategyType;
+        votingPower?: string;
+        multiplier?: string;
+    }
 }
 
 export interface ContestBuilderProps {
@@ -356,16 +350,12 @@ export const reducer = (state: any, action: any) => {
             const oldTokenType = action.payload.oldTokenType;
             const newTokenType = action.payload.newTokenType;
             const index = action.payload.index;
-            if (oldTokenType === newTokenType) {
-                return state;
-            }
-            if (updatedPayouts[index][oldTokenType]) {
-                updatedPayouts[index][newTokenType] = { amount: updatedPayouts[index][oldTokenType].amount };
-                // set the old token amount to 0
-                updatedPayouts[index][oldTokenType].amount = "0";
-            } else {
-                updatedPayouts[index][newTokenType] = { amount: "0" };
-            }
+
+            if (oldTokenType === newTokenType) return state;
+
+            updatedPayouts[index][newTokenType] = { amount: updatedPayouts[index][oldTokenType]?.amount || "0" };
+            delete updatedPayouts[index][oldTokenType];
+
             return { ...state, voterRewards: { ...state.voterRewards, payouts: updatedPayouts } };
         }
 
@@ -388,7 +378,6 @@ export const reducer = (state: any, action: any) => {
             };
         }
 
-
         case "updateSubRestrictionThreshold": {
             const updatedSubRestrictions = [...state.submitterRestrictions];
             if (!isNaN(action.payload.threshold)) {
@@ -406,9 +395,10 @@ export const reducer = (state: any, action: any) => {
                 ...state,
                 votingPolicy: [
                     ...state.votingPolicy,
-                    action.payload,
+                    action.payload.policy,
                 ],
             };
+
         }
 
         case "removeVotingPolicy": {
@@ -416,6 +406,12 @@ export const reducer = (state: any, action: any) => {
                 ...state,
                 votingPolicy: state.votingPolicy.filter((_: any, index: number) => index !== action.payload),
             };
+        }
+
+        case "updateVotingPolicy": {
+            const updatedVotingPolicy = [...state.votingPolicy];
+            updatedVotingPolicy[action.payload.index] = action.payload.policy;
+            return { ...state, votingPolicy: updatedVotingPolicy };
         }
 
         case "setErrors":

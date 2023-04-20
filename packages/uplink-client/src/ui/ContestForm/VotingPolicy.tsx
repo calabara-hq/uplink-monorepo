@@ -1,9 +1,7 @@
 import {
-  ArcadeStrategy,
   arraysSubtract,
   ContestBuilderProps,
   VotingPolicyType,
-  WeightedStrategy,
 } from "@/app/contestbuilder/contestHandler";
 import TokenModal, { TokenManager } from "../TokenModal/TokenModal";
 import { BlockWrapper } from "./ContestForm";
@@ -20,6 +18,12 @@ const VotingPolicy = ({
   dispatch: React.Dispatch<any>;
 }) => {
   const [isTokenModalOpen, setIsTokenModalOpen] = useState<boolean>(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+
+  const handleEditStrategy = (index: number) => {
+    setEditIndex(index);
+    setIsTokenModalOpen(true);
+  };
 
   return (
     <BlockWrapper title="Voting Policy">
@@ -38,7 +42,20 @@ const VotingPolicy = ({
                 return (
                   <tr key={index}>
                     <td className="text-center">{policy?.token?.symbol}</td>
-                    <td className="text-center">{policy?.strategy?.type}</td>
+                    <td className="text-center">
+                      <p>{policy?.strategy?.type}</p>
+                      <p>
+                        {policy?.strategy?.type === "arcade"
+                          ? policy?.strategy?.votingPower
+                          : policy?.strategy?.multiplier}{" "}
+                      </p>
+                      <button
+                        className="btn btn-sm"
+                        onClick={() => handleEditStrategy(index)}
+                      >
+                        edit
+                      </button>
+                    </td>
                     <td className="text-center">
                       <button
                         className="btn btn-sm"
@@ -60,11 +77,15 @@ const VotingPolicy = ({
         </div>
         <Modal
           isModalOpen={isTokenModalOpen}
-          onClose={() => setIsTokenModalOpen(false)}
+          onClose={() => {
+            setIsTokenModalOpen(false);
+            setEditIndex(null);
+          }}
         >
           <VotingPolicyManager
             isModalOpen={isTokenModalOpen}
             setIsModalOpen={setIsTokenModalOpen}
+            editIndex={editIndex}
             state={state}
             dispatch={dispatch}
           />
@@ -87,8 +108,8 @@ const initialPolicyState: VotingPolicyType = {};
 type PolicyAction =
   | { type: "setToken"; payload: { token: IToken } }
   | {
-      type: "setStrategy";
-      payload: { strategy: ArcadeStrategy | WeightedStrategy };
+      type: "setStrategyType";
+      payload: { strategyType: "arcade" | "weighted" };
     }
   | { type: "setStrategyParameter"; payload: { value: string } };
 
@@ -102,10 +123,18 @@ const policyReducer = (
         ...state,
         token: action.payload.token,
       };
-    case "setStrategy":
+    case "setStrategyType":
+      if (state.strategy?.type === action.payload.strategyType) {
+        return state;
+      }
       return {
         ...state,
-        strategy: action.payload.strategy,
+        strategy: {
+          type: action.payload.strategyType,
+          ...(action.payload.strategyType === "arcade"
+            ? { votingPower: state.strategy?.multiplier || "" }
+            : { multiplier: state.strategy?.votingPower || "" }),
+        },
       };
     case "setStrategyParameter":
       if (state.strategy) {
@@ -133,17 +162,21 @@ const VotingPolicyManager = ({
   setIsModalOpen,
   state,
   dispatch,
+  editIndex,
 }: {
   isModalOpen: boolean;
   setIsModalOpen: (isModalOpen: boolean) => void;
   state: ContestBuilderProps;
   dispatch: React.Dispatch<any>;
+  editIndex: number | null;
 }) => {
-  const [progress, setProgress] = useState(0);
+  const isEdit = typeof editIndex === "number";
+
   const [currentPolicy, setCurrentPolicy] = useReducer(
     policyReducer,
-    initialPolicyState
+    isEdit ? state.votingPolicy[editIndex] : initialPolicyState
   );
+  const [progress, setProgress] = useState(isEdit ? 1 : 0);
 
   const saveTokenCallback = (token: IToken) => {
     setCurrentPolicy({
@@ -175,7 +208,20 @@ const VotingPolicyManager = ({
         <ModalActions
           onCancel={() => setIsModalOpen(false)}
           onConfirm={() => {
-            dispatch({ type: "addVotingPolicy", payload: currentPolicy });
+            isEdit
+              ? dispatch({
+                  type: "updateVotingPolicy",
+                  payload: {
+                    policy: currentPolicy,
+                    index: editIndex,
+                  },
+                })
+              : dispatch({
+                  type: "addVotingPolicy",
+                  payload: {
+                    policy: currentPolicy,
+                  },
+                });
             setIsModalOpen(false);
           }}
           confirmLabel="confirm"
@@ -193,25 +239,12 @@ const StrategyManager = ({
   currentPolicy: VotingPolicyType;
   setCurrentPolicy: React.Dispatch<any>;
 }) => {
-  const [threshold, setThreshold] = useState<number>(0);
-
   const handleStrategyChange = (strategyType: string) => {
     setCurrentPolicy({
-      type: "setStrategy",
+      type: "setStrategyType",
       payload: {
-        strategy:
-          strategyType === "arcade"
-            ? { type: "arcade", votingPower: "0" }
-            : { type: "weighted", multiplier: "0" },
+        strategyType: strategyType === "arcade" ? "arcade" : "weighted",
       },
-    });
-  };
-
-  const handleThresholdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setThreshold(parseInt(e.target.value));
-    setCurrentPolicy({
-      type: "setStrategyParameter",
-      payload: { value: e.target.value },
     });
   };
 
@@ -243,16 +276,57 @@ const StrategyManager = ({
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <label className="text-gray-700 font-medium">Threshold</label>
-        <input
-          className="input input-bordered w-full max-w-xs"
-          type="number"
-          value={threshold}
-          onChange={handleThresholdChange}
+        <StrategyParameterInput
+          currentPolicy={currentPolicy}
+          setCurrentPolicy={setCurrentPolicy}
         />
       </div>
     </div>
   );
+};
+
+const StrategyParameterInput = ({
+  currentPolicy,
+  setCurrentPolicy,
+}: {
+  currentPolicy: VotingPolicyType;
+  setCurrentPolicy: React.Dispatch<any>;
+}) => {
+  console.log(currentPolicy);
+  const handleParameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentPolicy({
+      type: "setStrategyParameter",
+      payload: { value: e.target.value },
+    });
+  };
+
+  if (currentPolicy?.strategy?.type === "arcade") {
+    return (
+      <>
+        <label className="text-gray-700 font-medium">voting power</label>
+        <input
+          className="input input-bordered w-full max-w-xs"
+          type="number"
+          value={currentPolicy?.strategy?.votingPower || ""}
+          onChange={handleParameterChange}
+        />
+      </>
+    );
+  }
+  if (currentPolicy?.strategy?.type === "weighted") {
+    return (
+      <>
+        <label className="text-gray-700 font-medium">multiplier</label>
+        <input
+          className="input input-bordered w-full max-w-xs"
+          type="number"
+          value={currentPolicy?.strategy?.multiplier || ""}
+          onChange={handleParameterChange}
+        />
+      </>
+    );
+  }
+  return null;
 };
 
 export default VotingPolicy;
