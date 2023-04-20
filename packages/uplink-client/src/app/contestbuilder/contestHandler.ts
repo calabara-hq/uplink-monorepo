@@ -40,8 +40,9 @@ export interface VoterRewards {
     ]
 };
 
-export type SubmitterRestriction = IToken & {
-    threshold: string;
+export type SubmitterRestriction = {
+    token?: IToken;
+    threshold?: string;
 }
 
 export type VotingStrategyType = "arcade" | "weighted";
@@ -366,7 +367,7 @@ export const reducer = (state: any, action: any) => {
                 ...state,
                 submitterRestrictions: [
                     ...state.submitterRestrictions,
-                    action.payload.token,
+                    action.payload,
                 ],
             };
         }
@@ -378,13 +379,9 @@ export const reducer = (state: any, action: any) => {
             };
         }
 
-        case "updateSubRestrictionThreshold": {
+        case "updateSubmitterRestriction": {
             const updatedSubRestrictions = [...state.submitterRestrictions];
-            if (!isNaN(action.payload.threshold)) {
-                updatedSubRestrictions[action.payload.index].threshold = action.payload.threshold;
-            } else {
-                updatedSubRestrictions[action.payload.index].threshold = "";
-            }
+            updatedSubRestrictions[action.payload.index] = action.payload.restriction;
             return { ...state, submitterRestrictions: updatedSubRestrictions };
         }
 
