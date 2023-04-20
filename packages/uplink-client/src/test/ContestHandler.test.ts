@@ -451,10 +451,11 @@ describe("Submitter Restrictions", () => {
         const initialState = {
             submitterRestrictions: [],
         };
-        const action = { type: "addSubmitterRestriction", payload: { token: sampleETHToken } };
+        const action = { type: "addSubmitterRestriction", payload: { token: sampleETHToken, threshold: "1" } };
         const expectedState = {
             submitterRestrictions: [{
-                ...sampleETHToken,
+                token: sampleETHToken,
+                threshold: "1",
             }],
         };
         expect(reducer(initialState, action)).toEqual(expectedState);
@@ -471,13 +472,13 @@ describe("Submitter Restrictions", () => {
         expect(reducer(initialState, action)).toEqual(expectedState);
     })
 
-    test("updateSubRestrictionThreshold", () => {
+    test("updateSubmitterRestriction", () => {
         const initialState = {
-            submitterRestrictions: [{ ...sampleETHToken }],
+            submitterRestrictions: [{ token: sampleETHToken, threshold: "1" }],
         };
-        const action = { type: "updateSubRestrictionThreshold", payload: { index: 0, threshold: "20" } };
+        const action = { type: "updateSubmitterRestriction", payload: { index: 0, restriction: { token: sampleETHToken, threshold: "5" } } };
         const expectedState = {
-            submitterRestrictions: [{ ...sampleETHToken, threshold: "20" }],
+            submitterRestrictions: [{ token: sampleETHToken, threshold: "5" }],
         };
         expect(reducer(initialState, action)).toEqual(expectedState);
     })
