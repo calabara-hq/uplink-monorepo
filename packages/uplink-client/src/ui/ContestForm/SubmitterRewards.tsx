@@ -3,13 +3,11 @@ import {
   ContestBuilderProps,
   rewardsObjectToArray,
   SubmitterRewards,
-  VoterRewards,
 } from "@/app/contestbuilder/contestHandler";
 import { useState, useEffect, useReducer, Fragment } from "react";
 import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
-import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
 import TokenCard from "../TokenCard/TokenCard";
 
 /**
@@ -20,21 +18,6 @@ import TokenCard from "../TokenCard/TokenCard";
  */
 
 // type the reducer functions
-
-type AddRewardAction = {
-  type: "addRewardOption";
-  payload: IToken;
-};
-
-type SwapRewardAction = {
-  type: "swapRewardOption";
-  payload: IToken;
-};
-
-type ToggleRewardAction = {
-  type: "toggleRewardOption";
-  payload: { token: IToken; selected: boolean };
-};
 
 type AddSubRankAction = {
   type: "addSubRank";
@@ -68,21 +51,28 @@ const SubmitterRewardsComponent = ({
   dispatch: React.Dispatch<any>;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleSaveCallback = (data: IToken, actionType: "add" | "swap") => {
-    if (actionType === "add")
-      return dispatch({ type: "addSubmitterReward", payload: { token: data } });
-    else if (actionType === "swap")
-      return dispatch({
-        type: "swapSubmitterReward",
-        payload: { token: data },
-      });
+  const handleSaveCallback = (data: IToken) => {
+    return dispatch({ type: "addSubmitterReward", payload: { token: data } });
+  };
+
+  const handleRemove = (token: IToken) => {
+    dispatch({
+      type: "removeSubmitterReward",
+      payload: { token: token },
+    });
   };
 
   return (
     <BlockWrapper title="Submitter Rewards">
       <div className="flex flex-col w-full gap-2">
         {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
-          return <TokenCard key={index} token={token} dispatch={dispatch} />;
+          return (
+            <TokenCard
+              key={index}
+              token={token}
+              handleRemove={() => handleRemove(token)}
+            />
+          );
         })}
       </div>
       <button className="btn" onClick={() => setIsModalOpen(true)}>
@@ -96,13 +86,14 @@ const SubmitterRewardsComponent = ({
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        callback={handleSaveCallback}
+        saveCallback={handleSaveCallback}
         existingTokens={rewardsObjectToArray(state.submitterRewards)}
         quickAddTokens={arraysSubtract(
           state.spaceTokens,
           rewardsObjectToArray(state.submitterRewards)
         )}
         uniqueStandard={true}
+        continuous={false}
       />
     </BlockWrapper>
   );

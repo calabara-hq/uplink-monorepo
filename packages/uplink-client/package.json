@@ -9,7 +9,7 @@
     "lint": "next lint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test": "cross-env dotenv -e .env.local jest --coverage",
+    "test": "cross-env dotenv -e .env.local jest",
     "test:watch": "jest --watch"
   },
   "dependencies": {

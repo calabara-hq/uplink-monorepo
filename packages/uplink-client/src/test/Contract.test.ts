@@ -1,11 +1,14 @@
 import { describe, expect, test } from "@jest/globals";
 import { verifyTokenStandard } from "@/lib/contract";
+import { sampleERC1155Token, sampleERC20Token, sampleERC721Token, sampleETHToken } from "./sampleTokens";
 
 
-const ERC721 = "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03" // nouns
-const ERC20 = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" // usdc
-const ERC1155 = "0xab0ab2fc1c498942B24278Bbd86bD171a3406A5E" // meme seizer
+const ERC721 = sampleERC721Token.address // nouns
+const ERC20 = sampleERC20Token.address // usdc
+const ERC1155 = sampleERC1155Token.address // meme seizer
 const EOA = "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"
+
+
 describe("token contract validation", () => {
 
     // erc20

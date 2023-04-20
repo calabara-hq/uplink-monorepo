@@ -9,9 +9,9 @@ import { BlockWrapper } from "./ContestForm";
 let Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
 
 const labelOptions: Option[] = [
-  { value: "art" },
-  { value: "design" },
-  { value: "misc" },
+  { value: "art", label: "art" },
+  { value: "design", label: "design" },
+  { value: "misc", label: "misc" },
 ];
 
 const StandardPrompt = ({
