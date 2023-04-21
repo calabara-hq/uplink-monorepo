@@ -103,6 +103,9 @@ const initialState = {
     subRewards: {
       duplicateRanks: [],
     },
+    voterRewards: {
+      duplicateRanks: [],
+    },
   },
   /*
   submitterRewards: [],
@@ -143,6 +146,7 @@ const ContestForm = () => {
     {
       name: "Voter Rewards",
       component: <VoterRewardsComponent state={state} dispatch={dispatch} />,
+      errors: state.errors.voterRewards?.duplicateRanks?.length > 0,
     },
     {
       name: "Restrictions",

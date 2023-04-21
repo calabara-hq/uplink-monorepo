@@ -86,18 +86,12 @@ export interface ContestBuilderProps {
 }
 
 
-export type SubRewardPayoutError = {
-    rank?: string;
-    ETH?: string;
-    ERC20?: string;
-    ERC721?: string;
-    ERC1155?: string;
-}
 
-export type SubRewardErrors = {
+export type RewardError = {
     //payouts: SubRewardPayoutError[];
     duplicateRanks: number[];
 }
+
 
 export type ContestBuilderErrors = {
     type?: string;
@@ -107,7 +101,8 @@ export type ContestBuilderErrors = {
     contestPromptTitle: string | null;
     contestPromptBody: string | null;
     media_url: string | null;
-    subRewards: SubRewardErrors;
+    subRewards: RewardError;
+    voterRewards: RewardError;
 }
 
 export const reducer = (state: any, action: any) => {
@@ -549,9 +544,10 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
 
         case 3:
             return validateSubmitterRewards(state);
+
+        case 4:
+            return validateVoterRewards(state);
         /*
-    case 4:
-        return validateStep4(state);
     case 5:
         return validateStep5(state);
     case 6:
@@ -609,6 +605,29 @@ const validateSubmitterRewards = (state: ContestBuilderProps) => {
     ranks.forEach((rank, index) => {
         if (seenRanks.includes(rank)) {
             errors.subRewards.duplicateRanks.push(rank);
+        } else {
+            seenRanks.push(rank);
+        }
+    });
+
+    return errors;
+};
+
+const validateVoterRewards = (state: ContestBuilderProps) => {
+    const errors: ContestBuilderErrors = {
+        voterRewards: {
+            duplicateRanks: [],
+        }
+    };
+
+    const seenRanks: number[] = [];
+
+    const payouts = state.voterRewards.payouts;
+    const ranks = payouts ? payouts.map((payout) => payout.rank) : [];
+
+    ranks.forEach((rank, index) => {
+        if (seenRanks.includes(rank)) {
+            errors.voterRewards.duplicateRanks.push(rank);
         } else {
             seenRanks.push(rank);
         }

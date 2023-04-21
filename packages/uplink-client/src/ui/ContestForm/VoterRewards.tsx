@@ -3,6 +3,7 @@ import { BlockWrapper } from "./ContestForm";
 import {
   arraysSubtract,
   ContestBuilderProps,
+  RewardError,
   rewardsObjectToArray,
   VoterRewards,
 } from "@/app/contestbuilder/contestHandler";
@@ -46,7 +47,7 @@ const VoterRewardsComponent = ({
 
       <VoterRewardsMatrix
         spaceTokens={state.spaceTokens}
-        voterRewards={state.voterRewards}
+        state={state}
         dispatch={dispatch}
       />
 
@@ -74,18 +75,26 @@ const VoterRewardsComponent = ({
 
 const VoterRewardsMatrix = ({
   spaceTokens,
-  voterRewards,
+  state,
   dispatch,
 }: {
   spaceTokens: IToken[];
-  voterRewards: VoterRewards;
+  state: ContestBuilderProps;
   dispatch: React.Dispatch<any>;
 }) => {
+  const { voterRewards, errors } = state;
+
   const addRank = () => {
     dispatch({ type: "addVoterRank" });
   };
+
   return (
     <div className="flex flex-col w-full gap-2">
+      {errors.voterRewards.duplicateRanks.length > 0 && (
+        <div className="text-red-500">
+          <p>oops, you have some duplicate ranks</p>
+        </div>
+      )}
       {voterRewards && (
         <div className="flex flex-col gap-2">
           {(voterRewards.ERC20 || voterRewards.ETH) &&
@@ -97,11 +106,13 @@ const VoterRewardsMatrix = ({
                   reward={reward}
                   rewardsLength={voterRewards?.payouts?.length ?? 0}
                   availableRewardTokens={Object.entries(voterRewards)
+
                     .filter(
                       ([key, value]) => key !== "payouts" && value !== null
                     )
                     .flatMap(([key, value]) => value)}
                   dispatch={dispatch}
+                  errors={errors.voterRewards}
                 />
               );
             })}
@@ -120,12 +131,14 @@ const VoterRewardRow = ({
   availableRewardTokens,
   rewardsLength,
   dispatch,
+  errors,
 }: {
   index: number;
   reward: any;
   availableRewardTokens: IToken[];
   rewardsLength: number;
   dispatch: React.Dispatch<any>;
+  errors: RewardError;
 }) => {
   console.log(availableRewardTokens);
   const menuSelectOptions = availableRewardTokens.map((token) => {
@@ -173,7 +186,11 @@ const VoterRewardRow = ({
     <div className="flex flex-row items-center gap-2">
       <p>voters that accurately choose rank </p>
       <input
-        className="input input-bordered w-16"
+        className={`input w-16 ${
+          errors.duplicateRanks.includes(index)
+            ? "input-error"
+            : "input-bordered"
+        }`}
         type="number"
         value={reward.rank || ""}
         onChange={(e) => updateRank(index, Number(e.target.value))}
