@@ -357,8 +357,8 @@ export const reducer = (state: any, action: any) => {
                         ...state.voterRewards.payouts,
                         {
                             rank: state.voterRewards.payouts.length + 1,
-                            ...(state.voterRewards.ETH ? { ETH: { amount: "0" } } : {}),
-                            ...(state.voterRewards.ERC20 ? { ERC20: { amount: "0" } } : {}),
+                            ...(state.voterRewards.ETH ? { ETH: { amount: "" } } : {}),
+                            ...(state.voterRewards.ERC20 ? { ERC20: { amount: "" } } : {}),
 
                         },
                     ],

@@ -258,19 +258,15 @@ describe("Submitter Rewards", () => {
 })
 
 describe("Voter Rewards", () => {
-    test("addVoterReward ETH", () => {
+    test("addVoterReward ETH intial state empty", () => {
         const initialState = {
-            voterRewards: {
-                ERC20: sampleERC20Token,
-                payouts: [{ rank: 1, ERC20: { amount: "100" } }],
-            },
+            voterRewards: {},
         };
         const action = { type: "addVoterReward", payload: { token: sampleETHToken } };
         const expectedState = {
             voterRewards: {
                 ETH: sampleETHToken,
-                ERC20: sampleERC20Token,
-                payouts: [{ rank: 1, ERC20: { amount: "100" }, ETH: { amount: "0" } }],
+                payouts: [{ rank: 1, ETH: { amount: "" } }],
             },
         };
         expect(reducer(initialState, action)).toEqual(expectedState);
@@ -319,6 +315,22 @@ describe("Voter Rewards", () => {
 
     });
 
+    test("removeVoterReward should return empty object", () => {
+        const initialState = {
+            voterRewards: {
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "100" } }],
+            },
+        };
+
+        const action = { type: "removeVoterReward", payload: { token: sampleERC20Token } };
+        const expectedState = {
+            voterRewards: {},
+        };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+
+    });
+
     test("addVoterRank", () => {
         const initialState = {
             voterRewards: {
@@ -335,7 +347,7 @@ describe("Voter Rewards", () => {
                 ERC20: sampleERC20Token,
                 payouts: [
                     { rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } },
-                    { rank: 2, ERC20: { amount: "0" }, ETH: { amount: "0" } },
+                    { rank: 2, ERC20: { amount: "" }, ETH: { amount: "" } },
                 ],
             },
         };
