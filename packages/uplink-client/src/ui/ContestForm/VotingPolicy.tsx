@@ -28,6 +28,9 @@ const VotingPolicy = ({
   return (
     <BlockWrapper title="Voting Policy">
       <div className="flex flex-col w-full gap-2">
+        {state.errors.votingPolicy && (
+          <p className="text-red-500">{state.errors.votingPolicy}</p>
+        )}
         <div className="overflow-x-auto w-full">
           <table className="table w-full">
             <thead>

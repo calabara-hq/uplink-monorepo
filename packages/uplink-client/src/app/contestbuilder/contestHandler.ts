@@ -103,6 +103,7 @@ export type ContestBuilderErrors = {
     media_url: string | null;
     subRewards: RewardError;
     voterRewards: RewardError;
+    votingPolicy?: string;
 }
 
 export const reducer = (state: any, action: any) => {
@@ -547,11 +548,12 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
 
         case 4:
             return validateVoterRewards(state);
+
+        case 5:
+            break;
+        case 6:
+            return validateVotingPolicy(state);
         /*
-    case 5:
-        return validateStep5(state);
-    case 6:
-        return validateStep6(state);
     case 7:
         return validateStep7(state);
     */
@@ -635,3 +637,11 @@ const validateVoterRewards = (state: ContestBuilderProps) => {
 
     return errors;
 };
+
+const validateVotingPolicy = (state: ContestBuilderProps) => {
+    console.log('validate voting policy')
+    // set an error if the voting policy is not set
+    return {
+        ...(!state.votingPolicy.length ? { votingPolicy: "Please add a voting policy" } : {}),
+    }
+}

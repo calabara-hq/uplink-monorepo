@@ -211,14 +211,6 @@ const SubmitterRewardMatrix = ({
             {submitterRewards?.payouts?.map((payout, index) => (
               <tr key={index}>
                 <th className="w-24 text-center">
-                  {/*
-                  className={`input w-24 ${
-                      
-                      errors.subRewards.duplicateRanks.includes(index)
-                        ? "input-error"
-                        : "input-bordered"
-                    `}
-                  */}
                   <input
                     className={`input w-24 ${
                       errors.subRewards.duplicateRanks.includes(index)

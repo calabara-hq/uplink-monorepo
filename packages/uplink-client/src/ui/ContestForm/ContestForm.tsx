@@ -155,7 +155,9 @@ const ContestForm = () => {
     {
       name: "Voting Policy",
       component: <VotingPolicy state={state} dispatch={dispatch} />,
+      errors: state.errors.votingPolicy,
     },
+    {},
   ];
 
   const handleSubmit = async () => {
@@ -168,6 +170,7 @@ const ContestForm = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       const errors = validateStep(state, currentStep);
+
       console.log(errors);
       if (Object.keys(errors).length > 0)
         return dispatch({ type: "setErrors", payload: errors });
