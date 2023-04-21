@@ -52,7 +52,7 @@ describe("Submitter Rewards", () => {
                 ERC20: sampleERC20Token,
                 ERC721: sampleERC721Token,
                 ERC1155: sampleERC1155Token,
-                payouts: [{ rank: 1, ERC20: { amount: "0" } }],
+                payouts: [{ rank: 1, ERC20: { amount: "" } }],
             },
         };
         expect(reducer(initialState, action)).toEqual(expectedState);
@@ -125,7 +125,6 @@ describe("Submitter Rewards", () => {
                 ETH: sampleETHToken,
                 ERC20: sampleERC20Token,
                 ERC721: sampleERC721Token,
-                ERC1155: sampleERC1155Token,
                 payouts: [{ rank: 1, ERC20: { amount: "100" }, ERC721: { tokenId: "1" } }],
             },
         };
@@ -135,10 +134,26 @@ describe("Submitter Rewards", () => {
             submitterRewards: {
                 ETH: sampleETHToken,
                 ERC721: sampleERC721Token,
-                ERC1155: sampleERC1155Token,
                 payouts: [{ rank: 1, ERC721: { tokenId: "1" } }],
             },
         };
+        expect(reducer(initialState, action)).toEqual(expectedState);
+
+    });
+
+    test("removeSubmitterReward should unset fields on single initial token", () => {
+        const initialState = {
+            submitterRewards: {
+                ERC20: sampleERC20Token,
+                payouts: [{ rank: 1, ERC20: { amount: "100" } }],
+            },
+        };
+
+        const action = { type: "removeSubmitterReward", payload: { token: sampleERC20Token } };
+        const expectedState = {
+            submitterRewards: {},
+        };
+        //console.log(JSON.stringify(reducer(initialState, action), null, 2));
         expect(reducer(initialState, action)).toEqual(expectedState);
 
     });
@@ -568,335 +583,6 @@ describe("Voting Policy", () => {
 
 
 });
-
-
-/*
-test("should remove an ERC20 token from submitter rewards", () => {
-    const initialState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [{ rank: 1, ERC20: { amount: "0" } }],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "removeERC20Token", payload: { index: 0 } };
-    const expectedState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [{ rank: 1 }],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should remove an ERC721 token from submitter rewards", () => {
-    const initialState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [{ rank: 1, ERC721: { tokenId: 1 } }],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "removeERC721Token", payload: { index: 0 } };
-    const expectedState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [{ rank: 1 }],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should update the amount of an existing ERC1155 token in submitter rewards", () => {
-    const initialState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [{ rank: 1, ERC1155: { amount: "10" } }],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "updateERC1155Amount", payload: { index: 0, amount: "20" } };
-    const expectedState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [{ rank: 1, ERC1155: { amount: "20" } }],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should update the rank of an existing payout in submitter rewards", () => {
-    const initialState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [
-                { rank: 1, ETH: { amount: "100" } },
-                { rank: 2, ERC20: { amount: "50" } },
-                { rank: 3, ERC721: { tokenId: 1 } },
-            ],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "updatePayoutRank", payload: { oldRank: 2, newRank: 1 } };
-    const expectedState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [
-                { rank: 1, ETH: { amount: "100" }, ERC20: { amount: "50" } },
-                { rank: 2, ERC721: { tokenId: 1 } },
-            ],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-
-test("should remove a payout from submitter rewards", () => {
-    const initialState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [
-                { rank: 1, ETH: { amount: "100" } },
-                { rank: 2, ERC20: { amount: "50" } },
-                { rank: 3, ERC721: { tokenId: 1 } },
-            ],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "removePayout", payload: { rank: 2 } };
-    const expectedState = {
-        submitterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-            payouts: [
-                { rank: 1, ETH: { amount: "100" } },
-                { rank: 2, ERC721: { tokenId: 1 } },
-            ],
-        },
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should update the amount of an existing token in voter rewards", () => {
-    const initialState = {
-        submitterRewards: null,
-        voterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-        },
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "updateVoterTokenAmount", payload: { index: 0, amount: "200" } };
-    const expectedState = {
-        submitterRewards: null,
-        voterRewards: {
-            ETH: sampleETHToken,
-            ERC20: sampleERC20Token,
-            ERC721: sampleERC721Token,
-            ERC1155: sampleERC1155Token,
-        },
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should add a new submitter restriction", () => {
-    const initialState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [{ type: "country", value: "US" }],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "addSubmitterRestriction", payload: { type: "age", value: "18" } };
-    const expectedState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [
-            { type: "country", value: "US" },
-            { type: "age", value: "18" },
-        ],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should remove a submitter restriction", () => {
-    const initialState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [
-            { type: "country", value: "US" },
-            { type: "age", value: "18" },
-        ],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "removeSubmitterRestriction", payload: { index: 0 } };
-    const expectedState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [{ type: "age", value: "18" }],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should add a new voting policy", () => {
-    const initialState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [{ type: "approval" }],
-        errors: {},
-    };
-    const action = { type: "addVotingPolicy", payload: { type: "threshold", value: "50" } };
-    const expectedState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [
-            { type: "approval" },
-            { type: "threshold", value: "50" },
-        ],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should remove a voting policy", () => {
-    const initialState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [
-            { type: "approval" },
-            { type: "threshold", value: "50" },
-        ],
-        errors: {},
-    };
-    const action = { type: "removeVotingPolicy", payload: { index: 0 } };
-    const expectedState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [{ type: "threshold", value: "50" }],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should set errors", () => {
-    const initialState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    const action = { type: "setErrors", payload: { submitterRewards: "Invalid rewards" } };
-    const expectedState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: { submitterRewards: "Invalid rewards" },
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-
-test("should clear errors", () => {
-    const initialState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: { submitterRewards: "Invalid rewards" },
-    };
-    const action = { type: "clearErrors" };
-    const expectedState = {
-        submitterRewards: null,
-        voterRewards: null,
-        submitterRestrictions: [],
-        votingPolicy: [],
-        errors: {},
-    };
-    expect(reducer(initialState, action)).toEqual(expectedState);
-});
-*/
-
-
-
 
 
 

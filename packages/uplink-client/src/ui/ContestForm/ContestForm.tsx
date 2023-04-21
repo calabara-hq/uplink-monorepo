@@ -10,6 +10,7 @@ import {
 import {
   ContestBuilderProps,
   reducer,
+  validateStep,
 } from "@/app/contestbuilder/contestHandler";
 import StandardPrompt from "./StandardPrompt";
 import Deadlines from "./Deadlines";
@@ -18,6 +19,9 @@ import SubmitterRewardsComponent from "./SubmitterRewards";
 import VoterRewardsComponent from "./VoterRewards";
 import SubmitterRestrictions from "./SubmitterRestrictions";
 import VotingPolicy from "./VotingPolicy";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+
 export const BlockWrapper = ({
   title,
   children,
@@ -34,17 +38,23 @@ export const BlockWrapper = ({
   );
 };
 
+const ContestSchema = Yup.object<ContestBuilderProps>({
+  type: Yup.string().nullable().required("Required"),
+  startTime: Yup.string().required("Required"),
+  voteTime: Yup.string().required("Required"),
+  endTime: Yup.string().required("Required"),
+  contestPromptTitle: Yup.string().required("Required"),
+  contestPromptBody: Yup.string().required("Required"),
+  submitterRestrictions: Yup.array().required("Required"),
+  votingPolicy: Yup.array().required("Required"),
+});
+
 const initialState = {
   type: null,
   startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
   voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
   endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
-  errors: {
-    type: null,
-    startTime: null,
-    voteTime: null,
-    endTime: null,
-  },
+
   contestPromptTitle: "",
   contestPromptBody: "",
   media_blob: null,
@@ -81,13 +91,7 @@ const initialState = {
       decimals: 0,
     },
   ],
-  submitterRewards: {
-    payouts: [
-      {
-        rank: 1,
-      },
-    ],
-  },
+  submitterRewards: {},
   voterRewards: {
     payouts: [
       {
@@ -97,6 +101,15 @@ const initialState = {
   },
   submitterRestrictions: [],
   votingPolicy: [],
+
+  errors: {
+    contestPromptTitle: null,
+    contestPromptBody: null,
+    media_url: null,
+    subRewards: {
+      duplicateRanks: [],
+    },
+  },
   /*
   submitterRewards: [],
   voterRewards: [],
@@ -106,16 +119,73 @@ const initialState = {
   */
 } as ContestBuilderProps;
 
-export default function ContestForm() {
+const ContestForm = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [steps, setSteps] = useState(["Choose a template", "Dates"]);
+  const [currentStep, setCurrentStep] = useState<number>(0);
 
-  const handleSave = async () => {
+  const steps = [
+    {
+      name: "Contest Type",
+      component: <ContestType state={state} dispatch={dispatch} />,
+      errors: state.errors.type,
+    },
+    {
+      name: "Deadlines",
+      component: <Deadlines state={state} dispatch={dispatch} />,
+      errors:
+        state.errors.startTime || state.errors.voteTime || state.errors.endTime,
+    },
+    {
+      name: "Standard Prompt",
+      component: <StandardPrompt state={state} dispatch={dispatch} />,
+    },
+    {
+      name: "Submitter Rewards",
+      component: (
+        <SubmitterRewardsComponent state={state} dispatch={dispatch} />
+      ),
+      errors: state.errors.subRewards?.duplicateRanks?.length > 0,
+    },
+    {
+      name: "Voter Rewards",
+      component: <VoterRewardsComponent state={state} dispatch={dispatch} />,
+    },
+    {
+      name: "Restrictions",
+      component: <SubmitterRestrictions state={state} dispatch={dispatch} />,
+    },
+    {
+      name: "Voting Policy",
+      component: <VotingPolicy state={state} dispatch={dispatch} />,
+    },
+  ];
+
+  const handleSubmit = async () => {
     const contest = {
       ...state,
     };
     console.log(contest);
+  };
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      const errors = validateStep(state, currentStep);
+      console.log(errors);
+      if (Object.keys(errors).length > 0)
+        return dispatch({ type: "setErrors", payload: errors });
+
+      //setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleStepChange = (index: number) => {
+    setCurrentStep(index);
   };
 
   return (
@@ -123,52 +193,83 @@ export default function ContestForm() {
       <div className="flex w-full lg:w-1/5 items-start ">
         <ul className="steps steps-horizontal lg:steps-vertical">
           {steps.map((el, index) => {
+            const isActive = currentStep === index;
+            const isCompleted = index < currentStep;
+            const hasErrors = steps[currentStep].errors;
+            const stepClass = isActive
+              ? "step step-primary"
+              : isCompleted
+              ? "step step-success"
+              : "step step-neutral";
+            const dataContent = hasErrors ? "✕" : isCompleted ? "✓" : "●";
+
             return (
               <li
                 key={index}
-                onClick={() => setCurrentStep(index)}
-                className={`step text-sm cursor-pointer ${
-                  index <= currentStep ? "step-primary" : ""
-                }`}
+                data-content={dataContent}
+                className={`${stepClass} cursor-pointer`}
+                onClick={() => handleStepChange(index)}
               >
-                {el}
+                {el.name}
               </li>
             );
           })}
         </ul>
       </div>
-      <div className="flex flex-col w-full lg:w-4/5 gap-2">
-        <ContestType type={state.type} dispatch={dispatch} />
-        {state.type && <Deadlines state={state} dispatch={dispatch} />}
-        <StandardPrompt state={state} dispatch={dispatch} />
-        <SubmitterRewardsComponent state={state} dispatch={dispatch} />
-        <VoterRewardsComponent state={state} dispatch={dispatch} />
-        <SubmitterRestrictions state={state} dispatch={dispatch} />
-        <VotingPolicy state={state} dispatch={dispatch} />
-        {/*<TweetThread state={state} dispatch={dispatch} />*/}
+      <div className="flex flex-col w-full lg:w-4/5 gap-8">
+        <Formik<ContestBuilderProps>
+          initialValues={state}
+          validationSchema={ContestSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting }) => (
+            <Form className="px-4 py-6  shadow rounded-lg">
+              {steps.map((el, index) => {
+                return (
+                  <div
+                    key={index}
+                    className={`${index !== currentStep ? "hidden" : ""}`}
+                  >
+                    {el.component}
+                  </div>
+                );
+              })}
+
+              {currentStep > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-secondary mr-2"
+                  onClick={handlePrevious}
+                >
+                  Previous
+                </button>
+              )}
+              {currentStep < steps.length - 1 && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleNext}
+                >
+                  Next
+                </button>
+              )}
+
+              {currentStep === steps.length - 1 && (
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={isSubmitting}
+                  onClick={handleSubmit}
+                >
+                  Save
+                </button>
+              )}
+            </Form>
+          )}
+        </Formik>
       </div>
-      <button className="btn btn-primary" onClick={handleSave}>
-        save
-      </button>
     </div>
   );
-}
-
-/**
- * first tweet should be the title + cover image and rewards
- * 2nd tweet should be instructions
- */
-
-const TweetThread = ({
-  state,
-  dispatch,
-}: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
-}) => {
-  return (
-    <BlockWrapper title="Tweet">
-      <div className="flex flex-col w-full lg:flex-row"></div>
-    </BlockWrapper>
-  );
 };
+
+export default ContestForm;

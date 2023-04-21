@@ -16,19 +16,19 @@ const Deadlines = ({
     // endtime < voteTime || endTime === voteTime
     // endtime < startTime || endTime === startTime
 
-    if (voteTime < startTime || voteTime === startTime) {
+    if (voteTime <= startTime) {
       dispatch({
         type: "setErrors",
         payload: { voteTime: "vote date must be after start date" },
       });
     }
-    if (endTime < voteTime || endTime === voteTime) {
+    if (endTime <= voteTime) {
       dispatch({
         type: "setErrors",
         payload: { endTime: "end date must be after vote date" },
       });
     }
-    if (endTime < startTime || endTime === startTime) {
+    if (endTime <= startTime) {
       dispatch({
         type: "setErrors",
         payload: { endTime: "end date must be after start date" },
@@ -40,7 +40,7 @@ const Deadlines = ({
       <DateTimeSelector
         isoString={startTime}
         label="start"
-        error={errors.startTime}
+        error={errors?.startTime}
         callback={(isoString) => {
           dispatch({ type: "setStartTime", payload: isoString });
         }}
@@ -48,7 +48,7 @@ const Deadlines = ({
       <DateTimeSelector
         isoString={voteTime}
         label="vote"
-        error={errors.voteTime}
+        error={errors?.voteTime}
         callback={(isoString) => {
           dispatch({ type: "setVoteTime", payload: isoString });
         }}
@@ -56,7 +56,7 @@ const Deadlines = ({
       <DateTimeSelector
         isoString={endTime}
         label="end"
-        error={errors.endTime}
+        error={errors?.endTime}
         callback={(isoString) => {
           dispatch({ type: "setEndTime", payload: isoString });
         }}

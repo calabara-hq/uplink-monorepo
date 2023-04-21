@@ -1,27 +1,29 @@
 import { IToken, IERCToken, INativeToken } from "@/types/token";
 
+
+type FungiblePayout = {
+    amount: string;
+}
+
+type NonFungiblePayout = {
+    tokenId: number | null;
+}
+
+interface IPayout {
+    rank: number;
+    ETH?: FungiblePayout;
+    ERC20?: FungiblePayout;
+    ERC721?: NonFungiblePayout;
+    ERC1155?: FungiblePayout;
+}
+
+
 export interface SubmitterRewards {
     ETH?: IToken;
     ERC20?: IToken;
     ERC721?: IToken;
     ERC1155?: IToken;
-    payouts: [
-        {
-            rank: number;
-            ETH?: {
-                amount: string;
-            };
-            ERC20?: {
-                amount: string;
-            };
-            ERC721?: {
-                tokenId: number | null;
-            }
-            ERC1155?: {
-                amount: string;
-            };
-        }
-    ]
+    payouts?: IPayout[];
 }
 
 export interface VoterRewards {
@@ -74,15 +76,29 @@ export interface ContestBuilderProps {
     errors: ContestBuilderErrors;
 }
 
+
+export type SubRewardPayoutError = {
+    rank?: string;
+    ETH?: string;
+    ERC20?: string;
+    ERC721?: string;
+    ERC1155?: string;
+}
+
+export type SubRewardErrors = {
+    //payouts: SubRewardPayoutError[];
+    duplicateRanks: number[];
+}
+
 export type ContestBuilderErrors = {
-    type: string | null;
-    startTime: string | null;
-    voteTime: string | null;
-    endTime: string | null;
+    type?: string;
+    startTime?: string;
+    voteTime?: string;
+    endTime?: string;
     contestPromptTitle: string | null;
     contestPromptBody: string | null;
     media_url: string | null;
-
+    subRewards: SubRewardErrors;
 }
 
 export const reducer = (state: any, action: any) => {
@@ -92,25 +108,25 @@ export const reducer = (state: any, action: any) => {
             return {
                 ...state,
                 type: action.payload,
-                errors: { ...state.errors, type: null },
+                errors: { ...state.errors, type: undefined },
             };
         case "setStartTime":
             return {
                 ...state,
                 startTime: action.payload,
-                errors: { ...state.errors, startTime: null },
+                errors: { ...state.errors, startTime: undefined },
             };
         case "setVoteTime":
             return {
                 ...state,
                 voteTime: action.payload,
-                errors: { ...state.errors, voteTime: null },
+                errors: { ...state.errors, voteTime: undefined },
             };
         case "setEndTime":
             return {
                 ...state,
                 endTime: action.payload,
-                errors: { ...state.errors, endTime: null },
+                errors: { ...state.errors, endTime: undefined },
             };
         case "setContestPromptTitle":
             return {
@@ -151,30 +167,44 @@ export const reducer = (state: any, action: any) => {
 
 
                     // add the type to each payout
-                    payouts: state.submitterRewards.payouts.map((payout: any) => {
+                    payouts: (state.submitterRewards?.payouts ?? [
+                        {
+                            rank: 1,
+                            [action.payload.token.type]: action.payload.token.type === 'ERC721'
+                                ? { tokenId: null }
+                                : { amount: '' },
+                        }
+                    ]).map((payout: any) => {
                         return {
                             ...payout,
-                            // we also use this for swapping, so check if payout for type is already there otherwise set to 0 / null
-                            [action.payload.token.type]:
-                                action.payload.token.type === 'ERC721' ?
-                                    { tokenId: payout[action.payload.token.type]?.tokenId || null }
-                                    :
-                                    { amount: payout[action.payload.token.type]?.amount || "0" }
+                            [action.payload.token.type]: {
+                                ...payout[action.payload.token.type],
+                                ...(action.payload.token.type === 'ERC721'
+                                    ? { tokenId: payout[action.payload.token.type]?.tokenId ?? null }
+                                    : { amount: payout[action.payload.token.type]?.amount ?? '' }
+                                )
+                            }
                         };
-                    }),
+                    })
                 }
             }
         };
 
         case "removeSubmitterReward": {
-            const { [action.payload.token.type]: _, ...updatedSubmitterRewards } = state.submitterRewards;
+            const { [action.payload.token.type]: _, payouts, ...updatedSubmitterRewards } = state.submitterRewards;
 
-            const updatedPayouts = [];
-            for (let i = 0; i < state.submitterRewards.payouts.length; i++) {
-                const payout = state.submitterRewards.payouts[i];
-                const { [action.payload.token.type]: _, ...updatedPayout } = payout;
-                if (Object.keys(updatedPayout).length > 0) {
-                    updatedPayouts.push(updatedPayout);
+            const hasOtherRewardTypes = Object.keys(updatedSubmitterRewards).length > 0;
+            const updatedPayouts: Array<object> | undefined = hasOtherRewardTypes ? [] : undefined;
+
+            if (hasOtherRewardTypes) {
+                for (let i = 0; i < state.submitterRewards.payouts.length; i++) {
+                    const payout = state.submitterRewards.payouts[i];
+                    const { [action.payload.token.type]: _, ...updatedPayout } = payout;
+                    if (Object.keys(updatedPayout).length > 0) {
+                        if (updatedPayouts !== undefined) {
+                            updatedPayouts.push(updatedPayout);
+                        }
+                    }
                 }
             }
 
@@ -182,11 +212,10 @@ export const reducer = (state: any, action: any) => {
                 ...state,
                 submitterRewards: {
                     ...updatedSubmitterRewards,
-                    payouts: updatedPayouts
+                    ...(updatedPayouts !== undefined && { payouts: updatedPayouts })
                 }
             };
         }
-
 
         case "addSubRank": {
             return {
@@ -197,10 +226,10 @@ export const reducer = (state: any, action: any) => {
                         ...state.submitterRewards.payouts,
                         {
                             rank: state.submitterRewards.payouts.length + 1,
-                            ...(state.submitterRewards.ETH ? { ETH: { amount: "0" } } : {}),
-                            ...(state.submitterRewards.ERC20 ? { ERC20: { amount: "0" } } : {}),
+                            ...(state.submitterRewards.ETH ? { ETH: { amount: "" } } : {}),
+                            ...(state.submitterRewards.ERC20 ? { ERC20: { amount: "" } } : {}),
                             ...(state.submitterRewards.ERC721 ? { ERC721: { tokenId: null } } : {}),
-                            ...(state.submitterRewards.ERC1155 ? { ERC1155: { amount: "0" } } : {}),
+                            ...(state.submitterRewards.ERC1155 ? { ERC1155: { amount: "" } } : {}),
 
                         },
                     ],
@@ -411,6 +440,12 @@ export const reducer = (state: any, action: any) => {
             return { ...state, votingPolicy: updatedVotingPolicy };
         }
 
+        case "validateStep": {
+            const stepIndex = action.payload;
+            const newErrors = validateStep(state, stepIndex);
+            return { ...state, errors: { ...state.errors, newErrors } };
+        }
+
         case "setErrors":
             return {
                 ...state,
@@ -430,7 +465,7 @@ export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
         ERC20: submitterRewards.ERC20,
         ERC721: submitterRewards.ERC721,
         ERC1155: submitterRewards.ERC1155,
-        payouts: submitterRewards.payouts.map((payout: any) => {
+        payouts: submitterRewards.payouts?.map((payout: any) => {
             const cleanedPayout: any = { rank: payout.rank };
             if (payout.ETH && payout.ETH.amount > 0) {
                 cleanedPayout.ETH = payout.ETH;
@@ -445,10 +480,9 @@ export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
                 cleanedPayout.ERC1155 = payout.ERC1155;
             }
             return cleanedPayout;
-        }),
+        }) ?? undefined,
     };
     return cleanedSubmitterRewards as SubmitterRewards;
-
 }
 
 
@@ -474,3 +508,86 @@ export const arraysSubtract = (arr1: IToken[], arr2: IToken[], strictTypes?: str
     });
 
 }
+
+export const validateStep = (state: ContestBuilderProps, step: number) => {
+    const errors = {}
+    switch (step) {
+        case 0:
+            return validateContestType(state);
+
+
+        case 1:
+            // contest deadlines are handled in component effects
+            return validateContestDeadlines(state);
+        case 2:
+            break;
+
+        case 3:
+            return validateSubmitterRewards(state);
+        /*
+    case 4:
+        return validateStep4(state);
+    case 5:
+        return validateStep5(state);
+    case 6:
+        return validateStep6(state);
+    case 7:
+        return validateStep7(state);
+    */
+        default:
+            break;
+    }
+    return errors
+}
+
+
+const validateContestType = (state: ContestBuilderProps) => {
+    return {
+        ...(!state.type ? { type: "Please select a contest type" } : {}),
+    }
+}
+
+
+
+
+const validateContestDeadlines = (state: ContestBuilderProps) => {
+    const errors: ContestBuilderErrors = {};
+
+    if (state.voteTime <= state.startTime) {
+        errors.voteTime = "vote date must be after start date";
+    }
+
+    if (state.endTime <= state.voteTime) {
+        errors.endTime = "end date must be after vote date";
+    }
+
+    if (state.endTime <= state.startTime) {
+        errors.endTime = "end date must be after start date";
+    }
+
+    return errors;
+}
+
+
+const validateSubmitterRewards = (state: ContestBuilderProps) => {
+    const errors: ContestBuilderErrors = {
+        subRewards: {
+            duplicateRanks: [],
+        }
+    };
+
+    const seenRanks: number[] = [];
+
+    const payouts = state.submitterRewards.payouts;
+    const ranks = payouts ? payouts.map((payout) => payout.rank) : [];
+
+    ranks.forEach((rank, index) => {
+        if (seenRanks.includes(rank)) {
+            errors.subRewards.duplicateRanks.push(rank);
+        } else {
+            seenRanks.push(rank);
+        }
+    });
+
+    return errors;
+};

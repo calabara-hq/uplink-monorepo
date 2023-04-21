@@ -80,7 +80,7 @@ const SubmitterRewardsComponent = ({
       </button>
       <SubmitterRewardMatrix
         spaceTokens={state.spaceTokens}
-        submitterRewards={state.submitterRewards}
+        state={state}
         dispatch={dispatch}
       />
       <TokenModal
@@ -121,11 +121,11 @@ const Toggle = ({
 
 const SubmitterRewardMatrix = ({
   spaceTokens,
-  submitterRewards,
+  state,
   dispatch,
 }: {
   spaceTokens: IToken[];
-  submitterRewards: SubmitterRewards;
+  state: ContestBuilderProps;
   dispatch: React.Dispatch<
     | AddSubRankAction
     | RemoveSubRankAction
@@ -134,6 +134,8 @@ const SubmitterRewardMatrix = ({
     | UpdateERC721TokenIdAction
   >;
 }) => {
+  const { submitterRewards, errors } = state;
+
   const addRank = () => {
     dispatch({ type: "addSubRank" });
   };
@@ -180,6 +182,11 @@ const SubmitterRewardMatrix = ({
   ) {
     return (
       <div className="overflow-x-auto w-full">
+        {errors.subRewards.duplicateRanks.length > 0 && (
+          <div className="text-red-500">
+            <p>oops, you have some duplicate ranks</p>
+          </div>
+        )}
         <table className="table w-full">
           {/* head */}
           <thead>
@@ -201,11 +208,23 @@ const SubmitterRewardMatrix = ({
             </tr>
           </thead>
           <tbody className="w-full">
-            {submitterRewards.payouts.map((payout, index) => (
+            {submitterRewards?.payouts?.map((payout, index) => (
               <tr key={index}>
                 <th className="w-24 text-center">
+                  {/*
+                  className={`input w-24 ${
+                      
+                      errors.subRewards.duplicateRanks.includes(index)
+                        ? "input-error"
+                        : "input-bordered"
+                    `}
+                  */}
                   <input
-                    className="input input-bordered w-24"
+                    className={`input w-24 ${
+                      errors.subRewards.duplicateRanks.includes(index)
+                        ? "input-error"
+                        : "input-bordered"
+                    }`}
                     type="number"
                     value={payout.rank || ""}
                     onChange={(e) => updateRank(index, Number(e.target.value))}
@@ -268,7 +287,8 @@ const SubmitterRewardMatrix = ({
                   </td>
                 ) : null}
 
-                {submitterRewards.payouts.length > 1 ? (
+                {submitterRewards?.payouts?.length &&
+                submitterRewards.payouts.length > 1 ? (
                   <td className="w-32 text-right">
                     <button
                       className="btn btn-sm btn-error"

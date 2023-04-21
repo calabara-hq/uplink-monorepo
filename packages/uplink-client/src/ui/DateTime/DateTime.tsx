@@ -1,4 +1,3 @@
-"use client";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
@@ -40,8 +39,8 @@ export default function DateTimeSelector({
 }: {
   isoString: string;
   label: string;
-  error: string | null;
   callback: (isoString: string) => void;
+  error?: string;
 }) {
   const { iDate, iHour, iMinute, iMeridiem } = deconstructIsoString(isoString);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

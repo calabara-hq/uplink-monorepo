@@ -4,12 +4,13 @@ import {
   ArrowRightIcon,
   CheckBadgeIcon,
 } from "@heroicons/react/24/solid";
+import { ContestBuilderProps } from "@/app/contestbuilder/contestHandler";
 
 const ContestType = ({
-  type,
+  state,
   dispatch,
 }: {
-  type: string | null;
+  state: ContestBuilderProps;
   dispatch: React.Dispatch<any>;
 }) => {
   return (
@@ -18,7 +19,7 @@ const ContestType = ({
         <div className="indicator grid flex-grow w-full h-32">
           <span
             className={`indicator-item badge bg-transparent border-none ${
-              type === "standard" ? "visible" : "hidden"
+              state.type === "standard" ? "visible" : "hidden"
             }`}
           >
             <CheckBadgeIcon className="w-8 text-green-400" />
@@ -28,7 +29,7 @@ const ContestType = ({
               dispatch({ type: "setType", payload: "standard" });
             }}
             className={`btn h-full card bg-base-300 border-2 rounded-box place-items-center ${
-              type === "standard" ? "border-green-400" : ""
+              state.type === "standard" ? "border-green-400" : ""
             }`}
           >
             standard contest
@@ -38,7 +39,7 @@ const ContestType = ({
         <div className="indicator grid flex-grow w-full h-32">
           <span
             className={`indicator-item badge bg-transparent border-none ${
-              type === "twitter" ? "visible" : "hidden"
+              state.type === "twitter" ? "visible" : "hidden"
             }`}
           >
             <CheckBadgeIcon className="w-8 text-blue-400" />
@@ -48,12 +49,15 @@ const ContestType = ({
               dispatch({ type: "setType", payload: "twitter" });
             }}
             className={`btn h-full card bg-base-300 border-2 rounded-box place-items-center ${
-              type === "twitter" ? "border-blue-400" : ""
+              state.type === "twitter" ? "border-blue-400" : ""
             }`}
           >
             twitter contest
           </button>
         </div>
+        {state.errors.type && (
+          <p className="text-red-500">{state.errors.type}</p>
+        )}
       </div>
     </BlockWrapper>
   );
