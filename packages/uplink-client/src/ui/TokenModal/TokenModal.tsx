@@ -4,6 +4,7 @@ import { IERCToken, isERCToken, IToken } from "@/types/token";
 import {
   ArrowPathIcon,
   ExclamationTriangleIcon,
+  PlusIcon,
 } from "@heroicons/react/24/solid";
 import { useTokenManager } from "@/hooks/useTokenManager";
 import Modal, { ModalActions } from "../Modal/Modal";
@@ -165,59 +166,54 @@ const QuickAddToken = ({
   );
 
   return (
-    <div className="w-full px-1 flex flex-col gap-2">
-      <div className="flex flex-row items-center justify-evenly">
-        <div className="flex flex-col">
-          <h2 className="text-2xl">Quick Add</h2>
-          <div className="flex flex-col gap-2">
-            <input
-              type="text"
-              className="input input-bordered"
-              placeholder="Search tokens..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-            />
+    <div className="flex flex-col w-full px-1 gap-4">
+      <h2 className="text-2xl">Quick Add</h2>
+      <input
+        type="text"
+        className="input input-bordered"
+        placeholder="Search tokens..."
+        value={searchQuery}
+        onChange={(event) => setSearchQuery(event.target.value)}
+      />
 
-            {filteredTokens && filteredTokens.length > 0 ? (
-              <ul className="menu menu-compact lg:menu-normal bg-base-100 w-56 p-2 rounded-box">
-                {filteredTokens.map((el, index) => {
-                  return (
-                    <li key={index}>
-                      <a
-                        className={`flex flex-row justify-between hover:bg-base-200 ${
-                          JSON.stringify(state.quickAddToken) ===
-                          JSON.stringify(el)
-                            ? "bg-primary"
-                            : "bg-base-100"
-                        }`}
-                        onClick={() => {
-                          dispatch({
-                            type: "setQuickAddToken",
-                            payload: el,
-                          });
-                        }}
-                      >
-                        <b>{el.symbol}</b>
-                        {el.type}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <div className="alert alert-warning shadow-lg">
-                <p>hmm.. I couldn't find that token</p>
-              </div>
-            )}
-          </div>
+      {filteredTokens && filteredTokens.length > 0 ? (
+        <ul className="menu menu-compact lg:menu-normal bg-base-100 w-full p-2 rounded-box">
+          {filteredTokens.map((el, index) => {
+            return (
+              <li key={index}>
+                <a
+                  className={`flex flex-row justify-between hover:bg-base-200 ${
+                    JSON.stringify(state.quickAddToken) === JSON.stringify(el)
+                      ? "bg-primary"
+                      : "bg-base-100"
+                  }`}
+                  onClick={() => {
+                    dispatch({
+                      type: "setQuickAddToken",
+                      payload: el,
+                    });
+                  }}
+                >
+                  <b>{el.symbol}</b>
+                  {el.type}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <div className="alert alert-warning justify-start shadow-lg">
+          <ExclamationTriangleIcon className="w-6 h-6" />
+          <p>hmm.. I couldn't find that token</p>
         </div>
-        <div className="divider lg:divider-horizontal">
-          <ArrowPathIcon className="w-24" />
-        </div>
-        <button className="text-2xl" onClick={() => setProgress(1)}>
-          Manual Add
-        </button>
-      </div>
+      )}
+      <button
+        className="btn btn-normal btn-secondary"
+        onClick={() => setProgress(1)}
+      >
+        Manual Add
+        <PlusIcon className="ml-2 w-6" />
+      </button>
     </div>
   );
 };
