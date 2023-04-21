@@ -64,7 +64,7 @@ const SubmitterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Submitter Rewards">
-      <div className="flex flex-col w-full gap-2">
+      <div className="flex flex-row w-full gap-4">
         {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
           return (
             <TokenCard

@@ -207,13 +207,15 @@ const QuickAddToken = ({
           <p>hmm.. I couldn't find that token</p>
         </div>
       )}
-      <button
-        className="btn btn-normal btn-secondary"
-        onClick={() => setProgress(1)}
-      >
-        Manual Add
-        <PlusIcon className="ml-2 w-6" />
-      </button>
+      <div>
+        <button
+          className="btn btn-secondary"
+          onClick={() => setProgress(1)}
+        >
+          Manual Add
+          <PlusIcon className="ml-2 w-6" />
+        </button>
+      </div>
     </div>
   );
 };
