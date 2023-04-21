@@ -23,10 +23,10 @@ const StandardPrompt = ({
 }) => {
   const [selectedLabel, setSelectedLabel] = useState<Option>(labelOptions[0]);
   const imageUploader = useRef<HTMLInputElement>(null);
-
+  const [mediaBlob, setMediaBlob] = useState<string | null>(null);
   const editorCallback = (data: OutputData) => {
     dispatch({
-      type: "setContestPromptBody",
+      type: "setPromptBody",
       payload: data,
     });
   };
@@ -50,16 +50,27 @@ const StandardPrompt = ({
                   <div className="flex flex-col mt-auto">
                     <label className="text-sm p-1">Title</label>
                     <input
-                      className="input"
+                      className={`input ${
+                        state.errors.prompt?.title
+                          ? "input-error"
+                          : "input-bordered"
+                      }`}
                       type="text"
-                      value={state.contestPromptTitle}
+                      value={state.prompt.title}
                       onChange={(e) =>
                         dispatch({
-                          type: "setContestPromptTitle",
+                          type: "setPromptTitle",
                           payload: e.target.value,
                         })
                       }
                     />
+                    {state.errors.prompt?.title && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">
+                          {state.errors.prompt?.title}
+                        </span>
+                      </label>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col ml-auto">
@@ -69,19 +80,16 @@ const StandardPrompt = ({
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={async (event) => {
+                    onChange={(event) => {
                       handleMediaUpload(
                         event,
                         ["image"],
                         (base64) => {
-                          dispatch({
-                            type: "setMediaBlob",
-                            payload: base64,
-                          });
+                          setMediaBlob(base64);
                         },
                         (ipfsUrl) => {
                           dispatch({
-                            type: "setMediaUrl",
+                            type: "setCoverUrl",
                             payload: ipfsUrl,
                           });
                         }
@@ -94,18 +102,18 @@ const StandardPrompt = ({
                       className="w-36 rounded-lg cursor-pointer flex justify-center items-center"
                       onClick={() => imageUploader.current?.click()}
                     >
-                      {state.media_blob && <img src={state.media_blob} />}
-                      {!state.media_blob && (
+                      {mediaBlob && <img src={mediaBlob} />}
+                      {!mediaBlob && (
                         <div className="flex justify-center items-center w-full h-full rounded-lg bg-gray-500">
                           <p>cover image</p>
                         </div>
                       )}
                     </div>
                   </div>
-                  {state.errors?.media_url && (
+                  {state.errors?.prompt?.coverUrl && (
                     <label className="label">
                       <span className="label-text-alt text-error">
-                        {state.errors.media_url}
+                        {state.errors?.prompt?.coverUrl}
                       </span>
                     </label>
                   )}
@@ -115,6 +123,13 @@ const StandardPrompt = ({
           </div>
           <div className="flex flex-col w-full xl:w-8/12">
             <label className="text-sm p-1">Body</label>
+            {state.errors.prompt?.body && (
+              <label className="label">
+                <span className="label-text-alt text-error">
+                  {state.errors.prompt?.body}
+                </span>
+              </label>
+            )}
             <Editor editorCallback={editorCallback} />
           </div>
         </div>

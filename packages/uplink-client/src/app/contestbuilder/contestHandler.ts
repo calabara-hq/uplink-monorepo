@@ -1,5 +1,5 @@
 import { IToken, IERCToken, INativeToken } from "@/types/token";
-
+import { OutputData } from "@editorjs/editorjs";
 
 type FungiblePayout = {
     amount: string;
@@ -32,29 +32,10 @@ export interface VoterRewards {
     payouts?: IPayout[];
 }
 
-/*
-export interface VoterRewards {
-    ETH?: IToken;
-    ERC20?: IToken;
-    payouts: [
-        {
-            rank: number;
-            ETH?: {
-                amount: string;
-            };
-            ERC20?: {
-                amount: string;
-            };
-        }
-    ]
-};
-*/
 export type SubmitterRestriction = {
     token?: IToken;
     threshold?: string;
 }
-
-
 
 export type VotingStrategyType = "arcade" | "weighted";
 
@@ -68,15 +49,18 @@ export type VotingPolicyType = {
     }
 }
 
+export interface Prompt {
+    title: string;
+    body: OutputData | null;
+    coverUrl?: string;
+}
+
 export interface ContestBuilderProps {
     type: string | null;
     startTime: string;
     voteTime: string;
     endTime: string;
-    contestPromptTitle: string;
-    contestPromptBody: string;
-    media_blob: string | null;
-    media_url: string | null;
+    prompt: Prompt;
     spaceTokens: IToken[];
     submitterRewards: SubmitterRewards;
     voterRewards: VoterRewards;
@@ -85,25 +69,25 @@ export interface ContestBuilderProps {
     errors: ContestBuilderErrors;
 }
 
-
-
 export type RewardError = {
-    //payouts: SubRewardPayoutError[];
     duplicateRanks: number[];
 }
 
+export type PromptError = {
+    title?: string;
+    body?: string;
+    coverUrl?: string;
+}
 
 export type ContestBuilderErrors = {
     type?: string;
     startTime?: string;
     voteTime?: string;
     endTime?: string;
-    contestPromptTitle: string | null;
-    contestPromptBody: string | null;
-    media_url: string | null;
     subRewards: RewardError;
     voterRewards: RewardError;
     votingPolicy?: string;
+    prompt?: PromptError;
 }
 
 export const reducer = (state: any, action: any) => {
@@ -133,30 +117,46 @@ export const reducer = (state: any, action: any) => {
                 endTime: action.payload,
                 errors: { ...state.errors, endTime: undefined },
             };
-        case "setContestPromptTitle":
+        case "setPromptTitle": {
+
+            const { title: titleError, ...existingPromptErrors } = state.errors.prompt
+
             return {
                 ...state,
-                contestPromptTitle: action.payload,
-                errors: { ...state.errors, contestPromptTitle: null },
+                prompt: {
+                    ...state.prompt,
+                    title: action.payload,
+                },
+
+                errors: { ...state.errors, prompt: { ...existingPromptErrors } },
             };
-        case "setContestPromptBody":
+        }
+
+        case "setPromptBody": {
+            const { body: bodyError, ...existingPromptErrors } = state.errors.prompt
+
             return {
                 ...state,
-                contestPromptBody: action.payload,
-                errors: { ...state.errors, contestPromptBody: null },
+                prompt: {
+                    ...state.prompt,
+                    body: action.payload,
+                },
+                errors: { ...state.errors, prompt: { ...existingPromptErrors } },
             };
-        case "setMediaBlob":
+        }
+
+        case "setCoverUrl": {
+            const { coverUrl: urlError, ...existingPromptErrors } = state.errors.prompt
+
             return {
                 ...state,
-                media_blob: action.payload,
-                errors: { ...state.errors, media_blob: null },
+                prompt: {
+                    ...state.prompt,
+                    coverUrl: action.payload,
+                },
+                errors: { ...state.errors, prompt: { ...existingPromptErrors } },
             };
-        case "setMediaUrl":
-            return {
-                ...state,
-                media_url: action.payload,
-                errors: { ...state.errors, media_url: null },
-            };
+        }
 
         // submitter rewards
 
@@ -254,12 +254,21 @@ export const reducer = (state: any, action: any) => {
 
         case "updateSubRank": {
             const updatedPayouts = [...state.submitterRewards.payouts];
-            if (!isNaN(action.payload.rank)) {
-                updatedPayouts[action.payload.index].rank = Number(action.payload.rank);
-            } else {
-                updatedPayouts[action.payload.index].rank = 0;
+            updatedPayouts[action.payload.index].rank = Number(action.payload.rank);
+            const updatedErrors = { ...state.errors.subRewards };
+            // if the index is in errors.dupliateRanks, remove it from the array
+            if (updatedErrors.duplicateRanks.includes(action.payload.index)) {
+                updatedErrors.duplicateRanks = updatedErrors.duplicateRanks.filter((index: number) => index !== action.payload.index);
             }
-            return { ...state, submitterRewards: { ...state.submitterRewards, payouts: updatedPayouts } };
+
+            return {
+                ...state,
+                submitterRewards: { ...state.submitterRewards, payouts: updatedPayouts },
+                errors: {
+                    ...state.errors,
+                    subRewards: updatedErrors
+                }
+            };
         }
 
         case "updateSubRewardAmount": {
@@ -375,12 +384,21 @@ export const reducer = (state: any, action: any) => {
 
         case "updateVoterRank": {
             const updatedPayouts = [...state.voterRewards.payouts];
-            if (!isNaN(action.payload.rank)) {
-                updatedPayouts[action.payload.index].rank = Number(action.payload.rank);
-            } else {
-                updatedPayouts[action.payload.index].rank = 0;
+            updatedPayouts[action.payload.index].rank = Number(action.payload.rank);
+            const updatedErrors = { ...state.errors.voterRewards };
+            // if the index is in errors.dupliateRanks, remove it from the array
+            if (updatedErrors.duplicateRanks.includes(action.payload.index)) {
+                updatedErrors.duplicateRanks = updatedErrors.duplicateRanks.filter((index: number) => index !== action.payload.index);
             }
-            return { ...state, voterRewards: { ...state.voterRewards, payouts: updatedPayouts } };
+
+            return {
+                ...state,
+                voterRewards: { ...state.voterRewards, payouts: updatedPayouts },
+                errors: {
+                    ...state.errors,
+                    voterRewards: updatedErrors
+                }
+            };
         }
 
         case "updateVoterRewardAmount": {
@@ -515,7 +533,7 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
             // contest deadlines are handled in component effects
             return validateContestDeadlines(state);
         case 2:
-            break;
+            return validatePrompt(state);
 
         case 3:
             return validateSubmitterRewards(state);
@@ -524,7 +542,7 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
             return validateVoterRewards(state);
 
         case 5:
-            break;
+            return { isError: false, errors: {} }
         case 6:
             return validateVotingPolicy(state);
         /*
@@ -540,7 +558,9 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
 
 const validateContestType = (state: ContestBuilderProps) => {
     return {
-        ...(!state.type ? { type: "Please select a contest type" } : {}),
+        ...(!state.type ? {
+            errors: { type: "Please select a contest type" }, isError: true
+        } : { isError: false, errors: {} }),
     }
 }
 
@@ -548,25 +568,33 @@ const validateContestType = (state: ContestBuilderProps) => {
 
 
 const validateContestDeadlines = (state: ContestBuilderProps) => {
+    let isError = false;
     const errors: ContestBuilderErrors = {};
 
     if (state.voteTime <= state.startTime) {
         errors.voteTime = "vote date must be after start date";
+        isError = true;
     }
 
     if (state.endTime <= state.voteTime) {
         errors.endTime = "end date must be after vote date";
+        isError = true;
     }
 
     if (state.endTime <= state.startTime) {
         errors.endTime = "end date must be after start date";
+        isError = true;
     }
 
-    return errors;
+    return {
+        errors,
+        isError: isError,
+    };
 }
 
 
 const validateSubmitterRewards = (state: ContestBuilderProps) => {
+    let isError = false;
     const errors: ContestBuilderErrors = {
         subRewards: {
             duplicateRanks: [],
@@ -577,19 +605,24 @@ const validateSubmitterRewards = (state: ContestBuilderProps) => {
 
     const payouts = state.submitterRewards.payouts;
     const ranks = payouts ? payouts.map((payout) => payout.rank) : [];
-
     ranks.forEach((rank, index) => {
         if (seenRanks.includes(rank)) {
-            errors.subRewards.duplicateRanks.push(rank);
+            errors.subRewards.duplicateRanks.push(index);
+            console.log(seenRanks)
+            isError = true;
         } else {
             seenRanks.push(rank);
         }
     });
 
-    return errors;
+    return {
+        errors,
+        isError: isError,
+    };
 };
 
 const validateVoterRewards = (state: ContestBuilderProps) => {
+    let isError = false;
     const errors: ContestBuilderErrors = {
         voterRewards: {
             duplicateRanks: [],
@@ -603,23 +636,47 @@ const validateVoterRewards = (state: ContestBuilderProps) => {
 
     ranks.forEach((rank, index) => {
         if (seenRanks.includes(rank)) {
-            errors.voterRewards.duplicateRanks.push(rank);
+            errors.voterRewards.duplicateRanks.push(index);
+            isError = true;
         } else {
             seenRanks.push(rank);
         }
     });
 
-    return errors;
+    return {
+        errors,
+        isError: isError,
+    };
 };
 
 const validateVotingPolicy = (state: ContestBuilderProps) => {
-    console.log('validate voting policy')
     // set an error if the voting policy is not set
     return {
-        ...(!state.votingPolicy.length ? { votingPolicy: "Please add a voting policy" } : {}),
+        ...(!state.votingPolicy.length ? {
+            errors: { votingPolicy: "Please add a voting policy" }, isError: true
+        } : { isError: false, errors: {} }),
     }
 }
 
+const validatePrompt = (state: ContestBuilderProps) => {
+
+    const isTitle = state.prompt.title.length > 0;
+    const isBody = state.prompt.body?.blocks?.length ?? 0 > 0;
+    const isCoverUrl = state?.prompt?.coverUrl?.length ?? 0 > 0;
+
+    return {
+        isError: !isTitle || !isBody || !isCoverUrl,
+        errors: {
+            ...(isTitle && isBody && isCoverUrl ? {} : {
+                prompt: {
+                    ...(isTitle ? {} : { title: "Please enter a title" }),
+                    ...(isBody ? {} : { body: "Please enter a description" }),
+                    ...(isCoverUrl ? {} : { coverUrl: "Please enter a cover url" }),
+                }
+            })
+        }
+    }
+}
 
 export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
 
@@ -672,8 +729,6 @@ export const cleanVoterRewards = (voterRewards: VoterRewards) => {
 
     let seenETH: boolean = false;
     let seenERC20: boolean = false;
-    let seenERC721: boolean = false;
-    let seenERC1155: boolean = false;
 
 
     const cleanedPayouts = voterRewards.payouts?.map((payout) => {

@@ -1,4 +1,4 @@
-import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, reducer, rewardsObjectToArray, SubmitterRewards, VoterRewards } from "@/app/contestbuilder/contestHandler";
+import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, ContestBuilderProps, reducer, rewardsObjectToArray, SubmitterRewards, VoterRewards } from "@/app/contestbuilder/contestHandler";
 import { IToken } from "@/types/token";
 import { describe, expect, test } from "@jest/globals";
 import { sampleERC1155Token, sampleERC20Token, sampleERC721Token, sampleETHToken } from "./sampleTokens";
@@ -194,6 +194,11 @@ describe("Submitter Rewards", () => {
                 ERC1155: sampleERC1155Token,
                 payouts: [{ rank: 1, ERC20: { amount: "100" } }],
             },
+            errors: {
+                subRewards: {
+                    duplicateRanks: []
+                }
+            }
         };
 
         const action = { type: "updateSubRank", payload: { index: 0, rank: 2 } };
@@ -205,6 +210,11 @@ describe("Submitter Rewards", () => {
                 ERC1155: sampleERC1155Token,
                 payouts: [{ rank: 2, ERC20: { amount: "100" } }],
             },
+            errors: {
+                subRewards: {
+                    duplicateRanks: []
+                }
+            }
         };
 
         expect(reducer(initialState, action)).toEqual(expectedState);
@@ -338,6 +348,11 @@ describe("Voter Rewards", () => {
                 ERC20: sampleERC20Token,
                 payouts: [{ rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } }],
             },
+            errors: {
+                voterRewards: {
+                    duplicateRanks: []
+                }
+            }
         };
 
         const action = { type: "addVoterRank" };
@@ -350,6 +365,11 @@ describe("Voter Rewards", () => {
                     { rank: 2, ERC20: { amount: "" }, ETH: { amount: "" } },
                 ],
             },
+            errors: {
+                voterRewards: {
+                    duplicateRanks: []
+                }
+            }
         };
         expect(reducer(initialState, action)).toEqual(expectedState);
     });
@@ -383,6 +403,11 @@ describe("Voter Rewards", () => {
                 ERC20: sampleERC20Token,
                 payouts: [{ rank: 1, ERC20: { amount: "100" }, ETH: { amount: "10" } }],
             },
+            errors: {
+                voterRewards: {
+                    duplicateRanks: []
+                }
+            }
         };
         const action = { type: "updateVoterRank", payload: { index: 0, rank: 2 } };
         const expectedState = {
@@ -391,6 +416,11 @@ describe("Voter Rewards", () => {
                 ERC20: sampleERC20Token,
                 payouts: [{ rank: 2, ERC20: { amount: "100" }, ETH: { amount: "10" } }],
             },
+            errors: {
+                voterRewards: {
+                    duplicateRanks: []
+                }
+            }
         };
         expect(reducer(initialState, action)).toEqual(expectedState);
     });

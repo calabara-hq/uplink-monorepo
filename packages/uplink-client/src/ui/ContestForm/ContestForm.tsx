@@ -55,10 +55,11 @@ const initialState = {
   voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
   endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
 
-  contestPromptTitle: "",
-  contestPromptBody: "",
-  media_blob: null,
-  media_url: null,
+  prompt: {
+    title: "",
+    body: null,
+  },
+
   spaceTokens: [
     {
       type: "ETH",
@@ -97,9 +98,6 @@ const initialState = {
   votingPolicy: [],
 
   errors: {
-    contestPromptTitle: null,
-    contestPromptBody: null,
-    media_url: null,
     subRewards: {
       duplicateRanks: [],
     },
@@ -135,6 +133,8 @@ const ContestForm = () => {
     {
       name: "Standard Prompt",
       component: <StandardPrompt state={state} dispatch={dispatch} />,
+      //errors: Object.keys(state.errors?.prompt)?.length ?? 0 > 0,
+      errors: Object.keys(state.errors?.prompt).length > 0,
     },
     {
       name: "Submitter Rewards",
@@ -169,13 +169,12 @@ const ContestForm = () => {
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      const errors = validateStep(state, currentStep);
+      const res = validateStep(state, currentStep);
+      console.log(res);
+      if (res.isError)
+        return dispatch({ type: "setErrors", payload: res.errors });
 
-      console.log(errors);
-      if (Object.keys(errors).length > 0)
-        return dispatch({ type: "setErrors", payload: errors });
-
-      //setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1);
     }
   };
 
