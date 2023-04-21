@@ -92,13 +92,7 @@ const initialState = {
     },
   ],
   submitterRewards: {},
-  voterRewards: {
-    payouts: [
-      {
-        rank: 1,
-      },
-    ],
-  },
+  voterRewards: {},
   submitterRestrictions: [],
   votingPolicy: [],
 

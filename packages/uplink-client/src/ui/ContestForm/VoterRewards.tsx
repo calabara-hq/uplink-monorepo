@@ -89,12 +89,13 @@ const VoterRewardsMatrix = ({
       {voterRewards && (
         <div className="flex flex-col gap-2">
           {(voterRewards.ERC20 || voterRewards.ETH) &&
-            voterRewards.payouts.map((reward, index) => {
+            voterRewards?.payouts?.map((reward, index) => {
               return (
                 <VoterRewardRow
                   key={index}
                   index={index}
                   reward={reward}
+                  rewardsLength={voterRewards?.payouts?.length ?? 0}
                   availableRewardTokens={Object.entries(voterRewards)
                     .filter(
                       ([key, value]) => key !== "payouts" && value !== null
@@ -117,11 +118,13 @@ const VoterRewardRow = ({
   index,
   reward,
   availableRewardTokens,
+  rewardsLength,
   dispatch,
 }: {
   index: number;
   reward: any;
   availableRewardTokens: IToken[];
+  rewardsLength: number;
   dispatch: React.Dispatch<any>;
 }) => {
   console.log(availableRewardTokens);
@@ -190,9 +193,11 @@ const VoterRewardRow = ({
         setSelected={updateTokenType}
         options={menuSelectOptions}
       />
-      <button className="btn btn-sm" onClick={removeRank}>
-        delete
-      </button>
+      {rewardsLength > 1 && (
+        <button className="btn btn-sm" onClick={removeRank}>
+          delete
+        </button>
+      )}
     </div>
   );
 };

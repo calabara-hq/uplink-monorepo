@@ -29,6 +29,13 @@ export interface SubmitterRewards {
 export interface VoterRewards {
     ETH?: IToken;
     ERC20?: IToken;
+    payouts?: IPayout[];
+}
+
+/*
+export interface VoterRewards {
+    ETH?: IToken;
+    ERC20?: IToken;
     payouts: [
         {
             rank: number;
@@ -41,11 +48,13 @@ export interface VoterRewards {
         }
     ]
 };
-
+*/
 export type SubmitterRestriction = {
     token?: IToken;
     threshold?: string;
 }
+
+
 
 export type VotingStrategyType = "arcade" | "weighted";
 
@@ -281,6 +290,9 @@ export const reducer = (state: any, action: any) => {
         // voter rewards
 
         case "addVoterReward": {
+            if (action.payload.token.type === 'ERC721' || action.payload.token.type === 'ERC1155') {
+                return state;
+            }
             const { [action.payload.token.type]: _, ...updatedVoterRewards } = state.voterRewards;
             return {
                 ...state,
@@ -291,26 +303,39 @@ export const reducer = (state: any, action: any) => {
 
 
                     // add the type to each payout
-                    payouts: state.voterRewards.payouts.map((payout: any) => {
+                    payouts: (state.voterRewards?.payouts ?? [
+                        {
+                            rank: 1,
+                            [action.payload.token.type]: { amount: '' },
+                        }
+                    ]).map((payout: any) => {
                         return {
                             ...payout,
-                            // we also use this for swapping, so check if payout for type is already there otherwise set to 0
-                            [action.payload.token.type]: { amount: payout[action.payload.token.type]?.amount || "0" },
+                            [action.payload.token.type]: {
+                                ...payout[action.payload.token.type],
+                                amount: payout[action.payload.token.type]?.amount ?? ''
+                            }
                         };
-                    }),
+                    })
                 }
             }
         };
 
         case "removeVoterReward": {
-            const { [action.payload.token.type]: _, ...updatedVoterRewards } = state.voterRewards;
+            const { [action.payload.token.type]: _, payouts, ...updatedVoterRewards } = state.voterRewards;
 
-            const updatedPayouts = [];
-            for (let i = 0; i < state.voterRewards.payouts.length; i++) {
-                const payout = state.voterRewards.payouts[i];
-                const { [action.payload.token.type]: _, ...updatedPayout } = payout;
-                if (Object.keys(updatedPayout).length > 0) {
-                    updatedPayouts.push(updatedPayout);
+            const hasOtherRewardTypes = Object.keys(updatedVoterRewards).length > 0;
+            const updatedPayouts: Array<object> | undefined = hasOtherRewardTypes ? [] : undefined;
+
+            if (hasOtherRewardTypes) {
+                for (let i = 0; i < state.voterRewards.payouts.length; i++) {
+                    const payout = state.voterRewards.payouts[i];
+                    const { [action.payload.token.type]: _, ...updatedPayout } = payout;
+                    if (Object.keys(updatedPayout).length > 0) {
+                        if (updatedPayouts !== undefined) {
+                            updatedPayouts.push(updatedPayout);
+                        }
+                    }
                 }
             }
 
@@ -318,7 +343,7 @@ export const reducer = (state: any, action: any) => {
                 ...state,
                 voterRewards: {
                     ...updatedVoterRewards,
-                    payouts: updatedPayouts
+                    ...(updatedPayouts !== undefined && { payouts: updatedPayouts })
                 }
             };
         }
