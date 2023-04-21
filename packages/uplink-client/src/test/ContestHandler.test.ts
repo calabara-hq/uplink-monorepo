@@ -1,4 +1,4 @@
-import { arraysSubtract, cleanSubmitterRewards, reducer, rewardsObjectToArray, SubmitterRewards } from "@/app/contestbuilder/contestHandler";
+import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, reducer, rewardsObjectToArray, SubmitterRewards, VoterRewards } from "@/app/contestbuilder/contestHandler";
 import { IToken } from "@/types/token";
 import { describe, expect, test } from "@jest/globals";
 import { sampleERC1155Token, sampleERC20Token, sampleERC721Token, sampleETHToken } from "./sampleTokens";
@@ -605,30 +605,77 @@ describe("Helper functions", () => {
         const dirtyRewards: SubmitterRewards = {
             // ... other properties
             ETH: sampleETHToken,
-
             ERC20: sampleERC20Token,
+            ERC721: sampleERC721Token,
+            ERC1155: sampleERC1155Token,
             payouts: [
                 {
                     rank: 1,
-                    ETH: { amount: '1' },
-                    ERC20: { amount: '0' }
+                    ETH: { amount: '1.65' },
+                    ERC20: { amount: '' },
+                    ERC721: { tokenId: 0 },
+                    ERC1155: { amount: '0' }
                 },
             ],
         };
 
         const cleanRewards = {
+            ETH: sampleETHToken,
+            ERC721: sampleERC721Token,
+            payouts: [
+                {
+                    rank: 1,
+                    ETH: { amount: 1.65 },
+                    ERC721: { tokenId: 0 }
+
+                },
+            ],
+        };
+
+        const newState = cleanSubmitterRewards(dirtyRewards);
+        expect(newState).toEqual(cleanRewards);
+    })
+
+    test("cleanSubRewards empty rewards", () => {
+        const dirtyRewards: SubmitterRewards = {};
+        const cleanRewards = {};
+        const newState = cleanSubmitterRewards(dirtyRewards);
+        expect(newState).toEqual(cleanRewards);
+    })
+
+
+    test("cleanVoterRewards", () => {
+        const dirtyRewards: VoterRewards = {
             // ... other properties
             ETH: sampleETHToken,
             ERC20: sampleERC20Token,
             payouts: [
                 {
                     rank: 1,
-                    ETH: { amount: '1' },
+                    ETH: { amount: '1.6' },
+                    ERC20: { amount: '' },
                 },
             ],
         };
 
-        const newState = cleanSubmitterRewards(dirtyRewards);
+        const cleanRewards = {
+            ETH: sampleETHToken,
+            payouts: [
+                {
+                    rank: 1,
+                    ETH: { amount: 1.6 },
+                },
+            ],
+        };
+
+        const newState = cleanVoterRewards(dirtyRewards);
+        expect(newState).toEqual(cleanRewards);
+    })
+
+    test("cleanVoterRewards empty rewards", () => {
+        const dirtyRewards: VoterRewards = {};
+        const cleanRewards = {};
+        const newState = cleanVoterRewards(dirtyRewards);
         expect(newState).toEqual(cleanRewards);
     })
 

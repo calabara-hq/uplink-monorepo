@@ -480,32 +480,6 @@ export const reducer = (state: any, action: any) => {
 
 // helper functions
 
-export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
-    const cleanedSubmitterRewards = {
-        ETH: submitterRewards.ETH,
-        ERC20: submitterRewards.ERC20,
-        ERC721: submitterRewards.ERC721,
-        ERC1155: submitterRewards.ERC1155,
-        payouts: submitterRewards.payouts?.map((payout: any) => {
-            const cleanedPayout: any = { rank: payout.rank };
-            if (payout.ETH && payout.ETH.amount > 0) {
-                cleanedPayout.ETH = payout.ETH;
-            }
-            if (payout.ERC20 && payout.ERC20.amount > 0) {
-                cleanedPayout.ERC20 = payout.ERC20;
-            }
-            if (payout.ERC721 && payout.ERC721.tokenId > 0) {
-                cleanedPayout.ERC721 = payout.ERC721;
-            }
-            if (payout.ERC1155 && payout.ERC1155.amount > 0) {
-                cleanedPayout.ERC1155 = payout.ERC1155;
-            }
-            return cleanedPayout;
-        }) ?? undefined,
-    };
-    return cleanedSubmitterRewards as SubmitterRewards;
-}
-
 
 export const rewardsObjectToArray = (rewards: SubmitterRewards | VoterRewards, strictTypes?: string[]) => {
     return Object.values(rewards).filter(
@@ -645,3 +619,84 @@ const validateVotingPolicy = (state: ContestBuilderProps) => {
         ...(!state.votingPolicy.length ? { votingPolicy: "Please add a voting policy" } : {}),
     }
 }
+
+
+export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
+
+    let seenETH: boolean = false;
+    let seenERC20: boolean = false;
+    let seenERC721: boolean = false;
+    let seenERC1155: boolean = false;
+
+
+    const cleanedPayouts = submitterRewards.payouts?.map((payout) => {
+        const cleanedPayout: any = { rank: payout.rank };
+        const ETHPayout = Number(payout.ETH?.amount ?? 0);
+        const ERC20Payout = Number(payout.ERC20?.amount ?? 0);
+        const ERC721Payout = Number(payout.ERC721?.tokenId ?? -1);
+        const ERC1155Payout = Number(payout.ERC1155?.amount ?? 0);
+
+        if (ETHPayout > 0) {
+            cleanedPayout.ETH = { amount: ETHPayout };
+            seenETH = true;
+        }
+
+        if (ERC20Payout > 0) {
+            cleanedPayout.ERC20 = { amount: ERC20Payout };
+            seenERC20 = true;
+        }
+
+        if (ERC721Payout > -1) {
+            cleanedPayout.ERC721 = { tokenId: ERC721Payout };
+            seenERC721 = true;
+        }
+
+        if (ERC1155Payout > 0) {
+            cleanedPayout.ERC1155 = { amount: ERC1155Payout };
+            seenERC1155 = true;
+        }
+
+        return cleanedPayout;
+    })
+
+    return {
+        ...(seenETH ? { ETH: submitterRewards.ETH } : {}),
+        ...(seenERC20 ? { ERC20: submitterRewards.ERC20 } : {}),
+        ...(seenERC721 ? { ERC721: submitterRewards.ERC721 } : {}),
+        ...(seenERC1155 ? { ERC1155: submitterRewards.ERC1155 } : {}),
+        ...(cleanedPayouts ? { payouts: cleanedPayouts } : {}),
+    }
+};
+
+export const cleanVoterRewards = (voterRewards: VoterRewards) => {
+
+    let seenETH: boolean = false;
+    let seenERC20: boolean = false;
+    let seenERC721: boolean = false;
+    let seenERC1155: boolean = false;
+
+
+    const cleanedPayouts = voterRewards.payouts?.map((payout) => {
+        const cleanedPayout: any = { rank: payout.rank };
+        const ETHPayout = Number(payout.ETH?.amount ?? 0);
+        const ERC20Payout = Number(payout.ERC20?.amount ?? 0);
+
+        if (ETHPayout > 0) {
+            cleanedPayout.ETH = { amount: ETHPayout };
+            seenETH = true;
+        }
+
+        if (ERC20Payout > 0) {
+            cleanedPayout.ERC20 = { amount: ERC20Payout };
+            seenERC20 = true;
+        }
+
+        return cleanedPayout;
+    })
+
+    return {
+        ...(seenETH ? { ETH: voterRewards.ETH } : {}),
+        ...(seenERC20 ? { ERC20: voterRewards.ERC20 } : {}),
+        ...(cleanedPayouts ? { payouts: cleanedPayouts } : {}),
+    }
+};
