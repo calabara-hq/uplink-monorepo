@@ -1,6 +1,8 @@
 import { IToken, INativeToken, IERCToken } from "@/types/token";
 
-const TokenBadge = ({ token }: { token: IToken }) => {
+const TokenBadge = ({ token }: { token?: IToken }) => {
+    if (!token) return null;
+    
   const type = token.type;
   if (type === "ETH") {
     return <div className="badge badge-neutral badge-outline badge-lg">Ethereuem</div>;
