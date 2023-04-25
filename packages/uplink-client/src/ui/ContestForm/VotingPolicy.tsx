@@ -228,6 +228,10 @@ const VotingPolicyManager = ({
             setIsModalOpen(false);
           }}
           confirmLabel="confirm"
+          confirmDisabled={
+            !currentPolicy?.strategy?.votingPower &&
+            !currentPolicy?.strategy?.multiplier
+          }
         />
       </>
     );

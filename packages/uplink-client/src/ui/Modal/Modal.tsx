@@ -48,17 +48,23 @@ export const ModalActions = ({
   onCancel,
   onConfirm,
   confirmLabel,
+  confirmDisabled,
 }: {
   onCancel: () => void;
   onConfirm: () => void;
   confirmLabel: string;
+  confirmDisabled?: boolean;
 }) => {
   return (
     <div className="modal-action mt-8">
       <button onClick={onCancel} className="btn mr-auto">
         Cancel
       </button>
-      <button disabled={false} onClick={onConfirm} className="btn btn-primary">
+      <button
+        disabled={confirmDisabled}
+        onClick={onConfirm}
+        className="btn btn-primary"
+      >
         {confirmLabel}
       </button>
     </div>
