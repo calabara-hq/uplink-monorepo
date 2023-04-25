@@ -7,13 +7,13 @@ const TokenBadge = ({ token }: { token: IToken }) => {
 
   }
   if (type === "ERC20") {
-    return <div className="badge badge-primary badge-lg">ERC20</div>;
+    return <div className="badge badge-primary badge-lg">ERC-20</div>;
   }
   if (type === "ERC721") {
-    return <div className="badge badge-secondary badge-lg">ERC721</div>;
+    return <div className="badge badge-secondary badge-lg">ERC-721</div>;
   }
   if (type === "ERC1155") {
-    return <div className="badge badge-accent badge-lg">ERC1155</div>;
+    return <div className="badge badge-accent badge-lg">ERC-1155</div>;
   }
   return null;
 };

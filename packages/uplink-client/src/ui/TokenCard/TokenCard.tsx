@@ -2,7 +2,11 @@ import { IToken, INativeToken, IERCToken } from "@/types/token";
 import TokenBadge from "../TokenBadge/TokenBadge";
 import Image from "next/image";
 import EthLogo from "../../../public/eth-logo.png";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import {
+  TrashIcon,
+  LinkIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/24/solid";
 
 const TokenCard = ({
   token,
@@ -12,8 +16,8 @@ const TokenCard = ({
   handleRemove?: () => void;
 }) => {
   return (
-    <div className="card w-96 bg-base-100 shadow-xl">
-      <div className="card-body p-6">
+    <div className="card lg:w-1/3 bg-base-100 p-4 shadow-xl">
+      <div className="card-body p-0">
         <h2 className="card-title">Symbol: {token.symbol}</h2>
         {token.type === "ETH" && <ETHCard token={token} />}
         {token.type !== "ETH" && <ERCCard token={token} />}
@@ -41,19 +45,24 @@ const ETHCard = ({ token }: { token: INativeToken }) => {
 const ERCCard = ({ token }: { token: IERCToken }) => {
   return (
     <>
-      <a
-        className="link link-hover"
-        href={"https://etherscan.io/token/"} // + token.address}
-        target="_blank"
-      >
-        Address:{" "}
-        {token.address.substring(0, 4) +
-          "..." +
-          token.address.substring(35, 40)}
-      </a>
-      <p>
+      <div className="flex flex-row items-center">
+        <p>Address:</p>
+        <a
+          className=" btn btn-sm btn-ghost link link-hover p-2"
+          href={"https://etherscan.io/token/"} // + token.address}
+          target="_blank"
+        >
+          {" "}
+          {token.address.substring(0, 4) +
+            "..." +
+            token.address.substring(35, 40)}
+          <ArrowTopRightOnSquareIcon className="w-5 ml-2" />
+        </a>
+      </div>
+      <div className="flex flex-row items-center">
+        <p className="">Type:</p>
         <TokenBadge token={token} />
-      </p>
+      </div>
     </>
   );
 };

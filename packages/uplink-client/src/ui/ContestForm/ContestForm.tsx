@@ -33,7 +33,7 @@ export const BlockWrapper = ({
     <div className="bg-black/30 p-6 rounded-lg">
       <h1 className="text-2xl font-bold">{title}</h1>
       <div className="p-2" />
-      <div className="flex flex-col items-center p-6">{children}</div>
+      <div className="flex flex-col items-center lg:p-6">{children}</div>
     </div>
   );
 };

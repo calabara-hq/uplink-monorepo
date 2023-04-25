@@ -64,7 +64,7 @@ const SubmitterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Submitter Rewards">
-      <div className="flex flex-row w-full gap-4">
+      <div className="flex flex-col lg:flex-row w-full gap-4">
         {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
           return (
             <TokenCard
@@ -75,7 +75,7 @@ const SubmitterRewardsComponent = ({
           );
         })}
       </div>
-      <button className="btn" onClick={() => setIsModalOpen(true)}>
+      <button className="btn m-4" onClick={() => setIsModalOpen(true)}>
         add reward
       </button>
       <SubmitterRewardMatrix
