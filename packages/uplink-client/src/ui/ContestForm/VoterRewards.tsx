@@ -32,7 +32,7 @@ const VoterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Voter Rewards">
-      <div className="flex flex-col w-full gap-2">
+      <div className="flex flex-col lg:flex-row w-full gap-4">
         {rewardsObjectToArray(state.voterRewards).map((token, index) => {
           return (
             <TokenCard
@@ -43,7 +43,11 @@ const VoterRewardsComponent = ({
           );
         })}
       </div>
-
+      <div>
+        <button className="btn m-4" onClick={() => setIsModalOpen(true)}>
+          add reward
+        </button>
+      </div>
       <VoterRewardsMatrix
         spaceTokens={state.spaceTokens}
         voterRewards={state.voterRewards}
@@ -65,9 +69,7 @@ const VoterRewardsComponent = ({
         continuous={false}
       />
 
-      <button className="btn" onClick={() => setIsModalOpen(true)}>
-        add reward
-      </button>
+
     </BlockWrapper>
   );
 };
@@ -85,9 +87,9 @@ const VoterRewardsMatrix = ({
     dispatch({ type: "addVoterRank" });
   };
   return (
-    <div className="flex flex-col w-full gap-2">
+    <div className="flex flex-col w-full lg:w-3/4 bg-base-100 p-4 gap-2 rounded-xl shadow-xl">
       {voterRewards && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           {(voterRewards.ERC20 || voterRewards.ETH) &&
             voterRewards.payouts.map((reward, index) => {
               return (
@@ -104,8 +106,8 @@ const VoterRewardsMatrix = ({
                 />
               );
             })}
-          <button className="btn btn-sm" onClick={addRank}>
-            add
+          <button className="btn btn-sm mr-auto" onClick={addRank}>
+            add rank
           </button>
         </div>
       )}
@@ -167,17 +169,17 @@ const VoterRewardRow = ({
   };
 
   return (
-    <div className="flex flex-row items-center gap-2">
-      <p>voters that accurately choose rank </p>
+    <div className="flex flex-row items-center justify-evenly gap-2">
+      <p>Voters that accurately choose rank </p>
       <input
-        className="input input-bordered w-16"
+        className="input input-bordered focus:bg-neutral text-center w-16"
         type="number"
         value={reward.rank || ""}
         onChange={(e) => updateRank(index, Number(e.target.value))}
       />
       <p>will split</p>
       <input
-        className="input input-bordered w-32"
+        className="input input-bordered focus:bg-neutral text-center w-32"
         type="number"
         value={reward[selectedToken.value].amount || ""}
         onChange={(e) =>
@@ -190,7 +192,7 @@ const VoterRewardRow = ({
         setSelected={updateTokenType}
         options={menuSelectOptions}
       />
-      <button className="btn btn-sm" onClick={removeRank}>
+      <button className="btn btn-sm btn-error" onClick={removeRank}>
         delete
       </button>
     </div>
