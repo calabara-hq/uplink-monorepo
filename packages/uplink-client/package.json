@@ -33,6 +33,7 @@
     "eslint-config-next": "13.1.6",
     "ethers": "5.7.2",
     "formik": "^2.2.9",
+    "framer-motion": "^10.12.4",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "ipfs-mini": "^1.1.5",

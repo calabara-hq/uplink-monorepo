@@ -6,6 +6,7 @@ import {
   useRef,
   useCallback,
   ReactNode,
+  Fragment,
 } from "react";
 import {
   ContestBuilderProps,
@@ -21,6 +22,7 @@ import SubmitterRestrictions from "./SubmitterRestrictions";
 import VotingPolicy from "./VotingPolicy";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import { AnimatePresence, motion } from "framer-motion";
 
 export const BlockWrapper = ({
   title,
@@ -134,7 +136,7 @@ const ContestForm = () => {
       name: "Standard Prompt",
       component: <StandardPrompt state={state} dispatch={dispatch} />,
       //errors: Object.keys(state.errors?.prompt)?.length ?? 0 > 0,
-      errors: Object.keys(state.errors?.prompt).length > 0,
+      errors: Object.keys(state.errors?.prompt ?? {}).length > 0,
     },
     {
       name: "Submitter Rewards",
@@ -224,46 +226,53 @@ const ContestForm = () => {
         >
           {({ isSubmitting }) => (
             <Form className="px-4 py-6  shadow rounded-lg">
-              {steps.map((el, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={`${index !== currentStep ? "hidden" : ""}`}
-                  >
-                    {el.component}
-                  </div>
-                );
-              })}
+              {/* steps.map((el, index) => {
+                const isActive = currentStep === index;
+                const isPrevious = index < currentStep;
 
-              {currentStep > 0 && (
-                <button
-                  type="button"
-                  className="btn btn-secondary mr-2"
-                  onClick={handlePrevious}
-                >
-                  Previous
-                </button>
-              )}
-              {currentStep < steps.length - 1 && (
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleNext}
-                >
-                  Next
-                </button>
-              )}
+                return <div key={index}>{el.component}</div>;
+              })*/}
 
-              {currentStep === steps.length - 1 && (
-                <button
-                  className="btn btn-primary"
-                  type="submit"
-                  disabled={isSubmitting}
-                  onClick={handleSubmit}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  Save
-                </button>
-              )}
+                  {steps[currentStep].component}
+                  {currentStep > 0 && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary mr-2"
+                      onClick={handlePrevious}
+                    >
+                      Previous
+                    </button>
+                  )}
+                  {currentStep < steps.length - 1 && (
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleNext}
+                    >
+                      Next
+                    </button>
+                  )}
+
+                  {currentStep === steps.length - 1 && (
+                    <button
+                      className="btn btn-primary"
+                      type="submit"
+                      disabled={isSubmitting}
+                      onClick={handleSubmit}
+                    >
+                      Save
+                    </button>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </Form>
           )}
         </Formik>
