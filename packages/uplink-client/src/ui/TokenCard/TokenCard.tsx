@@ -17,8 +17,8 @@ const TokenCard = ({
 }) => {
   return (
     <div className="card lg:w-1/3 bg-base-100 p-4 shadow-xl">
-      <div className="card-body p-0">
-        <h2 className="card-title">Symbol: {token.symbol}</h2>
+      <div className="card-body justify-between p-0">
+        <h2 className="card-title">{token.symbol}</h2>
         {token.type === "ETH" && <ETHCard token={token} />}
         {token.type !== "ETH" && <ERCCard token={token} />}
         <div className="card-actions justify-end">
@@ -45,23 +45,19 @@ const ETHCard = ({ token }: { token: INativeToken }) => {
 const ERCCard = ({ token }: { token: IERCToken }) => {
   return (
     <>
-      <div className="flex flex-row items-center">
-        <p>Address:</p>
+      <div className="flex flex-row justify-between items-center">
         <a
-          className=" btn btn-sm btn-ghost link link-hover p-2"
-          href={"https://etherscan.io/token/"} // + token.address}
+          className=" btn btn-sm btn-ghost link"
+          href={`https://etherscan.io/token/${token.address}`}
           target="_blank"
         >
           {" "}
           {token.address.substring(0, 4) +
             "..." +
             token.address.substring(35, 40)}
-          <ArrowTopRightOnSquareIcon className="w-5 ml-2" />
         </a>
-      </div>
-      <div className="flex flex-row items-center">
-        <p className="">Type:</p>
         <TokenBadge token={token} />
+
       </div>
     </>
   );
