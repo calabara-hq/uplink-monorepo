@@ -27,10 +27,10 @@ const SubmitterRestrictions = ({
 
   return (
     <BlockWrapper title="Submitter Restrictions">
-      <div className="alert alert-info p-2 w-fit shadow-lg">
+      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-4 ml-auto w-fit shadow-lg">
         <div>
           <span>
-          Select the tokens and their respective thresholds that the submitter must hold to be able to submit.
+          Select the tokens and their respective thresholds that the <br />submitter must hold to be able to submit.
           </span>
         </div>
       </div>

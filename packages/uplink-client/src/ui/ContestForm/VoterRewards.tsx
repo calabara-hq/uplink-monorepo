@@ -32,10 +32,10 @@ const VoterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Voter Rewards">
-      <div className="alert alert-info p-2 w-fit shadow-lg">
+      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-4 ml-auto w-fit shadow-lg">
         <div>
           <span>
-            Select the tokens that will be distributed to the top X voters who accuraterly predict the outcome of the contest.
+            Select the tokens that will be distributed to the top X <br></br>voters who accuraterly predict the outcome of the contest.
           </span>
         </div>
       </div>

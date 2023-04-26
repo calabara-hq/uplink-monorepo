@@ -9,7 +9,7 @@ import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import TokenCard from "../TokenCard/TokenCard";
-import { TrashIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, SparklesIcon } from "@heroicons/react/24/solid";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
@@ -65,8 +65,9 @@ const SubmitterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Submitter Rewards">
-      <div className="alert alert-info p-2 w-fit shadow-lg">
-        <div>
+      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-2 ml-auto w-fit shadow-lg">
+        <div className="flex flex-row gap-2">
+          <SparklesIcon className="w-6 h-6" />
           <span>
             Select the tokens that will be distributed to the top X submitters
           </span>

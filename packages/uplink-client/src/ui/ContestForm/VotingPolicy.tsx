@@ -27,15 +27,14 @@ const VotingPolicy = ({
 
   return (
     <BlockWrapper title="Voting Policy">
-      <div className="alert alert-info p-2 w-fit shadow-lg">
+      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-4 ml-auto w-fit shadow-lg">
         <div>
           <span>
-            Voting credits determine how voting power is calculated, as well as
+            Voting credits determine how voting power is calculated,<br /> as well as
             any restrictions on voting power.
           </span>
         </div>
       </div>
-
       <div className="flex flex-col items-center w-full gap-4">
         <button
           className="btn"
