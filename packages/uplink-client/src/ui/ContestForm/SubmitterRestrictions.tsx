@@ -9,6 +9,7 @@ import { SubmitterRestriction } from "@/app/contestbuilder/contestHandler";
 import { useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
+import { TrashIcon, SparklesIcon } from "@heroicons/react/24/solid";
 
 const SubmitterRestrictions = ({
   state,
@@ -27,15 +28,17 @@ const SubmitterRestrictions = ({
 
   return (
     <BlockWrapper title="Submitter Restrictions">
-      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-4 ml-auto w-fit shadow-lg">
-        <div>
+      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-2 w-fit shadow-lg">
+        <div className="flex flex-row gap-2">
+          <SparklesIcon className="w-6 h-6" />
           <span>
-          Select the tokens and their respective thresholds that the <br />submitter must hold to be able to submit.
+            Select the tokens and their respective thresholds that the submitter
+            must hold to be able to submit.
           </span>
         </div>
       </div>
 
-      <div className="flex flex-col items-center w-3/4 gap-4">
+      <div className="flex flex-col items-center w-full gap-4">
         <button
           className="btn"
           onClick={() => {
@@ -74,7 +77,7 @@ const SubmitterRestrictions = ({
                       </td>
                       <td className="text-center">
                         <button
-                          className="btn btn-sm btn-error"
+                          className="btn btn-xs btn-ghost"
                           onClick={() => {
                             dispatch({
                               type: "removeSubmitterRestriction",
@@ -83,6 +86,7 @@ const SubmitterRestrictions = ({
                           }}
                         >
                           Remove
+                          <TrashIcon className="w-5 ml-2" />
                         </button>
                       </td>
                     </tr>
@@ -221,9 +225,9 @@ const ThresholdManager = ({
     });
   };
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <label className="text-xl font-medium">Threshold</label>
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-col gap-2">
         <p>{currentRestriction?.token?.symbol}</p>
         <TokenBadge token={currentRestriction?.token} />
       </div>

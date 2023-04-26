@@ -65,7 +65,7 @@ const SubmitterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Submitter Rewards">
-      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-2 ml-auto w-fit shadow-lg">
+      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-2 w-fit shadow-lg">
         <div className="flex flex-row gap-2">
           <SparklesIcon className="w-6 h-6" />
           <span>
@@ -74,7 +74,7 @@ const SubmitterRewardsComponent = ({
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row justify-center w-full gap-4">
+      <div className="flex flex-col lg:flex-row w-full gap-4">
         {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
           return (
             <TokenCard
@@ -220,7 +220,7 @@ const SubmitterRewardMatrix = ({
           <tbody className="w-full">
             {submitterRewards?.payouts?.map((payout, index) => (
               <tr key={index}>
-                <th className="w-24 text-center">
+                <th className="w-6 lg:w-24 text-center">
                   {/*
                   className={`input w-24 ${
                       
@@ -230,7 +230,7 @@ const SubmitterRewardMatrix = ({
                     `}
                   */}
                   <input
-                    className={`input text-center w-12 lg:w-24 ${
+                    className={`input focus:bg-neutral text-center w-12 lg:w-20 ${
                       errors.subRewards.duplicateRanks.includes(index)
                         ? "input-error"
                         : "input-bordered"
@@ -244,7 +244,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ETH ? (
                   <td className="text-center ">
                     <input
-                      className="input input-bordered text-center w-14 lg:w-28"
+                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ETH?.amount || ""}
                       onChange={(e) =>
@@ -257,7 +257,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC20 ? (
                   <td className="text-center ">
                     <input
-                      className="input input-bordered text-center w-14 lg:w-28"
+                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ERC20?.amount || ""}
                       onChange={(e) =>
@@ -270,7 +270,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC721 ? (
                   <td className="text-center">
                     <input
-                      className="input input-bordered text-center w-14 lg:w-28"
+                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
                       type="number"
                       value={
                         payout.ERC721?.tokenId !== null
@@ -287,7 +287,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC1155 ? (
                   <td className="text-center">
                     <input
-                      className="input input-bordered text-center w-14 lg:w-28"
+                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ERC1155?.amount || ""}
                       onChange={(e) =>
@@ -299,12 +299,12 @@ const SubmitterRewardMatrix = ({
 
                 {submitterRewards?.payouts?.length &&
                 submitterRewards.payouts.length > 1 ? (
-                  <td className="w-32 text-right">
+                  <td className="w-12">
                     <button
-                      className="btn btn-sm btn-error"
+                      className="btn btn-sm btn-ghost"
                       onClick={() => removeRank(index)}
                     >
-                      remove
+                      <TrashIcon className="w-6" />
                     </button>
                   </td>
                 ) : (

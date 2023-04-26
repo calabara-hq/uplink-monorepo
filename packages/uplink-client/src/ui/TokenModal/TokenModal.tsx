@@ -16,6 +16,7 @@ import {
   TokenState,
   TokenAction,
 } from "@/hooks/useTokenManager";
+import TokenBadge from "../TokenBadge/TokenBadge";
 
 const TokenModal = ({
   isModalOpen,
@@ -177,14 +178,14 @@ const QuickAddToken = ({
       />
 
       {filteredTokens && filteredTokens.length > 0 ? (
-        <ul className="menu menu-compact lg:menu-normal bg-base-100 w-full p-2 rounded-box">
+        <ul className="menu menu-compact lg:menu-normal bg-base-100 w-full gap-2 p-2 rounded-box">
           {filteredTokens.map((el, index) => {
             return (
               <li key={index}>
                 <a
                   className={`flex flex-row justify-between hover:bg-base-200 ${
                     JSON.stringify(state.quickAddToken) === JSON.stringify(el)
-                      ? "bg-primary"
+                      ? "bg-base-200"
                       : "bg-base-100"
                   }`}
                   onClick={() => {
@@ -195,7 +196,7 @@ const QuickAddToken = ({
                   }}
                 >
                   <b>{el.symbol}</b>
-                  {el.type}
+                  <TokenBadge token={el} />
                 </a>
               </li>
             );
@@ -209,7 +210,7 @@ const QuickAddToken = ({
       )}
       <div>
         <button
-          className="btn btn-secondary"
+          className="btn btn-sm btn-secondary"
           onClick={() => setProgress(1)}
         >
           Manual Add

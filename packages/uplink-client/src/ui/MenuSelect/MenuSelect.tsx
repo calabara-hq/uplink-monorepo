@@ -41,7 +41,7 @@ const MenuSelect = ({
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <p>{selected.value}</p>
-        <ChevronDownIcon className="w-4 ml-auto" />
+        <ChevronDownIcon className="w-5 ml-2" />
       </div>
 
       {isOpen && (
