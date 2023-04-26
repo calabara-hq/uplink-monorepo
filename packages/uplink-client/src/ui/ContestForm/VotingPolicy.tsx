@@ -27,54 +27,74 @@ const VotingPolicy = ({
 
   return (
     <BlockWrapper title="Voting Policy">
-      <div className="flex flex-col w-full gap-2">
-        <div className="overflow-x-auto w-full">
-          <table className="table w-full">
-            <thead>
-              <tr>
-                <th className="text-center">Token</th>
-                <th className="text-center">Strategy</th>
-                <th className="text-center"></th>
-              </tr>
-            </thead>
-            <tbody className="w-full">
-              {state.votingPolicy.map((policy, index) => {
-                return (
-                  <tr key={index}>
-                    <td className="text-center">{policy?.token?.symbol}</td>
-                    <td className="text-center">
-                      <p>{policy?.strategy?.type}</p>
-                      <p>
-                        {policy?.strategy?.type === "arcade"
-                          ? policy?.strategy?.votingPower
-                          : policy?.strategy?.multiplier}{" "}
-                      </p>
-                      <button
-                        className="btn btn-sm"
-                        onClick={() => handleEditStrategy(index)}
-                      >
-                        edit
-                      </button>
-                    </td>
-                    <td className="text-center">
-                      <button
-                        className="btn btn-sm"
-                        onClick={() => {
-                          dispatch({
-                            type: "removeVotingPolicy",
-                            payload: index,
-                          });
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="alert alert-info p-2 w-fit shadow-lg">
+        <div>
+          <span>
+            Voting credits determine how voting power is calculated, as well as
+            any restrictions on voting power.
+          </span>
         </div>
+      </div>
+
+      <div className="flex flex-col items-center w-full gap-4">
+        <button
+          className="btn"
+          onClick={() => {
+            setIsTokenModalOpen(true);
+          }}
+        >
+          Add Policy
+        </button>
+
+        {state.votingPolicy.length > 0 && (
+          <div className="overflow-x-auto w-full">
+            <table className="table w-full">
+              <thead>
+                <tr>
+                  <th className="text-center">Token</th>
+                  <th className="text-center">Strategy</th>
+                  <th className="text-center"></th>
+                </tr>
+              </thead>
+              <tbody className="w-full">
+                {state.votingPolicy.map((policy, index) => {
+                  return (
+                    <tr key={index}>
+                      <td className="text-center">{policy?.token?.symbol}</td>
+                      <td className="text-center">
+                        <p>{policy?.strategy?.type}</p>
+                        <p>
+                          {policy?.strategy?.type === "arcade"
+                            ? policy?.strategy?.votingPower
+                            : policy?.strategy?.multiplier}{" "}
+                        </p>
+                        <button
+                          className="btn btn-sm"
+                          onClick={() => handleEditStrategy(index)}
+                        >
+                          edit
+                        </button>
+                      </td>
+                      <td className="text-center">
+                        <button
+                          className="btn btn-sm"
+                          onClick={() => {
+                            dispatch({
+                              type: "removeVotingPolicy",
+                              payload: index,
+                            });
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
         <Modal
           isModalOpen={isTokenModalOpen}
           onClose={() => {
@@ -90,14 +110,6 @@ const VotingPolicy = ({
             dispatch={dispatch}
           />
         </Modal>
-        <button
-          className="btn btn-sm"
-          onClick={() => {
-            setIsTokenModalOpen(true);
-          }}
-        >
-          Add Policy
-        </button>
       </div>
     </BlockWrapper>
   );

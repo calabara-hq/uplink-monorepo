@@ -27,7 +27,15 @@ const SubmitterRestrictions = ({
 
   return (
     <BlockWrapper title="Submitter Restrictions">
-      <div className="flex flex-col items-center w-3/4 gap-2">
+      <div className="alert alert-info p-2 w-fit shadow-lg">
+        <div>
+          <span>
+          Select the tokens and their respective thresholds that the submitter must hold to be able to submit.
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center w-3/4 gap-4">
         <button
           className="btn"
           onClick={() => {

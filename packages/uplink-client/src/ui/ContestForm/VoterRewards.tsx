@@ -32,7 +32,15 @@ const VoterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Voter Rewards">
-      <div className="flex flex-col lg:flex-row w-full gap-4">
+      <div className="alert alert-info p-2 w-fit shadow-lg">
+        <div>
+          <span>
+            Select the tokens that will be distributed to the top X voters who accuraterly predict the outcome of the contest.
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row justify-center w-full gap-4">
         {rewardsObjectToArray(state.voterRewards).map((token, index) => {
           return (
             <TokenCard
@@ -44,7 +52,7 @@ const VoterRewardsComponent = ({
         })}
       </div>
       <div>
-        <button className="btn m-4" onClick={() => setIsModalOpen(true)}>
+        <button className="btn" onClick={() => setIsModalOpen(true)}>
           add reward
         </button>
       </div>
@@ -68,8 +76,6 @@ const VoterRewardsComponent = ({
         strictTypes={["ERC20"]}
         continuous={false}
       />
-
-
     </BlockWrapper>
   );
 };
@@ -86,6 +92,7 @@ const VoterRewardsMatrix = ({
   const addRank = () => {
     dispatch({ type: "addVoterRank" });
   };
+
   return (
     <div className="flex flex-col w-full lg:w-3/4 bg-base-100 p-4 gap-2 rounded-xl shadow-xl">
       {voterRewards && (
