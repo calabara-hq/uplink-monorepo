@@ -40,8 +40,8 @@ const MenuSelect = ({
         className="flex bg-base-100 rounded-lg p-3 cursor-pointer hover:bg-base-200"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <p>{selected.value}</p>
-        <ChevronDownIcon className="w-4 ml-auto" />
+        <p>{selected.label}</p>
+        <ChevronDownIcon className="w-5 ml-2" />
       </div>
 
       {isOpen && (
