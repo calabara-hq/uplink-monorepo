@@ -10,6 +10,7 @@ import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import TokenCard from "../TokenCard/TokenCard";
 import { TrashIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import InfoAlert from "../InfoAlert/InfoAlert";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
@@ -65,15 +66,11 @@ const SubmitterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Submitter Rewards">
-      <div className="alert bg-neutral border-2 border-[#3ABFF8] p-2 w-fit shadow-lg">
-        <div className="flex flex-row gap-2">
-          <SparklesIcon className="w-6 h-6" />
-          <span>
-            Select the tokens that will be distributed to the top X submitters
-          </span>
-        </div>
-      </div>
-
+      <InfoAlert>
+        <p>
+          Select the tokens that will be distributed to the top X submitters
+        </p>
+      </InfoAlert>
       <div className="flex flex-col lg:flex-row w-full gap-4">
         {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
           return (

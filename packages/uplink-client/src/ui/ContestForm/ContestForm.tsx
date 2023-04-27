@@ -222,7 +222,7 @@ const ContestForm = () => {
           onSubmit={handleSubmit}
         >
           {({ isSubmitting }) => (
-            <Form className="px-4 py-6  shadow rounded-lg">
+            <Form className="shadow rounded-lg">
               {steps.map((el, index) => {
                 return (
                   <div
