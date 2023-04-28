@@ -79,7 +79,6 @@ const SubmitterRewardsComponent = ({
         add reward
       </button>
       <SubmitterRewardMatrix
-        spaceTokens={state.spaceTokens}
         state={state}
         dispatch={dispatch}
       />
@@ -120,11 +119,9 @@ const Toggle = ({
 };
 
 const SubmitterRewardMatrix = ({
-  spaceTokens,
   state,
   dispatch,
 }: {
-  spaceTokens: IToken[];
   state: ContestBuilderProps;
   dispatch: React.Dispatch<
     | AddSubRankAction

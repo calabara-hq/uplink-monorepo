@@ -14,53 +14,27 @@ type Admin {
   address: String!
 }
 
-type EnsResponse {
-  success: Boolean!
-  errors: ErrorData
-  ens: String!
-}
-
 type Query {
   space(id: ID!): Space
   spaces: [Space!]!
-  isEnsValid(ens: String!): EnsResponse!
 }
 
 ## mutations
 
-type FieldResponse {
-  value: String!
-  error: String
-}
-
-type SpaceResponse {
-  id: ID
-  ens: String!
-  name: String!
-  logo_url: String!
-  website: String!
-  twitter: String!
-  admins: [String!]!
-}
-
-type ErrorData {
-  ens: String
+type SpaceBuilderErrors {
   name: String
   logo_url: String
   website: String
   twitter: String
-  admins: [String]
-  topLevelAdminsError: String
+  admins: String
 }
 
 type SpaceMutationResponse {
   success: Boolean!
-  errors: ErrorData
-  spaceResponse: SpaceResponse!
+  errors: SpaceBuilderErrors
 }
 
-input AlterSpaceInput {
-  ens: String!
+input SpaceBuilderInput {
   name: String!
   logo_url: String!
   website: String
@@ -69,8 +43,8 @@ input AlterSpaceInput {
 }
 
 type Mutation {
-  createSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
-  editSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse!
+  createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse!
+  editSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse!
 }
 
 extend schema

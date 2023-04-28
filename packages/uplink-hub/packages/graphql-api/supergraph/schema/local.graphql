@@ -41,17 +41,6 @@ type Admin
   address: String!
 }
 
-input AlterSpaceInput
-  @join__type(graph: SPACES)
-{
-  ens: String!
-  name: String!
-  logo_url: String!
-  website: String
-  twitter: String
-  admins: [String!]!
-}
-
 input authDataInput
   @join__type(graph: USER)
 {
@@ -141,39 +130,12 @@ scalar Decimal
 scalar EditorData
   @join__type(graph: CONTESTS)
 
-type EnsResponse
-  @join__type(graph: SPACES)
-{
-  success: Boolean!
-  errors: ErrorData
-  ens: String!
-}
-
 enum ERCTokenType
   @join__type(graph: CONTESTS)
 {
   ERC20 @join__enumValue(graph: CONTESTS)
   ERC721 @join__enumValue(graph: CONTESTS)
   ERC1155 @join__enumValue(graph: CONTESTS)
-}
-
-type ErrorData
-  @join__type(graph: SPACES)
-{
-  ens: String
-  name: String
-  logo_url: String
-  website: String
-  twitter: String
-  admins: [String]
-  topLevelAdminsError: String
-}
-
-type FieldResponse
-  @join__type(graph: SPACES)
-{
-  value: String!
-  error: String
 }
 
 input FungiblePayout
@@ -245,8 +207,8 @@ type Mutation
   @join__type(graph: USER)
 {
   createContest(contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
-  createSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse! @join__field(graph: SPACES)
-  editSpace(spaceData: AlterSpaceInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  editSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   signIn(authData: authDataInput): signInResponse! @join__field(graph: USER)
 }
 
@@ -286,7 +248,6 @@ type Query
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
   space(id: ID!): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
-  isEnsValid(ens: String!): EnsResponse! @join__field(graph: SPACES)
   submissions(contestId: Int!): [Submission!]! @join__field(graph: SUBMISSIONS)
   submission(submissionId: Int!): Submission! @join__field(graph: SUBMISSIONS)
   me: User! @join__field(graph: USER)
@@ -334,24 +295,31 @@ type Space
   admins: [Admin!]! @join__field(graph: SPACES)
 }
 
+type SpaceBuilderErrors
+  @join__type(graph: SPACES)
+{
+  name: String
+  logo_url: String
+  website: String
+  twitter: String
+  admins: String
+}
+
+input SpaceBuilderInput
+  @join__type(graph: SPACES)
+{
+  name: String!
+  logo_url: String!
+  website: String
+  twitter: String
+  admins: [String!]!
+}
+
 type SpaceMutationResponse
   @join__type(graph: SPACES)
 {
   success: Boolean!
-  errors: ErrorData
-  spaceResponse: SpaceResponse!
-}
-
-type SpaceResponse
-  @join__type(graph: SPACES)
-{
-  id: ID
-  ens: String!
-  name: String!
-  logo_url: String!
-  website: String!
-  twitter: String!
-  admins: [String!]!
+  errors: SpaceBuilderErrors
 }
 
 type Submission

@@ -10,7 +10,11 @@ import {
 } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import handleMediaUpload from "@/lib/mediaUpload";
-import { reducer, SpaceBuilderProps } from "@/app/spacebuilder/spaceHandler";
+import {
+  reducer,
+  SpaceBuilderProps,
+  validateSpaceBuilderProps,
+} from "@/app/spacebuilder/spaceHandler";
 import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 import { useRouter } from "next/navigation";
 import useHandleMutation from "@/hooks/useHandleMutation";
@@ -24,14 +28,29 @@ export default function SpaceForm({
   isNewSpace: boolean;
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [progress, setProgress] = useState(isNewSpace ? 0 : 1);
+  const [progress, setProgress] = useState(1);
   const router = useRouter();
 
   const handleMutation = useHandleMutation(
     isNewSpace ? CreateSpaceDocument : EditSpaceDocument
   );
 
+  const validate = async () => {
+    const result = await validateSpaceBuilderProps(state);
+    console.log(result.isValid);
+    console.log(result.errors);
+    if (result.isValid) return true;
+    else {
+      dispatch({
+        type: "setTotalState",
+        payload: { spaceBuilderData: result.values, errors: result.errors },
+      });
+      return false;
+    }
+  };
+
   const onFormSubmit = async (state: SpaceBuilderProps) => {
+    return validate();
     const result = await handleMutation({
       spaceData: {
         ens: state.ens,
@@ -372,6 +391,9 @@ const SpaceAdmins = ({
 }) => {
   const { data: session, status } = useSession();
   const userAddress = session?.user?.address || "you";
+
+  console.log(state.errors.admins);
+
   useEffect(() => {
     if (status === "authenticated") {
       return dispatch({
@@ -396,44 +418,48 @@ const SpaceAdmins = ({
       <label className="label">
         <span className="label-text">Admins</span>
       </label>
-      {state.admins.map((admin: string, index: number) => {
-        return (
-          <div key={index}>
-            <div className="flex justify-center items-center gap-2">
-              <input
-                type="text"
-                placeholder="vitalik.eth"
-                className="input input-bordered w-full max-w-xs disabled:text-gray-400"
-                disabled={index < 2}
-                value={admin}
-                onChange={(e) =>
-                  dispatch({
-                    type: "setAdmin",
-                    payload: { index: index, value: e.target.value },
-                  })
-                }
-              />
-              {index > 1 && (
-                <button
-                  onClick={() => {
-                    dispatch({ type: "removeAdmin", payload: index });
-                  }}
-                  className="btn bg-transparent border-none"
-                >
-                  <XCircleIcon className="w-8" />
-                </button>
+      <div className="flex flex-col gap-4">
+        {state.admins.map((admin: string, index: number) => {
+          const isError = state.errors?.admins?.[index];
+          return (
+            <div key={index}>
+              <div className="flex justify-center items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="vitalik.eth"
+                  className={`input w-full max-w-xs disabled:text-gray-400
+                ${isError ? "input-error" : "input-bordered"}`}
+                  disabled={index < 1}
+                  value={admin}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "setAdmin",
+                      payload: { index: index, value: e.target.value },
+                    })
+                  }
+                />
+                {index > 0 && (
+                  <button
+                    onClick={() => {
+                      dispatch({ type: "removeAdmin", payload: index });
+                    }}
+                    className="btn bg-transparent border-none"
+                  >
+                    <XCircleIcon className="w-8" />
+                  </button>
+                )}
+              </div>
+              {isError && (
+                <label className="label">
+                  <span className="label-text-alt text-error">
+                    invalid address
+                  </span>
+                </label>
               )}
             </div>
-            {state.errors?.admins && (
-              <label className="label">
-                <span className="label-text-alt text-error">
-                  {state.errors.admins[index]}
-                </span>
-              </label>
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
       <button
         className="btn"
         onClick={() => {
@@ -447,3 +473,13 @@ const SpaceAdmins = ({
     </div>
   );
 };
+
+const AdminInput = ({
+  state,
+  dispatch,
+  index,
+}: {
+  state: SpaceBuilderProps;
+  dispatch: any;
+  index: number;
+}) => {};

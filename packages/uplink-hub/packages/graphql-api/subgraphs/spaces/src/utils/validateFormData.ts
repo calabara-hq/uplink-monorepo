@@ -5,6 +5,10 @@ export type FieldResponse = {
     error: string;
 }
 
+type FieldResponse2 = {
+    error?: string;
+}
+
 export const validateSpaceEns = async (ens: string): Promise<FieldResponse> => {
     const fields: FieldResponse = { value: ens, error: null };
     if (!fields.value) {
@@ -36,123 +40,129 @@ export const validateSpaceEns = async (ens: string): Promise<FieldResponse> => {
 
 
 // validate space name
-export const validateSpaceName = async (name: string): Promise<FieldResponse> => {
-    const fields: FieldResponse = { value: name, error: null };
+export const validateSpaceName = async (name: string) => {
 
-    if (!fields.value) {
-        fields.error = "Space name cannot be empty"
-        return fields
+    const response: FieldResponse2 = {};
+
+    if (!name) {
+        response.error = "Name is required"
+        return response
     }
 
+    const trimmedName = name.trim();
 
-    fields.value = fields.value.trim()
-
-
-    if (fields.value.length < 3) {
-        fields.error = "Space name must be at least 3 characters";
-        return fields
+    if (trimmedName.length < 3) {
+        response.error = "Name must be at least 3 characters long";
+        return response
     }
 
-    if (fields.value.length > 30) {
-        fields.error = "Space name is too long";
-        return fields
+    if (trimmedName.length > 30) {
+        response.error = "Name must be less than 30 characters long";
+        return response
     }
 
-    return fields;
+    if (!trimmedName.match(/^[a-zA-Z0-9_ ]+$/)) {
+        response.error = "Name must only contain alphanumeric characters, spaces, and underscores";
+        return response
+    }
+
+    return response
 }
 
 // validate space logo
-export const validateSpaceLogo = (logo_url: string): FieldResponse => {
-    const fields: FieldResponse = { value: logo_url, error: null };
+export const validateSpaceLogo = (logo_url: string) => {
 
-    if (!fields.value) {
-        fields.error = "Space logo cannot be empty"
-        return fields
+    const response: FieldResponse2 = {};
+
+    if (!logo_url) {
+        response.error = "Logo is required"
+        return response
     }
 
-    fields.value = fields.value.trim();
-    const isIpfsLogo = fields.value.match(/https:\/\/calabara.mypinata.cloud\/ipfs\/Qm[a-zA-Z0-9]{44}/);
+    const trimmedLogo = logo_url.trim();
 
-    if (!isIpfsLogo) {
-        fields.error = "Space logo is not valid";
+    const pattern = /^(https:\/\/(?:[a-z0-9]+\.(?:ipfs|ipns)\.[a-z]+|cloudflare-ipfs\.com\/ipfs\/[a-zA-Z0-9]+|cloud\.ipfs\.io\/ipfs\/[a-zA-Z0-9]+|ipfs\.infura\.io\/ipfs\/[a-zA-Z0-9]+|dweb\.link\/ipfs\/[a-zA-Z0-9]+|ipfs\.fsi\.cloud\/ipfs\/[a-zA-Z0-9]+|ipfs\.runfission\.com\/ipfs\/[a-zA-Z0-9]+|calabara\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+)|ipfs:\/\/[a-zA-Z0-9]+)/;
+    if (!pattern.test(trimmedLogo)) {
+        response.error = "Logo is not valid"
+        return response
     }
 
-    return fields;
+    return response
 }
 
 export const validateSpaceWebsite = (website: string) => {
-    const fields: FieldResponse = { value: website, error: null };
-    // valid websites include https://, http://, and no protocol
-    if (!fields.value) return fields;
-    fields.value = fields.value.trim();
 
-    if (fields.value.length > 50) {
-        fields.error = "Website is too long";
-        return fields
+    const response: FieldResponse2 = {};
+
+    if (!website) return response;
+
+    const trimmedWebsite = website.trim();
+
+    const pattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]+)\.([a-z]{2,})(\.[a-z]{2,})?$/;
+    if (!pattern.test(trimmedWebsite)) {
+        response.error = "Website is not valid"
+        return response
     }
 
-    if (fields.value.length > 0) {
-        const isWebsite = fields.value.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/);
-        if (!isWebsite) {
-            fields.error = "Website is not valid";
-        }
-    }
-
-    return fields;
+    return response
 }
 
 export const validateSpaceTwitter = (twitter: string) => {
-    const fields: FieldResponse = { value: twitter, error: null };
-    if (!fields.value) return fields;
-    fields.value = fields.value.trim();
 
-    if (fields.value.length > 15) {
-        fields.error = "Twitter handle is too long";
-        return fields
+    const response: FieldResponse2 = {};
+
+    if (!twitter) return response;
+
+    const trimmedTwitter = twitter.trim();
+
+    const pattern = /^@(\w){1,15}$/;
+    if (!pattern.test(trimmedTwitter)) {
+        response.error = "Twitter handle is not valid"
+        return response
     }
 
-    if (fields.value.length > 0) {
-        const isTwitter = fields.value.match(/^@(\w){1,15}$/);
-        if (!isTwitter) {
-            fields.error = "Twitter handle is not valid";
-        }
-    }
-    return fields;
+    return response
+
 }
 
+// return cleaned admins and errors
 export const validateSpaceAdmins = async (admins: string[]) => {
-    let topLevelAdminsError = null;
 
-    if (!admins) return { topLevelAdminsError: "Admins cannot be empty", errors: [], addresses: [] }
+    const response: {
+        addresses: string[];
+        error?: string;
+    } = {
+        addresses: [],
+    }
 
-    const promises = admins.map(async (admin) => {
-        const field: FieldResponse = { value: admin, error: null };
 
-        if (!field.value || field.value.length === 0) return undefined; // remove empty fields
+    if (!admins || admins.length === 0) {
+        response.error = "Admins are required";
+        return response;
+    }
 
-        const cleanAddress = await validateEthAddress(field.value);
 
-        if (!cleanAddress) {
-            field.error = "invalid address";
-            topLevelAdminsError = "1 or more admin fields are invalid"
-            return field
+    const promises = admins.map(async (admin, index) => {
+
+        if (!admin) {
+            return null;
         }
 
-        field.value = cleanAddress;
-        return field;
+        const cleanAddress = await validateEthAddress(admin);
+
+        if (!cleanAddress) {
+            response.error = `invalid address at index ${index}`;
+            return null
+        }
+
+        response.addresses.push(cleanAddress);
+        return;
     })
 
+    await Promise.all(promises);
 
-    // filter out undefined and duplicates from filteredAdmins.
-    const filteredAdmins = await (await Promise.all(promises)).filter((value, index, self) => {
-        return value !== undefined && self.findIndex(v => v && v.value === value.value) === index;
-    });
+    // remove duplicates from response.addresses
+    response.addresses = [...new Set(response.addresses)];
 
-    // store all errors and addresses in unique arrays
-    const errors = filteredAdmins.map(admin => admin.error);
-    const addresses = filteredAdmins.map(admin => admin.value);
-
-    if (addresses.length < 1) return { topLevelAdminsError: "Admins cannot be empty", errors: [], addresses: [] }
-
-    return { topLevelAdminsError, errors, addresses }
+    return response;
 }

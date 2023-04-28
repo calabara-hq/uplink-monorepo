@@ -262,7 +262,9 @@ export const validateSubmitterRestrictions = async (submitterRestrictions: Submi
             }
         }
 
-        if (!threshold || threshold <= 0) {
+        const floatThreshold = parseFloat(threshold);
+
+        if (!floatThreshold || floatThreshold <= 0) {
             response.thresholds.error = "Threshold must be a positive, non-zero number";
         }
     }
@@ -294,14 +296,18 @@ export const validateVotingPolicy = async (votingPolicy: VotingPolicy[]) => {
         // return false if multiplier and votingPower are both undefined
         if (!multiplier && !votingPower) return false;
 
+
+        const floatMultiplier = parseFloat(multiplier);
+        const floatVotingPower = parseFloat(votingPower);
+
         if (type === 'arcade') {
-            if (!votingPower) return false
-            if (votingPower <= 0) return false;
+            if (!floatVotingPower) return false
+            if (floatVotingPower <= 0) return false;
         }
 
         if (type === 'weighted') {
-            if (!multiplier) return false
-            if (multiplier <= 0) return false;
+            if (!floatMultiplier) return false
+            if (floatMultiplier <= 0) return false;
         }
 
         return true;
