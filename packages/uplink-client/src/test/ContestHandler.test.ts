@@ -655,7 +655,7 @@ describe("Helper functions", () => {
             payouts: [
                 {
                     rank: 1,
-                    ETH: { amount: 1.65 },
+                    ETH: { amount: '1.65' },
                     ERC721: { tokenId: 0 }
 
                 },
@@ -693,7 +693,7 @@ describe("Helper functions", () => {
             payouts: [
                 {
                     rank: 1,
-                    ETH: { amount: 1.6 },
+                    ETH: { amount: '1.6' },
                 },
             ],
         };

@@ -42,7 +42,6 @@ export const IsEnsValidDocument = gql`
 `;
 
 
-// upsert a space
 export const CreateSpaceDocument = gql`
     mutation CreateSpace($spaceData: AlterSpaceInput!){
         createSpace(spaceData: $spaceData){

@@ -15,37 +15,6 @@ import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 import { useRouter } from "next/navigation";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import toast from "react-hot-toast";
-const postData = async ({
-  state,
-  isNewSpace,
-}: {
-  state: SpaceBuilderProps;
-  isNewSpace: boolean;
-}) => {
-  const result = await graphqlClient
-    .mutation(isNewSpace ? CreateSpaceDocument : EditSpaceDocument, {
-      spaceData: {
-        ens: state.ens,
-        name: state.name,
-        website: state.website,
-        logo_url: state.logo_url,
-        twitter: state.twitter,
-        admins: state.admins,
-      },
-    })
-    .toPromise();
-  if (result.error) {
-    throw new Error(result.error.message);
-  }
-  const { success, errors, spaceResponse } = stripTypenames(
-    isNewSpace ? result.data.createSpace : result.data.editSpace
-  );
-  return {
-    success,
-    errors,
-    spaceResponse,
-  };
-};
 
 export default function SpaceForm({
   initialState,
@@ -63,7 +32,6 @@ export default function SpaceForm({
   );
 
   const onFormSubmit = async (state: SpaceBuilderProps) => {
-    console.log(state);
     const result = await handleMutation({
       spaceData: {
         ens: state.ens,
@@ -83,7 +51,7 @@ export default function SpaceForm({
 
     if (!success)
       toast.error(
-        "Oops, something went wrong. Please check your inputs and try again."
+        "Oops, something went wrong. Please check the fields and try again."
       );
 
     // set the parsed data and errors

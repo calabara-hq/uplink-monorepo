@@ -55,11 +55,15 @@ export interface Prompt {
     coverUrl?: string;
 }
 
-export interface ContestBuilderProps {
-    type: string | null;
+export interface Deadlines {
     startTime: string;
     voteTime: string;
     endTime: string;
+}
+
+export interface ContestBuilderProps {
+    type: string | null;
+    deadlines: Deadlines;
     prompt: Prompt;
     spaceTokens: IToken[];
     submitterRewards: SubmitterRewards;
@@ -67,6 +71,12 @@ export interface ContestBuilderProps {
     submitterRestrictions: SubmitterRestriction[] | [];
     votingPolicy: VotingPolicyType[] | [];
     errors: ContestBuilderErrors;
+}
+
+export type DeadlineError = {
+    startTime?: string;
+    voteTime?: string;
+    endTime?: string;
 }
 
 export type RewardError = {
@@ -81,9 +91,7 @@ export type PromptError = {
 
 export type ContestBuilderErrors = {
     type?: string;
-    startTime?: string;
-    voteTime?: string;
-    endTime?: string;
+    deadlines: DeadlineError;
     subRewards: RewardError;
     voterRewards: RewardError;
     votingPolicy?: string;
@@ -99,27 +107,40 @@ export const reducer = (state: any, action: any) => {
                 type: action.payload,
                 errors: { ...state.errors, type: undefined },
             };
+
         case "setStartTime":
             return {
                 ...state,
-                startTime: action.payload,
-                errors: { ...state.errors, startTime: undefined },
+                deadlines: {
+                    ...state.deadlines,
+                    startTime: action.payload,
+                },
+                errors: { ...state.errors, deadlines: { ...state.errors.deadlines, startTime: undefined } },
             };
+
         case "setVoteTime":
             return {
                 ...state,
-                voteTime: action.payload,
-                errors: { ...state.errors, voteTime: undefined },
+                deadlines: {
+                    ...state.deadlines,
+                    voteTime: action.payload,
+                },
+                errors: { ...state.errors, deadlines: { ...state.errors.deadlines, voteTime: undefined } },
             };
+
         case "setEndTime":
             return {
                 ...state,
-                endTime: action.payload,
-                errors: { ...state.errors, endTime: undefined },
+                deadlines: {
+                    ...state.deadlines,
+                    endTime: action.payload,
+                },
+                errors: { ...state.errors, deadlines: { ...state.errors.deadlines, endTime: undefined } },
             };
+
         case "setPromptTitle": {
 
-            const { title: titleError, ...existingPromptErrors } = state.errors.prompt
+            const { title: titleError, ...existingPromptErrors } = state.errors.prompt || {}
 
             return {
                 ...state,
@@ -133,7 +154,7 @@ export const reducer = (state: any, action: any) => {
         }
 
         case "setPromptBody": {
-            const { body: bodyError, ...existingPromptErrors } = state.errors.prompt
+            const { body: bodyError, ...existingPromptErrors } = state.errors.prompt || {}
 
             return {
                 ...state,
@@ -146,7 +167,7 @@ export const reducer = (state: any, action: any) => {
         }
 
         case "setCoverUrl": {
-            const { coverUrl: urlError, ...existingPromptErrors } = state.errors.prompt
+            const { coverUrl: urlError, ...existingPromptErrors } = state.errors.prompt || {}
 
             return {
                 ...state,
@@ -569,20 +590,22 @@ const validateContestType = (state: ContestBuilderProps) => {
 
 const validateContestDeadlines = (state: ContestBuilderProps) => {
     let isError = false;
-    const errors: ContestBuilderErrors = {};
+    const errors: ContestBuilderErrors = {
+        deadlines: {}
+    };
 
-    if (state.voteTime <= state.startTime) {
-        errors.voteTime = "vote date must be after start date";
+    if (state.deadlines.voteTime <= state.deadlines.startTime) {
+        errors.deadlines.voteTime = "vote date must be after start date";
         isError = true;
     }
 
-    if (state.endTime <= state.voteTime) {
-        errors.endTime = "end date must be after vote date";
+    if (state.deadlines.endTime <= state.deadlines.voteTime) {
+        errors.deadlines.endTime = "end date must be after vote date";
         isError = true;
     }
 
-    if (state.endTime <= state.startTime) {
-        errors.endTime = "end date must be after start date";
+    if (state.deadlines.endTime <= state.deadlines.startTime) {
+        errors.deadlines.endTime = "end date must be after start date";
         isError = true;
     }
 
@@ -688,17 +711,17 @@ export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
 
     const cleanedPayouts = submitterRewards.payouts?.map((payout) => {
         const cleanedPayout: any = { rank: payout.rank };
-        const ETHPayout = Number(payout.ETH?.amount ?? 0);
-        const ERC20Payout = Number(payout.ERC20?.amount ?? 0);
-        const ERC721Payout = Number(payout.ERC721?.tokenId ?? -1);
-        const ERC1155Payout = Number(payout.ERC1155?.amount ?? 0);
+        const ETHPayout = payout.ETH?.amount ?? '0';
+        const ERC20Payout = payout.ERC20?.amount ?? '0';
+        const ERC721Payout = payout.ERC721?.tokenId ?? -1;
+        const ERC1155Payout = payout.ERC1155?.amount ?? '0';
 
-        if (ETHPayout > 0) {
+        if (parseFloat(ETHPayout) > 0) {
             cleanedPayout.ETH = { amount: ETHPayout };
             seenETH = true;
         }
 
-        if (ERC20Payout > 0) {
+        if (parseFloat(ERC20Payout) > 0) {
             cleanedPayout.ERC20 = { amount: ERC20Payout };
             seenERC20 = true;
         }
@@ -708,7 +731,7 @@ export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
             seenERC721 = true;
         }
 
-        if (ERC1155Payout > 0) {
+        if (parseFloat(ERC1155Payout) > 0) {
             cleanedPayout.ERC1155 = { amount: ERC1155Payout };
             seenERC1155 = true;
         }
@@ -733,15 +756,15 @@ export const cleanVoterRewards = (voterRewards: VoterRewards) => {
 
     const cleanedPayouts = voterRewards.payouts?.map((payout) => {
         const cleanedPayout: any = { rank: payout.rank };
-        const ETHPayout = Number(payout.ETH?.amount ?? 0);
-        const ERC20Payout = Number(payout.ERC20?.amount ?? 0);
+        const ETHPayout = payout.ETH?.amount ?? '0';
+        const ERC20Payout = payout.ERC20?.amount ?? '0';
 
-        if (ETHPayout > 0) {
+        if (parseFloat(ETHPayout) > 0) {
             cleanedPayout.ETH = { amount: ETHPayout };
             seenETH = true;
         }
 
-        if (ERC20Payout > 0) {
+        if (parseFloat(ERC20Payout) > 0) {
             cleanedPayout.ERC20 = { amount: ERC20Payout };
             seenERC20 = true;
         }

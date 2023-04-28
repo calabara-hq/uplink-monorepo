@@ -1,3 +1,8 @@
+scalar ISODateString
+scalar EditorData
+scalar IpfsUrl
+scalar Decimal
+
 type Space @key(fields: "id") {
   id: ID!
   contests: [Contest!]!
@@ -29,6 +34,175 @@ extend type Query {
   contest(contestId: Int!): Contest!
   #spaceContests(spaceId: Int, spaceName: String): [Contest!]!
   activeContests: [ActiveContest!]!
+}
+
+enum ContestType {
+  standard
+  twitter
+}
+
+input Deadlines {
+  startTime: ISODateString!
+  voteTime: ISODateString!
+  endTime: ISODateString!
+}
+
+input Prompt {
+  title: String!
+  body: EditorData!
+  coverUrl: IpfsUrl
+}
+
+enum ERCTokenType {
+  ERC20
+  ERC721
+  ERC1155
+}
+
+enum NativeTokenType {
+  ETH
+}
+
+input IERCToken {
+  type: ERCTokenType!
+  address: String!
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
+}
+
+input INativeToken {
+  type: NativeTokenType!
+  symbol: NativeTokenType!
+  decimals: Int!
+}
+
+input FungiblePayout {
+  amount: Decimal!
+}
+
+input NonFungiblePayout {
+  tokenId: Int!
+}
+
+input IPayout {
+  rank: Int!
+  ETH: FungiblePayout
+  ERC20: FungiblePayout
+  ERC721: NonFungiblePayout
+  ERC1155: FungiblePayout
+}
+
+input SubmitterRewards {
+  ETH: INativeToken
+  ERC20: IERCToken
+  ERC721: IERCToken
+  ERC1155: IERCToken
+  payouts: [IPayout!]
+}
+
+input VoterRewards {
+  ETH: INativeToken
+  ERC20: IERCToken
+  payouts: [IPayout!]
+}
+
+enum RestrictionTokenType {
+  ETH
+  ERC20
+  ERC721
+  ERC1155
+}
+
+input RestrictionToken {
+  type: RestrictionTokenType!
+  address: String!
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
+}
+
+input SubmitterRestriction {
+  token: RestrictionToken
+  threshold: Decimal
+}
+
+enum VotingStrategyType {
+  arcade
+  weighted
+}
+
+input VotingStrategy {
+  type: VotingStrategyType!
+  votingPower: Decimal
+  multiplier: Decimal
+}
+
+input VotingPolicy {
+  token: RestrictionToken!
+  strategy: VotingStrategy!
+}
+
+input ContestBuilderProps {
+  ens: String!
+  type: ContestType!
+  deadlines: Deadlines!
+  prompt: Prompt!
+  submitterRewards: SubmitterRewards!
+  voterRewards: VoterRewards!
+  submitterRestrictions: [SubmitterRestriction!]!
+  votingPolicy: [VotingPolicy!]!
+}
+
+type ContestPromptError {
+  title: String
+  body: String
+  coverUrl: String
+}
+
+type ContestDeadlineError {
+  startTime: String
+  voteTime: String
+  endTime: String
+}
+
+type SubmitterRewardsError {
+  tokens: String
+  payouts: String
+}
+
+type VoterRewardsError {
+  tokens: String
+  payouts: String
+}
+
+type SubmitterRestrictionsError {
+  tokens: String
+  thresholds: String
+}
+
+type VotingPolicyError {
+  tokens: String
+  strategies: String
+}
+
+type ContestErrorData {
+  type: String
+  deadlines: ContestDeadlineError
+  prompt: ContestPromptError
+  submitterRewards: SubmitterRewardsError
+  voterRewards: VoterRewardsError
+  submitterRestrictions: SubmitterRestrictionsError
+  votingPolicy: VotingPolicyError
+}
+
+type ContestMutationResponse {
+  success: Boolean!
+  errors: ContestErrorData
+}
+
+type Mutation {
+  createContest(contestData: ContestBuilderProps!): ContestMutationResponse!
 }
 
 extend schema

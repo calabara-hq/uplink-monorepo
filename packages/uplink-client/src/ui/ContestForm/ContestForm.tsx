@@ -10,6 +10,8 @@ import {
 } from "react";
 import {
   ContestBuilderProps,
+  cleanSubmitterRewards,
+  cleanVoterRewards,
   reducer,
   validateStep,
 } from "@/app/contestbuilder/contestHandler";
@@ -23,6 +25,9 @@ import VotingPolicy from "./VotingPolicy";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { AnimatePresence, motion } from "framer-motion";
+import useHandleMutation from "@/hooks/useHandleMutation";
+import { CreateContestDocument } from "@/lib/graphql/contests.gql";
+import { toast } from "react-hot-toast";
 
 export const BlockWrapper = ({
   title,
@@ -53,9 +58,11 @@ const ContestSchema = Yup.object<ContestBuilderProps>({
 
 const initialState = {
   type: null,
-  startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
-  voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
-  endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+  deadlines: {
+    startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
+    voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
+    endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+  },
 
   prompt: {
     title: "",
@@ -106,6 +113,7 @@ const initialState = {
     voterRewards: {
       duplicateRanks: [],
     },
+    deadlines: {},
   },
   /*
   submitterRewards: [],
@@ -116,9 +124,73 @@ const initialState = {
   */
 } as ContestBuilderProps;
 
+function excludeNullProperties(inputObj) {
+  const newObj = {};
+
+  for (const key in inputObj) {
+    if (inputObj[key] !== null) {
+      newObj[key] = inputObj[key];
+    }
+  }
+
+  return newObj;
+}
+
 const ContestForm = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const handleMutation = useHandleMutation(CreateContestDocument);
+
+  const handleFormSubmit = async () => {
+    console.log(state);
+    // return handleSubmit();
+    const res = await handleMutation({
+      contestData: {
+        ens: "sharkdao.eth",
+        type: state.type,
+        deadlines: state.deadlines,
+        prompt: state.prompt,
+        submitterRewards: cleanSubmitterRewards(state.submitterRewards),
+        voterRewards: cleanVoterRewards(state.voterRewards),
+        submitterRestrictions: state.submitterRestrictions,
+        votingPolicy: [
+          {
+            token: {
+              type: "ERC20",
+              address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+              symbol: "USDC",
+              decimals: 6,
+            },
+            strategy: {
+              type: "arcade",
+              votingPower: '100',
+            },
+          },
+        ],
+      },
+    });
+
+    if (!res) return;
+    const { errors, success } = res.data.createContest;
+
+    if (!success) {
+      toast.error(
+        "Oops, something went wrong. Please check the fields and try again."
+      );
+      console.log(excludeNullProperties(errors));
+    }
+    /*
+    dispatch({
+      type: "setErrors",
+      payload: errors,
+    });
+    */
+    if (success) {
+      toast.success("Contest created successfully!", {
+        icon: "🎉",
+      });
+    }
+  };
 
   const steps = [
     {
@@ -129,8 +201,7 @@ const ContestForm = () => {
     {
       name: "Deadlines",
       component: <Deadlines state={state} dispatch={dispatch} />,
-      errors:
-        state.errors.startTime || state.errors.voteTime || state.errors.endTime,
+      errors: Object.keys(state.errors?.deadlines ?? {}).length > 0,
     },
     {
       name: "Standard Prompt",
@@ -266,7 +337,7 @@ const ContestForm = () => {
                       className="btn btn-primary"
                       type="submit"
                       disabled={isSubmitting}
-                      onClick={handleSubmit}
+                      onClick={handleFormSubmit}
                     >
                       Save
                     </button>
