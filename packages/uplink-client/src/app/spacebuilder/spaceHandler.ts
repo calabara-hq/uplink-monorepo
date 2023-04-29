@@ -6,35 +6,26 @@ export type FormField = {
 };
 
 export type SpaceBuilderErrors = {
-  ens: string | null;
-  name: string | null;
-  logo_url: string | null;
-  website: string | null;
-  twitter: string | null;
+  name?: string;
+  logo_url?: string;
+  website?: string;
+  twitter?: string;
   admins: (string | null)[];
 };
 
 export type SpaceBuilderProps = {
-  ens: string;
   name: string;
   logo_url: string;
   logo_blob: string;
-  website: string;
-  twitter: string;
+  website?: string;
+  twitter?: string;
   admins: string[];
   errors: SpaceBuilderErrors;
 };
 
-export const reducer = (state: any, action: any) => {
+export const reducer = (state: SpaceBuilderProps, action: any) => {
   switch (action.type) {
-    /*
-    case "setSpaceEns":
-      return {
-        ...state,
-        ens: action.payload,
-        errors: { ...state.errors, ens: null },
-      };
-      */
+
     case "setSpaceName":
       return {
         ...state,
@@ -53,18 +44,27 @@ export const reducer = (state: any, action: any) => {
         logo_url: action.payload,
         errors: { ...state.errors, logo_url: null },
       };
-    case "setWebsite":
+
+    case "setWebsite": {
+      const { website: websiteError, ...otherErrors } = state.errors;
+
       return {
         ...state,
-        website: action.payload,
-        errors: { ...state.errors, website: null },
+        website: action.payload !== "" ? action.payload : undefined,
+        errors: otherErrors,
       };
-    case "setTwitter":
+    }
+
+    case "setTwitter": {
+      const { twitter: twitterError, ...otherErrors } = state.errors;
+
       return {
         ...state,
-        twitter: action.payload,
-        errors: { ...state.errors, twitter: null },
+        twitter: action.payload !== "" ? action.payload : undefined,
+        errors: otherErrors,
       };
+    }
+
     case "setPfp":
       return {
         ...state,
@@ -81,24 +81,24 @@ export const reducer = (state: any, action: any) => {
       return {
         ...state,
         admins: state.admins.filter(
-          (admin: FormField, index: number) => index !== action.payload
+          (admin: string, index: number) => index !== action.payload
         ),
         errors: {
           ...state.errors,
           admins: state.errors.admins.filter(
-            (admin: string, index: number) => index !== action.payload
+            (admin: string | null, index: number) => index !== action.payload
           ),
         },
       };
     case "setAdmin":
       return {
         ...state,
-        admins: state.admins.map((admin: FormField, index: number) =>
+        admins: state.admins.map((admin: string, index: number) =>
           index === action.payload.index ? action.payload.value : admin
         ),
         errors: {
           ...state.errors,
-          admins: state.errors.admins.map((admin: string, index: number) =>
+          admins: state.errors.admins.map((admin: string | null, index: number) =>
             index === action.payload.index ? null : admin
           ),
         },
@@ -127,14 +127,14 @@ export const reducer = (state: any, action: any) => {
 };
 
 
-const validateSpaceName = (name: SpaceBuilderProps['name']): { error: string | null, value: SpaceBuilderProps['name'] } => {
+export const validateSpaceName = (name: SpaceBuilderProps['name']): { error: string | null, value: SpaceBuilderProps['name'] } => {
 
   const cleanedName = name.trim();
 
   if (!cleanedName) return { value: cleanedName, error: "Name is required" };
   if (cleanedName.length < 3) return { value: cleanedName, error: "Name must be at least 3 characters long" }
   if (cleanedName.length > 30) return { value: cleanedName, error: "Name must be less than 30 characters long" }
-  if (!cleanedName.match(/^[a-zA-Z0-9_ ]+$/)) return { value: cleanedName, error: "Name must only contain alphanumeric characters, spaces, and underscores" }
+  if (!cleanedName.match(/^[a-zA-Z0-9_ ]+$/)) return { value: cleanedName, error: "Name must only contain alphanumeric characters and underscores" }
 
   return {
     error: null,
@@ -142,7 +142,7 @@ const validateSpaceName = (name: SpaceBuilderProps['name']): { error: string | n
   }
 }
 
-const validateSpaceLogo = (logoUrl: SpaceBuilderProps['logo_url']): { error: string | null, value: SpaceBuilderProps['logo_url'] } => {
+export const validateSpaceLogo = (logoUrl: SpaceBuilderProps['logo_url']): { error: string | null, value: SpaceBuilderProps['logo_url'] } => {
 
   if (!logoUrl) return { value: logoUrl, error: "Logo is required" };
   const pattern = /^(https:\/\/(?:[a-z0-9]+\.(?:ipfs|ipns)\.[a-z]+|cloudflare-ipfs\.com\/ipfs\/[a-zA-Z0-9]+|cloud\.ipfs\.io\/ipfs\/[a-zA-Z0-9]+|ipfs\.infura\.io\/ipfs\/[a-zA-Z0-9]+|dweb\.link\/ipfs\/[a-zA-Z0-9]+|ipfs\.fsi\.cloud\/ipfs\/[a-zA-Z0-9]+|ipfs\.runfission\.com\/ipfs\/[a-zA-Z0-9]+|calabara\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+)|ipfs:\/\/[a-zA-Z0-9]+)/;
@@ -154,11 +154,12 @@ const validateSpaceLogo = (logoUrl: SpaceBuilderProps['logo_url']): { error: str
   };
 }
 
-const validateSpaceWebsite = (website: SpaceBuilderProps['website']): { error: string | null, value: SpaceBuilderProps['website'] } => {
+export const validateSpaceWebsite = (website: SpaceBuilderProps['website']): { error: string | null, value?: SpaceBuilderProps['website'] } => {
+
+  if (!website) return { error: null };
 
   const cleanedWebsite = website.trim().toLowerCase();
 
-  if (!website) return { value: cleanedWebsite, error: null };
   const pattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]+)\.([a-z]{2,})(\.[a-z]{2,})?$/;
   if (!pattern.test(website)) return { value: cleanedWebsite, error: "Website is not valid" };
 
@@ -168,13 +169,13 @@ const validateSpaceWebsite = (website: SpaceBuilderProps['website']): { error: s
   };
 }
 
-const validateSpaceTwitter = (twitter: SpaceBuilderProps['twitter']): { error: string | null, value: SpaceBuilderProps['twitter'] } => {
+export const validateSpaceTwitter = (twitter: SpaceBuilderProps['twitter']): { error: string | null, value?: SpaceBuilderProps['twitter'] } => {
+
+  if (!twitter) return { error: null };
 
   const cleanedTwitter = twitter.trim().toLowerCase();
 
-  if (!twitter) return { value: cleanedTwitter, error: null };
-
-  const pattern = /^@?(\w){1,15}$/;
+  const pattern = /^@(\w){1,15}$/;
   if (!pattern.test(twitter)) return { value: cleanedTwitter, error: "Twitter handle is not valid" };
 
   return {
@@ -192,9 +193,7 @@ const validateSpaceTwitter = (twitter: SpaceBuilderProps['twitter']): { error: s
  * 
  */
 
-const validateSpaceAdmins = async (admins: SpaceBuilderProps['admins']): Promise<{ error: SpaceBuilderErrors['admins'], value: SpaceBuilderProps['admins'] }> => {
-  console.log(admins)
-
+export const validateSpaceAdmins = async (admins: SpaceBuilderProps['admins']): Promise<{ error: SpaceBuilderErrors['admins'], value: SpaceBuilderProps['admins'] }> => {
   type adminField = {
     value: string,
     error: string | null
@@ -223,18 +222,22 @@ const validateSpaceAdmins = async (admins: SpaceBuilderProps['admins']): Promise
 
   const adminFields = await Promise.all(promises);
 
-  // Filter out undefined and null fields
-  const filteredAdminFields = adminFields.filter((field): field is adminField => field !== undefined && field !== null);
 
-  // TODO remove duplicates
-
+  // Filter out undefined and null fields, and remove duplicates
+  const uniqueAdminFields = adminFields.reduce((acc: adminField[], field) => {
+    if (field && !acc.some(item => item.value === field.value)) {
+      acc.push(field);
+    }
+    return acc;
+  }, []);
 
   // Store errors and values in separate arrays
-  const errors = filteredAdminFields.map(field => field.error);
-  const values = filteredAdminFields.map(field => field.value);
+  const errors = uniqueAdminFields.map(field => field.error);
+  const values = uniqueAdminFields.map(field => field.value);
 
   // Return the result
   return { error: errors, value: values };
+
 }
 
 
@@ -257,8 +260,8 @@ export const validateSpaceBuilderProps = async (props: SpaceBuilderProps) => {
   const values = {
     name: nameValue,
     logo_url: logoValue,
-    website: websiteValue,
-    twitter: twitterValue,
+    ...(websiteValue ? { website: websiteValue } : {}),
+    ...(twitterValue ? { twitter: twitterValue } : {}),
     admins: adminsValue,
   }
 

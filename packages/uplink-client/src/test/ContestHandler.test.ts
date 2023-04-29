@@ -3,13 +3,6 @@ import { IToken } from "@/types/token";
 import { describe, expect, test } from "@jest/globals";
 import { sampleERC1155Token, sampleERC20Token, sampleERC721Token, sampleETHToken } from "./sampleTokens";
 
-const initialState = {
-    // ... other properties
-    rewardOptions: [],
-    submitterRewards: {
-        payouts: [],
-    },
-};
 
 
 
@@ -161,6 +154,13 @@ describe("Submitter Rewards", () => {
 
 
     test("addSubRank", () => {
+        const initialState = {
+            rewardOptions: [],
+            submitterRewards: {
+                payouts: [],
+            },
+        };
+
         const action = { type: "addSubRank" };
         const newState = reducer(initialState, action);
         expect(newState.submitterRewards.payouts).toHaveLength(1);

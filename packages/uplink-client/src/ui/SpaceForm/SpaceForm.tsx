@@ -94,58 +94,6 @@ export default function SpaceForm({
     }
   };
 
-  const onEnsSubmit = async () => {
-    const { ens } = state;
-    const result = await graphqlClient
-      .query(IsEnsValidDocument, { ens })
-      .toPromise();
-    if (result.error) throw new Error(result.error.message);
-    const {
-      success,
-      errors,
-      ens: ensResult,
-    } = stripTypenames(result.data.isEnsValid);
-
-    dispatch({
-      type: "setTotalState",
-      payload: { ens: ensResult, errors: { ...state.errors, ens: errors.ens } },
-    });
-
-    if (success) {
-      dispatch({
-        type: "setAdmin",
-        payload: {
-          index: 1,
-          value: ensResult,
-        },
-      });
-      setProgress(1);
-    }
-  };
-
-  useEffect(() => {
-    if (state.errors.ens) {
-      setProgress(0);
-    }
-  }, [state.errors.ens]);
-
-  if (progress === 0) {
-    return (
-      <div className="flex w-6/12 bbackdrop-blur-md bg-black/30 text-white px-2 py-2 rounded-lg justify-center items-center ml-auto mr-auto">
-        <div className=" flex flex-col gap-2 w-full max-w-xs">
-          <SpaceEns state={state} dispatch={dispatch} />
-          <button
-            className="btn"
-            disabled={state.errors.ens}
-            onClick={onEnsSubmit}
-          >
-            next
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex w-6/12 bbackdrop-blur-md bg-black/30 text-white px-2 py-2 rounded-lg justify-center items-center ml-auto mr-auto">
       <div className=" flex flex-col gap-2 w-full max-w-xs">
@@ -171,42 +119,6 @@ export default function SpaceForm({
     </div>
   );
 }
-
-const SpaceEns = ({
-  state,
-  dispatch,
-}: {
-  state: SpaceBuilderProps;
-  dispatch: any;
-}) => {
-  return (
-    <div>
-      <label className="label">
-        <span className="label-text">Ens</span>
-      </label>
-      <input
-        type="text"
-        autoComplete="off"
-        value={state.ens}
-        onChange={(e) => {
-          dispatch({
-            type: "setSpaceEns",
-            payload: e.target.value,
-          });
-        }}
-        placeholder="Nouns"
-        className={`input input-bordered w-full max-w-xs ${
-          state.errors.ens ? "input-error" : "input-primary"
-        }`}
-      />
-      {state.errors.ens && (
-        <label className="label">
-          <span className="label-text-alt text-error">{state.errors.ens}</span>
-        </label>
-      )}
-    </div>
-  );
-};
 
 const SpaceName = ({
   state,
@@ -321,7 +233,7 @@ const SpaceWebsite = ({
       <input
         type="text"
         autoComplete="off"
-        value={state.website}
+        value={state.website || ""}
         onChange={(e) => {
           dispatch({
             type: "setWebsite",
@@ -359,7 +271,7 @@ const SpaceTwitter = ({
       <input
         type="text"
         autoComplete="off"
-        value={state.twitter}
+        value={state.twitter || ""}
         onChange={(e) => {
           dispatch({
             type: "setTwitter",
@@ -391,8 +303,6 @@ const SpaceAdmins = ({
 }) => {
   const { data: session, status } = useSession();
   const userAddress = session?.user?.address || "you";
-
-  console.log(state.errors.admins);
 
   useEffect(() => {
     if (status === "authenticated") {

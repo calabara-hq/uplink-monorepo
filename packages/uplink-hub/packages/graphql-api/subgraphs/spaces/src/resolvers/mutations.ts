@@ -1,6 +1,5 @@
 import { Authorization } from "lib";
 import {
-    validateSpaceEns,
     validateSpaceName,
     validateSpaceLogo,
     validateSpaceTwitter,
@@ -20,13 +19,11 @@ const processSpaceData = async (spaceData, isNewSpace) => {
     const adminsResult = await validateSpaceAdmins(admins);
 
     const errors = {
-
         ...(nameResult.error ? { name: nameResult.error } : {}),
         ...(logoResult.error ? { logo_url: logoResult.error } : {}),
         ...(websiteResult.error ? { website: websiteResult.error } : {}),
         ...(twitterResult.error ? { twitter: twitterResult.error } : {}),
         ...(adminsResult.error ? { admins: adminsResult.error } : {}),
-
     };
 
     return {
