@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, test, jest, beforeEach, beforeAll } from '@jest/globals';
 import {
     validateSpaceName,
     validateSpaceLogo,
@@ -10,58 +10,95 @@ import {
 import { _prismaClient } from "lib";
 
 
+
+
+
 // space name
 
 describe('validateSpaceName', () => {
-    test('should return error if name is empty string', async () => {
-        const { value, error } = await validateSpaceName('');
-        expect(error).toBe('Name is required');
-        expect(value).toBe('');
-    });
-    test('should return error if name is null', async () => {
-        const { value, error } = await validateSpaceName(null as any);
-        expect(error).toBe('Name is required');
-        expect(value).toBeUndefined();
-    });
-    test('should return error if name is < 3 characters', async () => {
-        const { value, error } = await validateSpaceName('ab');
-        expect(error).toBe('Name must be at least 3 characters');
-        expect(value).toBe('ab');
-    });
-    test('should return error if name is too long', async () => {
-        const { value, error } = await validateSpaceName('a'.repeat(31));
-        expect(error).toBe('Name must be less than 30 characters');
-        expect(value).toBe('a'.repeat(31));
+
+    describe('new space mode', () => {
+
+        let mockFindMany;
+
+        beforeAll(() => {
+            mockFindMany = jest.spyOn(_prismaClient.space, 'findMany');
+        });
+
+        beforeEach(() => {
+            mockFindMany.mockClear();
+            mockFindMany.mockImplementation(async () => []);
+        });
+
+        test('should return error if name is empty string', async () => {
+            const { value, error } = await validateSpaceName('');
+            expect(error).toBe('Name is required');
+            expect(value).toBe('');
+        });
+
+        test('should return error if name is null', async () => {
+            const { value, error } = await validateSpaceName(null as any);
+            expect(error).toBe('Name is required');
+            expect(value).toBeUndefined();
+        });
+        test('should return error if name is < 3 characters', async () => {
+            const { value, error } = await validateSpaceName('ab');
+            expect(error).toBe('Name must be at least 3 characters');
+            expect(value).toBe('ab');
+        });
+        test('should return error if name is too long', async () => {
+            const { value, error } = await validateSpaceName('a'.repeat(31));
+            expect(error).toBe('Name must be less than 30 characters');
+            expect(value).toBe('a'.repeat(31));
+        });
+
+        test('should return error if non alphanumeric', async () => {
+            const { value, error } = await validateSpaceName('aasdf!!@');
+            expect(error).toBe('Name must only contain alphanumeric characters and underscores');
+            expect(value).toBe('aasdf!!@');
+        });
+
+        test('should pass validation #1', async () => {
+            const { value, error } = await validateSpaceName('nouns');
+            expect(error).toBeUndefined();
+            expect(value).toBe('nouns');
+        });
+        test('should pass validation #2', async () => {
+            const { value, error } = await validateSpaceName('  nouns  ');
+            expect(error).toBeUndefined();
+            expect(value).toBe('nouns');
+        });
+
     });
 
-    test('should return error if non alphanumeric', async () => {
-        const { value, error } = await validateSpaceName('aasdf!!@');
-        expect(error).toBe('Name must only contain alphanumeric characters and underscores');
-        expect(value).toBe('aasdf!!@');
-    });
+    describe('edit space mode', () => {
 
-    test('should pass validation #1', async () => {
-        const { value, error } = await validateSpaceName('nouns');
-        expect(error).toBeUndefined();
-        expect(value).toBe('nouns');
-    });
-    test('should pass validation #2', async () => {
-        const { value, error } = await validateSpaceName('  nouns  ');
-        expect(error).toBeUndefined();
-        expect(value).toBe('nouns');
-    });
+        let mockFindMany;
 
+        beforeAll(() => {
+            mockFindMany = jest.spyOn(_prismaClient.space, 'findMany');
+        });
 
-    /*
-    TODO
-    
-    test('should return error if name is already taken', async () => {
-        const name = 'sharkdao';
-        const { value, error } = await validateSpaceName(name, "1");
-        expect(error).toBe('Name is already taken');
-        expect(value).toBe(name);
-    });
-    */
+        beforeEach(() => {
+            mockFindMany.mockClear();
+        });
+
+        test('should return error if name is already taken and id is not the same', async () => {
+            const name = 'sharkdao';
+            mockFindMany.mockImplementation(async () => [{ id: 1, name: name }]);
+            const { value, error } = await validateSpaceName(name, "2");
+            expect(error).toBe('Name is already taken');
+            expect(value).toBe(name);
+        });
+
+        test('should succeed if name is take and id is the same', async () => {
+            const name = 'sharkdao';
+            mockFindMany.mockImplementation(async () => []);
+            const { value, error } = await validateSpaceName(name, "2");
+            expect(error).toBeUndefined();
+            expect(value).toBe(name);
+        });
+    })
 
 });
 
