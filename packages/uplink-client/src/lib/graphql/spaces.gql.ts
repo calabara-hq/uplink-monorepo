@@ -5,6 +5,7 @@ export const AllSpacesDocument = gql`
         spaces{
             id
             name
+            displayName
             members
             admins{
                 address
@@ -14,11 +15,12 @@ export const AllSpacesDocument = gql`
 `;
 
 export const SpaceDocument = gql`
-    query Query($id: ID!){
-        space(id: $id){
+    query Query($name: String, $id: ID){
+        space(name: $name, id: $id){
             id
             name
-            logo_url
+            displayName
+            logoUrl
             twitter
             website
             admins{
@@ -43,23 +45,13 @@ export const IsEnsValidDocument = gql`
 
 
 export const CreateSpaceDocument = gql`
-    mutation CreateSpace($spaceData: AlterSpaceInput!){
+    mutation CreateSpace($spaceData: SpaceBuilderInput!){
         createSpace(spaceData: $spaceData){
+            spaceName
             success
             errors{
-                ens
                 name
-                logo_url
-                twitter
-                website
-                admins
-                topLevelAdminsError
-            }
-            spaceResponse{
-                id
-                ens
-                name
-                logo_url
+                logoUrl
                 twitter
                 website
                 admins
@@ -69,23 +61,13 @@ export const CreateSpaceDocument = gql`
 `;
 
 export const EditSpaceDocument = gql`
-    mutation EditSpace($spaceData: AlterSpaceInput!){
-        editSpace(spaceData: $spaceData){
+    mutation EditSpace($spaceId: ID!, $spaceData: SpaceBuilderInput!){
+        editSpace(spaceId: $spaceId, spaceData: $spaceData){
+            spaceName
             success
             errors{
-                ens
                 name
-                logo_url
-                twitter
-                website
-                admins
-                topLevelAdminsError
-            }
-            spaceResponse{
-                id
-                ens
-                name
-                logo_url
+                logoUrl
                 twitter
                 website
                 admins

@@ -7,6 +7,8 @@ import {
     validateSpaceTwitter,
 } from '../src/utils/validateFormData';
 
+import { _prismaClient } from "lib";
+
 
 // space name
 
@@ -48,6 +50,19 @@ describe('validateSpaceName', () => {
         expect(error).toBeUndefined();
         expect(value).toBe('nouns');
     });
+
+
+    /*
+    TODO
+    
+    test('should return error if name is already taken', async () => {
+        const name = 'sharkdao';
+        const { value, error } = await validateSpaceName(name, "1");
+        expect(error).toBe('Name is already taken');
+        expect(value).toBe(name);
+    });
+    */
+
 });
 
 // logo
@@ -78,12 +93,14 @@ describe('validateSpaceLogo', () => {
         expect(error).toBeUndefined();
         expect(value).toBe('https://calabara.mypinata.cloud/ipfs/Qmdu6zwZqY6XtLUPigE7hsqcEPTwbeon5j9SCXYiBekei4')
     });
+
+
+
 });
 
 // website
 
 describe('validateSpaceWebsite', () => {
-
 
     test('should ignore entry if website is empty string', () => {
         const { error, value } = validateSpaceWebsite('');

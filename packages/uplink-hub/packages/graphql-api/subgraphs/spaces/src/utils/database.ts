@@ -1,13 +1,22 @@
 import { _prismaClient } from "lib";
+import { GraphQLError } from "graphql";
 
-export const createDbSpace = async (spaceData) => {
-    const { ens, name, logo_url, website, twitter, admins } = spaceData;
+type SpaceData = {
+    name: string;
+    logoUrl: string;
+    website?: string;
+    twitter?: string;
+    admins: string[];
+}
+
+export const createDbSpace = async (spaceData: SpaceData) => {
+    const { name, logoUrl, website, twitter, admins } = spaceData;
 
     const newSpace = await _prismaClient.space.create({
         data: {
-            id: ens,
-            name: name,
-            logo_url: logo_url,
+            name: name.replace(' ', '').toLowerCase(),
+            displayName: name,
+            logoUrl: logoUrl,
             website: website,
             twitter: twitter,
             members: 0,
@@ -22,19 +31,35 @@ export const createDbSpace = async (spaceData) => {
 
         }
     });
-    return newSpace.id;
+    return newSpace.name;
 }
 
 // editDbSpace should update space by id
-export const updateDbSpace = async (id, spaceData) => {
-    const { name, logo_url, website, twitter, admins } = spaceData;
+export const updateDbSpace = async (id: string, spaceData: SpaceData, user) => {
+    const { name, logoUrl, website, twitter, admins } = spaceData;
+    const spaceId = parseInt(id);
+
+    console.log(admins)
+
+
     // 1. Get space with admins
     const spaceWithAdmins = await _prismaClient.space.findUnique({
-        where: { id: id },
+        where: { id: spaceId },
         include: { admins: true },
     });
 
-    // 2. Delete all existing admins
+    // 2. check that current user is an admin
+    const isAdmin = spaceWithAdmins.admins.some((admin) => admin.address === user);
+
+    if (!isAdmin) {
+        throw new GraphQLError('Unauthorized', {
+            extensions: {
+                code: 'UNAUTHORIZED'
+            }
+        })
+    }
+
+    // 3. Delete all existing admins
     await Promise.all(
         spaceWithAdmins.admins.map((admin) =>
             _prismaClient.admin.delete({
@@ -43,14 +68,15 @@ export const updateDbSpace = async (id, spaceData) => {
         )
     );
 
-    // 3. update the space
+    // 4. update the space
     const result = await _prismaClient.space.update({
         where: {
-            id: id
+            id: spaceId
         },
         data: {
-            name: name,
-            logo_url: logo_url,
+            name: name.replace(' ', '').toLowerCase(),
+            displayName: name,
+            logoUrl: logoUrl,
             website: website,
             twitter: twitter,
             admins: {
@@ -62,5 +88,5 @@ export const updateDbSpace = async (id, spaceData) => {
             }
         }
     });
-    return result.id;
+    return result.name;
 }

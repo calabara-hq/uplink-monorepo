@@ -167,6 +167,7 @@ input IPayout
 
 scalar IpfsUrl
   @join__type(graph: CONTESTS)
+  @join__type(graph: SPACES)
 
 scalar ISODateString
   @join__type(graph: CONTESTS)
@@ -199,7 +200,7 @@ type Mutation
 {
   createContest(contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
-  editSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
 }
 
 enum NativeTokenType
@@ -229,7 +230,7 @@ type Query
 {
   contest(contestId: Int!): Contest! @join__field(graph: CONTESTS)
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
-  space(id: ID!): Space @join__field(graph: SPACES)
+  space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
   submissions(contestId: Int!): [Submission!]! @join__field(graph: SUBMISSIONS)
   submission(submissionId: Int!): Submission! @join__field(graph: SUBMISSIONS)
@@ -261,8 +262,9 @@ type Space
   id: ID!
   contests: [Contest!]! @join__field(graph: CONTESTS)
   name: String! @join__field(graph: SPACES)
+  displayName: String! @join__field(graph: SPACES)
   members: Int! @join__field(graph: SPACES)
-  logo_url: String! @join__field(graph: SPACES)
+  logoUrl: String! @join__field(graph: SPACES)
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
   admins: [Admin!]! @join__field(graph: SPACES)
@@ -272,7 +274,7 @@ type SpaceBuilderErrors
   @join__type(graph: SPACES)
 {
   name: String
-  logo_url: String
+  logoUrl: String
   website: String
   twitter: String
   admins: String
@@ -282,7 +284,7 @@ input SpaceBuilderInput
   @join__type(graph: SPACES)
 {
   name: String!
-  logo_url: String!
+  logoUrl: IpfsUrl!
   website: String
   twitter: String
   admins: [String!]!
@@ -291,6 +293,7 @@ input SpaceBuilderInput
 type SpaceMutationResponse
   @join__type(graph: SPACES)
 {
+  spaceName: String
   success: Boolean!
   errors: SpaceBuilderErrors
 }

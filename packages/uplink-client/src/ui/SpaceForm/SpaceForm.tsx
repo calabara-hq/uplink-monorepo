@@ -23,12 +23,13 @@ import toast from "react-hot-toast";
 export default function SpaceForm({
   initialState,
   isNewSpace,
+  spaceId,
 }: {
   initialState: SpaceBuilderProps;
   isNewSpace: boolean;
+  spaceId?: string;
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [progress, setProgress] = useState(1);
   const router = useRouter();
 
   const handleMutation = useHandleMutation(
@@ -37,48 +38,48 @@ export default function SpaceForm({
 
   const validate = async () => {
     const result = await validateSpaceBuilderProps(state);
-    console.log(result.isValid);
-    console.log(result.errors);
-    if (result.isValid) return true;
-    else {
+
+    if (!result.isValid) {
       dispatch({
         type: "setTotalState",
         payload: { spaceBuilderData: result.values, errors: result.errors },
       });
-      return false;
     }
+
+    return result;
   };
 
   const onFormSubmit = async (state: SpaceBuilderProps) => {
-    return validate();
+    const { isValid, values } = await validate();
+    if (!isValid) return;
+
     const result = await handleMutation({
-      spaceData: {
-        ens: state.ens,
-        name: state.name,
-        website: state.website,
-        logo_url: state.logo_url,
-        twitter: state.twitter,
-        admins: state.admins,
-      },
+      spaceData: values,
+      spaceId,
     });
 
     if (!result) return;
 
-    const { errors, success, spaceResponse } = isNewSpace
+    const { errors, success, spaceName } = isNewSpace
       ? result.data.createSpace
       : result.data.editSpace;
 
-    if (!success)
+    if (!success) {
       toast.error(
         "Oops, something went wrong. Please check the fields and try again."
       );
+      // set any errors that came from the server
 
-    // set the parsed data and errors
-
-    dispatch({
-      type: "setTotalState",
-      payload: { ...spaceResponse, errors: errors },
-    });
+      dispatch({
+        type: "setErrors",
+        payload: {
+          ...(errors?.name && { name: errors.name }),
+          ...(errors?.website && { website: errors.website }),
+          ...(errors?.twitter && { twitter: errors.twitter }),
+          ...(errors?.logoUrl && { logoUrl: errors.logoUrl }),
+        },
+      });
+    }
 
     if (success) {
       toast.success(
@@ -90,7 +91,7 @@ export default function SpaceForm({
         }
       );
       router.refresh();
-      router.push(`/space/${spaceResponse.id}`);
+      router.push(`/space/${spaceName}`);
     }
   };
 
@@ -108,13 +109,6 @@ export default function SpaceForm({
           }}
           buttonLabel="submit"
         />
-        <button
-          onClick={() => {
-            onFormSubmit(state);
-          }}
-        >
-          test
-        </button>
       </div>
     </div>
   );
@@ -199,18 +193,18 @@ const SpaceLogo = ({
           className="w-24 rounded-full cursor-pointer flex justify-center items-center"
           onClick={() => imageUploader.current?.click()}
         >
-          {state.logo_blob && <img src={state.logo_blob} />}
-          {!state.logo_blob && (
+          {state.logoBlob && <img src={state.logoBlob} />}
+          {!state.logoBlob && (
             <div className="flex justify-center items-center w-full h-full rounded-full bg-gray-500">
               <p>logo</p>
             </div>
           )}
         </div>
       </div>
-      {state.errors?.logo_url && (
+      {state.errors?.logoUrl && (
         <label className="label">
           <span className="label-text-alt text-error">
-            {state.errors.logo_url}
+            {state.errors.logoUrl}
           </span>
         </label>
       )}

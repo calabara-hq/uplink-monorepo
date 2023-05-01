@@ -1,15 +1,22 @@
 import { _prismaClient } from "lib";
 
-const findSpaceById = async (id: string) => {
+const findSpace = async (id?: string, name?: string) => {
+    const where = id
+        ? { id: parseInt(id) }
+        : name
+            ? { name }
+            : undefined;
+
+    if (!where) {
+        return null;
+    }
     return await _prismaClient.space.findUnique({
-        where: {
-            id: id
-        },
+        where,
         include: {
-            admins: true
-        }
+            admins: true,
+        },
     });
-}
+};
 
 
 
@@ -18,33 +25,21 @@ const queries = {
         async spaces() {
             const spaces = await _prismaClient.space.findMany({
                 include: {
-                    admins: true
-                }
+                    admins: true,
+                },
             });
-            return spaces
+            return spaces;
         },
         async space(parent, { id, name }, contextValue, info) {
-            return await findSpaceById(id);
+            return await findSpace(id, name);
         },
-        /*
-        async isEnsValid(parent, { ens }, contextValue, info) {
-            const result = await validateSpaceEns(ens);
-            const isSuccess = !result.error;
-            const errors = { ens: result.error }
-            return {
-                success: isSuccess,
-                errors: errors,
-                ens: result.value
-            }
-        },
-        */
     },
 
     Space: {
         async __resolveReference(space) {
-            return await findSpaceById(space.id);
-        }
-    }
+            return await findSpace(space.id);
+        },
+    },
 };
 
 

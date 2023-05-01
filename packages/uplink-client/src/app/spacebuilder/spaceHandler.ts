@@ -7,7 +7,7 @@ export type FormField = {
 
 export type SpaceBuilderErrors = {
   name?: string;
-  logo_url?: string;
+  logoUrl?: string;
   website?: string;
   twitter?: string;
   admins: (string | null)[];
@@ -15,8 +15,8 @@ export type SpaceBuilderErrors = {
 
 export type SpaceBuilderProps = {
   name: string;
-  logo_url: string;
-  logo_blob: string;
+  logoUrl: string;
+  logoBlob: string;
   website?: string;
   twitter?: string;
   admins: string[];
@@ -35,14 +35,14 @@ export const reducer = (state: SpaceBuilderProps, action: any) => {
     case "setLogoBlob":
       return {
         ...state,
-        logo_blob: action.payload,
-        errors: { ...state.errors, logo_blob: null },
+        logoBlob: action.payload,
+        errors: { ...state.errors, logoBlob: null },
       };
     case "setLogoUrl":
       return {
         ...state,
-        logo_url: action.payload,
-        errors: { ...state.errors, logo_url: null },
+        logoUrl: action.payload,
+        errors: { ...state.errors, logoUrl: null },
       };
 
     case "setWebsite": {
@@ -142,7 +142,7 @@ export const validateSpaceName = (name: SpaceBuilderProps['name']): { error: str
   }
 }
 
-export const validateSpaceLogo = (logoUrl: SpaceBuilderProps['logo_url']): { error: string | null, value: SpaceBuilderProps['logo_url'] } => {
+export const validateSpaceLogo = (logoUrl: SpaceBuilderProps['logoUrl']): { error: string | null, value: SpaceBuilderProps['logoUrl'] } => {
 
   if (!logoUrl) return { value: logoUrl, error: "Logo is required" };
   const pattern = /^(https:\/\/(?:[a-z0-9]+\.(?:ipfs|ipns)\.[a-z]+|cloudflare-ipfs\.com\/ipfs\/[a-zA-Z0-9]+|cloud\.ipfs\.io\/ipfs\/[a-zA-Z0-9]+|ipfs\.infura\.io\/ipfs\/[a-zA-Z0-9]+|dweb\.link\/ipfs\/[a-zA-Z0-9]+|ipfs\.fsi\.cloud\/ipfs\/[a-zA-Z0-9]+|ipfs\.runfission\.com\/ipfs\/[a-zA-Z0-9]+|calabara\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+)|ipfs:\/\/[a-zA-Z0-9]+)/;
@@ -244,14 +244,14 @@ export const validateSpaceAdmins = async (admins: SpaceBuilderProps['admins']): 
 
 export const validateSpaceBuilderProps = async (props: SpaceBuilderProps) => {
   const { error: nameError, value: nameValue } = validateSpaceName(props.name);
-  const { error: logoErrors, value: logoValue } = validateSpaceLogo(props.logo_url);
+  const { error: logoErrors, value: logoValue } = validateSpaceLogo(props.logoUrl);
   const { error: websiteErrors, value: websiteValue } = validateSpaceWebsite(props.website);
   const { error: twitterErrors, value: twitterValue } = validateSpaceTwitter(props.twitter);
   const { error: adminsErrors, value: adminsValue } = await validateSpaceAdmins(props.admins);
 
   const errors = {
     ...(nameError ? { name: nameError } : {}),
-    ...(logoErrors ? { logo_url: logoErrors } : {}),
+    ...(logoErrors ? { logoUrl: logoErrors } : {}),
     ...(websiteErrors ? { website: websiteErrors } : {}),
     ...(twitterErrors ? { twitter: twitterErrors } : {}),
     admins: adminsErrors
@@ -259,14 +259,18 @@ export const validateSpaceBuilderProps = async (props: SpaceBuilderProps) => {
 
   const values = {
     name: nameValue,
-    logo_url: logoValue,
+    logoUrl: logoValue,
     ...(websiteValue ? { website: websiteValue } : {}),
     ...(twitterValue ? { twitter: twitterValue } : {}),
     admins: adminsValue,
   }
 
+
+  const { admins, ...otherErrors } = errors;
+
+  const hasAdminErrors = admins.some((admin) => typeof admin === 'string');
   return {
-    isValid: Object.keys(errors).length === 0,
+    isValid: Object.keys(otherErrors).length === 0 && !hasAdminErrors,
     errors,
     values
   }

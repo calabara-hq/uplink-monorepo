@@ -12,21 +12,23 @@ const getSpace = async (id: string) => {
 
   const { contests, id: spaceId, ...data } = stripTypenames(results.data.space);
 
-  data.logo_blob = data.logo_url;
-  data.ens = spaceId;
-  data.admins = data.admins.map((admin: any) => admin.address);
-  data.errors = {
-    ens: null,
-    name: null,
-    logo_url: null,
-    website: null,
-    twitter: null,
-    admins: Array(data.admins.length).fill(null),
+  return {
+    ...data,
+    logoBlob: data.logoUrl,
+    admins: data.admins.map((admin: any) => admin.address),
+    errors: {
+      admins: Array(data.admins.length).fill(null),
+    },
   };
-  return data;
 };
 
 export default async function Page({ params }: { params: { id: string } }) {
   const initialState = await getSpace(params.id);
-  return <SpaceForm initialState={initialState} isNewSpace={false} />;
+  return (
+    <SpaceForm
+      initialState={initialState}
+      isNewSpace={false}
+      spaceId={params.id}
+    />
+  );
 }

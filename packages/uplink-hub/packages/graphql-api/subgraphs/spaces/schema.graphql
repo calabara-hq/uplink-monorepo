@@ -1,8 +1,11 @@
+scalar IpfsUrl
+
 type Space @key(fields: "id") {
   id: ID!
   name: String!
+  displayName: String!
   members: Int!
-  logo_url: String!
+  logoUrl: String!
   twitter: String
   website: String
   admins: [Admin!]!
@@ -15,7 +18,7 @@ type Admin {
 }
 
 type Query {
-  space(id: ID!): Space
+  space(id: ID, name: String): Space
   spaces: [Space!]!
 }
 
@@ -23,20 +26,21 @@ type Query {
 
 type SpaceBuilderErrors {
   name: String
-  logo_url: String
+  logoUrl: String
   website: String
   twitter: String
   admins: String
 }
 
 type SpaceMutationResponse {
+  spaceName: String
   success: Boolean!
   errors: SpaceBuilderErrors
 }
 
 input SpaceBuilderInput {
   name: String!
-  logo_url: String!
+  logoUrl: IpfsUrl!
   website: String
   twitter: String
   admins: [String!]!
@@ -44,7 +48,7 @@ input SpaceBuilderInput {
 
 type Mutation {
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse!
-  editSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse!
+  editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse!
 }
 
 extend schema

@@ -2,13 +2,15 @@ import { validateEthAddress } from "../utils/ethAddress.js";
 import { _prismaClient, SpaceProps } from "lib";
 
 // validate space name
-export const validateSpaceName = async (name: SpaceProps["name"]) => {
+export const validateSpaceName = async (name: SpaceProps["name"], spaceId?: string) => {
     const response: {
         error?: string;
         value: string;
     } = {
         value: name?.trim(),
     };
+
+    const isNewSpace = !spaceId;
 
     if (!response.value) {
         response.error = "Name is required";
@@ -25,16 +27,32 @@ export const validateSpaceName = async (name: SpaceProps["name"]) => {
         response.error = "Name must only contain alphanumeric characters and underscores";
     }
 
+    const dbFormattedName = response.value.replace(' ', '').toLowerCase();
+    const where = {
+        name: dbFormattedName,
+        ...(!isNewSpace ? { id: { not: parseInt(spaceId) } } : {}),
+    };
+
+    // check if the name is already taken
+    const spaces = await _prismaClient.space.findMany({
+        where: where,
+    });
+
+    if (spaces.length > 0) {
+        response.error = "Name is already taken";
+        return response;
+    }
+
     return response;
 };
 
 // validate space logo
-export const validateSpaceLogo = (logo_url: SpaceProps["logo_url"]) => {
+export const validateSpaceLogo = (logoUrl: SpaceProps["logoUrl"]) => {
     const response: {
         error?: string;
         value: string;
     } = {
-        value: logo_url?.trim(),
+        value: logoUrl?.trim(),
     };
 
     if (!response.value) {
