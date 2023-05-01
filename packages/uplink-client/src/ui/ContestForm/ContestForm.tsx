@@ -59,7 +59,7 @@ const ContestSchema = Yup.object<ContestBuilderProps>({
 const initialState = {
   type: null,
   deadlines: {
-    startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
+    startTime: "now",
     voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
     endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
   },
@@ -115,26 +115,7 @@ const initialState = {
     },
     deadlines: {},
   },
-  /*
-  submitterRewards: [],
-  voterRewards: [],
-  submitterRestrictions: [],
-  voterRestrictions: [],
-  votingPolicy: "",
-  */
 } as ContestBuilderProps;
-
-function excludeNullProperties(inputObj) {
-  const newObj = {};
-
-  for (const key in inputObj) {
-    if (inputObj[key] !== null) {
-      newObj[key] = inputObj[key];
-    }
-  }
-
-  return newObj;
-}
 
 const ContestForm = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -163,7 +144,7 @@ const ContestForm = () => {
             },
             strategy: {
               type: "arcade",
-              votingPower: '100',
+              votingPower: "100",
             },
           },
         ],
@@ -177,7 +158,7 @@ const ContestForm = () => {
       toast.error(
         "Oops, something went wrong. Please check the fields and try again."
       );
-      console.log(excludeNullProperties(errors));
+      console.log(errors);
     }
     /*
     dispatch({

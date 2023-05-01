@@ -53,6 +53,7 @@ export interface Prompt {
     title: string;
     body: OutputData | null;
     coverUrl?: string;
+    coverBlob?: string;
 }
 
 export interface Deadlines {
@@ -91,9 +92,9 @@ export type PromptError = {
 
 export type ContestBuilderErrors = {
     type?: string;
-    deadlines: DeadlineError;
-    subRewards: RewardError;
-    voterRewards: RewardError;
+    deadlines?: DeadlineError;
+    subRewards?: RewardError;
+    voterRewards?: RewardError;
     votingPolicy?: string;
     prompt?: PromptError;
 }
@@ -163,6 +164,16 @@ export const reducer = (state: any, action: any) => {
                     body: action.payload,
                 },
                 errors: { ...state.errors, prompt: { ...existingPromptErrors } },
+            };
+        }
+
+        case "setCoverBlob": {
+            return {
+                ...state,
+                prompt: {
+                    ...state.prompt,
+                    coverBlob: action.payload,
+                }
             };
         }
 
@@ -547,21 +558,16 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
     const errors = {}
     switch (step) {
         case 0:
-            return validateContestType(state);
-
-
+            return validateContestType(state.type);
         case 1:
             // contest deadlines are handled in component effects
-            return validateContestDeadlines(state);
+            return validateContestDeadlines(state.deadlines);
         case 2:
             return validatePrompt(state);
-
         case 3:
             return validateSubmitterRewards(state);
-
         case 4:
             return validateVoterRewards(state);
-
         case 5:
             return { isError: false, errors: {} }
         case 6:
@@ -577,36 +583,58 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
 }
 
 
-const validateContestType = (state: ContestBuilderProps) => {
+export const validateContestType = (type: ContestBuilderProps['type']) => {
+
+    const isError = !type || (type !== 'standard' && type !== 'twitter');
+
     return {
-        ...(!state.type ? {
-            errors: { type: "Please select a contest type" }, isError: true
-        } : { isError: false, errors: {} }),
+        isError: isError,
+        ...(isError ? { errors: { type: "Contest type is required" } } : { errors: {} })
     }
 }
 
 
 
 
-const validateContestDeadlines = (state: ContestBuilderProps) => {
-    let isError = false;
-    const errors: ContestBuilderErrors = {
-        deadlines: {}
-    };
+export const validateContestDeadlines = (deadlines: ContestBuilderProps['deadlines']) => {
 
-    if (state.deadlines.voteTime <= state.deadlines.startTime) {
-        errors.deadlines.voteTime = "vote date must be after start date";
-        isError = true;
+    const { startTime, voteTime, endTime } = deadlines || {};
+    const now = new Date(Date.now()).toISOString().slice(0, -5) + "Z"
+
+    // if startTime is "now", use a new Date() object for these calculations
+    const calculatedStartTime = startTime === 'now' ? now : startTime;
+
+
+    const calculateErrors = () => {
+        let startTimeError = "";
+        let voteTimeError = "";
+        let endTimeError = "";
+
+        // check for null values
+        if (!calculatedStartTime) startTimeError = "start date is required";
+        if (!voteTime) voteTimeError = "vote date is required";
+        if (!endTime) endTimeError = "end date is required";
+        if (startTimeError || voteTimeError || endTimeError) return { startTimeError, voteTimeError, endTimeError }
+
+        // check that dates are in the correct order
+        if (voteTime <= calculatedStartTime) voteTimeError = "vote date must be after start date";
+        if (endTime <= voteTime) endTimeError = "end date must be after vote date";
+        if (endTime <= calculatedStartTime) endTimeError = "end date must be after start date";
+
+        return { startTimeError, voteTimeError, endTimeError }
+
     }
 
-    if (state.deadlines.endTime <= state.deadlines.voteTime) {
-        errors.deadlines.endTime = "end date must be after vote date";
-        isError = true;
-    }
+    const { startTimeError, voteTimeError, endTimeError } = calculateErrors();
 
-    if (state.deadlines.endTime <= state.deadlines.startTime) {
-        errors.deadlines.endTime = "end date must be after start date";
-        isError = true;
+    const isError = startTimeError || voteTimeError || endTimeError;
+
+    const errors = {
+        ...(isError ? {
+            ...(startTimeError ? { startTime: startTimeError } : {}),
+            ...(voteTimeError ? { voteTime: voteTimeError } : {}),
+            ...(endTimeError ? { endTime: endTimeError } : {}),
+        } : {})
     }
 
     return {
@@ -616,7 +644,7 @@ const validateContestDeadlines = (state: ContestBuilderProps) => {
 }
 
 
-const validateSubmitterRewards = (state: ContestBuilderProps) => {
+export const validateSubmitterRewards = (state: ContestBuilderProps) => {
     let isError = false;
     const errors: ContestBuilderErrors = {
         subRewards: {
@@ -644,7 +672,7 @@ const validateSubmitterRewards = (state: ContestBuilderProps) => {
     };
 };
 
-const validateVoterRewards = (state: ContestBuilderProps) => {
+export const validateVoterRewards = (state: ContestBuilderProps) => {
     let isError = false;
     const errors: ContestBuilderErrors = {
         voterRewards: {
@@ -672,7 +700,7 @@ const validateVoterRewards = (state: ContestBuilderProps) => {
     };
 };
 
-const validateVotingPolicy = (state: ContestBuilderProps) => {
+export const validateVotingPolicy = (state: ContestBuilderProps) => {
     // set an error if the voting policy is not set
     return {
         ...(!state.votingPolicy.length ? {
@@ -681,7 +709,7 @@ const validateVotingPolicy = (state: ContestBuilderProps) => {
     }
 }
 
-const validatePrompt = (state: ContestBuilderProps) => {
+export const validatePrompt = (state: ContestBuilderProps) => {
 
     const isTitle = state.prompt.title.length > 0;
     const isBody = state.prompt.body?.blocks?.length ?? 0 > 0;

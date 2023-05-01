@@ -1,4 +1,4 @@
-import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, ContestBuilderProps, reducer, rewardsObjectToArray, SubmitterRewards, VoterRewards } from "@/app/contestbuilder/contestHandler";
+import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, ContestBuilderProps, reducer, rewardsObjectToArray, SubmitterRewards, validateContestDeadlines, validateContestType, VoterRewards } from "@/app/contestbuilder/contestHandler";
 import { IToken } from "@/types/token";
 import { describe, expect, test } from "@jest/globals";
 import { sampleERC1155Token, sampleERC20Token, sampleERC721Token, sampleETHToken } from "./sampleTokens";
@@ -805,3 +805,140 @@ describe("Helper functions", () => {
 
     });
 });
+
+
+
+describe('validation', () => {
+    describe('validate contest type', () => {
+        test('should fail with null contest type', () => {
+            const contestType = null
+            const { isError, errors } = validateContestType(contestType);
+            expect(isError).toBeTruthy()
+            expect(errors).toEqual({
+                type: 'Contest type is required'
+            });
+        })
+        test('should fail with empty string contest type', () => {
+            const contestType = ''
+            const { isError, errors } = validateContestType(contestType);
+            expect(isError).toBeTruthy()
+            expect(errors).toEqual({
+                type: 'Contest type is required'
+            });
+        })
+        test('should fail with unsupported contest type', () => {
+            const contestType = 'prophouse'
+            const { isError, errors } = validateContestType(contestType);
+            expect(isError).toBeTruthy()
+            expect(errors).toEqual({
+                type: 'Contest type is required'
+            });
+        })
+        test('should succeed with standard contest type', () => {
+            const contestType = 'standard'
+            const { isError, errors } = validateContestType(contestType);
+            expect(isError).toBeFalsy()
+            expect(errors).toEqual({});
+        })
+
+        test('should succeed with twitter contest type', () => {
+            const contestType = 'twitter'
+            const { isError, errors } = validateContestType(contestType);
+            expect(isError).toBeFalsy()
+            expect(errors).toEqual({});
+        })
+    })
+
+
+    describe('validate contest deadlines', () => {
+        test('should fail with null deadlines', () => {
+            const deadlines = null as any;
+            const { isError, errors } = validateContestDeadlines(deadlines);
+            expect(isError).toBeTruthy()
+            expect(errors).toEqual({
+                startTime: 'start date is required',
+                voteTime: 'vote date is required',
+                endTime: 'end date is required',
+            });
+        })
+        test('should fail with empty string deadlines', () => {
+            const deadlines = {
+                startTime: '',
+                voteTime: '',
+                endTime: '',
+            };
+            const { isError, errors } = validateContestDeadlines(deadlines);
+            expect(isError).toBeTruthy()
+            expect(errors).toEqual({
+                startTime: 'start date is required',
+                voteTime: 'vote date is required',
+                endTime: 'end date is required',
+            });
+        })
+
+        test('should fail with vote date < start date', () => {
+            const deadlines = {
+                startTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
+                voteTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
+                endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+            };
+            const { isError, errors } = validateContestDeadlines(deadlines);
+            expect(isError).toBeTruthy()
+            expect(errors).toEqual({
+                voteTime: 'vote date must be after start date',
+            });
+        })
+
+        test('should fail with end date < vote date', () => {
+            const deadlines = {
+                startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
+                voteTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+                endTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
+
+            };
+            const { isError, errors } = validateContestDeadlines(deadlines);
+            expect(isError).toBeTruthy()
+            expect(errors).toEqual({
+                endTime: 'end date must be after vote date',
+            });
+        })
+
+        test('should fail with end date < start date and end date < vote date', () => {
+            const deadlines = {
+                startTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
+                voteTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+                endTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
+
+            };
+            const { isError, errors } = validateContestDeadlines(deadlines);
+            expect(isError).toBeTruthy()
+            expect(errors).toEqual({
+                endTime: 'end date must be after start date',
+            });
+        })
+
+        test('should succeed with valid deadlines', () => {
+            const deadlines = {
+                startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
+                voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
+                endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+            };
+            const { isError, errors } = validateContestDeadlines(deadlines);
+            expect(isError).toBeFalsy()
+            expect(errors).toEqual({});
+        })
+
+        test('should succeed with `now` as startTime string', () => {
+            const deadlines = {
+                startTime: 'now',
+                voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
+                endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+            };
+            const { isError, errors } = validateContestDeadlines(deadlines);
+            expect(isError).toBeFalsy()
+            expect(errors).toEqual({});
+        })
+
+    })
+
+})

@@ -23,7 +23,6 @@ const StandardPrompt = ({
 }) => {
   const [selectedLabel, setSelectedLabel] = useState<Option>(labelOptions[0]);
   const imageUploader = useRef<HTMLInputElement>(null);
-  const [mediaBlob, setMediaBlob] = useState<string | null>(null);
   const editorCallback = (data: OutputData) => {
     dispatch({
       type: "setPromptBody",
@@ -85,7 +84,10 @@ const StandardPrompt = ({
                         event,
                         ["image"],
                         (base64) => {
-                          setMediaBlob(base64);
+                          dispatch({
+                            type: "setCoverBlob",
+                            payload: base64,
+                          });
                         },
                         (ipfsUrl) => {
                           dispatch({
@@ -102,8 +104,10 @@ const StandardPrompt = ({
                       className="w-36 rounded-lg cursor-pointer flex justify-center items-center"
                       onClick={() => imageUploader.current?.click()}
                     >
-                      {mediaBlob && <img src={mediaBlob} />}
-                      {!mediaBlob && (
+                      {state.prompt.coverBlob && (
+                        <img src={state.prompt.coverBlob} />
+                      )}
+                      {!state.prompt.coverBlob && (
                         <div className="flex justify-center items-center w-full h-full rounded-lg bg-gray-500">
                           <p>cover image</p>
                         </div>

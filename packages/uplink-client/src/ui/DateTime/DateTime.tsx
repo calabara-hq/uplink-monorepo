@@ -1,15 +1,16 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 
 import "react-day-picker/dist/style.css";
+import { ISODateString } from "@/providers/SessionProvider";
 
-const deconstructIsoString = (isoString: string) => {
-  const date = new Date(isoString);
+const deconstructIsoString = (isoString: ISODateString | "now") => {
+  const date = isoString === "now" ? new Date(Date.now()) : new Date(isoString);
   const hour = date.getHours();
   const minute = date.getMinutes();
   const meridiem = hour >= 12 ? "PM" : "AM";
-  const adjustedHour = hour % 12 || 12;
+  const adjustedHour = hour === 0 ? 12 : (hour > 12 ? hour - 12 : hour);
   const adjustedMinute = minute < 10 ? "0" + minute : minute;
   return {
     iDate: date,
@@ -49,7 +50,11 @@ export default function DateTimeSelector({
   const [minute, setMinute] = useState(iMinute);
   const [meridiem, setMeridiem] = useState(iMeridiem);
   const [progress, setProgress] = useState<number>(0);
-  const createReadableDate = () => {
+
+  const createReadableDate = (isNow: boolean) => {
+    if (isNow) {
+      return "now";
+    }
     return format(
       new Date(
         selectedDay.getFullYear(),
@@ -61,8 +66,9 @@ export default function DateTimeSelector({
       "MMM d, yyyy h:mm aa"
     );
   };
-  const [readableDate, setReadableDate] = useState<string>(() =>
-    createReadableDate()
+
+  const [readableDate, setReadableDate] = useState<string>(
+    createReadableDate(isoString === "now")
   );
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -103,7 +109,7 @@ export default function DateTimeSelector({
     if (progress < 1 && selectedDay) {
       setProgress(1);
     } else {
-      setReadableDate(createReadableDate());
+      setReadableDate(createReadableDate(false)); // Pass false to update the date/time
       const isoString = constructIsoString(selectedDay, hour, minute, meridiem);
       callback(isoString);
       handleCloseAndReset();

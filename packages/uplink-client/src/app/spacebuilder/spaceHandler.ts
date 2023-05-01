@@ -36,7 +36,6 @@ export const reducer = (state: SpaceBuilderProps, action: any) => {
       return {
         ...state,
         logoBlob: action.payload,
-        errors: { ...state.errors, logoBlob: null },
       };
     case "setLogoUrl":
       return {
