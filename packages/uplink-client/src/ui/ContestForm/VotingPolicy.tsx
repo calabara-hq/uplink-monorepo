@@ -271,10 +271,10 @@ const StrategyManager = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg shadow-md">
+    <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <label className="text-xl font-medium">Strategy</label>
-        <div className="flex justify-around items-center">
+        <div className="flex justify-around items-center bg-base-100 rounded-lg">
           <button
             className={`${
               currentPolicy?.strategy?.type === "arcade"
@@ -285,7 +285,7 @@ const StrategyManager = ({
           >
             Arcade
           </button>
-          <div className="divider lg:divider-horizontal">
+          <div className="divider lg:divider-horizontal text-primary-content">
             <ArrowPathIcon className="w-24" />
           </div>
 

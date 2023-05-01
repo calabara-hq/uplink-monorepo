@@ -16,14 +16,14 @@ const TokenCard = ({
   handleRemove?: () => void;
 }) => {
   return (
-    <div className="card w-full lg:w-1/4 bg-base-100 p-4 shadow-xl">
+    <div className="card w-full lg:w-1/4 bg-base-100 p-4 shadow-box">
       <div className="card-body justify-between p-0">
         <h2 className="card-title">{token.symbol}</h2>
         {token.type === "ETH" && <ETHCard token={token} />}
         {token.type !== "ETH" && <ERCCard token={token} />}
         <div className="card-actions justify-end">
           {handleRemove && (
-            <button className="btn btn-xs btn-ghost" onClick={handleRemove}>
+            <button className="btn btn-sm btn-ghost" onClick={handleRemove}>
               remove
               <TrashIcon className="w-4 ml-2" />
             </button>
