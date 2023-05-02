@@ -78,10 +78,7 @@ const SubmitterRewardsComponent = ({
       <button className="btn" onClick={() => setIsModalOpen(true)}>
         add reward
       </button>
-      <SubmitterRewardMatrix
-        state={state}
-        dispatch={dispatch}
-      />
+      <SubmitterRewardMatrix state={state} dispatch={dispatch} />
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -179,11 +176,11 @@ const SubmitterRewardMatrix = ({
   ) {
     return (
       <div className="overflow-x-auto w-full">
-        {errors.subRewards.duplicateRanks.length > 0 && (
+        {errors?.submitterRewards?.duplicateRanks?.length ?? 0 > 0 ? (
           <div className="text-red-500">
             <p>oops, you have some duplicate ranks</p>
           </div>
-        )}
+        ) : null}
         <table className="table w-full">
           {/* head */}
           <thead>
@@ -210,7 +207,7 @@ const SubmitterRewardMatrix = ({
                 <th className="w-24 text-center">
                   <input
                     className={`input w-24 ${
-                      errors.subRewards.duplicateRanks.includes(index)
+                      errors?.submitterRewards?.duplicateRanks?.includes(index)
                         ? "input-error"
                         : "input-bordered"
                     }`}

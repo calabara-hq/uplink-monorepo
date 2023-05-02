@@ -134,7 +134,10 @@ const StandardPrompt = ({
                 </span>
               </label>
             )}
-            <Editor editorCallback={editorCallback} />
+            <Editor
+              data={state.prompt.body ?? undefined}
+              editorCallback={editorCallback}
+            />
           </div>
         </div>
         <div className="flex flex-col w-full lg:w-1/2"></div>

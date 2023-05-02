@@ -7,12 +7,14 @@ import {
   useCallback,
   ReactNode,
   Fragment,
+  useMemo,
 } from "react";
 import {
   ContestBuilderProps,
   cleanSubmitterRewards,
   cleanVoterRewards,
   reducer,
+  validateAllContestBuilderProps,
   validateStep,
 } from "@/app/contestbuilder/contestHandler";
 import StandardPrompt from "./StandardPrompt";
@@ -44,17 +46,6 @@ export const BlockWrapper = ({
     </div>
   );
 };
-
-const ContestSchema = Yup.object<ContestBuilderProps>({
-  type: Yup.string().nullable().required("Required"),
-  startTime: Yup.string().required("Required"),
-  voteTime: Yup.string().required("Required"),
-  endTime: Yup.string().required("Required"),
-  contestPromptTitle: Yup.string().required("Required"),
-  contestPromptBody: Yup.string().required("Required"),
-  submitterRestrictions: Yup.array().required("Required"),
-  votingPolicy: Yup.array().required("Required"),
-});
 
 const initialState = {
   type: null,
@@ -106,15 +97,7 @@ const initialState = {
   submitterRestrictions: [],
   votingPolicy: [],
 
-  errors: {
-    subRewards: {
-      duplicateRanks: [],
-    },
-    voterRewards: {
-      duplicateRanks: [],
-    },
-    deadlines: {},
-  },
+  errors: {},
 } as ContestBuilderProps;
 
 const ContestForm = () => {
@@ -122,8 +105,215 @@ const ContestForm = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const handleMutation = useHandleMutation(CreateContestDocument);
 
+  useEffect(() => {
+    console.log(state.errors);
+  }, [state]);
+
+  /*
+  const [stepErrors, setStepErrors] = useState([
+    {
+      name: "type",
+      errors: state.errors.type, 
+    },
+    Object.keys(state.errors?.deadlines ?? {}).length > 0, 
+    Object.keys(state.errors?.prompt ?? {}).length > 0, 
+    state.errors.submitterRewards?.duplicateRanks?.length > 0, 
+    state.errors.voterRewards?.duplicateRanks?.length > 0, 
+    false, // submitter restrictions errors
+    state.errors.votingPolicy, // voting policy errors
+  ]);
+  */
+
   const handleFormSubmit = async () => {
-    console.log(state);
+    const { isError, errors: validationErrors } =
+      validateAllContestBuilderProps(state);
+    if (isError) {
+      // set the current step to the first step with errors
+      const firstErrorStep = steps.findIndex(
+        (step) => step.errorField in validationErrors
+      );
+      setCurrentStep(firstErrorStep);
+
+      return dispatch({
+        type: "setErrors",
+        payload: validationErrors,
+      });
+    }
+  };
+
+  const steps = [
+    {
+      name: "Contest Type",
+      component: <ContestType state={state} dispatch={dispatch} />,
+      errorField: "type",
+    },
+    {
+      name: "Deadlines",
+      component: <Deadlines state={state} dispatch={dispatch} />,
+      errorField: "deadlines",
+    },
+    {
+      name: "Standard Prompt",
+      component: <StandardPrompt state={state} dispatch={dispatch} />,
+      errorField: "prompt",
+    },
+    {
+      name: "Submitter Rewards",
+      component: (
+        <SubmitterRewardsComponent state={state} dispatch={dispatch} />
+      ),
+      errorField: "submitterRewards",
+    },
+    {
+      name: "Voter Rewards",
+      component: <VoterRewardsComponent state={state} dispatch={dispatch} />,
+      errorField: "voterRewards",
+    },
+    {
+      name: "Restrictions",
+      component: <SubmitterRestrictions state={state} dispatch={dispatch} />,
+      errorField: "submitterRestrictions",
+    },
+    {
+      name: "Voting Policy",
+      component: <VotingPolicy state={state} dispatch={dispatch} />,
+      errorField: "votingPolicy",
+    },
+    {
+      errorField: "none",
+    },
+  ];
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      const res = validateStep(state, currentStep);
+      if (res.isError) {
+        return dispatch({ type: "setErrors", payload: res.errors });
+      }
+
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const renderStepStatusIcon = (index: number) => {
+    const step = steps[index];
+    if (state.errors[step.errorField]) {
+      return <span>x</span>;
+    } else if (currentStep > index) {
+      return <span>$</span>;
+    } else {
+      return <span>*</span>;
+    }
+  };
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white px-4 py-8 rounded-lg ml-auto mr-auto">
+      <div className="flex flex-col w-1/5">
+        <ul className="steps steps-horizontal lg:steps-vertical">
+          {steps.map((el, index) => {
+            const isActive = currentStep === index;
+            const isCompleted = index < currentStep;
+            const hasErrors = state.errors[el.errorField];
+
+            const stepClass = isActive
+              ? "step step-primary"
+              : isCompleted
+              ? "step step-success"
+              : "step step-neutral";
+            const dataContent = hasErrors ? "✕" : isCompleted ? "✓" : "●";
+
+            return (
+              <li
+                key={index}
+                data-content={dataContent}
+                className={`${stepClass} cursor-pointer`}
+                onClick={() => setCurrentStep(index)}
+              >
+                {el.name}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <div className="flex flex-col w-full lg:w-4/5 gap-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {steps[currentStep].component}
+            {currentStep > 0 && (
+              <button
+                type="button"
+                className="btn btn-secondary mr-2"
+                onClick={handlePrevious}
+              >
+                Previous
+              </button>
+            )}
+            {currentStep < steps.length - 1 && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleNext}
+              >
+                Next
+              </button>
+            )}
+
+            {currentStep === steps.length - 1 && (
+              <button
+                className="btn btn-primary"
+                type="submit"
+                onClick={handleFormSubmit}
+              >
+                Save
+              </button>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+export default ContestForm;
+
+/*
+  const [stepErrors, setStepErrors] = useState([
+    state.errors.type,
+    Object.keys(state.errors?.deadlines ?? {}).length > 0,
+    Object.keys(state.errors?.prompt ?? {}).length > 0,
+    state.errors.submitterRewards?.duplicateRanks?.length > 0,
+    state.errors.voterRewards?.duplicateRanks?.length > 0,
+    false,
+    state.errors.votingPolicy,
+  ]);
+*/
+
+/*
+
+  const handleFormSubmit = async () => {
+    const { isError, errors: validationErrors } =
+      validateAllContestBuilderProps(state);
+    if (isError) {
+      //setCurrentStep(0);
+      return dispatch({
+        type: "setErrors",
+        payload: validationErrors,
+      });
+    }
+    return;
+
     // return handleSubmit();
     const res = await handleMutation({
       contestData: {
@@ -160,12 +350,7 @@ const ContestForm = () => {
       );
       console.log(errors);
     }
-    /*
-    dispatch({
-      type: "setErrors",
-      payload: errors,
-    });
-    */
+
     if (success) {
       toast.success("Contest created successfully!", {
         icon: "🎉",
@@ -173,83 +358,25 @@ const ContestForm = () => {
     }
   };
 
-  const steps = [
-    {
-      name: "Contest Type",
-      component: <ContestType state={state} dispatch={dispatch} />,
-      errors: state.errors.type,
-    },
-    {
-      name: "Deadlines",
-      component: <Deadlines state={state} dispatch={dispatch} />,
-      errors: Object.keys(state.errors?.deadlines ?? {}).length > 0,
-    },
-    {
-      name: "Standard Prompt",
-      component: <StandardPrompt state={state} dispatch={dispatch} />,
-      //errors: Object.keys(state.errors?.prompt)?.length ?? 0 > 0,
-      errors: Object.keys(state.errors?.prompt ?? {}).length > 0,
-    },
-    {
-      name: "Submitter Rewards",
-      component: (
-        <SubmitterRewardsComponent state={state} dispatch={dispatch} />
-      ),
-      errors: state.errors.subRewards?.duplicateRanks?.length > 0,
-    },
-    {
-      name: "Voter Rewards",
-      component: <VoterRewardsComponent state={state} dispatch={dispatch} />,
-      errors: state.errors.voterRewards?.duplicateRanks?.length > 0,
-    },
-    {
-      name: "Restrictions",
-      component: <SubmitterRestrictions state={state} dispatch={dispatch} />,
-    },
-    {
-      name: "Voting Policy",
-      component: <VotingPolicy state={state} dispatch={dispatch} />,
-      errors: state.errors.votingPolicy,
-    },
-    {},
-  ];
+  */
 
-  const handleSubmit = async () => {
-    const contest = {
-      ...state,
-    };
-    console.log(contest);
-  };
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      const res = validateStep(state, currentStep);
-      console.log(res);
-      if (res.isError)
-        return dispatch({ type: "setErrors", payload: res.errors });
-
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleStepChange = (index: number) => {
-    setCurrentStep(index);
-  };
-
-  return (
-    <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white px-4 py-8 rounded-lg ml-auto mr-auto">
+/*
       <div className="flex w-full lg:w-1/5 items-start ">
         <ul className="steps steps-horizontal lg:steps-vertical">
           {steps.map((el, index) => {
+            console.log("MAPPING STEPS");
+            console.log(stepErrors);
             const isActive = currentStep === index;
             const isCompleted = index < currentStep;
-            const hasErrors = steps[currentStep].errors;
+            const hasErrors = stepErrors[currentStep];
+            console.log(
+              "step",
+              el.name,
+              "with index",
+              index,
+              "has errors",
+              hasErrors
+            );
             const stepClass = isActive
               ? "step step-primary"
               : isCompleted
@@ -270,67 +397,6 @@ const ContestForm = () => {
           })}
         </ul>
       </div>
-      <div className="flex flex-col w-full lg:w-4/5 gap-8">
-        <Formik<ContestBuilderProps>
-          initialValues={state}
-          validationSchema={ContestSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ isSubmitting }) => (
-            <Form className="px-4 py-6  shadow rounded-lg">
-              {/* steps.map((el, index) => {
-                const isActive = currentStep === index;
-                const isPrevious = index < currentStep;
 
-                return <div key={index}>{el.component}</div>;
-              })*/}
 
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {steps[currentStep].component}
-                  {currentStep > 0 && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary mr-2"
-                      onClick={handlePrevious}
-                    >
-                      Previous
-                    </button>
-                  )}
-                  {currentStep < steps.length - 1 && (
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={handleNext}
-                    >
-                      Next
-                    </button>
-                  )}
-
-                  {currentStep === steps.length - 1 && (
-                    <button
-                      className="btn btn-primary"
-                      type="submit"
-                      disabled={isSubmitting}
-                      onClick={handleFormSubmit}
-                    >
-                      Save
-                    </button>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </Form>
-          )}
-        </Formik>
-      </div>
-    </div>
-  );
-};
-
-export default ContestForm;
+*/

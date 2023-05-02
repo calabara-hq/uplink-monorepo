@@ -90,11 +90,11 @@ const VoterRewardsMatrix = ({
 
   return (
     <div className="flex flex-col w-full gap-2">
-      {errors.voterRewards.duplicateRanks.length > 0 && (
+      {errors?.voterRewards?.duplicateRanks?.length ?? 0 > 0 ? (
         <div className="text-red-500">
           <p>oops, you have some duplicate ranks</p>
         </div>
-      )}
+      ) : null}
       {voterRewards && (
         <div className="flex flex-col gap-2">
           {(voterRewards.ERC20 || voterRewards.ETH) &&
@@ -106,13 +106,12 @@ const VoterRewardsMatrix = ({
                   reward={reward}
                   rewardsLength={voterRewards?.payouts?.length ?? 0}
                   availableRewardTokens={Object.entries(voterRewards)
-
                     .filter(
                       ([key, value]) => key !== "payouts" && value !== null
                     )
                     .flatMap(([key, value]) => value)}
                   dispatch={dispatch}
-                  errors={errors.voterRewards}
+                  errors={errors?.voterRewards}
                 />
               );
             })}
@@ -138,9 +137,8 @@ const VoterRewardRow = ({
   availableRewardTokens: IToken[];
   rewardsLength: number;
   dispatch: React.Dispatch<any>;
-  errors: RewardError;
+  errors?: RewardError;
 }) => {
-  console.log(availableRewardTokens);
   const menuSelectOptions = availableRewardTokens.map((token) => {
     return { value: token.type, label: token.symbol };
   });
@@ -187,7 +185,7 @@ const VoterRewardRow = ({
       <p>voters that accurately choose rank </p>
       <input
         className={`input w-16 ${
-          errors.duplicateRanks.includes(index)
+          errors?.duplicateRanks?.includes(index)
             ? "input-error"
             : "input-bordered"
         }`}
