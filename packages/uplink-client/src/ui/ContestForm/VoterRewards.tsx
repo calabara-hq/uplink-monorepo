@@ -11,6 +11,8 @@ import TokenModal from "../TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import { useEffect, useState } from "react";
 import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
+import { TrashIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import InfoAlert from "../InfoAlert/InfoAlert";
 
 const VoterRewardsComponent = ({
   state,
@@ -33,7 +35,14 @@ const VoterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Voter Rewards">
-      <div className="flex flex-col w-full gap-2">
+      <InfoAlert>
+        <p>
+          Select the tokens that will be distributed to the top X voters who
+          accuraterly predict the outcome of the contest.
+        </p>
+      </InfoAlert>
+
+      <div className="flex flex-col lg:flex-row w-full gap-4">
         {rewardsObjectToArray(state.voterRewards).map((token, index) => {
           return (
             <TokenCard
@@ -44,7 +53,11 @@ const VoterRewardsComponent = ({
           );
         })}
       </div>
-
+      <div>
+        <button className="btn" onClick={() => setIsModalOpen(true)}>
+          add reward
+        </button>
+      </div>
       <VoterRewardsMatrix
         spaceTokens={state.spaceTokens}
         state={state}
@@ -65,10 +78,6 @@ const VoterRewardsComponent = ({
         strictTypes={["ERC20"]}
         continuous={false}
       />
-
-      <button className="btn" onClick={() => setIsModalOpen(true)}>
-        add reward
-      </button>
     </BlockWrapper>
   );
 };
@@ -181,10 +190,10 @@ const VoterRewardRow = ({
   };
 
   return (
-    <div className="flex flex-row items-center gap-2">
-      <p>voters that accurately choose rank </p>
+    <div className="flex flex-col lg:flex-row items-center w-full justify-between gap-2 bg-base-100 p-4 rounded-xl">
+      <p className="text-center">Voters that accurately choose rank </p>
       <input
-        className={`input w-16 ${
+        className={`input w-16 focus:bg-neutral text-center ${
           errors?.duplicateRanks?.includes(index)
             ? "input-error"
             : "input-bordered"
@@ -195,7 +204,7 @@ const VoterRewardRow = ({
       />
       <p>will split</p>
       <input
-        className="input input-bordered w-32"
+        className="input input-bordered focus:bg-neutral text-center w-16 lg:w-24"
         type="number"
         value={reward[selectedToken.value].amount || ""}
         onChange={(e) =>
@@ -208,11 +217,13 @@ const VoterRewardRow = ({
         setSelected={updateTokenType}
         options={menuSelectOptions}
       />
-      {rewardsLength > 1 && (
-        <button className="btn btn-sm" onClick={removeRank}>
-          delete
-        </button>
-      )}
+
+      <button
+        className="btn btn-sm btn-ghost ml-auto lg:m-0"
+        onClick={removeRank}
+      >
+        <TrashIcon className="w-6" />
+      </button>
     </div>
   );
 };

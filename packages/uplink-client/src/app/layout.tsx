@@ -29,9 +29,9 @@ export default async function RootLayout({
   console.log("layout re-render");
 
   return (
-    <html lang="en">
+    <html lang="en" data-theme="mytheme">
       <head />
-      <body className="bg-base min-h-screen">
+      <body className="bg-gradient-vertical bg-primary min-h-screen">
         <WalletProvider session={session}>
           <Nav />
           {/*<Sidebar />*/}

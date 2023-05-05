@@ -9,6 +9,8 @@ import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import TokenCard from "../TokenCard/TokenCard";
+import { TrashIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import InfoAlert from "../InfoAlert/InfoAlert";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
@@ -64,7 +66,12 @@ const SubmitterRewardsComponent = ({
 
   return (
     <BlockWrapper title="Submitter Rewards">
-      <div className="flex flex-col w-full gap-2">
+      <InfoAlert>
+        <p>
+          Select the tokens that will be distributed to the top X submitters
+        </p>
+      </InfoAlert>
+      <div className="flex flex-col lg:flex-row w-full gap-4">
         {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
           return (
             <TokenCard
@@ -218,9 +225,9 @@ const SubmitterRewardMatrix = ({
                 </th>
 
                 {payout.ETH ? (
-                  <td className="text-center">
+                  <td className="text-center ">
                     <input
-                      className="input input-bordered w-32"
+                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ETH?.amount || ""}
                       onChange={(e) =>
@@ -231,9 +238,9 @@ const SubmitterRewardMatrix = ({
                 ) : null}
 
                 {payout.ERC20 ? (
-                  <td className="text-center">
+                  <td className="text-center ">
                     <input
-                      className="input input-bordered w-32"
+                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ERC20?.amount || ""}
                       onChange={(e) =>
@@ -246,7 +253,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC721 ? (
                   <td className="text-center">
                     <input
-                      className="input input-bordered w-32"
+                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
                       type="number"
                       value={
                         payout.ERC721?.tokenId !== null
@@ -263,7 +270,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC1155 ? (
                   <td className="text-center">
                     <input
-                      className="input input-bordered w-32"
+                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ERC1155?.amount || ""}
                       onChange={(e) =>
@@ -275,12 +282,12 @@ const SubmitterRewardMatrix = ({
 
                 {submitterRewards?.payouts?.length &&
                 submitterRewards.payouts.length > 1 ? (
-                  <td className="w-32 text-right">
+                  <td className="w-12">
                     <button
-                      className="btn btn-sm btn-error"
+                      className="btn btn-sm btn-ghost"
                       onClick={() => removeRank(index)}
                     >
-                      Delete
+                      <TrashIcon className="w-6" />
                     </button>
                   </td>
                 ) : (

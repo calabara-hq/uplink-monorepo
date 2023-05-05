@@ -14,7 +14,7 @@ const Editor = ({
 
   return (
     <div
-      className="flex flex-col justify-center bg-base-100 rounded-lg cursor-text 
+      className="flex flex-col justify-center bg-base-100 rounded-lg cursor-text shadow-box
                 p-4 md:pr-5 md:pl-20 text-lg"
     >
       <ReactEditorJS

@@ -39,10 +39,9 @@ export const BlockWrapper = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="bg-black/30 p-6 rounded-lg">
+    <div className="">
       <h1 className="text-2xl font-bold">{title}</h1>
-      <div className="p-2" />
-      <div className="flex flex-col items-center p-6">{children}</div>
+      <div className="flex flex-col items-center lg:p-4 gap-4">{children}</div>
     </div>
   );
 };
@@ -234,8 +233,9 @@ const ContestForm = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white px-4 py-8 rounded-lg ml-auto mr-auto">
-      <div className="flex flex-col w-1/5">
+
+    <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white px-4 py-8 ml-auto mr-auto">
+      <div className="flex w-full lg:w-1/5 items-start ">
         <ul className="steps steps-horizontal lg:steps-vertical">
           {steps.map((el, index) => {
             const isActive = currentStep === index;
@@ -308,116 +308,3 @@ const ContestForm = () => {
 };
 
 export default ContestForm;
-
-/*
-  const [stepErrors, setStepErrors] = useState([
-    state.errors.type,
-    Object.keys(state.errors?.deadlines ?? {}).length > 0,
-    Object.keys(state.errors?.prompt ?? {}).length > 0,
-    state.errors.submitterRewards?.duplicateRanks?.length > 0,
-    state.errors.voterRewards?.duplicateRanks?.length > 0,
-    false,
-    state.errors.votingPolicy,
-  ]);
-*/
-
-/*
-
-  const handleFormSubmit = async () => {
-    const { isError, errors: validationErrors } =
-      validateAllContestBuilderProps(state);
-    if (isError) {
-      //setCurrentStep(0);
-      return dispatch({
-        type: "setErrors",
-        payload: validationErrors,
-      });
-    }
-    return;
-
-    // return handleSubmit();
-    const res = await handleMutation({
-      contestData: {
-        ens: "sharkdao.eth",
-        type: state.type,
-        deadlines: state.deadlines,
-        prompt: state.prompt,
-        submitterRewards: cleanSubmitterRewards(state.submitterRewards),
-        voterRewards: cleanVoterRewards(state.voterRewards),
-        submitterRestrictions: state.submitterRestrictions,
-        votingPolicy: [
-          {
-            token: {
-              type: "ERC20",
-              address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-              symbol: "USDC",
-              decimals: 6,
-            },
-            strategy: {
-              type: "arcade",
-              votingPower: "100",
-            },
-          },
-        ],
-      },
-    });
-
-    if (!res) return;
-    const { errors, success } = res.data.createContest;
-
-    if (!success) {
-      toast.error(
-        "Oops, something went wrong. Please check the fields and try again."
-      );
-      console.log(errors);
-    }
-
-    if (success) {
-      toast.success("Contest created successfully!", {
-        icon: "🎉",
-      });
-    }
-  };
-
-  */
-
-/*
-      <div className="flex w-full lg:w-1/5 items-start ">
-        <ul className="steps steps-horizontal lg:steps-vertical">
-          {steps.map((el, index) => {
-            console.log("MAPPING STEPS");
-            console.log(stepErrors);
-            const isActive = currentStep === index;
-            const isCompleted = index < currentStep;
-            const hasErrors = stepErrors[currentStep];
-            console.log(
-              "step",
-              el.name,
-              "with index",
-              index,
-              "has errors",
-              hasErrors
-            );
-            const stepClass = isActive
-              ? "step step-primary"
-              : isCompleted
-              ? "step step-success"
-              : "step step-neutral";
-            const dataContent = hasErrors ? "✕" : isCompleted ? "✓" : "●";
-
-            return (
-              <li
-                key={index}
-                data-content={dataContent}
-                className={`${stepClass} cursor-pointer`}
-                onClick={() => handleStepChange(index)}
-              >
-                {el.name}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-
-
-*/

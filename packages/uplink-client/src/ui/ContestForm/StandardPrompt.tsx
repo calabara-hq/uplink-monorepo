@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { OutputData } from "@editorjs/editorjs";
 import { BlockWrapper } from "./ContestForm";
 let Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
+import { PhotoIcon } from "@heroicons/react/24/solid";
 
 const labelOptions: Option[] = [
   { value: "art", label: "art" },
@@ -33,9 +34,9 @@ const StandardPrompt = ({
   return (
     <BlockWrapper title="Contest Prompt">
       <div className="flex flex-col w-10/12">
-        <div className="flex flex-col w-full gap-6">
+        <div className="flex flex-col items-center w-full gap-6">
           <div className="flex flex-row w-full">
-            <div className="flex flex-col gap-6 w-full">
+            <div className="flex flex-col gap-6 w-full items-center">
               <div className="flex flex-row w-full xl:w-8/12 gap-6">
                 <div className="flex flex-col w-full">
                   <div className="flex flex-col w-1/3">
@@ -49,7 +50,7 @@ const StandardPrompt = ({
                   <div className="flex flex-col mt-auto">
                     <label className="text-sm p-1">Title</label>
                     <input
-                      className={`input ${
+                      className={`input focus:shadow-box ${
                         state.errors.prompt?.title
                           ? "input-error"
                           : "input-bordered"
