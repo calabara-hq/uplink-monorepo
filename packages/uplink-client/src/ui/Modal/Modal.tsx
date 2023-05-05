@@ -33,7 +33,7 @@ const Modal = ({
     return (
       <div className="fixed inset-0 flex items-center justify-center z-50 w-full ">
         <div className="modal modal-open">
-          <div ref={modalRef} className="modal-box bg-black/90">
+          <div ref={modalRef} className="modal-box bg-start shadow-2xl">
             {children}
           </div>
         </div>

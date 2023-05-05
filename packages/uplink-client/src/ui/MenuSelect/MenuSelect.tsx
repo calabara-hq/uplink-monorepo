@@ -37,7 +37,7 @@ const MenuSelect = ({
   return (
     <div className="relative" ref={dropdownRef}>
       <div
-        className="flex bg-base-100 rounded-lg p-3 cursor-pointer hover:bg-base-200"
+        className="flex justify-between bg-base-100 rounded-lg p-3 cursor-pointer hover:bg-base-200"
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <p>{selected.label}</p>
@@ -45,7 +45,7 @@ const MenuSelect = ({
       </div>
 
       {isOpen && (
-        <ul className="absolute menu bg-base-200 w-fit p-2 rounded-box z-10 mt-2">
+        <ul className="absolute menu items-center bg-base-200 w-full p-2 rounded-box z-10 mt-2 gap-1">
           {options.map((option, index) => (
             <li
               key={index}
@@ -53,11 +53,11 @@ const MenuSelect = ({
                 setSelected(option);
                 setIsOpen(false);
               }}
-              className={`rounded-lg ${
-                selected.value === option.value ? "bg-primary" : ""
+              className={`rounded-lg w-full ${
+                selected.value === option.value ? "bg-primary disabled:pointer-events-none" : ""
               }`}
             >
-              <a>{option.label}</a>
+              <a className="">{option.label}</a>
             </li>
           ))}
           {/*
