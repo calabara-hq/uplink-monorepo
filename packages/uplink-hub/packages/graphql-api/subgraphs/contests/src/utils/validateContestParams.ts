@@ -19,6 +19,7 @@ export type NonFungiblePayout = {
 }
 
 export type Deadlines = {
+    snapshot: string;
     startTime: string;
     voteTime: string;
     endTime: string;
@@ -98,9 +99,18 @@ export interface ContestBuilderProps {
 
 
 export const validateDeadlines = (deadlines: ContestBuilderProps['deadlines']) => {
-    const { startTime, voteTime, endTime } = deadlines;
+    const { snapshot, startTime, voteTime, endTime } = deadlines;
 
+    const now = new Date().toISOString();
     const errorArr: string[] = [];
+
+    if (snapshot && startTime && snapshot > startTime) {
+        errorArr.push("Snapshot date must be before start date");
+    }
+
+    if (snapshot && snapshot > now) {
+        errorArr.push("Snapshot date must be in the past");
+    }
 
     if (voteTime && startTime && voteTime <= startTime) {
         errorArr.push("Vote date must be after start date");

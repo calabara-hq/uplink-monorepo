@@ -61,6 +61,7 @@ export interface Prompt {
 }
 
 export interface Deadlines {
+    snapshot: string;
     startTime: string;
     voteTime: string;
     endTime: string;
@@ -79,6 +80,7 @@ export interface ContestBuilderProps {
 }
 
 export type DeadlineError = {
+    snapshot?: string;
     startTime?: string;
     voteTime?: string;
     endTime?: string;
@@ -114,6 +116,24 @@ export const reducer = (state: any, action: any) => {
                 errors: otherErrors,
             };
         }
+
+        case "setSnapshot": {
+            const { deadlines: deadlineErrors, ...existingErrors } = state.errors;
+            const { snapshot: snapshotError, ...existingDeadlineErrors } = deadlineErrors || {};
+
+            return {
+                ...state,
+                deadlines: {
+                    ...state.deadlines,
+                    snapshot: action.payload,
+                },
+                errors: {
+                    ...existingErrors,
+                    ...(existingDeadlineErrors && Object.keys(existingDeadlineErrors).length > 0) ? { deadlines: existingDeadlineErrors } : {}
+                },
+            };
+        }
+
         case "setStartTime": {
             const { deadlines: deadlineErrors, ...existingErrors } = state.errors;
             const { startTime: startTimeError, ...existingDeadlineErrors } = deadlineErrors || {};
@@ -709,40 +729,45 @@ export const validateContestType = (type: ContestBuilderProps['type']) => {
 
 export const validateContestDeadlines = (deadlines: ContestBuilderProps['deadlines']) => {
 
-    const { startTime, voteTime, endTime } = deadlines || {};
+    const { snapshot, startTime, voteTime, endTime } = deadlines || {};
     const now = new Date(Date.now()).toISOString().slice(0, -5) + "Z"
 
-    // if startTime is "now", use a new Date() object for these calculations
+    // if startTime or snapshot is "now", use a new Date() object for these calculations
     const calculatedStartTime = startTime === 'now' ? now : startTime;
-
+    const calculatedSnapshot = snapshot === 'now' ? now : snapshot;
 
     const calculateErrors = () => {
+        let snapshotError = "";
         let startTimeError = "";
         let voteTimeError = "";
         let endTimeError = "";
 
         // check for null values
+        if (!calculatedSnapshot) snapshotError = "snapshot date is required";
         if (!calculatedStartTime) startTimeError = "start date is required";
         if (!voteTime) voteTimeError = "vote date is required";
         if (!endTime) endTimeError = "end date is required";
-        if (startTimeError || voteTimeError || endTimeError) return { startTimeError, voteTimeError, endTimeError }
+        if (snapshotError || startTimeError || voteTimeError || endTimeError) return { snapshotError, startTimeError, voteTimeError, endTimeError }
 
         // check that dates are in the correct order
+        if (calculatedSnapshot > calculatedStartTime) snapshotError = "snapshot date must be before start date";
+        if (calculatedSnapshot > now) snapshotError = "snapshot date must be in the past";
         if (voteTime <= calculatedStartTime) voteTimeError = "vote date must be after start date";
         if (endTime <= voteTime) endTimeError = "end date must be after vote date";
         if (endTime <= calculatedStartTime) endTimeError = "end date must be after start date";
 
-        return { startTimeError, voteTimeError, endTimeError }
+        return { snapshotError, startTimeError, voteTimeError, endTimeError }
 
     }
 
-    const { startTimeError, voteTimeError, endTimeError } = calculateErrors();
+    const { snapshotError, startTimeError, voteTimeError, endTimeError } = calculateErrors();
 
-    const isError = !!(startTimeError || voteTimeError || endTimeError);
+    const isError = !!(startTimeError || voteTimeError || endTimeError || snapshotError);
 
     const errors = {
         ...(isError ? {
             deadlines: {
+                ...(snapshotError ? { snapshot: snapshotError } : {}),
                 ...(startTimeError ? { startTime: startTimeError } : {}),
                 ...(voteTimeError ? { voteTime: voteTimeError } : {}),
                 ...(endTimeError ? { endTime: endTimeError } : {}),
@@ -751,6 +776,7 @@ export const validateContestDeadlines = (deadlines: ContestBuilderProps['deadlin
     }
 
     const cleanedDeadlines = {
+        snapshot: calculatedSnapshot,
         startTime: calculatedStartTime,
         voteTime,
         endTime

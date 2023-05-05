@@ -30,7 +30,7 @@ const constructIsoString = (
   const dateObj = new Date(date);
   const adjustedHours = (parseInt(hour) % 12) + (meridiem === "PM" ? 12 : 0);
   dateObj.setHours(adjustedHours, parseInt(minute));
-  return dateObj.toISOString().slice(0, -5) + "Z";
+  return dateObj.toISOString();
 };
 
 export default function DateTimeSelector({

@@ -42,6 +42,7 @@ enum ContestType {
 }
 
 input Deadlines {
+  snapshot: ISODateString!
   startTime: ISODateString!
   voteTime: ISODateString!
   endTime: ISODateString!

@@ -112,6 +112,7 @@ enum ContestType
 input Deadlines
   @join__type(graph: CONTESTS)
 {
+  snapshot: ISODateString!
   startTime: ISODateString!
   voteTime: ISODateString!
   endTime: ISODateString!

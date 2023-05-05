@@ -1351,6 +1351,7 @@ describe("Contest Handler", () => {
                 expect(isError).toEqual(true)
                 expect(errors).toEqual({
                     deadlines: {
+                        snapshot: 'snapshot date is required',
                         startTime: 'start date is required',
                         voteTime: 'vote date is required',
                         endTime: 'end date is required',
@@ -1359,6 +1360,7 @@ describe("Contest Handler", () => {
             })
             test('should fail with empty string deadlines', () => {
                 const deadlines = {
+                    snapshot: '',
                     startTime: '',
                     voteTime: '',
                     endTime: '',
@@ -1367,6 +1369,7 @@ describe("Contest Handler", () => {
                 expect(isError).toEqual(true)
                 expect(errors).toEqual({
                     deadlines: {
+                        snapshot: 'snapshot date is required',
                         startTime: 'start date is required',
                         voteTime: 'vote date is required',
                         endTime: 'end date is required',
@@ -1376,6 +1379,7 @@ describe("Contest Handler", () => {
 
             test('should fail with vote date < start date', () => {
                 const deadlines = {
+                    snapshot: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
                     startTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
                     voteTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
                     endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
@@ -1391,6 +1395,7 @@ describe("Contest Handler", () => {
 
             test('should fail with end date < vote date', () => {
                 const deadlines = {
+                    snapshot: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
                     startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
                     voteTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
                     endTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
@@ -1407,6 +1412,7 @@ describe("Contest Handler", () => {
 
             test('should fail with end date < start date and end date < vote date', () => {
                 const deadlines = {
+                    snapshot: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
                     startTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
                     voteTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
                     endTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
@@ -1423,6 +1429,7 @@ describe("Contest Handler", () => {
 
             test('should succeed with valid deadlines', () => {
                 const deadlines = {
+                    snapshot: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
                     startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
                     voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
                     endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
@@ -1432,8 +1439,9 @@ describe("Contest Handler", () => {
                 expect(errors).toEqual({});
             })
 
-            test('should succeed with `now` as startTime string', () => {
+            test('should succeed with `now` as startTime and `now` as snapshot', () => {
                 const deadlines = {
+                    snapshot: 'now',
                     startTime: 'now',
                     voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
                     endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",

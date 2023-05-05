@@ -37,6 +37,7 @@ describe('Contest Param Validation', () => {
 
         test('should return error if startTime is after voteTime', async () => {
             const deadlines = {
+                snapshot: '2020-01-01T00:00:00.000Z',
                 startTime: '2020-01-02T00:00:00.000Z',
                 voteTime: '2020-01-01T00:00:00.000Z',
                 endTime: '2020-01-03T00:00:00.000Z',
@@ -44,6 +45,7 @@ describe('Contest Param Validation', () => {
             const { error, deadlines: deadlineResponse } = validateDeadlines(deadlines);
             expect(error).toEqual('Vote date must be after start date');
             expect(deadlineResponse).toEqual({
+                snapshot: deadlines.snapshot,
                 startTime: deadlines.startTime,
                 voteTime: deadlines.voteTime,
                 endTime: deadlines.endTime,
@@ -53,6 +55,7 @@ describe('Contest Param Validation', () => {
 
         test('should return error if voteTime is after endTime', async () => {
             const deadlines = {
+                snapshot: '2020-01-01T00:00:00.000Z',
                 startTime: '2020-01-02T00:00:00.000Z',
                 voteTime: '2020-01-04T00:00:00.000Z',
                 endTime: '2020-01-03T00:00:00.000Z',
@@ -60,6 +63,7 @@ describe('Contest Param Validation', () => {
             const { error, deadlines: deadlineResponse } = validateDeadlines(deadlines);
             expect(error).toEqual('End date must be after vote date');
             expect(deadlineResponse).toEqual({
+                snapshot: deadlines.snapshot,
                 startTime: deadlines.startTime,
                 voteTime: deadlines.voteTime,
                 endTime: deadlines.endTime,
@@ -68,6 +72,7 @@ describe('Contest Param Validation', () => {
 
         test('should return multiple errors #1', async () => {
             const deadlines = {
+                snapshot: '2020-01-01T00:00:00.000Z',
                 startTime: '2021-01-02T00:00:00.000Z',
                 voteTime: '2021-01-03T00:00:00.000Z',
                 endTime: '2021-01-01T00:00:00.000Z',
@@ -75,6 +80,7 @@ describe('Contest Param Validation', () => {
             const { error, deadlines: deadlineResponse } = validateDeadlines(deadlines);
             expect(error).toEqual('End date must be after vote date, End date must be after start date');
             expect(deadlineResponse).toEqual({
+                snapshot: deadlines.snapshot,
                 startTime: deadlines.startTime,
                 voteTime: deadlines.voteTime,
                 endTime: deadlines.endTime,
@@ -84,13 +90,15 @@ describe('Contest Param Validation', () => {
 
         test('should return multiple errors #2', async () => {
             const deadlines = {
+                snapshot: '2021-01-04T00:00:00.000Z',
                 startTime: '2021-01-03T00:00:00.000Z',
                 voteTime: '2021-01-02T00:00:00.000Z',
                 endTime: '2021-01-01T00:00:00.000Z',
             }
             const { error, deadlines: deadlineResponse } = validateDeadlines(deadlines);
-            expect(error).toEqual('Vote date must be after start date, End date must be after vote date, End date must be after start date');
+            expect(error).toEqual('Snapshot date must be before start date, Vote date must be after start date, End date must be after vote date, End date must be after start date');
             expect(deadlineResponse).toEqual({
+                snapshot: deadlines.snapshot,
                 startTime: deadlines.startTime,
                 voteTime: deadlines.voteTime,
                 endTime: deadlines.endTime,

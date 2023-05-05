@@ -49,9 +49,10 @@ export const BlockWrapper = ({
 const initialState = {
   type: null,
   deadlines: {
+    snapshot: "now",
     startTime: "now",
-    voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
-    endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+    voteTime: new Date(Date.now() + 2 * 864e5).toISOString(),
+    endTime: new Date(Date.now() + 4 * 864e5).toISOString(),
   },
 
   prompt: {
@@ -133,9 +134,9 @@ const ContestForm = () => {
     const contestData = {
       ...values,
       ens: "sharkdao.eth",
-    }
+    };
 
-    console.log(contestData)
+    console.log(contestData);
 
     const res = await handleMutation({
       contestData: {
@@ -233,7 +234,6 @@ const ContestForm = () => {
   };
 
   return (
-
     <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white px-4 py-8 ml-auto mr-auto">
       <div className="flex w-full lg:w-1/5 items-start ">
         <ul className="steps steps-horizontal lg:steps-vertical">
