@@ -22,7 +22,7 @@ model Space {
   name        String  @unique
   displayName String
   members     Int
-  logoUrl    String
+  logoUrl     String
   twitter     String?
   website     String?
   admins      Admin[]

@@ -1,14 +1,14 @@
 import { describe, expect, test } from "@jest/globals";
-import { validateDeadlines, validatePrompt, validateSubmitterRestrictions, validateSubmitterRewards, validateVoterRewards, validateVotingPolicy } from "../src/resolvers/mutations";
+import { ContestBuilderProps, VotingPolicy, validateDeadlines, validatePrompt, validateSubmitterRestrictions, validateSubmitterRewards, validateVoterRewards, validateVotingPolicy } from "../src/utils/validateContestParams";
 import { IERCToken, INativeToken, IToken, SubmitterRestriction, SubmitterRewards, VoterRewards } from "lib";
-import { VotingPolicy } from "lib";
+
 
 export const sampleERC1155Token: IERCToken = {
     type: "ERC1155",
-    address: "0xab0ab2fc1c498942B24278Bbd86bD171a3406A5E",
-    symbol: "MmSzr",
+    address: "0x7c2748C7Ec984b559EADc39C7a4944398E34911a",
+    symbol: "TNS",
     decimals: 0,
-    tokenId: 1,
+    tokenId: 2,
 }
 
 export const sampleERC20Token: IERCToken = {
@@ -31,551 +31,631 @@ export const sampleETHToken: INativeToken = {
     decimals: 18,
 }
 
+describe('Contest Param Validation', () => {
+
+    describe(' Validate Deadlines', () => {
+
+        test('should return error if startTime is after voteTime', async () => {
+            const deadlines = {
+                startTime: '2020-01-02T00:00:00.000Z',
+                voteTime: '2020-01-01T00:00:00.000Z',
+                endTime: '2020-01-03T00:00:00.000Z',
+            }
+            const { error, deadlines: deadlineResponse } = validateDeadlines(deadlines);
+            expect(error).toEqual('Vote date must be after start date');
+            expect(deadlineResponse).toEqual({
+                startTime: deadlines.startTime,
+                voteTime: deadlines.voteTime,
+                endTime: deadlines.endTime,
+            });
+        })
 
 
-describe('validate deadlines', () => {
+        test('should return error if voteTime is after endTime', async () => {
+            const deadlines = {
+                startTime: '2020-01-02T00:00:00.000Z',
+                voteTime: '2020-01-04T00:00:00.000Z',
+                endTime: '2020-01-03T00:00:00.000Z',
+            }
+            const { error, deadlines: deadlineResponse } = validateDeadlines(deadlines);
+            expect(error).toEqual('End date must be after vote date');
+            expect(deadlineResponse).toEqual({
+                startTime: deadlines.startTime,
+                voteTime: deadlines.voteTime,
+                endTime: deadlines.endTime,
+            });
+        })
 
-    const success = {
-        startTime: {},
-        voteTime: {},
-        endTime: {}
-    }
-
-    test('should return error if dates are null', async () => {
-        const deadlines = null
-        const result = validateDeadlines(deadlines);
-        expect(result).toStrictEqual({
-            startTime: { error: 'startTime must be defined' },
-            voteTime: { error: 'voteTime must be defined' },
-            endTime: { error: 'endTime must be defined' }
-        });
-    })
-
-    test('should return error if dates are not valid ISO strings', async () => {
-        const deadlines = {
-            startTime: 'not a valid ISO string',
-            voteTime: 'not a valid ISO string',
-            endTime: 'not a valid ISO string',
-        }
-        const result = validateDeadlines(deadlines);
-        expect(result).toStrictEqual({
-            startTime: { error: 'startTime must be a valid ISO date' },
-            voteTime: { error: 'voteTime must be a valid ISO date' },
-            endTime: { error: 'endTime must be a valid ISO date' }
-        });
-    })
-
-    test('should return error if dates have overlap #1', async () => {
-        const deadlines = {
-            startTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
-            voteTime: new Date().toISOString(),
-            endTime: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-        }
-        const result = validateDeadlines(deadlines);
-        expect(result).toStrictEqual({
-            startTime: {},
-            voteTime: { error: "Vote date must be after start date" },
-            endTime: {}
-        });
-    })
-
-    test('should return error if dates have overlap #2', async () => {
-        const deadlines = {
-            startTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
-            voteTime: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            endTime: new Date().toISOString(),
-        }
-        const result = validateDeadlines(deadlines);
-        expect(result).toStrictEqual({
-            startTime: {},
-            voteTime: {},
-            endTime: { error: "End date must be after start date" }
-        });
-    })
-
-    test('should succeed', () => {
-        const deadlines = {
-            startTime: new Date().toISOString(),
-            voteTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
-            endTime: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-        }
-        const result = validateDeadlines(deadlines);
-        expect(result).toStrictEqual(success);
-    })
-
-})
-
-
-describe('validate prompt', () => {
-
-    const success = {
-        title: {},
-        body: {},
-        coverUrl: {},
-    }
-
-    test('should return error if prompt is null', async () => {
-        const prompt = null
-        const result = validatePrompt(prompt);
-        expect(result).toStrictEqual({
-            title: { error: 'Prompt title must be defined' },
-            body: { error: 'Prompt body must be defined' },
-            coverUrl: {}
-        });
-    })
-
-    test('should return error if prompt is empty', async () => {
-        const prompt = {
-            title: '',
-            body: '',
-            coverUrl: '',
-        }
-        const result = validatePrompt(prompt);
-        expect(result).toStrictEqual({
-            title: { error: 'Prompt title must be defined' },
-            body: { error: 'Prompt body must be defined' },
-            coverUrl: {}
-        });
-    })
-
-    test('should return error if coverUrl is not valid IPFS', async () => {
-        const prompt = {
-            title: 'test',
-            body: 'test',
-            coverUrl: 'test',
-        }
-        const result = validatePrompt(prompt);
-        expect(result).toStrictEqual({
-            title: {},
-            body: {},
-            coverUrl: { error: "Prompt cover image must be a valid IPFS hash" }
-        });
-    })
-
-    test('should succeed', () => {
-        const prompt = {
-            title: 'title',
-            body: 'body',
-            coverUrl: 'https://calabara.mypinata.cloud/ipfs/QmUxRzCcizzuNdyPRxMdn4LFQQQ5ce9cRqubnUCaR4G7Bz',
-        }
-        const result = validatePrompt(prompt);
-        expect(result).toStrictEqual(success);
-    })
-})
-
-
-describe('validate submitter rewards', () => {
-
-    const success = {
-        tokens: {},
-        payouts: {},
-    }
-
-    test('should succeed if submitter rewards is null', async () => {
-        const submitterRewards = null
-        const result = await validateSubmitterRewards(submitterRewards);
-        expect(result).toStrictEqual({
-            tokens: {},
-            payouts: {},
-        });
-    })
-
-    test('should succeed if submitter rewards is empty object', async () => {
-        const submitterRewards = {}
-        const result = await validateSubmitterRewards(submitterRewards);
-        expect(result).toStrictEqual({
-            tokens: {},
-            payouts: {},
-        });
-    })
-
-    test('should return error if invalid tokens are passed ', async () => {
-        const submitterRewards: SubmitterRewards = {
-            ERC20: {
-                type: "ERC20",
-                address: "0x0000000",
-                decimals: 18,
-                symbol: "TEST",
-            },
-            payouts:
-                [{
-                    rank: 1,
-                    ERC20: {
-                        amount: 100,
-                    }
-                }]
-        }
-        const result = await validateSubmitterRewards(submitterRewards);
-        expect(result).toStrictEqual({
-            tokens: { error: "Invalid ERC20 token" },
-            payouts: {},
-        });
-    })
-
-    test('should return error if payouts are defined without tokens ', async () => {
-        const submitterRewards: SubmitterRewards = {
-            payouts:
-                [{
-                    rank: 1,
-                    ERC20: {
-                        amount: 100,
-                    }
-                }]
-        }
-        const result = await validateSubmitterRewards(submitterRewards);
-        expect(result).toStrictEqual({
-            tokens: { error: "At least one token must be defined" },
-            payouts: {},
-        });
-    })
-
-    test('should return error if tokens are defined without payouts ', async () => {
-        const submitterRewards: SubmitterRewards = {
-            ERC20: {
-                type: "ERC20",
-                address: "0x0000000",
-                decimals: 18,
-                symbol: "TEST",
-            },
-            payouts: []
-        }
-        const result = await validateSubmitterRewards(submitterRewards);
-        expect(result).toStrictEqual({
-            tokens: {},
-            payouts: { error: "At least one payout must be defined" }
+        test('should return multiple errors #1', async () => {
+            const deadlines = {
+                startTime: '2021-01-02T00:00:00.000Z',
+                voteTime: '2021-01-03T00:00:00.000Z',
+                endTime: '2021-01-01T00:00:00.000Z',
+            }
+            const { error, deadlines: deadlineResponse } = validateDeadlines(deadlines);
+            expect(error).toEqual('End date must be after vote date, End date must be after start date');
+            expect(deadlineResponse).toEqual({
+                startTime: deadlines.startTime,
+                voteTime: deadlines.voteTime,
+                endTime: deadlines.endTime,
+            });
 
         });
-    })
 
+        test('should return multiple errors #2', async () => {
+            const deadlines = {
+                startTime: '2021-01-03T00:00:00.000Z',
+                voteTime: '2021-01-02T00:00:00.000Z',
+                endTime: '2021-01-01T00:00:00.000Z',
+            }
+            const { error, deadlines: deadlineResponse } = validateDeadlines(deadlines);
+            expect(error).toEqual('Vote date must be after start date, End date must be after vote date, End date must be after start date');
+            expect(deadlineResponse).toEqual({
+                startTime: deadlines.startTime,
+                voteTime: deadlines.voteTime,
+                endTime: deadlines.endTime,
+            });
 
-});
-
-describe('validate voter rewards', () => {
-
-    const success = {
-        tokens: {},
-        payouts: {},
-    }
-
-    test('should succeed if Voter rewards is null', async () => {
-        const voterRewards = null
-        const result = await validateVoterRewards(voterRewards);
-        expect(result).toStrictEqual({
-            tokens: {},
-            payouts: {},
         });
-    })
-
-    test('should succeed if Voter rewards is empty object', async () => {
-        const voterRewards = {}
-        const result = await validateVoterRewards(voterRewards);
-        expect(result).toStrictEqual({
-            tokens: {},
-            payouts: {},
-        });
-    })
-
-    test('should return error if invalid tokens are passed ', async () => {
-        const voterRewards: VoterRewards = {
-            ERC20: {
-                type: "ERC20",
-                address: "0x0000000",
-                decimals: 18,
-                symbol: "TEST",
-            },
-            payouts:
-                [{
-                    rank: 1,
-                    ERC20: {
-                        amount: 100,
-                    }
-                }]
-        }
-        const result = await validateVoterRewards(voterRewards);
-        expect(result).toStrictEqual({
-            tokens: { error: "Invalid ERC20 token" },
-            payouts: {},
-        });
-    })
-
-    test('should return error if payouts are defined without tokens ', async () => {
-        const voterRewards: VoterRewards = {
-            payouts:
-                [{
-                    rank: 1,
-                    ERC20: {
-                        amount: 100,
-                    }
-                }]
-        }
-        const result = await validateVoterRewards(voterRewards);
-        expect(result).toStrictEqual({
-            tokens: { error: "At least one token must be defined" },
-            payouts: {},
-        });
-    })
-
-    test('should return error if tokens are defined without payouts ', async () => {
-        const voterRewards: VoterRewards = {
-            ERC20: {
-                type: "ERC20",
-                address: "0x0000000",
-                decimals: 18,
-                symbol: "TEST",
-            },
-            payouts: []
-        }
-        const result = await validateVoterRewards(voterRewards);
-        expect(result).toStrictEqual({
-            tokens: {},
-            payouts: { error: "At least one payout must be defined" }
-        });
-    })
-
-    test('should succeed with valid data ', async () => {
-        const voterRewards: VoterRewards = {
-            ERC20: sampleERC20Token,
-            payouts:
-                [{
-                    rank: 1,
-                    ERC20: {
-                        amount: 100,
-                    }
-                }]
-        }
-        const result = await validateVoterRewards(voterRewards);
-        expect(result).toStrictEqual({
-            tokens: {},
-            payouts: {}
-        });
-    })
 
 
-});
+    });
 
-
-describe('validate submitter restrictions', () => {
-    const success = {
-        tokens: {},
-        thresholds: {}
-    }
-
-    test("should succeed if submitter restrictions is empty array", async () => {
-        const submitterRestrictions = []
-        const result = await validateSubmitterRestrictions(submitterRestrictions);
-        expect(result).toStrictEqual(success);
-    })
-
-    test("should return error if restriction token is invalid", async () => {
-        const submitterRestrictions: SubmitterRestriction[] = [
-            {
-                token: sampleETHToken,
-                threshold: 100
-            },
-            {
-                token: {
-                    type: "ERC20",
-                    address: "0x0000000",
-                    decimals: 18,
-                    symbol: "TEST",
+    describe('Validate Prompt', () => {
+        test('return error if prompt title is empty string and body blocks are empty', async () => {
+            const prompt = {
+                title: '',
+                body: {
+                    time: 1682628241526,
+                    blocks: [],
+                    version: "2.26.5"
                 },
-                threshold: 100
             }
-        ]
-        const result = await validateSubmitterRestrictions(submitterRestrictions);
-        expect(result).toStrictEqual({
-            tokens: { error: "Invalid ERC20 token" },
-            thresholds: {}
-        });
-    })
+            const { error, prompt: promptResponse } = validatePrompt(prompt);
+            expect(error).toEqual('Prompt title is required, Prompt body blocks cannot be empty');
+            expect(promptResponse).toEqual({
+                title: prompt.title,
+                body: prompt.body,
+            });
+        })
 
-    test("should return error if threshold is 0", async () => {
-        const submitterRestrictions: SubmitterRestriction[] = [
-            {
-                token: sampleETHToken,
-                threshold: 0
-            },
-        ]
-        const result = await validateSubmitterRestrictions(submitterRestrictions);
-        expect(result).toStrictEqual({
-            tokens: {},
-            thresholds: { error: "Threshold must be a positive, non-zero number" }
-        });
-    })
-
-    test("should return error if threshold is negative", async () => {
-        const submitterRestrictions: SubmitterRestriction[] = [
-            {
-                token: sampleETHToken,
-                threshold: -10
-            },
-        ]
-        const result = await validateSubmitterRestrictions(submitterRestrictions);
-        expect(result).toStrictEqual({
-            tokens: {},
-            thresholds: { error: "Threshold must be a positive, non-zero number" }
-        });
-    })
-
-    test("should succeed if threshold is decimal", async () => {
-        const submitterRestrictions: SubmitterRestriction[] = [
-            {
-                token: sampleETHToken,
-                threshold: 10.5534
-            },
-        ]
-        const result = await validateSubmitterRestrictions(submitterRestrictions);
-        expect(result).toStrictEqual(success);
-    })
-
-})
-
-
-describe('validate voting policy', () => {
-
-    const success = {
-        tokens: {},
-        strategies: {}
-    }
-
-    test("should return error if voting policy token is invalid", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: {
-                type: "ERC20",
-                address: "0x0000000",
-                decimals: 18,
-                symbol: "TEST",
-            },
-            strategy: {
-                type: "arcade",
-                votingPower: 100
+        test('succeed if body and title are valid', async () => {
+            const prompt = {
+                title: 'test',
+                body: {
+                    time: 1682628241526,
+                    blocks: [
+                        {
+                            id: "qZxrSG7bxL",
+                            type: "paragraph",
+                            data: {
+                                text: "test"
+                            }
+                        }
+                    ],
+                    version: "2.26.5"
+                }
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: { error: "Invalid ERC20 token" },
-            strategies: {}
-        });
-    })
 
-    test("should return error if neither strategy parameters are passed", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: sampleERC20Token,
-            strategy: {
-                type: "arcade",
+            const { error, prompt: promptResponse } = validatePrompt(prompt);
+            expect(error).toBeUndefined();
+            expect(promptResponse).toEqual({
+                title: prompt.title,
+                body: prompt.body
+            });
+
+        });
+
+        test('succeed if body and title and coverUrl are valid', async () => {
+            const prompt = {
+                title: '    test   ',
+                body: {
+                    time: 1682628241526,
+                    blocks: [
+                        {
+                            id: "qZxrSG7bxL",
+                            type: "paragraph",
+                            data: {
+                                text: "test"
+                            }
+                        }
+                    ],
+                    version: "2.26.5",
+
+                },
+                coverUrl: 'https://calabara.mypinata.cloud/ipfs/QmUxRzCcizzuNdyPRxMdn4LFQQQ5ce9cRqubnUCaR4G7Bz'
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: {},
-            strategies: { error: "Invalid strategy at index 0" }
-        });
-    })
 
-    test("should return error if both strategy parameters are passed", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: sampleERC20Token,
-            strategy: {
-                type: "arcade",
-                votingPower: 100,
-                multiplier: 1
+            const { error, prompt: promptResponse } = validatePrompt(prompt);
+            expect(error).toBeUndefined();
+            expect(promptResponse).toEqual({
+                title: 'test',
+                body: prompt.body,
+                coverUrl: prompt.coverUrl
+            });
+        });
+
+    });
+
+
+    describe('Validate Submitter Rewards', () => {
+
+        test('return error if payouts are defined without a token', async () => {
+            const submitterRewards = {
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    }
+                ]
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: {},
-            strategies: { error: "Invalid strategy at index 0" }
-        });
-    })
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('At least one token must be defined');
+            expect(submitterRewardsResponse).toEqual({
+                payouts: submitterRewards.payouts
+            });
+        })
 
-    test("should return error if arcade strategy parameter is negative", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: sampleERC20Token,
-            strategy: {
-                type: "arcade",
-                votingPower: -100,
+        test('return error if tokens are defined without a payout', async () => {
+            const submitterRewards = {
+                ETH: sampleETHToken,
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: {},
-            strategies: { error: "Invalid strategy at index 0" }
-        });
-    })
 
-    test("should return error if weighted strategy parameter is negative", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: sampleERC20Token,
-            strategy: {
-                type: "weighted",
-                multiplier: -100,
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('At least one payout must be defined');
+        });
+
+        test('return error if tokens are defined with an empty array payout', async () => {
+            const submitterRewards = {
+                ETH: sampleETHToken,
+                payouts: []
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: {},
-            strategies: { error: "Invalid strategy at index 0" }
-        });
-    })
 
-    test("should return error if arcade parameter is passed to weighted strategy", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: sampleERC20Token,
-            strategy: {
-                type: "weighted",
-                votingPower: 100,
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('At least one payout must be defined');
+        });
+
+
+        test('return error if token is invalid', async () => {
+            const submitterRewards = {
+                ERC20: { ...sampleERC20Token, address: '0x123' },
+                payouts: [
+                    {
+                        rank: 1,
+                        ERC20: { amount: '100' }
+                    }
+                ]
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: {},
-            strategies: { error: "Invalid strategy at index 0" }
-        });
-    })
 
-    test("should return error if weighted parameter is passed to arcade strategy", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: sampleERC20Token,
-            strategy: {
-                type: "arcade",
-                multiplier: 100,
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('Invalid ERC20 token');
+        });
+
+        test('return error if token is not ERC / Native', async () => {
+            const submitterRewards = {
+                INVALID: { ...sampleERC20Token, address: '0x123' },
+                payouts: [
+                    {
+                        rank: 1,
+                        ERC20: { amount: '100' }
+                    }
+                ]
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: {},
-            strategies: { error: "Invalid strategy at index 0" }
-        });
-    })
 
-    test("should succeed with valid arcade strategy", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: sampleERC20Token,
-            strategy: {
-                type: "arcade",
-                votingPower: 100,
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('Invalid INVALID token');
+        });
+
+        test('return error if duplicate ranks are found', async () => {
+            const submitterRewards = {
+                ETH: sampleETHToken,
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    }
+                ]
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: {},
-            strategies: {}
-        });
-    })
 
-    test("should succeed with valid weighted strategy", async () => {
-        const votingPolicy: VotingPolicy[] = [{
-            token: sampleERC20Token,
-            strategy: {
-                type: "weighted",
-                multiplier: 1,
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('Duplicate rank 1 found at index 1, Duplicate rank 2 found at index 3');
+        });
+
+        test('return multiple errors', async () => {
+            const submitterRewards = {
+                ERC20: { ...sampleERC20Token, address: '0x123' },
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    }
+                ]
             }
-        }]
-        const result = await validateVotingPolicy(votingPolicy);
-        expect(result).toStrictEqual({
-            tokens: {},
-            strategies: {}
+
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('Invalid ERC20 token, Duplicate rank 1 found at index 1, Duplicate rank 2 found at index 3');
         });
+
+        test('return error if fungible payout amount is negative or 0', async () => {
+            const submitterRewards = {
+                ETH: sampleETHToken,
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '-100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '0' }
+                    }
+                ]
+            };
+
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('Invalid ETH amount for rank 1 at index 0, Invalid ETH amount for rank 2 at index 1');
+        });
+
+        test('return error if ERC721 tokenId is null', async () => {
+            const submitterRewards = {
+                ERC721: sampleERC721Token,
+                payouts: [
+                    {
+                        rank: 1,
+                        ERC721: { tokenId: null }
+                    }
+                ]
+            };
+
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toEqual('Invalid ERC721 tokenId for rank 1 at index 0');
+        });
+
+        test('succeed with valid params and fungible erc1155 token', async () => {
+            const submitterRewards = {
+                ETH: sampleETHToken,
+                ERC1155: sampleERC1155Token,
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100.5' },
+                        ERC1155: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '200.25' }
+                    }
+                ]
+            };
+
+            const { error, submitterRewards: submitterRewardsResponse } = await validateSubmitterRewards(submitterRewards);
+            expect(error).toBeUndefined();
+            expect(submitterRewardsResponse).toEqual({
+                ETH: sampleETHToken,
+                ERC1155: sampleERC1155Token,
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100.5' },
+                        ERC1155: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '200.25' }
+
+                    }
+                ]
+            });
+        });
+    });
+
+
+    describe('Validate Voter Rewards', () => {
+
+        test('return error if payouts are defined without a token', async () => {
+            const voterRewards = {
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    }
+                ]
+            }
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toEqual('At least one token must be defined');
+            expect(voterRewardsResponse).toEqual({
+                payouts: voterRewards.payouts
+            });
+        })
+
+        test('return error if tokens are defined without a payout', async () => {
+            const voterRewards = {
+                ETH: sampleETHToken,
+            }
+
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toEqual('At least one payout must be defined');
+        });
+
+        test('return error if tokens are defined with an empty array payout', async () => {
+            const voterRewards = {
+                ETH: sampleETHToken,
+                payouts: []
+            }
+
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toEqual('At least one payout must be defined');
+        });
+
+
+        test('return error if token is invalid', async () => {
+            const voterRewards = {
+                ERC20: { ...sampleERC20Token, address: '0x123' },
+                payouts: [
+                    {
+                        rank: 1,
+                        ERC20: { amount: '100' }
+                    }
+                ]
+            }
+
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toEqual('Invalid ERC20 token');
+        });
+
+        test('return error if token is not ERC / Native', async () => {
+            const voterRewards = {
+                INVALID: { ...sampleERC20Token, address: '0x123' },
+                payouts: [
+                    {
+                        rank: 1,
+                        ERC20: { amount: '100' }
+                    }
+                ]
+            }
+
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toEqual('Invalid INVALID token');
+        });
+
+        test('return error if duplicate ranks are found', async () => {
+            const voterRewards = {
+                ETH: sampleETHToken,
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    }
+                ]
+            }
+
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toEqual('Duplicate rank 1 found at index 1, Duplicate rank 2 found at index 3');
+        });
+
+        test('return multiple errors', async () => {
+            const voterRewards = {
+                ERC20: { ...sampleERC20Token, address: '0x123' },
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    }
+                ]
+            }
+
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toEqual('Invalid ERC20 token, Duplicate rank 1 found at index 1, Duplicate rank 2 found at index 3');
+        });
+
+        test('return error if multiple tokens are defined for a single payout', async () => {
+            const voterRewards = {
+                ETH: sampleETHToken,
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' },
+                        ERC20: { amount: '100' }
+                    }
+                ]
+            }
+
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toEqual('Only one token can be defined for payout at index 0');
+        });
+
+
+        test('succeed if params are valid', async () => {
+            const voterRewards = {
+                ETH: sampleETHToken,
+                payouts: [
+                    {
+                        rank: 1,
+                        ETH: { amount: '100' }
+                    },
+                    {
+                        rank: 2,
+                        ETH: { amount: '100' }
+                    }
+                ]
+            }
+
+            const { error, voterRewards: voterRewardsResponse } = await validateVoterRewards(voterRewards);
+            expect(error).toBeUndefined();
+            expect(voterRewardsResponse).toEqual({
+                ETH: sampleETHToken,
+                payouts: voterRewards.payouts
+            });
+        });
+
+    });
+
+    describe('Validate Submitter Restrictions', () => {
+
+        test("should succeed if submitter restrictions is empty array", async () => {
+            const submitterRestrictions = []
+            const { error, submitterRestrictions: submitterRestrictionsResponse } = await validateSubmitterRestrictions(submitterRestrictions);
+            expect(error).toBeUndefined();
+            expect(submitterRestrictionsResponse).toEqual([]);
+        })
+
+        test("should return error if restriction token is invalid", async () => {
+            const submitterRestrictions = [
+                {
+                    token: sampleETHToken,
+                    threshold: '100'
+                },
+                {
+                    token: { ...sampleERC20Token, address: '0x123' },
+                    threshold: '100'
+                }
+            ]
+            const { error, submitterRestrictions: submitterRestrictionsResponse } = await validateSubmitterRestrictions(submitterRestrictions);
+            expect(error).toEqual("Invalid ERC20 token");
+        })
+
+        test("should return error if threshold is 0", async () => {
+            const submitterRestrictions = [
+                {
+                    token: sampleETHToken,
+                    threshold: '0'
+                },
+            ]
+            const { error, submitterRestrictions: submitterRestrictionsResponse } = await validateSubmitterRestrictions(submitterRestrictions);
+            expect(error).toEqual(`Invalid threshold amount at index 0`);
+        });
+
+
+        test("should return error if threshold is negative", async () => {
+            const submitterRestrictions = [
+                {
+                    token: sampleETHToken,
+                    threshold: '-10'
+                },
+            ]
+            const { error, submitterRestrictions: submitterRestrictionsResponse } = await validateSubmitterRestrictions(submitterRestrictions);
+            expect(error).toEqual(`Invalid threshold amount at index 0`);
+        });
+        test("should succeed if threshold is decimal", async () => {
+            const submitterRestrictions = [
+                {
+                    token: sampleETHToken,
+                    threshold: '10.5'
+                },
+            ]
+            const { error, submitterRestrictions: submitterRestrictionsResponse } = await validateSubmitterRestrictions(submitterRestrictions);
+            expect(error).toBeUndefined();
+            expect(submitterRestrictionsResponse).toEqual(submitterRestrictions);
+        });
+
     })
 
-})
+    describe('Validate Voting Policy', () => {
+
+        test("should return error if voting policy token is invalid", async () => {
+
+            const votingPolicy: ContestBuilderProps['votingPolicy'] = [{
+                token: { ...sampleERC20Token, address: '0x123' },
+                strategy: {
+                    type: 'arcade',
+                    votingPower: '100'
+                }
+            }]
+
+            const { error, votingPolicy: votingPolicyResponse } = await validateVotingPolicy(votingPolicy);
+            expect(error).toEqual("Invalid ERC20 token");
+        })
+
+
+        test("should return error if arcade strategy parameter is negative", async () => {
+            const votingPolicy: ContestBuilderProps['votingPolicy'] = [{
+                token: sampleERC20Token,
+                strategy: {
+                    type: 'arcade',
+                    votingPower: '-100'
+                }
+            }]
+
+            const { error, votingPolicy: votingPolicyResponse } = await validateVotingPolicy(votingPolicy);
+            expect(error).toEqual(`Invalid strategy at index 0`)
+        })
+
+
+        test("should succeed with valid arcade strategy", async () => {
+            const votingPolicy: ContestBuilderProps['votingPolicy'] = [{
+                token: sampleERC20Token,
+                strategy: {
+                    type: 'arcade',
+                    votingPower: '100'
+                }
+            }]
+
+            const { error, votingPolicy: votingPolicyResponse } = await validateVotingPolicy(votingPolicy);
+            expect(error).toBeUndefined();
+            expect(votingPolicyResponse).toEqual(votingPolicy);
+        })
+
+        test("should succeed with valid weighted strategy", async () => {
+            const votingPolicy: ContestBuilderProps['votingPolicy'] = [{
+                token: sampleERC20Token,
+                strategy: {
+                    type: 'weighted',
+                }
+            }]
+
+            const { error, votingPolicy: votingPolicyResponse } = await validateVotingPolicy(votingPolicy);
+            expect(error).toBeUndefined();
+            expect(votingPolicyResponse).toEqual(votingPolicy);
+
+        })
+
+    });
+});
+

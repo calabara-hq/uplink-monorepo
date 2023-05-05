@@ -105,38 +105,59 @@ const ContestForm = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const handleMutation = useHandleMutation(CreateContestDocument);
 
-  useEffect(() => {
-    console.log(state.errors);
-  }, [state]);
+  const handleFinalValidation = async () => {
+    const {
+      isError,
+      errors: validationErrors,
+      values,
+    } = validateAllContestBuilderProps(state);
+    if (!isError) return values;
 
-  /*
-  const [stepErrors, setStepErrors] = useState([
-    {
-      name: "type",
-      errors: state.errors.type, 
-    },
-    Object.keys(state.errors?.deadlines ?? {}).length > 0, 
-    Object.keys(state.errors?.prompt ?? {}).length > 0, 
-    state.errors.submitterRewards?.duplicateRanks?.length > 0, 
-    state.errors.voterRewards?.duplicateRanks?.length > 0, 
-    false, // submitter restrictions errors
-    state.errors.votingPolicy, // voting policy errors
-  ]);
-  */
+    // on error, set the current step to the first step with errors
+    const firstErrorStep = steps.findIndex(
+      (step) => step.errorField in validationErrors
+    );
+    setCurrentStep(firstErrorStep);
+
+    dispatch({
+      type: "setErrors",
+      payload: validationErrors,
+    });
+
+    return null;
+  };
 
   const handleFormSubmit = async () => {
-    const { isError, errors: validationErrors } =
-      validateAllContestBuilderProps(state);
-    if (isError) {
-      // set the current step to the first step with errors
-      const firstErrorStep = steps.findIndex(
-        (step) => step.errorField in validationErrors
-      );
-      setCurrentStep(firstErrorStep);
+    const values = await handleFinalValidation();
+    if (!values) return;
 
-      return dispatch({
-        type: "setErrors",
-        payload: validationErrors,
+    const contestData = {
+      ...values,
+      ens: "sharkdao.eth",
+    }
+
+    console.log(contestData)
+
+    const res = await handleMutation({
+      contestData: {
+        ens: "sharkdao.eth",
+        ...values,
+      },
+    });
+
+    if (!res) return;
+    const { errors, success } = res.data.createContest;
+
+    if (!success) {
+      toast.error(
+        "Oops, something went wrong. Please check the fields and try again."
+      );
+      console.log(errors);
+    }
+
+    if (success) {
+      toast.success("Contest created successfully!", {
+        icon: "🎉",
       });
     }
   };

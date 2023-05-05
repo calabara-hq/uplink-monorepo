@@ -86,12 +86,12 @@ type ContestErrorData
   @join__type(graph: CONTESTS)
 {
   type: String
-  deadlines: ContestDeadlineError
-  prompt: ContestPromptError
-  submitterRewards: SubmitterRewardsError
-  voterRewards: VoterRewardsError
-  submitterRestrictions: SubmitterRestrictionsError
-  votingPolicy: VotingPolicyError
+  deadlines: String
+  prompt: String
+  submitterRewards: String
+  voterRewards: String
+  submitterRestrictions: String
+  votingPolicy: String
 }
 
 type ContestMutationResponse
@@ -259,7 +259,7 @@ input RestrictionToken
   @join__type(graph: CONTESTS)
 {
   type: RestrictionTokenType!
-  address: String!
+  address: String
   symbol: String!
   decimals: Int!
   tokenId: Int
@@ -407,7 +407,6 @@ input VotingStrategy
 {
   type: VotingStrategyType!
   votingPower: Decimal
-  multiplier: Decimal
 }
 
 enum VotingStrategyType

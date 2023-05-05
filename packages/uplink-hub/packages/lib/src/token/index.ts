@@ -11,6 +11,7 @@ dotenv.config();
 
 const ERC721Interface = '0x80ac58cd';
 const ERC1155Interface = '0xd9b67a26';
+const ERC1155MetaDataURIInterface = '0xd9b67a26';
 
 const provider = new ethers.providers.AlchemyProvider('homestead', process.env.ALCHEMY_KEY);
 const validateERC20 = async (address: string) => {
@@ -91,6 +92,20 @@ export const isValidERC1155TokenId = async ({ contractAddress, tokenId }: {
         // Check if the URI is valid
         const uriRegex = new RegExp('^(https?|ipfs):\\/\\/[^\\s/$.?#].[^\\s]*$', 'i');
         return uriRegex.test(uri);
+    } catch (err) {
+        return false;
+    }
+}
+
+
+export const isERC1155TokenFungible = async ({ contractAddress, tokenId }: {
+    contractAddress: string, tokenId: number
+}) => {
+    try {
+        const tokenContract = new ethers.Contract(contractAddress, ERC1155ABI, provider);
+        const isFungible = await tokenContract.supportsInterface(ERC1155MetaDataURIInterface);
+        if (isFungible) return true;
+        return false;
     } catch (err) {
         return false;
     }

@@ -37,17 +37,21 @@ export type SubmitterRestriction = {
     threshold?: string;
 }
 
-export type VotingStrategyType = "arcade" | "weighted";
+export type ArcadeStrategy = {
+    type: "arcade";
+    votingPower?: string;
+}
+
+export type WeightedStrategy = {
+    type: "weighted";
+}
 
 
 export type VotingPolicyType = {
     token?: IToken;
-    strategy?: {
-        type: VotingStrategyType;
-        votingPower?: string;
-        multiplier?: string;
-    }
-}
+    strategy?: ArcadeStrategy | WeightedStrategy;
+} & ({ strategy: ArcadeStrategy; votingPower: string } | { strategy: WeightedStrategy });
+
 
 export interface Prompt {
     title: string;
@@ -697,7 +701,8 @@ export const validateContestType = (type: ContestBuilderProps['type']) => {
 
     return {
         isError: isError,
-        ...(isError ? { errors: { type: "Contest type is required" } } : { errors: {} })
+        ...(isError ? { errors: { type: "Contest type is required" } } : { errors: {} }),
+        value: type
     }
 }
 
@@ -745,9 +750,16 @@ export const validateContestDeadlines = (deadlines: ContestBuilderProps['deadlin
         } : {})
     }
 
+    const cleanedDeadlines = {
+        startTime: calculatedStartTime,
+        voteTime,
+        endTime
+    }
+
     return {
         errors,
         isError: isError,
+        value: cleanedDeadlines
     };
 }
 
@@ -776,7 +788,8 @@ export const validatePrompt = (prompt: ContestBuilderProps['prompt']) => {
 
     return {
         isError: isError,
-        errors: errors
+        errors: errors,
+        value: prompt
     }
 }
 
@@ -812,6 +825,7 @@ export const validateSubmitterRewards = (submitterRewards: ContestBuilderProps['
     return {
         errors,
         isError: isError,
+        value: cleanSubmitterRewards(submitterRewards)
     };
 };
 
@@ -844,6 +858,7 @@ export const validateVoterRewards = (voterRewards: ContestBuilderProps['voterRew
     return {
         errors,
         isError: isError,
+        value: cleanVoterRewards(voterRewards)
     };
 };
 
@@ -861,37 +876,47 @@ export const validateVotingPolicy = (votingPolicy: ContestBuilderProps['votingPo
     return {
         errors,
         isError: isError,
+        value: votingPolicy
     }
 }
 
 
 export const validateAllContestBuilderProps = (contestBuilderProps: ContestBuilderProps) => {
 
-    const { type, deadlines, prompt, submitterRewards, voterRewards, votingPolicy } = contestBuilderProps;
+    const { type, deadlines, prompt, submitterRewards, submitterRestrictions, voterRewards, votingPolicy } = contestBuilderProps;
 
-    const contestTypeErrors = validateContestType(type);
-    const deadlinesErrors = validateContestDeadlines(deadlines);
-    const promptErrors = validatePrompt(prompt);
-    const submitterRewardsErrors = validateSubmitterRewards(submitterRewards);
-    const voterRewardsErrors = validateVoterRewards(voterRewards);
-    const votingPolicyErrors = validateVotingPolicy(votingPolicy);
+    const contestTypeValidation = validateContestType(type);
+    const deadlineValidation = validateContestDeadlines(deadlines);
+    const promptValidation = validatePrompt(prompt);
+    const subRewardValidation = validateSubmitterRewards(submitterRewards);
+    const voterRewardValidation = validateVoterRewards(voterRewards);
+    const votingPolicyValidation = validateVotingPolicy(votingPolicy);
 
-    const isError = contestTypeErrors.isError || deadlinesErrors.isError || promptErrors.isError || submitterRewardsErrors.isError || voterRewardsErrors.isError || votingPolicyErrors.isError;
+    const isError = contestTypeValidation.isError || deadlineValidation.isError || promptValidation.isError || subRewardValidation.isError || voterRewardValidation.isError || votingPolicyValidation.isError;
 
     const errors = {
         ...(isError ? {
-            ...(contestTypeErrors.isError ? contestTypeErrors.errors : {}),
-            ...(deadlinesErrors.isError ? deadlinesErrors.errors : {}),
-            ...(promptErrors.isError ? promptErrors.errors : {}),
-            ...(submitterRewardsErrors.isError ? submitterRewardsErrors.errors : {}),
-            ...(voterRewardsErrors.isError ? voterRewardsErrors.errors : {}),
-            ...(votingPolicyErrors.isError ? votingPolicyErrors.errors : {}),
+            ...(contestTypeValidation.isError ? contestTypeValidation.errors : {}),
+            ...(deadlineValidation.isError ? deadlineValidation.errors : {}),
+            ...(promptValidation.isError ? promptValidation.errors : {}),
+            ...(subRewardValidation.isError ? subRewardValidation.errors : {}),
+            ...(voterRewardValidation.isError ? voterRewardValidation.errors : {}),
+            ...(votingPolicyValidation.isError ? votingPolicyValidation.errors : {}),
         } : {})
     }
 
     return {
         errors,
         isError: isError,
+        values: {
+            type: contestTypeValidation.value,
+            deadlines: deadlineValidation.value,
+            prompt: promptValidation.value,
+            submitterRewards: subRewardValidation.value,
+            voterRewards: voterRewardValidation.value,
+            submitterRestrictions: submitterRestrictions,
+            votingPolicy: votingPolicyValidation.value
+        }
     }
 }
 
