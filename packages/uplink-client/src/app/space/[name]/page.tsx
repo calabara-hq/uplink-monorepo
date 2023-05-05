@@ -4,18 +4,18 @@ import Link from "next/link";
 
 // return the space data and contests
 
-const getSpace = async (id: string) => {
-  console.log("ID is", id);
-  const results = await graphqlClient.query(SpaceDocument, { id }).toPromise();
+const getSpace = async (name: string) => {
+  const results = await graphqlClient
+    .query(SpaceDocument, { name })
+    .toPromise();
   if (results.error) throw new Error(results.error.message);
   if (!results.data.space) throw new Error("Space not found");
   return results.data;
 };
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: { name: string } }) {
   try {
-    const spaceData = await getSpace(params.id);
-    console.log(spaceData);
+    const spaceData = await getSpace(params.name);
     const { space, spaceContests } = spaceData;
     return (
       <div>
@@ -23,9 +23,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           edit space
         </Link>
         <br></br>
-        <Link href={'/contestbuilder/create'}>
-          create contest
-        </Link>
+        <Link href={"/contestbuilder/create"}>create contest</Link>
         <pre className="text-white">{JSON.stringify(spaceData, null, 2)}</pre>
       </div>
     );

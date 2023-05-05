@@ -44,7 +44,7 @@ const queries = {
 const contests = [
     {
         id: "1",
-        spaceId: 7,
+        spaceId: "1",
         tag: "test",
         start: "1",
         vote: "1",

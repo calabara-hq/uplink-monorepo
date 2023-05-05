@@ -1,4 +1,5 @@
 import {
+  ArcadeStrategy,
   arraysSubtract,
   ContestBuilderProps,
   VotingPolicyType,
@@ -7,7 +8,7 @@ import TokenModal, { TokenManager } from "../TokenModal/TokenModal";
 import { BlockWrapper } from "./ContestForm";
 import { IToken } from "@/types/token";
 import { SubmitterRestriction } from "@/app/contestbuilder/contestHandler";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
 import InfoAlert from "../InfoAlert/InfoAlert";
@@ -31,6 +32,10 @@ const VotingPolicy = ({
     setEditIndex(index);
     setIsTokenModalOpen(true);
   };
+
+  useEffect(() => {
+    console.log("votingPolicy", state.votingPolicy);
+  }, [state.votingPolicy]);
 
   return (
     <BlockWrapper title="Voting Policy">
@@ -73,9 +78,8 @@ const VotingPolicy = ({
                           {policy?.strategy?.type}
                         </p>
                         <p>
-                          {policy?.strategy?.type === "arcade"
-                            ? policy?.strategy?.votingPower
-                            : policy?.strategy?.multiplier}{" "}
+                          {policy?.strategy?.type === "arcade" &&
+                            policy?.strategy?.votingPower}
                         </p>
                         <button
                           className="btn btn-sm btn-ghost link"
@@ -125,58 +129,6 @@ const VotingPolicy = ({
   );
 };
 
-const initialPolicyState: VotingPolicyType = {};
-
-type PolicyAction =
-  | { type: "setToken"; payload: { token: IToken } }
-  | {
-      type: "setStrategyType";
-      payload: { strategyType: "arcade" | "weighted" };
-    }
-  | { type: "setStrategyParameter"; payload: { value: string } };
-
-const policyReducer = (
-  state: VotingPolicyType,
-  action: PolicyAction
-): VotingPolicyType => {
-  switch (action.type) {
-    case "setToken":
-      return {
-        ...state,
-        token: action.payload.token,
-      };
-    case "setStrategyType":
-      if (state.strategy?.type === action.payload.strategyType) {
-        return state;
-      }
-      return {
-        ...state,
-        strategy: {
-          type: action.payload.strategyType,
-          ...(action.payload.strategyType === "arcade"
-            ? { votingPower: state.strategy?.multiplier || "" }
-            : { multiplier: state.strategy?.votingPower || "" }),
-        },
-      };
-    case "setStrategyParameter":
-      if (state.strategy) {
-        return {
-          ...state,
-          strategy: {
-            ...state.strategy,
-            ...(state.strategy.type === "arcade"
-              ? { votingPower: action.payload.value }
-              : { multiplier: action.payload.value }),
-          },
-        };
-      } else {
-        return state;
-      }
-    default:
-      return state;
-  }
-};
-
 // extend the token manager with policy specific options
 
 const VotingPolicyManager = ({
@@ -194,18 +146,49 @@ const VotingPolicyManager = ({
 }) => {
   const isEdit = typeof editIndex === "number";
 
-  const [currentPolicy, setCurrentPolicy] = useReducer(
-    policyReducer,
-    isEdit ? state.votingPolicy[editIndex] : initialPolicyState
+  const [strategyToken, setStrategyToken] = useState<IToken | null>(
+    isEdit ? state.votingPolicy[editIndex]?.token ?? null : null
   );
+
+  const [selectedStrategy, setSelectedStrategy] = useState<
+    "arcade" | "weighted" | null
+  >(isEdit ? state.votingPolicy[editIndex].strategy?.type || null : null);
+
+  const [votingPower, setVotingPower] = useState<string>(
+    isEdit && selectedStrategy === "arcade"
+      ? (state.votingPolicy[editIndex]?.strategy as ArcadeStrategy)
+          ?.votingPower ?? ""
+      : ""
+  );
+
   const [progress, setProgress] = useState(isEdit ? 1 : 0);
 
   const saveTokenCallback = (token: IToken) => {
-    setCurrentPolicy({
-      type: "setToken",
-      payload: { token: token },
-    });
+    setStrategyToken(token);
     setProgress(1);
+  };
+
+  const handleSubmitStrategy = () => {
+    const policy = {
+      token: strategyToken,
+      strategy: {
+        type: selectedStrategy,
+        ...(selectedStrategy === "arcade" ? { votingPower: votingPower } : {}),
+      },
+    };
+
+    if (isEdit) {
+      dispatch({
+        type: "updateVotingPolicy",
+        payload: { index: editIndex, policy: policy },
+      });
+    } else {
+      dispatch({
+        type: "addVotingPolicy",
+        payload: { policy: policy },
+      });
+    }
+    setIsModalOpen(false);
   };
 
   if (progress === 0)
@@ -213,8 +196,13 @@ const VotingPolicyManager = ({
       <TokenManager
         setIsModalOpen={setIsModalOpen}
         saveCallback={saveTokenCallback}
-        existingTokens={null}
-        quickAddTokens={state.spaceTokens}
+        existingTokens={state.votingPolicy.map(
+          (policy) => policy.token as IToken
+        )}
+        quickAddTokens={arraysSubtract(
+          state.spaceTokens,
+          state.votingPolicy.map((policy) => policy.token as IToken)
+        )}
         continuous={true}
         uniqueStandard={false}
       />
@@ -224,29 +212,16 @@ const VotingPolicyManager = ({
     return (
       <>
         <StrategyManager
-          currentPolicy={currentPolicy}
-          setCurrentPolicy={setCurrentPolicy}
+          selectedStrategy={selectedStrategy}
+          setSelectedStrategy={setSelectedStrategy}
+          votingPower={votingPower}
+          setVotingPower={setVotingPower}
         />
         <ModalActions
           onCancel={() => setIsModalOpen(false)}
-          onConfirm={() => {
-            isEdit
-              ? dispatch({
-                  type: "updateVotingPolicy",
-                  payload: {
-                    policy: currentPolicy,
-                    index: editIndex,
-                  },
-                })
-              : dispatch({
-                  type: "addVotingPolicy",
-                  payload: {
-                    policy: currentPolicy,
-                  },
-                });
-            setIsModalOpen(false);
-          }}
+          onConfirm={handleSubmitStrategy}
           confirmLabel="confirm"
+          confirmDisabled={selectedStrategy === "arcade" ? !votingPower : false}
         />
       </>
     );
@@ -255,19 +230,18 @@ const VotingPolicyManager = ({
 };
 
 const StrategyManager = ({
-  currentPolicy,
-  setCurrentPolicy,
+  selectedStrategy,
+  setSelectedStrategy,
+  votingPower,
+  setVotingPower,
 }: {
-  currentPolicy: VotingPolicyType;
-  setCurrentPolicy: React.Dispatch<any>;
+  selectedStrategy: "arcade" | "weighted" | null;
+  setSelectedStrategy: any;
+  votingPower: string;
+  setVotingPower: any;
 }) => {
   const handleStrategyChange = (strategyType: string) => {
-    setCurrentPolicy({
-      type: "setStrategyType",
-      payload: {
-        strategyType: strategyType === "arcade" ? "arcade" : "weighted",
-      },
-    });
+    setSelectedStrategy(strategyType);
   };
 
   return (
@@ -277,7 +251,7 @@ const StrategyManager = ({
         <div className="flex justify-around items-center bg-base-100 rounded-lg">
           <button
             className={`${
-              currentPolicy?.strategy?.type === "arcade"
+              selectedStrategy === "arcade"
                 ? "btn btn-lg btn-active btn-accent"
                 : "btn btn-lg btn-outline"
             } px-4 py-2 rounded-md`}
@@ -291,7 +265,7 @@ const StrategyManager = ({
 
           <button
             className={`${
-              currentPolicy?.strategy?.type === "weighted"
+              selectedStrategy === "weighted"
                 ? "btn btn-lg btn-active btn-accent"
                 : "btn btn-lg btn-outline"
             } px-4 py-2 rounded-md`}
@@ -303,8 +277,9 @@ const StrategyManager = ({
       </div>
       <div className="flex flex-col gap-4">
         <StrategyParameterInput
-          currentPolicy={currentPolicy}
-          setCurrentPolicy={setCurrentPolicy}
+          votingPower={votingPower}
+          setVotingPower={setVotingPower}
+          selectedStrategy={selectedStrategy}
         />
       </div>
     </div>
@@ -312,48 +287,33 @@ const StrategyManager = ({
 };
 
 const StrategyParameterInput = ({
-  currentPolicy,
-  setCurrentPolicy,
+  votingPower,
+  setVotingPower,
+  selectedStrategy,
 }: {
-  currentPolicy: VotingPolicyType;
-  setCurrentPolicy: React.Dispatch<any>;
+  votingPower: string;
+  setVotingPower: any;
+  selectedStrategy: "arcade" | "weighted" | null;
 }) => {
-  console.log(currentPolicy);
   const handleParameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentPolicy({
-      type: "setStrategyParameter",
-      payload: { value: e.target.value },
-    });
+    setVotingPower(e.target.value);
   };
 
-  if (currentPolicy?.strategy?.type === "arcade") {
+  if (selectedStrategy === "arcade") {
     return (
       <>
         <label className="font-medium ">Voting Power</label>
         <input
           className="input input-bordered w-full max-w-xs"
           type="number"
-          value={currentPolicy?.strategy?.votingPower || ""}
-          onChange={handleParameterChange}
-        />
-        <p>Defines a uniform numbers of credits alloted to each participant</p>
-      </>
-    );
-  }
-  if (currentPolicy?.strategy?.type === "weighted") {
-    return (
-      <>
-        <label className="font-medium">Multiplier</label>
-        <input
-          className="input input-bordered w-full max-w-xs"
-          type="number"
-          value={currentPolicy?.strategy?.multiplier || ""}
+          value={votingPower || ""}
           onChange={handleParameterChange}
         />
         <p>Voting credits are based on ETH or ERC-20 holdings.</p>
       </>
     );
   }
+
   return null;
 };
 

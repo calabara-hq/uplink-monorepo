@@ -1,0 +1,363 @@
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION) {
+  query: Query
+  mutation: Mutation
+}
+
+directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+directive @join__field(
+  graph: join__Graph
+  requires: join__FieldSet
+  provides: join__FieldSet
+  type: String
+  external: Boolean
+  override: String
+  usedOverridden: Boolean
+) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(
+  graph: join__Graph!
+  interface: String!
+) repeatable on OBJECT | INTERFACE
+
+directive @join__type(
+  graph: join__Graph!
+  key: join__FieldSet
+  extension: Boolean! = false
+  resolvable: Boolean! = true
+  isInterfaceObject: Boolean! = false
+) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @join__unionMember(
+  graph: join__Graph!
+  member: String!
+) repeatable on UNION
+
+directive @link(
+  url: String
+  as: String
+  for: link__Purpose
+  import: [link__Import]
+) repeatable on SCHEMA
+
+type ActiveContest @join__type(graph: CONTESTS) {
+  id: Int!
+  spaceId: Int!
+  tag: String!
+  start: String!
+  vote: String!
+  end: String!
+  created: String!
+  spaceLink: Space!
+}
+
+type Admin @join__type(graph: SPACES) {
+  id: Int!
+  spaceId: Int!
+  address: String!
+}
+
+input authDataInput @join__type(graph: USER) {
+  message: String!
+  signature: String!
+}
+
+type Contest @join__type(graph: CONTESTS, key: "id") {
+  id: Int!
+  spaceId: Int!
+  spaceName: String!
+  tag: String!
+  start: String!
+  vote: String!
+  end: String!
+  created: String!
+}
+
+input ContestBuilderProps @join__type(graph: CONTESTS) {
+  ens: String!
+  type: ContestType!
+  deadlines: Deadlines!
+  prompt: Prompt!
+  submitterRewards: SubmitterRewards!
+  voterRewards: VoterRewards!
+  submitterRestrictions: [SubmitterRestriction!]!
+  votingPolicy: [VotingPolicy!]!
+}
+
+type ContestDeadlineError @join__type(graph: CONTESTS) {
+  startTime: String
+  voteTime: String
+  endTime: String
+}
+
+type ContestErrorData @join__type(graph: CONTESTS) {
+  type: String
+  deadlines: String
+  prompt: String
+  submitterRewards: String
+  voterRewards: String
+  submitterRestrictions: String
+  votingPolicy: String
+}
+
+type ContestMutationResponse @join__type(graph: CONTESTS) {
+  success: Boolean!
+  errors: ContestErrorData
+}
+
+type ContestPromptError @join__type(graph: CONTESTS) {
+  title: String
+  body: String
+  coverUrl: String
+}
+
+enum ContestType @join__type(graph: CONTESTS) {
+  standard @join__enumValue(graph: CONTESTS)
+  twitter @join__enumValue(graph: CONTESTS)
+}
+
+input Deadlines @join__type(graph: CONTESTS) {
+  startTime: ISODateString!
+  voteTime: ISODateString!
+  endTime: ISODateString!
+}
+
+scalar Decimal @join__type(graph: CONTESTS)
+
+scalar EditorData @join__type(graph: CONTESTS)
+
+enum ERCTokenType @join__type(graph: CONTESTS) {
+  ERC20 @join__enumValue(graph: CONTESTS)
+  ERC721 @join__enumValue(graph: CONTESTS)
+  ERC1155 @join__enumValue(graph: CONTESTS)
+}
+
+input FungiblePayout @join__type(graph: CONTESTS) {
+  amount: Decimal!
+}
+
+input IERCToken @join__type(graph: CONTESTS) {
+  type: ERCTokenType!
+  address: String!
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
+}
+
+input INativeToken @join__type(graph: CONTESTS) {
+  type: NativeTokenType!
+  symbol: NativeTokenType!
+  decimals: Int!
+}
+
+input IPayout @join__type(graph: CONTESTS) {
+  rank: Int!
+  ETH: FungiblePayout
+  ERC20: FungiblePayout
+  ERC721: NonFungiblePayout
+  ERC1155: FungiblePayout
+}
+
+scalar IpfsUrl @join__type(graph: CONTESTS) @join__type(graph: SPACES)
+
+scalar ISODateString @join__type(graph: CONTESTS)
+
+scalar join__FieldSet
+
+enum join__Graph {
+  CONTESTS @join__graph(name: "contests", url: "http://localhost:4003/graphql")
+  SPACES @join__graph(name: "spaces", url: "http://localhost:4002/graphql")
+  SUBMISSIONS
+    @join__graph(name: "submissions", url: "http://localhost:4004/graphql")
+  USER @join__graph(name: "user", url: "http://localhost:4005/graphql")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+type Mutation
+  @join__type(graph: CONTESTS)
+  @join__type(graph: SPACES)
+  @join__type(graph: USER) {
+  createContest(contestData: ContestBuilderProps!): ContestMutationResponse!
+    @join__field(graph: CONTESTS)
+  createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse!
+    @join__field(graph: SPACES)
+  editSpace(
+    spaceId: ID!
+    spaceData: SpaceBuilderInput!
+  ): SpaceMutationResponse! @join__field(graph: SPACES)
+  signIn(authData: authDataInput): signInResponse! @join__field(graph: USER)
+}
+
+enum NativeTokenType @join__type(graph: CONTESTS) {
+  ETH @join__enumValue(graph: CONTESTS)
+}
+
+type NonceResult @join__type(graph: USER) {
+  nonce: Int!
+}
+
+input NonFungiblePayout @join__type(graph: CONTESTS) {
+  tokenId: Int!
+}
+
+input Prompt @join__type(graph: CONTESTS) {
+  title: String!
+  body: EditorData!
+  coverUrl: IpfsUrl
+}
+
+type Query
+  @join__type(graph: CONTESTS)
+  @join__type(graph: SPACES)
+  @join__type(graph: SUBMISSIONS)
+  @join__type(graph: USER) {
+  contest(contestId: Int!): Contest! @join__field(graph: CONTESTS)
+  activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
+  space(id: ID, name: String): Space @join__field(graph: SPACES)
+  spaces: [Space!]! @join__field(graph: SPACES)
+  submissions(contestId: Int!): [Submission!]! @join__field(graph: SUBMISSIONS)
+  submission(submissionId: Int!): Submission! @join__field(graph: SUBMISSIONS)
+  me: User! @join__field(graph: USER)
+  generateNonce: NonceResult! @join__field(graph: USER)
+}
+
+input RestrictionToken @join__type(graph: CONTESTS) {
+  type: RestrictionTokenType!
+  address: String
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
+}
+
+enum RestrictionTokenType @join__type(graph: CONTESTS) {
+  ETH @join__enumValue(graph: CONTESTS)
+  ERC20 @join__enumValue(graph: CONTESTS)
+  ERC721 @join__enumValue(graph: CONTESTS)
+  ERC1155 @join__enumValue(graph: CONTESTS)
+}
+
+type signInResponse @join__type(graph: USER) {
+  code: Int!
+  success: Boolean!
+  message: String!
+}
+
+type Space
+  @join__type(graph: CONTESTS, key: "id")
+  @join__type(graph: SPACES, key: "id") {
+  id: ID!
+  contests: [Contest!]! @join__field(graph: CONTESTS)
+  name: String! @join__field(graph: SPACES)
+  displayName: String! @join__field(graph: SPACES)
+  members: Int! @join__field(graph: SPACES)
+  logoUrl: String! @join__field(graph: SPACES)
+  twitter: String @join__field(graph: SPACES)
+  website: String @join__field(graph: SPACES)
+  admins: [Admin!]! @join__field(graph: SPACES)
+}
+
+type SpaceBuilderErrors @join__type(graph: SPACES) {
+  name: String
+  logoUrl: String
+  website: String
+  twitter: String
+  admins: String
+}
+
+input SpaceBuilderInput @join__type(graph: SPACES) {
+  name: String!
+  logoUrl: IpfsUrl!
+  website: String
+  twitter: String
+  admins: [String!]!
+}
+
+type SpaceMutationResponse @join__type(graph: SPACES) {
+  spaceName: String
+  success: Boolean!
+  errors: SpaceBuilderErrors
+}
+
+type Submission @join__type(graph: SUBMISSIONS, key: "id") {
+  id: Int!
+  contestId: Int!
+  author: String!
+  url: String!
+  created: String!
+}
+
+input SubmitterRestriction @join__type(graph: CONTESTS) {
+  token: RestrictionToken
+  threshold: Decimal
+}
+
+type SubmitterRestrictionsError @join__type(graph: CONTESTS) {
+  tokens: String
+  thresholds: String
+}
+
+input SubmitterRewards @join__type(graph: CONTESTS) {
+  ETH: INativeToken
+  ERC20: IERCToken
+  ERC721: IERCToken
+  ERC1155: IERCToken
+  payouts: [IPayout!]
+}
+
+type SubmitterRewardsError @join__type(graph: CONTESTS) {
+  tokens: String
+  payouts: String
+}
+
+type User @join__type(graph: USER, key: "address") {
+  address: ID!
+  isAuthenticated: Boolean!
+}
+
+input VoterRewards @join__type(graph: CONTESTS) {
+  ETH: INativeToken
+  ERC20: IERCToken
+  payouts: [IPayout!]
+}
+
+type VoterRewardsError @join__type(graph: CONTESTS) {
+  tokens: String
+  payouts: String
+}
+
+input VotingPolicy @join__type(graph: CONTESTS) {
+  token: RestrictionToken!
+  strategy: VotingStrategy!
+}
+
+type VotingPolicyError @join__type(graph: CONTESTS) {
+  tokens: String
+  strategies: String
+}
+
+input VotingStrategy @join__type(graph: CONTESTS) {
+  type: VotingStrategyType!
+  votingPower: Decimal
+}
+
+enum VotingStrategyType @join__type(graph: CONTESTS) {
+  arcade @join__enumValue(graph: CONTESTS)
+  weighted @join__enumValue(graph: CONTESTS)
+}

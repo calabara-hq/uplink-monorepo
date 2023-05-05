@@ -1,10 +1,183 @@
 import { validateEthAddress } from "../utils/ethAddress.js";
-import { _prismaClient } from "lib";
-export type FieldResponse = {
-    value: string;
-    error: string;
+import { _prismaClient, SpaceProps } from "lib";
+
+// validate space name
+export const validateSpaceName = async (name: SpaceProps["name"], spaceId?: string) => {
+    const response: {
+        error?: string;
+        value: string;
+    } = {
+        value: name?.trim(),
+    };
+
+    const isNewSpace = !spaceId;
+
+    if (!response.value) {
+        response.error = "Name is required";
+        return response;
+    }
+
+    const nameLength = response.value.length;
+
+    if (nameLength < 3) {
+        response.error = "Name must be at least 3 characters";
+    } else if (nameLength > 30) {
+        response.error = "Name must be less than 30 characters";
+    } else if (!response.value.match(/^[a-zA-Z0-9_ ]+$/)) {
+        response.error = "Name must only contain alphanumeric characters and underscores";
+    }
+
+    const dbFormattedName = response.value.replace(' ', '').toLowerCase();
+    const where = {
+        name: dbFormattedName,
+        ...(!isNewSpace ? { id: { not: parseInt(spaceId) } } : {}),
+    };
+
+    // check if the name is already taken
+    const spaces = await _prismaClient.space.findMany({
+        where: where,
+    });
+
+    if (spaces.length > 0) {
+        response.error = "Name is already taken";
+        return response;
+    }
+
+    return response;
+};
+
+// validate space logo
+export const validateSpaceLogo = (logoUrl: SpaceProps["logoUrl"]) => {
+    const response: {
+        error?: string;
+        value: string;
+    } = {
+        value: logoUrl?.trim(),
+    };
+
+    if (!response.value) {
+        response.error = "Logo is required";
+        return response;
+    }
+
+    const pattern = /^(https:\/\/(?:[a-z0-9]+\.(?:ipfs|ipns)\.[a-z]+|cloudflare-ipfs\.com\/ipfs\/[a-zA-Z0-9]+|cloud\.ipfs\.io\/ipfs\/[a-zA-Z0-9]+|ipfs\.infura\.io\/ipfs\/[a-zA-Z0-9]+|dweb\.link\/ipfs\/[a-zA-Z0-9]+|ipfs\.fsi\.cloud\/ipfs\/[a-zA-Z0-9]+|ipfs\.runfission\.com\/ipfs\/[a-zA-Z0-9]+|calabara\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+)|ipfs:\/\/[a-zA-Z0-9]+)/;
+
+    if (!pattern.test(response.value)) {
+        response.error = "Logo is not valid";
+    }
+
+    return response;
+};
+
+export const validateSpaceWebsite = (website: SpaceProps["website"]) => {
+
+    const response: {
+        value?: string;
+        error?: string;
+    } = {}
+
+    if (!website) return response;
+
+    const trimmedWebsite = website.trim();
+
+    const pattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]+)\.([a-z]{2,})(\.[a-z]{2,})?$/;
+
+    if (!pattern.test(trimmedWebsite)) {
+        response.error = "Website is not valid"
+        return response
+    }
+
+    response.value = trimmedWebsite;
+    return response
+
 }
 
+export const validateSpaceTwitter = (twitter: SpaceProps["twitter"]) => {
+
+    const response: {
+        value?: string;
+        error?: string;
+    } = {}
+
+    if (!twitter) return response;
+
+    const trimmedTwitter = twitter.trim();
+
+    const pattern = /^@(\w){1,15}$/;
+    if (!pattern.test(trimmedTwitter)) {
+        response.error = "Twitter handle is not valid"
+        return response
+    }
+
+    response.value = trimmedTwitter;
+    return response
+
+}
+
+export const validateSpaceAdmins = async (admins: SpaceProps["admins"]) => {
+    const response: {
+        addresses: string[];
+        error?: string;
+    } = {
+        addresses: [],
+    };
+
+    type adminField = {
+        value: string,
+        error: string | null
+    };
+
+    if (!admins || admins.length === 0) {
+        response.error = "Admins are required";
+        return response;
+    }
+
+    const adminFields = await Promise.all(
+        admins.map(async (admin, index) => {
+            if (!admin || admin.length === 0) {
+                return null;
+            }
+
+            const cleanAddress = await validateEthAddress(admin);
+
+            if (!cleanAddress) {
+                return { value: admin, error: `invalid address at index ${index}` };
+            }
+
+            return { value: cleanAddress, error: null };
+        })
+    );
+
+    // store errors first so that indexes match with the passed values before cleaning
+    // Accumulate error messages into a single string
+
+    const errors = adminFields.reduce((acc, field) => {
+        if (field && field.error) {
+            acc += (acc ? ", " : "") + field.error;
+        }
+        return acc;
+    }, "");
+
+    if (errors) {
+        response.error = errors;
+    }
+
+    const uniqueAdminFields = adminFields.reduce((acc: adminField[], field) => {
+        if (field && !acc.some(item => item.value === field.value)) {
+            acc.push(field);
+        }
+        return acc;
+    }, []);
+
+    response.addresses = uniqueAdminFields
+        .filter((field): field is adminField => field && field.error === null)
+        .map(field => field.value);
+
+    return response;
+};
+
+
+/*
 export const validateSpaceEns = async (ens: string): Promise<FieldResponse> => {
     const fields: FieldResponse = { value: ens, error: null };
     if (!fields.value) {
@@ -33,126 +206,4 @@ export const validateSpaceEns = async (ens: string): Promise<FieldResponse> => {
 
     return fields;
 }
-
-
-// validate space name
-export const validateSpaceName = async (name: string): Promise<FieldResponse> => {
-    const fields: FieldResponse = { value: name, error: null };
-
-    if (!fields.value) {
-        fields.error = "Space name cannot be empty"
-        return fields
-    }
-
-
-    fields.value = fields.value.trim()
-
-
-    if (fields.value.length < 3) {
-        fields.error = "Space name must be at least 3 characters";
-        return fields
-    }
-
-    if (fields.value.length > 30) {
-        fields.error = "Space name is too long";
-        return fields
-    }
-
-    return fields;
-}
-
-// validate space logo
-export const validateSpaceLogo = (logo_url: string): FieldResponse => {
-    const fields: FieldResponse = { value: logo_url, error: null };
-
-    if (!fields.value) {
-        fields.error = "Space logo cannot be empty"
-        return fields
-    }
-
-    fields.value = fields.value.trim();
-    const isIpfsLogo = fields.value.match(/https:\/\/calabara.mypinata.cloud\/ipfs\/Qm[a-zA-Z0-9]{44}/);
-
-    if (!isIpfsLogo) {
-        fields.error = "Space logo is not valid";
-    }
-
-    return fields;
-}
-
-export const validateSpaceWebsite = (website: string) => {
-    const fields: FieldResponse = { value: website, error: null };
-    // valid websites include https://, http://, and no protocol
-    if (!fields.value) return fields;
-    fields.value = fields.value.trim();
-
-    if (fields.value.length > 50) {
-        fields.error = "Website is too long";
-        return fields
-    }
-
-    if (fields.value.length > 0) {
-        const isWebsite = fields.value.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/);
-        if (!isWebsite) {
-            fields.error = "Website is not valid";
-        }
-    }
-
-    return fields;
-}
-
-export const validateSpaceTwitter = (twitter: string) => {
-    const fields: FieldResponse = { value: twitter, error: null };
-    if (!fields.value) return fields;
-    fields.value = fields.value.trim();
-
-    if (fields.value.length > 15) {
-        fields.error = "Twitter handle is too long";
-        return fields
-    }
-
-    if (fields.value.length > 0) {
-        const isTwitter = fields.value.match(/^@(\w){1,15}$/);
-        if (!isTwitter) {
-            fields.error = "Twitter handle is not valid";
-        }
-    }
-    return fields;
-}
-
-export const validateSpaceAdmins = async (admins: string[]) => {
-    let topLevelAdminsError = null;
-
-    if (!admins) return { topLevelAdminsError: "Admins cannot be empty", errors: [], addresses: [] }
-
-    const promises = admins.map(async (admin) => {
-        const field: FieldResponse = { value: admin, error: null };
-
-        if (!field.value || field.value.length === 0) return undefined; // remove empty fields
-
-        const cleanAddress = await validateEthAddress(field.value);
-
-        if (!cleanAddress) {
-            field.error = "invalid address";
-            topLevelAdminsError = "1 or more admin fields are invalid"
-            return field
-        }
-
-        field.value = cleanAddress;
-        return field;
-    })
-
-
-    // filter out undefined and duplicates from filteredAdmins.
-    const filteredAdmins = await (await Promise.all(promises)).filter((value, index, self) => {
-        return value !== undefined && self.findIndex(v => v && v.value === value.value) === index;
-    });
-
-    // store all errors and addresses in unique arrays
-    const errors = filteredAdmins.map(admin => admin.error);
-    const addresses = filteredAdmins.map(admin => admin.value);
-
-    if (addresses.length < 1) return { topLevelAdminsError: "Admins cannot be empty", errors: [], addresses: [] }
-
-    return { topLevelAdminsError, errors, addresses }
-}
+*/

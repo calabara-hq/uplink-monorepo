@@ -6,10 +6,15 @@ import {
   useRef,
   useCallback,
   ReactNode,
+  Fragment,
+  useMemo,
 } from "react";
 import {
   ContestBuilderProps,
+  cleanSubmitterRewards,
+  cleanVoterRewards,
   reducer,
+  validateAllContestBuilderProps,
   validateStep,
 } from "@/app/contestbuilder/contestHandler";
 import StandardPrompt from "./StandardPrompt";
@@ -21,6 +26,10 @@ import SubmitterRestrictions from "./SubmitterRestrictions";
 import VotingPolicy from "./VotingPolicy";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import { AnimatePresence, motion } from "framer-motion";
+import useHandleMutation from "@/hooks/useHandleMutation";
+import { CreateContestDocument } from "@/lib/graphql/contests.gql";
+import { toast } from "react-hot-toast";
 
 export const BlockWrapper = ({
   title,
@@ -37,27 +46,19 @@ export const BlockWrapper = ({
   );
 };
 
-const ContestSchema = Yup.object<ContestBuilderProps>({
-  type: Yup.string().nullable().required("Required"),
-  startTime: Yup.string().required("Required"),
-  voteTime: Yup.string().required("Required"),
-  endTime: Yup.string().required("Required"),
-  contestPromptTitle: Yup.string().required("Required"),
-  contestPromptBody: Yup.string().required("Required"),
-  submitterRestrictions: Yup.array().required("Required"),
-  votingPolicy: Yup.array().required("Required"),
-});
-
 const initialState = {
   type: null,
-  startTime: new Date(Date.now()).toISOString().slice(0, -5) + "Z",
-  voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
-  endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+  deadlines: {
+    startTime: "now",
+    voteTime: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, -5) + "Z",
+    endTime: new Date(Date.now() + 4 * 864e5).toISOString().slice(0, -5) + "Z",
+  },
 
-  contestPromptTitle: "",
-  contestPromptBody: "",
-  media_blob: null,
-  media_url: null,
+  prompt: {
+    title: "",
+    body: null,
+  },
+
   spaceTokens: [
     {
       type: "ETH",
@@ -91,89 +92,126 @@ const initialState = {
     },
   ],
   submitterRewards: {},
-  voterRewards: {
-    payouts: [
-      {
-        rank: 1,
-      },
-    ],
-  },
+  voterRewards: {},
   submitterRestrictions: [],
   votingPolicy: [],
 
-  errors: {
-    contestPromptTitle: null,
-    contestPromptBody: null,
-    media_url: null,
-    subRewards: {
-      duplicateRanks: [],
-    },
-  },
-  /*
-  submitterRewards: [],
-  voterRewards: [],
-  submitterRestrictions: [],
-  voterRestrictions: [],
-  votingPolicy: "",
-  */
+  errors: {},
 } as ContestBuilderProps;
 
 const ContestForm = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const handleMutation = useHandleMutation(CreateContestDocument);
+
+  const handleFinalValidation = async () => {
+    const {
+      isError,
+      errors: validationErrors,
+      values,
+    } = validateAllContestBuilderProps(state);
+    if (!isError) return values;
+
+    // on error, set the current step to the first step with errors
+    const firstErrorStep = steps.findIndex(
+      (step) => step.errorField in validationErrors
+    );
+    setCurrentStep(firstErrorStep);
+
+    dispatch({
+      type: "setErrors",
+      payload: validationErrors,
+    });
+
+    return null;
+  };
+
+  const handleFormSubmit = async () => {
+    const values = await handleFinalValidation();
+    if (!values) return;
+
+    const contestData = {
+      ...values,
+      ens: "sharkdao.eth",
+    }
+
+    console.log(contestData)
+
+    const res = await handleMutation({
+      contestData: {
+        ens: "sharkdao.eth",
+        ...values,
+      },
+    });
+
+    if (!res) return;
+    const { errors, success } = res.data.createContest;
+
+    if (!success) {
+      toast.error(
+        "Oops, something went wrong. Please check the fields and try again."
+      );
+      console.log(errors);
+    }
+
+    if (success) {
+      toast.success("Contest created successfully!", {
+        icon: "🎉",
+      });
+    }
+  };
 
   const steps = [
     {
       name: "Contest Type",
       component: <ContestType state={state} dispatch={dispatch} />,
-      errors: state.errors.type,
+      errorField: "type",
     },
     {
       name: "Deadlines",
       component: <Deadlines state={state} dispatch={dispatch} />,
-      errors:
-        state.errors.startTime || state.errors.voteTime || state.errors.endTime,
+      errorField: "deadlines",
     },
     {
       name: "Standard Prompt",
       component: <StandardPrompt state={state} dispatch={dispatch} />,
+      errorField: "prompt",
     },
     {
       name: "Submitter Rewards",
       component: (
         <SubmitterRewardsComponent state={state} dispatch={dispatch} />
       ),
-      errors: state.errors.subRewards?.duplicateRanks?.length > 0,
+      errorField: "submitterRewards",
     },
     {
       name: "Voter Rewards",
       component: <VoterRewardsComponent state={state} dispatch={dispatch} />,
+      errorField: "voterRewards",
     },
     {
       name: "Restrictions",
       component: <SubmitterRestrictions state={state} dispatch={dispatch} />,
+      errorField: "submitterRestrictions",
     },
     {
       name: "Voting Policy",
       component: <VotingPolicy state={state} dispatch={dispatch} />,
+      errorField: "votingPolicy",
+    },
+    {
+      errorField: "none",
     },
   ];
 
-  const handleSubmit = async () => {
-    const contest = {
-      ...state,
-    };
-    console.log(contest);
-  };
-
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      const errors = validateStep(state, currentStep);
-      console.log(errors);
-      if (Object.keys(errors).length > 0)
-        return dispatch({ type: "setErrors", payload: errors });
+      const res = validateStep(state, currentStep);
+      if (res.isError) {
+        return dispatch({ type: "setErrors", payload: res.errors });
+      }
 
-      //setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -183,18 +221,27 @@ const ContestForm = () => {
     }
   };
 
-  const handleStepChange = (index: number) => {
-    setCurrentStep(index);
+  const renderStepStatusIcon = (index: number) => {
+    const step = steps[index];
+    if (state.errors[step.errorField]) {
+      return <span>x</span>;
+    } else if (currentStep > index) {
+      return <span>$</span>;
+    } else {
+      return <span>*</span>;
+    }
   };
 
   return (
+
     <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white px-4 py-8 ml-auto mr-auto">
       <div className="flex w-full lg:w-1/5 items-start ">
         <ul className="steps steps-horizontal lg:steps-vertical">
           {steps.map((el, index) => {
             const isActive = currentStep === index;
             const isCompleted = index < currentStep;
-            const hasErrors = steps[currentStep].errors;
+            const hasErrors = state.errors[el.errorField];
+
             const stepClass = isActive
               ? "step step-primary"
               : isCompleted
@@ -207,7 +254,7 @@ const ContestForm = () => {
                 key={index}
                 data-content={dataContent}
                 className={`${stepClass} cursor-pointer`}
-                onClick={() => handleStepChange(index)}
+                onClick={() => setCurrentStep(index)}
               >
                 {el.name}
               </li>
@@ -215,58 +262,46 @@ const ContestForm = () => {
           })}
         </ul>
       </div>
-      <div className="flex flex-col h-fit w-full lg:w-4/5 p-6 gap-8 rounded-lg shadow-box border-solid border-2 border-border">
-        <Formik<ContestBuilderProps>
-          initialValues={state}
-          validationSchema={ContestSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ isSubmitting }) => (
-            <Form className="h-full">
-              {steps.map((el, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={`${index !== currentStep ? "hidden" : ""}`}
-                  >
-                    {el.component}
-                  </div>
-                );
-              })}
-              <div className="flex flex-row justify-between">
-                {currentStep > 0 && (
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-secondary"
-                    onClick={handlePrevious}
-                  >
-                    Previous
-                  </button>
-                )}
-                {currentStep < steps.length - 1 && (
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-primary"
-                    onClick={handleNext}
-                  >
-                    Next
-                  </button>
-                )}
+      <div className="flex flex-col w-full lg:w-4/5 gap-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {steps[currentStep].component}
+            {currentStep > 0 && (
+              <button
+                type="button"
+                className="btn btn-secondary mr-2"
+                onClick={handlePrevious}
+              >
+                Previous
+              </button>
+            )}
+            {currentStep < steps.length - 1 && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleNext}
+              >
+                Next
+              </button>
+            )}
 
-                {currentStep === steps.length - 1 && (
-                  <button
-                    className="btn btn-sm btn-primary"
-                    type="submit"
-                    disabled={isSubmitting}
-                    onClick={handleSubmit}
-                  >
-                    Save
-                  </button>
-                )}
-              </div>
-            </Form>
-          )}
-        </Formik>
+            {currentStep === steps.length - 1 && (
+              <button
+                className="btn btn-primary"
+                type="submit"
+                onClick={handleFormSubmit}
+              >
+                Save
+              </button>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

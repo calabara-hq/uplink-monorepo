@@ -202,6 +202,7 @@ const SubmitterRestrictionManager = ({
             setIsModalOpen(false);
           }}
           confirmLabel="Save"
+          confirmDisabled={!currentRestriction.threshold}
         />
       </>
     );

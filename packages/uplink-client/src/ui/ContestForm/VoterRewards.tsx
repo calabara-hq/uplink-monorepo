@@ -3,6 +3,7 @@ import { BlockWrapper } from "./ContestForm";
 import {
   arraysSubtract,
   ContestBuilderProps,
+  RewardError,
   rewardsObjectToArray,
   VoterRewards,
 } from "@/app/contestbuilder/contestHandler";
@@ -59,7 +60,7 @@ const VoterRewardsComponent = ({
       </div>
       <VoterRewardsMatrix
         spaceTokens={state.spaceTokens}
-        voterRewards={state.voterRewards}
+        state={state}
         dispatch={dispatch}
       />
 
@@ -83,60 +84,70 @@ const VoterRewardsComponent = ({
 
 const VoterRewardsMatrix = ({
   spaceTokens,
-  voterRewards,
+  state,
   dispatch,
 }: {
   spaceTokens: IToken[];
-  voterRewards: VoterRewards;
+  state: ContestBuilderProps;
   dispatch: React.Dispatch<any>;
 }) => {
+  const { voterRewards, errors } = state;
+
   const addRank = () => {
     dispatch({ type: "addVoterRank" });
   };
-  if (voterRewards.ETH || voterRewards.ERC20) {
-    return (
-      <div className="flex flex-col w-full gap-2 rounded-xl">
-        {voterRewards && (
-          <div className="flex flex-col gap-4">
-            {(voterRewards.ERC20 || voterRewards.ETH) &&
-              voterRewards.payouts.map((reward, index) => {
-                return (
-                  <VoterRewardRow
-                    key={index}
-                    index={index}
-                    reward={reward}
-                    availableRewardTokens={Object.entries(voterRewards)
-                      .filter(
-                        ([key, value]) => key !== "payouts" && value !== null
-                      )
-                      .flatMap(([key, value]) => value)}
-                    dispatch={dispatch}
-                  />
-                );
-              })}
-            <button className="btn btn-sm mr-auto" onClick={addRank}>
-              add rank
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-  return null;
+
+  return (
+    <div className="flex flex-col w-full gap-2">
+      {errors?.voterRewards?.duplicateRanks?.length ?? 0 > 0 ? (
+        <div className="text-red-500">
+          <p>oops, you have some duplicate ranks</p>
+        </div>
+      ) : null}
+      {voterRewards && (
+        <div className="flex flex-col gap-2">
+          {(voterRewards.ERC20 || voterRewards.ETH) &&
+            voterRewards?.payouts?.map((reward, index) => {
+              return (
+                <VoterRewardRow
+                  key={index}
+                  index={index}
+                  reward={reward}
+                  rewardsLength={voterRewards?.payouts?.length ?? 0}
+                  availableRewardTokens={Object.entries(voterRewards)
+                    .filter(
+                      ([key, value]) => key !== "payouts" && value !== null
+                    )
+                    .flatMap(([key, value]) => value)}
+                  dispatch={dispatch}
+                  errors={errors?.voterRewards}
+                />
+              );
+            })}
+          <button className="btn btn-sm" onClick={addRank}>
+            add
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
 const VoterRewardRow = ({
   index,
   reward,
   availableRewardTokens,
+  rewardsLength,
   dispatch,
+  errors,
 }: {
   index: number;
   reward: any;
   availableRewardTokens: IToken[];
+  rewardsLength: number;
   dispatch: React.Dispatch<any>;
+  errors?: RewardError;
 }) => {
-  console.log(availableRewardTokens);
   const menuSelectOptions = availableRewardTokens.map((token) => {
     return { value: token.type, label: token.symbol };
   });
@@ -182,7 +193,11 @@ const VoterRewardRow = ({
     <div className="flex flex-col lg:flex-row items-center w-full justify-between gap-2 bg-base-100 p-4 rounded-xl">
       <p className="text-center">Voters that accurately choose rank </p>
       <input
-        className="input input-bordered focus:bg-neutral text-center w-16"
+        className={`input w-16 focus:bg-neutral text-center ${
+          errors?.duplicateRanks?.includes(index)
+            ? "input-error"
+            : "input-bordered"
+        }`}
         type="number"
         value={reward.rank || ""}
         onChange={(e) => updateRank(index, Number(e.target.value))}
@@ -202,6 +217,7 @@ const VoterRewardRow = ({
         setSelected={updateTokenType}
         options={menuSelectOptions}
       />
+
       <button
         className="btn btn-sm btn-ghost ml-auto lg:m-0"
         onClick={removeRank}

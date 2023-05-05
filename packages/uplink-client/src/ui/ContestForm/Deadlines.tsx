@@ -1,5 +1,4 @@
 import { ContestBuilderProps } from "@/app/contestbuilder/contestHandler";
-import { useEffect } from "react";
 import DateTimeSelector from "../DateTime/DateTime";
 import { BlockWrapper } from "./ContestForm";
 const Deadlines = ({
@@ -9,38 +8,15 @@ const Deadlines = ({
   state: ContestBuilderProps;
   dispatch: React.Dispatch<any>;
 }) => {
-  const { startTime, voteTime, endTime, errors } = state;
-  useEffect(() => {
-    // set errors if
-    // voteTime < startTime || voteTime === startTime
-    // endtime < voteTime || endTime === voteTime
-    // endtime < startTime || endTime === startTime
+  const { deadlines, errors } = state;
+  const { startTime, voteTime, endTime } = deadlines;
 
-    if (voteTime <= startTime) {
-      dispatch({
-        type: "setErrors",
-        payload: { voteTime: "vote date must be after start date" },
-      });
-    }
-    if (endTime <= voteTime) {
-      dispatch({
-        type: "setErrors",
-        payload: { endTime: "end date must be after vote date" },
-      });
-    }
-    if (endTime <= startTime) {
-      dispatch({
-        type: "setErrors",
-        payload: { endTime: "end date must be after start date" },
-      });
-    }
-  }, [startTime, voteTime, endTime]);
   return (
     <BlockWrapper title="Contest Dates">
       <DateTimeSelector
         isoString={startTime}
         label="start"
-        error={errors?.startTime}
+        error={errors?.deadlines?.startTime}
         callback={(isoString) => {
           dispatch({ type: "setStartTime", payload: isoString });
         }}
@@ -48,7 +24,7 @@ const Deadlines = ({
       <DateTimeSelector
         isoString={voteTime}
         label="vote"
-        error={errors?.voteTime}
+        error={errors?.deadlines?.voteTime}
         callback={(isoString) => {
           dispatch({ type: "setVoteTime", payload: isoString });
         }}
@@ -56,7 +32,7 @@ const Deadlines = ({
       <DateTimeSelector
         isoString={endTime}
         label="end"
-        error={errors?.endTime}
+        error={errors?.deadlines?.endTime}
         callback={(isoString) => {
           dispatch({ type: "setEndTime", payload: isoString });
         }}

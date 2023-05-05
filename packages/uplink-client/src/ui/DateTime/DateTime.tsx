@@ -1,15 +1,17 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 
 import "react-day-picker/dist/style.css";
+import { ISODateString } from "@/providers/SessionProvider";
+import Modal, { ModalActions } from "../Modal/Modal";
 
-const deconstructIsoString = (isoString: string) => {
-  const date = new Date(isoString);
+const deconstructIsoString = (isoString: ISODateString | "now") => {
+  const date = isoString === "now" ? new Date(Date.now()) : new Date(isoString);
   const hour = date.getHours();
   const minute = date.getMinutes();
   const meridiem = hour >= 12 ? "PM" : "AM";
-  const adjustedHour = hour % 12 || 12;
+  const adjustedHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
   const adjustedMinute = minute < 10 ? "0" + minute : minute;
   return {
     iDate: date,
@@ -49,7 +51,11 @@ export default function DateTimeSelector({
   const [minute, setMinute] = useState(iMinute);
   const [meridiem, setMeridiem] = useState(iMeridiem);
   const [progress, setProgress] = useState<number>(0);
-  const createReadableDate = () => {
+
+  const createReadableDate = (isNow: boolean) => {
+    if (isNow) {
+      return "now";
+    }
     return format(
       new Date(
         selectedDay.getFullYear(),
@@ -61,8 +67,9 @@ export default function DateTimeSelector({
       "MMM d, yyyy h:mm aa"
     );
   };
-  const [readableDate, setReadableDate] = useState<string>(() =>
-    createReadableDate()
+
+  const [readableDate, setReadableDate] = useState<string>(
+    createReadableDate(isoString === "now")
   );
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -84,7 +91,7 @@ export default function DateTimeSelector({
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
       ) {
-        handleCloseAndReset();
+        handleHardReset();
       }
     };
 
@@ -94,8 +101,12 @@ export default function DateTimeSelector({
     };
   }, [modalRef]);
 
-  const handleCloseAndReset = () => {
+  const handleHardReset = () => {
     setIsModalOpen(false);
+    setSelectedDay(iDate);
+    setHour(iHour);
+    setMinute(iMinute);
+    setMeridiem(iMeridiem);
     setProgress(0);
   };
 
@@ -103,10 +114,11 @@ export default function DateTimeSelector({
     if (progress < 1 && selectedDay) {
       setProgress(1);
     } else {
-      setReadableDate(createReadableDate());
+      setReadableDate(createReadableDate(false)); // Pass false to update the date/time
       const isoString = constructIsoString(selectedDay, hour, minute, meridiem);
       callback(isoString);
-      handleCloseAndReset();
+      setIsModalOpen(false);
+      setProgress(0);
     }
   };
 
@@ -132,6 +144,41 @@ export default function DateTimeSelector({
           </label>
         )}
       </div>
+      <Modal isModalOpen={isModalOpen} onClose={handleHardReset}>
+        <>
+          <div className="w-full px-1 flex flex-col gap-2 items-center justify-center">
+            <h2 className="text-xl">
+              {progress < 1 ? `select ${label} date` : `select ${label} time`}
+            </h2>
+            {progress === 0 && (
+              <DayPicker
+                mode="single"
+                selected={selectedDay}
+                onSelect={(day) => setSelectedDay(day as Date)}
+                disabled={disabledDays}
+                showOutsideDays
+              />
+            )}
+            {progress === 1 && (
+              <TimeSelector
+                hour={hour}
+                minute={minute}
+                meridiem={meridiem}
+                setHour={setHour}
+                setMinute={setMinute}
+                setMeridiem={setMeridiem}
+              />
+            )}
+          </div>
+          <ModalActions
+            onCancel={handleHardReset}
+            onConfirm={handleModalConfirm}
+            confirmLabel={progress < 1 ? "Next" : "Confirm"}
+          />
+        </>
+      </Modal>
+
+      {/*
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 w-fit">
           <div className="modal modal-open">
@@ -179,6 +226,7 @@ export default function DateTimeSelector({
           <div className="fixed inset-0 bg-black opacity-50"></div>
         </div>
       )}
+      */}
     </div>
   );
 }

@@ -13,7 +13,12 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@prisma/client": "^4.11.0"
+    "@editorjs/editorjs": "^2.26.5",
+    "@prisma/client": "^4.11.0",
+    "decimal.js": "^10.4.3",
+    "dotenv": "^16.0.3",
+    "ethers": "5.7.2",
+    "graphql": "^16.6.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",

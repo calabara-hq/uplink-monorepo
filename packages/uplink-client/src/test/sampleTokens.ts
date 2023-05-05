@@ -2,10 +2,10 @@ import { IERCToken, INativeToken, IToken } from "@/types/token";
 
 export const sampleERC1155Token: IERCToken = {
     type: "ERC1155",
-    address: "0xab0ab2fc1c498942B24278Bbd86bD171a3406A5E",
-    symbol: "MmSzr",
+    address: "0x7c2748C7Ec984b559EADc39C7a4944398E34911a",
+    symbol: "TNS",
     decimals: 0,
-    tokenId: 1,
+    tokenId: 2,
 }
 
 export const sampleERC20Token: IERCToken = {

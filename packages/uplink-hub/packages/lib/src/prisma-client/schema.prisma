@@ -18,23 +18,21 @@ model Session {
 }
 
 model Space {
-  id       String  @id
-  name     String
-  members  Int
-  logo_url String
-  twitter  String?
-  website  String?
-  admins   Admin[]
-
-  // mark id and name as unique
-  @@unique([id])
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  displayName String
+  members     Int
+  logoUrl     String
+  twitter     String?
+  website     String?
+  admins      Admin[]
 }
 
 model Admin {
   id      Int    @id @default(autoincrement())
   address String
   space   Space  @relation(fields: [spaceId], references: [id])
-  spaceId String
+  spaceId Int
 
   @@index([spaceId])
 }

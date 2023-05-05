@@ -85,11 +85,7 @@ const SubmitterRewardsComponent = ({
       <button className="btn" onClick={() => setIsModalOpen(true)}>
         add reward
       </button>
-      <SubmitterRewardMatrix
-        spaceTokens={state.spaceTokens}
-        state={state}
-        dispatch={dispatch}
-      />
+      <SubmitterRewardMatrix state={state} dispatch={dispatch} />
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -127,11 +123,9 @@ const Toggle = ({
 };
 
 const SubmitterRewardMatrix = ({
-  spaceTokens,
   state,
   dispatch,
 }: {
-  spaceTokens: IToken[];
   state: ContestBuilderProps;
   dispatch: React.Dispatch<
     | AddSubRankAction
@@ -189,11 +183,11 @@ const SubmitterRewardMatrix = ({
   ) {
     return (
       <div className="overflow-x-auto w-full">
-        {errors.subRewards.duplicateRanks.length > 0 && (
+        {errors?.submitterRewards?.duplicateRanks?.length ?? 0 > 0 ? (
           <div className="text-red-500">
             <p>oops, you have some duplicate ranks</p>
           </div>
-        )}
+        ) : null}
         <table className="table w-full">
           {/* head */}
           <thead>
@@ -217,18 +211,10 @@ const SubmitterRewardMatrix = ({
           <tbody className="w-full">
             {submitterRewards?.payouts?.map((payout, index) => (
               <tr key={index}>
-                <th className="w-6 lg:w-24 text-center">
-                  {/*
-                  className={`input w-24 ${
-                      
-                      errors.subRewards.duplicateRanks.includes(index)
-                        ? "input-error"
-                        : "input-bordered"
-                    `}
-                  */}
+                <th className="w-24 text-center">
                   <input
-                    className={`input focus:bg-neutral text-center w-12 lg:w-20 ${
-                      errors.subRewards.duplicateRanks.includes(index)
+                    className={`input w-24 ${
+                      errors?.submitterRewards?.duplicateRanks?.includes(index)
                         ? "input-error"
                         : "input-bordered"
                     }`}

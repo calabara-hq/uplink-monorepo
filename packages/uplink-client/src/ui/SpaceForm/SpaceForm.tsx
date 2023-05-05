@@ -10,88 +10,76 @@ import {
 } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import handleMediaUpload from "@/lib/mediaUpload";
-import { reducer, SpaceBuilderProps } from "@/app/spacebuilder/spaceHandler";
+import {
+  reducer,
+  SpaceBuilderProps,
+  validateSpaceBuilderProps,
+} from "@/app/spacebuilder/spaceHandler";
 import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 import { useRouter } from "next/navigation";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import toast from "react-hot-toast";
-const postData = async ({
-  state,
-  isNewSpace,
-}: {
-  state: SpaceBuilderProps;
-  isNewSpace: boolean;
-}) => {
-  const result = await graphqlClient
-    .mutation(isNewSpace ? CreateSpaceDocument : EditSpaceDocument, {
-      spaceData: {
-        ens: state.ens,
-        name: state.name,
-        website: state.website,
-        logo_url: state.logo_url,
-        twitter: state.twitter,
-        admins: state.admins,
-      },
-    })
-    .toPromise();
-  if (result.error) {
-    throw new Error(result.error.message);
-  }
-  const { success, errors, spaceResponse } = stripTypenames(
-    isNewSpace ? result.data.createSpace : result.data.editSpace
-  );
-  return {
-    success,
-    errors,
-    spaceResponse,
-  };
-};
 
 export default function SpaceForm({
   initialState,
   isNewSpace,
+  spaceId,
 }: {
   initialState: SpaceBuilderProps;
   isNewSpace: boolean;
+  spaceId?: string;
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [progress, setProgress] = useState(isNewSpace ? 0 : 1);
   const router = useRouter();
 
   const handleMutation = useHandleMutation(
     isNewSpace ? CreateSpaceDocument : EditSpaceDocument
   );
 
+  const validate = async () => {
+    const result = await validateSpaceBuilderProps(state);
+
+    if (!result.isValid) {
+      dispatch({
+        type: "setTotalState",
+        payload: { spaceBuilderData: result.values, errors: result.errors },
+      });
+    }
+
+    return result;
+  };
+
   const onFormSubmit = async (state: SpaceBuilderProps) => {
-    console.log(state);
+    const { isValid, values } = await validate();
+    if (!isValid) return;
+
     const result = await handleMutation({
-      spaceData: {
-        ens: state.ens,
-        name: state.name,
-        website: state.website,
-        logo_url: state.logo_url,
-        twitter: state.twitter,
-        admins: state.admins,
-      },
+      spaceData: values,
+      spaceId,
     });
 
     if (!result) return;
 
-    const { errors, success, spaceResponse } = isNewSpace
+    const { errors, success, spaceName } = isNewSpace
       ? result.data.createSpace
       : result.data.editSpace;
 
-    if (!success)
+    if (!success) {
       toast.error(
-        "Oops, something went wrong. Please check your inputs and try again."
+        "Oops, something went wrong. Please check the fields and try again."
       );
+      // set any errors that came from the server
 
-    // set the parsed data and errors
-
-    dispatch({
-      type: "setTotalState",
-      payload: { ...spaceResponse, errors: errors },
-    });
+      dispatch({
+        type: "setErrors",
+        payload: {
+          ...(errors?.name && { name: errors.name }),
+          ...(errors?.website && { website: errors.website }),
+          ...(errors?.twitter && { twitter: errors.twitter }),
+          ...(errors?.logoUrl && { logoUrl: errors.logoUrl }),
+        },
+      });
+    }
 
     if (success) {
       toast.success(
@@ -103,61 +91,9 @@ export default function SpaceForm({
         }
       );
       router.refresh();
-      router.push(`/space/${spaceResponse.id}`);
+      router.push(`/space/${spaceName}`);
     }
   };
-
-  const onEnsSubmit = async () => {
-    const { ens } = state;
-    const result = await graphqlClient
-      .query(IsEnsValidDocument, { ens })
-      .toPromise();
-    if (result.error) throw new Error(result.error.message);
-    const {
-      success,
-      errors,
-      ens: ensResult,
-    } = stripTypenames(result.data.isEnsValid);
-
-    dispatch({
-      type: "setTotalState",
-      payload: { ens: ensResult, errors: { ...state.errors, ens: errors.ens } },
-    });
-
-    if (success) {
-      dispatch({
-        type: "setAdmin",
-        payload: {
-          index: 1,
-          value: ensResult,
-        },
-      });
-      setProgress(1);
-    }
-  };
-
-  useEffect(() => {
-    if (state.errors.ens) {
-      setProgress(0);
-    }
-  }, [state.errors.ens]);
-
-  if (progress === 0) {
-    return (
-      <div className="flex w-6/12 bbackdrop-blur-md bg-black/30 text-white px-2 py-2 rounded-lg justify-center items-center ml-auto mr-auto">
-        <div className=" flex flex-col gap-2 w-full max-w-xs">
-          <SpaceEns state={state} dispatch={dispatch} />
-          <button
-            className="btn"
-            disabled={state.errors.ens}
-            onClick={onEnsSubmit}
-          >
-            next
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex w-6/12 bbackdrop-blur-md bg-black/30 text-white px-2 py-2 rounded-lg justify-center items-center ml-auto mr-auto">
@@ -173,53 +109,10 @@ export default function SpaceForm({
           }}
           buttonLabel="submit"
         />
-        <button
-          onClick={() => {
-            onFormSubmit(state);
-          }}
-        >
-          test
-        </button>
       </div>
     </div>
   );
 }
-
-const SpaceEns = ({
-  state,
-  dispatch,
-}: {
-  state: SpaceBuilderProps;
-  dispatch: any;
-}) => {
-  return (
-    <div>
-      <label className="label">
-        <span className="label-text">Ens</span>
-      </label>
-      <input
-        type="text"
-        autoComplete="off"
-        value={state.ens}
-        onChange={(e) => {
-          dispatch({
-            type: "setSpaceEns",
-            payload: e.target.value,
-          });
-        }}
-        placeholder="Nouns"
-        className={`input input-bordered w-full max-w-xs ${
-          state.errors.ens ? "input-error" : "input-primary"
-        }`}
-      />
-      {state.errors.ens && (
-        <label className="label">
-          <span className="label-text-alt text-error">{state.errors.ens}</span>
-        </label>
-      )}
-    </div>
-  );
-};
 
 const SpaceName = ({
   state,
@@ -300,18 +193,18 @@ const SpaceLogo = ({
           className="w-24 rounded-full cursor-pointer flex justify-center items-center"
           onClick={() => imageUploader.current?.click()}
         >
-          {state.logo_blob && <img src={state.logo_blob} />}
-          {!state.logo_blob && (
+          {state.logoBlob && <img src={state.logoBlob} />}
+          {!state.logoBlob && (
             <div className="flex justify-center items-center w-full h-full rounded-full bg-gray-500">
               <p>logo</p>
             </div>
           )}
         </div>
       </div>
-      {state.errors?.logo_url && (
+      {state.errors?.logoUrl && (
         <label className="label">
           <span className="label-text-alt text-error">
-            {state.errors.logo_url}
+            {state.errors.logoUrl}
           </span>
         </label>
       )}
@@ -334,7 +227,7 @@ const SpaceWebsite = ({
       <input
         type="text"
         autoComplete="off"
-        value={state.website}
+        value={state.website || ""}
         onChange={(e) => {
           dispatch({
             type: "setWebsite",
@@ -372,7 +265,7 @@ const SpaceTwitter = ({
       <input
         type="text"
         autoComplete="off"
-        value={state.twitter}
+        value={state.twitter || ""}
         onChange={(e) => {
           dispatch({
             type: "setTwitter",
@@ -404,6 +297,7 @@ const SpaceAdmins = ({
 }) => {
   const { data: session, status } = useSession();
   const userAddress = session?.user?.address || "you";
+
   useEffect(() => {
     if (status === "authenticated") {
       return dispatch({
@@ -428,44 +322,48 @@ const SpaceAdmins = ({
       <label className="label">
         <span className="label-text">Admins</span>
       </label>
-      {state.admins.map((admin: string, index: number) => {
-        return (
-          <div key={index}>
-            <div className="flex justify-center items-center gap-2">
-              <input
-                type="text"
-                placeholder="vitalik.eth"
-                className="input input-bordered w-full max-w-xs disabled:text-gray-400"
-                disabled={index < 2}
-                value={admin}
-                onChange={(e) =>
-                  dispatch({
-                    type: "setAdmin",
-                    payload: { index: index, value: e.target.value },
-                  })
-                }
-              />
-              {index > 1 && (
-                <button
-                  onClick={() => {
-                    dispatch({ type: "removeAdmin", payload: index });
-                  }}
-                  className="btn bg-transparent border-none"
-                >
-                  <XCircleIcon className="w-8" />
-                </button>
+      <div className="flex flex-col gap-4">
+        {state.admins.map((admin: string, index: number) => {
+          const isError = state.errors?.admins?.[index];
+          return (
+            <div key={index}>
+              <div className="flex justify-center items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="vitalik.eth"
+                  className={`input w-full max-w-xs disabled:text-gray-400
+                ${isError ? "input-error" : "input-bordered"}`}
+                  disabled={index < 1}
+                  value={admin}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "setAdmin",
+                      payload: { index: index, value: e.target.value },
+                    })
+                  }
+                />
+                {index > 0 && (
+                  <button
+                    onClick={() => {
+                      dispatch({ type: "removeAdmin", payload: index });
+                    }}
+                    className="btn bg-transparent border-none"
+                  >
+                    <XCircleIcon className="w-8" />
+                  </button>
+                )}
+              </div>
+              {isError && (
+                <label className="label">
+                  <span className="label-text-alt text-error">
+                    invalid address
+                  </span>
+                </label>
               )}
             </div>
-            {state.errors?.admins && (
-              <label className="label">
-                <span className="label-text-alt text-error">
-                  {state.errors.admins[index]}
-                </span>
-              </label>
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
       <button
         className="btn"
         onClick={() => {
@@ -479,3 +377,13 @@ const SpaceAdmins = ({
     </div>
   );
 };
+
+const AdminInput = ({
+  state,
+  dispatch,
+  index,
+}: {
+  state: SpaceBuilderProps;
+  dispatch: any;
+  index: number;
+}) => {};
