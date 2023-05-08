@@ -7,13 +7,26 @@ import {
 import { ContestBuilderProps } from "@/app/contestbuilder/contestHandler";
 import InfoAlert from "../InfoAlert/InfoAlert";
 
-const ContestType = ({
+const categories = [
+  "art",
+  "music",
+  "writing",
+  "video",
+  "photography",
+  "design",
+  "development",
+  "other",
+];
+
+const ContestMetadata = ({
   state,
   dispatch,
 }: {
   state: ContestBuilderProps;
   dispatch: React.Dispatch<any>;
 }) => {
+  const { type, category } = state.metadata;
+
   return (
     <BlockWrapper title="Choose a template">
       <InfoAlert>
@@ -23,7 +36,7 @@ const ContestType = ({
         <div className="indicator grid flex-grow w-full h-32">
           <span
             className={`indicator-item badge bg-transparent border-none ${
-              state.type === "standard" ? "visible" : "hidden"
+              type === "standard" ? "visible" : "hidden"
             }`}
           >
             <CheckBadgeIcon className="w-8 text-success" />
@@ -33,7 +46,9 @@ const ContestType = ({
               dispatch({ type: "setType", payload: "standard" });
             }}
             className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
-              state.type === "standard" ? "border-success btn-active focus:border-2 focus:border-success shadow-box" : ""
+              type === "standard"
+                ? "border-success btn-active focus:border-2 focus:border-success shadow-box"
+                : ""
             }`}
           >
             standard contest
@@ -43,7 +58,7 @@ const ContestType = ({
         <div className="indicator grid flex-grow w-full h-32">
           <span
             className={`indicator-item badge bg-transparent border-none ${
-              state.type === "twitter" ? "visible" : "hidden"
+              type === "twitter" ? "visible" : "hidden"
             }`}
           >
             <CheckBadgeIcon className="w-8 text-twitter" />
@@ -53,18 +68,41 @@ const ContestType = ({
               dispatch({ type: "setType", payload: "twitter" });
             }}
             className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
-              state.type === "twitter" ? "border-twitter btn-active focus:border-2 focus:border-twitter shadow-box" : ""
+              type === "twitter"
+                ? "border-twitter btn-active focus:border-2 focus:border-twitter shadow-box"
+                : ""
             }`}
           >
             twitter contest
           </button>
         </div>
-        {state.errors.type && (
-          <p className="text-red-500">{state.errors.type}</p>
+        {state.errors.metadata?.type && (
+          <p className="text-red-500">{state.errors.metadata?.type}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-5 w-full gap-4">
+        {categories.map((el, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              dispatch({ type: "setCategory", payload: el });
+            }}
+            className={`btn btn-ghost border-2 border-border h-full card place-items-center ${
+              el === category
+                ? "border-success btn-active focus:border-2 focus:border-success shadow-box"
+                : ""
+            }`}
+          >
+            {el}
+          </button>
+        ))}
+        {state.errors.metadata?.category && (
+          <p className="text-red-500">{state.errors.metadata?.category}</p>
         )}
       </div>
     </BlockWrapper>
   );
 };
 
-export default ContestType;
+export default ContestMetadata;

@@ -19,7 +19,7 @@ import {
 } from "@/app/contestbuilder/contestHandler";
 import StandardPrompt from "./StandardPrompt";
 import Deadlines from "./Deadlines";
-import ContestType from "./ContestType";
+import ContestMetadata from "./ContestMetadata";
 import SubmitterRewardsComponent from "./SubmitterRewards";
 import VoterRewardsComponent from "./VoterRewards";
 import SubmitterRestrictions from "./SubmitterRestrictions";
@@ -30,6 +30,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateContestDocument } from "@/lib/graphql/contests.gql";
 import { toast } from "react-hot-toast";
+import AdditionalParameters from "./AdditionalParameters";
 
 export const BlockWrapper = ({
   title,
@@ -47,7 +48,10 @@ export const BlockWrapper = ({
 };
 
 const initialState = {
-  type: null,
+  metadata: {
+    type: null,
+    category: null,
+  },
   deadlines: {
     snapshot: "now",
     startTime: "now",
@@ -96,6 +100,12 @@ const initialState = {
   voterRewards: {},
   submitterRestrictions: [],
   votingPolicy: [],
+  additionalParams: {
+    anonSubs: true,
+    visibleVotes: false,
+    selfVote: false,
+    subLimit: 1,
+  },
 
   errors: {},
 } as ContestBuilderProps;
@@ -106,6 +116,9 @@ const ContestForm = () => {
   const handleMutation = useHandleMutation(CreateContestDocument);
 
   const handleFinalValidation = async () => {
+    console.log(state);
+    return false;
+
     const {
       isError,
       errors: validationErrors,
@@ -165,8 +178,8 @@ const ContestForm = () => {
   const steps = [
     {
       name: "Contest Type",
-      component: <ContestType state={state} dispatch={dispatch} />,
-      errorField: "type",
+      component: <ContestMetadata state={state} dispatch={dispatch} />,
+      errorField: "metadata",
     },
     {
       name: "Deadlines",
@@ -201,6 +214,11 @@ const ContestForm = () => {
       errorField: "votingPolicy",
     },
     {
+      name: "Additional Parameters",
+      component: <AdditionalParameters state={state} dispatch={dispatch} />,
+      errorField: "additionalParameters",
+    },
+    {
       errorField: "none",
     },
   ];
@@ -208,6 +226,7 @@ const ContestForm = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       const res = validateStep(state, currentStep);
+      console.log(res);
       if (res.isError) {
         return dispatch({ type: "setErrors", payload: res.errors });
       }

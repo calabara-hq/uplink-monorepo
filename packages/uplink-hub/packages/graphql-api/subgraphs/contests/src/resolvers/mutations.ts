@@ -1,34 +1,39 @@
 
 import {
+    validateMetadata,
     validateDeadlines,
     validatePrompt,
     validateSubmitterRestrictions,
     validateSubmitterRewards,
     validateVoterRewards,
     validateVotingPolicy,
-    ContestBuilderProps
+    ContestBuilderProps,
+    validateAdditionalParams
 } from "../utils/validateContestParams.js";
 
 import { GraphQLError } from "graphql";
 
 const processContestData = async (contestData: ContestBuilderProps) => {
-    const { type, deadlines, prompt, submitterRewards, voterRewards, submitterRestrictions, votingPolicy } = contestData;
+    const { metadata, deadlines, prompt, submitterRewards, voterRewards, submitterRestrictions, votingPolicy, additionalParams } = contestData;
 
+    const metadataResult = validateMetadata(metadata);
     const deadlinesResult = validateDeadlines(deadlines);
     const promptResult = validatePrompt(prompt);
     const submitterRewardsResult = await validateSubmitterRewards(submitterRewards);
     const voterRewardsResult = await validateVoterRewards(voterRewards);
     const submitterRestrictionsResult = await validateSubmitterRestrictions(submitterRestrictions);
     const votingPolicyResult = await validateVotingPolicy(votingPolicy);
+    const additionalParamsResult = await validateAdditionalParams(additionalParams);
 
     const errors = {
-
-        ...(promptResult.error ? { prompt: promptResult.error } : {}),
+        ...(metadataResult.error ? { metadata: metadataResult.error } : {}),
         ...(deadlinesResult.error ? { deadlines: deadlinesResult.error } : {}),
+        ...(promptResult.error ? { prompt: promptResult.error } : {}),
         ...(submitterRewardsResult.error ? { submitterRewards: submitterRewardsResult.error } : {}),
         ...(voterRewardsResult.error ? { voterRewards: voterRewardsResult.error } : {}),
         ...(submitterRestrictionsResult.error ? { submitterRestrictions: submitterRestrictionsResult.error } : {}),
         ...(votingPolicyResult.error ? { votingPolicy: votingPolicyResult.error } : {}),
+        ...(additionalParamsResult.error ? { additionalParams: additionalParamsResult.error } : {}),
     }
 
     const isSuccess = Object.keys(errors).length === 0;

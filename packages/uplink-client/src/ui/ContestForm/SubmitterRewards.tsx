@@ -102,25 +102,6 @@ const SubmitterRewardsComponent = ({
   );
 };
 
-const Toggle = ({
-  defaultState,
-  onSelectCallback,
-}: {
-  defaultState: boolean;
-  onSelectCallback: (isSelected: boolean) => void;
-}) => {
-  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSelectCallback(e.target.checked);
-  };
-  return (
-    <input
-      type="checkbox"
-      className="toggle toggle-accent border-2"
-      defaultChecked={defaultState}
-      onChange={handleToggle}
-    />
-  );
-};
 
 const SubmitterRewardMatrix = ({
   state,

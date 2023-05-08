@@ -86,17 +86,47 @@ export interface VoterRewards {
     payouts?: IPayout[];
 }
 
+export interface AdditionalParams {
+    anonSubs: boolean;
+    visibleVotes: boolean;
+    selfVote: boolean;
+    subLimit: number;
+}
+
+export type Metadata = {
+    type: "standard" | "twitter";
+    category: string;
+}
 
 export interface ContestBuilderProps {
-    type: "standard" | "twitter";
+    metadata: Metadata;
     deadlines: Deadlines;
     prompt: Prompt;
     submitterRewards: SubmitterRewards;
     voterRewards: VoterRewards;
     submitterRestrictions: SubmitterRestriction[] | [];
     votingPolicy: VotingPolicy[] | [];
+    additionalParams: AdditionalParams;
 }
 
+
+export const validateMetadata = (metadata: ContestBuilderProps['metadata']) => {
+    const { type, category } = metadata;
+
+    const errorArr: string[] = [];
+
+    if (!category) {
+        errorArr.push("Contest category is required");
+        return { metadata, error: "Contest category is required" }
+    }
+
+    return {
+        metadata: {
+            type: metadata.type,
+            category: metadata.category.trim().toLowerCase(),
+        },
+    };
+}
 
 export const validateDeadlines = (deadlines: ContestBuilderProps['deadlines']) => {
     const { snapshot, startTime, voteTime, endTime } = deadlines;
@@ -379,3 +409,18 @@ export const validateVotingPolicy = async (votingPolicy: ContestBuilderProps['vo
 };
 
 
+export const validateAdditionalParams = (additionalParams: ContestBuilderProps['additionalParams']) => {
+
+    const { subLimit } = additionalParams;
+
+    if (subLimit > 3) {
+        return { additionalParams, error: "Submissions limit value cannot be greater than 3" };
+    }
+
+    if (subLimit < 0) {
+        return { additionalParams, error: "Submissions limit value cannot be less than 0" };
+    }
+
+    return { additionalParams };
+
+}

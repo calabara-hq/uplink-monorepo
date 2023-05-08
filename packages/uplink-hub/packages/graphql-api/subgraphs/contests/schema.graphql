@@ -41,6 +41,11 @@ enum ContestType {
   twitter
 }
 
+input Metadata {
+  type: ContestType!
+  category: String!
+}
+
 input Deadlines {
   snapshot: ISODateString!
   startTime: ISODateString!
@@ -143,57 +148,33 @@ input VotingPolicy {
   strategy: VotingStrategy!
 }
 
+input AdditionalParams {
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
 input ContestBuilderProps {
-  ens: String!
-  type: ContestType!
+  metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
   submitterRewards: SubmitterRewards!
   voterRewards: VoterRewards!
   submitterRestrictions: [SubmitterRestriction!]!
   votingPolicy: [VotingPolicy!]!
-}
-
-type ContestPromptError {
-  title: String
-  body: String
-  coverUrl: String
-}
-
-type ContestDeadlineError {
-  startTime: String
-  voteTime: String
-  endTime: String
-}
-
-type SubmitterRewardsError {
-  tokens: String
-  payouts: String
-}
-
-type VoterRewardsError {
-  tokens: String
-  payouts: String
-}
-
-type SubmitterRestrictionsError {
-  tokens: String
-  thresholds: String
-}
-
-type VotingPolicyError {
-  tokens: String
-  strategies: String
+  additionalParams: AdditionalParams!
 }
 
 type ContestErrorData {
-  type: String
+  metadata: String
   deadlines: String
   prompt: String
   submitterRewards: String
   voterRewards: String
   submitterRestrictions: String
   votingPolicy: String
+  additionalParams: String
 }
 
 type ContestMutationResponse {

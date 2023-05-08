@@ -33,6 +33,15 @@ type ActiveContest
   spaceLink: Space!
 }
 
+input AdditionalParams
+  @join__type(graph: CONTESTS)
+{
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
 type Admin
   @join__type(graph: SPACES)
 {
@@ -64,22 +73,15 @@ type Contest
 input ContestBuilderProps
   @join__type(graph: CONTESTS)
 {
-  ens: String!
   type: ContestType!
+  category: String!
   deadlines: Deadlines!
   prompt: Prompt!
   submitterRewards: SubmitterRewards!
   voterRewards: VoterRewards!
   submitterRestrictions: [SubmitterRestriction!]!
   votingPolicy: [VotingPolicy!]!
-}
-
-type ContestDeadlineError
-  @join__type(graph: CONTESTS)
-{
-  startTime: String
-  voteTime: String
-  endTime: String
+  additionalParams: AdditionalParams!
 }
 
 type ContestErrorData
@@ -92,6 +94,7 @@ type ContestErrorData
   voterRewards: String
   submitterRestrictions: String
   votingPolicy: String
+  additionalParams: String
 }
 
 type ContestMutationResponse
@@ -99,14 +102,6 @@ type ContestMutationResponse
 {
   success: Boolean!
   errors: ContestErrorData
-}
-
-type ContestPromptError
-  @join__type(graph: CONTESTS)
-{
-  title: String
-  body: String
-  coverUrl: String
 }
 
 enum ContestType
@@ -343,13 +338,6 @@ input SubmitterRestriction
   threshold: Decimal
 }
 
-type SubmitterRestrictionsError
-  @join__type(graph: CONTESTS)
-{
-  tokens: String
-  thresholds: String
-}
-
 input SubmitterRewards
   @join__type(graph: CONTESTS)
 {
@@ -358,13 +346,6 @@ input SubmitterRewards
   ERC721: IERCToken
   ERC1155: IERCToken
   payouts: [IPayout!]
-}
-
-type SubmitterRewardsError
-  @join__type(graph: CONTESTS)
-{
-  tokens: String
-  payouts: String
 }
 
 type User
@@ -382,25 +363,11 @@ input VoterRewards
   payouts: [IPayout!]
 }
 
-type VoterRewardsError
-  @join__type(graph: CONTESTS)
-{
-  tokens: String
-  payouts: String
-}
-
 input VotingPolicy
   @join__type(graph: CONTESTS)
 {
   token: RestrictionToken!
   strategy: VotingStrategy!
-}
-
-type VotingPolicyError
-  @join__type(graph: CONTESTS)
-{
-  tokens: String
-  strategies: String
 }
 
 input VotingStrategy
