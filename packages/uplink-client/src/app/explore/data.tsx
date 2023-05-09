@@ -9,7 +9,7 @@ export function AllSpaces({ spaces }: any) {
     >
       {spaces.data.spaces.map((space: any, index: any) => {
         return (
-          <Link key={index} href={`/${space.id}`}>
+          <Link key={index} href={`/space/${space.name}`}>
             <div
               className="card card-compact bg-neutral shadow-xl
             transition-all duration-300 ease-linear
