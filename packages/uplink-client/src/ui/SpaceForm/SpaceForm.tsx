@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import {
@@ -96,13 +96,15 @@ export default function SpaceForm({
   };
 
   return (
-    <div className="flex w-6/12 bbackdrop-blur-md bg-black/30 text-white px-2 py-2 rounded-lg justify-center items-center ml-auto mr-auto">
+    <div className="flex w-1/2 px-2 py-2 rounded-lg justify-center items-center ml-auto mr-auto">
       <div className=" flex flex-col gap-2 w-full max-w-xs">
-        <SpaceName state={state} dispatch={dispatch} />
+        <h2 className="text-3xl">Space Builder</h2>
         <SpaceLogo state={state} dispatch={dispatch} />
+        <SpaceName state={state} dispatch={dispatch} />
         <SpaceWebsite state={state} dispatch={dispatch} />
         <SpaceTwitter state={state} dispatch={dispatch} />
         <SpaceAdmins state={state} dispatch={dispatch} />
+        <div className="p-2" />
         <ConnectWithCallback
           callback={() => {
             onFormSubmit(state);
@@ -137,8 +139,8 @@ const SpaceName = ({
           });
         }}
         placeholder="Nouns"
-        className={`input input-bordered w-full max-w-xs ${
-          state.errors?.name ? "input-error" : "input-primary"
+        className={`input w-full max-w-xs ${
+          state.errors?.name ? "input-error" : "input focus:shadow-box"
         }`}
       />
       {state.errors?.name && (
@@ -235,8 +237,8 @@ const SpaceWebsite = ({
           });
         }}
         placeholder="nouns.wtf"
-        className={`input input-bordered w-full max-w-xs ${
-          state.errors?.website ? "input-error" : "input-primary"
+        className={`input w-full max-w-xs ${
+          state.errors?.website ? "input-error" : "input focus:shadow-box"
         }`}
       />
       {state.errors?.website && (
@@ -273,8 +275,8 @@ const SpaceTwitter = ({
           });
         }}
         placeholder="@nounsdao"
-        className={`input input-bordered w-full max-w-xs ${
-          state.errors?.twitter ? "input-error" : "input-primary"
+        className={`input w-full max-w-xs ${
+          state.errors?.twitter ? "input-error" : "input focus:shadow-box"
         }`}
       />
       {state.errors?.twitter && (
@@ -327,12 +329,12 @@ const SpaceAdmins = ({
           const isError = state.errors?.admins?.[index];
           return (
             <div key={index}>
-              <div className="flex justify-center items-center gap-2">
+              <div className="flex justify-center items-center gap-4">
                 <input
                   type="text"
                   placeholder="vitalik.eth"
                   className={`input w-full max-w-xs disabled:text-gray-400
-                ${isError ? "input-error" : "input-bordered"}`}
+                ${isError ? "input-error" : "input focus:shadow-box"}`}
                   disabled={index < 1}
                   value={admin}
                   onChange={(e) =>
@@ -347,9 +349,9 @@ const SpaceAdmins = ({
                     onClick={() => {
                       dispatch({ type: "removeAdmin", payload: index });
                     }}
-                    className="btn bg-transparent border-none"
+                    className="btn btn-square btn-ghost"
                   >
-                    <XCircleIcon className="w-8" />
+                    <TrashIcon className="w-6" />
                   </button>
                 )}
               </div>
@@ -363,17 +365,17 @@ const SpaceAdmins = ({
             </div>
           );
         })}
+        <button
+          className="btn btn-accent btn-outline w-fit"
+          onClick={() => {
+            dispatch({
+              type: "addAdmin",
+            });
+          }}
+        >
+          add
+        </button>
       </div>
-      <button
-        className="btn"
-        onClick={() => {
-          dispatch({
-            type: "addAdmin",
-          });
-        }}
-      >
-        add
-      </button>
     </div>
   );
 };
