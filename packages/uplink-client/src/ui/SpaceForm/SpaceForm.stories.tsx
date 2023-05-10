@@ -1,4 +1,3 @@
-import { withMockedRouter } from "../../../.storybook/decorators/RouterDecorator";
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
 import SpaceForm from "./SpaceForm";
 export default {
