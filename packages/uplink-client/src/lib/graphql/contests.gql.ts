@@ -6,33 +6,13 @@ export const CreateContestDocument = gql`
         createContest(contestData: $contestData){
             success
             errors{
-                type
-                deadlines{
-                    startTime
-                    voteTime
-                    endTime
-                }
-                prompt{
-                    title
-                    body
-                    coverUrl
-                }
-                submitterRewards{
-                    tokens
-                    payouts
-                }
-                voterRewards{
-                    tokens
-                    payouts
-                }
-                submitterRestrictions{
-                    tokens
-                    thresholds
-                }
-                votingPolicy{
-                    tokens
-                    strategies
-                }
+                metadata
+                deadlines
+                prompt
+                submitterRewards
+                voterRewards
+                submitterRestrictions
+                votingPolicy
             }
         }
     }

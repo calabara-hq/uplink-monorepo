@@ -1,4 +1,4 @@
-import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, ContestBuilderProps, reducer, rewardsObjectToArray, SubmitterRewards, validateContestDeadlines, validateContestMetadata, validatePrompt, validateSubmitterRewards, validateVoterRewards, validateVotingPolicy, VoterRewards } from "@/app/contestbuilder/contestHandler";
+import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, ContestBuilderProps, reducer, rewardsObjectToArray, SubmitterRewards, validateContestDeadlines, validateContestMetadata, validatePrompt, validateSubmitterRewards, validateVoterRewards, validateVotingPolicy, VoterRewards } from "@/lib/contestHandler";
 import { IToken } from "@/types/token";
 import { describe, expect, test } from "@jest/globals";
 import { sampleERC1155Token, sampleERC20Token, sampleERC721Token, sampleETHToken } from "./sampleTokens";

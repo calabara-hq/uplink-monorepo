@@ -1,4 +1,4 @@
-import { ContestBuilderProps } from "@/app/contestbuilder/contestHandler";
+import { ContestBuilderProps } from "@/lib/contestHandler";
 import DateTimeSelector from "../DateTime/DateTime";
 import { BlockWrapper } from "./ContestForm";
 const Deadlines = ({

@@ -2,7 +2,7 @@ import handleMediaUpload from "@/lib/mediaUpload";
 import MenuSelect from "../MenuSelect/MenuSelect";
 import { useCallback, useRef, useState } from "react";
 import { Option } from "../MenuSelect/MenuSelect";
-import { ContestBuilderProps } from "@/app/contestbuilder/contestHandler";
+import { ContestBuilderProps } from "@/lib/contestHandler";
 import dynamic from "next/dynamic";
 import { OutputData } from "@editorjs/editorjs";
 import { BlockWrapper } from "./ContestForm";

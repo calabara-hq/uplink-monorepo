@@ -14,6 +14,7 @@ export const DecimalScalar = new GraphQLScalarType<Decimal, string>({
     },
     // Parse the value received from the client into the internal Decimal.js value (server-side)
     parseValue: (value: unknown): Decimal => {
+        console.log('PARSE VALUE is ', value)
         if (typeof value !== 'string') {
             throw new TypeError('Decimal values must be a string');
         }

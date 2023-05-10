@@ -16,7 +16,7 @@ import {
   reducer,
   validateAllContestBuilderProps,
   validateStep,
-} from "@/app/contestbuilder/contestHandler";
+} from "@/lib/contestHandler";
 import StandardPrompt from "./StandardPrompt";
 import Deadlines from "./Deadlines";
 import ContestMetadata from "./ContestMetadata";
@@ -110,15 +110,12 @@ const initialState = {
   errors: {},
 } as ContestBuilderProps;
 
-const ContestForm = () => {
+const ContestForm = ({ spaceName }: { spaceName: string }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const handleMutation = useHandleMutation(CreateContestDocument);
 
   const handleFinalValidation = async () => {
-    console.log(state);
-    return false;
-
     const {
       isError,
       errors: validationErrors,
@@ -144,16 +141,11 @@ const ContestForm = () => {
     const values = await handleFinalValidation();
     if (!values) return;
 
-    const contestData = {
-      ...values,
-      ens: "sharkdao.eth",
-    };
-
-    console.log(contestData);
+    console.log(values);
 
     const res = await handleMutation({
       contestData: {
-        ens: "sharkdao.eth",
+        spaceName,
         ...values,
       },
     });

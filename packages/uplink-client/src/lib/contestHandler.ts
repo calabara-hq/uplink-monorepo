@@ -760,6 +760,8 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
             return { isError: false, errors: {} }
         case 6:
             return validateVotingPolicy(state.votingPolicy);
+        case 7:
+            return { isError: false, errors: {} }
     }
     return errors
 }
@@ -796,7 +798,7 @@ export const validateContestMetadata = (metadata: ContestBuilderProps['metadata'
 export const validateContestDeadlines = (deadlines: ContestBuilderProps['deadlines']) => {
 
     const { snapshot, startTime, voteTime, endTime } = deadlines || {};
-    const now = new Date(Date.now()).toISOString().slice(0, -5) + "Z"
+    const now = new Date(Date.now()).toISOString();
 
     // if startTime or snapshot is "now", use a new Date() object for these calculations
     const calculatedStartTime = startTime === 'now' ? now : startTime;
@@ -975,20 +977,20 @@ export const validateVotingPolicy = (votingPolicy: ContestBuilderProps['votingPo
 
 export const validateAllContestBuilderProps = (contestBuilderProps: ContestBuilderProps) => {
 
-    const { type, deadlines, prompt, submitterRewards, submitterRestrictions, voterRewards, votingPolicy } = contestBuilderProps;
+    const { metadata, deadlines, prompt, submitterRewards, submitterRestrictions, voterRewards, votingPolicy, additionalParams } = contestBuilderProps;
 
-    const contestTypeValidation = validateContestType(type);
+    const contestMetadataValidation = validateContestMetadata(metadata);
     const deadlineValidation = validateContestDeadlines(deadlines);
     const promptValidation = validatePrompt(prompt);
     const subRewardValidation = validateSubmitterRewards(submitterRewards);
     const voterRewardValidation = validateVoterRewards(voterRewards);
     const votingPolicyValidation = validateVotingPolicy(votingPolicy);
 
-    const isError = contestTypeValidation.isError || deadlineValidation.isError || promptValidation.isError || subRewardValidation.isError || voterRewardValidation.isError || votingPolicyValidation.isError;
+    const isError = contestMetadataValidation.isError || deadlineValidation.isError || promptValidation.isError || subRewardValidation.isError || voterRewardValidation.isError || votingPolicyValidation.isError;
 
     const errors = {
         ...(isError ? {
-            ...(contestTypeValidation.isError ? contestTypeValidation.errors : {}),
+            ...(contestMetadataValidation.isError ? contestMetadataValidation.errors : {}),
             ...(deadlineValidation.isError ? deadlineValidation.errors : {}),
             ...(promptValidation.isError ? promptValidation.errors : {}),
             ...(subRewardValidation.isError ? subRewardValidation.errors : {}),
@@ -1001,13 +1003,14 @@ export const validateAllContestBuilderProps = (contestBuilderProps: ContestBuild
         errors,
         isError: isError,
         values: {
-            type: contestTypeValidation.value,
+            metadata: contestMetadataValidation.value,
             deadlines: deadlineValidation.value,
             prompt: promptValidation.value,
             submitterRewards: subRewardValidation.value,
             voterRewards: voterRewardValidation.value,
             submitterRestrictions: submitterRestrictions,
-            votingPolicy: votingPolicyValidation.value
+            votingPolicy: votingPolicyValidation.value,
+            additionalParams: additionalParams
         }
     }
 }

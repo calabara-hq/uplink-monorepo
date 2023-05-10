@@ -3,7 +3,7 @@ import {
   ContestBuilderProps,
   rewardsObjectToArray,
   SubmitterRewards,
-} from "@/app/contestbuilder/contestHandler";
+} from "@/lib/contestHandler";
 import { useState, useEffect, useReducer, Fragment } from "react";
 import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
@@ -101,7 +101,6 @@ const SubmitterRewardsComponent = ({
     </BlockWrapper>
   );
 };
-
 
 const SubmitterRewardMatrix = ({
   state,

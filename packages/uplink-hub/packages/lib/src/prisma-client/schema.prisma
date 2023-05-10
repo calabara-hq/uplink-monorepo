@@ -18,14 +18,18 @@ model Session {
 }
 
 model Space {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
   displayName String
   members     Int
   logoUrl     String
   twitter     String?
   website     String?
   admins      Admin[]
+  contests    Contest[]
+  tokens      Token[]
+
+  @@index([name])
 }
 
 model Admin {
@@ -35,4 +39,98 @@ model Admin {
   spaceId Int
 
   @@index([spaceId])
+}
+
+model Contest {
+  id                         Int                         @id @default(autoincrement())
+  space                      Space                       @relation(fields: [spaceId], references: [id])
+  spaceId                    Int
+  created                    String
+  type                       String
+  category                   String
+  startTime                  String
+  voteTime                   String
+  endTime                    String
+  snapshot                   String
+  promptUrl                  String
+  anonSubs                   Boolean
+  visibleVotes               Boolean
+  selfVote                   Boolean
+  subLimit                   Int
+  submitterRewards           SubmitterReward[]
+  voterRewards               VoterReward[]
+  submitterTokenRestrictions SubmitterTokenRestriction[]
+  tokenVotingPolicies        TokenVotingPolicy[]
+
+  @@index([spaceId])
+}
+
+model SubmitterReward {
+  id        Int     @id @default(autoincrement())
+  contest   Contest @relation(fields: [contestId], references: [id])
+  contestId Int
+  token     Token   @relation(fields: [tokenLink], references: [id])
+  tokenLink Int
+  type      String
+  rank      Int
+  amount    String?
+  tokenId   Int?
+
+  @@index([tokenLink])
+  @@index([contestId])
+}
+
+model VoterReward {
+  id        Int     @id @default(autoincrement())
+  contest   Contest @relation(fields: [contestId], references: [id])
+  contestId Int
+  token     Token   @relation(fields: [tokenLink], references: [id])
+  tokenLink Int
+  type      String
+  rank      Int
+  amount    String?
+  tokenId   Int?
+
+  @@index([tokenLink])
+  @@index([contestId])
+}
+
+model SubmitterTokenRestriction {
+  id        Int     @id @default(autoincrement())
+  contest   Contest @relation(fields: [contestId], references: [id])
+  contestId Int
+  token     Token   @relation(fields: [tokenLink], references: [id])
+  tokenLink Int
+  threshold String
+
+  @@index([tokenLink])
+  @@index([contestId])
+}
+
+model TokenVotingPolicy {
+  id           Int     @id @default(autoincrement())
+  contest      Contest @relation(fields: [contestId], references: [id])
+  contestId    Int
+  token        Token   @relation(fields: [tokenLink], references: [id])
+  tokenLink    Int
+  strategyType String
+  
+
+  @@index([tokenLink])
+  @@index([contestId])
+}
+
+model Token {
+  id                    Int                         @id @default(autoincrement())
+  tokenHash             String                      @unique
+  type                  String
+  symbol                String
+  decimals              Int
+  address               String?
+  tokenId               Int?
+  spaces                Space[]
+  submitterRewards      SubmitterReward[]
+  voterRewards          VoterReward[]
+  submitterRestrictions SubmitterTokenRestriction[]
+  tokenVotingPolicies   TokenVotingPolicy[]
 }

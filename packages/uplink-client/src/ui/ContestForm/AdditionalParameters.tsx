@@ -1,4 +1,4 @@
-import { ContestBuilderProps } from "@/app/contestbuilder/contestHandler";
+import { ContestBuilderProps } from "@/lib/contestHandler";
 import { BlockWrapper } from "./ContestForm";
 
 const AdditionalParameters = ({

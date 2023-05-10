@@ -6,7 +6,7 @@ import {
   RewardError,
   rewardsObjectToArray,
   VoterRewards,
-} from "@/app/contestbuilder/contestHandler";
+} from "@/lib/contestHandler";
 import TokenModal from "../TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import { useEffect, useState } from "react";

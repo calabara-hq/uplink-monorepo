@@ -3,11 +3,11 @@ import {
   arraysSubtract,
   ContestBuilderProps,
   VotingPolicyType,
-} from "@/app/contestbuilder/contestHandler";
+  SubmitterRestriction,
+} from "@/lib/contestHandler";
 import TokenModal, { TokenManager } from "../TokenModal/TokenModal";
 import { BlockWrapper } from "./ContestForm";
 import { IToken } from "@/types/token";
-import { SubmitterRestriction } from "@/app/contestbuilder/contestHandler";
 import { useEffect, useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";

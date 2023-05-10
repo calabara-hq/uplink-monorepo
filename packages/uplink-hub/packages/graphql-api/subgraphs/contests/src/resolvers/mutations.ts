@@ -1,4 +1,6 @@
 
+import { DecimalScalar } from "lib";
+import { createDBContest } from "../utils/database.js";
 import {
     validateMetadata,
     validateDeadlines,
@@ -10,6 +12,8 @@ import {
     ContestBuilderProps,
     validateAdditionalParams
 } from "../utils/validateContestParams.js";
+
+import Decimal from 'decimal.js'
 
 import { GraphQLError } from "graphql";
 
@@ -51,7 +55,21 @@ const mutations = {
             //if (!user) throw new Error('Unauthorized');
 
             const { contestData } = args;
+
             const result = await processContestData(contestData);
+
+            if (result.success) {
+                const data = {
+                    metadata: contestData.metadata,
+                    deadlines: contestData.deadlines,
+                    prompt: contestData.prompt,
+                    additionalParams: contestData.additionalParams,
+                    submitterRewards: contestData.submitterRewards,
+                    voterRewards: contestData.voterRewards,
+                    submitterRestrictions: contestData.submitterRestrictions,
+                }
+                let contestId = await createDBContest(data)
+            }
 
             return {
                 success: result.success,

@@ -4,7 +4,7 @@ import {
   ArrowRightIcon,
   CheckBadgeIcon,
 } from "@heroicons/react/24/solid";
-import { ContestBuilderProps } from "@/app/contestbuilder/contestHandler";
+import { ContestBuilderProps } from "@/lib/contestHandler";
 import InfoAlert from "../InfoAlert/InfoAlert";
 
 const categories = [

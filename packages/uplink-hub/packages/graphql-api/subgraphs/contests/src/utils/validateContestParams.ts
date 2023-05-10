@@ -50,20 +50,6 @@ export type VotingPolicy = {
     strategy: ArcadeStrategy | WeightedStrategy;
 };
 
-export interface SubmitterRewards {
-    ETH?: IToken;
-    ERC20?: IToken;
-    ERC721?: IToken;
-    ERC1155?: IToken;
-    payouts?: IPayout[];
-}
-
-export interface VoterRewards {
-    ETH?: IToken;
-    ERC20?: IToken;
-    payouts?: IPayout[];
-}
-
 interface IPayout {
     rank: number;
     ETH?: FungiblePayout;

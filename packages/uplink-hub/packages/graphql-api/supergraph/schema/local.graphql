@@ -42,6 +42,15 @@ input AdditionalParams
   subLimit: Int!
 }
 
+type AdditionalParamsType
+  @join__type(graph: CONTESTS)
+{
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
 type Admin
   @join__type(graph: SPACES)
 {
@@ -62,19 +71,19 @@ type Contest
 {
   id: Int!
   spaceId: Int!
-  spaceName: String!
-  tag: String!
-  start: String!
-  vote: String!
-  end: String!
   created: String!
+  metadata: MetadataType!
+  deadlines: DeadlinesType!
+  promptUrl: IpfsUrl!
+  submitterRewards: [RewardType!]!
+  additionalParams: AdditionalParamsType!
 }
 
 input ContestBuilderProps
   @join__type(graph: CONTESTS)
 {
-  type: ContestType!
-  category: String!
+  spaceName: String!
+  metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
   submitterRewards: SubmitterRewards!
@@ -87,7 +96,7 @@ input ContestBuilderProps
 type ContestErrorData
   @join__type(graph: CONTESTS)
 {
-  type: String
+  metadata: String
   deadlines: String
   prompt: String
   submitterRewards: String
@@ -118,6 +127,15 @@ input Deadlines
   startTime: ISODateString!
   voteTime: ISODateString!
   endTime: ISODateString!
+}
+
+type DeadlinesType
+  @join__type(graph: CONTESTS)
+{
+  startTime: String!
+  voteTime: String!
+  endTime: String!
+  snapshot: String!
 }
 
 scalar Decimal
@@ -198,6 +216,20 @@ enum link__Purpose {
   EXECUTION
 }
 
+input Metadata
+  @join__type(graph: CONTESTS)
+{
+  type: ContestType!
+  category: String!
+}
+
+type MetadataType
+  @join__type(graph: CONTESTS)
+{
+  type: String!
+  category: String!
+}
+
 type Mutation
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
@@ -241,7 +273,7 @@ type Query
   @join__type(graph: SUBMISSIONS)
   @join__type(graph: USER)
 {
-  contest(contestId: Int!): Contest! @join__field(graph: CONTESTS)
+  contest(contestId: Int!): Contest @join__field(graph: CONTESTS)
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
@@ -268,6 +300,15 @@ enum RestrictionTokenType
   ERC20 @join__enumValue(graph: CONTESTS)
   ERC721 @join__enumValue(graph: CONTESTS)
   ERC1155 @join__enumValue(graph: CONTESTS)
+}
+
+type RewardType
+  @join__type(graph: CONTESTS)
+{
+  rank: Int!
+  amount: Decimal
+  tokenId: Int
+  token: TokenType!
 }
 
 type signInResponse
@@ -346,6 +387,17 @@ input SubmitterRewards
   ERC721: IERCToken
   ERC1155: IERCToken
   payouts: [IPayout!]
+}
+
+type TokenType
+  @join__type(graph: CONTESTS)
+{
+  tokenHash: String!
+  type: String!
+  address: String
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
 }
 
 type User
