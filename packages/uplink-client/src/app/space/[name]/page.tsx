@@ -3,7 +3,7 @@ import graphqlClient from "@/lib/graphql/initUrql";
 import Link from "next/link";
 import Image from "next/image";
 import TokenBadge from "@/ui/TokenBadge/TokenBadge";
-import TabGroup from "@/ui/TabGroup/TabGroup";
+import ContestDisplay from "@/ui/ContestDisplay/ContestDisplay";
 
 // return the space data and contests
 const contests = [
@@ -16,7 +16,7 @@ const contests = [
     endTime: "2023-04-27T22:15:49Z",
     created: "2023-04-25T22:15:49Z",
     prompt: {
-      title: "What is the best noun?",
+      title: "📺 Nouns AI Youtube Banner 📺",
     },
   },
 
@@ -29,7 +29,7 @@ const contests = [
     endTime: "2023-05-25T22:15:49Z",
     created: "2023-05-4T22:15:49Z",
     prompt: {
-      title: "What is the best meme?",
+      title: "🌅 Dawn @ The Noun Square! 🌅",
     },
   },
   {
@@ -41,7 +41,7 @@ const contests = [
     endTime: "2023-05-8T22:15:49Z",
     created: "2023-05-4T22:15:49Z",
     prompt: {
-      title: "What is the best video?",
+      title: "✎ Pencil Sketch Contest ✎",
     },
   },
   {
@@ -53,7 +53,7 @@ const contests = [
     endTime: "2023-05-8T22:15:49Z",
     created: "2023-05-4T22:15:49Z",
     prompt: {
-      title: "What is the best IRL picture?",
+      title: "😜 Just MEME It 🤣",
     },
   },
 ];
@@ -89,25 +89,6 @@ const spaceRewards = [
     amount: 100,
   },
 ];
-// calculate label
-// function takes start time, vote time, end time and returns either "accepting submissions", "voting", or "closed"
-
-function calculateStatus(startTime: string, voteTime: string, endTime: string) {
-  const now = new Date().toISOString();
-  if (now < voteTime) {
-    return {
-      label: "accepting submissions",
-      timeRemaining: "6 days",
-    };
-  } else if (now > voteTime && now < endTime) {
-    return {
-      label: "voting",
-      timeRemaining: "6 days",
-    };
-  } else if (now > endTime) {
-    return { label: "closed", timeRemaining: "6 days" };
-  }
-}
 
 const getSpace = async (name: string) => {
   const results = await graphqlClient
@@ -117,7 +98,7 @@ const getSpace = async (name: string) => {
   if (!results.data.space) throw new Error("Space not found");
   results.data.space.contests = contests;
   results.data.space.twitter = "@thenounsquare";
-  results.data.space.website = "https://calabara.com";
+  results.data.space.website = "tns.wtf";
   return results.data;
 };
 
@@ -127,8 +108,8 @@ export default async function Page({ params }: { params: { name: string } }) {
     const { contests, displayName, logoUrl, twitter, website } =
       spaceData.space;
     return (
-      <div className="flex flex-col m-auto mt-6 w-[90vw] gap-4">
-        <div className="flex flex-col lg:flex-row gap-4 items-center">
+      <div className="flex flex-col m-auto py-6 w-[90vw] gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 m-auto items-center w-4/5" >
           <div className="avatar">
             <figure className=" w-20 lg:w-24 rounded-full bg-transparent">
               <Image
@@ -170,22 +151,10 @@ export default async function Page({ params }: { params: { name: string } }) {
             </Link>
           </div>
         </div>
-        <TotalRewards1 />
-
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex w-full justify-between">
-            <h1 className="text-3xl">Contests</h1>
-            <TabGroup />
-          </div>
-          <div className="grid grid-rows-1 lg:grid-cols-4 gap-4 justify-center w-full">
-            {contests.map((contest: any) => {
-              return <ContestCard contest={contest} />;
-            })}
-            {contests.map((contest: any) => {
-              return <ContestCard contest={contest} />;
-            })}
-          </div>
-        </div>
+        <div className="p-2" />
+        <Stats />
+        <div className="p-2" />
+        <ContestDisplay contests={contests} />
         {/*
         <pre className="text-white">{JSON.stringify(spaceData, null, 2)}</pre>
         */}
@@ -196,30 +165,6 @@ export default async function Page({ params }: { params: { name: string } }) {
     return <h1 className="text-white">oops, we couldnt find that space!</h1>;
   }
 }
-
-export const ContestCard = ({ contest }: { contest: any }) => {
-  const status = calculateStatus(
-    contest.startTime,
-    contest.voteTime,
-    contest.endTime
-  );
-  return (
-    <div
-      key={contest.id}
-      className="card bg-base-100 shadow-box
-  transition-all duration-300 ease-linear
-  cursor-pointer hover:scale-105 rounded-3xl p-4"
-    >
-      <div className="card-body  p-0">
-        <h2 className="card-title mb-0">{contest.prompt.title}</h2>
-        <p className="badge">{contest.category}</p>
-        <p>{status?.label}</p>
-        <p>{status?.timeRemaining}</p>
-        <div className="card-actions justify-end"></div>
-      </div>
-    </div>
-  );
-};
 
 {
   /*}
@@ -242,25 +187,24 @@ export const TotalRewards = () => {
 */
 }
 
-export const TotalRewards1 = () => {
+export const Stats = () => {
   return (
-    <div className="flex flex-col justify-evenly items-center gap-4 p-4">
-      <h2 className="text-2xl">Total Rewards Distributed</h2>
-      <div className="stats stats-vertical lg:stats-horizontal w-full">
+    <div className="flex flex-col items-center gap-4 w-3/4 lg:m-auto">
+      <div className="stats stats-vertical lg:stats-horizontal w-full bg-transparent border-2 border-border shadow-box">
         <div className="stat place-items-center">
           <div className="stat-title">ETH</div>
           <div className="stat-value">20</div>
-          <div className="stat-desc">From January 1st to February 1st</div>
+          <div className="stat-desc">Jan 1st to Feb 1st</div>
         </div>
 
         <div className="stat place-items-center">
           <div className="stat-title">Tokens & NFTs</div>
-          <div className="stat-value text-secondary">4,200</div>
-          <div className="stat-desc text-secondary">↗︎ 40 (2%)</div>
+          <div className="stat-value">5</div>
+          <div className="stat-desc text-accent">↗︎ 40 (2%)</div>
         </div>
 
         <div className="stat place-items-center">
-          <div className="stat-title">Twitter Engagement</div>
+          <div className="stat-title">Twitter Impressions</div>
           <div className="stat-value">1,200</div>
           <div className="stat-desc">↘︎ 90 (14%)</div>
         </div>
