@@ -70,10 +70,10 @@ module.exports = {
 
           primary: colors.primary,
           secondary: colors.secondary,
-          accent: colors.accent1,
+          accent: colors.accent2,
           'primary-content': colors.text1,
           'secondary-content': colors.text1,
-          'accent-content': colors.text1,
+          'accent-content': colors.text3,
           'base-100': colors.base1,
           'base-200': colors.base2,
           'base-300': colors.base3,
