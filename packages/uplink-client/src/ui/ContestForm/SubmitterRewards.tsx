@@ -3,7 +3,7 @@ import {
   ContestBuilderProps,
   rewardsObjectToArray,
   SubmitterRewards,
-} from "@/app/contestbuilder/contestHandler";
+} from "@/lib/contestHandler";
 import { useState, useEffect, useReducer, Fragment } from "react";
 import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
@@ -99,26 +99,6 @@ const SubmitterRewardsComponent = ({
         continuous={false}
       />
     </BlockWrapper>
-  );
-};
-
-const Toggle = ({
-  defaultState,
-  onSelectCallback,
-}: {
-  defaultState: boolean;
-  onSelectCallback: (isSelected: boolean) => void;
-}) => {
-  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSelectCallback(e.target.checked);
-  };
-  return (
-    <input
-      type="checkbox"
-      className="toggle toggle-accent border-2"
-      defaultChecked={defaultState}
-      onChange={handleToggle}
-    />
   );
 };
 

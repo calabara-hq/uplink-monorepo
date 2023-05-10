@@ -1,4 +1,4 @@
-import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, ContestBuilderProps, reducer, rewardsObjectToArray, SubmitterRewards, validateContestDeadlines, validateContestType, validatePrompt, validateSubmitterRewards, validateVoterRewards, validateVotingPolicy, VoterRewards } from "@/app/contestbuilder/contestHandler";
+import { arraysSubtract, cleanSubmitterRewards, cleanVoterRewards, ContestBuilderProps, reducer, rewardsObjectToArray, SubmitterRewards, validateContestDeadlines, validateContestMetadata, validatePrompt, validateSubmitterRewards, validateVoterRewards, validateVotingPolicy, VoterRewards } from "@/lib/contestHandler";
 import { IToken } from "@/types/token";
 import { describe, expect, test } from "@jest/globals";
 import { sampleERC1155Token, sampleERC20Token, sampleERC721Token, sampleETHToken } from "./sampleTokens";
@@ -9,27 +9,57 @@ describe("Contest Handler", () => {
         describe("Contest Type", () => {
             test("setContestType from initial null state", () => {
                 const initialState = {
-                    type: null,
+                    metadata: {
+                        type: null,
+                        category: null,
+                    },
                     errors: {}
                 }
 
                 const action = { type: "setType", payload: "standard" }
-                const expectedState = { ...initialState, type: "standard" }
+                const expectedState = { ...initialState, metadata: { ...initialState.metadata, type: "standard" } }
                 expect(reducer(initialState, action)).toEqual(expectedState)
             })
 
             test("setContestType from initial error state", () => {
                 const initialState = {
-                    type: null,
+                    metadata: {
+                        type: null,
+                        category: "art",
+                    },
                     errors: {
-                        type: "error"
+                        metadata: {
+                            type: "error",
+                        }
                     }
                 }
 
                 const action = { type: "setType", payload: "standard" }
-                const expectedState = { type: "standard", errors: {} }
+                const expectedState = { metadata: { type: "standard", category: "art" }, errors: {} }
                 expect(reducer(initialState, action)).toEqual(expectedState)
             })
+
+            test("setContestCategory from dual error state", () => {
+                const initialState = {
+                    metadata: {
+                        type: null,
+                        category: null,
+                    },
+                    errors: {
+                        metadata: {
+                            type: "error",
+                            category: "error",
+                        }
+                    }
+                }
+
+                const action = { type: "setCategory", payload: "art" }
+                const expectedState = { metadata: { type: null, category: "art" }, errors: { metadata: { type: "error" } } }
+                expect(reducer(initialState, action)).toEqual(expectedState)
+            })
+
+
+
         });
 
 
@@ -1303,41 +1333,60 @@ describe("Contest Handler", () => {
 
 
     describe('validation', () => {
-        describe('validate contest type', () => {
-            test('should fail with null contest type', () => {
-                const contestType = null
-                const { isError, errors } = validateContestType(contestType);
+        describe('validate contest metadata', () => {
+            test('should fail with null contest type and category', () => {
+                const metadata = {
+                    type: null,
+                    category: null
+                }
+                const { isError, errors } = validateContestMetadata(metadata);
                 expect(isError).toEqual(true)
-                expect(errors).toEqual({
-                    type: 'Contest type is required'
+                expect(errors.metadata).toEqual({
+                    type: 'Contest type is required',
+                    category: 'Contest category is required'
+
                 });
             })
             test('should fail with empty string contest type', () => {
-                const contestType = ''
-                const { isError, errors } = validateContestType(contestType);
+                const metadata = {
+                    type: "",
+                    category: "art"
+                }
+                const { isError, errors } = validateContestMetadata(metadata);
                 expect(isError).toEqual(true)
-                expect(errors).toEqual({
+                expect(errors.metadata).toEqual({
                     type: 'Contest type is required'
                 });
             })
-            test('should fail with unsupported contest type', () => {
-                const contestType = 'prophouse'
-                const { isError, errors } = validateContestType(contestType);
+
+            test('should fail with empty string contest category', () => {
+                const metadata = {
+                    type: "standard",
+                    category: ""
+                }
+                const { isError, errors } = validateContestMetadata(metadata);
                 expect(isError).toEqual(true)
-                expect(errors).toEqual({
-                    type: 'Contest type is required'
+                expect(errors.metadata).toEqual({
+                    category: 'Contest category is required'
                 });
             })
-            test('should succeed with standard contest type', () => {
-                const contestType = 'standard'
-                const { isError, errors } = validateContestType(contestType);
+
+            test('should succeed with standard contest type and valid category', () => {
+                const metadata = {
+                    type: "standard",
+                    category: "art"
+                }
+                const { isError, errors } = validateContestMetadata(metadata);
                 expect(isError).toEqual(false)
                 expect(errors).toEqual({});
             })
 
-            test('should succeed with twitter contest type', () => {
-                const contestType = 'twitter'
-                const { isError, errors } = validateContestType(contestType);
+            test('should succeed with twitter contest type and valid category', () => {
+                const metadata = {
+                    type: "twitter",
+                    category: "design"
+                }
+                const { isError, errors } = validateContestMetadata(metadata);
                 expect(isError).toEqual(false)
                 expect(errors).toEqual({});
             })

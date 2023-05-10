@@ -16,10 +16,10 @@ import {
   reducer,
   validateAllContestBuilderProps,
   validateStep,
-} from "@/app/contestbuilder/contestHandler";
+} from "@/lib/contestHandler";
 import StandardPrompt from "./StandardPrompt";
 import Deadlines from "./Deadlines";
-import ContestType from "./ContestType";
+import ContestMetadata from "./ContestMetadata";
 import SubmitterRewardsComponent from "./SubmitterRewards";
 import VoterRewardsComponent from "./VoterRewards";
 import SubmitterRestrictions from "./SubmitterRestrictions";
@@ -30,6 +30,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateContestDocument } from "@/lib/graphql/contests.gql";
 import { toast } from "react-hot-toast";
+import AdditionalParameters from "./AdditionalParameters";
 
 export const BlockWrapper = ({
   title,
@@ -47,7 +48,10 @@ export const BlockWrapper = ({
 };
 
 const initialState = {
-  type: null,
+  metadata: {
+    type: null,
+    category: null,
+  },
   deadlines: {
     snapshot: "now",
     startTime: "now",
@@ -96,11 +100,17 @@ const initialState = {
   voterRewards: {},
   submitterRestrictions: [],
   votingPolicy: [],
+  additionalParams: {
+    anonSubs: true,
+    visibleVotes: false,
+    selfVote: false,
+    subLimit: 1,
+  },
 
   errors: {},
 } as ContestBuilderProps;
 
-const ContestForm = () => {
+const ContestForm = ({ spaceName }: { spaceName: string }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const handleMutation = useHandleMutation(CreateContestDocument);
@@ -131,16 +141,11 @@ const ContestForm = () => {
     const values = await handleFinalValidation();
     if (!values) return;
 
-    const contestData = {
-      ...values,
-      ens: "sharkdao.eth",
-    };
-
-    console.log(contestData);
+    console.log(values);
 
     const res = await handleMutation({
       contestData: {
-        ens: "sharkdao.eth",
+        spaceName,
         ...values,
       },
     });
@@ -165,8 +170,8 @@ const ContestForm = () => {
   const steps = [
     {
       name: "Contest Type",
-      component: <ContestType state={state} dispatch={dispatch} />,
-      errorField: "type",
+      component: <ContestMetadata state={state} dispatch={dispatch} />,
+      errorField: "metadata",
     },
     {
       name: "Deadlines",
@@ -201,6 +206,11 @@ const ContestForm = () => {
       errorField: "votingPolicy",
     },
     {
+      name: "Additional Parameters",
+      component: <AdditionalParameters state={state} dispatch={dispatch} />,
+      errorField: "additionalParameters",
+    },
+    {
       errorField: "none",
     },
   ];
@@ -208,6 +218,7 @@ const ContestForm = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       const res = validateStep(state, currentStep);
+      console.log(res);
       if (res.isError) {
         return dispatch({ type: "setErrors", payload: res.errors });
       }

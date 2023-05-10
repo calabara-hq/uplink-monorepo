@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { ContestBuilderProps, VotingPolicy, validateDeadlines, validatePrompt, validateSubmitterRestrictions, validateSubmitterRewards, validateVoterRewards, validateVotingPolicy } from "../src/utils/validateContestParams";
+import { ContestBuilderProps, VotingPolicy, validateDeadlines, validateMetadata, validatePrompt, validateSubmitterRestrictions, validateSubmitterRewards, validateVoterRewards, validateVotingPolicy } from "../src/utils/validateContestParams";
 import { IERCToken, INativeToken, IToken, SubmitterRestriction, SubmitterRewards, VoterRewards } from "lib";
 
 
@@ -32,6 +32,35 @@ export const sampleETHToken: INativeToken = {
 }
 
 describe('Contest Param Validation', () => {
+
+
+    describe('Validate Metadata', () => {
+        test('should return error if category is null', async () => {
+            const metadata: ContestBuilderProps['metadata'] = {
+                type: "twitter",
+                category: null,
+            }
+            const { error, metadata: metadataResponse } = validateMetadata(metadata);
+            expect(error).toEqual('Contest category is required');
+            expect(metadataResponse).toEqual({
+                type: metadata.type,
+                category: metadata.category,
+            });
+        });
+
+        test('should succeed if params are valid', async () => {
+            const metadata: ContestBuilderProps['metadata'] = {
+                type: "twitter",
+                category: "art   ",
+            }
+            const { error, metadata: metadataResponse } = validateMetadata(metadata);
+            expect(error).toBeUndefined();
+            expect(metadataResponse).toEqual({
+                type: metadata.type,
+                category: "art",
+            });
+        });
+    });
 
     describe(' Validate Deadlines', () => {
 

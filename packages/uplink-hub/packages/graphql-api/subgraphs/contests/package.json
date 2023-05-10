@@ -15,6 +15,9 @@
     "@apollo/federation": "^0.38.1",
     "@apollo/server": "^4.3.3",
     "@apollo/subgraph": "^2.3.1",
+    "@pinata/sdk": "^2.1.0",
+    "decimal.js": "^10.4.3",
+    "dotenv": "^16.0.3",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "lib": "workspace:*"

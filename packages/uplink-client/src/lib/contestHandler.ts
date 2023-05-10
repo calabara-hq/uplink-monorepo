@@ -67,8 +67,20 @@ export interface Deadlines {
     endTime: string;
 }
 
-export interface ContestBuilderProps {
+export interface AdditionalParams {
+    anonSubs: boolean;
+    visibleVotes: boolean;
+    selfVote: boolean;
+    subLimit: number;
+}
+
+export type Metadata = {
     type: string | null;
+    category: string | null;
+}
+
+export interface ContestBuilderProps {
+    metadata: Metadata;
     deadlines: Deadlines;
     prompt: Prompt;
     spaceTokens: IToken[];
@@ -76,6 +88,7 @@ export interface ContestBuilderProps {
     voterRewards: VoterRewards;
     submitterRestrictions: SubmitterRestriction[] | [];
     votingPolicy: VotingPolicyType[] | [];
+    additionalParams: AdditionalParams;
     errors: ContestBuilderErrors;
 }
 
@@ -96,8 +109,14 @@ export type PromptError = {
     coverUrl?: string;
 }
 
-export type ContestBuilderErrors = {
+export type MetadataError = {
     type?: string;
+    category?: string;
+}
+
+
+export type ContestBuilderErrors = {
+    metadata?: MetadataError;
     deadlines?: DeadlineError;
     prompt?: PromptError;
     submitterRewards?: RewardError;
@@ -109,11 +128,34 @@ export const reducer = (state: any, action: any) => {
     switch (action.type) {
 
         case "setType": {
-            const { type: typeError, ...otherErrors } = state.errors;
+            const { metadata, ...existingErrors } = state.errors;
+            const { type: typeError, ...existingMetadataErrors } = metadata || {};
             return {
                 ...state,
-                type: action.payload,
-                errors: otherErrors,
+                metadata: {
+                    ...state.metadata,
+                    type: action.payload,
+                },
+                errors: {
+                    ...existingErrors,
+                    ...existingMetadataErrors && Object.keys(existingMetadataErrors).length > 0 ? { metadata: existingMetadataErrors } : {}
+                }
+            };
+        }
+
+        case "setCategory": {
+            const { metadata, ...existingErrors } = state.errors;
+            const { category: categoryError, ...existingMetadataErrors } = metadata || {};
+            return {
+                ...state,
+                metadata: {
+                    ...state.metadata,
+                    category: action.payload,
+                },
+                errors: {
+                    ...existingErrors,
+                    ...existingMetadataErrors && Object.keys(existingMetadataErrors).length > 0 ? { metadata: existingMetadataErrors } : {}
+                }
             };
         }
 
@@ -650,6 +692,14 @@ export const reducer = (state: any, action: any) => {
             return { ...state, votingPolicy: updatedVotingPolicy, errors: errors };
         }
 
+        case "setAnonSubs": return { ...state, additionalParams: { ...state.additionalParams, anonSubs: action.payload } };
+
+        case "setVisibleVotes": return { ...state, additionalParams: { ...state.additionalParams, visibleVotes: action.payload } };
+
+        case "setSelfVote": return { ...state, additionalParams: { ...state.additionalParams, selfVote: action.payload } };
+
+        case "setSubLimit": return { ...state, additionalParams: { ...state.additionalParams, subLimit: action.payload } };
+
         case "validateStep": {
             const stepIndex = action.payload;
             const newErrors = validateStep(state, stepIndex);
@@ -697,7 +747,7 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
     const errors = {}
     switch (step) {
         case 0:
-            return validateContestType(state.type);
+            return validateContestMetadata(state.metadata);
         case 1:
             return validateContestDeadlines(state.deadlines);
         case 2:
@@ -710,19 +760,37 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
             return { isError: false, errors: {} }
         case 6:
             return validateVotingPolicy(state.votingPolicy);
+        case 7:
+            return { isError: false, errors: {} }
     }
     return errors
 }
 
 
-export const validateContestType = (type: ContestBuilderProps['type']) => {
+export const validateContestMetadata = (metadata: ContestBuilderProps['metadata']) => {
 
-    const isError = !type || (type !== 'standard' && type !== 'twitter');
+    const { type, category } = metadata || {};
+
+    const isTypeError = !type || (type !== 'standard' && type !== 'twitter');
+    const isCategoryError = !category;
+
+    const isError = isTypeError || isCategoryError;
+
+
+    const errors = {
+        ...(isError ? {
+            metadata: {
+                ...(isTypeError) ? { type: "Contest type is required" } : {},
+                ...(isCategoryError) ? { category: "Contest category is required" } : {}
+            }
+        } : {})
+    }
+
 
     return {
         isError: isError,
-        ...(isError ? { errors: { type: "Contest type is required" } } : { errors: {} }),
-        value: type
+        errors,
+        value: metadata
     }
 }
 
@@ -730,7 +798,7 @@ export const validateContestType = (type: ContestBuilderProps['type']) => {
 export const validateContestDeadlines = (deadlines: ContestBuilderProps['deadlines']) => {
 
     const { snapshot, startTime, voteTime, endTime } = deadlines || {};
-    const now = new Date(Date.now()).toISOString().slice(0, -5) + "Z"
+    const now = new Date(Date.now()).toISOString();
 
     // if startTime or snapshot is "now", use a new Date() object for these calculations
     const calculatedStartTime = startTime === 'now' ? now : startTime;
@@ -909,20 +977,20 @@ export const validateVotingPolicy = (votingPolicy: ContestBuilderProps['votingPo
 
 export const validateAllContestBuilderProps = (contestBuilderProps: ContestBuilderProps) => {
 
-    const { type, deadlines, prompt, submitterRewards, submitterRestrictions, voterRewards, votingPolicy } = contestBuilderProps;
+    const { metadata, deadlines, prompt, submitterRewards, submitterRestrictions, voterRewards, votingPolicy, additionalParams } = contestBuilderProps;
 
-    const contestTypeValidation = validateContestType(type);
+    const contestMetadataValidation = validateContestMetadata(metadata);
     const deadlineValidation = validateContestDeadlines(deadlines);
     const promptValidation = validatePrompt(prompt);
     const subRewardValidation = validateSubmitterRewards(submitterRewards);
     const voterRewardValidation = validateVoterRewards(voterRewards);
     const votingPolicyValidation = validateVotingPolicy(votingPolicy);
 
-    const isError = contestTypeValidation.isError || deadlineValidation.isError || promptValidation.isError || subRewardValidation.isError || voterRewardValidation.isError || votingPolicyValidation.isError;
+    const isError = contestMetadataValidation.isError || deadlineValidation.isError || promptValidation.isError || subRewardValidation.isError || voterRewardValidation.isError || votingPolicyValidation.isError;
 
     const errors = {
         ...(isError ? {
-            ...(contestTypeValidation.isError ? contestTypeValidation.errors : {}),
+            ...(contestMetadataValidation.isError ? contestMetadataValidation.errors : {}),
             ...(deadlineValidation.isError ? deadlineValidation.errors : {}),
             ...(promptValidation.isError ? promptValidation.errors : {}),
             ...(subRewardValidation.isError ? subRewardValidation.errors : {}),
@@ -935,13 +1003,14 @@ export const validateAllContestBuilderProps = (contestBuilderProps: ContestBuild
         errors,
         isError: isError,
         values: {
-            type: contestTypeValidation.value,
+            metadata: contestMetadataValidation.value,
             deadlines: deadlineValidation.value,
             prompt: promptValidation.value,
             submitterRewards: subRewardValidation.value,
             voterRewards: voterRewardValidation.value,
             submitterRestrictions: submitterRestrictions,
-            votingPolicy: votingPolicyValidation.value
+            votingPolicy: votingPolicyValidation.value,
+            additionalParams: additionalParams
         }
     }
 }

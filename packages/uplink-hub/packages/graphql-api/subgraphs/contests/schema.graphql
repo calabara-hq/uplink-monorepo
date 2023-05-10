@@ -8,15 +8,57 @@ type Space @key(fields: "id") {
   contests: [Contest!]!
 }
 
+type MetadataType {
+  type: String!
+  category: String!
+}
+
+type DeadlinesType {
+  startTime: String!
+  voteTime: String!
+  endTime: String!
+  snapshot: String!
+}
+
+type TokenType {
+  tokenHash: String!
+  type: String!
+  address: String
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
+}
+
+type RewardType {
+  rank: Int!
+  amount: Decimal
+  tokenId: Int
+  token: TokenType!
+}
+
+type SubmitterRestrictionType {
+  token: TokenType!
+  threshold: Decimal!
+}
+
+type AdditionalParamsType {
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
 type Contest @key(fields: "id") {
   id: Int!
   spaceId: Int!
-  spaceName: String!
-  tag: String!
-  start: String!
-  vote: String!
-  end: String!
   created: String!
+  metadata: MetadataType!
+  deadlines: DeadlinesType!
+  promptUrl: IpfsUrl!
+  submitterRewards: [RewardType!]!
+  voterRewards: [RewardType!]!
+  submitterRestrictions: [SubmitterRestrictionType!]!
+  additionalParams: AdditionalParamsType!
 }
 
 type ActiveContest {
@@ -31,7 +73,7 @@ type ActiveContest {
 }
 
 extend type Query {
-  contest(contestId: Int!): Contest!
+  contest(contestId: Int!): Contest
   #spaceContests(spaceId: Int, spaceName: String): [Contest!]!
   activeContests: [ActiveContest!]!
 }
@@ -39,6 +81,11 @@ extend type Query {
 enum ContestType {
   standard
   twitter
+}
+
+input Metadata {
+  type: ContestType!
+  category: String!
 }
 
 input Deadlines {
@@ -143,57 +190,34 @@ input VotingPolicy {
   strategy: VotingStrategy!
 }
 
+input AdditionalParams {
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
 input ContestBuilderProps {
-  ens: String!
-  type: ContestType!
+  spaceName: String!
+  metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
   submitterRewards: SubmitterRewards!
   voterRewards: VoterRewards!
   submitterRestrictions: [SubmitterRestriction!]!
   votingPolicy: [VotingPolicy!]!
-}
-
-type ContestPromptError {
-  title: String
-  body: String
-  coverUrl: String
-}
-
-type ContestDeadlineError {
-  startTime: String
-  voteTime: String
-  endTime: String
-}
-
-type SubmitterRewardsError {
-  tokens: String
-  payouts: String
-}
-
-type VoterRewardsError {
-  tokens: String
-  payouts: String
-}
-
-type SubmitterRestrictionsError {
-  tokens: String
-  thresholds: String
-}
-
-type VotingPolicyError {
-  tokens: String
-  strategies: String
+  additionalParams: AdditionalParams!
 }
 
 type ContestErrorData {
-  type: String
+  metadata: String
   deadlines: String
   prompt: String
   submitterRewards: String
   voterRewards: String
   submitterRestrictions: String
   votingPolicy: String
+  additionalParams: String
 }
 
 type ContestMutationResponse {

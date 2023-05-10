@@ -33,6 +33,24 @@ type ActiveContest
   spaceLink: Space!
 }
 
+input AdditionalParams
+  @join__type(graph: CONTESTS)
+{
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
+type AdditionalParamsType
+  @join__type(graph: CONTESTS)
+{
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
 type Admin
   @join__type(graph: SPACES)
 {
@@ -53,45 +71,39 @@ type Contest
 {
   id: Int!
   spaceId: Int!
-  spaceName: String!
-  tag: String!
-  start: String!
-  vote: String!
-  end: String!
   created: String!
+  metadata: MetadataType!
+  deadlines: DeadlinesType!
+  promptUrl: IpfsUrl!
+  submitterRewards: [RewardType!]!
+  additionalParams: AdditionalParamsType!
 }
 
 input ContestBuilderProps
   @join__type(graph: CONTESTS)
 {
-  ens: String!
-  type: ContestType!
+  spaceName: String!
+  metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
   submitterRewards: SubmitterRewards!
   voterRewards: VoterRewards!
   submitterRestrictions: [SubmitterRestriction!]!
   votingPolicy: [VotingPolicy!]!
-}
-
-type ContestDeadlineError
-  @join__type(graph: CONTESTS)
-{
-  startTime: String
-  voteTime: String
-  endTime: String
+  additionalParams: AdditionalParams!
 }
 
 type ContestErrorData
   @join__type(graph: CONTESTS)
 {
-  type: String
+  metadata: String
   deadlines: String
   prompt: String
   submitterRewards: String
   voterRewards: String
   submitterRestrictions: String
   votingPolicy: String
+  additionalParams: String
 }
 
 type ContestMutationResponse
@@ -99,14 +111,6 @@ type ContestMutationResponse
 {
   success: Boolean!
   errors: ContestErrorData
-}
-
-type ContestPromptError
-  @join__type(graph: CONTESTS)
-{
-  title: String
-  body: String
-  coverUrl: String
 }
 
 enum ContestType
@@ -123,6 +127,15 @@ input Deadlines
   startTime: ISODateString!
   voteTime: ISODateString!
   endTime: ISODateString!
+}
+
+type DeadlinesType
+  @join__type(graph: CONTESTS)
+{
+  startTime: String!
+  voteTime: String!
+  endTime: String!
+  snapshot: String!
 }
 
 scalar Decimal
@@ -203,6 +216,20 @@ enum link__Purpose {
   EXECUTION
 }
 
+input Metadata
+  @join__type(graph: CONTESTS)
+{
+  type: ContestType!
+  category: String!
+}
+
+type MetadataType
+  @join__type(graph: CONTESTS)
+{
+  type: String!
+  category: String!
+}
+
 type Mutation
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
@@ -246,7 +273,7 @@ type Query
   @join__type(graph: SUBMISSIONS)
   @join__type(graph: USER)
 {
-  contest(contestId: Int!): Contest! @join__field(graph: CONTESTS)
+  contest(contestId: Int!): Contest @join__field(graph: CONTESTS)
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
@@ -273,6 +300,15 @@ enum RestrictionTokenType
   ERC20 @join__enumValue(graph: CONTESTS)
   ERC721 @join__enumValue(graph: CONTESTS)
   ERC1155 @join__enumValue(graph: CONTESTS)
+}
+
+type RewardType
+  @join__type(graph: CONTESTS)
+{
+  rank: Int!
+  amount: Decimal
+  tokenId: Int
+  token: TokenType!
 }
 
 type signInResponse
@@ -343,13 +379,6 @@ input SubmitterRestriction
   threshold: Decimal
 }
 
-type SubmitterRestrictionsError
-  @join__type(graph: CONTESTS)
-{
-  tokens: String
-  thresholds: String
-}
-
 input SubmitterRewards
   @join__type(graph: CONTESTS)
 {
@@ -360,11 +389,15 @@ input SubmitterRewards
   payouts: [IPayout!]
 }
 
-type SubmitterRewardsError
+type TokenType
   @join__type(graph: CONTESTS)
 {
-  tokens: String
-  payouts: String
+  tokenHash: String!
+  type: String!
+  address: String
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
 }
 
 type User
@@ -382,25 +415,11 @@ input VoterRewards
   payouts: [IPayout!]
 }
 
-type VoterRewardsError
-  @join__type(graph: CONTESTS)
-{
-  tokens: String
-  payouts: String
-}
-
 input VotingPolicy
   @join__type(graph: CONTESTS)
 {
   token: RestrictionToken!
   strategy: VotingStrategy!
-}
-
-type VotingPolicyError
-  @join__type(graph: CONTESTS)
-{
-  tokens: String
-  strategies: String
 }
 
 input VotingStrategy

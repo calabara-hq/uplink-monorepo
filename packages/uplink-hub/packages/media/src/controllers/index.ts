@@ -1,6 +1,5 @@
 import stream from 'stream';
 import busboy from 'busboy';
-import axios from 'axios';
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
 dotenv.config();
