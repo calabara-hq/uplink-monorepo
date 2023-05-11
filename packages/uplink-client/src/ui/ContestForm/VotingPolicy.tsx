@@ -11,12 +11,7 @@ import { IToken } from "@/types/token";
 import { useEffect, useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
-import InfoAlert from "../InfoAlert/InfoAlert";
-import {
-  TrashIcon,
-  SparklesIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/solid";
+import { TrashIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 
 const VotingPolicy = ({
   state,
@@ -38,13 +33,11 @@ const VotingPolicy = ({
   }, [state.votingPolicy]);
 
   return (
-    <BlockWrapper title="Voting Policy">
-      <InfoAlert>
-        <p>
-          Voting credits determine how voting power is calculated, as well as
-          any restrictions on voting power.
-        </p>
-      </InfoAlert>
+    <BlockWrapper
+      title="Voting Policy"
+      info="Voting credits determine how voting power is calculated, as well as
+    any restrictions on voting power."
+    >
       <div className="flex flex-col items-center w-full gap-4">
         <button
           className="btn"
@@ -71,16 +64,18 @@ const VotingPolicy = ({
                     <tr key={index}>
                       <td className="text-center">
                         <p>{policy?.token?.symbol}</p>
+                        <div className="p-1" />
                         <TokenBadge token={policy?.token} />
                       </td>
                       <td className="text-center">
-                        <p className="font-bold badge badge-lg">
+                        <p className="font-bold badge badge-ghost badge-lg">
                           {policy?.strategy?.type}
                         </p>
                         <p>
                           {policy?.strategy?.type === "arcade" &&
                             policy?.strategy?.votingPower}
                         </p>
+                        <div className="p-1" />
                         <button
                           className="btn btn-sm btn-ghost link"
                           onClick={() => handleEditStrategy(index)}
@@ -248,26 +243,26 @@ const StrategyManager = ({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <label className="text-xl font-medium">Strategy</label>
-        <div className="flex justify-around items-center bg-base-100 rounded-lg">
+        <div className="flex justify-around items-center rounded-lg">
           <button
             className={`${
               selectedStrategy === "arcade"
-                ? "btn btn-lg btn-active btn-accent"
-                : "btn btn-lg btn-outline"
+                ? "btn btn-sm md:btn-md lg:btn-lg btn-active btn-success"
+                : "btn btn-sm md:btn-md lg:btn-lg btn-outline"
             } px-4 py-2 rounded-md`}
             onClick={() => handleStrategyChange("arcade")}
           >
             Arcade
           </button>
           <div className="divider lg:divider-horizontal text-primary-content">
-            <ArrowPathIcon className="w-24" />
+            <ArrowPathIcon className="w-16 lg:w-24" />
           </div>
 
           <button
             className={`${
               selectedStrategy === "weighted"
-                ? "btn btn-lg btn-active btn-accent"
-                : "btn btn-lg btn-outline"
+                ? "btn btn-sm md:btn-md lg:btn-lg btn-active btn-success"
+                : "btn btn-sm sm:btn-sm md:btn-md lg:btn-lg btn-outline"
             } px-4 py-2 rounded-md`}
             onClick={() => handleStrategyChange("weighted")}
           >

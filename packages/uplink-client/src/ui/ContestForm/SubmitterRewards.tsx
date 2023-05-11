@@ -9,8 +9,7 @@ import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import TokenCard from "../TokenCard/TokenCard";
-import { TrashIcon, SparklesIcon } from "@heroicons/react/24/solid";
-import InfoAlert from "../InfoAlert/InfoAlert";
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
@@ -65,12 +64,11 @@ const SubmitterRewardsComponent = ({
   };
 
   return (
-    <BlockWrapper title="Submitter Rewards">
-      <InfoAlert>
-        <p>
-          Select the tokens that will be distributed to the top X submitters
-        </p>
-      </InfoAlert>
+    <BlockWrapper
+      title="Submitter Rewards"
+      info="Select the tokens that will be distributed to the top X submitters
+    "
+    >
       <div className="flex flex-col lg:flex-row w-full gap-4">
         {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
           return (
@@ -193,7 +191,7 @@ const SubmitterRewardMatrix = ({
               <tr key={index}>
                 <th className="w-24 text-center">
                   <input
-                    className={`input w-24 ${
+                    className={`input w-24 text-center ${
                       errors?.submitterRewards?.duplicateRanks?.includes(index)
                         ? "input-error"
                         : "input-bordered"
@@ -207,7 +205,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ETH ? (
                   <td className="text-center ">
                     <input
-                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
+                      className="input input-bordered focus:bg-base-200 text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ETH?.amount || ""}
                       onChange={(e) =>
@@ -220,7 +218,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC20 ? (
                   <td className="text-center ">
                     <input
-                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
+                      className="input input-bordered focus:bg-base-200 text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ERC20?.amount || ""}
                       onChange={(e) =>
@@ -233,7 +231,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC721 ? (
                   <td className="text-center">
                     <input
-                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
+                      className="input input-bordered focus:bg-base-200 text-center w-14 lg:w-28"
                       type="number"
                       value={
                         payout.ERC721?.tokenId !== null
@@ -250,7 +248,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC1155 ? (
                   <td className="text-center">
                     <input
-                      className="input input-bordered focus:bg-neutral text-center w-14 lg:w-28"
+                      className="input input-bordered focus:bg-base-200 text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ERC1155?.amount || ""}
                       onChange={(e) =>
@@ -264,10 +262,10 @@ const SubmitterRewardMatrix = ({
                 submitterRewards.payouts.length > 1 ? (
                   <td className="w-12">
                     <button
-                      className="btn btn-sm btn-ghost"
+                      className="btn btn-square btn-ghost"
                       onClick={() => removeRank(index)}
                     >
-                      <TrashIcon className="w-6" />
+                      <TrashIcon className="w-6 h-6" />
                     </button>
                   </td>
                 ) : (
@@ -277,7 +275,7 @@ const SubmitterRewardMatrix = ({
             ))}
             <tr>
               <th>
-                <button className="btn btn-sm" onClick={addRank}>
+                <button className="btn btn-sm " onClick={addRank}>
                   Add Rank
                 </button>
               </th>

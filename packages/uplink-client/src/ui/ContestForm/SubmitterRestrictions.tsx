@@ -9,8 +9,7 @@ import { IToken } from "@/types/token";
 import { useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
-import InfoAlert from "../InfoAlert/InfoAlert";
-import { TrashIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import { TrashIcon} from "@heroicons/react/24/solid";
 
 const SubmitterRestrictions = ({
   state,
@@ -28,14 +27,11 @@ const SubmitterRestrictions = ({
   };
 
   return (
-    <BlockWrapper title="Submitter Restrictions">
-      <InfoAlert>
-        <p>
-          Select the tokens and their respective thresholds that the submitter
-          must hold to be able to submit.
-        </p>
-      </InfoAlert>
-
+    <BlockWrapper
+      title="Submitter Restrictions"
+      info="Select the tokens and their respective thresholds that the submitter
+    must hold to be able to submit."
+    >
       <div className="flex flex-col items-center w-full gap-4">
         <button
           className="btn"
@@ -62,10 +58,13 @@ const SubmitterRestrictions = ({
                     <tr key={index}>
                       <td className="text-center">
                         <p>{restriction?.token?.symbol}</p>
+                        <div className="p-1" />
+
                         <TokenBadge token={restriction?.token} />
                       </td>
                       <td className="text-center">
                         <p>{restriction.threshold}</p>
+
                         <button
                           className="btn btn-sm btn-ghost link"
                           onClick={() => handleEditRestriction(index)}
@@ -234,7 +233,7 @@ const ThresholdManager = ({
         The number of tokens a submitter must hold to be able to submit to this
       </p>
       <input
-        className="input input-bordered w-full max-w-xs"
+        className="input w-full max-w-xs"
         type="number"
         value={currentRestriction?.threshold || ""}
         onChange={handleThresholdChange}

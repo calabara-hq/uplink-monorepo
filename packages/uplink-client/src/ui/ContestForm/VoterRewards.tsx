@@ -11,8 +11,7 @@ import TokenModal from "../TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import { useEffect, useState } from "react";
 import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
-import { TrashIcon, SparklesIcon } from "@heroicons/react/24/solid";
-import InfoAlert from "../InfoAlert/InfoAlert";
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 const VoterRewardsComponent = ({
   state,
@@ -34,14 +33,11 @@ const VoterRewardsComponent = ({
   };
 
   return (
-    <BlockWrapper title="Voter Rewards">
-      <InfoAlert>
-        <p>
-          Select the tokens that will be distributed to the top X voters who
-          accuraterly predict the outcome of the contest.
-        </p>
-      </InfoAlert>
-
+    <BlockWrapper
+      title="Voter Rewards"
+      info="Select the tokens that will be distributed to the top X voters who
+    accuraterly predict the outcome of the contest."
+    >
       <div className="flex flex-col lg:flex-row w-full gap-4">
         {rewardsObjectToArray(state.voterRewards).map((token, index) => {
           return (
@@ -97,40 +93,43 @@ const VoterRewardsMatrix = ({
     dispatch({ type: "addVoterRank" });
   };
 
-  return (
-    <div className="flex flex-col w-full gap-2">
-      {errors?.voterRewards?.duplicateRanks?.length ?? 0 > 0 ? (
-        <div className="text-red-500">
-          <p>oops, you have some duplicate ranks</p>
-        </div>
-      ) : null}
-      {voterRewards && (
-        <div className="flex flex-col gap-2">
-          {(voterRewards.ERC20 || voterRewards.ETH) &&
-            voterRewards?.payouts?.map((reward, index) => {
-              return (
-                <VoterRewardRow
-                  key={index}
-                  index={index}
-                  reward={reward}
-                  rewardsLength={voterRewards?.payouts?.length ?? 0}
-                  availableRewardTokens={Object.entries(voterRewards)
-                    .filter(
-                      ([key, value]) => key !== "payouts" && value !== null
-                    )
-                    .flatMap(([key, value]) => value)}
-                  dispatch={dispatch}
-                  errors={errors?.voterRewards}
-                />
-              );
-            })}
-          <button className="btn btn-sm" onClick={addRank}>
-            add
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  if (voterRewards.ETH || voterRewards.ERC20) {
+    return (
+      <div className="flex flex-col w-full gap-2">
+        {errors?.voterRewards?.duplicateRanks?.length ?? 0 > 0 ? (
+          <div className="text-red-500">
+            <p>oops, you have some duplicate ranks</p>
+          </div>
+        ) : null}
+        {voterRewards && (
+          <div className="flex flex-col gap-2">
+            {(voterRewards.ERC20 || voterRewards.ETH) &&
+              voterRewards?.payouts?.map((reward, index) => {
+                return (
+                  <VoterRewardRow
+                    key={index}
+                    index={index}
+                    reward={reward}
+                    rewardsLength={voterRewards?.payouts?.length ?? 0}
+                    availableRewardTokens={Object.entries(voterRewards)
+                      .filter(
+                        ([key, value]) => key !== "payouts" && value !== null
+                      )
+                      .flatMap(([key, value]) => value)}
+                    dispatch={dispatch}
+                    errors={errors?.voterRewards}
+                  />
+                );
+              })}
+            <button className="btn btn-sm w-fit" onClick={addRank}>
+              add
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+  return null;
 };
 
 const VoterRewardRow = ({
@@ -193,7 +192,7 @@ const VoterRewardRow = ({
     <div className="flex flex-col lg:flex-row items-center w-full justify-between gap-2 bg-base-100 p-4 rounded-xl">
       <p className="text-center">Voters that accurately choose rank </p>
       <input
-        className={`input w-16 focus:bg-neutral text-center ${
+        className={`input w-16 focus:bg-base-200 text-center ${
           errors?.duplicateRanks?.includes(index)
             ? "input-error"
             : "input-bordered"
@@ -204,7 +203,7 @@ const VoterRewardRow = ({
       />
       <p>will split</p>
       <input
-        className="input input-bordered focus:bg-neutral text-center w-16 lg:w-24"
+        className="input input-bordered focus:bg-base-200 text-center w-16 lg:w-24"
         type="number"
         value={reward[selectedToken.value].amount || ""}
         onChange={(e) =>
@@ -219,10 +218,10 @@ const VoterRewardRow = ({
       />
 
       <button
-        className="btn btn-sm btn-ghost ml-auto lg:m-0"
+        className="btn btn-sm lg:btn-square btn-ghost ml-auto lg:m-0"
         onClick={removeRank}
       >
-        <TrashIcon className="w-6" />
+        <TrashIcon className="w-4 h-4 lg:w-6 lg:h-6" />
       </button>
     </div>
   );

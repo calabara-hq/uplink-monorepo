@@ -5,7 +5,6 @@ import {
   CheckBadgeIcon,
 } from "@heroicons/react/24/solid";
 import { ContestBuilderProps } from "@/lib/contestHandler";
-import InfoAlert from "../InfoAlert/InfoAlert";
 
 const categories = [
   "art",
@@ -28,10 +27,10 @@ const ContestMetadata = ({
   const { type, category } = state.metadata;
 
   return (
-    <BlockWrapper title="Choose a template">
-      <InfoAlert>
-        <p>Select what type of Contest you'd like to run</p>
-      </InfoAlert>
+    <BlockWrapper
+      title="Choose a template"
+      info="Select what type of Contest you'd like to run"
+    >
       <div className="flex flex-col w-full lg:flex-row mt-2">
         <div className="indicator grid flex-grow w-full h-32">
           <span
@@ -47,7 +46,7 @@ const ContestMetadata = ({
             }}
             className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
               type === "standard"
-                ? "border-success btn-active focus:border-2 focus:border-success shadow-box"
+                ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
                 : ""
             }`}
           >
@@ -69,7 +68,7 @@ const ContestMetadata = ({
             }}
             className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
               type === "twitter"
-                ? "border-twitter btn-active focus:border-2 focus:border-twitter shadow-box"
+                ? "border-twitter border-2 shadow-box hover:border-twitter hover:bg-transparent"
                 : ""
             }`}
           >
@@ -81,7 +80,7 @@ const ContestMetadata = ({
         )}
       </div>
 
-      <div className="grid grid-cols-5 w-full gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 w-full gap-4">
         {categories.map((el, index) => (
           <button
             key={index}
@@ -90,7 +89,7 @@ const ContestMetadata = ({
             }}
             className={`btn btn-ghost border-2 border-border h-full card place-items-center ${
               el === category
-                ? "border-success btn-active focus:border-2 focus:border-success shadow-box"
+                ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
                 : ""
             }`}
           >

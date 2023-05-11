@@ -31,18 +31,22 @@ import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateContestDocument } from "@/lib/graphql/contests.gql";
 import { toast } from "react-hot-toast";
 import AdditionalParameters from "./AdditionalParameters";
+import InfoAlert from "../InfoAlert/InfoAlert";
 
 export const BlockWrapper = ({
   title,
+  info,
   children,
 }: {
   title: string;
+  info: string;
   children: React.ReactNode;
 }) => {
   return (
     <div className="">
       <h1 className="text-2xl font-bold">{title}</h1>
-      <div className="flex flex-col items-center lg:p-4 gap-4">{children}</div>
+      <InfoAlert>{info}</InfoAlert>
+      <div className="flex flex-col items-center p-4 lg:p-8 gap-4">{children}</div>
     </div>
   );
 };
@@ -283,34 +287,36 @@ const ContestForm = ({ spaceName }: { spaceName: string }) => {
             transition={{ duration: 0.2 }}
           >
             {steps[currentStep].component}
-            {currentStep > 0 && (
-              <button
-                type="button"
-                className="btn btn-secondary mr-2"
-                onClick={handlePrevious}
-              >
-                Previous
-              </button>
-            )}
-            {currentStep < steps.length - 1 && (
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleNext}
-              >
-                Next
-              </button>
-            )}
+            <div className="flex flex-row justify-between w-full">
+              {currentStep > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-secondary mr-2"
+                  onClick={handlePrevious}
+                >
+                  Previous
+                </button>
+              )}
+              {currentStep < steps.length - 1 && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleNext}
+                >
+                  Next
+                </button>
+              )}
 
-            {currentStep === steps.length - 1 && (
-              <button
-                className="btn btn-primary"
-                type="submit"
-                onClick={handleFormSubmit}
-              >
-                Save
-              </button>
-            )}
+              {currentStep === steps.length - 1 && (
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  onClick={handleFormSubmit}
+                >
+                  Save
+                </button>
+              )}
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>
