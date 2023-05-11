@@ -1,7 +1,7 @@
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-10/12 m-auto">
+    <div className="w-[90vw] m-auto">
       {children}
     </div>
   );
