@@ -6,24 +6,104 @@ const contestById = async (id: string) => {
     const contest = await _prismaClient.contest.findUnique({
         where: { id: contestId },
         include: {
-            submitterRewards: {
+            rewards: {
                 include: {
-                    token: true
+                    tokenReward: {
+                        include: {
+                            token: true
+                        }
+                    }
                 }
             },
-            voterRewards: {
+            submitterRestrictions: {
                 include: {
-                    token: true
+                    tokenRestriction: {
+                        include: {
+                            token: true
+                        }
+                    }
+                }
+            },
+            votingPolicy: {
+                include: {
+                    arcadeVotingPolicy: {
+                        include: {
+                            token: true
+                        }
+                    },
+                    weightedVotingPolicy: {
+                        include: {
+                            token: true
+                        }
+                    }
+
                 }
             }
         }
     });
-    //console.log(JSON.stringify(contest, null, 2))
+    console.log(JSON.stringify(contest, null, 2))
     return contest;
 }
 
+
+
+
+
+const contestById2 = async (id: string) => {
+
+    const contestId = parseInt(id);
+
+
+
+    const contestPromise = _prismaClient.contest.findUnique({
+        where: { id: contestId },
+    });
+
+    const rewardsPromise = _prismaClient.reward.findMany({
+        where: { contestId: contestId },
+        include: {
+            tokenReward: { include: { token: true } },
+        }
+    });
+
+    const submitterRestrictionsPromise = _prismaClient.submitterRestriction.findMany({
+        where: { contestId: contestId },
+        include: { tokenRestriction: { include: { token: true } } },
+    });
+
+    const votingPolicyPromise = _prismaClient.votingPolicy.findMany({
+        where: { contestId: contestId },
+        include: {
+            arcadeVotingPolicy: { include: { token: true } },
+            weightedVotingPolicy: { include: { token: true } },
+        },
+    });
+
+    const [contest, rewards, submitterRestrictions, votingPolicy] = await Promise.all([
+        contestPromise,
+        rewardsPromise,
+        submitterRestrictionsPromise,
+        votingPolicyPromise,
+    ]);
+
+    const data = {
+        ...contest,
+        rewards,
+        submitterRestrictions,
+        votingPolicy,
+    };
+
+    console.log(JSON.stringify(data, null, 2))
+
+    return data;
+
+}
+
+
+
+
 const formatContest = (contest) => {
-    const { type, category, startTime, voteTime, endTime, snapshot, submitterRewards, voterRewards, ...rest } = contest;
+    const { type, category, startTime, voteTime, endTime, snapshot, rewards, submitterRestrictions, votingPolicy, ...rest } = contest;
 
     const data = {
         metadata: {
@@ -36,16 +116,46 @@ const formatContest = (contest) => {
             endTime,
             snapshot
         },
-        submitterRewards: submitterRewards.map(reward => {
+
+        submitterRewards: rewards.filter(reward => reward.recipient === 'submitter').map(reward => {
             return {
                 ...reward,
-                amount: DecimalScalar.parseValue(reward.amount) ?? null,
+                tokenReward: {
+                    ...reward.tokenReward,
+                    amount: DecimalScalar.parseValue(reward.tokenReward.amount),
+                },
             }
         }),
-        voterRewards: voterRewards.map(reward => {
+
+
+        voterRewards: rewards.filter(reward => reward.recipient === 'voter').map(reward => {
             return {
                 ...reward,
-                amount: DecimalScalar.parseValue(reward.amount) ?? null,
+                tokenReward: {
+                    ...reward.tokenReward,
+                    amount: DecimalScalar.parseValue(reward.tokenReward.amount),
+                },
+            }
+        }),
+
+
+        submitterRestrictions: submitterRestrictions.map(restriction => {
+            return {
+                ...restriction,
+                tokenRestriction: {
+                    ...restriction.tokenRestriction,
+                    threshold: DecimalScalar.parseValue(restriction.tokenRestriction.threshold),
+                },
+            }
+        }),
+
+        votingPolicy: votingPolicy.map(policy => {
+            return {
+                ...policy,
+                arcadeVotingPolicy: {
+                    ...policy.arcadeVotingPolicy,
+                    votingPower: DecimalScalar.parseValue(policy.arcadeVotingPolicy.votingPower),
+                },
             }
         }),
         ...rest
@@ -56,12 +166,13 @@ const formatContest = (contest) => {
 }
 
 
-
 const queries = {
     Query: {
         async contest(_, { contestId }, contextValue, info) {
-            const contest = await contestById(contestId)
+            console.time("fetchContest")
+            const contest = await contestById2(contestId)
                 .then(contest => contest ? formatContest(contest) : null)
+            console.timeEnd("fetchContest")
             return contest;
             //return contests.find(contest => contest.id === contestId);
         },

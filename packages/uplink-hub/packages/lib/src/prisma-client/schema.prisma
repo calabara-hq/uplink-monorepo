@@ -1,11 +1,12 @@
 datasource db {
   provider     = "mysql"
-  url          = env("DATABASE_URL")
+  url          = env("PRISMA_DATABASE")
   relationMode = "prisma"
 }
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
 }
 
 model Session {
@@ -42,95 +43,116 @@ model Admin {
 }
 
 model Contest {
-  id                         Int                         @id @default(autoincrement())
-  space                      Space                       @relation(fields: [spaceId], references: [id])
-  spaceId                    Int
-  created                    String
-  type                       String
-  category                   String
-  startTime                  String
-  voteTime                   String
-  endTime                    String
-  snapshot                   String
-  promptUrl                  String
-  anonSubs                   Boolean
-  visibleVotes               Boolean
-  selfVote                   Boolean
-  subLimit                   Int
-  submitterRewards           SubmitterReward[]
-  voterRewards               VoterReward[]
-  submitterTokenRestrictions SubmitterTokenRestriction[]
-  tokenVotingPolicies        TokenVotingPolicy[]
+  id                    Int                    @id @default(autoincrement())
+  space                 Space                  @relation(fields: [spaceId], references: [id])
+  spaceId               Int
+  created               String
+  type                  String
+  category              String
+  startTime             String
+  voteTime              String
+  endTime               String
+  snapshot              String
+  promptUrl             String
+  anonSubs              Boolean
+  visibleVotes          Boolean
+  selfVote              Boolean
+  subLimit              Int
+  rewards               Reward[]
+  submitterRestrictions SubmitterRestriction[]
+  votingPolicy          VotingPolicy[]
 
   @@index([spaceId])
 }
 
-model SubmitterReward {
+model Reward {
+  id          Int           @id @default(autoincrement())
+  contest     Contest       @relation(fields: [contestId], references: [id])
+  contestId   Int
+  rank        Int
+  recipient   String
+  tokenReward TokenReward?
+
+  @@index([contestId])
+}
+
+model TokenReward {
   id        Int     @id @default(autoincrement())
-  contest   Contest @relation(fields: [contestId], references: [id])
-  contestId Int
+  reward    Reward  @relation(fields: [rewardId], references: [id])
+  rewardId  Int     @unique
   token     Token   @relation(fields: [tokenLink], references: [id])
   tokenLink Int
-  type      String
-  rank      Int
   amount    String?
   tokenId   Int?
 
   @@index([tokenLink])
+}
+
+
+model SubmitterRestriction {
+  id               Int               @id @default(autoincrement())
+  contest          Contest           @relation(fields: [contestId], references: [id])
+  contestId        Int
+  restrictionType  String
+  tokenRestriction TokenRestriction?
+
   @@index([contestId])
 }
 
-model VoterReward {
-  id        Int     @id @default(autoincrement())
-  contest   Contest @relation(fields: [contestId], references: [id])
-  contestId Int
-  token     Token   @relation(fields: [tokenLink], references: [id])
-  tokenLink Int
-  type      String
-  rank      Int
-  amount    String?
-  tokenId   Int?
+model TokenRestriction {
+  id                   Int                  @id @default(autoincrement())
+  submitterRestriction SubmitterRestriction @relation(fields: [restrictionId], references: [id])
+  restrictionId        Int                  @unique
+  token                Token                @relation(fields: [tokenLink], references: [id])
+  tokenLink            Int
+  threshold            String
 
   @@index([tokenLink])
+}
+
+model VotingPolicy {
+  id                   Int                   @id @default(autoincrement())
+  contest              Contest               @relation(fields: [contestId], references: [id])
+  contestId            Int
+  strategyType         String
+  arcadeVotingPolicy   ArcadeVotingPolicy?
+  weightedVotingPolicy WeightedVotingPolicy?
+
   @@index([contestId])
 }
 
-model SubmitterTokenRestriction {
-  id        Int     @id @default(autoincrement())
-  contest   Contest @relation(fields: [contestId], references: [id])
-  contestId Int
-  token     Token   @relation(fields: [tokenLink], references: [id])
-  tokenLink Int
-  threshold String
+model ArcadeVotingPolicy {
+  id             Int          @id @default(autoincrement())
+  votingPolicy   VotingPolicy @relation(fields: [votingPolicyId], references: [id])
+  votingPolicyId Int          @unique
+  votingPower    String
+  token          Token        @relation(fields: [tokenLink], references: [id])
+  tokenLink      Int
 
   @@index([tokenLink])
-  @@index([contestId])
 }
 
-model TokenVotingPolicy {
-  id           Int     @id @default(autoincrement())
-  contest      Contest @relation(fields: [contestId], references: [id])
-  contestId    Int
-  token        Token   @relation(fields: [tokenLink], references: [id])
-  tokenLink    Int
-  strategyType String
-  
+model WeightedVotingPolicy {
+  id             Int          @id @default(autoincrement())
+  votingPolicy   VotingPolicy @relation(fields: [votingPolicyId], references: [id])
+  votingPolicyId Int          @unique
+  token          Token        @relation(fields: [tokenLink], references: [id])
+  tokenLink      Int
 
   @@index([tokenLink])
-  @@index([contestId])
 }
 
 model Token {
-  id                    Int                         @id @default(autoincrement())
-  tokenHash             String                      @unique
-  type                  String
-  symbol                String
-  decimals              Int
-  address               String?
-  tokenId               Int?
-  spaces                Space[]
-  submitterRewards      SubmitterReward[]
-  voterRewards          VoterReward[]
-  submitterRestrictions SubmitterTokenRestriction[]
-  tokenVotingPolicies   TokenVotingPolicy[]
+  id                   Int                    @id @default(autoincrement())
+  tokenHash            String                 @unique
+  type                 String
+  symbol               String
+  decimals             Int
+  address              String?
+  tokenId              Int?
+  spaces               Space[]
+  tokenRewards         TokenReward[]
+  tokenRestrictions    TokenRestriction[]
+  arcadeVotingPolicy   ArcadeVotingPolicy[]
+  weightedVotingPolicy WeightedVotingPolicy[]
 }

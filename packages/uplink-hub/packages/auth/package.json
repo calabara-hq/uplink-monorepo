@@ -14,11 +14,13 @@
   "dependencies": {
     "@quixo3/prisma-session-store": "^3.1.10",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "ethers": "5.7.2",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "lib": "workspace:*",
-    "siwe": "2.1.3"
+    "siwe": "2.1.3",
+    "twitter-api-v2": "^1.14.2"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",

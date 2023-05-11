@@ -1,5 +1,17 @@
 import { randomBytes, randomUUID } from 'crypto';
 import { generateNonce, SiweMessage } from 'siwe';
+import { TwitterApi } from 'twitter-api-v2';
+import dotenv from 'dotenv';
+dotenv.config();
+
+
+const twitterClient = new TwitterApi({ clientId: process.env.TWITTER_OAUTH_CLIENT_ID, clientSecret: process.env.TWITTER_OAUTH_CLIENT_SECRET });
+const twitterRedirect = "https://localhost:443/api/auth/twitter/oauth2"
+const twitterScopes = {
+    write: ['tweet.read', 'users.read', 'tweet.write'],
+    read: ['tweet.read', 'users.read']
+}
+
 
 export type ISODateString = string;
 
@@ -48,8 +60,6 @@ export const verifySignature = async (req, res) => {
 }
 
 
-// TODO handle csrf
-
 export const signOut = async (req, res) => {
 
     const { csrfToken } = req.body
@@ -57,7 +67,21 @@ export const signOut = async (req, res) => {
 
     req.session.destroy((err) => {
         if (err) return res.send(false)
-        console.log('AFTER DESTROY', req.session)
         return res.send(true)
     })
+}
+
+export const initiateTwitterAuth = async (req, res) => {
+    console.log(req.sessionID)
+    const { scope } = req.body;
+    const { url, codeVerifier, state } = twitterClient.generateOAuth2AuthLink(twitterRedirect, { scope: twitterScopes[scope] });
+    res.send({ url, scope })
+}
+
+
+export const twitterOauth2 = async (req, res) => {
+    const { state, code } = req.query;
+    console.log(req.sessionID)
+    res.status(200).send({ state, code })
+
 }

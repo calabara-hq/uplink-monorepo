@@ -3,6 +3,8 @@
 *.gz
 *.log
 *.dockerignore
+drizzle.config.json
+migrations/
 node_modules/
 dist/
 coverage

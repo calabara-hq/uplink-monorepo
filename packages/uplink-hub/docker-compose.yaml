@@ -7,6 +7,7 @@ services:
       dockerfile: ./packages/proxy/Dockerfile
     ports:
       - "8080:80"
+      - "443:443"
   auth:
     container_name: auth
     build:

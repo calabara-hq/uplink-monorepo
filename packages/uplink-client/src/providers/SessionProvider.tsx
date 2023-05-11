@@ -6,9 +6,16 @@ import { CtxOrReq, fetchData } from "@/utils /fetchData";
 
 export type ISODateString = string;
 
+export type UserTwitterObject = {
+  id: string;
+  username: string;
+  avatar: string;
+}
+
 export interface Session {
   user?: {
     address?: string | null;
+    twitter?: UserTwitterObject | null;
   };
   expires: ISODateString;
 }

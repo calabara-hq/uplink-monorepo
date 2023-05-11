@@ -67,6 +67,7 @@ const mutations = {
                     submitterRewards: contestData.submitterRewards,
                     voterRewards: contestData.voterRewards,
                     submitterRestrictions: contestData.submitterRestrictions,
+                    votingPolicy: contestData.votingPolicy,
                 }
                 let contestId = await createDBContest(data)
             }

@@ -10,7 +10,7 @@ const Template = (args: any) => <SpaceForm {...args} />;
 
 export const CreateSpaceLoggedIn = Template.bind({});
 CreateSpaceLoggedIn.args = {
-  loggedIn: false,
+  loggedIn: true,
   isNewSpace: true,
   initialState: {
     name: "",
@@ -27,7 +27,7 @@ CreateSpaceLoggedIn.args = {
 
 export const CreateSpaceLoggedOut = Template.bind({});
 CreateSpaceLoggedOut.args = {
-  loggedIn: true,
+  loggedIn: false,
   isNewSpace: true,
   initialState: {
     name: "",

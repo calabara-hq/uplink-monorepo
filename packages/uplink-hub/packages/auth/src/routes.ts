@@ -15,6 +15,11 @@ auth.get('/csrf', authController.getCsrfToken)
 
 auth.post('/sign_in', authController.verifySignature)
 
+auth.post('/twitter/initiate_twitter_auth', authController.initiateTwitterAuth)
+
+auth.get('/twitter/oauth2', authController.twitterOauth2)
+
+
 /*
 auth.post('/sign_out',
     async (req, res) => {

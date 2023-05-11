@@ -7,8 +7,9 @@
     "strict": true,
     "esModuleInterop": true,
     "declaration": true,
+    "skipLibCheck": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "test"]

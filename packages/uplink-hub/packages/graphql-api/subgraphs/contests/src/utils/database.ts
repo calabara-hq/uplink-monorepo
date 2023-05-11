@@ -69,6 +69,20 @@ export interface SubmitterRestriction {
     threshold: string;
 }
 
+export type ArcadeStrategy = {
+    type: "arcade";
+    votingPower: string;
+};
+
+export type WeightedStrategy = {
+    type: "weighted";
+};
+
+export interface VotingPolicy {
+    token: IToken;
+    strategy: ArcadeStrategy | WeightedStrategy;
+}
+
 type ContestData = {
     metadata: Metadata;
     deadlines: Deadlines;
@@ -78,6 +92,7 @@ type ContestData = {
     submitterRewards: SubmitterRewards;
     voterRewards: VoterRewards;
     submitterRestrictions: SubmitterRestriction[];
+    votingPolicy: VotingPolicy[];
 }
 
 
@@ -222,6 +237,32 @@ export const createDBContest = async (contest: ContestData) => {
 
     }));
 
+    const votingPolicyData = await Promise.all(contest.votingPolicy.map(async (policy) => {
+        const { token, strategy } = policy;
+        const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
+        const dbToken = await _prismaClient.token.upsert({
+            where: { tokenHash: tokenHash },
+            update: {},
+            create: {
+                tokenHash: tokenHash,
+                type: token.type,
+                symbol: token.symbol,
+                decimals: token.decimals,
+                address: isERCToken(token) ? token.address : null,
+                tokenId: isERCToken(token) ? token.tokenId : null,
+            },
+        });
+        return {
+            strategy,
+            token: {
+                connect: {
+                    id: dbToken.id,
+                },
+            },
+        };
+
+    }));
+
 
 
     const newContest = await _prismaClient.contest.create({
@@ -238,6 +279,7 @@ export const createDBContest = async (contest: ContestData) => {
             visibleVotes: contest.additionalParams.visibleVotes,
             selfVote: contest.additionalParams.selfVote,
             subLimit: contest.additionalParams.subLimit,
+            /*
             submitterRewards: {
                 create: submitterRewardsData.map(reward => {
                     return {
@@ -260,14 +302,70 @@ export const createDBContest = async (contest: ContestData) => {
                     }
                 })
             },
-            submitterTokenRestrictions: {
+            */
+
+
+        rewards: {
+            create: [
+                ...submitterRewardsData.map(reward => ({
+                    rank: reward.rank,
+                    recipient: 'submitter',
+                    tokenReward: {
+                        create: {
+                            token: reward.token,
+                            ...('amount' in reward.value && { amount: reward.value.amount.toString() }),
+                            ...('tokenId' in reward.value && { tokenId: reward.value.tokenId })
+                        }
+                    }
+                })),
+                ...voterRewardsData.map(reward => ({
+                    rank: reward.rank,
+                    recipient: 'voter',
+                    tokenReward: {
+                        create: {
+                            token: reward.token,
+                            ...('amount' in reward.value && { amount: reward.value.amount.toString() }),
+                            ...('tokenId' in reward.value && { tokenId: reward.value.tokenId })
+                        }
+                    }
+                })),
+            ]
+        },
+
+
+            submitterRestrictions: {
                 create: submitterRestrictionData.map(restriction => {
                     return {
-                        token: restriction.token,
-                        threshold: restriction.threshold.toString()
+                        restrictionType: 'token',
+                        tokenRestriction: {
+                            create: {
+                                token: restriction.token,
+                                threshold: restriction.threshold.toString()
+                            }
+                        }
                     }
                 })
             },
+
+            votingPolicy: {
+                create: votingPolicyData.map(policy => {
+                    return {
+                        strategyType: policy.strategy.type,
+                        arcadeVotingPolicy: policy.strategy.type === 'arcade' ? {
+                            create: {
+                                votingPower: policy.strategy.votingPower.toString(),
+                                token: policy.token
+                            }
+                        } : undefined,
+                        tokenVotingPolicy: policy.strategy.type === 'weighted' ? {
+                            create: {
+                                token: policy.token
+                            }
+                        } : undefined,
+                    }
+                })
+            },
+
             space: {
                 connect: {
                     id: 1
