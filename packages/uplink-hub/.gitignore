@@ -3,6 +3,8 @@
 *.gz
 *.log
 *.dockerignore
+*.cert
+*.key
 drizzle.config.json
 migrations/
 node_modules/

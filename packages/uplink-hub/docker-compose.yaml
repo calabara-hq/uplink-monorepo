@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 services:
   proxy:
     container_name: proxy
@@ -8,6 +8,13 @@ services:
     ports:
       - "8080:80"
       - "443:443"
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
   auth:
     container_name: auth
     build:
@@ -18,6 +25,9 @@ services:
     volumes:
       - ./packages/auth:/usr/src/app/packages/auth
         # - auth_node_modules:/usr/src/app/packages/auth/node_modules
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
   media:
     container_name: media
     build:
@@ -42,7 +52,7 @@ services:
     ports:
       - "4002:4000"
     volumes:
-        - ./packages/graphql-api/subgraphs/spaces/src:/usr/src/app/packages/spaces/src
+      - ./packages/graphql-api/subgraphs/spaces/src:/usr/src/app/packages/spaces/src
 
   contests:
     container_name: contests

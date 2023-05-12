@@ -3,6 +3,7 @@ import Image from "next/image";
 import { AllSpacesDocument } from "@/lib/graphql/spaces.gql";
 import graphqlClient from "@/lib/graphql/initUrql";
 import { AllSpaces } from "./data";
+import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton";
 
 //console.log('revalidating')
 
@@ -59,6 +60,7 @@ export default async function Page() {
           </svg>
           <p className="pl-2">create</p>
         </Link>
+        <TwitterConnectButton />
         <div className="form-control ml-auto">
           <div className="input-group">
             <input

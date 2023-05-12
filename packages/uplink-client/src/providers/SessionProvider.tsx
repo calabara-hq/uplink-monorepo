@@ -8,9 +8,10 @@ export type ISODateString = string;
 
 export type UserTwitterObject = {
   id: string;
+  name: string;
   username: string;
-  avatar: string;
-}
+  profile_image_url: string;
+};
 
 export interface Session {
   user?: {
@@ -129,6 +130,7 @@ export const getSession = async (params?: GetSessionParams) => {
   if (params?.broadcast ?? true) {
     broadcast.post({ event: "session", data: { trigger: "getSession" } });
   }
+  console.log("current session is: ", session);
   return session;
 };
 
@@ -185,6 +187,25 @@ export const signOut = async () => {
   return data;
 };
 
+export const twitterSignIn = async (scope: string) => {
+  // Logic to sign in with Twitter goes here
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_HUB_URL}/auth/twitter/initiate_twitter_auth`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ scope: scope }),
+    }
+  );
+
+  const data = await res.json();
+  //if (res.ok) await _SessionStore._getSession({ event: "storage" });
+  return data;
+};
+
 type SessionProviderProps = {
   children: React.ReactNode;
   session: Session | null;
@@ -221,6 +242,7 @@ export function SessionProvider(props: SessionProviderProps) {
           _SessionStore._session = await getSession({
             broadcast: !storageEvent,
           });
+
           setSession(_SessionStore._session);
           return;
         }

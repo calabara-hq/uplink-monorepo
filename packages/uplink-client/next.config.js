@@ -10,6 +10,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'calabara.mypinata.cloud',
         port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pbs.twimg.com',
+        port: '',
       }
     ]
   }

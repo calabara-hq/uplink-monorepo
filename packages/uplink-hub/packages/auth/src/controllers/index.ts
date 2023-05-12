@@ -2,6 +2,7 @@ import { randomBytes, randomUUID } from 'crypto';
 import { generateNonce, SiweMessage } from 'siwe';
 import { TwitterApi } from 'twitter-api-v2';
 import dotenv from 'dotenv';
+import { redisClient } from '../index.js';
 dotenv.config();
 
 
@@ -72,16 +73,47 @@ export const signOut = async (req, res) => {
 }
 
 export const initiateTwitterAuth = async (req, res) => {
-    console.log(req.sessionID)
+    console.log('initiate session', req.sessionID)
     const { scope } = req.body;
-    const { url, codeVerifier, state } = twitterClient.generateOAuth2AuthLink(twitterRedirect, { scope: twitterScopes[scope] });
+    const { url, codeVerifier, state: stateVerifier } = twitterClient.generateOAuth2AuthLink(twitterRedirect, { scope: twitterScopes[scope] });
+    req.session.SIWT = {
+        codeVerifier,
+        stateVerifier
+    }
+
     res.send({ url, scope })
 }
 
 
 export const twitterOauth2 = async (req, res) => {
     const { state, code } = req.query;
-    console.log(req.sessionID)
-    res.status(200).send({ state, code })
+
+    console.log('twitterOauth2', req.sessionID)
+
+    const { codeVerifier, stateVerifier } = req.session.SIWT;
+
+    if (!codeVerifier || !state || !stateVerifier || !code) {
+        return res.status(400).send('You denied the app or your session expired!');
+    }
+
+    if (state !== stateVerifier) {
+        return res.status(400).send('Stored tokens didnt match!');
+    }
+
+    // Obtain access token
+
+    twitterClient.loginWithOAuth2({ code, codeVerifier, redirectUri: twitterRedirect })
+        .then(async ({ client: loggedClient, accessToken, refreshToken, expiresIn }) => {
+            // {loggedClient} is an authenticated client in behalf of some user
+            // Store {accessToken} somewhere, it will be valid until {expiresIn} is hit.
+            // If you want to refresh your token later, store {refreshToken} (it is present if 'offline.access' has been given as scope)
+
+            // Example request
+            const { data: userObject } = await loggedClient.v2.me({ "user.fields": ["profile_image_url"] });
+            req.session.user.twitter = userObject
+            console.log('TWITTER USER OBJECT', userObject)
+            return res.sendStatus(200)
+        })
+        .catch(() => res.status(403).send('Invalid verifier or access tokens!'));
 
 }
