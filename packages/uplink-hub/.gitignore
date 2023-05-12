@@ -4,6 +4,7 @@
 *.log
 *.dockerignore
 *.cert
+*.crt
 *.key
 drizzle.config.json
 migrations/
