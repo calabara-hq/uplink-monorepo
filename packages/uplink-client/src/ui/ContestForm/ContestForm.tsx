@@ -39,13 +39,13 @@ export const BlockWrapper = ({
   children,
 }: {
   title: string;
-  info: string;
+  info?: string;
   children: React.ReactNode;
 }) => {
   return (
     <div className="">
       <h1 className="text-2xl font-bold">{title}</h1>
-      <InfoAlert>{info}</InfoAlert>
+      {info &&<InfoAlert>{info}</InfoAlert>}
       <div className="flex flex-col items-center p-4 lg:p-8 gap-4">{children}</div>
     </div>
   );

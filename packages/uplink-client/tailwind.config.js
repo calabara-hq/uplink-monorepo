@@ -20,7 +20,7 @@ const colors = {
     // Text Colors
     text1: '#FFFFFF',
     text2: '#EBEBEB',
-    text3: '#DCDCDC',
+    text3: '#A1A1AA',
     
     // Additional Colors
     success: '#60B56C',
@@ -73,7 +73,7 @@ module.exports = {
           accent: colors.accent2,
           'primary-content': colors.text1,
           'secondary-content': colors.text1,
-          'accent-content': colors.text3,
+          'accent-content': colors.text2,
           'base-100': colors.base1,
           'base-200': colors.base2,
           'base-300': colors.base3,

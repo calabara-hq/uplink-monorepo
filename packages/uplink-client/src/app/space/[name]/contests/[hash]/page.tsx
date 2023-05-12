@@ -1,17 +1,19 @@
 import Image from "next/image";
 import contestImage from "public/tns-sketch-contest.jpeg";
-import SubmissionCard, { SubmissionCardVote } from "@/ui/SubmissionCard/SubmissionCard";
+import SubmissionCard, {
+  SubmissionCardVote,
+} from "@/ui/SubmissionCard/SubmissionCard";
 import { SubmissionCard2 } from "@/ui/SubmissionCard/SubmissionCard";
 import Modal from "@/ui/Modal/Modal";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/solid";
 
 export default async function Page({ params }: { params: { id: string } }) {
   return (
-    <div className="flex flex-row m-auto w-[90vw] gap-2">
-      <div className="flex flex-col w-full lg:w-3/4 p-2 gap-4">
+    <div className="flex flex-row m-auto w-[90vw] gap-4 py-6">
+      <div className="flex flex-col w-full lg:w-3/4 gap-4">
         <div className="card lg:card-side bg-transparent shadow-box">
-          <div className="card-body border-2 border-border rounded-lg">
-            <div className="flex gap-4 items-center">
+          <div className="card-body border-2 border-border rounded-lg p-4 lg:p-8">
+            <div className="flex flex-col-reverse lg:flex-row gap-4 items-center">
               <div className="avatar">
                 <div className=" w-20 lg:w-24 rounded-full bg-transparent">
                   <Image
@@ -23,7 +25,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </div>
               </div>
               <h2 className="card-title text-3xl">The Noun Square</h2>
-              <div className="ml-auto btn btn-sm btn-active">Submitting</div>
+              <div className="m-0 lg:ml-auto btn btn-sm btn-info btn-active">Submitting</div>
             </div>
 
             <div className="flex flex-col p-2 lg:p-4 gap-4">
@@ -33,10 +35,6 @@ export default async function Page({ params }: { params: { id: string } }) {
                 610-615. 🏆 .069 ETH for 5 Winners 🏆 Contest Closes: 2/17 @
                 10pm est 🤝 Follow + Tag 🔖 @thenounsquare + some friends
               </p>
-            </div>
-
-            <div className="card-actions justify-end">
-              <SubmitButton />
             </div>
           </div>
         </div>
@@ -59,9 +57,9 @@ export default async function Page({ params }: { params: { id: string } }) {
           <SubmissionCard />
         </div>
       </div>
-      <div className="hidden sticky top-10 right-0 lg:flex lg:flex-col items-center w-1/4 h-1/2 gap-4">
-        <div className="flex flex-col justify-center gap-4 bg-base-100 w-full rounded-xl">
-          <figure className="relative h-80">
+      <div className="hidden lg:flex lg:flex-col items-center w-1/4 gap-4">
+        <div className="relative top-0 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
+          <figure className="relative h-[350px]">
             <Image
               src={contestImage}
               alt="contest image"
@@ -70,17 +68,147 @@ export default async function Page({ params }: { params: { id: string } }) {
             />
           </figure>
         </div>
-        {/*}
-        <div className="flex flex-row items-center justify-between gap-2 bg-base-100 w-full rounded-lg">
-          <button className="btn btn-primary w-3/4">Submit</button>
-          <p className="w-1/4 text-center">4 days</p>
+        <div className="sticky top-5 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
+          <SubmitButton />
+          <SubRewards2 />
+
+
+
+          {/*
+
+          <VoterRewards />
+          <VoterCart />
+                    */}
         </div>
-        */}
+      </div>
+      {/*
+      <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      </Modal>
+  */}
+    </div>
+  );
+}
 
-        <VoterRewards />
-        <VoterCart />
+export function SubRewards1() {
+  return (
+    <div className="flex flex-col items-center gap-2 h-fit bg-base-100 rounded-lg w-full">
+      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit mr-auto">
+        Submitter Rewards
+      </div>
+      <div className="flex flex-row items-center justify-center m-1 p-2 gap-2 w-fit">
+        <p className="font-bold">1 ETH</p>
+      </div>
+    </div>
+  );
+}
 
-        {/*
+export function SubRewards2() {
+  return (
+    <div className="flex flex-col items-center gap-2 h-fit bg-base-100 rounded-lg w-full">
+      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit mr-auto">
+        Submitter Rewards
+      </div>
+      <div className="flex flex-row justify-evenly m-2 p-2 gap-2 w-full ">
+        <p className="font-bold">1 ETH</p>
+        <p className="font-bold">20K SHARK</p>
+      </div>
+    </div>
+  );
+}
+
+export function SubRewards3() {
+  return (
+    <div className="flex flex-col items-center gap-2 h-fit bg-base-100 rounded-lg w-full">
+      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit mr-auto">
+        Submitter Rewards
+      </div>
+      <div className="flex flex-row justify-evenly m-2 p-2 gap-2 w-full ">
+        <p className="font-bold">1 ETH</p>
+        <div className="dropdown dropdown-hover ">
+          <label tabIndex={0} className="font-bold cursor-pointer hover:bg-base-200 p-2 rounded-lg">
+            2 More
+          </label>
+          <div
+            tabIndex={0}
+            className=" card compact dropdown-content bg-base-200 rounded-box w-fit mt-2"
+          >
+            <div className="card-body">
+              <p>1 NOUN</p>
+              <p>1 TNS</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function VoterRewards() {
+  return (
+    <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
+      <div className="bg-warning text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+        Voter Rewards
+      </div>
+      <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+        <p className="font-bold">
+          Voters who select the #1 submission will split <br /> 0.05 ETH
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function Closed() {
+  return (
+    <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
+      <div className="bg-error text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+        Contest Closed
+      </div>
+      <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+        <button className="btn btn-outline">
+          Download Winners
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function VoterCart() {
+  return (
+    <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-fit">
+      <div className="bg-warning text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+        Voting Cart
+      </div>
+      <div className="grid grid-cols-3 justify-items-center justify-evenly p-2 gap-2 w-full font-bold text-center">
+        <p>Voting Power</p>
+        <p>Votes Spent</p>
+        <p>Remaining</p>
+        <p>13</p>
+        <p>3</p>
+        <p>10</p>
+      </div>
+      <div className="flex flex-col gap-2 p-2">
+        <SubmissionCardVote />
+        <SubmissionCardVote />
+        <SubmissionCardVote />
+        <SubmissionCardVote />
+        <SubmissionCardVote />
+      </div>
+    </div>
+  );
+}
+
+export function SubmitButton() {
+  return (
+    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2">
+      <button className="btn btn-primary flex flex-1">Submit</button>
+      <p className="mx-2 p-2 text-center">4 days</p>
+    </div>
+  );
+}
+
+{
+  /*
         <div className="flex flex-row justify-evenly p-4 bg-base-100 w-full rounded-xl">
           <label htmlFor="my-modal-5">
             <button className="btn gap-2">
@@ -262,178 +390,8 @@ export default async function Page({ params }: { params: { id: string } }) {
             </div>
           </div>
         </div>
-        */}
-      </div>
-      {/*
-      <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-      </Modal>
-  */}
-    </div>
-  );
+        */
 }
-
-export function SubRewards1() {
-  return (
-    <div className="flex flex-col bg-transparent w-full">
-      <div className="bg-neutral w-fit p-2 rounded-t-lg">
-        <p>Submitter Rewards</p>
-      </div>
-      <div className="flex w-full justify-center">
-        <div className="flex flex-row justify-evenly p-2 gap-2 bg-base-100 border-2 border-border rounded-b-xl rounded-tr-xl w-full">
-          <p className="btn btn-ghost">1 ETH</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards3() {
-  return (
-    <div className="flex flex-col bg-transparent w-full">
-      <div className="bg-neutral w-fit p-2 rounded-t-lg">
-        <p>Submitter Rewards</p>
-      </div>
-      <div className="flex w-full justify-center">
-        <div className="flex flex-row justify-evenly p-2 gap-2 bg-base-100 border-2 border-border rounded-b-xl rounded-tr-xl w-full">
-          <p className="btn btn-ghost">1 ETH</p>
-          <div className="dropdown dropdown-hover">
-            <label tabIndex={0} className="btn btn-ghost">
-              2 More
-            </label>
-            <div
-              tabIndex={0}
-              className="card compact dropdown-content shadow bg-base-100 rounded-box w-64"
-            >
-              <div className="card-body">
-                <h2 className="card-title">You needed more info?</h2>
-                <p>Here is a description!</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards2() {
-  return (
-    <div className="flex flex-col bg-transparent w-full">
-      <div className="bg-neutral w-fit p-2 rounded-t-lg">
-        <p>Submitter Rewards</p>
-      </div>
-      <div className="flex w-full justify-center">
-        <div className="flex flex-row justify-evenly p-2 gap-2 bg-base-100 border-2 border-border rounded-b-xl rounded-tr-xl w-full">
-          <p className="btn btn-ghost">1 ETH</p>
-          <p className="btn btn-ghost">20K SHARK</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards23() {
-  return (
-    <div className="flex flex-col justify-between h-24 bg-base-100 border-2 border-border rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row justify-evenly p-2 gap-2 ">
-        <p className="btn btn-ghost">1 ETH</p>
-        <div className="dropdown dropdown-right dropdown-end dropdown-hover ">
-          <label tabIndex={0} className="btn btn-ghost">
-            2 More
-          </label>
-          <div
-            tabIndex={0}
-            className=" card compact dropdown-content bg-base-200 shadow-box rounded-box w-36 ml-1"
-          >
-            <div className="card-body">
-              <p>1 NOUN</p>
-              <p>1 TNS</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards21() {
-  return (
-    <div className="flex flex-col justify-between h-24 bg-base-100 border-2 border-border rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row justify-evenly p-2 gap-2 ">
-        <p className="btn btn-ghost">1 ETH</p>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards22() {
-  return (
-    <div className="flex flex-col justify-between h-24 bg-base-100 border-2 border-border rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row justify-evenly p-2 gap-2 ">
-        <p className="btn btn-ghost">1 ETH</p>
-        <p className="btn btn-ghost">20K SHARK</p>
-      </div>
-    </div>
-  );
-}
-
-export function VoterRewards() {
-  return (
-    <div className="flex flex-col justify-between bg-base-100 border-2 border-border rounded-lg w-full">
-      <div className="bg-warning text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Voter Rewards
-      </div>
-      <div className="flex flex-col items-center justify-evenly p-2 gap-2 w-full">
-        <p>Voters who select the #1 submission will split <br /> 0.05 ETH</p>
-      </div>
-    </div>
-  );
-}
-
-export function VoterCart() {
-  return (
-    <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-fit">
-      <div className="bg-warning text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Voting Cart
-      </div>
-      <div className="grid grid-cols-3 justify-items-center justify-evenly p-2 gap-2 w-full ">
-        <p>Voting Power</p>
-        <p>Votes Spent</p>
-        <p>Votes Remaining</p>
-        <p>13</p>
-        <p>3</p>
-        <p>10</p>
-      </div>
-      <div className="flex flex-col gap-2 p-2">
-      <SubmissionCardVote />
-      <SubmissionCardVote />
-      <SubmissionCardVote />
-      <SubmissionCardVote />
-      <SubmissionCardVote />
-
-      </div>
-    </div>
-  );
-}
-
-export function SubmitButton() {
-  return (
-    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg">
-      <button className="btn btn-primary flex flex-1">Submit</button>
-      <p className="p-2 text-center">4 days</p>
-    </div>
-  );
-}
-
 /*
       <div className="flex flex-row w-full h-40 bg-base-100 rounded-xl">
         <div className="flex flex-col justify-evenly items-center w-1/3 p-2">

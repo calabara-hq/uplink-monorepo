@@ -9,7 +9,7 @@ const AdditionalParameters = ({
   dispatch: React.Dispatch<any>;
 }) => {
   return (
-    <BlockWrapper title="Additional Parameters" info="Toggle Additional Params">
+    <BlockWrapper title="Additional Parameters">
       <div className="flex flex-col w-full mt-2 gap-8">
         <AnonymousSubmissions
           anonSubs={state.additionalParams.anonSubs}
