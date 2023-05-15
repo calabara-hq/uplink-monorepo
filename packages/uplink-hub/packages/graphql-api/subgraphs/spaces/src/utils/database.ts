@@ -1,4 +1,4 @@
-import { _prismaClient } from "lib";
+import { _prismaClient, db, schema } from "lib";
 import { GraphQLError } from "graphql";
 
 type SpaceData = {
@@ -9,7 +9,7 @@ type SpaceData = {
     admins: string[];
 }
 
-export const createDbSpace = async (spaceData: SpaceData) => {
+export const createPrismaDbSpace = async (spaceData: SpaceData) => {
     const { name, logoUrl, website, twitter, admins } = spaceData;
 
     const newSpace = await _prismaClient.space.create({
@@ -33,6 +33,36 @@ export const createDbSpace = async (spaceData: SpaceData) => {
     });
     return newSpace.name;
 }
+
+
+export const createDrizzleDbSpace = async (spaceData: SpaceData) => {
+    const { name, logoUrl, website, twitter, admins } = spaceData;
+
+    const space: schema.dbNewSpaceType = {
+        name: name.replace(' ', '').toLowerCase(),
+        displayName: name,
+        logoUrl: logoUrl,
+        website: website,
+        twitter: twitter,
+        members: 0,
+    }
+
+    const spaceId = await db.transaction(async (tx) => {
+        const newSpace = await tx.insert(schema.spaces).values(space)
+        const spaceId = parseInt(newSpace.insertId);
+        await tx.insert(schema.admins).values(admins.map(admin => {
+            return {
+                address: admin,
+                spaceId: spaceId
+            }
+        }))
+        return spaceId
+    });
+
+    console.log('RETURNED SPACE ID IS', spaceId)
+
+}
+
 
 // editDbSpace should update space by id
 export const updateDbSpace = async (id: string, spaceData: SpaceData, user) => {

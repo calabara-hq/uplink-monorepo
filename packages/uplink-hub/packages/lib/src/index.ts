@@ -1,7 +1,7 @@
 
 export * from './authorization/index.js';
 export * from './prisma-client/index.js';
-export { db, getSession } from './drizzle/index.js'
+export * from './drizzle/index.js'
 export * from './token/index.js'
 export * from './types/token.js';
 export * from './types/contest.js';

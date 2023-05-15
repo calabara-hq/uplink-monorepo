@@ -6,7 +6,7 @@ import {
     validateSpaceWebsite,
     validateSpaceAdmins
 } from "../utils/validateFormData.js";
-import { createDbSpace, updateDbSpace } from "../utils/database.js";
+import { createPrismaDbSpace, createDrizzleDbSpace, updateDbSpace } from "../utils/database.js";
 import { GraphQLError } from "graphql";
 
 
@@ -45,16 +45,18 @@ const mutations = {
     Mutation: {
         createSpace: async (_: any, args: any, context: any) => {
 
+            /*
             const user = await Authorization.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'
                 }
             })
-
+            */
+           const user = "nickdodson.eth"
             const { spaceData } = args;
             const result = await processSpaceData(spaceData, user);
-            const spaceName = result.success ? await createDbSpace(result.cleanedSpaceData) : null;
+            const spaceName = result.success ? await createDrizzleDbSpace(result.cleanedSpaceData) : null;
 
             return {
                 spaceName: spaceName,

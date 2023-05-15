@@ -9,7 +9,7 @@
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "generate-prisma": "prisma generate --schema=./src/prisma-client/schema.prisma",
-    "migrate-drizzle": "npx drizzle-kit push:mysql --config=./src/drizzle/drizzle.config.json",
+    "push-db": "npx drizzle-kit push:mysql --config=./src/drizzle/drizzle.config.json",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },

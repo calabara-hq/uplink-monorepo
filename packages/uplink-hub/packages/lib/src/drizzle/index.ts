@@ -2,7 +2,8 @@ import { drizzle } from 'drizzle-orm/planetscale-serverless';
 import { connect } from '@planetscale/database'
 import dotenv from 'dotenv';
 import { sql } from 'drizzle-orm';
-//import { session } from './schema'
+import { and, asc, desc, eq, or } from 'drizzle-orm';
+
 dotenv.config();
 
 
@@ -12,13 +13,7 @@ const connection = connect({
     password: process.env.DATABASE_PASSWORD,
 })
 
+export * as schema from './schema.js';
+export const sqlOps = { and, asc, desc, eq, or, sql };
 export const db = drizzle(connection);
-
-
-export const getSession = async () => {
-
-    return await db.execute<{ sid: string }
-    >(sql`select * from session`)
-
-}
 
