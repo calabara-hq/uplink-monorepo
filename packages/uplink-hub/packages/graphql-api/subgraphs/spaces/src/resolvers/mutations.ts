@@ -6,7 +6,7 @@ import {
     validateSpaceWebsite,
     validateSpaceAdmins
 } from "../utils/validateFormData.js";
-import { createPrismaDbSpace, createDrizzleDbSpace, updateDbSpace } from "../utils/database.js";
+import { updateDbSpace, createDbSpace } from "../utils/database.js";
 import { GraphQLError } from "graphql";
 
 
@@ -53,10 +53,10 @@ const mutations = {
                 }
             })
             */
-           const user = "nickdodson.eth"
+            const user = "nickdodson.eth"
             const { spaceData } = args;
             const result = await processSpaceData(spaceData, user);
-            const spaceName = result.success ? await createDrizzleDbSpace(result.cleanedSpaceData) : null;
+            const spaceName = result.success ? await createDbSpace(result.cleanedSpaceData) : null;
 
             return {
                 spaceName: spaceName,
@@ -67,12 +67,15 @@ const mutations = {
 
         editSpace: async (_: any, args: any, context: any) => {
 
+            /*
             const user = await Authorization.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'
                 }
             })
+            */
+            const user = "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"
 
             const { spaceId, spaceData } = args;
             const result = await processSpaceData(spaceData, user, spaceId);
