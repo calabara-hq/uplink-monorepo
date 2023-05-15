@@ -6,6 +6,7 @@ import {
   TrashIcon,
   LinkIcon,
   ArrowTopRightOnSquareIcon,
+
 } from "@heroicons/react/24/solid";
 
 const TokenCard = ({
@@ -23,7 +24,7 @@ const TokenCard = ({
         {token.type !== "ETH" && <ERCCard token={token} />}
         <div className="card-actions justify-end">
           {handleRemove && (
-            <button className="btn btn-sm btn-ghost" onClick={handleRemove}>
+            <button className="btn btn-xs btn-ghost" onClick={handleRemove}>
               remove
               <TrashIcon className="w-4 ml-2" />
             </button>

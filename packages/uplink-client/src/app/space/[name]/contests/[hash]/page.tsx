@@ -74,11 +74,11 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 
 
-          {/*
+          
 
           <VoterRewards />
           <VoterCart />
-                    */}
+                    
         </div>
       </div>
       {/*

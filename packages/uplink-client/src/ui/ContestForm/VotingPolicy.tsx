@@ -11,7 +11,11 @@ import { IToken } from "@/types/token";
 import { useEffect, useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
-import { TrashIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
+import {
+  TrashIcon,
+  ArrowPathIcon,
+  PencilIcon,
+} from "@heroicons/react/24/solid";
 
 const VotingPolicy = ({
   state,
@@ -39,71 +43,58 @@ const VotingPolicy = ({
     any restrictions on voting power."
     >
       <div className="flex flex-col items-center w-full gap-4">
+        {state.votingPolicy.length > 0 && (
+          <div className="flex flex-col lg:flex-row w-full gap-4">
+            {state.votingPolicy.map((policy, index) => {
+              return (
+                <div className="card w-full lg:w-1/4 bg-base-100 p-4 shadow-box">
+                  <div className="card-body justify-between p-0">
+                    <h2 className="card-title justify-between">
+                      {policy?.token?.symbol}
+                      <button
+                        className="btn btn-sm btn-ghost link"
+                        onClick={() => handleEditStrategy(index)}
+                      >
+                        <PencilIcon className="w-4" />
+                      </button>
+                    </h2>
+                    <div className="flex flex-col items-end gap-2">
+                      <TokenBadge token={policy?.token} />
+                      <p className="font-bold">{policy?.strategy?.type}</p>
+
+                      <p className="">
+                        {policy?.strategy?.type === "arcade" &&
+                          policy?.strategy?.votingPower}
+                      </p>
+                    </div>
+                    <div className="card-actions justify-end">
+                      <button
+                        className="btn btn-xs btn-ghost"
+                        onClick={() => {
+                          dispatch({
+                            type: "removeVotingPolicy",
+                            payload: index,
+                          });
+                        }}
+                      >
+                        remove
+                        <TrashIcon className="w-4 ml-2" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
         <button
-          className="btn"
+          className="btn btn-ghost underline"
           onClick={() => {
             setIsTokenModalOpen(true);
           }}
         >
           Add Policy
         </button>
-
-        {state.votingPolicy.length > 0 && (
-          <div className="overflow-x-auto w-full">
-            <table className="table w-full">
-              <thead>
-                <tr>
-                  <th className="text-center">Token</th>
-                  <th className="text-center">Strategy</th>
-                  <th className="text-center"></th>
-                </tr>
-              </thead>
-              <tbody className="w-full">
-                {state.votingPolicy.map((policy, index) => {
-                  return (
-                    <tr key={index}>
-                      <td className="text-center">
-                        <p>{policy?.token?.symbol}</p>
-                        <div className="p-1" />
-                        <TokenBadge token={policy?.token} />
-                      </td>
-                      <td className="text-center">
-                        <p className="font-bold badge badge-ghost badge-lg">
-                          {policy?.strategy?.type}
-                        </p>
-                        <p>
-                          {policy?.strategy?.type === "arcade" &&
-                            policy?.strategy?.votingPower}
-                        </p>
-                        <div className="p-1" />
-                        <button
-                          className="btn btn-sm btn-ghost link"
-                          onClick={() => handleEditStrategy(index)}
-                        >
-                          edit
-                        </button>
-                      </td>
-                      <td className="text-center">
-                        <button
-                          className="btn btn-xs btn-ghost"
-                          onClick={() => {
-                            dispatch({
-                              type: "removeVotingPolicy",
-                              payload: index,
-                            });
-                          }}
-                        >
-                          Remove
-                          <TrashIcon className="w-5 ml-2" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
         <Modal
           isModalOpen={isTokenModalOpen}
           onClose={() => {

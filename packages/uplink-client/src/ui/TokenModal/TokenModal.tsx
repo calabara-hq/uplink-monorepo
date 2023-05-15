@@ -210,11 +210,10 @@ const QuickAddToken = ({
       )}
       <div>
         <button
-          className="btn btn-sm btn-ghost"
+          className="btn btn-sm btn-ghost underline"
           onClick={() => setProgress(1)}
         >
           Manual Add
-          <PlusIcon className="ml-2 w-5" />
         </button>
       </div>
     </div>

@@ -249,8 +249,8 @@ const ContestForm = ({ spaceName }: { spaceName: string }) => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white px-4 py-8 ml-auto mr-auto">
-      <div className="flex w-full lg:w-1/5 items-start ">
+    <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white lg:px-4 py-4 lg:py-8 ml-auto mr-auto">
+      <div className="hidden lg:flex w-full lg:w-1/5 items-start ">
         <ul className="steps steps-horizontal lg:steps-vertical">
           {steps.map((el, index) => {
             const isActive = currentStep === index;
@@ -258,7 +258,7 @@ const ContestForm = ({ spaceName }: { spaceName: string }) => {
             const hasErrors = state.errors[el.errorField];
 
             const stepClass = isActive
-              ? "step step-primary"
+              ? "step step-secondary"
               : isCompleted
               ? "step step-success"
               : "step step-neutral";
