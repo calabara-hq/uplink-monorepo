@@ -1,36 +1,47 @@
-import { sqlOps } from "lib";
-import { schema } from "lib";
-import { _prismaClient, db } from "lib";
+import { sqlOps, schema, db } from "lib";
 
 const findSpace = async (id?: string, name?: string) => {
     const where = id
-        ? { id: parseInt(id) }
+        ? sqlOps.eq(schema.spaces.id, parseInt(id))
         : name
-            ? { name }
-            : undefined;
+            ? sqlOps.eq(schema.spaces.name, name)
+            : null;
 
     if (!where) {
         return null;
     }
-    return await _prismaClient.space.findUnique({
-        where,
-        include: {
-            admins: true,
-        },
-    });
-};
+    const result = await db.select({
+        id: schema.spaces.id,
+        name: schema.spaces.name,
+        displayName: schema.spaces.displayName,
+        twitter: schema.spaces.twitter,
+        website: schema.spaces.website,
+        logoUrl: schema.spaces.logoUrl,
+        members: schema.spaces.members,
+        admins: schema.admins
+    }).from(schema.spaces).leftJoin(schema.admins, sqlOps.eq(schema.spaces.id, schema.admins.spaceId)).where(where).limit(1);
 
-const findSpace2 = async (id?: string, name?: string) => {
-    const where = id
-        ? { id: parseInt(id) }
-        : name
-            ? { name }
-            : undefined;
+    const aggregatedData = result.reduce((acc, row) => {
+        const spaceId = row.id;
+        const admin = {
+            id: row.admins.id,
+            spaceId: row.admins.spaceId,
+            address: row.admins.address,
+        };
 
-    if (!where) {
-        return null;
-    }
-    return await db.select().from(schema.spaces).limit(1)
+        if (acc[spaceId]) {
+            acc[spaceId].admins.push(admin);
+        } else {
+            acc[spaceId] = {
+                ...row,
+                admins: [admin],
+            };
+        }
+
+        return acc;
+    }, {});
+
+    return Object.values(aggregatedData)[0];
 }
 
 const allSpaces = async () => {
@@ -58,8 +69,7 @@ const allSpaces = async () => {
             acc[spaceId].admins.push(admin);
         } else {
             acc[spaceId] = {
-                id: row.id,
-                name: row.name,
+                ...row,
                 admins: [admin],
             };
         }
@@ -76,13 +86,13 @@ const queries = {
             return allSpaces();
         },
         async space(parent, { id, name }, contextValue, info) {
-            return await findSpace(id, name);
+            return findSpace(id, name);
         },
     },
 
     Space: {
         async __resolveReference(space) {
-            return await findSpace(space.id);
+            return findSpace(space.id);
         },
     },
 };
