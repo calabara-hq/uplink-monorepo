@@ -1,6 +1,6 @@
 
 import { DecimalScalar } from "lib";
-import { createDBContest } from "../utils/database.js";
+import { createDbContest } from "../utils/database.js";
 import {
     validateMetadata,
     validateDeadlines,
@@ -60,6 +60,7 @@ const mutations = {
 
             if (result.success) {
                 const data = {
+                    spaceId: contestData.spaceId,
                     metadata: contestData.metadata,
                     deadlines: contestData.deadlines,
                     prompt: contestData.prompt,
@@ -67,13 +68,16 @@ const mutations = {
                     submitterRewards: contestData.submitterRewards,
                     voterRewards: contestData.voterRewards,
                     submitterRestrictions: contestData.submitterRestrictions,
+                    votingPolicy: contestData.votingPolicy,
                 }
-                let contestId = await createDBContest(data)
             }
+
+            let contestId = result.success ? await createDbContest(contestData) : null
 
             return {
                 success: result.success,
                 errors: result.errors,
+                contestId: contestId,
             }
         },
     }

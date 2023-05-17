@@ -1,42 +1,42 @@
 import express from 'express';
-import auth from './routes.js';
 import bodyParser from 'body-parser';
+import auth from './routes.js';
 import session from 'express-session';
-import {_prismaClient} from 'lib';
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import Redis from 'ioredis';
+import RedisStore from 'connect-redis';
+import dotenv from 'dotenv';
+dotenv.config();
 const port = 5000
 const app = express();
+
+export const redisClient = new Redis(process.env.REDIS_URL);
+
+let redisStore = new RedisStore({
+  client: redisClient,
+  prefix: "uplink-session:",
+})
+
 
 app.use(bodyParser.json())
 
 app.use(session({
   name: "uplink-hub",
   secret: "SESS_SECRET",
+  store: redisStore,
+  //store: new session.MemoryStore,
   saveUninitialized: false,
   resave: false,
-  // memory store
-  //store: new session.MemoryStore(),
-
-  store: new PrismaSessionStore(_prismaClient, {
-    checkPeriod: 5 * 60 * 1000, // 5 minutes
-    dbRecordIdIsSessionId: true,
-    dbRecordIdFunction: undefined,
-  }),
-
-
   cookie: {
-    sameSite: false,
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === "production",
     expires: new Date(Date.now() + 60 * 60 * 1000),
     httpOnly: true,
   },
-
 }))
+
 
 app.use(auth)
 
 app.listen(port, () => {
   console.log(`🔗  Auth server ready on port ${port}`);
 })
-
-
