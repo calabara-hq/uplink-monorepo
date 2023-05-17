@@ -1,7 +1,7 @@
-import { EditorOutputData, IToken, _prismaClient } from "lib";
+import { EditorOutputData, IToken, _prismaClient, db, schema, sqlOps, isERCToken } from "lib";
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
-import { isERCToken } from "lib";
+import { GraphQLError } from "graphql";
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
@@ -32,15 +32,13 @@ type AdditionalParams = {
     subLimit: number;
 }
 
-
-export type FungiblePayout = {
+type FungiblePayout = {
     amount: string;
 }
 
-export type NonFungiblePayout = {
+type NonFungiblePayout = {
     tokenId: number | null;
 }
-
 
 interface IPayout {
     rank: number;
@@ -50,7 +48,7 @@ interface IPayout {
     ERC1155?: FungiblePayout;
 }
 
-export interface SubmitterRewards {
+interface SubmitterRewards {
     ETH?: IToken;
     ERC20?: IToken;
     ERC721?: IToken;
@@ -58,32 +56,33 @@ export interface SubmitterRewards {
     payouts?: IPayout[];
 }
 
-export interface VoterRewards {
+interface VoterRewards {
     ETH?: IToken;
     ERC20?: IToken;
     payouts?: IPayout[];
 }
 
-export interface SubmitterRestriction {
+interface SubmitterRestriction {
     token: IToken;
     threshold: string;
 }
 
-export type ArcadeStrategy = {
+type ArcadeStrategy = {
     type: "arcade";
     votingPower: string;
 };
 
-export type WeightedStrategy = {
+type WeightedStrategy = {
     type: "weighted";
 };
 
-export interface VotingPolicy {
+interface VotingPolicy {
     token: IToken;
     strategy: ArcadeStrategy | WeightedStrategy;
 }
 
 type ContestData = {
+    spaceId: string;
     metadata: Metadata;
     deadlines: Deadlines;
     //created: string;
@@ -116,265 +115,230 @@ export const prepareContestPromptUrl = async (contestPrompt: Prompt) => {
     })
 }
 
-/*
-    take the rewards and create a flattened array of payouts
-    it should look like this:
-    [
-        {
-            rank: 1,
-            payouts: [
-                {
-                    token: {
-                        address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-                        ...
-                    }
-                    amount?: '1000000000000000000'
-                    tokenId?: 100
-                }
-            ]
 
-    ]
+const insertSubRewards = async (contestId, submitterRewards) => {
 
-*/
-const prepareContestRewards = async (contestRewards: SubmitterRewards | VoterRewards) => {
-    const flattenedRewards = contestRewards.payouts?.flatMap(payout => {
-        const { rank, ...payoutData } = payout;
-        return Object.entries(payoutData).map(([tokenType, value]) => ({
-            rank: payout.rank,
-            token: contestRewards[tokenType],
-            value
-        }));
-    }) ?? [];
-
-    return flattenedRewards;
+    const tokenSubRewardsArr = [];
+    await db.transaction(async (innerTx) => {
+        for (const reward of submitterRewards) {
+            const newReward: schema.dbNewRewardType = {
+                contestId,
+                rank: reward.rank,
+                recipient: 'submitter',
+            }
+            const insertedReward = await innerTx.insert(schema.rewards).values(newReward);
+            const newTokenReward: schema.dbNewTokenRewardType = {
+                rewardId: parseInt(insertedReward.insertId),
+                tokenLink: reward.tokenLink,
+                amount: 'amount' in reward.value ? reward.value.amount.toString() : null,
+                tokenId: 'tokenId' in reward.value ? reward.value.tokenId : null,
+            }
+            tokenSubRewardsArr.push(newTokenReward);
+        }
+        await innerTx.insert(schema.tokenRewards).values(tokenSubRewardsArr);
+    });
 }
 
-export const createDBContest = async (contest: ContestData) => {
 
-    //console.log(JSON.stringify(contest, null, 2))
+const insertVoterRewards = async (contestId, voterRewards) => {
 
-    const promptUrl = await prepareContestPromptUrl(contest.prompt);
-
-    const flattenedSubmitterRewards = await prepareContestRewards(contest.submitterRewards);
-    const flattenedVoterRewards = await prepareContestRewards(contest.voterRewards);
-
-    const submitterRewardsData = await Promise.all(flattenedSubmitterRewards.map(async (payout) => {
-        const { rank, token, value } = payout;
-        const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
-        const dbToken = await _prismaClient.token.upsert({
-            where: { tokenHash: tokenHash },
-            update: {},
-            create: {
-                tokenHash: tokenHash,
-                type: token.type,
-                symbol: token.symbol,
-                decimals: token.decimals,
-                address: isERCToken(token) ? token.address : null,
-                tokenId: isERCToken(token) ? token.tokenId : null,
-
-            },
-        });
-        return {
-            rank,
-            value,
-            token: {
-                connect: {
-                    id: dbToken.id,
-                },
-            },
-        };
-    }));
-
-    const voterRewardsData = await Promise.all(flattenedVoterRewards.map(async (payout) => {
-        const { rank, token, value } = payout;
-        const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
-        const dbToken = await _prismaClient.token.upsert({
-            where: { tokenHash: tokenHash },
-            update: {},
-            create: {
-                tokenHash: tokenHash,
-                type: token.type,
-                symbol: token.symbol,
-                decimals: token.decimals,
-                address: isERCToken(token) ? token.address : null,
-                tokenId: isERCToken(token) ? token.tokenId : null,
-            },
-        });
-        return {
-            rank,
-            value,
-            token: {
-                connect: {
-                    id: dbToken.id,
-                },
-            },
-        };
-    }));
-
-    const submitterRestrictionData = await Promise.all(contest.submitterRestrictions.map(async (restriction) => {
-        const { token, threshold } = restriction;
-        const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
-        const dbToken = await _prismaClient.token.upsert({
-            where: { tokenHash: tokenHash },
-            update: {},
-            create: {
-                tokenHash: tokenHash,
-                type: token.type,
-                symbol: token.symbol,
-                decimals: token.decimals,
-                address: isERCToken(token) ? token.address : null,
-                tokenId: isERCToken(token) ? token.tokenId : null,
-            },
-        });
-        return {
-            threshold,
-            token: {
-                connect: {
-                    id: dbToken.id,
-                },
-            },
-        };
-
-    }));
-
-    const votingPolicyData = await Promise.all(contest.votingPolicy.map(async (policy) => {
-        const { token, strategy } = policy;
-        const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
-        const dbToken = await _prismaClient.token.upsert({
-            where: { tokenHash: tokenHash },
-            update: {},
-            create: {
-                tokenHash: tokenHash,
-                type: token.type,
-                symbol: token.symbol,
-                decimals: token.decimals,
-                address: isERCToken(token) ? token.address : null,
-                tokenId: isERCToken(token) ? token.tokenId : null,
-            },
-        });
-        return {
-            strategy,
-            token: {
-                connect: {
-                    id: dbToken.id,
-                },
-            },
-        };
-
-    }));
-
-
-
-    const newContest = await _prismaClient.contest.create({
-        data: {
-            created: new Date().toISOString(),
-            type: contest.metadata.type,
-            category: contest.metadata.category,
-            promptUrl: promptUrl,
-            startTime: contest.deadlines.startTime,
-            voteTime: contest.deadlines.voteTime,
-            endTime: contest.deadlines.endTime,
-            snapshot: contest.deadlines.snapshot,
-            anonSubs: contest.additionalParams.anonSubs,
-            visibleVotes: contest.additionalParams.visibleVotes,
-            selfVote: contest.additionalParams.selfVote,
-            subLimit: contest.additionalParams.subLimit,
-            /*
-            submitterRewards: {
-                create: submitterRewardsData.map(reward => {
-                    return {
-                        type: 'token',
-                        rank: reward.rank,
-                        token: reward.token,
-                        ...('amount' in reward.value && { amount: reward.value.amount.toString() }),
-                        ...('tokenId' in reward.value && { tokenId: reward.value.tokenId })
-                    }
-                })
-            },
-            voterRewards: {
-                create: voterRewardsData.map(reward => {
-                    return {
-                        type: 'token',
-                        rank: reward.rank,
-                        token: reward.token,
-                        ...('amount' in reward.value && { amount: reward.value.amount.toString() }),
-                        ...('tokenId' in reward.value && { tokenId: reward.value.tokenId })
-                    }
-                })
-            },
-            */
-
-
-        rewards: {
-            create: [
-                ...submitterRewardsData.map(reward => ({
-                    rank: reward.rank,
-                    recipient: 'submitter',
-                    tokenReward: {
-                        create: {
-                            token: reward.token,
-                            ...('amount' in reward.value && { amount: reward.value.amount.toString() }),
-                            ...('tokenId' in reward.value && { tokenId: reward.value.tokenId })
-                        }
-                    }
-                })),
-                ...voterRewardsData.map(reward => ({
-                    rank: reward.rank,
-                    recipient: 'voter',
-                    tokenReward: {
-                        create: {
-                            token: reward.token,
-                            ...('amount' in reward.value && { amount: reward.value.amount.toString() }),
-                            ...('tokenId' in reward.value && { tokenId: reward.value.tokenId })
-                        }
-                    }
-                })),
-            ]
-        },
-
-
-            submitterRestrictions: {
-                create: submitterRestrictionData.map(restriction => {
-                    return {
-                        restrictionType: 'token',
-                        tokenRestriction: {
-                            create: {
-                                token: restriction.token,
-                                threshold: restriction.threshold.toString()
-                            }
-                        }
-                    }
-                })
-            },
-
-            votingPolicy: {
-                create: votingPolicyData.map(policy => {
-                    return {
-                        strategyType: policy.strategy.type,
-                        arcadeVotingPolicy: policy.strategy.type === 'arcade' ? {
-                            create: {
-                                votingPower: policy.strategy.votingPower.toString(),
-                                token: policy.token
-                            }
-                        } : undefined,
-                        tokenVotingPolicy: policy.strategy.type === 'weighted' ? {
-                            create: {
-                                token: policy.token
-                            }
-                        } : undefined,
-                    }
-                })
-            },
-
-            space: {
-                connect: {
-                    id: 1
-                }
-            },
+    const tokenVoterRewardsArr = [];
+    await db.transaction(async (innerTx) => {
+        for (const reward of voterRewards) {
+            const newReward: schema.dbNewRewardType = {
+                contestId,
+                rank: reward.rank,
+                recipient: 'voter',
+            }
+            const insertedReward = await innerTx.insert(schema.rewards).values(newReward);
+            const newTokenReward: schema.dbNewTokenRewardType = {
+                rewardId: parseInt(insertedReward.insertId),
+                tokenLink: reward.tokenLink,
+                amount: 'amount' in reward.value ? reward.value.amount.toString() : null,
+                tokenId: 'tokenId' in reward.value ? reward.value.tokenId : null,
+            }
+            tokenVoterRewardsArr.push(newTokenReward);
         }
+        await innerTx.insert(schema.tokenRewards).values(tokenVoterRewardsArr);
+    });
+}
 
+
+const insertSubmitterRestrictions = async (contestId, submitterRestrictions) => {
+
+    // insert submitter restrictions to restrictions table
+    const subRestrictionArr = []
+    await db.transaction(async (innerTx) => {
+        for (const restriction of submitterRestrictions) {
+            const newRestriction: schema.dbNewSubmitterRestrictionType = {
+                contestId,
+                restrictionType: "token",
+            }
+            const insertedRestriction = await innerTx.insert(schema.submitterRestrictions).values(newRestriction);
+
+            const newTokenRestriction: schema.dbNewTokenRestrictionType = {
+                restrictionId: parseInt(insertedRestriction.insertId),
+                tokenLink: restriction.tokenLink,
+                threshold: restriction.threshold,
+            }
+            subRestrictionArr.push(newTokenRestriction);
+        };
+        await innerTx.insert(schema.tokenRestrictions).values(subRestrictionArr);
 
     });
-
-    console.log(JSON.stringify(newContest, null, 2))
 }
+
+const insertVotingPolicies = async (contestId, votingPolicy) => {
+
+    // insert the voting policies
+    await db.transaction(async (innerTx) => {
+
+        for (const policy of votingPolicy) {
+            const newVotingPolicy: schema.dbNewVotingPolicyType = {
+                contestId,
+                strategyType: policy.strategy.type,
+            }
+            const insertedVotingPolicy = await innerTx.insert(schema.votingPolicy).values(newVotingPolicy);
+
+            if (policy.strategy.type === "arcade") {
+                const newArcadeVotingPolicy: schema.dbNewArcadeVotingStrategyType = {
+                    votingPolicyId: parseInt(insertedVotingPolicy.insertId),
+                    votingPower: policy.strategy.votingPower,
+                    tokenLink: policy.tokenLink,
+                }
+                await innerTx.insert(schema.arcadeVotingStrategy).values(newArcadeVotingPolicy);
+            }
+            else if (policy.strategy.type === "weighted") {
+                const newWeightedVotingPolicy: schema.dbNewWeightedVotingStrategyType = {
+                    votingPolicyId: parseInt(insertedVotingPolicy.insertId),
+                    tokenLink: policy.tokenLink,
+                }
+                await innerTx.insert(schema.weightedVotingStrategy).values(newWeightedVotingPolicy);
+            }
+        };
+    });
+
+}
+
+
+export const createDbContest = async (contest: ContestData) => {
+    const spaceId = parseInt(contest.spaceId);
+    const promptUrl = await prepareContestPromptUrl(contest.prompt);
+
+
+
+    const uniqueTokens = new Map();
+
+    const insertUniqueToken = async (token) => {
+        const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
+
+        if (!uniqueTokens.has(tokenHash)) {
+            const existingToken = await db
+                .select({ id: schema.tokens.id })
+                .from(schema.tokens)
+                .where(sqlOps.eq(schema.tokens.tokenHash, tokenHash));
+
+            if (!existingToken[0]) {
+                const newToken: schema.dbNewTokenType = {
+                    tokenHash: tokenHash,
+                    type: token.type,
+                    symbol: token.symbol,
+                    decimals: token.decimals,
+                    address: isERCToken(token) ? token.address : null,
+                    tokenId: isERCToken(token) ? token.tokenId : null,
+                };
+
+                const insertedToken = await db.insert(schema.tokens).values(newToken);
+                const insertId = parseInt(insertedToken.insertId);
+                uniqueTokens.set(tokenHash, { dbTokenId: insertId });
+                return insertId;
+            } else {
+                const existingId = existingToken[0].id;
+                uniqueTokens.set(tokenHash, { dbTokenId: existingId });
+                return existingId;
+            }
+        } else {
+            const existingId = uniqueTokens.get(tokenHash).dbTokenId;
+            return existingId;
+        }
+    }
+
+
+
+    const prepareContestRewards = async (contestRewards: SubmitterRewards | VoterRewards) => {
+        const flattenedRewards = [];
+
+        if (contestRewards.payouts) {
+            for (const payout of contestRewards.payouts) {
+                const { rank, ...payoutData } = payout;
+
+                for (const [tokenType, value] of Object.entries(payoutData)) {
+                    const reward = {
+                        rank: payout.rank,
+                        tokenLink: await insertUniqueToken(contestRewards[tokenType]),
+                        value
+                    };
+                    flattenedRewards.push(reward);
+                }
+            }
+        }
+
+        return flattenedRewards;
+    };
+
+
+    const prepareRestrictionsAndPolicies = async (arr) => {
+        const returnArr = [];
+        for (const arrElement of arr) {
+            const { token, ...rest } = arrElement;
+            const dbTokenId = await insertUniqueToken(token);
+            returnArr.push({ tokenLink: dbTokenId, ...rest });
+        };
+        return returnArr;
+    };
+
+
+    const adjustedSubmitterRewards = await prepareContestRewards(contest.submitterRewards);
+    const adjustedVoterRewards = await prepareContestRewards(contest.submitterRewards);
+    const adjustedVotingPolicy = await prepareRestrictionsAndPolicies(contest.votingPolicy);
+    const adjustedSubmitterRestrictions = await prepareRestrictionsAndPolicies(contest.submitterRestrictions);
+
+
+    const newContest: schema.dbNewContestType = {
+        spaceId: spaceId,
+        type: contest.metadata.type,
+        category: contest.metadata.category,
+        promptUrl: promptUrl,
+        startTime: new Date(contest.deadlines.startTime),
+        voteTime: new Date(contest.deadlines.voteTime),
+        endTime: new Date(contest.deadlines.endTime),
+        snapshot: new Date(contest.deadlines.snapshot),
+        anonSubs: contest.additionalParams.anonSubs,
+        visibleVotes: contest.additionalParams.visibleVotes,
+        selfVote: contest.additionalParams.selfVote,
+        subLimit: contest.additionalParams.subLimit,
+        created: new Date()
+    }
+
+
+    try {
+        return await db.transaction(async (tx) => {
+            const contest = await tx.insert(schema.contests).values(newContest)
+            const contestId = parseInt(contest.insertId);
+            await Promise.all([
+                insertSubRewards(contestId, adjustedSubmitterRewards),
+                insertVoterRewards(contestId, adjustedVoterRewards),
+                insertSubmitterRestrictions(contestId, adjustedSubmitterRestrictions),
+                insertVotingPolicies(contestId, adjustedVotingPolicy),
+            ]);
+            return contestId;
+        });
+    } catch (err) {
+        throw new Error("database error: " + err.message)
+    }
+
+
+
+
+
+};

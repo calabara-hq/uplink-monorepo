@@ -229,7 +229,7 @@ input AdditionalParams {
 }
 
 input ContestBuilderProps {
-  spaceName: String!
+  spaceId: String!
   metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
@@ -253,6 +253,7 @@ type ContestErrorData {
 
 type ContestMutationResponse {
   success: Boolean!
+  contestId: Int
   errors: ContestErrorData
 }
 

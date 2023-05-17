@@ -5129,6 +5129,7 @@ __metadata:
     jest: ^29.5.0
     nodemon: ^2.0.20
     prisma: 4.14.0
+    sql: ^0.78.0
     ts-jest: ^29.1.0
     ts-node: ^10.9.1
     typescript: ^4.9.5
@@ -5190,6 +5191,13 @@ __metadata:
   version: 4.7.0
   resolution: "lodash.xorby@npm:4.7.0"
   checksum: 397a97d5b60556bb05c7deebd2a130880c4f7b3a72d95a1d6a8efacfa223086decfc51c5dc94f53503017d4c9255f6788c3c56e2b9c66305f29b13e636188509
+  languageName: node
+  linkType: hard
+
+"lodash@npm:4.1.x":
+  version: 4.1.0
+  resolution: "lodash@npm:4.1.0"
+  checksum: 29bc9fbd4af5fd2a2f0ebd7592fe4834cdbc71872c5d59ee36a025479f5211b66052a10d8cfbd4b90931974b703676603acf7ff9ce2939a1fe1a31163d8d543e
   languageName: node
   linkType: hard
 
@@ -6460,6 +6468,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sliced@npm:0.0.x":
+  version: 0.0.5
+  resolution: "sliced@npm:0.0.5"
+  checksum: 016d372c94e225bcd5700d3ba1a154bd24964195bd3fcb6a720c758730e17580a370f47365c3bfb806d13a4d5bccd423fbd0b5d8179bff9a4a7ef9962449e7e3
+  languageName: node
+  linkType: hard
+
 "smart-buffer@npm:^4.2.0":
   version: 4.2.0
   resolution: "smart-buffer@npm:4.2.0"
@@ -6532,6 +6547,16 @@ __metadata:
   version: 1.0.3
   resolution: "sprintf-js@npm:1.0.3"
   checksum: 19d79aec211f09b99ec3099b5b2ae2f6e9cdefe50bc91ac4c69144b6d3928a640bb6ae5b3def70c2e85a2c3d9f5ec2719921e3a59d3ca3ef4b2fd1a4656a0df3
+  languageName: node
+  linkType: hard
+
+"sql@npm:^0.78.0":
+  version: 0.78.0
+  resolution: "sql@npm:0.78.0"
+  dependencies:
+    lodash: 4.1.x
+    sliced: 0.0.x
+  checksum: 7b0ca6bed14e646d1aff5e341e308571fb8a4201cebb4e2906c81415c06437b454081a8e432d26fa256303a966a3addea22c872dd8689bb7aa0ca318203953bc
   languageName: node
   linkType: hard
 

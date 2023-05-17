@@ -85,7 +85,7 @@ type Contest
 input ContestBuilderProps
   @join__type(graph: CONTESTS)
 {
-  spaceName: String!
+  spaceId: String!
   metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
@@ -113,6 +113,7 @@ type ContestMutationResponse
   @join__type(graph: CONTESTS)
 {
   success: Boolean!
+  contestId: Int
   errors: ContestErrorData
 }
 

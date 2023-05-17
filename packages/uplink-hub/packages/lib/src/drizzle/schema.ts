@@ -34,7 +34,7 @@ export const contests = mysqlTable('contests', {
     startTime: datetime('startTime').notNull(),
     voteTime: datetime('voteTime').notNull(),
     endTime: datetime('endTime').notNull(),
-    snapshot: varchar('snapshot', { length: 255 }).notNull(),
+    snapshot: datetime('snapshot').notNull(),
     promptUrl: varchar('promptUrl', { length: 255 }).notNull(),
     anonSubs: boolean('anonSubs').notNull(),
     visibleVotes: boolean('visibleVotes').notNull(),
@@ -53,7 +53,7 @@ export const rewards = mysqlTable('rewards', {
     contestIdIndex: index("rewards_contest_id_idx").on(rewards.contestId),
 }));
 
-export const submitterRestriction = mysqlTable('submitterRestriction', {
+export const submitterRestrictions = mysqlTable('submitterRestrictions', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     restrictionType: varchar('restrictionType', { length: 255 }).notNull(),
@@ -68,7 +68,7 @@ export const tokens = mysqlTable('tokens', {
     type: varchar('type', { length: 255 }).notNull(),
     symbol: varchar('symbol', { length: 255 }).notNull(),
     decimals: int('decimals').notNull(),
-    address: varchar('address', { length: 255 }).notNull(),
+    address: varchar('address', { length: 255 }),
     tokenId: int('tokenId'),
 }, (tokens) => ({
     tokenHashIndex: uniqueIndex("tokenhash_idx").on(
@@ -91,7 +91,7 @@ export const tokenRewards = mysqlTable('tokenRewards', {
     rewardId: int('rewardId').notNull(),
     tokenLink: int('tokenLink').notNull(),
     amount: varchar('amount', { length: 255 }),
-    tokenId: int('tokenId').notNull(),
+    tokenId: int('tokenId'),
 }, (tokenRewards) => ({
     tokenRewardsRewardIdIndex: uniqueIndex("tokenRewards_reward_id_idx").on(tokenRewards.rewardId),
     tokenRewardsTokenLinkIndex: index("tokenRewards_token_link_idx").on(tokenRewards.tokenLink),
@@ -140,8 +140,8 @@ export type dbNewContestType = InferModel<typeof contests, 'insert'>
 export type dbRewardType = InferModel<typeof rewards>
 export type dbNewRewardType = InferModel<typeof rewards, 'insert'>
 
-export type dbSubmitterRestrictionType = InferModel<typeof submitterRestriction>
-export type dbNewSubmitterRestrictionType = InferModel<typeof submitterRestriction, 'insert'>
+export type dbSubmitterRestrictionType = InferModel<typeof submitterRestrictions>
+export type dbNewSubmitterRestrictionType = InferModel<typeof submitterRestrictions, 'insert'>
 
 export type dbTokenType = InferModel<typeof tokens>
 export type dbNewTokenType = InferModel<typeof tokens, 'insert'>
