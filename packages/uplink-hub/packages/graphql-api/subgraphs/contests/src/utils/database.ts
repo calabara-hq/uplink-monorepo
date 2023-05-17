@@ -220,6 +220,26 @@ const insertVotingPolicies = async (contestId, votingPolicy) => {
 
 }
 
+// update the many-to-many mapping of spacesToTokens
+const insertSpaceToken = async (spaceId, tokenId) => {
+    const existingLink = await db.select({ id: schema.spacesToTokens.id })
+        .from(schema.spacesToTokens)
+        .where(sqlOps.and(
+            sqlOps.eq(schema.spacesToTokens.spaceId, spaceId),
+            sqlOps.eq(schema.spacesToTokens.tokenLink, tokenId)
+        ));
+
+    if (!existingLink[0]) {
+        // insert the new link
+        const newSpaceToken: schema.dbNewSpaceToTokenType = {
+            spaceId: spaceId,
+            tokenLink: tokenId,
+        }
+        await db.insert(schema.spacesToTokens).values(newSpaceToken);
+    }
+}
+
+
 
 export const createDbContest = async (contest: ContestData) => {
     const spaceId = parseInt(contest.spaceId);
@@ -251,14 +271,17 @@ export const createDbContest = async (contest: ContestData) => {
                 const insertedToken = await db.insert(schema.tokens).values(newToken);
                 const insertId = parseInt(insertedToken.insertId);
                 uniqueTokens.set(tokenHash, { dbTokenId: insertId });
+                await insertSpaceToken(spaceId, insertId);
                 return insertId;
             } else {
                 const existingId = existingToken[0].id;
                 uniqueTokens.set(tokenHash, { dbTokenId: existingId });
+                await insertSpaceToken(spaceId, existingId);
                 return existingId;
             }
         } else {
             const existingId = uniqueTokens.get(tokenHash).dbTokenId;
+            await insertSpaceToken(spaceId, existingId);
             return existingId;
         }
     }
