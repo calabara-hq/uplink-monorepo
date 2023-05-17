@@ -41,7 +41,13 @@ const AnonymousSubmissions = ({
 }) => {
   return (
     <div className="flex w-full ">
-      <p>Anon Subs</p>
+      <div className="flex flex-col w-full ">
+        <p className="text-lg font-bold ">Anon Subs</p>
+        <p className="text-sm text-accent-content ml-2">
+          Should contest results be visible during voting?
+        </p>
+      </div>
+
       <div className="ml-auto">
         <Toggle
           defaultState={anonSubs}
@@ -63,7 +69,12 @@ const VisibleVotes = ({
 }) => {
   return (
     <div className="flex w-full ">
-      <p>Visible Votes</p>
+      <div className="flex flex-col w-full ">
+        <p className="text-lg font-bold ">Visible Votes</p>
+        <p className="text-sm text-accent-content ml-2">
+          Should contest results be visible during voting?
+        </p>
+      </div>
       <div className="ml-auto">
         <Toggle
           defaultState={visibleVotes}
@@ -85,7 +96,13 @@ const SelfVotes = ({
 }) => {
   return (
     <div className="flex w-full ">
-      <p>Self Votes</p>
+      <div className="flex flex-col w-full ">
+        <p className="text-lg font-bold ">Self Votes</p>
+        <p className="text-sm text-accent-content ml-2">
+          Are participants able to vote on their own submissions?
+        </p>
+      </div>
+
       <div className="ml-auto">
         <Toggle
           defaultState={selfVote}
@@ -106,16 +123,16 @@ const SubmissionLimit = ({
   dispatch: React.Dispatch<any>;
 }) => {
   return (
-    <div className="flex w-full ">
-      <p>Submission Limit</p>
-      <div className="ml-auto flex gap-2">
+    <div className="flex flex-col lg:flex-row w-full gap-2">
+      <p className="text-lg font-bold">Submission Limit</p>
+      <div className="lg:ml-auto flex gap-2">
         <button
           onClick={() => {
             dispatch({ type: "setSubLimit", payload: 1 });
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 1
-              ? "border-success btn-active focus:border-2 focus:border-success shadow-box"
+              ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
               : ""
           }`}
         >
@@ -127,7 +144,7 @@ const SubmissionLimit = ({
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 2
-              ? "border-success btn-active focus:border-2 focus:border-success shadow-box"
+              ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
               : ""
           }`}
         >
@@ -139,7 +156,7 @@ const SubmissionLimit = ({
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 3
-              ? "border-success btn-active focus:border-2 focus:border-success shadow-box"
+              ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
               : ""
           }`}
         >
@@ -151,7 +168,7 @@ const SubmissionLimit = ({
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 0
-              ? "border-success btn-active focus:border-2 focus:border-success shadow-box"
+              ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
               : ""
           }`}
         >
@@ -175,7 +192,7 @@ const Toggle = ({
   return (
     <input
       type="checkbox"
-      className="toggle toggle-accent border-2"
+      className="toggle toggle-success border-2"
       defaultChecked={defaultState}
       onChange={handleToggle}
     />

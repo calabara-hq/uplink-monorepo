@@ -171,7 +171,7 @@ const QuickAddToken = ({
       <h2 className="text-2xl">Quick Add</h2>
       <input
         type="text"
-        className="input input-bordered"
+        className="input"
         placeholder="Search tokens..."
         value={searchQuery}
         onChange={(event) => setSearchQuery(event.target.value)}
@@ -183,7 +183,7 @@ const QuickAddToken = ({
             return (
               <li key={index}>
                 <a
-                  className={`flex flex-row justify-between hover:bg-base-200 ${
+                  className={`flex flex-row justify-between hover:bg-base-200 transition-all  ${
                     JSON.stringify(state.quickAddToken) === JSON.stringify(el)
                       ? "bg-base-200"
                       : "bg-base-100"
@@ -210,11 +210,10 @@ const QuickAddToken = ({
       )}
       <div>
         <button
-          className="btn btn-sm btn-secondary"
+          className="btn btn-sm btn-ghost underline"
           onClick={() => setProgress(1)}
         >
           Manual Add
-          <PlusIcon className="ml-2 w-6" />
         </button>
       </div>
     </div>
@@ -284,7 +283,7 @@ const TokenSwap = ({
         </div>
       </div>
       <div className="flex flex-col w-full lg:flex-row gap-2">
-        <div className="relative flex-grow h-32 card bg-base-300 rounded-box justify-center items-center">
+        <div className="relative flex-grow h-32 card bg-base-200 rounded-box justify-center items-center">
           <div className="absolute top-0 left-0 bg-info text-xs text-black px-1 py-0.5 rounded-br-md rounded-tl-md">
             Existing
           </div>
@@ -295,7 +294,7 @@ const TokenSwap = ({
         <div className="divider lg:divider-horizontal">
           <ArrowPathIcon className="w-24" />
         </div>
-        <div className="relative flex-grow h-32 card bg-base-300 rounded-box justify-center items-center">
+        <div className="relative flex-grow h-32 card bg-base-200 rounded-box justify-center items-center">
           <div className="absolute top-0 left-0 bg-success text-xs text-black px-1 py-0.5 rounded-br-md rounded-tl-md">
             Proposed
           </div>
@@ -328,7 +327,7 @@ const InputField = ({
   <div className={`flex flex-col ${className}`}>
     <label className="text-sm p-1">{label}</label>
     <input
-      className={`input ${error ? "input-error" : "input-primary"}`}
+      className={`input ${error ? "input-error" : "input"}`}
       type={type}
       placeholder={placeholder}
       value={value}

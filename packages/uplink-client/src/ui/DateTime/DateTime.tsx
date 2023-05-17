@@ -133,8 +133,8 @@ export default function DateTimeSelector({
           type="text"
           readOnly
           value={readableDate}
-          className={`input input-bordered w-full max-w-xs disabled:text-gray-300 cursor-pointer ${
-            error ? "input-error" : "input-primary"
+          className={`input w-full max-w-xs disabled:text-gray-300 cursor-pointer ${
+            error ? "input-error" : "input"
           }`}
           onClick={() => setIsModalOpen(true)}
         />
@@ -275,7 +275,7 @@ const TimeSelector = ({
         value={hour}
         onChange={handleHourChange}
         placeholder="hh"
-        className="input input-bordered w-24 border"
+        className="input w-24 border"
       />
       <span className="px-2">:</span>
       <input
@@ -283,7 +283,7 @@ const TimeSelector = ({
         value={minute}
         onChange={handleMinuteChange}
         placeholder="mm"
-        className="input input-bordered w-24 border"
+        className="input w-24 border"
         ref={minuteInputRef}
       />
       <div className="ml-4 ">
@@ -292,7 +292,7 @@ const TimeSelector = ({
             setMeridiem("AM");
           }}
           className={`btn-sm border-transparent border-2 text-white rounded-l-full fadeColor ${
-            meridiem === "AM" ? "bg-blue-400" : "bg-grey-700"
+            meridiem === "AM" ? "bg-base-200" : "bg-base-100"
           }`}
         >
           AM
@@ -302,7 +302,7 @@ const TimeSelector = ({
             setMeridiem("PM");
           }}
           className={`btn-sm border-transparent border-2 text-white rounded-r-full fadeColor ${
-            meridiem === "PM" ? "bg-blue-400" : "bg-grey-700"
+            meridiem === "PM" ? "bg-base-200" : "bg-base-100"
           }`}
         >
           PM

@@ -25,9 +25,9 @@ TenSpaces.args = {
     data: {
       spaces: [
         { name: "test", id: "test" },
-        { name: "test", id: "test" },
-        { name: "test", id: "test" },
-        { name: "test", id: "test" },
+        { name: "nouns", id: "test" },
+        { name: "shark", id: "test" },
+        { name: "links", id: "test" },
         { name: "test", id: "test" },
         { name: "test", id: "test" },
         { name: "test", id: "test" },

@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { XCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon, TrashIcon, UserIcon } from "@heroicons/react/24/solid";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import {
@@ -96,9 +96,9 @@ export default function SpaceForm({
   };
 
   return (
-    <div className="flex w-1/2 px-2 py-2 rounded-lg justify-center items-center ml-auto mr-auto">
-      <div className=" flex flex-col gap-2 w-full max-w-xs">
-        <h2 className="text-3xl">Space Builder</h2>
+    <div className="flex flex-col w-full px-2 pt-2 pb-6 rounded-lg justify-center items-center">
+      <div className="flex flex-col gap-2  w-full lg:w-2/5">
+        <h2 className="text-3xl text-center">Space Builder</h2>
         <SpaceLogo state={state} dispatch={dispatch} />
         <SpaceName state={state} dispatch={dispatch} />
         <SpaceWebsite state={state} dispatch={dispatch} />
@@ -131,6 +131,7 @@ const SpaceName = ({
       <input
         type="text"
         autoComplete="off"
+        spellCheck="false"
         value={state.name}
         onChange={(e) => {
           dispatch({
@@ -192,13 +193,13 @@ const SpaceLogo = ({
       />
       <div className="avatar">
         <div
-          className="w-24 rounded-full cursor-pointer flex justify-center items-center"
+          className="w-28 h-28 rounded-full cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all"
           onClick={() => imageUploader.current?.click()}
         >
           {state.logoBlob && <img src={state.logoBlob} />}
           {!state.logoBlob && (
-            <div className="flex justify-center items-center w-full h-full rounded-full bg-gray-500">
-              <p>logo</p>
+            <div className="flex justify-center items-center w-full h-full">
+              <UserIcon className="w-8 h-8" />
             </div>
           )}
         </div>
@@ -229,6 +230,7 @@ const SpaceWebsite = ({
       <input
         type="text"
         autoComplete="off"
+        spellCheck="false"
         value={state.website || ""}
         onChange={(e) => {
           dispatch({
@@ -267,6 +269,7 @@ const SpaceTwitter = ({
       <input
         type="text"
         autoComplete="off"
+        spellCheck="false"
         value={state.twitter || ""}
         onChange={(e) => {
           dispatch({
@@ -320,7 +323,7 @@ const SpaceAdmins = ({
     });
   }, [status]);
   return (
-    <div>
+    <div className="">
       <label className="label">
         <span className="label-text">Admins</span>
       </label>
@@ -329,11 +332,12 @@ const SpaceAdmins = ({
           const isError = state.errors?.admins?.[index];
           return (
             <div key={index}>
-              <div className="flex justify-center items-center gap-4">
+              <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="vitalik.eth"
-                  className={`input w-full max-w-xs disabled:text-gray-400
+                  spellCheck="false"
+                  className={`input w-full disabled:text-gray-400
                 ${isError ? "input-error" : "input focus:shadow-box"}`}
                   disabled={index < 1}
                   value={admin}

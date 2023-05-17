@@ -13,7 +13,7 @@ const Deadlines = ({
 
 
   return (
-    <BlockWrapper title="Contest Dates">
+    <BlockWrapper title="Contest Dates" info="Select dates & times">
       <DateTimeSelector
         isoString={startTime !== 'now' ? startTime.slice(0, -5) + "Z": startTime}
         label="start"

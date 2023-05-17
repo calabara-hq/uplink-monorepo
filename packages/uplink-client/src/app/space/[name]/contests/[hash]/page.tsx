@@ -1,86 +1,73 @@
 import Image from "next/image";
 import contestImage from "public/tns-sketch-contest.jpeg";
-import SubmissionCard, { SubmissionCardVote } from "@/ui/SubmissionCard/SubmissionCard";
-import { SubmissionCard2 } from "@/ui/SubmissionCard/SubmissionCard";
 import Modal from "@/ui/Modal/Modal";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/solid";
+import Contests from "@/ui/Contests/Contests";
+
+const getContest = async (id: string) => {
+  const contest = {
+    id: "1",
+    spaceId: "1",
+    prompt: {
+      title: "Sketch a DAO",
+      body: "Draw a DAO",
+      coverUrl:
+        "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
+    },
+    metadata: {
+      category: "art",
+      type: "standard",
+    },
+    deadlines: {
+      startTime: new Date(Date.now()).toISOString(),
+      voteTime: new Date(Date.now() + 1 * 864e5).toISOString(),
+      endTime: new Date(Date.now() + 2 * 864e5).toISOString(),
+      snapshot: new Date(Date.now()).toISOString(),
+    },
+    submitterRewards: [
+      {
+        rank: "1",
+        tokenReward: {
+          amount: 1,
+          token: {
+            type: "ETH",
+            address: "0xabcd",
+            symbol: "ETH",
+            decimals: 18,
+          },
+        },
+      },
+    ],
+  };
+  const space = {
+    id: "1",
+    displayName: "Shark DAO",
+  };
+  const selectedSubs = [
+    {
+      id: "1",
+      name: "Sub1",
+      image:
+        "https://calabara.mypinata.cloud/ipfs/QmfSASTvVBNdAAqmQSgRXVK6wA7ap9EwW4JSKoGq1kKcmf?_gl=1*pam249*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjgzMi42MC4wLjA.",
+    },
+    {
+      id: "2",
+      name: "Sub2",
+      image:
+        "https://calabara.mypinata.cloud/ipfs/QmZfA7nc9KZ5RAtgYB3MVnzR8y9Jm3vzv8zRvezibb67kM?_gl=1*12l1tvo*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjMzOS4yNy4wLjA.",
+    },
+  ];
+  return { contest, space, selectedSubs };
+};
 
 export default async function Page({ params }: { params: { id: string } }) {
+  const { contest, space, selectedSubs } = await getContest(params.id);
   return (
-    <div className="flex flex-row m-auto w-[90vw] gap-2">
-      <div className="flex flex-col w-full lg:w-3/4 p-2 gap-4">
-        <div className="card lg:card-side bg-transparent shadow-box">
-          <div className="card-body border-2 border-border rounded-lg">
-            <div className="flex gap-4 items-center">
-              <div className="avatar">
-                <div className=" w-20 lg:w-24 rounded-full bg-transparent">
-                  <Image
-                    src={"/noun-47.png"}
-                    alt={"org avatar"}
-                    height={300}
-                    width={300}
-                  />
-                </div>
-              </div>
-              <h2 className="card-title text-3xl">The Noun Square</h2>
-              <div className="ml-auto btn btn-sm btn-active">Submitting</div>
-            </div>
+    <Contests contest={contest} space={space} selectedSubs={selectedSubs} />
+  );
+}
 
-            <div className="flex flex-col p-2 lg:p-4 gap-4">
-              <h3 className="text-2xl">✏️ TNS Sketch Contest ✏️ </h3>
-              <p className="text-xl">
-                Create an illustration or sketch using any or all the Nouns from
-                610-615. 🏆 .069 ETH for 5 Winners 🏆 Contest Closes: 2/17 @
-                10pm est 🤝 Follow + Tag 🔖 @thenounsquare + some friends
-              </p>
-            </div>
-
-            <div className="card-actions justify-end">
-              <SubmitButton />
-            </div>
-          </div>
-        </div>
-        <h1 className="text-4xl text-center">Submissions</h1>
-
-        <div className="flex flex-col w-full gap-4 lg:flex-row lg:flex-wrap justify-center rounded-xl">
-          <SubmissionCard />
-          <SubmissionCard2 />
-          <SubmissionCard />
-          <SubmissionCard2 />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-        </div>
-      </div>
-      <div className="hidden sticky top-10 right-0 lg:flex lg:flex-col items-center w-1/4 h-1/2 gap-4">
-        <div className="flex flex-col justify-center gap-4 bg-base-100 w-full rounded-xl">
-          <figure className="relative h-80">
-            <Image
-              src={contestImage}
-              alt="contest image"
-              fill
-              className="object-fill rounded-xl"
-            />
-          </figure>
-        </div>
-        {/*}
-        <div className="flex flex-row items-center justify-between gap-2 bg-base-100 w-full rounded-lg">
-          <button className="btn btn-primary w-3/4">Submit</button>
-          <p className="w-1/4 text-center">4 days</p>
-        </div>
-        */}
-
-        <VoterRewards />
-        <VoterCart />
-
-        {/*
+{
+  /*
         <div className="flex flex-row justify-evenly p-4 bg-base-100 w-full rounded-xl">
           <label htmlFor="my-modal-5">
             <button className="btn gap-2">
@@ -262,178 +249,8 @@ export default async function Page({ params }: { params: { id: string } }) {
             </div>
           </div>
         </div>
-        */}
-      </div>
-      {/*
-      <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-      </Modal>
-  */}
-    </div>
-  );
+        */
 }
-
-export function SubRewards1() {
-  return (
-    <div className="flex flex-col bg-transparent w-full">
-      <div className="bg-neutral w-fit p-2 rounded-t-lg">
-        <p>Submitter Rewards</p>
-      </div>
-      <div className="flex w-full justify-center">
-        <div className="flex flex-row justify-evenly p-2 gap-2 bg-base-100 border-2 border-border rounded-b-xl rounded-tr-xl w-full">
-          <p className="btn btn-ghost">1 ETH</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards3() {
-  return (
-    <div className="flex flex-col bg-transparent w-full">
-      <div className="bg-neutral w-fit p-2 rounded-t-lg">
-        <p>Submitter Rewards</p>
-      </div>
-      <div className="flex w-full justify-center">
-        <div className="flex flex-row justify-evenly p-2 gap-2 bg-base-100 border-2 border-border rounded-b-xl rounded-tr-xl w-full">
-          <p className="btn btn-ghost">1 ETH</p>
-          <div className="dropdown dropdown-hover">
-            <label tabIndex={0} className="btn btn-ghost">
-              2 More
-            </label>
-            <div
-              tabIndex={0}
-              className="card compact dropdown-content shadow bg-base-100 rounded-box w-64"
-            >
-              <div className="card-body">
-                <h2 className="card-title">You needed more info?</h2>
-                <p>Here is a description!</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards2() {
-  return (
-    <div className="flex flex-col bg-transparent w-full">
-      <div className="bg-neutral w-fit p-2 rounded-t-lg">
-        <p>Submitter Rewards</p>
-      </div>
-      <div className="flex w-full justify-center">
-        <div className="flex flex-row justify-evenly p-2 gap-2 bg-base-100 border-2 border-border rounded-b-xl rounded-tr-xl w-full">
-          <p className="btn btn-ghost">1 ETH</p>
-          <p className="btn btn-ghost">20K SHARK</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards23() {
-  return (
-    <div className="flex flex-col justify-between h-24 bg-base-100 border-2 border-border rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row justify-evenly p-2 gap-2 ">
-        <p className="btn btn-ghost">1 ETH</p>
-        <div className="dropdown dropdown-right dropdown-end dropdown-hover ">
-          <label tabIndex={0} className="btn btn-ghost">
-            2 More
-          </label>
-          <div
-            tabIndex={0}
-            className=" card compact dropdown-content bg-base-200 shadow-box rounded-box w-36 ml-1"
-          >
-            <div className="card-body">
-              <p>1 NOUN</p>
-              <p>1 TNS</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards21() {
-  return (
-    <div className="flex flex-col justify-between h-24 bg-base-100 border-2 border-border rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row justify-evenly p-2 gap-2 ">
-        <p className="btn btn-ghost">1 ETH</p>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards22() {
-  return (
-    <div className="flex flex-col justify-between h-24 bg-base-100 border-2 border-border rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row justify-evenly p-2 gap-2 ">
-        <p className="btn btn-ghost">1 ETH</p>
-        <p className="btn btn-ghost">20K SHARK</p>
-      </div>
-    </div>
-  );
-}
-
-export function VoterRewards() {
-  return (
-    <div className="flex flex-col justify-between bg-base-100 border-2 border-border rounded-lg w-full">
-      <div className="bg-warning text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Voter Rewards
-      </div>
-      <div className="flex flex-col items-center justify-evenly p-2 gap-2 w-full">
-        <p>Voters who select the #1 submission will split <br /> 0.05 ETH</p>
-      </div>
-    </div>
-  );
-}
-
-export function VoterCart() {
-  return (
-    <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-fit">
-      <div className="bg-warning text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Voting Cart
-      </div>
-      <div className="grid grid-cols-3 justify-items-center justify-evenly p-2 gap-2 w-full ">
-        <p>Voting Power</p>
-        <p>Votes Spent</p>
-        <p>Votes Remaining</p>
-        <p>13</p>
-        <p>3</p>
-        <p>10</p>
-      </div>
-      <div className="flex flex-col gap-2 p-2">
-      <SubmissionCardVote />
-      <SubmissionCardVote />
-      <SubmissionCardVote />
-      <SubmissionCardVote />
-      <SubmissionCardVote />
-
-      </div>
-    </div>
-  );
-}
-
-export function SubmitButton() {
-  return (
-    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg">
-      <button className="btn btn-primary flex flex-1">Submit</button>
-      <p className="p-2 text-center">4 days</p>
-    </div>
-  );
-}
-
 /*
       <div className="flex flex-row w-full h-40 bg-base-100 rounded-xl">
         <div className="flex flex-col justify-evenly items-center w-1/3 p-2">

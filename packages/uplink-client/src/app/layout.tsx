@@ -31,7 +31,7 @@ export default async function RootLayout({
   return (
     <html lang="en" data-theme="mytheme">
       <head />
-      <body className="bg-gradient-vertical bg-primary min-h-screen">
+      <body className="bg-gradient-vertical min-h-screen">
         <WalletProvider session={session}>
           <Nav />
           {/*<Sidebar />*/}

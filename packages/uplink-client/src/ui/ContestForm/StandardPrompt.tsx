@@ -32,105 +32,96 @@ const StandardPrompt = ({
   };
 
   return (
-    <BlockWrapper title="Contest Prompt">
+    <BlockWrapper
+      title="Contest Prompt"
+      info="Choose a cover image, title, and body"
+    >
       <div className="flex flex-col w-10/12">
         <div className="flex flex-col items-center w-full gap-6">
-          <div className="flex flex-row w-full">
-            <div className="flex flex-col gap-6 w-full items-center">
-              <div className="flex flex-row w-full xl:w-8/12 gap-6">
-                <div className="flex flex-col w-full">
-                  <div className="flex flex-col w-1/3">
-                    <label className="text-sm p-1">Label</label>
-                    <MenuSelect
-                      options={labelOptions}
-                      selected={selectedLabel}
-                      setSelected={setSelectedLabel}
-                    />
-                  </div>
-                  <div className="flex flex-col mt-auto">
-                    <label className="text-sm p-1">Title</label>
-                    <input
-                      className={`input focus:shadow-box ${
-                        state.errors.prompt?.title
-                          ? "input-error"
-                          : "input-bordered"
-                      }`}
-                      type="text"
-                      value={state.prompt.title}
-                      onChange={(e) =>
+          <div className="flex flex-col gap-6 w-full items-center">
+            <div className="flex flex-col-reverse lg:flex-row-reverse lg:items-end w-full xl:w-8/12 gap-6">
+              <div className="flex flex-col w-full">
+                <label className="text-sm p-1">Title</label>
+                <input
+                  className={`input focus:shadow-box ${
+                    state.errors.prompt?.title
+                      ? "input-error"
+                      : "input"
+                  }`}
+                  type="text"
+                  value={state.prompt.title}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "setPromptTitle",
+                      payload: e.target.value,
+                    })
+                  }
+                />
+                {state.errors.prompt?.title && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {state.errors.prompt?.title}
+                    </span>
+                  </label>
+                )}
+              </div>
+              <div className="flex flex-col ml-auto">
+                <label className="text-sm p-1">Cover Image</label>
+                <input
+                  placeholder="Logo"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    handleMediaUpload(
+                      event,
+                      ["image"],
+                      (base64) => {
                         dispatch({
-                          type: "setPromptTitle",
-                          payload: e.target.value,
-                        })
+                          type: "setCoverBlob",
+                          payload: base64,
+                        });
+                      },
+                      (ipfsUrl) => {
+                        dispatch({
+                          type: "setCoverUrl",
+                          payload: ipfsUrl,
+                        });
                       }
-                    />
-                    {state.errors.prompt?.title && (
-                      <label className="label">
-                        <span className="label-text-alt text-error">
-                          {state.errors.prompt?.title}
-                        </span>
-                      </label>
+                    );
+                  }}
+                  ref={imageUploader}
+                />
+                <div className="avatar">
+                  <div
+                    className="w-36 rounded-lg cursor-pointer flex justify-center items-center"
+                    onClick={() => imageUploader.current?.click()}
+                  >
+                    {state.prompt.coverBlob && (
+                      <img src={state.prompt.coverBlob} />
+                    )}
+                    {!state.prompt.coverBlob && (
+                      <div className="flex justify-center items-center w-full h-full rounded-lg bg-base-100 hover:bg-base-200 transition-all">
+                        <PhotoIcon className="w-10 h-10" />
+                      </div>
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col ml-auto">
-                  <label className="text-sm p-1">Cover Image</label>
-                  <input
-                    placeholder="Logo"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(event) => {
-                      handleMediaUpload(
-                        event,
-                        ["image"],
-                        (base64) => {
-                          dispatch({
-                            type: "setCoverBlob",
-                            payload: base64,
-                          });
-                        },
-                        (ipfsUrl) => {
-                          dispatch({
-                            type: "setCoverUrl",
-                            payload: ipfsUrl,
-                          });
-                        }
-                      );
-                    }}
-                    ref={imageUploader}
-                  />
-                  <div className="avatar">
-                    <div
-                      className="w-36 rounded-lg cursor-pointer flex justify-center items-center"
-                      onClick={() => imageUploader.current?.click()}
-                    >
-                      {state.prompt.coverBlob && (
-                        <img src={state.prompt.coverBlob} />
-                      )}
-                      {!state.prompt.coverBlob && (
-                        <div className="flex justify-center items-center w-full h-full rounded-lg bg-gray-500">
-                          <p>cover image</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {state.errors?.prompt?.coverUrl && (
-                    <label className="label">
-                      <span className="label-text-alt text-error">
-                        {state.errors?.prompt?.coverUrl}
-                      </span>
-                    </label>
-                  )}
-                </div>
+                {state.errors?.prompt?.coverUrl && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {state.errors?.prompt?.coverUrl}
+                    </span>
+                  </label>
+                )}
               </div>
             </div>
           </div>
           <div className="flex flex-col w-full xl:w-8/12">
             <label className="text-sm p-1">Body</label>
             {state.errors.prompt?.body && (
-              <label className="label">
-                <span className="label-text-alt text-error">
+              <label className="label pt-0">
+                <span className="label-text-alt text-error ">
                   {state.errors.prompt?.body}
                 </span>
               </label>
@@ -148,3 +139,15 @@ const StandardPrompt = ({
 };
 
 export default StandardPrompt;
+
+{
+  /*
+                  <div className="flex flex-col w-1/3">
+                    <label className="text-sm p-1">Label</label>
+                    <MenuSelect
+                      options={labelOptions}
+                      selected={selectedLabel}
+                      setSelected={setSelectedLabel}
+                    />
+  */
+}
