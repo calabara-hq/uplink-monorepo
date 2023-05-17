@@ -7,9 +7,8 @@ const findSpace = async (id?: string, name?: string) => {
             ? sqlOps.eq(schema.spaces.name, name)
             : null;
 
-    if (!where) {
-        return null;
-    }
+    if (!where) return null;
+
     const result = await db.select({
         id: schema.spaces.id,
         name: schema.spaces.name,

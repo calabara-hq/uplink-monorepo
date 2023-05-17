@@ -1,11 +1,19 @@
-import { sqlOps } from "lib";
-import { db, schema } from "lib";
-import { _prismaClient, DecimalScalar } from "lib";
+import { sqlOps, db, schema, DecimalScalar } from "lib";
 
 
 
 
-const fetchContestTopLevel = async (contestId: number) => {
+
+const fetchContestTopLevel = async (contestId?: number, spaceId?: number) => {
+    const where = contestId
+        ? sqlOps.eq(schema.contests.id, contestId)
+        : spaceId
+            ? sqlOps.eq(schema.contests.spaceId, spaceId)
+            : null;
+
+    if (!where) return null;
+
+
     const result = await db.select({
         id: schema.contests.id,
         spaceId: schema.contests.spaceId,
@@ -29,9 +37,9 @@ const fetchContestTopLevel = async (contestId: number) => {
         },
     })
         .from(schema.contests)
-        .where(sqlOps.eq(schema.contests.id, contestId));
+        .where(where);
 
-    return result[0];
+    return result;
 }
 
 
@@ -155,43 +163,58 @@ const fetchVotingPolicy = async (contestId: number) => {
 }
 
 
-const contestById = async (id: string) => {
+const singleContestByContestId = async (id: string) => {
     const contestId = parseInt(id);
 
     const [contestTopLevel, submitterRewards, voterRewards, submitterRestrictions, votingPolicy] = await Promise.all([
-        fetchContestTopLevel(contestId),
+        fetchContestTopLevel(contestId, null),
         fetchSubmitterRewards(contestId),
         fetchVoterRewards(contestId),
         fetchSubmitterRestrictions(contestId),
         fetchVotingPolicy(contestId)
     ])
 
-
-    const contest = {
-        ...contestTopLevel,
+    return {
+        ...contestTopLevel[0],
         submitterRewards,
         voterRewards,
         submitterRestrictions,
         votingPolicy
     }
-    return contest
-
 }
+
+
+const multiContestsBySpaceId = async (id: string) => {
+    const spaceId = parseInt(id);
+    const contestTopLevel = await fetchContestTopLevel(null, spaceId);
+    const result = await Promise.all(contestTopLevel.map(async (contest) => {
+        const [submitterRewards, voterRewards, submitterRestrictions, votingPolicy] = await Promise.all([
+            fetchSubmitterRewards(contest.id),
+            fetchVoterRewards(contest.id),
+            fetchSubmitterRestrictions(contest.id),
+            fetchVotingPolicy(contest.id)
+        ])
+        return {
+            ...contest,
+            submitterRewards,
+            voterRewards,
+            submitterRestrictions,
+            votingPolicy
+        }
+    }));
+    return result
+}
+
+
 
 
 const queries = {
     Query: {
         async contest(_, { contestId }, contextValue, info) {
-            const contest = await contestById(contestId)
+            const contest = await singleContestByContestId(contestId)
             return contest;
         },
-        /*
-        spaceContests(_, { spaceId, spaceName }) {
-            if (spaceId) return contests.filter(contest => contest.spaceId === spaceId)
-            else if (spaceName) return contests.filter(contest => contest.spaceName === spaceName)
-            else throw new Error("You must provide either a spaceId or a spaceName");
-        },
-        */
+
         activeContests() {
             return contests.filter(contest => contest.deadlines.startTime > '0')
         }
@@ -201,7 +224,7 @@ const queries = {
     // used to resolve contests to spaces
     Space: {
         contests(space) {
-            return contests.filter(contest => contest.spaceId === space.id)
+            return multiContestsBySpaceId(space.id);
         }
     },
 
