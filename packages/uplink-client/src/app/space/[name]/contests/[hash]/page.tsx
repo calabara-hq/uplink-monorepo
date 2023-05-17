@@ -1,209 +1,68 @@
 import Image from "next/image";
 import contestImage from "public/tns-sketch-contest.jpeg";
-import SubmissionCard, {
-  SubmissionCardVote,
-} from "@/ui/SubmissionCard/SubmissionCard";
-import { SubmissionCard2 } from "@/ui/SubmissionCard/SubmissionCard";
 import Modal from "@/ui/Modal/Modal";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/solid";
+import Contests from "@/ui/Contests/Contests";
+
+const getContest = async (id: string) => {
+  const contest = {
+    id: "1",
+    spaceId: "1",
+    prompt: {
+      title: "Sketch a DAO",
+      body: "Draw a DAO",
+      coverUrl:
+        "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
+    },
+    metadata: {
+      category: "art",
+      type: "standard",
+    },
+    deadlines: {
+      startTime: new Date(Date.now()).toISOString(),
+      voteTime: new Date(Date.now() + 1 * 864e5).toISOString(),
+      endTime: new Date(Date.now() + 2 * 864e5).toISOString(),
+      snapshot: new Date(Date.now()).toISOString(),
+    },
+    submitterRewards: [
+      {
+        rank: "1",
+        tokenReward: {
+          amount: 1,
+          token: {
+            type: "ETH",
+            address: "0xabcd",
+            symbol: "ETH",
+            decimals: 18,
+          },
+        },
+      },
+    ],
+  };
+  const space = {
+    id: "1",
+    displayName: "Shark DAO",
+  };
+  const selectedSubs = [
+    {
+      id: "1",
+      name: "Sub1",
+      image:
+        "https://calabara.mypinata.cloud/ipfs/QmfSASTvVBNdAAqmQSgRXVK6wA7ap9EwW4JSKoGq1kKcmf?_gl=1*pam249*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjgzMi42MC4wLjA.",
+    },
+    {
+      id: "2",
+      name: "Sub2",
+      image:
+        "https://calabara.mypinata.cloud/ipfs/QmZfA7nc9KZ5RAtgYB3MVnzR8y9Jm3vzv8zRvezibb67kM?_gl=1*12l1tvo*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjMzOS4yNy4wLjA.",
+    },
+  ];
+  return { contest, space, selectedSubs };
+};
 
 export default async function Page({ params }: { params: { id: string } }) {
+  const { contest, space, selectedSubs } = await getContest(params.id);
   return (
-    <div className="flex flex-row m-auto w-[90vw] gap-4 py-6">
-      <div className="flex flex-col w-full lg:w-3/4 gap-4">
-        <div className="card lg:card-side bg-transparent shadow-box">
-          <div className="card-body border-2 border-border rounded-lg p-4 lg:p-8">
-            <div className="flex flex-col-reverse lg:flex-row gap-4 items-center">
-              <div className="avatar">
-                <div className=" w-20 lg:w-24 rounded-full bg-transparent">
-                  <Image
-                    src={"/noun-47.png"}
-                    alt={"org avatar"}
-                    height={300}
-                    width={300}
-                  />
-                </div>
-              </div>
-              <h2 className="card-title text-3xl">The Noun Square</h2>
-              <div className="m-0 lg:ml-auto btn btn-sm btn-info btn-active">Submitting</div>
-            </div>
-
-            <div className="flex flex-col p-2 lg:p-4 gap-4">
-              <h3 className="text-2xl">✏️ TNS Sketch Contest ✏️ </h3>
-              <p className="text-xl">
-                Create an illustration or sketch using any or all the Nouns from
-                610-615. 🏆 .069 ETH for 5 Winners 🏆 Contest Closes: 2/17 @
-                10pm est 🤝 Follow + Tag 🔖 @thenounsquare + some friends
-              </p>
-            </div>
-          </div>
-        </div>
-        <h1 className="text-4xl text-center">Submissions</h1>
-
-        <div className="flex flex-col w-full gap-4 lg:flex-row lg:flex-wrap justify-center rounded-xl">
-          <SubmissionCard />
-          <SubmissionCard2 />
-          <SubmissionCard />
-          <SubmissionCard2 />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-          <SubmissionCard />
-        </div>
-      </div>
-      <div className="hidden lg:flex lg:flex-col items-center w-1/4 gap-4">
-        <div className="relative top-0 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
-          <figure className="relative h-[350px]">
-            <Image
-              src={contestImage}
-              alt="contest image"
-              fill
-              className="object-fill rounded-xl"
-            />
-          </figure>
-        </div>
-        <div className="sticky top-5 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
-          <SubmitButton />
-          <SubRewards2 />
-
-
-
-          
-
-          <VoterRewards />
-          <VoterCart />
-                    
-        </div>
-      </div>
-      {/*
-      <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-      </Modal>
-  */}
-    </div>
-  );
-}
-
-export function SubRewards1() {
-  return (
-    <div className="flex flex-col items-center gap-2 h-fit bg-base-100 rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit mr-auto">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row items-center justify-center m-1 p-2 gap-2 w-fit">
-        <p className="font-bold">1 ETH</p>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards2() {
-  return (
-    <div className="flex flex-col items-center gap-2 h-fit bg-base-100 rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit mr-auto">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row justify-evenly m-2 p-2 gap-2 w-full ">
-        <p className="font-bold">1 ETH</p>
-        <p className="font-bold">20K SHARK</p>
-      </div>
-    </div>
-  );
-}
-
-export function SubRewards3() {
-  return (
-    <div className="flex flex-col items-center gap-2 h-fit bg-base-100 rounded-lg w-full">
-      <div className="bg-info text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit mr-auto">
-        Submitter Rewards
-      </div>
-      <div className="flex flex-row justify-evenly m-2 p-2 gap-2 w-full ">
-        <p className="font-bold">1 ETH</p>
-        <div className="dropdown dropdown-hover ">
-          <label tabIndex={0} className="font-bold cursor-pointer hover:bg-base-200 p-2 rounded-lg">
-            2 More
-          </label>
-          <div
-            tabIndex={0}
-            className=" card compact dropdown-content bg-base-200 rounded-box w-fit mt-2"
-          >
-            <div className="card-body">
-              <p>1 NOUN</p>
-              <p>1 TNS</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function VoterRewards() {
-  return (
-    <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-      <div className="bg-warning text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Voter Rewards
-      </div>
-      <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-        <p className="font-bold">
-          Voters who select the #1 submission will split <br /> 0.05 ETH
-        </p>
-      </div>
-    </div>
-  );
-}
-
-export function Closed() {
-  return (
-    <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-      <div className="bg-error text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Contest Closed
-      </div>
-      <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-        <button className="btn btn-outline">
-          Download Winners
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export function VoterCart() {
-  return (
-    <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-fit">
-      <div className="bg-warning text-lg text-black px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-        Voting Cart
-      </div>
-      <div className="grid grid-cols-3 justify-items-center justify-evenly p-2 gap-2 w-full font-bold text-center">
-        <p>Voting Power</p>
-        <p>Votes Spent</p>
-        <p>Remaining</p>
-        <p>13</p>
-        <p>3</p>
-        <p>10</p>
-      </div>
-      <div className="flex flex-col gap-2 p-2">
-        <SubmissionCardVote />
-        <SubmissionCardVote />
-        <SubmissionCardVote />
-        <SubmissionCardVote />
-        <SubmissionCardVote />
-      </div>
-    </div>
-  );
-}
-
-export function SubmitButton() {
-  return (
-    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2">
-      <button className="btn btn-primary flex flex-1">Submit</button>
-      <p className="mx-2 p-2 text-center">4 days</p>
-    </div>
+    <Contests contest={contest} space={space} selectedSubs={selectedSubs} />
   );
 }
 
