@@ -5,6 +5,7 @@ export const CreateContestDocument = gql`
     mutation CreateContest($contestData: ContestBuilderProps!){
         createContest(contestData: $contestData){
             success
+            contestId
             errors{
                 metadata
                 deadlines

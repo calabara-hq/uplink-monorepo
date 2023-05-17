@@ -2,6 +2,7 @@ import express from 'express';
 import * as authController from './controllers/index.js'
 const auth = express();
 import bodyParser from 'body-parser';
+
 auth.use(bodyParser.json())
 
 auth.get('/', (req, res) => {
@@ -10,21 +11,10 @@ auth.get('/', (req, res) => {
 
 
 auth.get('/session', authController.getSession)
-
 auth.get('/csrf', authController.getCsrfToken)
-
 auth.post('/sign_in', authController.verifySignature)
-
-/*
-auth.post('/sign_out',
-    async (req, res) => {
-        console.log(req.session)
-        res.send('hello from sign_out').status(200)
-    })
-*/
-
-
-
+auth.post('/twitter/initiate_twitter_auth', authController.initiateTwitterAuth)
+auth.get('/twitter/oauth2', authController.twitterOauth2)
 auth.post('/sign_out', authController.signOut)
 
 export default auth

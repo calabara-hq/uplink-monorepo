@@ -59,6 +59,13 @@ type Admin
   address: String!
 }
 
+type ArcadeVotingPolicyType
+  @join__type(graph: CONTESTS)
+{
+  token: TokenType!
+  votingPower: Decimal
+}
+
 type Contest
   @join__type(graph: CONTESTS, key: "id")
 {
@@ -69,13 +76,16 @@ type Contest
   deadlines: DeadlinesType!
   promptUrl: IpfsUrl!
   submitterRewards: [RewardType!]!
+  voterRewards: [RewardType!]!
+  submitterRestrictions: [SubmitterRestrictionType!]!
+  votingPolicy: [VotingPolicyType!]!
   additionalParams: AdditionalParamsType!
 }
 
 input ContestBuilderProps
   @join__type(graph: CONTESTS)
 {
-  spaceName: String!
+  spaceId: String!
   metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
@@ -103,6 +113,7 @@ type ContestMutationResponse
   @join__type(graph: CONTESTS)
 {
   success: Boolean!
+  contestId: Int
   errors: ContestErrorData
 }
 
@@ -287,9 +298,7 @@ type RewardType
   @join__type(graph: CONTESTS)
 {
   rank: Int!
-  amount: Decimal
-  tokenId: Int
-  token: TokenType!
+  tokenReward: tokenRewardType!
 }
 
 type Space
@@ -335,6 +344,13 @@ type SpaceMutationResponse
   errors: SpaceBuilderErrors
 }
 
+type StrategyType
+  @join__type(graph: CONTESTS)
+{
+  type: VotingStrategyType!
+  votingPower: Decimal
+}
+
 type Submission
   @join__type(graph: SUBMISSIONS, key: "id")
 {
@@ -352,6 +368,13 @@ input SubmitterRestriction
   threshold: Decimal
 }
 
+type SubmitterRestrictionType
+  @join__type(graph: CONTESTS)
+{
+  restrictionType: String!
+  tokenRestriction: TokenRestrictionType!
+}
+
 input SubmitterRewards
   @join__type(graph: CONTESTS)
 {
@@ -360,6 +383,21 @@ input SubmitterRewards
   ERC721: IERCToken
   ERC1155: IERCToken
   payouts: [IPayout!]
+}
+
+type TokenRestrictionType
+  @join__type(graph: CONTESTS)
+{
+  token: TokenType!
+  threshold: Decimal!
+}
+
+type tokenRewardType
+  @join__type(graph: CONTESTS)
+{
+  amount: Decimal
+  tokenId: Int
+  token: TokenType!
 }
 
 type TokenType
@@ -388,6 +426,14 @@ input VotingPolicy
   strategy: VotingStrategy!
 }
 
+type VotingPolicyType
+  @join__type(graph: CONTESTS)
+{
+  strategyType: VotingStrategyType!
+  arcadeVotingPolicy: ArcadeVotingPolicyType
+  weightedVotingPolicy: WeightedVotingPolicyType
+}
+
 input VotingStrategy
   @join__type(graph: CONTESTS)
 {
@@ -400,4 +446,10 @@ enum VotingStrategyType
 {
   arcade @join__enumValue(graph: CONTESTS)
   weighted @join__enumValue(graph: CONTESTS)
+}
+
+type WeightedVotingPolicyType
+  @join__type(graph: CONTESTS)
+{
+  token: TokenType!
 }

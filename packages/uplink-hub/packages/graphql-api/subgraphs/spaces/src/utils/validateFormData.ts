@@ -1,5 +1,5 @@
 import { validateEthAddress } from "../utils/ethAddress.js";
-import { _prismaClient, SpaceProps } from "lib";
+import { db, schema, sqlOps, SpaceProps } from "lib";
 
 // validate space name
 export const validateSpaceName = async (name: SpaceProps["name"], spaceId?: string) => {
@@ -28,15 +28,18 @@ export const validateSpaceName = async (name: SpaceProps["name"], spaceId?: stri
     }
 
     const dbFormattedName = response.value.replace(' ', '').toLowerCase();
-    const where = {
-        name: dbFormattedName,
-        ...(!isNewSpace ? { id: { not: parseInt(spaceId) } } : {}),
-    };
+
+    const where = isNewSpace ?
+        sqlOps.eq(schema.spaces.name, dbFormattedName)
+        :
+        sqlOps.and(sqlOps.eq(schema.spaces.name, dbFormattedName), sqlOps.ne(schema.spaces.id, parseInt(spaceId)))
+
+
 
     // check if the name is already taken
-    const spaces = await _prismaClient.space.findMany({
-        where: where,
-    });
+    const spaces = await db.select({ id: schema.spaces.id }).from(schema.spaces).where(where);
+
+
 
     if (spaces.length > 0) {
         response.error = "Name is already taken";
