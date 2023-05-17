@@ -31,6 +31,7 @@ import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateContestDocument } from "@/lib/graphql/contests.gql";
 import { toast } from "react-hot-toast";
 import AdditionalParameters from "./AdditionalParameters";
+import { useRouter } from "next/navigation";
 
 export const BlockWrapper = ({
   title,
@@ -110,10 +111,17 @@ const initialState = {
   errors: {},
 } as ContestBuilderProps;
 
-const ContestForm = ({ spaceName }: { spaceName: string }) => {
+const ContestForm = ({
+  spaceName,
+  spaceId,
+}: {
+  spaceName: string;
+  spaceId: string;
+}) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const handleMutation = useHandleMutation(CreateContestDocument);
+  const router = useRouter();
 
   const handleFinalValidation = async () => {
     const {
@@ -141,17 +149,21 @@ const ContestForm = ({ spaceName }: { spaceName: string }) => {
     const values = await handleFinalValidation();
     if (!values) return;
 
-    console.log(values);
+    // console.log(values);
+
+    const contestData = {
+      spaceId,
+      ...values,
+    };
+
+    console.log(contestData);
 
     const res = await handleMutation({
-      contestData: {
-        spaceName,
-        ...values,
-      },
+      contestData,
     });
 
     if (!res) return;
-    const { errors, success } = res.data.createContest;
+    const { errors, success, contestId } = res.data.createContest;
 
     if (!success) {
       toast.error(
@@ -164,6 +176,8 @@ const ContestForm = ({ spaceName }: { spaceName: string }) => {
       toast.success("Contest created successfully!", {
         icon: "🎉",
       });
+      router.refresh();
+      router.push(`/space/${spaceName}/contests/${contestId}`);
     }
   };
 

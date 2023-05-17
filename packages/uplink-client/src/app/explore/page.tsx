@@ -13,6 +13,7 @@ import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton
 
 const getSpaces = async () => {
   const results = await graphqlClient.query(AllSpacesDocument, {}).toPromise();
+  console.log(results)
   if (results.error) {
     throw new Error(results.error.message);
   }

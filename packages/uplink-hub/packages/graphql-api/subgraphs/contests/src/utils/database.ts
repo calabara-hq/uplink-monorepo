@@ -135,7 +135,7 @@ const insertSubRewards = async (contestId, submitterRewards) => {
             }
             tokenSubRewardsArr.push(newTokenReward);
         }
-        await innerTx.insert(schema.tokenRewards).values(tokenSubRewardsArr);
+        if (tokenSubRewardsArr.length > 0) await innerTx.insert(schema.tokenRewards).values(tokenSubRewardsArr);
     });
 }
 
@@ -159,7 +159,7 @@ const insertVoterRewards = async (contestId, voterRewards) => {
             }
             tokenVoterRewardsArr.push(newTokenReward);
         }
-        await innerTx.insert(schema.tokenRewards).values(tokenVoterRewardsArr);
+        if (tokenVoterRewardsArr.length > 0) await innerTx.insert(schema.tokenRewards).values(tokenVoterRewardsArr);
     });
 }
 
@@ -183,7 +183,7 @@ const insertSubmitterRestrictions = async (contestId, submitterRestrictions) => 
             }
             subRestrictionArr.push(newTokenRestriction);
         };
-        await innerTx.insert(schema.tokenRestrictions).values(subRestrictionArr);
+        if (subRestrictionArr.length > 0) await innerTx.insert(schema.tokenRestrictions).values(subRestrictionArr);
 
     });
 }
@@ -302,7 +302,6 @@ export const createDbContest = async (contest: ContestData) => {
     const adjustedVoterRewards = await prepareContestRewards(contest.submitterRewards);
     const adjustedVotingPolicy = await prepareRestrictionsAndPolicies(contest.votingPolicy);
     const adjustedSubmitterRestrictions = await prepareRestrictionsAndPolicies(contest.submitterRestrictions);
-
 
     const newContest: schema.dbNewContestType = {
         spaceId: spaceId,
