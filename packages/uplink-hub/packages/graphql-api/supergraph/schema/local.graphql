@@ -341,6 +341,7 @@ type Space
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
   admins: [Admin!]! @join__field(graph: SPACES)
+  spaceTokens: [SpaceToken!]! @join__field(graph: SPACES)
 }
 
 type SpaceBuilderErrors
@@ -369,6 +370,17 @@ type SpaceMutationResponse
   spaceName: String
   success: Boolean!
   errors: SpaceBuilderErrors
+}
+
+type SpaceToken
+  @join__type(graph: SPACES)
+{
+  id: Int!
+  tokenHash: String!
+  symbol: String!
+  decimals: Int!
+  address: String
+  tokenId: String
 }
 
 type StrategyType

@@ -9,12 +9,22 @@ type Space @key(fields: "id") {
   twitter: String
   website: String
   admins: [Admin!]!
+  spaceTokens: [SpaceToken!]!
 }
 
 type Admin {
   id: Int!
   spaceId: Int!
   address: String!
+}
+
+type SpaceToken {
+  id: Int!
+  tokenHash: String!
+  symbol: String!
+  decimals: Int!
+  address: String
+  tokenId: String
 }
 
 type Query {

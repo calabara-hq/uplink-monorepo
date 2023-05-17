@@ -76,6 +76,14 @@ export const tokens = mysqlTable('tokens', {
     )
 }))
 
+export const spacesToTokens = mysqlTable('spacesToTokens', {
+    id: serial('id').primaryKey(),
+    spaceId: int('spaceId').notNull(),
+    tokenLink: int('tokenLink').notNull(),
+}, (spacesToTokens) => ({
+    spacesToTokensIdIndex: uniqueIndex("spacesToTokens_id_idx").on(spacesToTokens.spaceId, spacesToTokens.tokenLink),
+}));
+
 export const tokenRestrictions = mysqlTable('tokenRestrictions', {
     id: serial('id').primaryKey(),
     restrictionId: int('restrictionId').notNull(),
@@ -145,6 +153,9 @@ export type dbNewSubmitterRestrictionType = InferModel<typeof submitterRestricti
 
 export type dbTokenType = InferModel<typeof tokens>
 export type dbNewTokenType = InferModel<typeof tokens, 'insert'>
+
+export type dbSpaceToTokenType = InferModel<typeof spacesToTokens>
+export type dbNewSpaceToTokenType = InferModel<typeof spacesToTokens, 'insert'>
 
 export type dbTokenRestrictionType = InferModel<typeof tokenRestrictions>
 export type dbNewTokenRestrictionType = InferModel<typeof tokenRestrictions, 'insert'>
