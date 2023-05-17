@@ -1,5 +1,5 @@
 
-import { DecimalScalar } from "lib";
+import { DecimalScalar, AuthorizationController, schema } from "lib";
 import { createDbContest } from "../utils/database.js";
 import {
     validateMetadata,
@@ -14,8 +14,17 @@ import {
 } from "../utils/validateContestParams.js";
 
 import Decimal from 'decimal.js'
-
 import { GraphQLError } from "graphql";
+import { sqlOps, db } from '../utils/database.js';
+
+import dotenv from 'dotenv';
+dotenv.config();
+
+
+
+
+
+const authController = new AuthorizationController(process.env.REDIS_URL);
 
 const processContestData = async (contestData: ContestBuilderProps) => {
     const { metadata, deadlines, prompt, submitterRewards, voterRewards, submitterRestrictions, votingPolicy, additionalParams } = contestData;
@@ -48,15 +57,36 @@ const processContestData = async (contestData: ContestBuilderProps) => {
     }
 }
 
+
+const verifyUserIsAdmin = async (user: any, spaceId: string) => {
+    const isAdmin = await db.select({ id: schema.admins.id })
+        .from(schema.admins)
+        .where(
+            sqlOps.and(
+                sqlOps.eq(schema.admins.spaceId, parseInt(spaceId)),
+                sqlOps.eq(schema.admins.address, user.address)
+            )
+        )
+
+    return isAdmin.length > 0
+
+}
+
 const mutations = {
     Mutation: {
         createContest: async (_: any, args: any, context: any) => {
-            //const user = await Authorization.getUser(context);
-            //if (!user) throw new Error('Unauthorized');
+            const user = await authController.getUser(context);
+            if (!user) throw new Error('Unauthorized');
+
+            const isSpaceAdmin = await verifyUserIsAdmin(user, args.contestData.spaceId)
+            if (!isSpaceAdmin) throw new Error('Unauthorized');
+
 
             const { contestData } = args;
 
             const result = await processContestData(contestData);
+
+            let contestId
 
             if (result.success) {
                 const data = {
@@ -70,9 +100,10 @@ const mutations = {
                     submitterRestrictions: contestData.submitterRestrictions,
                     votingPolicy: contestData.votingPolicy,
                 }
+                contestId = await createDbContest(data)
+            } else {
+                contestId = null
             }
-
-            let contestId = result.success ? await createDbContest(contestData) : null
 
             return {
                 success: result.success,

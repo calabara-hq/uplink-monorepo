@@ -1,10 +1,13 @@
-import { EditorOutputData, IToken, _prismaClient, db, schema, sqlOps, isERCToken } from "lib";
+import { EditorOutputData, IToken, DatabaseController, schema, isERCToken } from "lib";
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
-import { GraphQLError } from "graphql";
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
+
+const databaseController = new DatabaseController(process.env.DATABASE_HOST, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
+export const db = databaseController.db;
+export const sqlOps = databaseController.sqlOps;
 
 
 type Metadata = {

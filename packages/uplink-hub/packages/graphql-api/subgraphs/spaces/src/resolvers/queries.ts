@@ -1,9 +1,9 @@
-import { sqlOps, schema, db } from "lib";
+import { schema } from "lib";
+import { sqlOps, db } from "../utils/database.js";
 
+console.log(db)
 
-
-
-const fetchSpaceTopLevel = async ({ spaceId, name }: {
+const fetchSingleSpaceTopLevel = async ({ spaceId, name }: {
     spaceId?: number,
     name?: string
 }) => {
@@ -24,7 +24,7 @@ const fetchSpaceTopLevel = async ({ spaceId, name }: {
         logoUrl: schema.spaces.logoUrl,
         members: schema.spaces.members,
     }).from(schema.spaces).where(where);
-
+    console.log(result)
     return result;
 }
 
@@ -64,7 +64,7 @@ const findSingleSpace = async ({ id, name }: {
     if (id) {
         const spaceId = parseInt(id);
         const [spaceTopLevel, admins, spaceTokens] = await Promise.all([
-            fetchSpaceTopLevel({ spaceId: spaceId }).then(space => space[0]),
+            fetchSingleSpaceTopLevel({ spaceId: spaceId }).then(space => space[0]),
             fetchAdmins(spaceId),
             fetchSpaceTokens(spaceId)
         ])
@@ -75,7 +75,7 @@ const findSingleSpace = async ({ id, name }: {
         }
     }
     else if (name) {
-        const space = await fetchSpaceTopLevel({ name: name }).then((space) => space[0]);
+        const space = await fetchSingleSpaceTopLevel({ name: name }).then((space) => space[0]);
         const [admins, spaceTokens] = await Promise.all([
             fetchAdmins(space.id),
             fetchSpaceTokens(space.id)
@@ -91,9 +91,8 @@ const findSingleSpace = async ({ id, name }: {
 
 
 
-const allSpaces = async () => {
-
-    const rows = await db.select({
+const findManySpaces = async () => {
+    const spaces = await db.select({
         id: schema.spaces.id,
         name: schema.spaces.name,
         displayName: schema.spaces.displayName,
@@ -101,36 +100,27 @@ const allSpaces = async () => {
         website: schema.spaces.website,
         logoUrl: schema.spaces.logoUrl,
         members: schema.spaces.members,
-        admins: schema.admins
-    }).from(schema.spaces).leftJoin(schema.admins, sqlOps.eq(schema.spaces.id, schema.admins.spaceId))
+    }).from(schema.spaces);
 
-    const aggregatedData = rows.reduce((acc, row) => {
-        const spaceId = row.id;
-        const admin = {
-            id: row.admins.id,
-            spaceId: row.admins.spaceId,
-            address: row.admins.address,
-        };
-
-        if (acc[spaceId]) {
-            acc[spaceId].admins.push(admin);
-        } else {
-            acc[spaceId] = {
-                ...row,
-                admins: [admin],
-            };
+    const result = await Promise.all(spaces.map(async (space) => {
+        const [admins, spaceTokens] = await Promise.all([
+            fetchAdmins(space.id),
+            fetchSpaceTokens(space.id)
+        ]);
+        return {
+            ...space,
+            admins,
+            spaceTokens
         }
+    }));
 
-        return acc;
-    }, {});
-
-    return Object.values(aggregatedData);
+    return result;
 }
 
 const queries = {
     Query: {
         async spaces() {
-            return allSpaces();
+            return findManySpaces();
         },
         async space(parent, { id, name }, contextValue, info) {
             return findSingleSpace({ id: id, name: name });

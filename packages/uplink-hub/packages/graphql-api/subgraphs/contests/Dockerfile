@@ -16,8 +16,6 @@ COPY ./packages/graphql-api/subgraphs/contests ./packages/contests
 # Install dependencies for the contests service
 RUN yarn install
 
-RUN yarn workspace lib generate-prisma
-
 RUN yarn workspace lib build
 
 # Set the working directory for the contests service

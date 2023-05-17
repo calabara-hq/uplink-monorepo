@@ -7,7 +7,7 @@ import {
     validateSpaceTwitter,
 } from '../src/utils/validateFormData';
 
-import { _prismaClient } from "lib";
+import { db } from "lib";
 
 
 
@@ -22,7 +22,8 @@ describe('validateSpaceName', () => {
         let mockFindMany;
 
         beforeAll(() => {
-            mockFindMany = jest.spyOn(_prismaClient.space, 'findMany');
+            // TODO - upgrade this for drizzle
+            //mockFindMany = jest.spyOn(_prismaClient.space, 'findMany');
         });
 
         beforeEach(() => {
@@ -76,7 +77,8 @@ describe('validateSpaceName', () => {
         let mockFindMany;
 
         beforeAll(() => {
-            mockFindMany = jest.spyOn(_prismaClient.space, 'findMany');
+            // TODO - upgrade this for drizzle
+            // mockFindMany = jest.spyOn(_prismaClient.space, 'findMany');
         });
 
         beforeEach(() => {

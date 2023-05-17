@@ -1,8 +1,5 @@
-import { sqlOps, db, schema, DecimalScalar } from "lib";
-
-
-
-
+import { DecimalScalar, schema } from "lib";
+import { sqlOps, db } from '../utils/database.js';
 
 const fetchContestTopLevel = async (contestId?: number, spaceId?: number) => {
     const where = contestId
@@ -38,7 +35,7 @@ const fetchContestTopLevel = async (contestId?: number, spaceId?: number) => {
     })
         .from(schema.contests)
         .where(where);
-
+    
     return result;
 }
 
@@ -224,6 +221,7 @@ const queries = {
     // used to resolve contests to spaces
     Space: {
         contests(space) {
+            console.log('IN HERE')
             return multiContestsBySpaceId(space.id);
         }
     },

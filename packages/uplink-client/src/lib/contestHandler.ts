@@ -883,7 +883,11 @@ export const validatePrompt = (prompt: ContestBuilderProps['prompt']) => {
     return {
         isError: isError,
         errors: errors,
-        value: prompt
+        value: {
+            title: prompt.title,
+            body: prompt.body,
+            ...(prompt.coverUrl ? { coverUrl: prompt.coverUrl } : {})
+        }
     }
 }
 

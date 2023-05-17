@@ -1,5 +1,6 @@
 import { validateEthAddress } from "../utils/ethAddress.js";
-import { db, schema, sqlOps, SpaceProps } from "lib";
+import { SpaceProps, schema } from "lib";
+import { db, sqlOps } from './database.js'
 
 // validate space name
 export const validateSpaceName = async (name: SpaceProps["name"], spaceId?: string) => {

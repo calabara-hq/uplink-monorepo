@@ -12,7 +12,6 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@quixo3/prisma-session-store": "^3.1.10",
     "connect-redis": "^7.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

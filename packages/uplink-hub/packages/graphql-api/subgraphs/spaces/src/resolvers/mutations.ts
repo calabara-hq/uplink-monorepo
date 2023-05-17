@@ -1,4 +1,4 @@
-import { Authorization } from "lib";
+import { AuthorizationController } from "lib";
 import {
     validateSpaceName,
     validateSpaceLogo,
@@ -8,6 +8,10 @@ import {
 } from "../utils/validateFormData.js";
 import { updateDbSpace, createDbSpace } from "../utils/database.js";
 import { GraphQLError } from "graphql";
+import dotenv from 'dotenv';
+dotenv.config();
+
+const authController = new AuthorizationController(process.env.REDIS_URL);
 
 
 const processSpaceData = async (spaceData, user, spaceId?: string) => {
@@ -45,17 +49,16 @@ const mutations = {
     Mutation: {
         createSpace: async (_: any, args: any, context: any) => {
 
-            /*
-            const user = await Authorization.getUser(context);
+
+            const user = await authController.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'
                 }
             })
-            */
-            const user = "nickdodson.eth"
+
             const { spaceData } = args;
-            const result = await processSpaceData(spaceData, user);
+            const result = await processSpaceData(spaceData, user.address);
             const spaceName = result.success ? await createDbSpace(result.cleanedSpaceData) : null;
 
             return {
@@ -67,19 +70,17 @@ const mutations = {
 
         editSpace: async (_: any, args: any, context: any) => {
 
-            /*
-            const user = await Authorization.getUser(context);
+
+            const user = await authController.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'
                 }
             })
-            */
-            const user = "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"
 
             const { spaceId, spaceData } = args;
             const result = await processSpaceData(spaceData, user, spaceId);
-            const spaceName = result.success ? await updateDbSpace(spaceId, result.cleanedSpaceData, user) : null;
+            const spaceName = result.success ? await updateDbSpace(spaceId, result.cleanedSpaceData, user.address) : null;
 
             return {
                 spaceName: spaceName,

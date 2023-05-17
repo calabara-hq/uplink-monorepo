@@ -1,5 +1,12 @@
-import { db, schema, sqlOps } from "lib";
+import { DatabaseController, schema } from "lib";
 import { GraphQLError } from "graphql";
+import dotenv from 'dotenv';
+dotenv.config();
+
+const databaseController = new DatabaseController(process.env.DATABASE_HOST, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
+export const db = databaseController.db;
+export const sqlOps = databaseController.sqlOps;
+
 
 
 export const createDbSpace = async (
