@@ -14,6 +14,7 @@ export const CreateContestDocument = gql`
                 voterRewards
                 submitterRestrictions
                 votingPolicy
+                twitter
             }
         }
     }
