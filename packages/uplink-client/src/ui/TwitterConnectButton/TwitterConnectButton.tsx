@@ -5,7 +5,7 @@ import Image from "next/image";
 const TwitterConnectButton = ({}) => {
   const { data: session, status } = useSession();
   const handleClick = async () => {
-    const res = await twitterSignIn("read");
+    const res = await twitterSignIn("write");
     if (res) {
       window.open(res.url, "_blank");
     }

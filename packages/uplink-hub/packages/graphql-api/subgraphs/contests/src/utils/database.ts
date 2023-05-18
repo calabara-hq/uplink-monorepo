@@ -1,4 +1,5 @@
 import { EditorOutputData, IToken, DatabaseController, schema, isERCToken } from "lib";
+import { TwitterApi } from 'twitter-api-v2';
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -98,6 +99,11 @@ type ContestData = {
 }
 
 
+
+
+
+
+
 // simple object hash function
 function djb2Hash(str) {
     let hash = 5381;
@@ -194,7 +200,7 @@ const insertSubmitterRestrictions = async (contestId, submitterRestrictions) => 
 const insertVotingPolicies = async (contestId, votingPolicy) => {
 
     // insert the voting policies
-    await db.transaction(async (innerTx) => {
+    return await db.transaction(async (innerTx) => {
 
         for (const policy of votingPolicy) {
             const newVotingPolicy: schema.dbNewVotingPolicyType = {
@@ -219,6 +225,7 @@ const insertVotingPolicies = async (contestId, votingPolicy) => {
                 await innerTx.insert(schema.weightedVotingStrategy).values(newWeightedVotingPolicy);
             }
         };
+        return innerTx;
     });
 
 }
@@ -244,7 +251,57 @@ const insertSpaceToken = async (spaceId, tokenId) => {
 
 
 
-export const createDbContest = async (contest: ContestData) => {
+class TwitterController {
+
+    private client: any;
+
+    constructor(accessToken: string) {
+        this.client = new TwitterApi(accessToken);
+    }
+
+    public async validateSession() {
+        try {
+            const session = await this.client.v2.me();
+            return session;
+        } catch (e) {
+            throw new Error(`failed to establish a twitter session`)
+        }
+    }
+
+    public async processThread(thread: any) {
+        const processedThread = thread.map((el) => {
+            const { text, media } = el;
+            return {
+                ...(text && { text }),
+                ...(media && { media: { media_ids: [media.media_id] } }),
+            }
+        });
+        if (!processedThread || processedThread.length === 0) throw new Error('invalid thread');
+        return processedThread;
+    }
+
+    public async sendTweet(thread: any) {
+        try {
+            await this.validateSession();
+            const processedThread = await this.processThread(thread);
+            const tweetResponse = await this.client.v2.tweetThread(processedThread);
+            return tweetResponse[0].data.id;
+
+        } catch (err) {
+            console.log(err);
+            if (err.message === 'invalid thread') {
+                throw err;
+            } else if (err.message === 'failed to establish a twitter session') {
+                throw err;
+            } else {
+                throw new Error('failed to send tweet');
+            }
+        }
+    }
+
+}
+
+export const createDbContest = async (contest: ContestData, user: any) => {
     const spaceId = parseInt(contest.spaceId);
     const promptUrl = await prepareContestPromptUrl(contest.prompt);
 
@@ -346,6 +403,24 @@ export const createDbContest = async (contest: ContestData) => {
     }
 
 
+    const sendAnnouncementTweet = async (contestId, user, thread) => {
+
+        const now = new Date().toISOString();
+        const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.expiresAt ?? now > now);
+        if (!isTwitterAuth) throw new Error('twitter is expired');
+
+        const twitterController = new TwitterController(user.twitter.accessToken);
+        const tweet_id = await twitterController.sendTweet(thread);
+        console.log('TWEET ID IS', tweet_id)
+
+
+        // 1. check user is still auth'd
+
+        // 2. process the thread
+    }
+
+
+
     try {
         return await db.transaction(async (tx) => {
             const contest = await tx.insert(schema.contests).values(newContest)
@@ -356,6 +431,9 @@ export const createDbContest = async (contest: ContestData) => {
                 insertSubmitterRestrictions(contestId, adjustedSubmitterRestrictions),
                 insertVotingPolicies(contestId, adjustedVotingPolicy),
             ]);
+            if (newContest.type === "twitter") {
+                const announcmentTweet = await sendAnnouncementTweet(contestId, user, [{ text: "this is another test tweet" }]);
+            }
             return contestId;
         });
     } catch (err) {

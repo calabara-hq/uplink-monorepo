@@ -110,8 +110,17 @@ export const twitterOauth2 = async (req, res) => {
 
             // Example request
             const { data: userObject } = await loggedClient.v2.me({ "user.fields": ["profile_image_url"] });
-            req.session.user.twitter = userObject
-            console.log('TWITTER USER OBJECT', userObject)
+
+            let now = new Date();
+            // add 1 hour and 55 minutes to the current time (access token expires in 2 hours)
+            now.setMinutes(now.getMinutes() + 115);
+            let expiresAt = now.toISOString();
+
+            req.session.user.twitter = {
+                ...userObject,
+                expiresAt: expiresAt,
+                accessToken: accessToken,
+            }
             return res.sendStatus(200)
         })
         .catch(() => res.status(403).send('Invalid verifier or access tokens!'));

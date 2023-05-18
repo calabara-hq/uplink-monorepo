@@ -35,7 +35,7 @@ import AdditionalParameters from "./AdditionalParameters";
 import InfoAlert from "../InfoAlert/InfoAlert";
 
 import { useRouter } from "next/navigation";
-
+import CreateContestTweet from "./CreateContestTweet";
 
 export const BlockWrapper = ({
   title,
@@ -49,8 +49,10 @@ export const BlockWrapper = ({
   return (
     <div className="">
       <h1 className="text-2xl font-bold">{title}</h1>
-      {info &&<InfoAlert>{info}</InfoAlert>}
-      <div className="flex flex-col items-center p-4 lg:p-8 gap-4">{children}</div>
+      {info && <InfoAlert>{info}</InfoAlert>}
+      <div className="flex flex-col items-center p-4 lg:p-8 gap-4">
+        {children}
+      </div>
     </div>
   );
 };
@@ -232,7 +234,9 @@ const ContestForm = ({
       errorField: "additionalParameters",
     },
     {
-      errorField: "none",
+      name: "Tweet",
+      component: <CreateContestTweet state={state} dispatch={dispatch} />,
+      errorField: "createContestTweet",
     },
   ];
 

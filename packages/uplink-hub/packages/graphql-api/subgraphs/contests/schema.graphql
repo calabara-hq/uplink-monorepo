@@ -249,6 +249,7 @@ type ContestErrorData {
   submitterRestrictions: String
   votingPolicy: String
   additionalParams: String
+  twitter: String
 }
 
 type ContestMutationResponse {

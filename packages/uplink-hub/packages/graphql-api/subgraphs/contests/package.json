@@ -20,7 +20,8 @@
     "dotenv": "^16.0.3",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
-    "lib": "workspace:*"
+    "lib": "workspace:*",
+    "twitter-api-v2": "^1.14.2"
   },
   "devDependencies": {
     "@types/node": "^18.11.19",

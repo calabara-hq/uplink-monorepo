@@ -762,6 +762,8 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
             return validateVotingPolicy(state.votingPolicy);
         case 7:
             return { isError: false, errors: {} }
+        case 8:
+            return { isError: false, errors: {} }
     }
     return errors
 }

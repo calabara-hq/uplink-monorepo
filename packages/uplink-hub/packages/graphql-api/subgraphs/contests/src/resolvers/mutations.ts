@@ -20,10 +20,6 @@ import { sqlOps, db } from '../utils/database.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
-
-
-
-
 const authController = new AuthorizationController(process.env.REDIS_URL);
 
 const processContestData = async (contestData: ContestBuilderProps) => {
@@ -78,11 +74,27 @@ const mutations = {
             const user = await authController.getUser(context);
             if (!user) throw new Error('Unauthorized');
 
+            console.log(user)
+
             const isSpaceAdmin = await verifyUserIsAdmin(user, args.contestData.spaceId)
             if (!isSpaceAdmin) throw new Error('Unauthorized');
 
 
             const { contestData } = args;
+
+
+            if (contestData.metadata.type === 'twitter') {
+                const now = new Date().toISOString();
+                const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.expiresAt ?? now > now);
+
+                if (!isTwitterAuth) return {
+                    success: false,
+                    contestId: null,
+                    errors: {
+                        twitter: "account is unauthorized"
+                    }
+                }
+            }
 
             const result = await processContestData(contestData);
 
@@ -100,7 +112,7 @@ const mutations = {
                     submitterRestrictions: contestData.submitterRestrictions,
                     votingPolicy: contestData.votingPolicy,
                 }
-                contestId = await createDbContest(data)
+                contestId = await createDbContest(data, user)
             } else {
                 contestId = null
             }
