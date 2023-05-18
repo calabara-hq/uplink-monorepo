@@ -125,109 +125,99 @@ export const prepareContestPromptUrl = async (contestPrompt: Prompt) => {
 }
 
 
-const insertSubRewards = async (contestId, submitterRewards) => {
+const insertSubRewards = async (contestId, submitterRewards, tx) => {
 
     const tokenSubRewardsArr = [];
-    await db.transaction(async (innerTx) => {
-        for (const reward of submitterRewards) {
-            const newReward: schema.dbNewRewardType = {
-                contestId,
-                rank: reward.rank,
-                recipient: 'submitter',
-            }
-            const insertedReward = await innerTx.insert(schema.rewards).values(newReward);
-            const newTokenReward: schema.dbNewTokenRewardType = {
-                rewardId: parseInt(insertedReward.insertId),
-                tokenLink: reward.tokenLink,
-                amount: 'amount' in reward.value ? reward.value.amount.toString() : null,
-                tokenId: 'tokenId' in reward.value ? reward.value.tokenId : null,
-            }
-            tokenSubRewardsArr.push(newTokenReward);
+    for (const reward of submitterRewards) {
+        const newReward: schema.dbNewRewardType = {
+            contestId,
+            rank: reward.rank,
+            recipient: 'submitter',
         }
-        if (tokenSubRewardsArr.length > 0) await innerTx.insert(schema.tokenRewards).values(tokenSubRewardsArr);
-    });
+        const insertedReward = await tx.insert(schema.rewards).values(newReward);
+        const newTokenReward: schema.dbNewTokenRewardType = {
+            rewardId: parseInt(insertedReward.insertId),
+            tokenLink: reward.tokenLink,
+            amount: 'amount' in reward.value ? reward.value.amount.toString() : null,
+            tokenId: 'tokenId' in reward.value ? reward.value.tokenId : null,
+        }
+        tokenSubRewardsArr.push(newTokenReward);
+    }
+    if (tokenSubRewardsArr.length > 0) await tx.insert(schema.tokenRewards).values(tokenSubRewardsArr);
 }
 
 
-const insertVoterRewards = async (contestId, voterRewards) => {
+const insertVoterRewards = async (contestId, voterRewards, tx) => {
 
     const tokenVoterRewardsArr = [];
-    await db.transaction(async (innerTx) => {
-        for (const reward of voterRewards) {
-            const newReward: schema.dbNewRewardType = {
-                contestId,
-                rank: reward.rank,
-                recipient: 'voter',
-            }
-            const insertedReward = await innerTx.insert(schema.rewards).values(newReward);
-            const newTokenReward: schema.dbNewTokenRewardType = {
-                rewardId: parseInt(insertedReward.insertId),
-                tokenLink: reward.tokenLink,
-                amount: 'amount' in reward.value ? reward.value.amount.toString() : null,
-                tokenId: 'tokenId' in reward.value ? reward.value.tokenId : null,
-            }
-            tokenVoterRewardsArr.push(newTokenReward);
+    for (const reward of voterRewards) {
+        const newReward: schema.dbNewRewardType = {
+            contestId,
+            rank: reward.rank,
+            recipient: 'voter',
         }
-        if (tokenVoterRewardsArr.length > 0) await innerTx.insert(schema.tokenRewards).values(tokenVoterRewardsArr);
-    });
+        const insertedReward = await tx.insert(schema.rewards).values(newReward);
+        const newTokenReward: schema.dbNewTokenRewardType = {
+            rewardId: parseInt(insertedReward.insertId),
+            tokenLink: reward.tokenLink,
+            amount: 'amount' in reward.value ? reward.value.amount.toString() : null,
+            tokenId: 'tokenId' in reward.value ? reward.value.tokenId : null,
+        }
+        tokenVoterRewardsArr.push(newTokenReward);
+    }
+    if (tokenVoterRewardsArr.length > 0) await tx.insert(schema.tokenRewards).values(tokenVoterRewardsArr);
 }
 
 
-const insertSubmitterRestrictions = async (contestId, submitterRestrictions) => {
+const insertSubmitterRestrictions = async (contestId, submitterRestrictions, tx) => {
 
     // insert submitter restrictions to restrictions table
     const subRestrictionArr = []
-    await db.transaction(async (innerTx) => {
-        for (const restriction of submitterRestrictions) {
-            const newRestriction: schema.dbNewSubmitterRestrictionType = {
-                contestId,
-                restrictionType: "token",
-            }
-            const insertedRestriction = await innerTx.insert(schema.submitterRestrictions).values(newRestriction);
+    for (const restriction of submitterRestrictions) {
+        const newRestriction: schema.dbNewSubmitterRestrictionType = {
+            contestId,
+            restrictionType: "token",
+        }
+        const insertedRestriction = await tx.insert(schema.submitterRestrictions).values(newRestriction);
 
-            const newTokenRestriction: schema.dbNewTokenRestrictionType = {
-                restrictionId: parseInt(insertedRestriction.insertId),
-                tokenLink: restriction.tokenLink,
-                threshold: restriction.threshold,
-            }
-            subRestrictionArr.push(newTokenRestriction);
-        };
-        if (subRestrictionArr.length > 0) await innerTx.insert(schema.tokenRestrictions).values(subRestrictionArr);
+        const newTokenRestriction: schema.dbNewTokenRestrictionType = {
+            restrictionId: parseInt(insertedRestriction.insertId),
+            tokenLink: restriction.tokenLink,
+            threshold: restriction.threshold,
+        }
+        subRestrictionArr.push(newTokenRestriction);
+    };
+    if (subRestrictionArr.length > 0) await tx.insert(schema.tokenRestrictions).values(subRestrictionArr);
 
-    });
 }
 
-const insertVotingPolicies = async (contestId, votingPolicy) => {
+const insertVotingPolicies = async (contestId, votingPolicy, tx) => {
 
     // insert the voting policies
-    return await db.transaction(async (innerTx) => {
 
-        for (const policy of votingPolicy) {
-            const newVotingPolicy: schema.dbNewVotingPolicyType = {
-                contestId,
-                strategyType: policy.strategy.type,
-            }
-            const insertedVotingPolicy = await innerTx.insert(schema.votingPolicy).values(newVotingPolicy);
+    for (const policy of votingPolicy) {
+        const newVotingPolicy: schema.dbNewVotingPolicyType = {
+            contestId,
+            strategyType: policy.strategy.type,
+        }
+        const insertedVotingPolicy = await tx.insert(schema.votingPolicy).values(newVotingPolicy);
 
-            if (policy.strategy.type === "arcade") {
-                const newArcadeVotingPolicy: schema.dbNewArcadeVotingStrategyType = {
-                    votingPolicyId: parseInt(insertedVotingPolicy.insertId),
-                    votingPower: policy.strategy.votingPower,
-                    tokenLink: policy.tokenLink,
-                }
-                await innerTx.insert(schema.arcadeVotingStrategy).values(newArcadeVotingPolicy);
+        if (policy.strategy.type === "arcade") {
+            const newArcadeVotingPolicy: schema.dbNewArcadeVotingStrategyType = {
+                votingPolicyId: parseInt(insertedVotingPolicy.insertId),
+                votingPower: policy.strategy.votingPower,
+                tokenLink: policy.tokenLink,
             }
-            else if (policy.strategy.type === "weighted") {
-                const newWeightedVotingPolicy: schema.dbNewWeightedVotingStrategyType = {
-                    votingPolicyId: parseInt(insertedVotingPolicy.insertId),
-                    tokenLink: policy.tokenLink,
-                }
-                await innerTx.insert(schema.weightedVotingStrategy).values(newWeightedVotingPolicy);
+            await tx.insert(schema.arcadeVotingStrategy).values(newArcadeVotingPolicy);
+        }
+        else if (policy.strategy.type === "weighted") {
+            const newWeightedVotingPolicy: schema.dbNewWeightedVotingStrategyType = {
+                votingPolicyId: parseInt(insertedVotingPolicy.insertId),
+                tokenLink: policy.tokenLink,
             }
-        };
-        return innerTx;
-    });
-
+            await tx.insert(schema.weightedVotingStrategy).values(newWeightedVotingPolicy);
+        }
+    };
 }
 
 // update the many-to-many mapping of spacesToTokens
@@ -425,23 +415,22 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         return await db.transaction(async (tx) => {
             const contest = await tx.insert(schema.contests).values(newContest)
             const contestId = parseInt(contest.insertId);
-            await Promise.all([
-                insertSubRewards(contestId, adjustedSubmitterRewards),
-                insertVoterRewards(contestId, adjustedVoterRewards),
-                insertSubmitterRestrictions(contestId, adjustedSubmitterRestrictions),
-                insertVotingPolicies(contestId, adjustedVotingPolicy),
-            ]);
+            await insertSubRewards(contestId, adjustedSubmitterRewards, tx);
+            await insertVoterRewards(contestId, adjustedVoterRewards, tx);
+            await insertSubmitterRestrictions(contestId, adjustedSubmitterRestrictions, tx);
+            await insertVotingPolicies(contestId, adjustedVotingPolicy, tx);
+
             if (newContest.type === "twitter") {
-                const announcmentTweet = await sendAnnouncementTweet(contestId, user, [{ text: "this is another test tweet" }]);
+                await sendAnnouncementTweet(contestId, user, [{ text: "this is another test tweet" }])
+                    .catch(err => {
+                        console.log(err);
+                        tx.rollback();
+                        throw err;
+                    })
             }
             return contestId;
         });
     } catch (err) {
         throw new Error("database error: " + err.message)
     }
-
-
-
-
-
 };
