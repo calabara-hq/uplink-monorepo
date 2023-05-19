@@ -93,8 +93,23 @@ services:
     volumes:
       - ./packages/graphql-api/subgraphs/submissions/src:/usr/src/app/packages/submissions/src
 
+  voting:
+    container_name: voting
+    build:
+      context: .
+      dockerfile: ./packages/graphql-api/subgraphs/voting/Dockerfile
+    ports:
+      - "4005:4000"
+    volumes:
+      - ./packages/graphql-api/subgraphs/voting/src:/usr/src/app/packages/voting/src
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+
 volumes:
   spaces_node_modules:
     #auth_node_modules:
   contests_node_modules:
   submissions_node_modules:
+  voting_node_modules:

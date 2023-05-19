@@ -35,7 +35,7 @@ const fetchContestTopLevel = async (contestId?: number, spaceId?: number) => {
     })
         .from(schema.contests)
         .where(where);
-    
+
     return result;
 }
 
@@ -125,6 +125,10 @@ const fetchSubmitterRestrictions = async (contestId: number) => {
     });
 }
 
+
+
+
+
 const fetchVotingPolicy = async (contestId: number) => {
     const votingPolicy = await db.select({
         id: schema.votingPolicy.id,
@@ -146,9 +150,41 @@ const fetchVotingPolicy = async (contestId: number) => {
         .where(sqlOps.eq(schema.votingPolicy.contestId, contestId));
 
 
-
+    console.log(JSON.stringify(votingPolicy, null, 2))
 
     return votingPolicy.map((policy) => {
+        return {
+            ...policy,
+            arcadeVotingPolicy: {
+                ...policy.arcadeVotingPolicy,
+                ...(policy.strategyType === "arcade" ? { votingPower: DecimalScalar.parseValue(policy.arcadeVotingPolicy.votingPower) } : {})
+            },
+            weightedVotingPolicy: {
+                ...policy.weightedVotingPolicy,
+            }
+        }
+    })
+}
+
+
+const fetchArcadeVotingPolicy = async (contestId: number) => {
+    const arcadeVotingPolicy = await db.select({
+        id: schema.votingPolicy.id,
+        contestId: schema.votingPolicy.contestId,
+        strategyType: schema.votingPolicy.strategyType,
+        arcadeVotingPolicy: {
+            ...schema.arcadeVotingStrategy,
+            token: schema.tokens
+        } as any,
+    })
+        .from(schema.votingPolicy)
+        .leftJoin(schema.arcadeVotingStrategy, sqlOps.eq(schema.arcadeVotingStrategy.votingPolicyId, schema.votingPolicy.id))
+        .leftJoin(schema.tokens, sqlOps.eq(schema.tokens.id, schema.arcadeVotingStrategy.tokenLink))
+        .where(sqlOps.and(sqlOps.eq(schema.votingPolicy.contestId, contestId), sqlOps.eq(schema.votingPolicy.strategyType, "arcade")));
+
+    console.log(JSON.stringify(arcadeVotingPolicy, null, 2))
+
+    return arcadeVotingPolicy.map((policy) => {
         return {
             ...policy,
             arcadeVotingPolicy: {
@@ -159,16 +195,43 @@ const fetchVotingPolicy = async (contestId: number) => {
     })
 }
 
+const fetchWeightedVotingPolicy = async (contestId: number) => {
+    const weightedVotingPolicy = await db.select({
+        id: schema.votingPolicy.id,
+        contestId: schema.votingPolicy.contestId,
+        strategyType: schema.votingPolicy.strategyType,
+        weightedVotingPolicy: {
+            ...schema.weightedVotingStrategy,
+            token: schema.tokens
+        } as any,
+    })
+        .from(schema.votingPolicy)
+        .leftJoin(schema.weightedVotingStrategy, sqlOps.eq(schema.weightedVotingStrategy.votingPolicyId, schema.votingPolicy.id))
+        .leftJoin(schema.tokens, sqlOps.eq(schema.tokens.id, schema.weightedVotingStrategy.tokenLink))
+        .where(sqlOps.and(sqlOps.eq(schema.votingPolicy.contestId, contestId), sqlOps.eq(schema.votingPolicy.strategyType, "weighted")));
+
+    return weightedVotingPolicy.map((policy) => {
+        return {
+            ...policy,
+            weightedVotingPolicy: {
+                ...policy.weightedVotingPolicy,
+            },
+        }
+    })
+}
+
+
 
 const singleContestByContestId = async (id: string) => {
     const contestId = parseInt(id);
 
-    const [contestTopLevel, submitterRewards, voterRewards, submitterRestrictions, votingPolicy] = await Promise.all([
+    const [contestTopLevel, submitterRewards, voterRewards, submitterRestrictions, arcadeVotingPolicy, weightedVotingPolicy] = await Promise.all([
         fetchContestTopLevel(contestId, null),
         fetchSubmitterRewards(contestId),
         fetchVoterRewards(contestId),
         fetchSubmitterRestrictions(contestId),
-        fetchVotingPolicy(contestId)
+        fetchArcadeVotingPolicy(contestId),
+        fetchWeightedVotingPolicy(contestId)
     ])
 
     return {
@@ -176,8 +239,12 @@ const singleContestByContestId = async (id: string) => {
         submitterRewards,
         voterRewards,
         submitterRestrictions,
-        votingPolicy
+        votingPolicy: [
+            ...arcadeVotingPolicy,
+            ...weightedVotingPolicy
+        ]
     }
+
 }
 
 
@@ -185,19 +252,22 @@ const multiContestsBySpaceId = async (id: string) => {
     const spaceId = parseInt(id);
     const contestTopLevel = await fetchContestTopLevel(null, spaceId);
     const result = await Promise.all(contestTopLevel.map(async (contest) => {
-        const [submitterRewards, voterRewards, submitterRestrictions, votingPolicy] = await Promise.all([
+        const [submitterRewards, voterRewards, submitterRestrictions, arcadeVotingPolicy, weightedVotingPolicy] = await Promise.all([
             fetchSubmitterRewards(contest.id),
             fetchVoterRewards(contest.id),
             fetchSubmitterRestrictions(contest.id),
-            fetchVotingPolicy(contest.id)
+            fetchArcadeVotingPolicy(contest.id),
+            fetchWeightedVotingPolicy(contest.id)
         ])
         return {
             ...contest,
             submitterRewards,
             voterRewards,
             submitterRestrictions,
-            votingPolicy
-        }
+            votingPolicy: [
+                ...arcadeVotingPolicy,
+                ...weightedVotingPolicy
+            ]        }
     }));
     return result
 }

@@ -23,9 +23,9 @@ type DeadlinesType {
 type TokenType {
   tokenHash: String!
   type: String!
-  address: String
   symbol: String!
   decimals: Int!
+  address: String
   tokenId: Int
 }
 
@@ -40,7 +40,6 @@ type RewardType {
   tokenReward: tokenRewardType!
 }
 
-
 type TokenRestrictionType {
   token: TokenType!
   threshold: Decimal!
@@ -51,18 +50,13 @@ type SubmitterRestrictionType {
   tokenRestriction: TokenRestrictionType!
 }
 
-type StrategyType {
-  type: VotingStrategyType!
-  votingPower: Decimal
-}
-
 type ArcadeVotingPolicyType {
-  token: TokenType!
+  token: TokenType
   votingPower: Decimal
 }
 
 type WeightedVotingPolicyType {
-  token: TokenType!
+  token: TokenType
 }
 
 type VotingPolicyType {

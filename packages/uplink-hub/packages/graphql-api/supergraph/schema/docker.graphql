@@ -62,7 +62,7 @@ type Admin
 type ArcadeVotingPolicyType
   @join__type(graph: CONTESTS)
 {
-  token: TokenType!
+  token: TokenType
   votingPower: Decimal
 }
 
@@ -357,13 +357,6 @@ type SpaceToken
   tokenId: String
 }
 
-type StrategyType
-  @join__type(graph: CONTESTS)
-{
-  type: VotingStrategyType!
-  votingPower: Decimal
-}
-
 type Submission
   @join__type(graph: SUBMISSIONS, key: "id")
 {
@@ -418,9 +411,9 @@ type TokenType
 {
   tokenHash: String!
   type: String!
-  address: String
   symbol: String!
   decimals: Int!
+  address: String
   tokenId: Int
 }
 
@@ -464,5 +457,5 @@ enum VotingStrategyType
 type WeightedVotingPolicyType
   @join__type(graph: CONTESTS)
 {
-  token: TokenType!
+  token: TokenType
 }

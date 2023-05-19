@@ -1,0 +1,26 @@
+scalar Decimal
+
+type Vote @key(fields: "id") {
+  id: ID!
+  submissionId: ID!
+  quantity: Decimal!
+}
+
+input VoteInputData {
+  submissionId: ID!
+  quantity: Decimal!
+}
+
+type VoteResponse {
+  success: Boolean!
+}
+
+type Mutation {
+  castVotes(voteInputData: VoteInputData!): VoteResponse!
+}
+
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.0"
+    import: ["@key", "@shareable"]
+  )
