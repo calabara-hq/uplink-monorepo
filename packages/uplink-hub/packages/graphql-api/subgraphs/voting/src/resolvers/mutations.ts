@@ -1,6 +1,7 @@
 import { db, sqlOps } from "../utils/database.js";
 import { GraphQLError } from "graphql";
 import { schema, AuthorizationController } from "lib";
+import { castVotes, retractAllVotes, retractSingleVote } from "../utils/voting.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,18 +17,41 @@ const mutations = {
         * }
         */
         castVotes: async (_: any, args: any, context: any) => {
-            // calculate voting power
-            // check if user has enough voting power
-            // cast votes
-            // update cache
-            // return updated voting power parameters + all submissions voted on
+
+            const user = await authController.getUser(context);
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
+            console.log(args.castVotesPayload);
+            return castVotes(user, args.contestId, args.castVotesPayload);
 
         },
 
-        retractVotes: async (_: any, args: any, context: any) => {
-            // delete votes from database
-            // return updated voting power parameters 
+        removeSingleVote: async (_: any, args: any, context: any) => {
+            const user = await authController.getUser(context);
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
+            return retractSingleVote(user, args.contestId, args.submissionId);
+
         },
+
+        removeAllVotes: async (_: any, args: any, context: any) => {
+            const user = await authController.getUser(context);
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+            return retractAllVotes(user, args.contestId);
+
+        }
     },
 };
 

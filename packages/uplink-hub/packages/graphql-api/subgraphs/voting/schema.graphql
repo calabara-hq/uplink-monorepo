@@ -37,18 +37,9 @@ type CastVoteResponse {
   userVotingParams: UserVotingParams!
 }
 
-input RemoveSingleVotePayload {
-  submissionId: ID!
-  contestId: ID!
-}
-
 type RemoveSingleVoteResponse {
   success: Boolean!
   userVotingParams: UserVotingParams!
-}
-
-input RemoveAllVotesPayload {
-  contestId: ID!
 }
 
 type RemoveAllVotesResponse {
@@ -56,11 +47,13 @@ type RemoveAllVotesResponse {
   userVotingParams: UserVotingParams!
 }
 
-
 type Mutation {
-  castVotes(castVotePayload: [CastVotePayload!]!): CastVoteResponse!
-  removeSingleVote(removeSingleVotePayload: RemoveSingleVotePayload!): RemoveSingleVoteResponse!
-  removeAllVotes(removeAllVotesPayload: RemoveAllVotesPayload!): RemoveAllVotesResponse!
+  castVotes(
+    contestId: ID!
+    castVotePayload: [CastVotePayload!]!
+  ): CastVoteResponse!
+  removeSingleVote(contestId: ID!): RemoveSingleVoteResponse!
+  removeAllVotes(submissionId: ID!, contestId: ID!): RemoveAllVotesResponse!
 }
 
 extend schema

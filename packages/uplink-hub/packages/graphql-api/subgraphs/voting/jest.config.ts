@@ -9,6 +9,7 @@ const jestConfig = {
     '^(\\.{1,2}/.*)\\.[jt]s$': '$1',
   },
   // ...
+  verbose: true,
 }
 
 module.exports = jestConfig
