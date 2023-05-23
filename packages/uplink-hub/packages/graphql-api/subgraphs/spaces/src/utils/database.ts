@@ -22,6 +22,7 @@ export const createDbSpace = async (
 
     const space: schema.dbNewSpaceType = {
         name: name.replaceAll(' ', '').toLowerCase(),
+        created: new Date().toISOString(),
         displayName: name,
         logoUrl: logoUrl,
         website: website,
@@ -82,7 +83,7 @@ export const updateDbSpace = async (
         }
     }
 
-    const updatedSpace: schema.dbNewSpaceType = {
+    const updatedSpace: Partial<schema.dbNewSpaceType> = {
         name: name.replaceAll(' ', '').toLowerCase(),
         displayName: name,
         logoUrl: logoUrl,

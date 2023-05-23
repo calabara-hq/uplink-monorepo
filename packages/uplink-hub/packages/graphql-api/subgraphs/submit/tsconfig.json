@@ -4,9 +4,12 @@
     "outDir": "dist",
     "lib": ["es2022"],
     "target": "es2022",
-    "module": "esnext",
+    "module": "es2022",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "types": ["node"]
-  }
+    "types": ["node"],
+  },
+  // ignore tests in build
+  "exclude": ["test"]
+  //"exclude" : ["test"]
 }

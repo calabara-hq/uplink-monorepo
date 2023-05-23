@@ -1,9 +1,10 @@
-import { mysqlTable, index, serial, boolean, text, varchar, int, datetime, uniqueIndex } from 'drizzle-orm/mysql-core';
+import { mysqlTable, index, serial, boolean, text, varchar, int, uniqueIndex } from 'drizzle-orm/mysql-core';
 import { InferModel } from 'drizzle-orm';
 
 
 export const spaces = mysqlTable('spaces', {
     id: serial('id').primaryKey(),
+    created: varchar('created', { length: 255 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
     displayName: varchar('displayName', { length: 255 }).notNull(),
     members: int('members').notNull(),
@@ -28,13 +29,13 @@ export const admins = mysqlTable('admins', {
 export const contests = mysqlTable('contests', {
     id: serial('id').primaryKey(),
     spaceId: int('spaceId').notNull(),
-    created: datetime('created').notNull(),
+    created: varchar('created', { length: 255 }).notNull(),
     type: varchar('type', { length: 255 }).notNull(),
     category: varchar('category', { length: 255 }).notNull(),
-    startTime: datetime('startTime').notNull(),
-    voteTime: datetime('voteTime').notNull(),
-    endTime: datetime('endTime').notNull(),
-    snapshot: datetime('snapshot').notNull(),
+    startTime: varchar('startTime', { length: 255 }).notNull(),
+    voteTime: varchar('voteTime', { length: 255 }).notNull(),
+    endTime: varchar('endTime', { length: 255 }).notNull(),
+    snapshot: varchar('snapshot', { length: 255 }).notNull(),
     promptUrl: varchar('promptUrl', { length: 255 }).notNull(),
     anonSubs: boolean('anonSubs').notNull(),
     visibleVotes: boolean('visibleVotes').notNull(),
@@ -137,7 +138,7 @@ export const submissions = mysqlTable('submissions', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     author: varchar('author', { length: 255 }).notNull(),
-    created: datetime('created').notNull(),
+    created: varchar('created', { length: 255 }).notNull(),
     type: varchar('type', { length: 255 }).notNull(),
     url: varchar('url', { length: 255 }).notNull(),
     version: varchar('version', { length: 255 }).notNull(),
@@ -151,7 +152,7 @@ export const votes = mysqlTable('votes', {
     contestId: int('contestId').notNull(),
     submissionId: int('submissionId').notNull(),
     voter: varchar('voter', { length: 255 }).notNull(),
-    created: datetime('created').notNull(),
+    created: varchar('created', { length: 255 }).notNull(),
     amount: varchar('amount', { length: 255 }).notNull()
 }, (votes) => ({
     votesContestIdIndex: index("votes_contest_id_idx").on(votes.contestId),

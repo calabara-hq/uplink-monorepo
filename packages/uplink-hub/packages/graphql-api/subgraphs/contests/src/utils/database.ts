@@ -381,15 +381,15 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         type: contest.metadata.type,
         category: contest.metadata.category,
         promptUrl: promptUrl,
-        startTime: new Date(contest.deadlines.startTime),
-        voteTime: new Date(contest.deadlines.voteTime),
-        endTime: new Date(contest.deadlines.endTime),
-        snapshot: new Date(contest.deadlines.snapshot),
+        startTime: new Date(contest.deadlines.startTime).toISOString(),
+        voteTime: new Date(contest.deadlines.voteTime).toISOString(),
+        endTime: new Date(contest.deadlines.endTime).toISOString(),
+        snapshot: new Date(contest.deadlines.snapshot).toISOString(),
         anonSubs: contest.additionalParams.anonSubs,
         visibleVotes: contest.additionalParams.visibleVotes,
         selfVote: contest.additionalParams.selfVote,
         subLimit: contest.additionalParams.subLimit,
-        created: new Date()
+        created: new Date().toISOString(),
     }
 
 

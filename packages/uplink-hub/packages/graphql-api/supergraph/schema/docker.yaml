@@ -8,10 +8,10 @@ subgraphs:
     routing_url: http://contests:4000/graphql
     schema:
       file: ../../subgraphs/contests/schema.graphql
-  submissions:
-    routing_url: http://submissions:4000/graphql
+  submit:
+    routing_url: http://submit:4000/graphql
     schema:
-      file: ../../subgraphs/submissions/schema.graphql
+      file: ../../subgraphs/submit/schema.graphql
   voting:
     routing_url: http://voting:4000/graphql
     schema:

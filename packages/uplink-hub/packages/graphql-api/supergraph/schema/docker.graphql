@@ -159,6 +159,7 @@ type DeadlinesType
 
 scalar Decimal
   @join__type(graph: CONTESTS)
+  @join__type(graph: SUBMIT)
   @join__type(graph: VOTING)
 
 scalar EditorData
@@ -218,7 +219,7 @@ scalar join__FieldSet
 enum join__Graph {
   CONTESTS @join__graph(name: "contests", url: "http://contests:4000/graphql")
   SPACES @join__graph(name: "spaces", url: "http://spaces:4000/graphql")
-  SUBMISSIONS @join__graph(name: "submissions", url: "http://submissions:4000/graphql")
+  SUBMIT @join__graph(name: "submit", url: "http://submit:4000/graphql")
   VOTING @join__graph(name: "voting", url: "http://voting:4000/graphql")
 }
 
@@ -258,9 +259,9 @@ type Mutation
   createContest(contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
-  castVotes(castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTING)
-  removeSingleVote(removeSingleVotePayload: RemoveSingleVotePayload!): RemoveSingleVoteResponse! @join__field(graph: VOTING)
-  removeAllVotes(removeAllVotesPayload: RemoveAllVotesPayload!): RemoveAllVotesResponse! @join__field(graph: VOTING)
+  castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTING)
+  removeSingleVote(contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTING)
+  removeAllVotes(submissionId: ID!, contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTING)
 }
 
 enum NativeTokenType
@@ -286,23 +287,15 @@ input Prompt
 type Query
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
-  @join__type(graph: SUBMISSIONS)
+  @join__type(graph: SUBMIT)
   @join__type(graph: VOTING)
 {
   contest(contestId: Int!): Contest @join__field(graph: CONTESTS)
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
-  submissions(contestId: Int!): [Submission!]! @join__field(graph: SUBMISSIONS)
-  submission(submissionId: Int!): Submission! @join__field(graph: SUBMISSIONS)
   testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTING)
   getUserVotingParams(walletAddress: String!, contestId: ID!): UserVotingParams! @join__field(graph: VOTING)
-}
-
-input RemoveAllVotesPayload
-  @join__type(graph: VOTING)
-{
-  contestId: ID!
 }
 
 type RemoveAllVotesResponse
@@ -310,13 +303,6 @@ type RemoveAllVotesResponse
 {
   success: Boolean!
   userVotingParams: UserVotingParams!
-}
-
-input RemoveSingleVotePayload
-  @join__type(graph: VOTING)
-{
-  submissionId: ID!
-  contestId: ID!
 }
 
 type RemoveSingleVoteResponse
@@ -413,14 +399,10 @@ type SpaceToken
   tokenId: String
 }
 
-type Submission
-  @join__type(graph: SUBMISSIONS, key: "id")
+type Submit
+  @join__type(graph: SUBMIT, key: "id")
 {
-  id: Int!
-  contestId: Int!
-  author: String!
-  url: String!
-  created: String!
+  id: ID!
 }
 
 input SubmitterRestriction

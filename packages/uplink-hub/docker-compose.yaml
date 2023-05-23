@@ -83,15 +83,21 @@ services:
       - DATABASE_USERNAME=${DATABASE_USERNAME}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
 
-  submissions:
-    container_name: submissions
+  submit:
+    container_name: submit
     build:
       context: .
-      dockerfile: ./packages/graphql-api/subgraphs/submissions/Dockerfile
+      dockerfile: ./packages/graphql-api/subgraphs/submit/Dockerfile
     ports:
       - "4004:4000"
     volumes:
-      - ./packages/graphql-api/subgraphs/submissions/src:/usr/src/app/packages/submissions/src
+      - ./packages/graphql-api/subgraphs/submit/src:/usr/src/app/packages/submit/src
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - ALCHEMY_KEY=${ALCHEMY_KEY}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
 
   voting:
     container_name: voting
@@ -113,5 +119,5 @@ volumes:
   spaces_node_modules:
     #auth_node_modules:
   contests_node_modules:
-  submissions_node_modules:
+  submit_node_modules:
   voting_node_modules:
