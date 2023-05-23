@@ -96,32 +96,31 @@ const getSpace = async (name: string) => {
     .toPromise();
   if (results.error) throw new Error(results.error.message);
   if (!results.data.space) throw new Error("Space not found");
-  results.data.space.contests = contests;
-  results.data.space.twitter = "@thenounsquare";
-  results.data.space.website = "tns.wtf";
+  //results.data.space.contests = contests;
   return results.data;
 };
 
 export default async function Page({ params }: { params: { name: string } }) {
   try {
     const spaceData = await getSpace(params.name);
+    console.log(spaceData);
     const { contests, displayName, logoUrl, twitter, website } =
       spaceData.space;
     return (
-      <div className="flex flex-col m-auto py-6 w-[90vw] gap-4">
-        <div className="flex flex-col lg:flex-row gap-4 m-auto items-center w-4/5" >
-          <div className="avatar">
-            <figure className=" w-20 lg:w-24 rounded-full bg-transparent">
+      <div className="flex flex-col items-center m-auto py-6 w-[90vw] gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 m-auto items-center w-4/5">
+          <div className="avatar ">
+            <div className="w-24 rounded-full bg-base-100">
               <Image
-                src={"/noun-47.png"}
+                src={logoUrl}
                 alt={"org avatar"}
-                height={300}
-                width={300}
+                fill
+                className="object-cover rounded-full"
               />
-            </figure>
+            </div>
           </div>
           <div className="flex flex-col">
-            <h2 className="card-title text-3xl">The Noun Square</h2>
+            <h2 className="card-title text-3xl">{displayName}</h2>
             {twitter && (
               <a
                 href={`https:/twitter.com/${twitter}`}
@@ -154,7 +153,7 @@ export default async function Page({ params }: { params: { name: string } }) {
         <div className="p-2" />
         <Stats />
         <div className="p-2" />
-        <ContestDisplay contests={contests} />
+        <ContestDisplay contests={contests} space={spaceData.space} />
         {/*
         <pre className="text-white">{JSON.stringify(spaceData, null, 2)}</pre>
         */}

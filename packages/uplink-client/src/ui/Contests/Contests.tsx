@@ -79,7 +79,7 @@ export function Prompt({
   metadata: any;
   status: string;
   space: any;
-  coverUrl: any;
+  coverUrl?: any;
 }) {
   console.log("promptData", promptData);
   return (

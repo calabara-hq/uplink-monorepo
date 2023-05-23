@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { SearchBar } from "@/ui/SearchBar/SearchBar";
+import { sub } from "date-fns";
 
 export function AllSpaces({ spaces }: any) {
   const [joinedSpaces, setJoinedSpaces] = useState<string[]>([]);
@@ -23,49 +24,48 @@ export function AllSpaces({ spaces }: any) {
     <>
       <div
         className="grid gap-4 py-6
-      grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center w-full"
       >
         {spaces.data.spaces.map((space: any, index: number) => {
           const isJoined = joinedSpaces.includes(space.name);
-          
 
           return (
-            <Link key={index} href={`/space/${space.name}`}>
-              <div
-                className="card card-compact bg-base-100 hover:shadow-box
+            <>
+              <Link key={index} href={`/space/${space.name}`}>
+                <div
+                  className="card card-compact hover:shadow-box bg-base-100
               transition-all duration-300 ease-linear
-              cursor-pointer hover:scale-105 rounded-3xl"
-              >
-                <div className="card-body items-center">
-                  <div className="avatar">
-                    <div className="w-24 rounded-full bg-base-100">
-                      <Image
-                        src={"/noun-47.png"}
-                        alt={"org avatar"}
-                        fill
-                        className="object-cover"
-                      />
+              cursor-pointer hover:scale-105 rounded-3xl w-[300px] h-[350px]"
+                >
+                  <figure className="relative h-2/3 ">
+                    <Image
+                      src={space.logoUrl}
+                      alt="submission image"
+                      fill
+                      className="rounded-t-xl object-cover w-full"
+                    />
+                  </figure>
+                  <div className="card-body items-center">
+                    <h2 className="card-title mb-0">{space.name}</h2>
+                    <div className="card-actions justify-end">
+                      <p>{space.members} members</p>
                     </div>
+                    <button
+                      className={`btn btn-xs ${
+                        isJoined ? "btn-outline btn-active" : "btn-outline"
+                      }`}
+                      onClick={(e) => handleJoinClick(e, space.name)}
+                    >
+                      {isJoined ? "Joined" : "Join"}
+                    </button>
                   </div>
-
-                  <h2 className="card-title mb-0">{space.name}</h2>
-                  <div className="card-actions justify-end">
-                    <p>{space.members} members</p>
-                  </div>
-                  <button
-                    className={`btn btn-xs ${
-                      isJoined ? "btn-outline btn-active" : "btn-outline"
-                    }`}
-                    onClick={(e) => handleJoinClick(e, space.name)}
-                  >
-                    {isJoined ? "Joined" : "Join"}
-                  </button>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </>
           );
         })}
       </div>
     </>
   );
 }
+

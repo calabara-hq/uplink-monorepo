@@ -7,6 +7,7 @@ import { AllSpaces} from "./data";
 import { SearchBar } from "@/ui/SearchBar/SearchBar";
 import { HomeIcon, PlusIcon } from "@heroicons/react/24/solid";
 import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton";
+import CreateThread from "@/ui/CreateThread/CreateThread";
 
 //console.log('revalidating')
 
@@ -27,7 +28,7 @@ export default async function Page() {
   const spaces = await getSpaces();
   console.log(spaces.data.spaces);
   return (
-    <div className="flex flex-col m-auto py-6 w-4/5 gap-4">
+    <div className="flex flex-col w-full justify-center m-auto py-6 lg:w-4/5 gap-4">
       <div className="flex flex-col md:flex-row items-center p-1 gap-4 py-8">
         <Link className="btn" href="/">
           <HomeIcon className="h-6 w-6" />
@@ -46,6 +47,7 @@ export default async function Page() {
 
         <SearchBar />
         <TwitterConnectButton />
+        <CreateThread />
 
       </div>
       <AllSpaces spaces={spaces} />
