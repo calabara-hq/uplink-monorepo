@@ -133,7 +133,32 @@ export const arcadeVotingStrategy = mysqlTable('arcadeVotingStrategy', {
     arcadeVotingStrategyTokenLinkIndex: index("arcadeVotingStrategy_token_link_idx").on(arcadeVotingStrategy.tokenLink),
 }));
 
+export const submissions = mysqlTable('submissions', {
+    id: serial('id').primaryKey(),
+    contestId: int('contestId').notNull(),
+    author: varchar('author', { length: 255 }).notNull(),
+    created: datetime('created').notNull(),
+    type: varchar('type', { length: 255 }).notNull(),
+    url: varchar('url', { length: 255 }).notNull(),
+    version: varchar('version', { length: 255 }).notNull(),
+}, (submissions) => ({
+    submissionsContestIdIndex: index("submissions_contest_id_idx").on(submissions.contestId),
+    submissionsAuthorIndex: index("submissions_author_idx").on(submissions.author),
+}));
 
+export const votes = mysqlTable('votes', {
+    id: serial('id').primaryKey(),
+    contestId: int('contestId').notNull(),
+    submissionId: int('submissionId').notNull(),
+    voter: varchar('voter', { length: 255 }).notNull(),
+    created: datetime('created').notNull(),
+    amount: varchar('amount', { length: 255 }).notNull()
+}, (votes) => ({
+    votesContestIdIndex: index("votes_contest_id_idx").on(votes.contestId),
+    votesSubmissionIdIndex: index("votes_submission_id_idx").on(votes.submissionId),
+    votesVoterIndex: index("votes_voter_idx").on(votes.voter),
+    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter, votes.amount),
+}));
 
 
 export type dbSpaceType = InferModel<typeof spaces>
@@ -172,5 +197,10 @@ export type dbNewWeightedVotingStrategyType = InferModel<typeof weightedVotingSt
 export type dbArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy>
 export type dbNewArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy, 'insert'>
 
+export type dbSubmissionType = InferModel<typeof submissions>
+export type dbNewSubmissionType = InferModel<typeof submissions, 'insert'>
+
+export type dbVoteType = InferModel<typeof votes>
+export type dbNewVoteType = InferModel<typeof votes, 'insert'>
 
 

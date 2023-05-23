@@ -1,5 +1,5 @@
 
-import { DecimalScalar, AuthorizationController, schema } from "lib";
+import { AuthorizationController, schema } from "lib";
 import { createDbContest } from "../utils/database.js";
 import {
     validateMetadata,
@@ -13,7 +13,6 @@ import {
     validateAdditionalParams
 } from "../utils/validateContestParams.js";
 
-import Decimal from 'decimal.js'
 import { GraphQLError } from "graphql";
 import { sqlOps, db } from '../utils/database.js';
 

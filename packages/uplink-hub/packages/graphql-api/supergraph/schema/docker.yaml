@@ -12,3 +12,7 @@ subgraphs:
     routing_url: http://submissions:4000/graphql
     schema:
       file: ../../subgraphs/submissions/schema.graphql
+  voting:
+    routing_url: http://voting:4000/graphql
+    schema:
+      file: ../../subgraphs/voting/schema.graphql

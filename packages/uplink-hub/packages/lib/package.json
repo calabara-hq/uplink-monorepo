@@ -19,6 +19,7 @@
     "decimal.js": "^10.4.3",
     "dotenv": "^16.0.3",
     "drizzle-orm": "^0.25.4",
+    "ethereum-block-by-date": "^1.4.7",
     "ethers": "5.7.2",
     "graphql": "^16.6.0",
     "ioredis": "^5.3.2",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
+    "@types/ethereum-block-by-date": "^1.4.1",
     "@types/node": "^18.11.19",
     "drizzle-kit": "db-push",
     "jest": "^29.5.0",

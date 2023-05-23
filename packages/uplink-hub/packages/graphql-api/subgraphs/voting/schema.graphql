@@ -6,17 +6,61 @@ type Vote @key(fields: "id") {
   quantity: Decimal!
 }
 
-input VoteInputData {
+type SampleResponse {
+  success: Boolean!
+}
+
+type VoteObject {
+  submissionId: ID!
+  votes: Decimal!
+}
+
+type UserVotingParams {
+  totalVotingPower: Decimal!
+  votesSpent: Decimal!
+  votesRemaining: Decimal!
+  userVotes: [VoteObject!]!
+}
+
+type Query {
+  testEndpoint(id: ID!): SampleResponse!
+  getUserVotingParams(walletAddress: String!, contestId: ID!): UserVotingParams!
+}
+
+input CastVotePayload {
   submissionId: ID!
   quantity: Decimal!
 }
 
-type VoteResponse {
+type CastVoteResponse {
   success: Boolean!
+  userVotingParams: UserVotingParams!
 }
 
+input RemoveSingleVotePayload {
+  submissionId: ID!
+  contestId: ID!
+}
+
+type RemoveSingleVoteResponse {
+  success: Boolean!
+  userVotingParams: UserVotingParams!
+}
+
+input RemoveAllVotesPayload {
+  contestId: ID!
+}
+
+type RemoveAllVotesResponse {
+  success: Boolean!
+  userVotingParams: UserVotingParams!
+}
+
+
 type Mutation {
-  castVotes(voteInputData: VoteInputData!): VoteResponse!
+  castVotes(castVotePayload: [CastVotePayload!]!): CastVoteResponse!
+  removeSingleVote(removeSingleVotePayload: RemoveSingleVotePayload!): RemoveSingleVoteResponse!
+  removeAllVotes(removeAllVotesPayload: RemoveAllVotesPayload!): RemoveAllVotesResponse!
 }
 
 extend schema

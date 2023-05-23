@@ -6,7 +6,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "clean": "yarn workspaces foreach 'echo $(pwd)/node_modules' | xargs rm -rf"
+    "clean": "yarn workspaces foreach 'echo $(pwd)/node_modules' | xargs rm -rf",
+    "test-voting": "cross-env ENV_PATH=./.env dotenv -- yarn workspace voting test --coverage",
+    "test-lib": "cross-env ENV_PATH=./.env dotenv -- yarn workspace lib test --coverage"
   },
   "workspaces": [
     "packages/*",
@@ -17,5 +19,9 @@
       "*"
     ]
   },
-  "packageManager": "yarn@3.5.0"
+  "packageManager": "yarn@3.5.0",
+  "dependencies": {
+    "cross-env": "^7.0.3",
+    "dotenv-cli": "^7.2.1"
+  }
 }

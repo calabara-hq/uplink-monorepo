@@ -6,11 +6,25 @@ import Image from "next/image";
 import contestImage from "../../public/tns-sketch-contest.jpeg";
 import SubmissionCard from "../SubmissionCard/SubmissionCard";
 import { SubmissionCard2 } from "../SubmissionCard/SubmissionCard";
-import { SubmissionCardVote, SubmissionCardBoxSelect } from "../SubmissionCard/SubmissionCard";
+import {
+  SubmissionCardVote,
+  SubmissionCardBoxSelect,
+} from "../SubmissionCard/SubmissionCard";
+import graphqlClient from "@/lib/graphql/initUrql";
+import { TestEndpointDocument } from "@/lib/graphql/votes.gql";
 
 export const getPromptData = async (contest: any) => {
   const promptData = await fetch(contest.promptUrl).then((res) => res.json());
   return promptData;
+};
+
+const testEndpoint = async (id: string) => {
+  const results = await graphqlClient
+    .query(TestEndpointDocument, { id })
+    .toPromise();
+  if (results.error) {
+    throw new Error(results.error.message);
+  }
 };
 
 export function CalculateStatus(contest: any) {
@@ -54,6 +68,7 @@ export default function Contests({
           space={space}
           coverUrl={contest.prompt.coverUrl}
         />
+        <button onClick={() => testEndpoint("435")}>test endpoint</button>
         <div className="flex flex-row justify-center w-full">
           <SubmissionDisplay />
           <SideBar
@@ -207,9 +222,10 @@ export function SubmissionDisplay() {
   return (
     <div className="flex flex-col w-full lg:w-3/4 gap-4">
       <div className="flex w-3/4 justify-between items-center m-auto">
-      <h1 className="text-xl lg:text-3xl text-center font-bold">Submissions</h1>
-      <button className="btn btn-sm btn-ghost">Contest Details</button>
-
+        <h1 className="text-xl lg:text-3xl text-center font-bold">
+          Submissions
+        </h1>
+        <button className="btn btn-sm btn-ghost">Contest Details</button>
       </div>
       <div className="flex flex-col lg:flex-row flex-wrap justify-center gap-4 w-full">
         <SubmissionCardBoxSelect />
@@ -285,9 +301,9 @@ export function DynamicSubRewards({
         </div>
         <div className="flex flex-col items-center gap-2 h-fit border-2 border-border rounded-lg p-4">
           {activeTab === "rewards" && (
-              <div className="flex flex-row items-center justify-center gap-2">
-                <p className="font-bold text-2xl">1 ETH</p>
-              </div>
+            <div className="flex flex-row items-center justify-center gap-2">
+              <p className="font-bold text-2xl">1 ETH</p>
+            </div>
           )}
           {activeTab === "details" && (
             <div className="grid grid-cols-2">

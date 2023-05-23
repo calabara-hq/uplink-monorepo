@@ -1,11 +1,11 @@
 import { ethers } from 'ethers';
-
+import EthDater from 'ethereum-block-by-date';
+import Decimal from 'decimal.js';
 import ERC20ABI from './abi/erc20ABI.js'
 import ERC721ABI from './abi/erc721ABI.js';
 import ERC1155ABI from './abi/erc1155ABI.js';
 import ERC165ABI from './abi/erc165ABI.js';
-
-
+import { IToken } from '../types/token.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -14,6 +14,10 @@ const ERC1155Interface = '0xd9b67a26';
 const ERC1155MetaDataURIInterface = '0xd9b67a26';
 
 const provider = new ethers.providers.AlchemyProvider('homestead', process.env.ALCHEMY_KEY);
+const dater = new EthDater(provider);
+
+
+
 const validateERC20 = async (address: string) => {
     try {
         const erc20Contract = new ethers.Contract(address, ERC20ABI, provider);
@@ -109,4 +113,40 @@ export const isERC1155TokenFungible = async ({ contractAddress, tokenId }: {
     } catch (err) {
         return false;
     }
+}
+
+export const calculateBlockFromTimestamp = async (timestamp: string) => {
+    const result = await dater.getDate(timestamp, true, false);
+    return result.block;
+}
+
+
+export const computeUserTokenBalance = async ({ token, snapshot, walletAddress }: {
+    token: IToken,
+    snapshot: string,
+    walletAddress: string
+}) => {
+
+    const blockNum = calculateBlockFromTimestamp(snapshot);
+
+    try {
+        if (token.type === "ETH") {
+            const balance = await provider.getBalance(walletAddress, blockNum);
+            return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
+        }
+        else if (token.type === "ERC1155") {
+            const tokenContract = new ethers.Contract(token.address, ERC1155ABI, provider);
+            const balance = await tokenContract.balanceOf(walletAddress, token.tokenId, { blockTag: blockNum });
+            return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
+        }
+        else { // ERC20 / ERC721
+            const tokenContract = new ethers.Contract(token.address, ERC20ABI, provider);
+            const balance = await tokenContract.balanceOf(walletAddress, { blockTag: blockNum });
+            return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
+        }
+    } catch (err) {
+        console.error(`Failed to fetch user balance for token with err: ${err}`);
+        return new Decimal(0);
+    }
+
 }

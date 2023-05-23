@@ -1,4 +1,4 @@
-import { DecimalScalar, schema } from "lib";
+import { Decimal, schema } from "lib";
 import { sqlOps, db } from '../utils/database.js';
 
 const fetchContestTopLevel = async (contestId?: number, spaceId?: number) => {
@@ -62,7 +62,7 @@ const fetchSubmitterRewards = async (contestId: number) => {
             ...reward,
             tokenReward: {
                 ...reward.tokenReward,
-                amount: DecimalScalar.parseValue(reward.tokenReward.amount)
+                amount: new Decimal(reward.tokenReward.amount)
             }
         }
     });
@@ -90,7 +90,7 @@ const fetchVoterRewards = async (contestId: number) => {
             ...reward,
             tokenReward: {
                 ...reward.tokenReward,
-                amount: DecimalScalar.parseValue(reward.tokenReward.amount)
+                amount: new Decimal(reward.tokenReward.amount)
             }
         }
     });
@@ -118,52 +118,11 @@ const fetchSubmitterRestrictions = async (contestId: number) => {
             ...restriction,
             tokenRestriction: {
                 ...restriction.tokenRestriction,
-                threshold: DecimalScalar.parseValue(restriction.tokenRestriction.threshold)
+                threshold: new Decimal(restriction.tokenRestriction.threshold)
             }
 
         }
     });
-}
-
-
-
-
-
-const fetchVotingPolicy = async (contestId: number) => {
-    const votingPolicy = await db.select({
-        id: schema.votingPolicy.id,
-        contestId: schema.votingPolicy.contestId,
-        strategyType: schema.votingPolicy.strategyType,
-        arcadeVotingPolicy: {
-            ...schema.arcadeVotingStrategy,
-            token: schema.tokens
-        } as any,
-        weightedVotingPolicy: {
-            ...schema.weightedVotingStrategy,
-            token: schema.tokens
-        } as any
-    })
-        .from(schema.votingPolicy)
-        .leftJoin(schema.arcadeVotingStrategy, sqlOps.eq(schema.arcadeVotingStrategy.votingPolicyId, schema.votingPolicy.id))
-        .leftJoin(schema.weightedVotingStrategy, sqlOps.eq(schema.weightedVotingStrategy.votingPolicyId, schema.votingPolicy.id))
-        .leftJoin(schema.tokens, sqlOps.eq(schema.tokens.id, schema.arcadeVotingStrategy.tokenLink))
-        .where(sqlOps.eq(schema.votingPolicy.contestId, contestId));
-
-
-    console.log(JSON.stringify(votingPolicy, null, 2))
-
-    return votingPolicy.map((policy) => {
-        return {
-            ...policy,
-            arcadeVotingPolicy: {
-                ...policy.arcadeVotingPolicy,
-                ...(policy.strategyType === "arcade" ? { votingPower: DecimalScalar.parseValue(policy.arcadeVotingPolicy.votingPower) } : {})
-            },
-            weightedVotingPolicy: {
-                ...policy.weightedVotingPolicy,
-            }
-        }
-    })
 }
 
 
@@ -189,7 +148,7 @@ const fetchArcadeVotingPolicy = async (contestId: number) => {
             ...policy,
             arcadeVotingPolicy: {
                 ...policy.arcadeVotingPolicy,
-                votingPower: DecimalScalar.parseValue(policy.arcadeVotingPolicy.votingPower)
+                votingPower: new Decimal(policy.arcadeVotingPolicy.votingPower)
             },
         }
     })
