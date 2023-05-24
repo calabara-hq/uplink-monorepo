@@ -8,6 +8,7 @@
   "scripts": {
     "clean": "yarn workspaces foreach 'echo $(pwd)/node_modules' | xargs rm -rf",
     "test-voting": "cross-env ENV_PATH=./.env dotenv -- yarn workspace voting test",
+    "test-submit": "cross-env ENV_PATH=./.env dotenv -- yarn workspace submit test",
     "test-lib": "cross-env ENV_PATH=./.env dotenv -- yarn workspace lib test"
   },
   "workspaces": [

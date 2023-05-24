@@ -1,7 +1,46 @@
 scalar Decimal
+scalar EditorData
+scalar SubmissionAssetUrl
 
-type Submit @key(fields: "id") {
+type Submission @key(fields: "id") {
   id: ID!
+  contestId: ID!
+  created: String!
+  type: String!
+  version: String!
+  author: String!
+  url: String!
+}
+
+type UserSubmissionParams {
+  maxSubPower: Int!
+  remainingSubPower: Int!
+  userSubmissions: [Submission!]!
+}
+
+type Query {
+  getUserSubmissionParams(
+    walletAddress: String!
+    contestId: ID!
+  ): UserSubmissionParams!
+}
+
+type createSubmissionResponse {
+  success: Boolean!
+}
+
+input SubmissionPayload {
+  title: String!
+  previewAsset: SubmissionAssetUrl
+  videoAsset: SubmissionAssetUrl
+  body: EditorData
+}
+
+type Mutation {
+  createSubmission(
+    contestId: ID!
+    submission: SubmissionPayload!
+  ): createSubmissionResponse!
 }
 
 extend schema

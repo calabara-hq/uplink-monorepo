@@ -222,10 +222,6 @@ export const calculateUserVotingParams = async (user: any, contestId: any) => {
 
     const votesSpent = userVotes.reduce((acc: Decimal, vote: any) => Decimal.add(acc, vote.votes), new Decimal(0));
     const votesRemaining = new Decimal(Decimal.sub(totalVotingPower, votesSpent));
-    console.log('voting power instance of decimal', totalVotingPower instanceof Decimal)
-    console.log('votes spent instance of decimal', votesSpent instanceof Decimal)
-    console.log('votes remaining instance of decimal', votesRemaining instanceof Decimal)
-    console.log(userVotes)
     return {
         totalVotingPower,
         votesSpent,

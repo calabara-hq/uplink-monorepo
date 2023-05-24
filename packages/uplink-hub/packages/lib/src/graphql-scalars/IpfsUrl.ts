@@ -32,7 +32,7 @@ export const IpfsUrlScalar = new GraphQLScalarType({
   },
 });
 
-function isIpfsUrl(value: unknown): value is string {
+export const isIpfsUrl = (value: unknown): value is string => {
   if (typeof value !== 'string') {
     return false;
   }

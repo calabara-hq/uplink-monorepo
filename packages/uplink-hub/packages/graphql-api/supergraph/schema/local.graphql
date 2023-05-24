@@ -146,6 +146,12 @@ enum ContestType
   twitter @join__enumValue(graph: CONTESTS)
 }
 
+type createSubmissionResponse
+  @join__type(graph: SUBMIT)
+{
+  success: Boolean!
+}
+
 input Deadlines
   @join__type(graph: CONTESTS)
 {
@@ -171,6 +177,7 @@ scalar Decimal
 
 scalar EditorData
   @join__type(graph: CONTESTS)
+  @join__type(graph: SUBMIT)
 
 enum ERCTokenType
   @join__type(graph: CONTESTS)
@@ -262,12 +269,14 @@ type MetadataType
 type Mutation
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
+  @join__type(graph: SUBMIT)
   @join__type(graph: USER)
   @join__type(graph: VOTING)
 {
   createContest(contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   signIn(authData: authDataInput): signInResponse! @join__field(graph: USER)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTING)
   removeSingleVote(contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTING)
@@ -311,6 +320,7 @@ type Query
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
+  getUserSubmissionParams(walletAddress: String!, contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
   me: User! @join__field(graph: USER)
   generateNonce: NonceResult! @join__field(graph: USER)
   testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTING)
@@ -426,10 +436,37 @@ type SpaceToken
   tokenId: String
 }
 
-type Submit
+type Submission
   @join__type(graph: SUBMIT, key: "id")
 {
   id: ID!
+  contestId: ID!
+  created: String!
+  type: String!
+  version: String!
+  author: String!
+  url: String!
+}
+
+scalar SubmissionAssetUrl
+  @join__type(graph: SUBMIT)
+
+input SubmissionPayload
+  @join__type(graph: SUBMIT)
+{
+  title: String!
+  template: SubmissionTemplate!
+  previewAsset: SubmissionAssetUrl
+  videoAsset: SubmissionAssetUrl
+  body: EditorData
+}
+
+enum SubmissionTemplate
+  @join__type(graph: SUBMIT)
+{
+  text @join__enumValue(graph: SUBMIT)
+  image @join__enumValue(graph: SUBMIT)
+  video @join__enumValue(graph: SUBMIT)
 }
 
 input SubmitterRestriction
@@ -487,6 +524,14 @@ type User
 {
   address: ID!
   isAuthenticated: Boolean!
+}
+
+type UserSubmissionParams
+  @join__type(graph: SUBMIT)
+{
+  maxSubPower: Int!
+  remainingSubPower: Int!
+  userSubmissions: [Submission!]!
 }
 
 type UserVotingParams
