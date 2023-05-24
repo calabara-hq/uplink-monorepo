@@ -232,9 +232,12 @@ describe('voting utils test suite', () => {
                 { submissionId: 2, votes: 1 }
             ]);
             jest.spyOn(votingUtils, 'insertVotes').mockResolvedValue(true);
-            jest.spyOn(votingUtils, 'getContestSubmissions').mockResolvedValue([
-                { id: 1 }, { id: 2 }, { id: 3 }
-            ])
+            jest.spyOn(votingUtils, 'getAdditionalParamsAndSubmissions').mockResolvedValue({
+                selfVote: true,
+                submissions: [
+                    { id: 1, author: 'yungweez.eth' }, { id: 2, author: 'yungweez.eth' }, { id: 3, author: 'yungweez.eth' }
+                ]
+            })
             jest.spyOn(votingUtils, 'calculateTotalVotingPower').mockResolvedValue(new Decimal('100'));
             jest.spyOn(votingUtils, 'calculateUserVotingParams').mockResolvedValue({
                 totalVotingPower: new Decimal('100'),
@@ -259,6 +262,43 @@ describe('voting utils test suite', () => {
 
         });
 
+        test('throw self voting error', async () => {
+            jest.spyOn(votingUtils, 'fetchUserVotes').mockResolvedValue([
+                { submissionId: 0, votes: 3 },
+                { submissionId: 1, votes: 2 },
+                { submissionId: 2, votes: 1 }
+            ]);
+            jest.spyOn(votingUtils, 'insertVotes').mockResolvedValue(true);
+            jest.spyOn(votingUtils, 'getAdditionalParamsAndSubmissions').mockResolvedValue({
+                selfVote: false,
+                submissions: [
+                    { id: 1, author: 'nickdodson.eth' }, { id: 2, author: 'yungweez.eth' }, { id: 3, author: 'yungweez.eth' }
+                ]
+            })
+            jest.spyOn(votingUtils, 'calculateTotalVotingPower').mockResolvedValue(new Decimal('100'));
+            jest.spyOn(votingUtils, 'calculateUserVotingParams').mockResolvedValue({
+                totalVotingPower: new Decimal('100'),
+                votesSpent: new Decimal('0'),
+                votesRemaining: new Decimal('100'),
+                userVotes: [],
+            });
+            const user = { address: 'nickdodson.eth' };
+            const contestId = 0;
+            const payload = [
+                { submissionId: 1, votes: new Decimal('10') },
+                { submissionId: 2, votes: new Decimal('30') },
+                { submissionId: 3, votes: new Decimal('60') }
+            ]
+
+            const result = votingUtils.castVotes(user, contestId, payload);
+            await expect(result).rejects.toEqual(new GraphQLError('Self voting is disabled', {
+                extensions: {
+                    code: 'SELF_VOTING_DISABLED'
+                }
+            }));
+
+        });
+
         test('throw insert votes error', async () => {
             jest.spyOn(votingUtils, 'fetchUserVotes').mockResolvedValue([
                 { submissionId: 0, votes: 3 },
@@ -272,9 +312,12 @@ describe('voting utils test suite', () => {
                     }
                 });
             });
-            jest.spyOn(votingUtils, 'getContestSubmissions').mockResolvedValue([
-                { id: 1 }, { id: 2 }, { id: 3 }
-            ])
+            jest.spyOn(votingUtils, 'getAdditionalParamsAndSubmissions').mockResolvedValue({
+                selfVote: true,
+                submissions: [
+                    { id: 1, author: 'yungweez.eth' }, { id: 2, author: 'yungweez.eth' }, { id: 3, author: 'yungweez.eth' }
+                ]
+            })
             jest.spyOn(votingUtils, 'calculateTotalVotingPower').mockResolvedValue(new Decimal('100'));
             jest.spyOn(votingUtils, 'calculateUserVotingParams').mockResolvedValue({
                 totalVotingPower: new Decimal('100'),
@@ -306,9 +349,12 @@ describe('voting utils test suite', () => {
                 { submissionId: 2, votes: 1 }
             ]);
             jest.spyOn(votingUtils, 'insertVotes').mockResolvedValue(true);
-            jest.spyOn(votingUtils, 'getContestSubmissions').mockResolvedValue([
-                { id: 1 }, { id: 2 }, { id: 3 }
-            ])
+            jest.spyOn(votingUtils, 'getAdditionalParamsAndSubmissions').mockResolvedValue({
+                selfVote: true,
+                submissions: [
+                    { id: 1, author: 'yungweez.eth' }, { id: 2, author: 'yungweez.eth' }, { id: 3, author: 'yungweez.eth' }
+                ]
+            })
             jest.spyOn(votingUtils, 'calculateTotalVotingPower').mockResolvedValue(new Decimal('100'));
             jest.spyOn(votingUtils, 'calculateUserVotingParams').mockResolvedValue({
                 totalVotingPower: new Decimal('100'),

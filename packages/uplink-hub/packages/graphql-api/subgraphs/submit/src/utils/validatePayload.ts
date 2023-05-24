@@ -30,7 +30,6 @@ const validateBody = (body: EditorOutputData | null) => {
 }
 
 const createTemplate = (videoAsset: string | null, previewAsset?: string, body?: EditorOutputData | null) => {
-
     if (videoAsset) return "video";
     else if (previewAsset) return "image";
     else if (body) return "text";
@@ -40,7 +39,6 @@ const createTemplate = (videoAsset: string | null, previewAsset?: string, body?:
 
 const composeSubmission = async (previewAsset: string | null, videoAsset: string | null, body: EditorOutputData | null) => {
     const errorArr: string[] = [];
-
 
     const template = createTemplate(videoAsset, previewAsset, body);
 

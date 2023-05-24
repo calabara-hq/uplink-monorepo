@@ -230,16 +230,39 @@ export const calculateUserVotingParams = async (user: any, contestId: any) => {
     }
 }
 
+/*
+export const getAdditionalContestParams = async (contestId: number) => {
+    const params = await db.select({
+        selfVote: schema.contests.selfVote,
+    }).from(schema.contests).where(sqlOps.eq(schema.contests.id, contestId));
 
+    return params[0];
+}
 
-
-// select submissionId's from submission table by contestId
 export const getContestSubmissions = async (contestId: number) => {
-    const contestSubmissions = await db.select({ id: schema.submissions.id })
+    const contestSubmissions = await db.select({ id: schema.submissions.id, author: schema.submissions.author })
         .from(schema.submissions)
         .where(sqlOps.eq(schema.submissions.contestId, contestId))
     return contestSubmissions;
 }
+*/
+
+export const getAdditionalParamsAndSubmissions = async (contestId: number) => {
+    const result = await db.select({
+        selfVote: schema.contests.selfVote,
+        submissions: {
+            id: schema.submissions.id,
+            author: schema.submissions.author
+        }
+    })
+        .from(schema.contests)
+        .leftJoin(schema.submissions, sqlOps.eq(schema.submissions.contestId, schema.contests.id))
+        .where(sqlOps.eq(schema.contests.id, contestId));
+
+    console.log(result);
+    return result[0];
+}
+
 
 // clean the payload & insert votes into table with unique constraint on (user, contest, submission, votes)
 export const insertVotes = async (user: any, contestId: any, payload: any) => {
@@ -280,7 +303,6 @@ export const castVotes = async (
         votes: Decimal,
     }[]
 ) => {
-
     const votingPower = await calculateTotalVotingPower(user, contestId);
     const proposedVotes = payload.reduce((acc: Decimal, el: any) => Decimal.add(acc, el.votes), new Decimal(0));
 
@@ -290,13 +312,21 @@ export const castVotes = async (
         }
     });
 
-    // select submissionId's from table to verify that they exist for this contest
-    // if payload contains a submissionId that doesn't exist for this contest, throw an error
+    const { selfVote: isSelfVote, submissions: contestSubmissions } = await getAdditionalParamsAndSubmissions(contestId);
 
-    const contestSubmissions = await getContestSubmissions(contestId);
-    const submissionIds = contestSubmissions.map((el: any) => el.id);
-    const payloadSubmissionIds = payload.map((el: any) => el.submissionId);
-    const invalidSubmissionIds = payloadSubmissionIds.filter((el: any) => !submissionIds.includes(el));
+    const submissionIds = new Set(contestSubmissions.map((el: any) => el.id));
+    const userSubmissionIds = isSelfVote ? null : new Set(contestSubmissions.filter((el: any) => el.author === user.address).map((el: any) => el.id));
+    let invalidSubmissionIds = [];
+    let selfVotes = [];
+
+    for (let el of payload) {
+        if (!submissionIds.has(el.submissionId)) {
+            invalidSubmissionIds.push(el.submissionId);
+        }
+        if (userSubmissionIds && userSubmissionIds.has(el.submissionId)) {
+            selfVotes.push(el.submissionId);
+        }
+    }
 
     if (invalidSubmissionIds.length > 0) throw new GraphQLError('Invalid submissionId', {
         extensions: {
@@ -304,9 +334,13 @@ export const castVotes = async (
         }
     });
 
-    await insertVotes(user, contestId, payload);
+    if (selfVotes.length > 0) throw new GraphQLError('Self voting is disabled', {
+        extensions: {
+            code: 'SELF_VOTING_DISABLED'
+        }
+    });
 
-    // return the updated voting state
+    await insertVotes(user, contestId, payload);
 
     const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId);
 
