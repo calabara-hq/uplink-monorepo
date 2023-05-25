@@ -12,10 +12,10 @@ subgraphs:
     routing_url: http://localhost:4004/graphql
     schema:
       file: ../../subgraphs/submit/schema.graphql
-  voting:
+  vote:
     routing_url: http://localhost:4005/graphql
     schema:
-      file: ../../subgraphs/voting/schema.graphql
+      file: ../../subgraphs/vote/schema.graphql
   user:
     routing_url: http://localhost:4006/graphql
     schema:

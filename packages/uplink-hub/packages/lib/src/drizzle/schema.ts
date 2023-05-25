@@ -158,7 +158,7 @@ export const votes = mysqlTable('votes', {
     votesContestIdIndex: index("votes_contest_id_idx").on(votes.contestId),
     votesSubmissionIdIndex: index("votes_submission_id_idx").on(votes.submissionId),
     votesVoterIndex: index("votes_voter_idx").on(votes.voter),
-    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter, votes.amount),
+    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter),
 }));
 
 

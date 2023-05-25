@@ -8115,6 +8115,7 @@ __metadata:
     "@apollo/server": ^4.3.3
     "@apollo/subgraph": ^2.3.1
     "@jest/globals": ^29.5.0
+    "@pinata/sdk": ^2.1.0
     "@types/node": ^18.11.19
     dotenv: ^16.0.3
     ethers: 5.7.2
@@ -8771,9 +8772,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"voting@workspace:packages/graphql-api/subgraphs/voting":
+"vote@workspace:packages/graphql-api/subgraphs/vote":
   version: 0.0.0-use.local
-  resolution: "voting@workspace:packages/graphql-api/subgraphs/voting"
+  resolution: "vote@workspace:packages/graphql-api/subgraphs/vote"
   dependencies:
     "@apollo/federation": ^0.38.1
     "@apollo/server": ^4.3.3

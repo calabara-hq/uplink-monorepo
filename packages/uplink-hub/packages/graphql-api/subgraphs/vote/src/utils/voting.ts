@@ -1,4 +1,4 @@
-import { db, sqlOps } from "../utils/database.js";
+import { db, sqlOps } from "./database.js";
 import { GraphQLError } from "graphql";
 import { schema, computeUserTokenBalance, Decimal } from "lib";
 import { getCacheValue, setCacheValue } from "./cache.js";
@@ -208,7 +208,7 @@ export const fetchUserVotes = async (user: any, contestId: any) => {
         votes: schema.votes.amount,
     }).from(schema.votes)
         .where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
-
+    console.log('userVotes', userVotes)
     return userVotes;
 }
 
@@ -230,7 +230,7 @@ export const calculateUserVotingParams = async (user: any, contestId: any) => {
     }
 }
 
-/*
+
 export const getAdditionalContestParams = async (contestId: number) => {
     const params = await db.select({
         selfVote: schema.contests.selfVote,
@@ -245,23 +245,7 @@ export const getContestSubmissions = async (contestId: number) => {
         .where(sqlOps.eq(schema.submissions.contestId, contestId))
     return contestSubmissions;
 }
-*/
 
-export const getAdditionalParamsAndSubmissions = async (contestId: number) => {
-    const result = await db.select({
-        selfVote: schema.contests.selfVote,
-        submissions: {
-            id: schema.submissions.id,
-            author: schema.submissions.author
-        }
-    })
-        .from(schema.contests)
-        .leftJoin(schema.submissions, sqlOps.eq(schema.submissions.contestId, schema.contests.id))
-        .where(sqlOps.eq(schema.contests.id, contestId));
-
-    console.log(result);
-    return result[0];
-}
 
 
 // clean the payload & insert votes into table with unique constraint on (user, contest, submission, votes)
@@ -270,15 +254,22 @@ export const insertVotes = async (user: any, contestId: any, payload: any) => {
         const preparedPayload = payload.map((el: any) => {
             return {
                 contestId,
-                ...el.submissionId,
+                submissionId: el.submissionId,
                 voter: user.address,
                 created: new Date().toISOString(),
-                amount: el.votes.toString(),
+                amount: el.quantity.toString(),
+            } as schema.dbNewVoteType
+        });
+
+        console.log('preparedPayload', preparedPayload)
+        await db.insert(schema.votes).values(preparedPayload).onDuplicateKeyUpdate({
+            set: {
+                amount: sqlOps.sql`values(amount)`,
             }
         });
-        await db.insert(schema.votes).values(preparedPayload).onDuplicateKeyUpdate({ amount: db.raw('VALUES(amount)') });
         return true;
     } catch (err) {
+        console.log(err)
         throw new GraphQLError('Failed to create votes', {
             extensions: {
                 code: 'FAILED_TO_CREATE_VOTES'
@@ -300,20 +291,28 @@ export const castVotes = async (
     contestId: number,
     payload: {
         submissionId: number,
-        votes: Decimal,
+        quantity: Decimal,
     }[]
 ) => {
     const votingPower = await calculateTotalVotingPower(user, contestId);
-    const proposedVotes = payload.reduce((acc: Decimal, el: any) => Decimal.add(acc, el.votes), new Decimal(0));
+    console.log(payload)
+    const proposedVotes = payload.reduce((acc: Decimal, el: any) => acc.plus(el.quantity), new Decimal(0));
 
+    /*
     if (proposedVotes > votingPower) throw new GraphQLError('Insufficient voting power', {
         extensions: {
             code: 'INSUFFICIENT_VOTING_POWER'
         }
     });
+    */
 
-    const { selfVote: isSelfVote, submissions: contestSubmissions } = await getAdditionalParamsAndSubmissions(contestId);
+    const [contestSubmissions, { selfVote: isSelfVote }] = await Promise.all([
+        getContestSubmissions(contestId),
+        getAdditionalContestParams(contestId)
+    ])
 
+
+    // TODO: there is a bug here
     const submissionIds = new Set(contestSubmissions.map((el: any) => el.id));
     const userSubmissionIds = isSelfVote ? null : new Set(contestSubmissions.filter((el: any) => el.author === user.address).map((el: any) => el.id));
     let invalidSubmissionIds = [];
@@ -328,6 +327,8 @@ export const castVotes = async (
         }
     }
 
+    console.log('invalidSubmissionIds', invalidSubmissionIds)
+
     if (invalidSubmissionIds.length > 0) throw new GraphQLError('Invalid submissionId', {
         extensions: {
             code: 'INVALID_SUBMISSION_ID'
@@ -339,7 +340,7 @@ export const castVotes = async (
             code: 'SELF_VOTING_DISABLED'
         }
     });
-
+    
     await insertVotes(user, contestId, payload);
 
     const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId);

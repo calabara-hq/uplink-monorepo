@@ -1,11 +1,19 @@
 import { db, sqlOps } from "../utils/database.js";
-import { schema, Decimal, computeUserTokenBalance } from "lib";
+import { schema, Decimal, computeUserTokenBalance, EditorOutputData } from "lib";
 import { getCacheValue, setCacheValue } from "./cache.js";
 import { GraphQLError } from "graphql";
+import pinataSDK from '@pinata/sdk';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
+
+
 // return the contest deadlines and additional params
 export const fetchContestParameters = async (contestId: number) => {
     const contestParameters = await db.select({
         subLimit: schema.contests.subLimit,
+        contestType: schema.contests.type,
         deadlines: {
             startTime: schema.contests.startTime,
             voteTime: schema.contests.voteTime,
@@ -105,12 +113,50 @@ export const deadlineAdjustedSubmittingPower = (
     return totalSubmittingPower;
 };
 
-// insert a submission into the database
-export const insertSubmission = async (
+
+
+
+
+// upload submission to ipfs and insert into db
+export const uploadSubmission = async (
     user: { address: string },
     contestId: number,
-    submission: any
-) => { };
+    submission: {
+        title: string,
+        previewAsset: string | null,
+        videoAsset: string | null,
+        body: EditorOutputData | null
+    },
+    contestType: string
+) => {
+
+    if (contestType === "twitter") { }
+    else if (contestType === "standard") {
+        const ipfsUrl = await pinata.pinJSONToIPFS(submission).then((result) => {
+            return `https://calabara.mypinata.cloud/ipfs/${result.IpfsHash}`;
+        }).catch((err) => {
+            throw new GraphQLError('Error uploading submission to IPFS', {
+                extensions: {
+                    code: 'IPFS_UPLOAD_ERROR'
+                }
+            })
+        })
+
+        const newSubmission: schema.dbNewSubmissionType = {
+            contestId: contestId,
+            author: user.address,
+            created: new Date().toISOString(),
+            type: contestType,
+            version: 'uplink-v1',
+            url: ipfsUrl,
+        }
+
+        const result = await db.insert(schema.submissions).values(newSubmission);
+        const submissionId = result.insertId;
+        return submissionId;
+
+    }
+};
 
 
 // verify that the user is eligible to submit
@@ -141,7 +187,7 @@ export const restrictionWalletCheck = async (
     return restrictionResults.some((result) => result === true);
 }
 
-// compute the max submission power for a user
+// compute the max submission power for a user and contest type
 export const computeMaxSubmissionPower = async (
     user: { address: string },
     contestId: number,
@@ -152,9 +198,9 @@ export const computeMaxSubmissionPower = async (
         fetchContestParameters(contestId)
     ])
 
-    const { subLimit, deadlines } = contestParameters;
+    const { subLimit, deadlines, contestType } = contestParameters;
 
-    if (cachedMaxSubPower !== null) return deadlineAdjustedSubmittingPower(cachedMaxSubPower, deadlines);
+    if (cachedMaxSubPower !== null) return { contestType, maxSubPower: deadlineAdjustedSubmittingPower(cachedMaxSubPower, deadlines) };
 
     else {
 
@@ -162,12 +208,12 @@ export const computeMaxSubmissionPower = async (
         const maxSubPower = subLimit === 0 ? 10 : subLimit;
         const submitterRestrictions = await fetchSubmitterRestrictions(contestId);
 
-        if (submitterRestrictions.length === 0) return deadlineAdjustedSubmittingPower(maxSubPower, deadlines);
+        if (submitterRestrictions.length === 0) return { contestType, maxSubPower: deadlineAdjustedSubmittingPower(maxSubPower, deadlines) };
 
         const userRestrictionResult = await restrictionWalletCheck(user, deadlines.snapshot, submitterRestrictions);
         const restrictionAdjustedSubPower = userRestrictionResult ? maxSubPower : 0;
         await setCacheTotalSubPower(user, contestId, restrictionAdjustedSubPower);
-        return deadlineAdjustedSubmittingPower(restrictionAdjustedSubPower, deadlines);
+        return { contestType, maxSubPower: deadlineAdjustedSubmittingPower(restrictionAdjustedSubPower, deadlines) };
     }
 
 };
@@ -178,7 +224,7 @@ export const computeSubmissionParams = async (
     contestId: number
 ) => {
 
-    const [maxSubPower, userSubmissions] = await Promise.all([
+    const [{ maxSubPower, contestType }, userSubmissions] = await Promise.all([
         computeMaxSubmissionPower(user, contestId),
         fetchUserSubmissions(user, contestId)
     ]);
@@ -186,6 +232,7 @@ export const computeSubmissionParams = async (
     const userSubCount = userSubmissions.length;
     const remainingSubPower = maxSubPower === 0 ? 0 : maxSubPower - userSubCount;
     return {
+        contestType,
         userSubmissions,
         remainingSubPower,
         maxSubPower
@@ -200,7 +247,7 @@ export const submit = async (
     submission: any // TODO: define submission type
 ) => {
 
-    const { maxSubPower, remainingSubPower, userSubmissions } = await computeSubmissionParams(user, contestId);
+    const { maxSubPower, contestType, remainingSubPower, userSubmissions } = await computeSubmissionParams(user, contestId);
 
     if (remainingSubPower === 0) throw new GraphQLError('No entries remaining', {
         extensions: {
@@ -208,7 +255,7 @@ export const submit = async (
         }
     });
 
-    await insertSubmission(user, contestId, submission);
+    await uploadSubmission(user, contestId, submission, contestType);
 
     return {
         userSubmissions: [...userSubmissions, submission],

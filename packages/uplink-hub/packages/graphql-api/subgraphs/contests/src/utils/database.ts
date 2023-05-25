@@ -98,12 +98,6 @@ type ContestData = {
     votingPolicy: VotingPolicy[];
 }
 
-
-
-
-
-
-
 // simple object hash function
 function djb2Hash(str) {
     let hash = 5381;

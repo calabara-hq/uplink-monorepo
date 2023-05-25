@@ -10,16 +10,16 @@ COPY ./yarn.lock ./
 # Copy lib
 COPY ./packages/lib ./packages/lib
 
-# Copy voting service
-COPY ./packages/graphql-api/subgraphs/voting ./packages/voting
+# Copy vote service
+COPY ./packages/graphql-api/subgraphs/vote ./packages/vote
 
-# Install dependencies for the voting service
+# Install dependencies for the vote service
 RUN yarn install
 
 RUN yarn workspace lib build
 
-# Set the working directory for the voting service
-WORKDIR /usr/src/app/packages/voting
+# Set the working directory for the vote service
+WORKDIR /usr/src/app/packages/vote
 
 EXPOSE 4000
 CMD ["yarn", "dev"]

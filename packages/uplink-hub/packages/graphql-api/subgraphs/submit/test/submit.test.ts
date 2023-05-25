@@ -5,6 +5,10 @@ import { GraphQLError } from 'graphql';
 import { Decimal } from 'lib';
 
 describe('submit utils test suite', () => {
+
+    jest.spyOn(submitUtils, 'uploadSubmission').mockResolvedValue(1);
+
+
     afterAll(async () => {
         await redisClient.quit();
     });
@@ -73,6 +77,7 @@ describe('submit utils test suite', () => {
         test('cache hit no restrictions', async () => {
             jest.spyOn(submitUtils, 'getCacheTotalSubPower').mockResolvedValue(3);
             jest.spyOn(submitUtils, 'fetchContestParameters').mockResolvedValue({
+                contestType: 'standard',
                 subLimit: 3,
                 deadlines: {
                     startTime: new Date(new Date().getTime() - 3000).toISOString(),
@@ -85,13 +90,14 @@ describe('submit utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 1;
             const result = await submitUtils.computeMaxSubmissionPower(user, contestId);
-            expect(result).toEqual(3);
+            expect(result).toEqual({contestType: 'standard', maxSubPower: 3});
         });
 
 
         test('cache hit unlimited subLimit', async () => {
             jest.spyOn(submitUtils, 'getCacheTotalSubPower').mockResolvedValue(10);
             jest.spyOn(submitUtils, 'fetchContestParameters').mockResolvedValue({
+                contestType: 'standard',
                 subLimit: 0,
                 deadlines: {
                     startTime: new Date(new Date().getTime() - 3000).toISOString(),
@@ -104,13 +110,14 @@ describe('submit utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 1;
             const result = await submitUtils.computeMaxSubmissionPower(user, contestId);
-            expect(result).toEqual(10);
+            expect(result).toEqual({contestType: 'standard', maxSubPower: 10});
         });
 
 
         test('cache hit with restrictions', async () => {
             jest.spyOn(submitUtils, 'getCacheTotalSubPower').mockResolvedValue(3);
             jest.spyOn(submitUtils, 'fetchContestParameters').mockResolvedValue({
+                contestType: 'standard',
                 subLimit: 0,
                 deadlines: {
                     startTime: new Date(new Date().getTime() - 3000).toISOString(),
@@ -133,7 +140,7 @@ describe('submit utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 1;
             const result = await submitUtils.computeMaxSubmissionPower(user, contestId);
-            expect(result).toEqual(3);
+            expect(result).toEqual({contestType: 'standard', maxSubPower: 3});
         });
 
 
@@ -141,6 +148,7 @@ describe('submit utils test suite', () => {
             jest.spyOn(submitUtils, 'getCacheTotalSubPower').mockResolvedValue(null);
             jest.spyOn(submitUtils, 'setCacheTotalSubPower').mockResolvedValue(true);
             jest.spyOn(submitUtils, 'fetchContestParameters').mockResolvedValue({
+                contestType: 'standard',
                 subLimit: 0,
                 deadlines: {
                     startTime: new Date(new Date().getTime() - 3000).toISOString(),
@@ -163,13 +171,14 @@ describe('submit utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 1;
             const result = await submitUtils.computeMaxSubmissionPower(user, contestId);
-            expect(result).toEqual(0);
+            expect(result).toEqual({contestType: 'standard', maxSubPower: 0});
         });
 
         test('cache miss, pass wallet check', async () => {
             jest.spyOn(submitUtils, 'getCacheTotalSubPower').mockResolvedValue(null);
             jest.spyOn(submitUtils, 'setCacheTotalSubPower').mockResolvedValue(true);
             jest.spyOn(submitUtils, 'fetchContestParameters').mockResolvedValue({
+                contestType: 'standard',
                 subLimit: 3,
                 deadlines: {
                     startTime: new Date(new Date().getTime() - 3000).toISOString(),
@@ -192,8 +201,7 @@ describe('submit utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 1;
             const result = await submitUtils.computeMaxSubmissionPower(user, contestId);
-            expect(result).toEqual(3);
-            expect(result).toEqual(3);
+            expect(result).toEqual({contestType: 'standard', maxSubPower: 3});
         });
 
     });
@@ -204,12 +212,13 @@ describe('submit utils test suite', () => {
         })
 
         test('positive maxSubPower, user has not submitted', async () => {
-            jest.spyOn(submitUtils, 'computeMaxSubmissionPower').mockResolvedValue(3);
+            jest.spyOn(submitUtils, 'computeMaxSubmissionPower').mockResolvedValue({contestType: 'standard', maxSubPower: 3});
             jest.spyOn(submitUtils, 'fetchUserSubmissions').mockResolvedValue([]);
             const user = { address: 'nickdodson.eth' };
             const contestId = 1;
             const result = await submitUtils.computeSubmissionParams(user, contestId);
             expect(result).toEqual({
+                contestType: 'standard',
                 remainingSubPower: 3,
                 maxSubPower: 3,
                 userSubmissions: []
@@ -217,12 +226,13 @@ describe('submit utils test suite', () => {
         })
 
         test('zero maxSubPower, user has not submitted', async () => {
-            jest.spyOn(submitUtils, 'computeMaxSubmissionPower').mockResolvedValue(0);
+            jest.spyOn(submitUtils, 'computeMaxSubmissionPower').mockResolvedValue({contestType: 'standard', maxSubPower: 0});
             jest.spyOn(submitUtils, 'fetchUserSubmissions').mockResolvedValue([]);
             const user = { address: 'nickdodson.eth' };
             const contestId = 1;
             const result = await submitUtils.computeSubmissionParams(user, contestId);
             expect(result).toEqual({
+                contestType: 'standard',
                 remainingSubPower: 0,
                 maxSubPower: 0,
                 userSubmissions: []
@@ -230,12 +240,13 @@ describe('submit utils test suite', () => {
         })
 
         test('positive maxSubPower, user has submitted', async () => {
-            jest.spyOn(submitUtils, 'computeMaxSubmissionPower').mockResolvedValue(3);
+            jest.spyOn(submitUtils, 'computeMaxSubmissionPower').mockResolvedValue({contestType: 'standard', maxSubPower: 3});
             jest.spyOn(submitUtils, 'fetchUserSubmissions').mockResolvedValue([{ id: 1 }, { id: 2 }]);
             const user = { address: 'nickdodson.eth' };
             const contestId = 1;
             const result = await submitUtils.computeSubmissionParams(user, contestId);
             expect(result).toEqual({
+                contestType: 'standard',
                 remainingSubPower: 1,
                 maxSubPower: 3,
                 userSubmissions: [{ id: 1 }, { id: 2 }]

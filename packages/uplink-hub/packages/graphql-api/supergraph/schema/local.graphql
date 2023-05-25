@@ -74,14 +74,14 @@ input authDataInput
 }
 
 input CastVotePayload
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   submissionId: ID!
   quantity: Decimal!
 }
 
 type CastVoteResponse
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   success: Boolean!
   userVotingParams: UserVotingParams!
@@ -173,7 +173,7 @@ type DeadlinesType
 scalar Decimal
   @join__type(graph: CONTESTS)
   @join__type(graph: SUBMIT)
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 
 scalar EditorData
   @join__type(graph: CONTESTS)
@@ -235,7 +235,7 @@ enum join__Graph {
   SPACES @join__graph(name: "spaces", url: "http://localhost:4002/graphql")
   SUBMIT @join__graph(name: "submit", url: "http://localhost:4004/graphql")
   USER @join__graph(name: "user", url: "http://localhost:4006/graphql")
-  VOTING @join__graph(name: "voting", url: "http://localhost:4005/graphql")
+  VOTE @join__graph(name: "vote", url: "http://localhost:4005/graphql")
 }
 
 scalar link__Import
@@ -271,16 +271,16 @@ type Mutation
   @join__type(graph: SPACES)
   @join__type(graph: SUBMIT)
   @join__type(graph: USER)
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   createContest(contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   signIn(authData: authDataInput): signInResponse! @join__field(graph: USER)
-  castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTING)
-  removeSingleVote(contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTING)
-  removeAllVotes(submissionId: ID!, contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTING)
+  castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
+  removeSingleVote(contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
+  removeAllVotes(submissionId: ID!, contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTE)
 }
 
 enum NativeTokenType
@@ -314,7 +314,7 @@ type Query
   @join__type(graph: SPACES)
   @join__type(graph: SUBMIT)
   @join__type(graph: USER)
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   contest(contestId: Int!): Contest @join__field(graph: CONTESTS)
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
@@ -323,19 +323,19 @@ type Query
   getUserSubmissionParams(walletAddress: String!, contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
   me: User! @join__field(graph: USER)
   generateNonce: NonceResult! @join__field(graph: USER)
-  testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTING)
-  getUserVotingParams(walletAddress: String!, contestId: ID!): UserVotingParams! @join__field(graph: VOTING)
+  testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTE)
+  getUserVotingParams(walletAddress: String!, contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
 }
 
 type RemoveAllVotesResponse
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   success: Boolean!
   userVotingParams: UserVotingParams!
 }
 
 type RemoveSingleVoteResponse
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   success: Boolean!
   userVotingParams: UserVotingParams!
@@ -368,7 +368,7 @@ type RewardType
 }
 
 type SampleResponse
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   success: Boolean!
 }
@@ -455,18 +455,9 @@ input SubmissionPayload
   @join__type(graph: SUBMIT)
 {
   title: String!
-  template: SubmissionTemplate!
   previewAsset: SubmissionAssetUrl
   videoAsset: SubmissionAssetUrl
   body: EditorData
-}
-
-enum SubmissionTemplate
-  @join__type(graph: SUBMIT)
-{
-  text @join__enumValue(graph: SUBMIT)
-  image @join__enumValue(graph: SUBMIT)
-  video @join__enumValue(graph: SUBMIT)
 }
 
 input SubmitterRestriction
@@ -535,7 +526,7 @@ type UserSubmissionParams
 }
 
 type UserVotingParams
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   totalVotingPower: Decimal!
   votesSpent: Decimal!
@@ -544,7 +535,7 @@ type UserVotingParams
 }
 
 type Vote
-  @join__type(graph: VOTING, key: "id")
+  @join__type(graph: VOTE, key: "id")
 {
   id: ID!
   submissionId: ID!
@@ -552,7 +543,7 @@ type Vote
 }
 
 type VoteObject
-  @join__type(graph: VOTING)
+  @join__type(graph: VOTE)
 {
   submissionId: ID!
   votes: Decimal!

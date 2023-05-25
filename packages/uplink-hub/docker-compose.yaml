@@ -94,20 +94,22 @@ services:
       - ./packages/graphql-api/subgraphs/submit/src:/usr/src/app/packages/submit/src
     environment:
       - REDIS_URL=${REDIS_URL}
+      - PINATA_KEY=${PINATA_KEY}
+      - PINATA_SECRET=${PINATA_SECRET}
       - ALCHEMY_KEY=${ALCHEMY_KEY}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_USERNAME=${DATABASE_USERNAME}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
 
-  voting:
-    container_name: voting
+  vote:
+    container_name: vote
     build:
       context: .
-      dockerfile: ./packages/graphql-api/subgraphs/voting/Dockerfile
+      dockerfile: ./packages/graphql-api/subgraphs/vote/Dockerfile
     ports:
       - "4005:4000"
     volumes:
-      - ./packages/graphql-api/subgraphs/voting/src:/usr/src/app/packages/voting/src
+      - ./packages/graphql-api/subgraphs/vote/src:/usr/src/app/packages/vote/src
     environment:
       - REDIS_URL=${REDIS_URL}
       - ALCHEMY_KEY=${ALCHEMY_KEY}
@@ -120,4 +122,4 @@ volumes:
     #auth_node_modules:
   contests_node_modules:
   submit_node_modules:
-  voting_node_modules:
+  vote_node_modules:
