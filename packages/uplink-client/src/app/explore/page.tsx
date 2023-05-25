@@ -44,9 +44,6 @@ export default async function Page() {
       <div className="flex flex-row justify-evenly">
         <TwitterConnectButton />
         <CreateThread />
-        <Link className="btn btn-ghost" href={"/space/sharkdao/createcontest"}>
-          <p className="pl-2">create contest</p>
-        </Link>
       </div>
       <AllSpaces spaces={spaces} />
     </div>

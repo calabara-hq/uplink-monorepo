@@ -47,7 +47,7 @@ export const BlockWrapper = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="">
+    <div className="border-2 border-border shadow-box p-6 rounded-xl">
       <h1 className="text-2xl font-bold">{title}</h1>
       {info &&<InfoAlert>{info}</InfoAlert>}
       <div className="flex flex-col items-center p-4 lg:p-8 gap-4">{children}</div>
