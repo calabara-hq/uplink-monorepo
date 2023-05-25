@@ -1,4 +1,4 @@
-import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
+;import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
 import Contests from "./Contests";
 
 export default {
@@ -206,8 +206,8 @@ SelectedSubs2.args = {
     id: "1",
     spaceId: "1",
     prompt: {
-      title: "Sketch a DAO",
-      body: "Draw a DAO",
+      title: "The Noun Square at Dawn Art Contest",
+      body: "Create an illustration or sketch using any or all the Nouns from 610-615. 🏆 .069 ETH for 5 Winners 🏆 Contest Closes: 2/17 @ 10pm est 🤝 Follow + Tag 🔖 @thenounsquare + some friends",
       coverUrl:
         "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
     },
@@ -248,8 +248,8 @@ SelectedSubs3.args = {
     id: "1",
     spaceId: "1",
     prompt: {
-      title: "Sketch a DAO",
-      body: "Draw a DAO",
+      title: "The Noun Square at Dawn Art Contest",
+      body: "Create an illustration or sketch using any or all the Nouns from 610-615. 🏆 .069 ETH for 5 Winners 🏆 Contest Closes: 2/17 @ 10pm est 🤝 Follow + Tag 🔖 @thenounsquare + some friends",
       coverUrl:
         "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
     },
@@ -290,14 +290,81 @@ SelectedSubs3.args = {
   ],
 };
 
+export const SelectedSubs0 = Template.bind({});
+SelectedSubs0.args = {
+  contest: {
+    id: "1",
+    spaceId: "1",
+    prompt: {
+      title: "The Noun Square at Dawn Art Contest",
+      body: "Create an illustration or sketch using any or all the Nouns from 610-615. 🏆 .069 ETH for 5 Winners 🏆 Contest Closes: 2/17 @ 10pm est 🤝 Follow + Tag 🔖 @thenounsquare + some friends",
+      coverUrl:
+        "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
+    },
+    metadata: {
+      category: "art",
+      type: "standard",
+    },
+    deadlines: {
+      startTime: new Date(Date.now() - 1 * 864e5).toISOString(),
+      voteTime: new Date(Date.now()).toISOString(),
+      endTime: new Date(Date.now() + 2 * 864e5).toISOString(),
+      snapshot: new Date(Date.now() - 1 * 864e5).toISOString(),
+    },
+  },
+  space: {
+    id: "1",
+    displayName: "Shark DAO",
+  },
+  selectedSubs: [
+
+  ],
+};
+
+export const SelectedSubs1 = Template.bind({});
+SelectedSubs1.args = {
+  contest: {
+    id: "1",
+    spaceId: "1",
+    prompt: {
+      title: "The Noun Square at Dawn Art Contest",
+      body: "Create an illustration or sketch using any or all the Nouns from 610-615. 🏆 .069 ETH for 5 Winners 🏆 Contest Closes: 2/17 @ 10pm est 🤝 Follow + Tag 🔖 @thenounsquare + some friends",
+      coverUrl:
+        "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
+    },
+    metadata: {
+      category: "art",
+      type: "standard",
+    },
+    deadlines: {
+      startTime: new Date(Date.now() - 1 * 864e5).toISOString(),
+      voteTime: new Date(Date.now()).toISOString(),
+      endTime: new Date(Date.now() + 2 * 864e5).toISOString(),
+      snapshot: new Date(Date.now() - 1 * 864e5).toISOString(),
+    },
+  },
+  space: {
+    id: "1",
+    displayName: "Shark DAO",
+  },
+  selectedSubs: [
+    {
+      id: "1",
+      name: "Sub1",
+      image:
+        "https://calabara.mypinata.cloud/ipfs/QmfSASTvVBNdAAqmQSgRXVK6wA7ap9EwW4JSKoGq1kKcmf?_gl=1*pam249*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjgzMi42MC4wLjA.",
+    },
+  ],
+};
+
 export const SelectedSubsMulti = Template.bind({});
 SelectedSubsMulti.args = {
   contest: {
     id: "1",
     spaceId: "1",
     prompt: {
-      title: "Sketch a DAO",
-      body: "Draw a DAO",
+      title: "The Noun Square at Dawn Art Contest",
+      body: "Create an illustration or sketch using any or all the Nouns from 610-615. 🏆 .069 ETH for 5 Winners 🏆 Contest Closes: 2/17 @ 10pm est 🤝 Follow + Tag 🔖 @thenounsquare + some friends",
       coverUrl:
         "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
     },

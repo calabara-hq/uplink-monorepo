@@ -1,12 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { use } from "react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import contestImage from "../../public/tns-sketch-contest.jpeg";
 import SubmissionCard from "../SubmissionCard/SubmissionCard";
 import { SubmissionCard2 } from "../SubmissionCard/SubmissionCard";
-import { SubmissionCardVote, SubmissionCardBoxSelect } from "../SubmissionCard/SubmissionCard";
+import {
+  SubmissionCardVote,
+  SubmissionCardBoxSelect,
+  LockedCardVote,
+} from "../SubmissionCard/SubmissionCard";
+import {
+  BuildingStorefrontIcon,
+  LockClosedIcon,
+  LockOpenIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/solid";
+import { is } from "date-fns/locale";
+import { set } from "date-fns";
+import { motion } from "framer-motion";
 
 export const getPromptData = async (contest: any) => {
   const promptData = await fetch(contest.promptUrl).then((res) => res.json());
@@ -45,8 +59,8 @@ export default function Contests({
   const status = CalculateStatus(contest);
 
   return (
-    <div className="flex justify-center m-auto w-[90vw] p-6">
-      <div className="flex flex-col w-full gap-4">
+    <div className="flex justify-center gap-4 m-auto w-[80vw] lg:py-6">
+      <div className="flex flex-col w-full lg:w-3/4 gap-4">
         <Prompt
           promptData={contest.prompt}
           metadata={contest.metadata}
@@ -54,16 +68,15 @@ export default function Contests({
           space={space}
           coverUrl={contest.prompt.coverUrl}
         />
-        <div className="flex flex-row justify-center w-full">
-          <SubmissionDisplay />
-          <SideBar
-            coverUrl={contest.prompt.coverUrl}
-            status={status}
-            submitterRewards={contest.submitterRewards}
-            selectedSubs={selectedSubs}
-          />
-        </div>
+
+        <SubmissionDisplay selectedSubs={selectedSubs} />
       </div>
+      <SideBar
+        coverUrl={contest.prompt.coverUrl}
+        status={status}
+        submitterRewards={contest.submitterRewards}
+        selectedSubs={selectedSubs}
+      />
     </div>
   );
 }
@@ -83,8 +96,8 @@ export function Prompt({
 }) {
   console.log("promptData", promptData);
   return (
-    <div className="card lg:card-side bg-transparent gap-4">
-      <div className="card-body w-full lg:w-3/4 border-2 border-border shadow-box rounded-lg p-4 lg:p-8">
+    <div className="card lg:card-side bg-transparent gap-4 h-min">
+      <div className="card-body w-full lg:w-full border-2 border-border shadow-box rounded-lg p-4 lg:p-4">
         <div className="flex flex-col-reverse lg:flex-row gap-4 items-center">
           <div className="avatar">
             <div className=" w-20 lg:w-24 rounded-full bg-transparent">
@@ -106,28 +119,29 @@ export function Prompt({
             <DynamicLabel status={status} />
           </div>
         </div>
-
-        <div className="flex flex-col p-1 lg:p-4 gap-4">
-          <h3 className="text-lg lg:text-2xl">{promptData.title}</h3>
-          <p className="text-sm lg:text-xl">
-            {promptData.body.length > 500
-              ? promptData.body.substring(0, 500) + "..."
-              : promptData.body}
-          </p>
+        <div className="flex flex-col lg:flex-row justify-between items-start  gap-2 w-full">
+          <div className="flex flex-col p-1 lg:p-4 gap-4 w-3/4">
+            <h3 className="text-lg lg:text-2xl">{promptData.title}</h3>
+            <p className="text-sm lg:text-xl">
+              {promptData.body.length > 500
+                ? promptData.body.substring(0, 500) + "..."
+                : promptData.body}
+            </p>
+          </div>
+          {coverUrl && (
+            <div className="w-fit lg:rounded-xl">
+              <figure className="relative w-56 h-56 ">
+                <Image
+                  src={coverUrl}
+                  alt="contest image"
+                  fill
+                  className="object-fill rounded-xl"
+                />
+              </figure>
+            </div>
+          )}
         </div>
       </div>
-      {coverUrl && (
-        <div className="w-full lg:w-1/3 lg:rounded-xl">
-          <figure className="relative h-56 lg:h-80">
-            <Image
-              src={coverUrl}
-              alt="contest image"
-              fill
-              className="object-fill rounded-xl"
-            />
-          </figure>
-        </div>
-      )}
     </div>
   );
 }
@@ -163,7 +177,7 @@ export function SideBar({
         <SubmitButton />
       </div>
       <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
-        <div className="sticky top-5 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
+        <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
           <DynamicSidebar
             status={status}
             submitterRewards={submitterRewards}
@@ -195,7 +209,7 @@ export function DynamicSidebar({
       </>
     );
   } else if (status === "voting") {
-    return <VoterCart selectedSubs={selectedSubs} />;
+    return <VoterCart userCurrentSelection={selectedSubs} />;
   } else if (status === "closed") {
     return <Closed />;
   } else {
@@ -203,16 +217,29 @@ export function DynamicSidebar({
   }
 }
 
-export function SubmissionDisplay() {
+export function SubmissionDisplay({ selectedSubs }: { selectedSubs: any }) {
   return (
-    <div className="flex flex-col w-full lg:w-3/4 gap-4">
-      <div className="flex w-3/4 justify-between items-center m-auto">
-      <h1 className="text-xl lg:text-3xl text-center font-bold">Submissions</h1>
-      <button className="btn btn-sm btn-ghost">Contest Details</button>
-
+    <div className="flex flex-col gap-4 w-full">
+      <div className="flex w-full justify-evenly items-center">
+        <h1 className="text-xl lg:text-3xl text-center font-bold">
+          Submissions
+        </h1>
       </div>
-      <div className="flex flex-col lg:flex-row flex-wrap justify-center gap-4 w-full">
-        <SubmissionCardBoxSelect />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-evenly gap-4 lg:w-full w-full">
+        <div>
+          <SubmissionCardBoxSelect />
+        </div>
+        <div>
+          <SubmissionCard />
+        </div>
+        <div>
+          <SubmissionCard2 />
+        </div>
+        <div>
+          <SubmissionCardBoxSelect />
+        </div>
+
+        
         <SubmissionCard />
         <SubmissionCard2 />
         <SubmissionCard />
@@ -227,6 +254,7 @@ export function SubmissionDisplay() {
         <SubmissionCard />
         <SubmissionCard />
         <SubmissionCard />
+  
       </div>
     </div>
   );
@@ -249,96 +277,81 @@ export function Pending() {
 
 export function DynamicSubRewards({
   submitterRewards,
-  tab,
 }: {
   submitterRewards: any;
-  tab: string;
 }) {
   console.log(submitterRewards);
   const [activeTab, setActiveTab] = useState("rewards");
 
-  const handleTabClick = (tab) => {
+  const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
+
   if (!submitterRewards || submitterRewards.length === 0) {
     return null;
-  } else if (submitterRewards.length === 1) {
-    return (
-      <div className="flex flex-col w-full">
-        <div className="tabs w-full">
-          <a
-            className={`tab tab-lg font-bold ${
-              activeTab === "rewards" ? "tab-active" : ""
-            }`}
-            onClick={() => handleTabClick("rewards")}
-          >
-            Submitter Rewards
-          </a>
-          <a
-            className={`tab tab-lg font-bold ${
-              activeTab === "details" ? "tab-active" : ""
-            }`}
-            onClick={() => handleTabClick("details")}
-          >
-            Details
-          </a>
-        </div>
-        <div className="flex flex-col items-center gap-2 h-fit border-2 border-border rounded-lg p-4">
-          {activeTab === "rewards" && (
-              <div className="flex flex-row items-center justify-center gap-2">
-                <p className="font-bold text-2xl">1 ETH</p>
-              </div>
-          )}
-          {activeTab === "details" && (
-            <div className="grid grid-cols-2">
-              <p>Rank: </p>
-              <p>{submitterRewards.rank} </p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  } else if (submitterRewards.length === 2) {
-    return (
-      <div className="flex flex-col items-center gap-2 h-fit bg-base-100 rounded-lg w-full">
-        <div className="bg-primary text-lg text-primary-content px-1 py-0.5 rounded-br-md rounded-tl-md w-fit mr-auto">
+  }
+
+  return (
+    <div className="flex flex-col w-full">
+      <div className="tabs w-full">
+        <a
+          className={`tab tab-lg font-bold ${
+            activeTab === "rewards" ? "tab-active" : ""
+          }`}
+          onClick={() => handleTabClick("rewards")}
+        >
           Submitter Rewards
-        </div>
-        <div className="flex flex-row justify-evenly m-2 p-2 gap-2 w-full ">
-          <p className="font-bold">1 ETH</p>
-          <p className="font-bold">20K SHARK</p>
-        </div>
+        </a>
+        <a
+          className={`tab tab-lg font-bold ${
+            activeTab === "details" ? "tab-active" : ""
+          }`}
+          onClick={() => handleTabClick("details")}
+        >
+          Details
+        </a>
       </div>
-    );
-  } else if (submitterRewards.length === 3) {
-    return (
-      <div className="flex flex-col items-center gap-2 h-fit bg-base-100 rounded-lg w-full">
-        <div className="bg-primary text-lg text-primary-content px-1 py-0.5 rounded-br-md rounded-tl-md w-fit mr-auto">
-          Submitter Rewards
-        </div>
-        <div className="flex flex-row justify-evenly m-2 p-2 gap-2 w-full ">
-          <p className="font-bold">1 ETH</p>
-          <div className="dropdown dropdown-hover dropdown-right dropdown-end">
-            <label
-              tabIndex={0}
-              className="font-bold cursor-pointer hover:bg-base-200 p-2 rounded-lg mr-1"
-            >
-              2 More
-            </label>
-            <div
-              tabIndex={0}
-              className=" card compact dropdown-content bg-base-200 rounded-box w-24"
-            >
-              <div className="card-body">
-                <p>1 NOUN</p>
-                <p>1 TNS</p>
+      <div className="flex flex-col items-center gap-2 h-fit border-2 border-border rounded-lg p-4">
+        {activeTab === "rewards" && (
+          <div className="flex flex-row items-center justify-around w-full gap-2">
+            <p className="font-bold text-2xl">1 ETH</p>
+            {submitterRewards.length >= 2 && (
+              <p className="font-bold text-2xl">20K SHARK</p>
+            )}
+            {submitterRewards.length >= 3 && (
+              <div className="dropdown dropdown-hover dropdown-right dropdown-end">
+                <label
+                  tabIndex={0}
+                  className="font-bold cursor-pointer hover:bg-base-200 p-2 rounded-lg mr-1"
+                >
+                  {submitterRewards.length - 2} More
+                </label>
+                <div
+                  tabIndex={0}
+                  className=" card compact dropdown-content bg-base-200 rounded-box w-24"
+                >
+                  <div className="card-body">
+                    {submitterRewards.length >= 3 && (
+                      <>
+                        <p>1 NOUN</p>
+                        <p>1 TNS</p>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
-        </div>
+        )}
+        {activeTab === "details" && (
+          <div className="grid grid-cols-2">
+            <p>Rank: </p>
+            <p>{submitterRewards.rank} </p>
+          </div>
+        )}
       </div>
-    );
-  } else return null;
+    </div>
+  );
 }
 
 export function VoterRewards() {
@@ -356,69 +369,228 @@ export function VoterRewards() {
   );
 }
 
-export function VoterCart({ selectedSubs }: { selectedSubs: any }) {
-  const [activeTab, setActiveTab] = useState("rewards");
+export function VoterCart({
+  totalVotingPower,
+  votesSpent,
+  votesRemaining,
+  userCurrentSelection,
+}: {
+  totalVotingPower: string;
+  votesSpent: string;
+  votesRemaining: string;
+  userCurrentSelection: any;
+}) {
+  const [activeTab, setActiveTab] = useState("votes");
+  const [editMode, setEditMode] = useState(false);
+  const [proposedSelection, setProposedSelection] = useState<any>([]);
+  const [isVotingCartVisible, setIsVotingCartVisible] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.5 } },
   };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === "votes" && !isVotingCartVisible) {
+      setIsVotingCartVisible(true);
+    }
+  };
+
+  const handleEditClick = () => {
+    setEditMode(true);
+    setCollapsed(false);
+  };
+
+  const handleCancelClick = () => {
+    setEditMode(false);
+  };
+
+  const addProposed = () => {
+    setProposedSelection([
+      ...proposedSelection,
+      {
+        id: 1,
+        title: "Submission #1",
+        image:
+          "https://calabara.mypinata.cloud/ipfs/QmUtZj7ksJumBa3amYnQb2tsCE7pdQcLLeD1SNWP1Jir9S",
+        votes: 0,
+      },
+    ]);
+  };
+
+  const handleCollapseClick = () => {
+    setCollapsed(!collapsed);
+    setEditMode(false);
+  };
+
+  const renderEditButton = () => {
+    if (editMode) {
+      return (
+        <button className="btn btn-sm btn-ghost" onClick={handleCancelClick}>
+          <LockOpenIcon className="w-4 h-4" />
+        </button>
+      );
+    } else {
+      return (
+        <button className="btn btn-sm btn-ghost" onClick={handleEditClick}>
+          <LockClosedIcon className="w-4 h-4 mr-2" />
+          Edit
+        </button>
+      );
+    }
+  };
+
   return (
-    <div className="flex flex-col w-full">
-      <div className="tabs w-full">
+    <div className="flex flex-col w-full mt-2">
+      <div className="tabs items-center w-full">
         <a
-          className={`tab tab-lg font-bold ${
-            activeTab === "rewards" ? "tab-active" : ""
+          className={`tab tab-lg font-bold indicator indicator-secondary ${
+            activeTab === "votes" ? "tab-active" : ""
           }`}
-          onClick={() => handleTabClick("rewards")}
+          onClick={() => handleTabClick("votes")}
         >
           Voting Cart
+          {proposedSelection.length > 0 && (
+            <span className="indicator-item badge badge-secondary">
+              {proposedSelection.length}
+            </span>
+          )}
         </a>
-        <a
-          className={`tab tab-lg font-bold ${
-            activeTab === "details" ? "tab-active" : ""
-          }`}
-          onClick={() => handleTabClick("details")}
-        >
-          Details
-        </a>
+
+        {isVotingCartVisible && (
+          <>
+            <a
+              className={`tab tab-lg font-bold ${
+                activeTab === "details" ? "tab-active" : ""
+              }`}
+              onClick={() => handleTabClick("details")}
+            >
+              Details
+            </a>
+
+            <a
+              className="tab tab-lg font-bold"
+              onClick={() => setIsVotingCartVisible(false)}
+            >
+              Close
+            </a>
+          </>
+        )}
       </div>
 
-      <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full">
-        {activeTab === "rewards" ? (
+      <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
+        {activeTab === "votes" && isVotingCartVisible ? (
           <>
-            {selectedSubs && selectedSubs.length > 0 ? (
+            {(userCurrentSelection && userCurrentSelection.length > 0) ||
+            (proposedSelection && proposedSelection.length > 0) ? (
               <>
-                <div className="flex flex-row w-full justify-between items-center p-2">
-                  <p className="">Submissions Selected:</p>
-                  <p className="font-bold ">{selectedSubs.length} </p>
+                <motion.div
+                  className="container"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {userCurrentSelection.length > 0 && (
+                    <motion.div
+                      className="flex flex-col gap-4 p-4 m-2 max-h-80 overflow-y-auto bg-neutral rounded-lg"
+                      variants={itemVariants}
+                    >
+                      <div className="flex flex-row w-full justify-between items-center">
+                        <p className="">Your current selections</p>
+                        <button
+                          className="btn btn-sm btn-ghost"
+                          onClick={handleCollapseClick}
+                        >
+                          {collapsed ? (
+                            <ChevronDownIcon className="w-4 h-4" />
+                          ) : (
+                            <ChevronUpIcon className="w-4 h-4" />
+                          )}
+                        </button>
+                        {renderEditButton()}
+                      </div>
+                      {!collapsed && (
+                        <div className="flex flex-col gap-2 transition-opacity">
+                          {userCurrentSelection.map((sub: any) => {
+                            if (editMode) {
+                              return <SubmissionCardVote key={sub.id} />;
+                            } else {
+                              return <LockedCardVote key={sub.id} />;
+                            }
+                          })}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
 
-                  <button className="btn btn-sm btn-ghost">clear</button>
-                </div>
-                <div className="flex flex-col gap-4 p-2 max-h-[500px] overflow-y-auto">
-                  {selectedSubs.map((sub: any) => (
-                    <SubmissionCardVote />
-                  ))}
-                </div>
-                <div className="flex flex-col gap-2 p-2">
-                  <div className="grid grid-cols-3 justify-items-center justify-evenly gap-2 w-full font-bold text-center">
-                    <p>Voting Power</p>
-                    <p>Votes Spent</p>
-                    <p>Remaining</p>
-                    <p>13</p>
-                    <p>3</p>
-                    <p>10</p>
-                  </div>
-                  <VoteButton />
-                </div>
+                  {proposedSelection.length > 0 && (
+                    <motion.div  variants={itemVariants}>
+                      <div className="flex flex-row w-full justify-start items-center p-2">
+                        <p className="">+ Your Proposed additions:</p>
+                      </div>
+                      <div className="flex flex-col gap-4 p-2 max-h-80 overflow-y-auto">
+                        {proposedSelection.map((sub: any) => (
+                          <SubmissionCardVote key={sub.id} />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <motion.div
+                    className="flex flex-col gap-2 p-2"
+                    variants={itemVariants}
+                  >
+                    <div className="grid grid-cols-3 justify-items-center justify-evenly gap-2 w-full font-bold text-center">
+                      <p>Voting Power</p>
+                      <p>Votes Spent</p>
+                      <p>Remaining</p>
+                      <p>{totalVotingPower}</p>
+                      <p>{votesSpent}</p>
+                      <p>{votesRemaining}</p>
+                    </div>
+                  </motion.div>
+
+                  <button
+                    className="btn btn-outline btn-sm w-fit"
+                    onClick={addProposed}
+                  >
+                    add proposed
+                  </button>
+
+                  {editMode && userCurrentSelection.length > 0 && (
+                    <div className="flex flex-row w-full justify-end items-center p-2">
+                      <button className="btn btn-sm btn-ghost">
+                        remove all
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+              <motion.div
+                className="flex flex-col items-center justify-evenly p-4 gap-2 w-full"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 <p className="text-lg font-bold">No Submissions Selected!</p>
                 <p className="">
-                  Voters who select the #1 submission will split:{" "}
+                  Voters who select the #1 submission will split:
                   <p className="text-lg font-bold text-center">0.05 ETH</p>
                 </p>
-              </div>
+                <button
+                  className="btn btn-outline btn-sm w-fit"
+                  onClick={addProposed}
+                >
+                  add proposed
+                </button>
+              </motion.div>
             )}
           </>
         ) : (
@@ -431,6 +603,7 @@ export function VoterCart({ selectedSubs }: { selectedSubs: any }) {
         )}
       </div>
       <div className="p-2 " />
+      {(proposedSelection.length > 0 || editMode) && <VoteButton />}
     </div>
   );
 }
@@ -447,7 +620,9 @@ export function SubmitButton() {
 export function VoteButton() {
   return (
     <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
-      <button className="btn btn-secondary flex flex-1">Vote</button>
+      <button className="btn btn-secondary flex flex-1">
+        Submit Batch Vote
+      </button>
       <p className="mx-2 p-2 text-center">1 days</p>
     </div>
   );

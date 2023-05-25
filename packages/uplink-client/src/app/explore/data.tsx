@@ -24,7 +24,7 @@ export function AllSpaces({ spaces }: any) {
     <>
       <div
         className="grid gap-4 py-6
-      grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center w-full"
+      grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full"
       >
         {spaces.data.spaces.map((space: any, index: number) => {
           const isJoined = joinedSpaces.includes(space.name);
@@ -35,7 +35,7 @@ export function AllSpaces({ spaces }: any) {
                 <div
                   className="card card-compact hover:shadow-box bg-base-100
               transition-all duration-300 ease-linear
-              cursor-pointer hover:scale-105 rounded-3xl w-[300px] h-[350px]"
+              cursor-pointer hover:scale-105 rounded-3xl min-w-max h-[350px]"
                 >
                   <figure className="relative h-2/3 ">
                     <Image
@@ -45,7 +45,7 @@ export function AllSpaces({ spaces }: any) {
                       className="rounded-t-xl object-cover w-full"
                     />
                   </figure>
-                  <div className="card-body items-center">
+                  <div className="card-body items-center h-1/3">
                     <h2 className="card-title mb-0">{space.name}</h2>
                     <div className="card-actions justify-end">
                       <p>{space.members} members</p>
