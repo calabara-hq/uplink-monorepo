@@ -1,13 +1,12 @@
 
 import {
-    verifyTokenStandard,
-    isERC1155TokenFungible,
-    isValidERC1155TokenId,
     isERCToken,
     IERCToken,
     IToken,
     EditorOutputData,
 } from "lib";
+
+import { tokenController } from "./tokenController.js";
 
 
 export type FungiblePayout = {
@@ -192,7 +191,7 @@ export const validateSubmitterRewards = async (submitterRewards: ContestBuilderP
 
 
         if (isERCToken(tokenData)) {
-            const isValid = await verifyTokenStandard({
+            const isValid = await tokenController.verifyTokenStandard({
                 contractAddress: tokenData.address as IERCToken["address"],
                 expectedStandard: token as "ERC20" | "ERC721" | "ERC1155",
             });
@@ -202,14 +201,14 @@ export const validateSubmitterRewards = async (submitterRewards: ContestBuilderP
             }
 
             if (tokenData.type === 'ERC1155') {
-                const isValidId = await isValidERC1155TokenId({
+                const isValidId = await tokenController.isValidERC1155TokenId({
                     contractAddress: tokenData.address,
                     tokenId: tokenData.tokenId
                 });
                 if (!isValidId) {
                     errorArr.push(`Invalid ${token} token id`);
                 } else {
-                    const isFungible = await isERC1155TokenFungible({
+                    const isFungible = await tokenController.isERC1155TokenFungible({
                         contractAddress: tokenData.address,
                         tokenId: tokenData.tokenId
                     });
@@ -283,7 +282,7 @@ export const validateVoterRewards = async (voterRewards: ContestBuilderProps['vo
         const tokenData = tokens[token];
 
         if (isERCToken(tokenData)) {
-            const isValid = await verifyTokenStandard({
+            const isValid = await tokenController.verifyTokenStandard({
                 contractAddress: tokenData.address as IERCToken["address"],
                 expectedStandard: token as "ERC20",
             });
@@ -330,7 +329,7 @@ export const validateSubmitterRestrictions = async (submitterRestrictions: Conte
 
     await Promise.all(submitterRestrictions.map(async ({ token, threshold }, index) => {
         if (isERCToken(token)) {
-            const isValid = await verifyTokenStandard({
+            const isValid = await tokenController.verifyTokenStandard({
                 contractAddress: token.address,
                 expectedStandard: token.type,
             });
@@ -374,7 +373,7 @@ export const validateVotingPolicy = async (votingPolicy: ContestBuilderProps['vo
     await Promise.all(votingPolicy.map(async ({ token, strategy }, index) => {
         if (isERCToken(token)) {
             // verify the token is valid
-            const isValidToken = await verifyTokenStandard({
+            const isValidToken = await tokenController.verifyTokenStandard({
                 contractAddress: token.address,
                 expectedStandard: token.type,
             });

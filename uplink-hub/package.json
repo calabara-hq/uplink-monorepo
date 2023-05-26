@@ -15,6 +15,7 @@
     "test:unit-voting": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace vote test",
     "test:unit-submit": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace submit test",
     "test:unit-lib": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib test",
+    "test:e2e": "yarn run env:test && docker compose up -d && cross-env ENV_PATH=./.env dotenv -- yarn workspace e2e test",
     "clean": "yarn workspaces foreach 'echo $(pwd)/node_modules' | xargs rm -rf"
   },
   "workspaces": [
@@ -22,7 +23,9 @@
     "packages/graphql-api/subgraphs/*"
   ],
   "constraints": {
-    "rootIsolation": ["*"]
+    "rootIsolation": [
+      "*"
+    ]
   },
   "packageManager": "yarn@3.5.0",
   "dependencies": {

@@ -1,7 +1,8 @@
 import { db, sqlOps } from "./database.js";
 import { GraphQLError } from "graphql";
-import { schema, computeUserTokenBalance, Decimal } from "lib";
+import { schema, Decimal } from "lib";
 import { getCacheValue, setCacheValue } from "./cache.js";
+import { tokenController } from "./tokenController.js";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -118,7 +119,7 @@ export const computeArcadeVotingPowerUserValues = async (
 ) => {
     const arcadeVotingPowerUserValues = await Promise.all(arcadePolicy.map(async (policy: any) => {
         const { token, votingPower } = policy;
-        const userBalance = await computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
+        const userBalance = await tokenController.computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
         if (userBalance > new Decimal(0)) return votingPower;
         return new Decimal(0);
     }));
@@ -143,7 +144,7 @@ export const computeWeightedVotingPowerUserValues = async (
 ) => {
     const weightedVotingPowerUserValues = await Promise.all(weightedPolicy.map(async (policy: any) => {
         const { token } = policy;
-        const userBalance = await computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
+        const userBalance = await tokenController.computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
         if (userBalance > new Decimal(0)) return userBalance;
         return new Decimal(0);
 
