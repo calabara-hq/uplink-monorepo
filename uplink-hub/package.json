@@ -1,0 +1,32 @@
+{
+  "name": "uplink-hub",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "author": "nick",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "env:test": "cp .env.test .env",
+    "env:dev": "cp .env.dev .env",
+    "env:prod": "cp .env.prod .env",
+    "build:docker": "yarn run env:dev && docker compose build",
+    "start": "yarn run env:dev && docker compose up",
+    "test:unit-voting": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace vote test",
+    "test:unit-submit": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace submit test",
+    "test:unit-lib": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib test",
+    "clean": "yarn workspaces foreach 'echo $(pwd)/node_modules' | xargs rm -rf"
+  },
+  "workspaces": [
+    "packages/*",
+    "packages/graphql-api/subgraphs/*"
+  ],
+  "constraints": {
+    "rootIsolation": ["*"]
+  },
+  "packageManager": "yarn@3.5.0",
+  "dependencies": {
+    "cross-env": "^7.0.3",
+    "dotenv-cli": "^7.2.1"
+  }
+}
