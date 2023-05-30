@@ -269,8 +269,8 @@ type Mutation
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
-  removeSingleVote(contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
-  removeAllVotes(submissionId: ID!, contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTE)
+  removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
+  removeAllVotes(contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTE)
 }
 
 enum NativeTokenType

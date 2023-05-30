@@ -52,8 +52,8 @@ type Mutation {
     contestId: ID!
     castVotePayload: [CastVotePayload!]!
   ): CastVoteResponse!
-  removeSingleVote(contestId: ID!): RemoveSingleVoteResponse!
-  removeAllVotes(submissionId: ID!, contestId: ID!): RemoveAllVotesResponse!
+  removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse!
+  removeAllVotes(contestId: ID!): RemoveAllVotesResponse!
 }
 
 extend schema

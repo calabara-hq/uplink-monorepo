@@ -28,7 +28,7 @@ export const fetchVotingPolicy = async (contestId: number, strategyType: string)
 
 export const fetchContestParams = async (contestId: number) => {
     const result = await db.select({
-        selfVOte: schema.contests.selfVote,
+        selfVote: schema.contests.selfVote,
         deadlines: {
             startTime: schema.contests.startTime,
             voteTime: schema.contests.voteTime,
@@ -50,8 +50,13 @@ export const fetchUserVotes = async (user: any, contestId: any) => {
         votes: schema.votes.amount,
     }).from(schema.votes)
         .where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
-    console.log('userVotes', userVotes)
-    return userVotes;
+
+    return userVotes.map((el: any) => {
+        return {
+            ...el,
+            votes: new Decimal(el.votes),
+        }
+    });
 }
 
 export const fetchContestSubmissions = async (contestId: number) => {
@@ -304,30 +309,26 @@ export const castVotes = async (
 
     const contestSubmissions = await fetchContestSubmissions(contestId);
 
-
-    // FIXME: there is a bug here
-
-    const submissionIds = new Set(contestSubmissions.map((el: any) => el.id));
-    const userSubmissionIds = contestParams.selfVote ? null : new Set(contestSubmissions.filter((el: any) => el.author === user.address).map((el: any) => el.id));
+    const contestSubmissionIds = new Set(contestSubmissions.map((el: any) => el.id.toString()));
+    const userSubmissionIds = contestParams.selfVote ? null : new Set(contestSubmissions.filter((el: any) => el.author === user.address).map((el: any) => el.id.toString()));
     let submissionIdErrors = [];
     let selfVoteErrors = [];
 
     for (let el of payload) {
-        if (!submissionIds.has(el.submissionId)) {
+        if (!contestSubmissionIds.has(el.submissionId.toString())) {
             submissionIdErrors.push(el.submissionId);
         }
-        if (userSubmissionIds && userSubmissionIds.has(el.submissionId)) {
+        if (!contestParams.selfVote && userSubmissionIds.has(el.submissionId.toString())) {
             selfVoteErrors.push(el.submissionId);
         }
     }
-
-    console.log('submissionIdErrors', submissionIdErrors)
 
     if (submissionIdErrors.length > 0) throw new GraphQLError('Invalid submissionId', {
         extensions: {
             code: 'INVALID_SUBMISSION_ID'
         }
     });
+
 
     if (selfVoteErrors.length > 0) throw new GraphQLError('Self voting is disabled', {
         extensions: {
@@ -340,10 +341,13 @@ export const castVotes = async (
     const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines);
 
     return {
-        totalVotingPower,
-        votesSpent,
-        votesRemaining,
-        userVotes
+        success: true,
+        userVotingParams: {
+            totalVotingPower,
+            votesSpent,
+            votesRemaining,
+            userVotes
+        }
     }
 }
 
@@ -354,13 +358,16 @@ export const retractAllVotes = async (user: any, contestId: any) => {
         const contestParams = await fetchContestParams(contestId);
         const totalVotingPower = await calculateTotalVotingPower(user, contestId, contestParams.deadlines);
 
-        await db.deleteFrom(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
+        await db.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
         // reset the voting params state
         return {
-            totalVotingPower,
-            votesSpent: new Decimal(0),
-            votesRemaining: totalVotingPower,
-            userVotes: []
+            success: true,
+            userVotingParams: {
+                totalVotingPower,
+                votesSpent: new Decimal(0),
+                votesRemaining: totalVotingPower,
+                userVotes: []
+            }
         }
     } catch (err) {
         throw new GraphQLError('Failed to delete votes', {
@@ -383,13 +390,17 @@ export const retractSingleVote = async (user: any, contestId: any, submissionId:
     }
 
     try {
-        await db.deleteFrom(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.submissionId, submissionId), sqlOps.eq(schema.votes.voter, user.address)));
+        await db.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.submissionId, submissionId), sqlOps.eq(schema.votes.voter, user.address)));
         const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines);
+
         return {
-            totalVotingPower,
-            votesSpent,
-            votesRemaining,
-            userVotes
+            success: true,
+            userVotingParams: {
+                totalVotingPower,
+                votesSpent,
+                votesRemaining,
+                userVotes
+            }
         }
     } catch (err) {
         throw new GraphQLError('Failed to delete votes', {

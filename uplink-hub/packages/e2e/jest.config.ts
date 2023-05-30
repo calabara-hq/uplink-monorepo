@@ -8,8 +8,10 @@ const jestConfig = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.[jt]s$': '$1',
   },
-  "setupFilesAfterEnv": ["./test/setup.ts"],
-  // ...
+  "globalSetup": "./test/globalSetup.js",
+  "globalTeardown": "./test/globalTeardown.js",
+
+  verbose: true,
 }
 
 module.exports = jestConfig

@@ -18,17 +18,15 @@ const mutations = {
         */
         castVotes: async (_: any, args: any, context: any) => {
 
-            /*
+
             const user = await authController.getUser(context);
+            console.log(user)
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'
                 }
             })
 
-            console.log(args.castVotesPayload);
-            */
-            const user = { address: 'nickdodson.eth' }
             return castVotes(user, args.contestId, args.castVotePayload);
 
         },

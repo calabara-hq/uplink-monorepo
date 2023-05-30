@@ -316,11 +316,7 @@ describe('voting utils test suite', () => {
         });
 
         test('throw self voting error', async () => {
-            jest.spyOn(votingUtils, 'fetchUserVotes').mockResolvedValue([
-                { submissionId: 0, quantity: 3 },
-                { submissionId: 1, quantity: 2 },
-                { submissionId: 2, quantity: 1 }
-            ]);
+            jest.spyOn(votingUtils, 'fetchUserVotes').mockResolvedValue([]);
             jest.spyOn(votingUtils, 'insertVotes').mockResolvedValue(true);
             jest.spyOn(votingUtils, 'fetchContestParams').mockResolvedValue({ selfVote: false, deadlines: {} })
             jest.spyOn(votingUtils, 'fetchContestSubmissions').mockResolvedValue([
@@ -423,14 +419,17 @@ describe('voting utils test suite', () => {
 
             const result = await votingUtils.castVotes(user, contestId, payload);
             expect(result).toEqual({
-                totalVotingPower: new Decimal('100'),
-                votesSpent: new Decimal('100'),
-                votesRemaining: new Decimal('0'),
-                userVotes: [
-                    { submissionId: 1, quantity: 10 },
-                    { submissionId: 2, quantity: 30 },
-                    { submissionId: 3, quantity: 60 }
-                ],
+                success: true,
+                userVotingParams: {
+                    totalVotingPower: new Decimal('100'),
+                    votesSpent: new Decimal('100'),
+                    votesRemaining: new Decimal('0'),
+                    userVotes: [
+                        { submissionId: 1, quantity: 10 },
+                        { submissionId: 2, quantity: 30 },
+                        { submissionId: 3, quantity: 60 }
+                    ],
+                }
             });
 
         });
