@@ -80,7 +80,7 @@ const SubmitterRewardsComponent = ({
           );
         })}
       </div>
-      <button className="btn" onClick={() => setIsModalOpen(true)}>
+      <button className="btn btn-ghost underline" onClick={() => setIsModalOpen(true)}>
         add reward
       </button>
       <SubmitterRewardMatrix state={state} dispatch={dispatch} />

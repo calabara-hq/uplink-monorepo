@@ -59,7 +59,7 @@ const VotingPolicy = ({
                       </button>
                     </h2>
                     <div className="flex gap-2 w-fit">
-                      <p className="font-bold">{policy?.strategy?.type}:</p>
+                      <p className="font-bold">{policy?.strategy?.type}</p>
 
                       <p className="">
                         {policy?.strategy?.type === "arcade" &&

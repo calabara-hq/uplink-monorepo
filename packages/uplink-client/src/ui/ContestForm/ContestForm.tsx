@@ -31,6 +31,12 @@ import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateContestDocument } from "@/lib/graphql/contests.gql";
 import { toast } from "react-hot-toast";
 import AdditionalParameters from "./AdditionalParameters";
+import {
+  CheckBadgeIcon,
+  XCircleIcon,
+  PencilSquareIcon,
+  EllipsisHorizontalCircleIcon,
+} from "@heroicons/react/24/solid";
 
 import InfoAlert from "../InfoAlert/InfoAlert";
 
@@ -49,8 +55,10 @@ export const BlockWrapper = ({
   return (
     <div className="border-2 border-border shadow-box p-6 rounded-xl">
       <h1 className="text-2xl font-bold">{title}</h1>
-      {info &&<InfoAlert>{info}</InfoAlert>}
-      <div className="flex flex-col items-center p-4 lg:p-8 gap-4">{children}</div>
+      {info && <InfoAlert>{info}</InfoAlert>}
+      <div className="flex flex-col items-center p-4 lg:p-8 gap-4">
+        {children}
+      </div>
     </div>
   );
 };
@@ -200,7 +208,7 @@ const ContestForm = ({
       errorField: "deadlines",
     },
     {
-      name: "Standard Prompt",
+      name: "Prompt",
       component: <StandardPrompt state={state} dispatch={dispatch} />,
       errorField: "prompt",
     },
@@ -267,32 +275,50 @@ const ContestForm = ({
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 w-11/12 text-white lg:px-4 py-4 lg:py-8 ml-auto mr-auto">
-      <div className="hidden lg:flex w-full lg:w-1/5 items-start ">
-        <ul className="steps steps-horizontal lg:steps-vertical">
+      <div className="flex flex-col lg:flex w-full lg:w-1/5 items-start ">
+        <div className="flex flex-row flex-wrap gap-1 lg:flex-col h-full lg:w-fit lg:gap-4">
           {steps.map((el, index) => {
             const isActive = currentStep === index;
             const isCompleted = index < currentStep;
             const hasErrors = state.errors[el.errorField];
 
             const stepClass = isActive
-              ? "step step-secondary"
+              ? {
+                  icon: <PencilSquareIcon className="w-3 h-3 lg:w-6 lg:h-6" />,
+                  style:
+                    "btn btn-xs lg:btn-lg btn-ghost underline w-fit normal-case",
+                }
               : isCompleted
-              ? "step step-success"
-              : "step step-neutral";
-            const dataContent = hasErrors ? "✕" : isCompleted ? "✓" : "●";
+              ? {
+                  icon: <CheckBadgeIcon className="w-3 h-3 lg:w-6 lg:h-6 fill-success" />,
+                  style: "btn btn-xs lg:btn-lg btn-ghost w-fit normal-case",
+                }
+              : hasErrors
+              ? {
+                  icon: <XCircleIcon className="w-3 h-3 lg:w-6 lg:h-6  fill-error" />,
+                  style:
+                    "btn btn-xs lg:btn-lg btn-ghost underline w-fit normal-case",
+                }
+              : {
+                  icon: (
+                    <EllipsisHorizontalCircleIcon className="w-3 h-3 lg:w-6 lg:h-6 fill-neutral" />
+                  ),
+                  style: "btn btn-xs lg:btn-lg btn-ghost  w-fit normal-case",
+                };
 
             return (
-              <li
-                key={index}
-                data-content={dataContent}
-                className={`${stepClass} cursor-pointer`}
+              <div
+                className={`${stepClass.style} cursor-pointer p-2 rounded-lg text-left`}
                 onClick={() => setCurrentStep(index)}
               >
-                {el.name}
-              </li>
+                <div className="flex items-start gap-1 lg:gap-2">
+                  {stepClass.icon}
+                  {el.name}
+                </div>
+              </div>
             );
           })}
-        </ul>
+        </div>
       </div>
       <div className="flex flex-col w-full lg:w-4/5 gap-8">
         <AnimatePresence mode="wait">
@@ -304,7 +330,8 @@ const ContestForm = ({
             transition={{ duration: 0.2 }}
           >
             {steps[currentStep].component}
-            <div className="flex flex-row justify-between w-full">
+            <div className="p-4" />
+            <div className="btn-group grid grid-cols-2 w-full lg:w-1/3 m-auto">
               {currentStep > 0 && (
                 <button
                   type="button"

@@ -50,7 +50,7 @@ const VoterRewardsComponent = ({
         })}
       </div>
       <div>
-        <button className="btn" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-ghost underline" onClick={() => setIsModalOpen(true)}>
           add reward
         </button>
       </div>
