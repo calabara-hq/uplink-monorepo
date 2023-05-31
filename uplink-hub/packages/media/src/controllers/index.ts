@@ -1,50 +1,54 @@
-import stream from 'stream';
 import busboy from 'busboy';
-import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
+import FormData from 'form-data';
+import axios from 'axios';
+import { validationResult } from 'express-validator';
+const logger = console
 dotenv.config();
 
-const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
-
-
 export const upload = async (req, res) => {
-    const bb = busboy({ headers: req.headers });
-    const fileBuffer = new stream.PassThrough();
+  const bb = busboy({ headers: req.headers });
 
-    bb.on('file', (name, file, info) => {
-        const { filename, encoding, mimeType } = info;
-        console.log(
-            `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
-            filename,
-            encoding,
-            mimeType
-        );
-        file.on('data', (data) => {
-            console.log(`File [${name}] got ${data.length} bytes`);
-            fileBuffer.write(data);
-        }).on('end', () => {
-            console.log(`File [${name}] done`);
-            fileBuffer.end();
-        });
-    });
+  // validate the request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
-    bb.on('finish', async () => {
-        try {
+  bb.on('file', async (name, file, info) => {
+    try {
+      const { filename, encoding, mimeType } = info;
+      logger.info(`File [${name}]: filename: %j, encoding: %j, mimeType: %j`, filename, encoding, mimeType);
 
-            const options = {
-                pinataMetadata: {
-                    name: 'upload',
-                },
-                pinataOptions: {
-                    // Set your desired pinning options here
-                },
-            };
+      const formData = new FormData();
+      formData.append('file', file, {
+        filepath: 'submissionAsset',
+      });
 
-            const response = await pinata.pinFileToIPFS(fileBuffer, options);
-            res.status(200).json(response);
-        } catch (error) {
-            res.status(500).send(error.message);
-        }
-    });
-    req.pipe(bb);
-}
+      const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+        headers: {
+          'Authorization': `Bearer ${process.env.PINATA_JWT}`,
+          ...formData.getHeaders()
+        },
+      });
+
+      logger.info(`File [${filename}] done`);
+      res.status(200).json(response.data);
+
+    } catch (error) {
+      logger.error('Error uploading file:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  bb.on('finish', () => {
+    logger.info('Finished uploading files');
+  });
+
+  bb.on('error', (error) => {
+    logger.error('Error processing file upload:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  });
+
+  req.pipe(bb);
+};

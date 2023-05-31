@@ -42,8 +42,7 @@ services:
       volumes:
         - ./packages/media:/usr/src/app
       environment:
-        - PINATA_KEY=${PINATA_KEY}
-        - PINATA_SECRET=${PINATA_SECRET}
+        - PINATA_JWT=${PINATA_JWT}
 
   graphql:
     container_name: graphql
