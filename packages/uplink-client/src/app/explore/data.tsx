@@ -20,6 +20,8 @@ export function AllSpaces({ spaces }: any) {
     }
   };
 
+  
+
   return (
     <>
       <div
@@ -35,7 +37,7 @@ export function AllSpaces({ spaces }: any) {
                 <div
                   className="card card-compact hover:shadow-box bg-base-100
               transition-all duration-300 ease-linear
-              cursor-pointer hover:scale-105 rounded-3xl min-w-max h-[350px]"
+              cursor-pointer hover:scale-105 rounded-3xl min-w-max h-[400px]"
                 >
                   <figure className="relative h-2/3 ">
                     <Image

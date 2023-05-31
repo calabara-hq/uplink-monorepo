@@ -27,32 +27,30 @@ const variants = {
   },
 };
 
+
+
 export default function CreateThread() {
   const [modalIsOpen, setModalisOpen] = useState(false);
   const [[currentStep, direction], setCurrentStep] = useState([0, 0]);
+  const maxSteps = 10; // Maximum number of steps/tweets
+
   const paginate = (newDirection: number) => {
-    if (currentStep === 1 && newDirection < 0) {
-      // Sliding up from tweet 2 to tweet 1
-      setCurrentStep([currentStep + newDirection, newDirection * +1]);
-    } else if (currentStep === 2 && newDirection > 0) {
-      // Sliding down from tweet 3 to tweet 2
-      setCurrentStep([currentStep + newDirection, newDirection * -1]);
+    const nextStep = currentStep + newDirection;
+    if (nextStep < 0) {
+      setCurrentStep([0, 0]);
+    } else if (nextStep >= maxSteps) {
+      setCurrentStep([maxSteps - 2, 0]);
     } else {
-      setCurrentStep([currentStep + newDirection, newDirection]);
+      setCurrentStep([nextStep, newDirection]);
     }
   };
-
-  const steps = [
-    {
-      component: <Tweet1 />,
-    },
-    {
-      component: <Tweet2 />,
-    },
-    {
-      component: <Tweet3 />,
-    },
-  ];
+  
+  const steps = Array.from({ length: maxSteps }).map((_, index) => {
+    return {
+      component: <Tweet key={index} />,
+    };
+  });
+  
 
   return (
     <div>
@@ -72,20 +70,22 @@ export default function CreateThread() {
               y: { type: "tween", ease: "easeOut", duration: 0.3 },
               opacity: { duration: 0.3 },
             }}
-            className="flex flex-col w-full h-[600px] gap-4"
+            className="flex flex-col w-full h-[650px] gap-4"
           >
             {currentStep > 0 && (
               <div
-                className="w-full h-[80px] bg-pink-700 cursor-pointer"
+                className="w-full h-[80px] bg-base-100 hover:bg-base-200 cursor-pointer"
                 onClick={() => paginate(-1)}
               />
             )}
-            <div className="w-full h-full bg-blue-600">
+            <div className="w-full h-full bg-base-100 p-4">
+            <p className="float-right">{currentStep}</p>
+
               {steps[currentStep].component}
             </div>
-            {currentStep < steps.length - 1 && (
+            {currentStep < maxSteps - 1 && (
               <div
-                className="w-full h-[80px] bg-green-700 cursor-pointer"
+                className="w-full h-[80px] bg-base-100 hover:bg-base-200 cursor-pointer"
                 onClick={() => paginate(1)}
               />
             )}
@@ -95,6 +95,118 @@ export default function CreateThread() {
     </div>
   );
 }
+
+const Tweet = () => {
+  const { data: session, status } = useSession();
+
+  const [tweetText, setTweetText] = useState("");
+
+  const handleChange = (e: any) => {
+    const text = e.target.value;
+    if (text.length <= 280) {
+      setTweetText(text);
+    }
+  };
+
+  const handleTextareaResize = (e: any) => {
+    e.target.style.height = "auto";
+    e.target.style.height = `${e.target.scrollHeight}px`;
+  };
+
+  const handleImageUpload = (e: any) => {
+    const files = Array.from(e.target.files).slice(0, 4);
+    const images = files.map((file) => URL.createObjectURL(file));
+    setUploadedImages(images);
+  };
+  const [uploadedImages, setUploadedImages] = useState([]);
+
+
+  return (
+    <div className="bg-base-100 rounded-lg h-full">
+      <div className="flex gap-4 justify-center w-full h-fit">
+        {/* User Avatar */}
+        {session?.user?.twitter?.profile_image_url && (
+          <Image
+            className="rounded-full"
+            width={50}
+            height={50}
+            src={session?.user?.twitter?.profile_image_url}
+            alt="User Avatar"
+          />
+        )}
+
+        <div className="flex flex-col gap-4 items-start w-full h-fit">
+          {/* User Info */}
+          <div className="flex items-center space-x-2 w-full h-fit">
+            <span className="font-semibold text-gray-800">
+              {session?.user?.twitter?.name}
+            </span>
+            <span className="text-gray-500">
+              {session?.user?.twitter?.username}
+            </span>
+            <span className="text-gray-500">•</span>
+            <span className="text-gray-500">2h</span>
+          </div>
+
+          {/* Tweet Textarea */}
+          <textarea
+            rows={1}
+            placeholder="What's happening?"
+            className="mt-1 p-2 textarea textarea-lg resize-none w-full overflow-y-hidden"
+            style={{ height: "auto" }}
+            value={tweetText}
+            onChange={handleChange}
+            onInput={handleTextareaResize}
+          />
+          <div className="text-gray-500 text-right">
+            {280 - tweetText.length} characters remaining
+          </div>
+
+          {/* Uploaded Images */}
+          {uploadedImages.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 h-1/3">
+              {uploadedImages.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Uploaded Image ${index + 1}`}
+                  className={
+                    uploadedImages.length === 1
+                      ? "w-full h-24"
+                      : uploadedImages.length === 2
+                      ? "w-1/2 h-1/4"
+                      : "w-1/2 sm:w-1/3 lg:w-1/4 h-1/4"
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Button Section */}
+          <div className="flex space-x-2 mt-2 w-full justify-between">
+            <label
+              htmlFor="image-upload"
+              className="flex items-center btn btn-square btn-sm btn-ghost"
+            >
+              <PhotoIcon className="w-6 h-6" />
+              <input
+                type="file"
+                id="image-upload"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </label>
+            <button className="bg-twitter hover:bg-opacity-60 text-white font-bold py-2 px-4 rounded focus:outline-none">
+              Tweet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Modal = ({
   isModalOpen,
@@ -141,229 +253,4 @@ const Modal = ({
     );
   }
   return null;
-};
-
-const Tweet1 = () => {
-  const { data: session, status } = useSession();
-
-  const [tweetText, setTweetText] = useState("");
-
-  const handleChange = (e) => {
-    const text = e.target.value;
-    if (text.length <= 280) {
-      setTweetText(text);
-    }
-  };
-
-  const handleTextareaResize = (e) => {
-    e.target.style.height = "auto";
-    e.target.style.height = `${e.target.scrollHeight}px`;
-  };
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files).slice(0, 4);
-    const images = files.map((file) => URL.createObjectURL(file));
-    setUploadedImages(images);
-  };
-  const [uploadedImages, setUploadedImages] = useState([]);
-
-  return (
-    <div className="p-4 bg-base-100 rounded-lg shadow h-full">
-      <div className="flex gap-4 justify-center w-full h-fit">
-        {/* User Avatar */}
-        {session?.user?.twitter?.profile_image_url && (
-          <Image
-            className="rounded-full"
-            width={50}
-            height={50}
-            src={session?.user?.twitter?.profile_image_url}
-            alt="User Avatar"
-          />
-        )}
-
-        <div className="flex flex-col gap-4 items-start w-full h-fit">
-          {/* User Info */}
-          <div className="flex items-center space-x-2 w-full h-fit">
-            <span className="font-semibold text-gray-800">
-              {session?.user?.twitter?.name}
-            </span>
-            <span className="text-gray-500">
-              {session?.user?.twitter?.username}
-            </span>
-            <span className="text-gray-500">•</span>
-            <span className="text-gray-500">2h</span>
-          </div>
-
-          {/* Tweet Textarea */}
-          <textarea
-            rows={1}
-            placeholder="What's happening?"
-            className="mt-1 p-2 textarea textarea-lg resize-none w-full overflow-y-hidden"
-            style={{ height: "auto" }}
-            value={tweetText}
-            onChange={handleChange}
-            onInput={handleTextareaResize}
-          />
-          <div className="text-gray-500 text-right">
-            {280 - tweetText.length} characters remaining
-          </div>
-
-          {/* Uploaded Images */}
-          {uploadedImages.length > 0 && (
-            <div className="flex gap-2 h-1/3">
-              {uploadedImages.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Uploaded Image ${index + 1}`}
-                  className={
-                    uploadedImages.length === 1
-                      ? "w-full h-24"
-                      : uploadedImages.length === 2
-                      ? "w-1/2 h-1/4"
-                      : "w-1/2 sm:w-1/3 lg:w-1/4 h-1/4"
-                  }
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Button Section */}
-          <div className="flex space-x-2 mt-2 w-full justify-between">
-            <label
-              htmlFor="image-upload"
-              className="flex items-center btn btn-square btn-sm btn-ghost"
-            >
-              <PhotoIcon className="w-6 h-6" />
-              <input
-                type="file"
-                id="image-upload"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </label>
-            <button className="bg-twitter hover:bg-twitter-600 text-white font-bold py-2 px-4 rounded focus:outline-none">
-              Tweet
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Tweet2 = () => {
-  const { data: session, status } = useSession();
-
-  const [tweetText, setTweetText] = useState("");
-
-  const handleChange = (e) => {
-    const text = e.target.value;
-    if (text.length <= 280) {
-      setTweetText(text);
-    }
-  };
-
-  const handleTextareaResize = (e) => {
-    e.target.style.height = "auto";
-    e.target.style.height = `${e.target.scrollHeight}px`;
-  };
-  return (
-    <div className="p-4 bg-base-100 rounded-lg shadow h-full">
-      <div className="flex gap-4 justify-center w-full">
-        {/* Twitter Profile */}
-        <img
-          src="https://placekitten.com/40/40"
-          alt="User Avatar"
-          className="w-10 h-10 rounded-full"
-        />
-
-        <div className="flex flex-col gap-4 items-start w-full">
-          {/* Tweet Textarea */}
-          <textarea
-            rows={1}
-            placeholder="Add another tweet"
-            className=" p-2 textarea textarea-lg resize-none w-full overflow-y-hidden"
-            style={{ height: "auto" }}
-            value={tweetText}
-            onChange={handleChange}
-            onInput={handleTextareaResize}
-          />
-          <div className="text-gray-500 text-right">
-            {280 - tweetText.length} characters remaining
-          </div>
-          {/* Button Section */}
-          <div className="flex justify-between items-center mt-2 w-full">
-            <div className="flex space-x-2">
-              <button className="flex items-center btn btn-square btn-sm btn-ghost">
-                <PhotoIcon className="w-6 h-6" />
-              </button>
-            </div>
-            <button className="bg-twitter hover:bg-twitter-600 text-white font-bold py-2 px-4 rounded focus:outline-none">
-              Tweet All
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Tweet3 = () => {
-  const { data: session, status } = useSession();
-
-  const [tweetText, setTweetText] = useState("");
-
-  const handleChange = (e) => {
-    const text = e.target.value;
-    if (text.length <= 280) {
-      setTweetText(text);
-    }
-  };
-
-  const handleTextareaResize = (e) => {
-    e.target.style.height = "auto";
-    e.target.style.height = `${e.target.scrollHeight}px`;
-  };
-  return (
-    <div className="p-4 bg-base-100 rounded-lg shadow h-full">
-      <div className="flex gap-4 justify-center w-full">
-        {/* Twitter Profile */}
-        <img
-          src="https://placekitten.com/40/40"
-          alt="User Avatar"
-          className="w-10 h-10 rounded-full"
-        />
-
-        <div className="flex flex-col gap-4 items-start w-full">
-          {/* Tweet Textarea */}
-          <textarea
-            rows={1}
-            placeholder="Add another tweet"
-            className="mt-1 p-2 textarea textarea-lg resize-none w-full overflow-y-hidden"
-            style={{ height: "auto" }}
-            value={tweetText}
-            onChange={handleChange}
-            onInput={handleTextareaResize}
-          />
-          <div className="text-gray-500 text-right">
-            {280 - tweetText.length} characters remaining
-          </div>
-          {/* Button Section */}
-          <div className="flex justify-between items-center mt-2 w-full">
-            <div className="flex space-x-2">
-              <button className="flex items-center btn btn-square btn-sm btn-ghost">
-                <PhotoIcon className="w-6 h-6" />
-              </button>
-            </div>
-            <button className="bg-twitter hover:bg-twitter-600 text-white font-bold py-2 px-4 rounded focus:outline-none">
-              Tweet All
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 };
