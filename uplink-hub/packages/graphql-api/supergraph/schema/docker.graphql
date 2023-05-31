@@ -1,0 +1,561 @@
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+{
+  query: Query
+  mutation: Mutation
+}
+
+directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+type ActiveContest
+  @join__type(graph: CONTESTS)
+{
+  id: Int!
+  spaceId: Int!
+  tag: String!
+  start: String!
+  vote: String!
+  end: String!
+  created: String!
+  spaceLink: Space!
+}
+
+input AdditionalParams
+  @join__type(graph: CONTESTS)
+{
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
+type AdditionalParamsType
+  @join__type(graph: CONTESTS)
+{
+  anonSubs: Boolean!
+  visibleVotes: Boolean!
+  selfVote: Boolean!
+  subLimit: Int!
+}
+
+type Admin
+  @join__type(graph: SPACES)
+{
+  id: Int!
+  spaceId: Int!
+  address: String!
+}
+
+type ArcadeVotingPolicyType
+  @join__type(graph: CONTESTS)
+{
+  token: TokenType
+  votingPower: Decimal
+}
+
+input CastVotePayload
+  @join__type(graph: VOTE)
+{
+  submissionId: ID!
+  quantity: Decimal!
+}
+
+type CastVoteResponse
+  @join__type(graph: VOTE)
+{
+  success: Boolean!
+  userVotingParams: UserVotingParams!
+}
+
+type Contest
+  @join__type(graph: CONTESTS, key: "id")
+{
+  id: Int!
+  spaceId: Int!
+  created: String!
+  metadata: MetadataType!
+  deadlines: DeadlinesType!
+  promptUrl: IpfsUrl!
+  submitterRewards: [RewardType!]!
+  voterRewards: [RewardType!]!
+  submitterRestrictions: [SubmitterRestrictionType!]!
+  votingPolicy: [VotingPolicyType!]!
+  additionalParams: AdditionalParamsType!
+}
+
+input ContestBuilderProps
+  @join__type(graph: CONTESTS)
+{
+  spaceId: String!
+  metadata: Metadata!
+  deadlines: Deadlines!
+  prompt: Prompt!
+  submitterRewards: SubmitterRewards!
+  voterRewards: VoterRewards!
+  submitterRestrictions: [SubmitterRestriction!]!
+  votingPolicy: [VotingPolicy!]!
+  additionalParams: AdditionalParams!
+}
+
+type ContestErrorData
+  @join__type(graph: CONTESTS)
+{
+  metadata: String
+  deadlines: String
+  prompt: String
+  submitterRewards: String
+  voterRewards: String
+  submitterRestrictions: String
+  votingPolicy: String
+  additionalParams: String
+  twitter: String
+}
+
+type ContestMutationResponse
+  @join__type(graph: CONTESTS)
+{
+  success: Boolean!
+  contestId: Int
+  errors: ContestErrorData
+}
+
+enum ContestType
+  @join__type(graph: CONTESTS)
+{
+  standard @join__enumValue(graph: CONTESTS)
+  twitter @join__enumValue(graph: CONTESTS)
+}
+
+type createSubmissionResponse
+  @join__type(graph: SUBMIT)
+{
+  success: Boolean!
+  errors: String
+  userSubmissionParams: UserSubmissionParams!
+}
+
+input Deadlines
+  @join__type(graph: CONTESTS)
+{
+  snapshot: ISODateString!
+  startTime: ISODateString!
+  voteTime: ISODateString!
+  endTime: ISODateString!
+}
+
+type DeadlinesType
+  @join__type(graph: CONTESTS)
+{
+  startTime: String!
+  voteTime: String!
+  endTime: String!
+  snapshot: String!
+}
+
+scalar Decimal
+  @join__type(graph: CONTESTS)
+  @join__type(graph: SUBMIT)
+  @join__type(graph: VOTE)
+
+scalar EditorData
+  @join__type(graph: CONTESTS)
+  @join__type(graph: SUBMIT)
+
+enum ERCTokenType
+  @join__type(graph: CONTESTS)
+{
+  ERC20 @join__enumValue(graph: CONTESTS)
+  ERC721 @join__enumValue(graph: CONTESTS)
+  ERC1155 @join__enumValue(graph: CONTESTS)
+}
+
+input FungiblePayout
+  @join__type(graph: CONTESTS)
+{
+  amount: Decimal!
+}
+
+input IERCToken
+  @join__type(graph: CONTESTS)
+{
+  type: ERCTokenType!
+  address: String!
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
+}
+
+input INativeToken
+  @join__type(graph: CONTESTS)
+{
+  type: NativeTokenType!
+  symbol: NativeTokenType!
+  decimals: Int!
+}
+
+input IPayout
+  @join__type(graph: CONTESTS)
+{
+  rank: Int!
+  ETH: FungiblePayout
+  ERC20: FungiblePayout
+  ERC721: NonFungiblePayout
+  ERC1155: FungiblePayout
+}
+
+scalar IpfsUrl
+  @join__type(graph: CONTESTS)
+  @join__type(graph: SPACES)
+
+scalar ISODateString
+  @join__type(graph: CONTESTS)
+
+scalar join__FieldSet
+
+enum join__Graph {
+  CONTESTS @join__graph(name: "contests", url: "http://contests:4000/graphql")
+  SPACES @join__graph(name: "spaces", url: "http://spaces:4000/graphql")
+  SUBMIT @join__graph(name: "submit", url: "http://submit:4000/graphql")
+  VOTE @join__graph(name: "vote", url: "http://vote:4000/graphql")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+input Metadata
+  @join__type(graph: CONTESTS)
+{
+  type: ContestType!
+  category: String!
+}
+
+type MetadataType
+  @join__type(graph: CONTESTS)
+{
+  type: String!
+  category: String!
+}
+
+type Mutation
+  @join__type(graph: CONTESTS)
+  @join__type(graph: SPACES)
+  @join__type(graph: SUBMIT)
+  @join__type(graph: VOTE)
+{
+  createContest(contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
+  createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
+  castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
+  removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
+  removeAllVotes(contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTE)
+}
+
+enum NativeTokenType
+  @join__type(graph: CONTESTS)
+{
+  ETH @join__enumValue(graph: CONTESTS)
+}
+
+input NonFungiblePayout
+  @join__type(graph: CONTESTS)
+{
+  tokenId: Int!
+}
+
+input Prompt
+  @join__type(graph: CONTESTS)
+{
+  title: String!
+  body: EditorData!
+  coverUrl: IpfsUrl
+}
+
+type Query
+  @join__type(graph: CONTESTS)
+  @join__type(graph: SPACES)
+  @join__type(graph: SUBMIT)
+  @join__type(graph: VOTE)
+{
+  contest(contestId: Int!): Contest @join__field(graph: CONTESTS)
+  activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
+  space(id: ID, name: String): Space @join__field(graph: SPACES)
+  spaces: [Space!]! @join__field(graph: SPACES)
+  getUserSubmissionParams(walletAddress: String!, contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
+  testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTE)
+  getUserVotingParams(walletAddress: String!, contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
+}
+
+type RemoveAllVotesResponse
+  @join__type(graph: VOTE)
+{
+  success: Boolean!
+  userVotingParams: UserVotingParams!
+}
+
+type RemoveSingleVoteResponse
+  @join__type(graph: VOTE)
+{
+  success: Boolean!
+  userVotingParams: UserVotingParams!
+}
+
+input RestrictionToken
+  @join__type(graph: CONTESTS)
+{
+  type: RestrictionTokenType!
+  address: String
+  symbol: String!
+  decimals: Int!
+  tokenId: Int
+}
+
+enum RestrictionTokenType
+  @join__type(graph: CONTESTS)
+{
+  ETH @join__enumValue(graph: CONTESTS)
+  ERC20 @join__enumValue(graph: CONTESTS)
+  ERC721 @join__enumValue(graph: CONTESTS)
+  ERC1155 @join__enumValue(graph: CONTESTS)
+}
+
+type RewardType
+  @join__type(graph: CONTESTS)
+{
+  rank: Int!
+  tokenReward: tokenRewardType!
+}
+
+type SampleResponse
+  @join__type(graph: VOTE)
+{
+  success: Boolean!
+}
+
+type Space
+  @join__type(graph: CONTESTS, key: "id")
+  @join__type(graph: SPACES, key: "id")
+{
+  id: ID!
+  contests: [Contest!]! @join__field(graph: CONTESTS)
+  name: String! @join__field(graph: SPACES)
+  displayName: String! @join__field(graph: SPACES)
+  members: Int! @join__field(graph: SPACES)
+  logoUrl: String! @join__field(graph: SPACES)
+  twitter: String @join__field(graph: SPACES)
+  website: String @join__field(graph: SPACES)
+  admins: [Admin!]! @join__field(graph: SPACES)
+  spaceTokens: [SpaceToken!]! @join__field(graph: SPACES)
+}
+
+type SpaceBuilderErrors
+  @join__type(graph: SPACES)
+{
+  name: String
+  logoUrl: String
+  website: String
+  twitter: String
+  admins: String
+}
+
+input SpaceBuilderInput
+  @join__type(graph: SPACES)
+{
+  name: String!
+  logoUrl: IpfsUrl!
+  website: String
+  twitter: String
+  admins: [String!]!
+}
+
+type SpaceMutationResponse
+  @join__type(graph: SPACES)
+{
+  spaceName: String
+  success: Boolean!
+  errors: SpaceBuilderErrors
+}
+
+type SpaceToken
+  @join__type(graph: SPACES)
+{
+  id: Int!
+  tokenHash: String!
+  symbol: String!
+  decimals: Int!
+  address: String
+  tokenId: String
+}
+
+type Submission
+  @join__type(graph: SUBMIT, key: "id")
+{
+  id: ID!
+  contestId: ID!
+  created: String!
+  type: String!
+  version: String!
+  author: String!
+  url: String!
+}
+
+scalar SubmissionAssetUrl
+  @join__type(graph: SUBMIT)
+
+input SubmissionPayload
+  @join__type(graph: SUBMIT)
+{
+  title: String!
+  previewAsset: SubmissionAssetUrl
+  videoAsset: SubmissionAssetUrl
+  body: EditorData
+}
+
+input SubmitterRestriction
+  @join__type(graph: CONTESTS)
+{
+  token: RestrictionToken
+  threshold: Decimal
+}
+
+type SubmitterRestrictionType
+  @join__type(graph: CONTESTS)
+{
+  restrictionType: String!
+  tokenRestriction: TokenRestrictionType!
+}
+
+input SubmitterRewards
+  @join__type(graph: CONTESTS)
+{
+  ETH: INativeToken
+  ERC20: IERCToken
+  ERC721: IERCToken
+  ERC1155: IERCToken
+  payouts: [IPayout!]
+}
+
+type TokenRestrictionType
+  @join__type(graph: CONTESTS)
+{
+  token: TokenType!
+  threshold: Decimal!
+}
+
+type tokenRewardType
+  @join__type(graph: CONTESTS)
+{
+  amount: Decimal
+  tokenId: Int
+  token: TokenType!
+}
+
+type TokenType
+  @join__type(graph: CONTESTS)
+{
+  tokenHash: String!
+  type: String!
+  symbol: String!
+  decimals: Int!
+  address: String
+  tokenId: Int
+}
+
+type UserSubmissionParams
+  @join__type(graph: SUBMIT)
+{
+  maxSubPower: Int!
+  remainingSubPower: Int!
+  userSubmissions: [Submission!]!
+}
+
+type UserVotingParams
+  @join__type(graph: VOTE)
+{
+  totalVotingPower: Decimal!
+  votesSpent: Decimal!
+  votesRemaining: Decimal!
+  userVotes: [VoteObject!]!
+}
+
+type Vote
+  @join__type(graph: VOTE, key: "id")
+{
+  id: ID!
+  submissionId: ID!
+  quantity: Decimal!
+}
+
+type VoteObject
+  @join__type(graph: VOTE)
+{
+  submissionId: ID!
+  votes: Decimal!
+}
+
+input VoterRewards
+  @join__type(graph: CONTESTS)
+{
+  ETH: INativeToken
+  ERC20: IERCToken
+  payouts: [IPayout!]
+}
+
+input VotingPolicy
+  @join__type(graph: CONTESTS)
+{
+  token: RestrictionToken!
+  strategy: VotingStrategy!
+}
+
+type VotingPolicyType
+  @join__type(graph: CONTESTS)
+{
+  strategyType: VotingStrategyType!
+  arcadeVotingPolicy: ArcadeVotingPolicyType
+  weightedVotingPolicy: WeightedVotingPolicyType
+}
+
+input VotingStrategy
+  @join__type(graph: CONTESTS)
+{
+  type: VotingStrategyType!
+  votingPower: Decimal
+}
+
+enum VotingStrategyType
+  @join__type(graph: CONTESTS)
+{
+  arcade @join__enumValue(graph: CONTESTS)
+  weighted @join__enumValue(graph: CONTESTS)
+}
+
+type WeightedVotingPolicyType
+  @join__type(graph: CONTESTS)
+{
+  token: TokenType
+}
