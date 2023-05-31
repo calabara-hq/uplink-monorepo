@@ -1,11 +1,9 @@
-import { describe, expect, test, jest, afterEach, afterAll, beforeAll } from '@jest/globals';
+import { describe, expect, test, jest, afterEach, afterAll, beforeAll, beforeEach } from '@jest/globals';
 import { request, GraphQLClient, gql } from 'graphql-request';
-import { schema } from "lib";
-import "isomorphic-fetch";
+import { IToken, schema } from "lib";
 import { dbNewContestType } from 'lib/dist/drizzle/schema';
-import { db, authenticatedGraphqlClient, sqlOps } from './config';
-import dotenv from 'dotenv';
-dotenv.config();
+import { db, authenticatedGraphqlClient, sqlOps, resetDatabase } from './config';
+import { randomUUID } from 'crypto';
 
 
 const nickAddress = '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C'
@@ -14,66 +12,115 @@ const endpoint = 'http://localhost:8080/api/graphql'
 
 
 /// seed db with test contest ///
-const seedContests = async () => {
-    const contest1: dbNewContestType = {
-        id: 1,
+const seedContests = async ({ window, selfVote, votingPolicy, submissions }: {
+    window: 'pending' | 'submitting' | 'voting' | 'end',
+    selfVote: boolean,
+    votingPolicy: {
+        strategyType: 'arcade' | 'weighted',
+        votingPower?: string,
+        token: IToken
+    }[],
+    submissions: {
+        author: string,
+    }[] | []
+}) => {
+
+    const deadlines = {
+        pending: {
+            startTime: new Date(Date.now() + 1 * 864e5).toISOString(),
+            voteTime: new Date(Date.now() + 2 * 864e5).toISOString(),
+            endTime: new Date(Date.now() + 3 * 864e5).toISOString(),
+            snapshot: new Date(Date.now() + 1 * 864e5).toISOString(),
+        },
+        submitting: {
+            startTime: new Date(Date.now() - 1 * 864e5).toISOString(),
+            voteTime: new Date(Date.now() + 1 * 864e5).toISOString(),
+            endTime: new Date(Date.now() + 2 * 864e5).toISOString(),
+            snapshot: new Date(Date.now() - 1 * 864e5).toISOString(),
+        },
+        voting: {
+            startTime: new Date(Date.now() - 2 * 864e5).toISOString(),
+            voteTime: new Date(Date.now() - 1 * 864e5).toISOString(),
+            endTime: new Date(Date.now() + 1 * 864e5).toISOString(),
+            snapshot: new Date(Date.now() - 2 * 864e5).toISOString(),
+        },
+        end: {
+            startTime: new Date(Date.now() - 3 * 864e5).toISOString(),
+            voteTime: new Date(Date.now() - 2 * 864e5).toISOString(),
+            endTime: new Date(Date.now() - 1 * 864e5).toISOString(),
+            snapshot: new Date(Date.now() - 3 * 864e5).toISOString(),
+        }
+    }
+
+    const contest: dbNewContestType = {
         spaceId: 1,
         type: 'standard',
         created: new Date(Date.now() - 2 * 864e5).toISOString(),
         category: 'art',
-        startTime: new Date(Date.now() - 2 * 864e5).toISOString(),
-        voteTime: new Date(Date.now() - 1 * 864e5).toISOString(),
-        endTime: new Date(Date.now() + 1 * 864e5).toISOString(),
-        snapshot: new Date(Date.now() - 2 * 864e5).toISOString(),
+        ...deadlines[window],
         promptUrl: 'https://calabara.com',
         anonSubs: false,
         visibleVotes: false,
-        selfVote: true,
+        selfVote: selfVote,
         subLimit: 3,
     }
-    const contestToken1: schema.dbNewTokenType = {
-        id: 1,
-        tokenHash: '123456',
-        type: 'ETH',
-        symbol: 'ETH',
-        decimals: 18,
-    };
-    const insertedContest = await db.insert(schema.contests).values(contest1);
-    const insertedToken = await db.insert(schema.tokens).values(contestToken1);
-    const newVotingPolicy: schema.dbNewVotingPolicyType = {
-        id: 1,
-        contestId: insertedContest.insertId,
-        strategyType: 'arcade',
-    }
-    await db.insert(schema.votingPolicy).values(newVotingPolicy);
-    const newArcadeVotingPolicy: schema.dbNewArcadeVotingStrategyType = {
-        id: 1,
-        votingPolicyId: 1,
-        votingPower: '10',
-        tokenLink: insertedToken.insertId,
-    }
-    await db.insert(schema.arcadeVotingStrategy).values(newArcadeVotingPolicy);
-    const submission1: schema.dbNewSubmissionType = {
-        id: 1,
-        contestId: 1,
-        author: nickAddress,
-        created: new Date().toISOString(),
-        type: 'text',
-        url: 'dummyurl',
-        version: 'uplink-v1'
-    }
-    const submission2: schema.dbNewSubmissionType = {
-        id: 2,
-        contestId: 1,
-        author: nickAddress,
-        created: new Date().toISOString(),
-        type: 'text',
-        url: 'dummyurl2',
-        version: 'uplink-v1'
+
+
+    const insertedContest = await db.insert(schema.contests).values(contest);
+
+    for (const policy of votingPolicy) {
+        const newToken: schema.dbNewTokenType = {
+            tokenHash: randomUUID().slice(0, 6),
+            type: policy.token.type,
+            symbol: policy.token.symbol,
+            decimals: policy.token.decimals,
+            ...(policy.token.type !== 'ETH' ? { address: policy.token.address } : {}),
+            ...(policy.token.type === 'ERC1155' ? { tokenId: policy.token.tokenId } : {}),
+        }
+
+        const insertedToken = await db.insert(schema.tokens).values(newToken);
+        const newVotingPolicy: schema.dbNewVotingPolicyType = {
+            contestId: insertedContest.insertId,
+            strategyType: policy.strategyType,
+        }
+        const insertedVotingPolicy = await db.insert(schema.votingPolicy).values(newVotingPolicy);
+        if (policy.strategyType === 'arcade') {
+            const newArcadeVotingPolicy: schema.dbNewArcadeVotingStrategyType = {
+                votingPolicyId: insertedVotingPolicy.insertId,
+                votingPower: policy.votingPower,
+                tokenLink: insertedToken.insertId,
+            }
+            await db.insert(schema.arcadeVotingStrategy).values(newArcadeVotingPolicy);
+        }
+        else if (policy.strategyType === 'weighted') {
+            const newWeightedVotingPolicy: schema.dbNewWeightedVotingStrategyType = {
+                votingPolicyId: insertedVotingPolicy.insertId,
+                tokenLink: insertedToken.insertId,
+            }
+            await db.insert(schema.weightedVotingStrategy).values(newWeightedVotingPolicy);
+        }
     }
 
-    await db.insert(schema.submissions).values(submission1);
-    await db.insert(schema.submissions).values(submission2);
+    let submissionIds = [];
+    for (const submission of submissions) {
+        const newSubmission: schema.dbNewSubmissionType = {
+            contestId: insertedContest.insertId,
+            author: submission.author,
+            created: new Date().toISOString(),
+            type: 'text',
+            url: 'dummyurl',
+            version: 'uplink-v1'
+        }
+        const insertedSubmission = await db.insert(schema.submissions).values(newSubmission);
+        submissionIds.push(insertedSubmission.insertId);
+    }
+
+
+
+    return {
+        contestId: insertedContest.insertId,
+        submissionIds: submissionIds
+    }
 
 }
 /// seed db with test contest ///
@@ -169,12 +216,48 @@ const removeAllVotes = async (contestId: string, authorized: boolean) => {
 
 describe('e2e vote', () => {
 
-    beforeAll(async () => {
-        await seedContests();
+
+
+    beforeEach(async () => {
+        await resetDatabase();
+    });
+
+    test('cast unauthorized vote', async () => {
+        const castVotePayload = [{
+            submissionId: '1',
+            quantity: '1'
+        }];
+
+        const result = castVotes('1', castVotePayload, false);
+        await expect(result).rejects.toMatchObject({
+            response: {
+                errors: [{
+                    extensions: {
+                        code: 'UNAUTHORIZED'
+                    }
+                }]
+            }
+        });
     });
 
     test('get user voting params', async () => {
-        const userVotingParams = await getUserVotingParams(nickAddress, '1');
+
+        const { contestId } = await seedContests({
+            window: 'voting',
+            selfVote: true,
+            votingPolicy: [{
+                strategyType: 'arcade',
+                votingPower: '10',
+                token: {
+                    type: 'ETH',
+                    decimals: 18,
+                    symbol: 'ETH',
+                }
+            }],
+            submissions: []
+        })
+
+        const userVotingParams = await getUserVotingParams(nickAddress, contestId);
         expect(userVotingParams).toEqual({
             getUserVotingParams: {
                 totalVotingPower: '10',
@@ -186,32 +269,35 @@ describe('e2e vote', () => {
     });
 
 
-    test('cast unauthorized vote', async () => {
-        const castVotePayload = [{
-            submissionId: '1',
-            quantity: '1'
-        }];
-
-        try {
-            await castVotes('1', castVotePayload, false);
-        } catch (error) {
-            expect(error.response.errors[0].message).toEqual('Unauthorized');
-        }
-    });
-
-
     test('successfully cast votes', async () => {
+
+        const { contestId, submissionIds } = await seedContests({
+            window: 'voting',
+            selfVote: true,
+            votingPolicy: [{
+                strategyType: 'arcade',
+                votingPower: '10',
+                token: {
+                    type: 'ETH',
+                    decimals: 18,
+                    symbol: 'ETH',
+                }
+            }],
+            submissions: [{ author: nickAddress }, { author: 'vitalik.eth' }]
+        })
+
+
         const castVotePayload = [{
-            submissionId: '1',
+            submissionId: submissionIds[0],
             quantity: '8'
         },
         {
-            submissionId: '2',
+            submissionId: submissionIds[1],
             quantity: '2'
         }
         ];
 
-        const castVotesResponse = await castVotes('1', castVotePayload, true);
+        const castVotesResponse = await castVotes(contestId, castVotePayload, true);
         expect(castVotesResponse).toEqual({
             castVotes: {
                 success: true,
@@ -219,70 +305,170 @@ describe('e2e vote', () => {
                     totalVotingPower: '10',
                     votesSpent: '10',
                     votesRemaining: '0',
-                    userVotes: [{ submissionId: '1' }, { submissionId: '2' }]
+                    userVotes: [{ submissionId: submissionIds[0] }, { submissionId: submissionIds[1] }]
                 }
             }
         })
     });
 
+
     test('cast vote with insufficient voting power', async () => {
+        const { contestId, submissionIds } = await seedContests({
+            window: 'voting',
+            selfVote: true,
+            votingPolicy: [{
+                strategyType: 'arcade',
+                votingPower: '10',
+                token: {
+                    type: 'ETH',
+                    decimals: 18,
+                    symbol: 'ETH',
+                }
+            }],
+            submissions: [{ author: nickAddress }, { author: 'vitalik.eth' }]
+        })
+
         const castVotePayload = [{
-            submissionId: '1',
+            submissionId: submissionIds[0],
             quantity: '8'
         },
         {
-            submissionId: '2',
-            quantity: '2'
+            submissionId: submissionIds[1],
+            quantity: '100'
         }
         ];
-        try {
-            await castVotes('1', castVotePayload, true);
-        } catch (error) {
-            expect(error.response.errors[0].message).toEqual('Insufficient voting power');
-        }
+        const result = castVotes(contestId, castVotePayload, true);
+        await expect(result).rejects.toMatchObject({
+            response: {
+                errors: [{
+                    extensions: {
+                        code: 'INSUFFICIENT_VOTING_POWER'
+                    }
+                }]
+            }
+        });
     });
 
     test('cast vote with invalid submission id', async () => {
+        const { contestId, submissionIds } = await seedContests({
+            window: 'voting',
+            selfVote: true,
+            votingPolicy: [{
+                strategyType: 'arcade',
+                votingPower: '10',
+                token: {
+                    type: 'ETH',
+                    decimals: 18,
+                    symbol: 'ETH',
+                }
+            }],
+            submissions: [{ author: nickAddress }, { author: 'vitalik.eth' }]
+        })
+
+        const invalidSubmissionId = submissionIds[0] + '10000';
         const castVotePayload = [{
-            submissionId: '3',
+            submissionId: invalidSubmissionId,
             quantity: '1'
         }];
-        try {
-            await castVotes('1', castVotePayload, true);
-        } catch (error) {
-            expect(error.response.errors[0].message).toEqual('Invalid submissionId');
-        }
+        const result = castVotes(contestId, castVotePayload, true);
+        await expect(result).rejects.toMatchObject({
+            response: {
+                errors: [{
+                    extensions: {
+                        code: 'INVALID_SUBMISSION_ID'
+                    }
+                }]
+            }
+        });
     });
 
     test('cast vote with invalid contest id', async () => {
+
+        const { contestId, submissionIds } = await seedContests({
+            window: 'voting',
+            selfVote: true,
+            votingPolicy: [{
+                strategyType: 'arcade',
+                votingPower: '10',
+                token: {
+                    type: 'ETH',
+                    decimals: 18,
+                    symbol: 'ETH',
+                }
+            }],
+            submissions: [{ author: nickAddress }, { author: 'vitalik.eth' }]
+        })
+
         const castVotePayload = [{
-            submissionId: '1',
+            submissionId: submissionIds[0],
             quantity: '1'
         }];
-        try {
-            await castVotes('2', castVotePayload, true);
-        } catch (error) {
-            expect(error.response.errors[0].message).toEqual('Contest does not exist');
-        }
+        const result = castVotes(contestId + 100000, castVotePayload, true);
+        await expect(result).rejects.toMatchObject({
+            response: {
+                errors: [{
+                    extensions: {
+                        code: 'CONTEST_DOES_NOT_EXIST'
+                    }
+                }]
+            }
+        });
     });
 
 
     test('remove single vote unauthorized', async () => {
-        try {
-            await removeSingleVote('1', '1', false);
-        } catch (error) {
-            expect(error.response.errors[0].message).toEqual('Unauthorized');
-        }
+        const result = removeSingleVote('1', '1', false);
+        await expect(result).rejects.toMatchObject({
+            response: {
+                errors: [{
+                    extensions: {
+                        code: 'UNAUTHORIZED'
+                    }
+                }]
+            }
+        });
     });
 
     test('remove single vote', async () => {
-        const removeSingleVoteResponse = await removeSingleVote('1', '1', true);
+        const { contestId, submissionIds } = await seedContests({
+            window: 'voting',
+            selfVote: true,
+            votingPolicy: [{
+                strategyType: 'arcade',
+                votingPower: '10',
+                token: {
+                    type: 'ETH',
+                    decimals: 18,
+                    symbol: 'ETH',
+                }
+            }],
+            submissions: [{ author: nickAddress }, { author: 'vitalik.eth' }]
+        })
+
+        await db.insert(schema.votes).values({
+            contestId: contestId,
+            submissionId: submissionIds[0],
+            voter: nickAddress,
+            created: new Date().toISOString(),
+            amount: '8'
+        });
+
+        await db.insert(schema.votes).values({
+            contestId: contestId,
+            submissionId: submissionIds[1],
+            voter: nickAddress,
+            created: new Date().toISOString(),
+            amount: '2'
+        });
+
+
+        const removeSingleVoteResponse = await removeSingleVote(contestId, submissionIds[0], true);
         expect(removeSingleVoteResponse).toEqual({
             removeSingleVote: {
                 success: true,
                 userVotingParams: {
                     totalVotingPower: '10',
-                    userVotes: [{ submissionId: '2', votes: '2' }],
+                    userVotes: [{ submissionId: submissionIds[1], votes: '2' }],
                     votesRemaining: '8',
                     votesSpent: '2'
                 }
@@ -291,16 +477,52 @@ describe('e2e vote', () => {
     });
 
     test('remove all votes unauthorized', async () => {
-        try {
-            await removeAllVotes('1', false);
-        } catch (error) {
-            expect(error.response.errors[0].message).toEqual('Unauthorized');
-        }
+        const result = removeAllVotes('1', false);
+        await expect(result).rejects.toMatchObject({
+            response: {
+                errors: [{
+                    extensions: {
+                        code: 'UNAUTHORIZED'
+                    }
+                }]
+            }
+        });
     });
 
-    
+
     test('remove all votes', async () => {
-        const removeAllVotesResponse = await removeAllVotes('1', true);
+        const { contestId, submissionIds } = await seedContests({
+            window: 'voting',
+            selfVote: true,
+            votingPolicy: [{
+                strategyType: 'arcade',
+                votingPower: '10',
+                token: {
+                    type: 'ETH',
+                    decimals: 18,
+                    symbol: 'ETH',
+                }
+            }],
+            submissions: [{ author: nickAddress }, { author: 'vitalik.eth' }]
+        })
+
+        await db.insert(schema.votes).values({
+            contestId: contestId,
+            submissionId: submissionIds[0],
+            voter: nickAddress,
+            created: new Date().toISOString(),
+            amount: '8'
+        });
+
+        await db.insert(schema.votes).values({
+            contestId: contestId,
+            submissionId: submissionIds[1],
+            voter: nickAddress,
+            created: new Date().toISOString(),
+            amount: '2'
+        });
+
+        const removeAllVotesResponse = await removeAllVotes(contestId, true);
         expect(removeAllVotesResponse).toEqual({
             removeAllVotes: {
                 success: true,
@@ -316,24 +538,41 @@ describe('e2e vote', () => {
 
     test('throw self voting error', async () => {
 
-        await db.update(schema.contests).set({ selfVote: false }).where(sqlOps.eq(schema.contests.id, 1));
+        const { contestId, submissionIds } = await seedContests({
+            window: 'voting',
+            selfVote: false,
+            votingPolicy: [{
+                strategyType: 'arcade',
+                votingPower: '10',
+                token: {
+                    type: 'ETH',
+                    decimals: 18,
+                    symbol: 'ETH',
+                }
+            }],
+            submissions: [{ author: nickAddress }, { author: 'vitalik.eth' }]
+        })
 
         const castVotePayload = [{
-            submissionId: '1',
+            submissionId: submissionIds[0],
             quantity: '8'
         },
         {
-            submissionId: '2',
+            submissionId: submissionIds[1],
             quantity: '2'
         }
         ];
 
-        try {
-            await castVotes('1', castVotePayload, true);
-        } catch (error) {
-            expect(error.response.errors[0].message).toEqual('Self voting is disabled');
-        }
+        const result = castVotes(contestId, castVotePayload, true);
+        await expect(result).rejects.toMatchObject({
+            response: {
+                errors: [{
+                    extensions: {
+                        code: 'SELF_VOTING_DISABLED'
+                    }
+                }]
+            }
+        });
     });
-    
 
 });

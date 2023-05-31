@@ -12,10 +12,10 @@
     "env:prod": "cp .env.prod .env",
     "build:docker": "yarn run env:dev && docker compose build",
     "start": "yarn run env:dev && docker compose up",
-    "test:unit-voting": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace vote test",
+    "test:unit-vote": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace vote test",
     "test:unit-submit": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace submit test",
     "test:unit-lib": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib test",
-    "test:e2e": "yarn run env:test && docker compose up -d && cross-env ENV_PATH=./.env dotenv -- yarn workspace e2e test",
+    "test:e2e": "yarn run env:test && docker compose up -d && cross-env ENV_PATH=./.env dotenv -- yarn workspace e2e test --runInBand",
     "clean": "yarn workspaces foreach 'echo $(pwd)/node_modules' | xargs rm -rf"
   },
   "workspaces": [

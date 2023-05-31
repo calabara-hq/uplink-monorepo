@@ -27,6 +27,8 @@ type Query {
 
 type createSubmissionResponse {
   success: Boolean!
+  errors: String
+  userSubmissionParams: UserSubmissionParams!
 }
 
 input SubmissionPayload {

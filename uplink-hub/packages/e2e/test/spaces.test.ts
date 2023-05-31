@@ -1,10 +1,7 @@
 import { describe, expect, test, jest, afterEach, afterAll, beforeAll } from '@jest/globals';
 import { gql } from 'graphql-request';
 import { schema } from "lib";
-import "isomorphic-fetch";
 import { authenticatedGraphqlClient, db, sqlOps } from './config';
-import dotenv from 'dotenv';
-dotenv.config();
 
 
 const nickAddress = '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C'
@@ -33,6 +30,7 @@ describe('e2e spaces', () => {
 
     test('successfully create a space', async () => {
 
+        
         const spaceData = {
             name: 'test space',
             logoUrl: 'https://calabara.mypinata.cloud/ipfs/QmNsiBiUh1x2mB9V6fdQN8KNEmLZWjK3WWCWMhAfmCENkP',
@@ -63,6 +61,7 @@ describe('e2e spaces', () => {
 
         const { spaceId, name, displayName, logoUrl, twitter } = spaceResult[0];
 
+        expect(name).toBe(spaceData.name.replace(' ', ''));
 
         const adminsResult = await db.select({
             adminId: schema.admins.id,
@@ -72,7 +71,7 @@ describe('e2e spaces', () => {
 
 
         expect(adminsResult[0].address).toBe(nickAddress);
-
+        
     })
 });
 

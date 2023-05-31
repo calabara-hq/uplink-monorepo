@@ -6,11 +6,10 @@ import 'isomorphic-fetch'
 import dotenv from 'dotenv';
 dotenv.config();
 
-
+let redisClient;
 const databaseController = new DatabaseController(process.env.DATABASE_HOST, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
 export const db = databaseController.db;
 export const sqlOps = databaseController.sqlOps;
-export const redisClient = new Redis(process.env.REDIS_URL);
 
 const endpoint = 'http://localhost:8080/api/graphql'
 const testSessionId = 'TESTING123456789';
@@ -37,6 +36,7 @@ export const authenticatedGraphqlClient = new GraphQLClient(endpoint, {
 
 
 const createSession = async () => {
+
     try {
         await redisClient.set(`uplink-session:${testSessionId}`, JSON.stringify(testSession))
         const session = await redisClient.get(`uplink-session:${testSessionId}`)
@@ -45,8 +45,22 @@ const createSession = async () => {
     } catch (error) {
         console.log('could not set test session')
     }
+
 }
 
+export const resetDatabase = async () => {
+    await db.delete(schema.spaces)
+    await db.delete(schema.admins)
+    await db.delete(schema.contests)
+    await db.delete(schema.tokens)
+    await db.delete(schema.votingPolicy)
+    await db.delete(schema.arcadeVotingStrategy)
+    await db.delete(schema.weightedVotingStrategy)
+    await db.delete(schema.submissions)
+    await db.delete(schema.votes)
+    await db.delete(schema.submitterRestrictions)
+    await db.delete(schema.tokenRestrictions)
+}
 
 export const setup = async () => {
     console.log('\n running global setup');
@@ -64,14 +78,26 @@ export const setup = async () => {
             throw new Error('Could not connect to the cluster. are you sure it\'s running?')
         })
 
-    await createSession();
-}
 
+    await new Promise((resolve, reject) => {
+        redisClient = new Redis(process.env.REDIS_URL, { retryStrategy: null })
+            .on('connect', async () => {
+                console.log('connected to redis');
+                await createSession();
+                resolve();
+            })
+            .on('error', (err) => {
+                console.log('could not connect to redis', err);
+                reject(err);
+            })
+    });
+
+}
 
 export const teardown = async () => {
     console.log('\n running global teardown');
-    await redisClient.del(`uplink-session:${testSessionId}`)
-    await redisClient.quit();
+    await redisClient.flushall();
+    await redisClient.disconnect();
     await db.delete(schema.spaces)
     await db.delete(schema.admins)
     await db.delete(schema.contests)
@@ -81,4 +107,6 @@ export const teardown = async () => {
     await db.delete(schema.weightedVotingStrategy)
     await db.delete(schema.submissions)
     await db.delete(schema.votes)
+    await db.delete(schema.submitterRestrictions)
+    await db.delete(schema.tokenRestrictions)
 };

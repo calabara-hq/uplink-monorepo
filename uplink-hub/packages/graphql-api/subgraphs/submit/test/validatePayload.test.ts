@@ -71,7 +71,7 @@ describe('validate submission payload test suite', () => {
                 const result = await validateUtils.composeSubmission(previewAsset, videoAsset, null);
                 expect(result.error).toBeUndefined();
                 expect(result.result).toEqual({
-                    template: "video",
+                    type: "video",
                     videoAsset: videoAsset,
                     previewAsset: previewAsset,
                 });
@@ -95,7 +95,7 @@ describe('validate submission payload test suite', () => {
                 const result = await validateUtils.composeSubmission(previewAsset, videoAsset, body);
                 expect(result.error).toBeUndefined();
                 expect(result.result).toEqual({
-                    template: "video",
+                    type: "video",
                     videoAsset: videoAsset,
                     previewAsset: previewAsset,
                     body: body
@@ -109,7 +109,7 @@ describe('validate submission payload test suite', () => {
                 const result = await validateUtils.composeSubmission(previewAsset, null, null);
                 expect(result.error).toBeUndefined();
                 expect(result.result).toEqual({
-                    template: "image",
+                    type: "image",
                     previewAsset: previewAsset,
                 });
             })
@@ -131,7 +131,7 @@ describe('validate submission payload test suite', () => {
                 const result = await validateUtils.composeSubmission(previewAsset, null, body);
                 expect(result.error).toBeUndefined();
                 expect(result.result).toEqual({
-                    template: "image",
+                    type: "image",
                     previewAsset: previewAsset,
                     body: body
                 });
@@ -156,7 +156,7 @@ describe('validate submission payload test suite', () => {
                 const result = await validateUtils.composeSubmission(null, null, body);
                 expect(result.error).toBeUndefined();
                 expect(result.result).toEqual({
-                    template: "text",
+                    type: "text",
                     body: body
                 });
             })

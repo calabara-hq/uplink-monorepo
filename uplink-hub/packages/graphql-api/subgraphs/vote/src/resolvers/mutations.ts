@@ -9,13 +9,7 @@ const authController = new AuthorizationController(process.env.REDIS_URL);
 
 const mutations = {
     Mutation: {
-        // take in array of voting objects
-        /**
-        * {
-        *  submissionId: number,
-        *  votes: number,
-        * }
-        */
+
         castVotes: async (_: any, args: any, context: any) => {
 
 

@@ -1,10 +1,11 @@
 import { db, sqlOps } from "../utils/database.js";
 import { schema, Decimal, EditorOutputData } from "lib";
 import { getCacheValue, setCacheValue } from "./cache.js";
-import { GraphQLError } from "graphql";
+import { GraphQLError, validate } from "graphql";
 import pinataSDK from '@pinata/sdk';
 import { tokenController } from "./tokenController.js"
 import dotenv from 'dotenv';
+import { validateSubmissionPayload } from "./validatePayload.js";
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
@@ -62,11 +63,12 @@ export const fetchUserSubmissions = async (
     user: { address: string },
     contestId: number
 ) => {
+
     const userSubmissions = await db.select({
         id: schema.submissions.id,
     })
         .from(schema.submissions)
-        .where(sqlOps.and(sqlOps.eq(schema.submissions.contestId, contestId), sqlOps.eq(schema.submissions.author, user)));
+        .where(sqlOps.and(sqlOps.eq(schema.submissions.contestId, contestId), sqlOps.eq(schema.submissions.author, user.address)));
 
     return userSubmissions;
 };
@@ -124,9 +126,10 @@ export const uploadSubmission = async (
     contestId: number,
     submission: {
         title: string,
-        previewAsset: string | null,
-        videoAsset: string | null,
-        body: EditorOutputData | null
+        type: string,
+        previewAsset?: string | null,
+        videoAsset?: string | null,
+        body?: EditorOutputData | null
     },
     contestType: string
 ) => {
@@ -245,22 +248,55 @@ export const computeSubmissionParams = async (
 export const submit = async (
     user: { address: string },
     contestId: number,
-    submission: any // TODO: define submission type
+    submission: {
+        title: string,
+        previewAsset?: string,
+        videoAsset?: string,
+        body?: EditorOutputData
+    }
 ) => {
 
     const { maxSubPower, contestType, remainingSubPower, userSubmissions } = await computeSubmissionParams(user, contestId);
 
-    if (remainingSubPower === 0) throw new GraphQLError('No entries remaining', {
+    if (maxSubPower === 0) throw new GraphQLError('No entries allowed', {
+        extensions: {
+            code: 'INELIGIBLE_TO_SUBMIT'
+        }
+    });
+
+
+    if (remainingSubPower < 1) throw new GraphQLError('No entries remaining', {
         extensions: {
             code: 'ENTRY_LIMIT_REACHED'
         }
     });
 
-    await uploadSubmission(user, contestId, submission, contestType);
 
-    return {
-        userSubmissions: [...userSubmissions, submission],
-        remainingSubPower: remainingSubPower - 1,
-        maxSubPower
+    const validatedPayloadResult = await validateSubmissionPayload(submission);
+    const { success, errors, cleanPayload } = validatedPayloadResult;
+
+    if (success) {
+        const submissionId = await uploadSubmission(user, contestId, cleanPayload, contestType);
+
+        return {
+            success: true,
+            userSubmissionParams: {
+                userSubmissions: [...userSubmissions, { id: submissionId, ...cleanPayload }],
+                remainingSubPower: remainingSubPower - 1,
+                maxSubPower
+            }
+        }
+    }
+
+    else if (!success) {
+        return {
+            success: false,
+            errors: errors,
+            userSubmissionParams: {
+                userSubmissions,
+                remainingSubPower,
+                maxSubPower
+            }
+        }
     }
 }

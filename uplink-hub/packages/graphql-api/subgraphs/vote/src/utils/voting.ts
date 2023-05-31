@@ -231,6 +231,12 @@ export const calculateUserVotingParams = async (
 
     const votesSpent = userVotes.reduce((acc: Decimal, vote: any) => Decimal.add(acc, vote.votes), new Decimal(0));
     const votesRemaining = new Decimal(Decimal.sub(totalVotingPower, votesSpent));
+
+    console.log('totalVotingPower', totalVotingPower.toString())
+    console.log('votesSpent', votesSpent.toString())
+    console.log('votesRemaining', votesRemaining.toString())
+    console.log('userVotes', userVotes)
+
     return {
         totalVotingPower,
         votesSpent,
@@ -262,6 +268,7 @@ export const insertVotes = async (user: any, contestId: any, payload: any) => {
         });
         return true;
     } catch (err) {
+        console.log('PRINTING HERE')
         console.log(err)
         throw new GraphQLError('Failed to create votes', {
             extensions: {
@@ -339,6 +346,12 @@ export const castVotes = async (
     await insertVotes(user, contestId, payload);
 
     const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines);
+
+    console.log('totalVotingPower', totalVotingPower.toString())
+    console.log('votesSpent', votesSpent.toString())
+    console.log('votesRemaining', votesRemaining.toString())
+    console.log('userVotes', userVotes)
+
 
     return {
         success: true,

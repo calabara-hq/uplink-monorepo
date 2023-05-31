@@ -143,6 +143,8 @@ type createSubmissionResponse
   @join__type(graph: SUBMIT)
 {
   success: Boolean!
+  errors: String
+  userSubmissionParams: UserSubmissionParams!
 }
 
 input Deadlines

@@ -1,3 +1,4 @@
+import { error } from "console";
 import { EditorOutputData } from "lib";
 
 const validateTitle = (title: string) => {
@@ -29,7 +30,7 @@ const validateBody = (body: EditorOutputData | null) => {
     return { result: body }
 }
 
-const createTemplate = (videoAsset: string | null, previewAsset?: string, body?: EditorOutputData | null) => {
+const createTemplateType = (videoAsset: string | null, previewAsset?: string, body?: EditorOutputData | null) => {
     if (videoAsset) return "video";
     else if (previewAsset) return "image";
     else if (body) return "text";
@@ -40,14 +41,14 @@ const createTemplate = (videoAsset: string | null, previewAsset?: string, body?:
 const composeSubmission = async (previewAsset: string | null, videoAsset: string | null, body: EditorOutputData | null) => {
     const errorArr: string[] = [];
 
-    const template = createTemplate(videoAsset, previewAsset, body);
+    const type = createTemplateType(videoAsset, previewAsset, body);
 
-    if (!template) return {
+    if (!type) return {
         error: "Submission content is required",
-        result: {}
+        result: { type }
     }
 
-    if (template === "video" && !previewAsset) {
+    if (type === "video" && !previewAsset) {
         errorArr.push("Preview asset is required");
     }
 
@@ -59,7 +60,7 @@ const composeSubmission = async (previewAsset: string | null, videoAsset: string
     return {
         error,
         result: {
-            template,
+            type,
             ...(videoAsset ? { videoAsset: videoAsset } : {}),
             ...(previewAsset ? { previewAsset: previewAsset } : {}),
             ...(bodyResult?.result ? { body: bodyResult.result } : {}),
@@ -72,9 +73,9 @@ const composeSubmission = async (previewAsset: string | null, videoAsset: string
 const validateSubmissionPayload = async (
     payload: {
         title: string,
-        previewAsset: string | null,
-        videoAsset: string | null,
-        body: EditorOutputData | null
+        previewAsset?: string,
+        videoAsset?: string,
+        body?: EditorOutputData
     }) => {
     const { title, previewAsset, videoAsset, body } = payload;
 
@@ -87,10 +88,11 @@ const validateSubmissionPayload = async (
     }
 
     const isSuccess = Object.keys(errors).length === 0;
+    const errorString = Object.values(errors).join(", ") || null;
 
     return {
         success: isSuccess,
-        errors: errors,
+        errors: errorString,
         cleanPayload: {
             title: titleResult.result,
             ...contentResult.result
