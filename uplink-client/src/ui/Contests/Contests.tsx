@@ -12,6 +12,7 @@ import {
 } from "../SubmissionCard/SubmissionCard";
 import graphqlClient from "@/lib/graphql/initUrql";
 import { TestEndpointDocument } from "@/lib/graphql/votes.gql";
+import Link from "next/link";
 
 export const getPromptData = async (contest: any) => {
   const promptData = await fetch(contest.promptUrl).then((res) => res.json());
@@ -205,8 +206,13 @@ export function DynamicSidebar({
     return (
       <>
         <DynamicSubRewards submitterRewards={submitterRewards} />
-
         <SubmitButton />
+        <Link
+          className="btn btn-ghost"
+          href={`${window.location.pathname}/studio`}
+        >
+          submit
+        </Link>
       </>
     );
   } else if (status === "voting") {

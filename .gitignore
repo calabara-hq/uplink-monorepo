@@ -4,4 +4,5 @@
 .env.prod
 node_modules/
 coverage/
+.yarn/cache
 
