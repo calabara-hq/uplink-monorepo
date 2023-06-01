@@ -97,8 +97,8 @@ export default function SpaceForm({
 
   return (
     <div className="flex flex-col w-full px-2 pt-2 pb-6 rounded-lg justify-center items-center">
-      <div className="flex flex-col gap-2  w-full lg:w-2/5">
-        <h2 className="text-3xl text-center">Space Builder</h2>
+      <div className="flex flex-col gap-2  w-full lg:w-2/5 border-2 border-border p-6 rounded-xl shadow-box">
+        <h2 className="text-3xl font-bold text-center">Space Builder</h2>
         <SpaceLogo state={state} dispatch={dispatch} />
         <SpaceName state={state} dispatch={dispatch} />
         <SpaceWebsite state={state} dispatch={dispatch} />
@@ -141,7 +141,7 @@ const SpaceName = ({
         }}
         placeholder="Nouns"
         className={`input w-full max-w-xs ${
-          state.errors?.name ? "input-error" : "input focus:shadow-box"
+          state.errors?.name ? "input-error" : "input"
         }`}
       />
       {state.errors?.name && (
@@ -240,7 +240,7 @@ const SpaceWebsite = ({
         }}
         placeholder="nouns.wtf"
         className={`input w-full max-w-xs ${
-          state.errors?.website ? "input-error" : "input focus:shadow-box"
+          state.errors?.website ? "input-error" : "input"
         }`}
       />
       {state.errors?.website && (
@@ -279,7 +279,7 @@ const SpaceTwitter = ({
         }}
         placeholder="@nounsdao"
         className={`input w-full max-w-xs ${
-          state.errors?.twitter ? "input-error" : "input focus:shadow-box"
+          state.errors?.twitter ? "input-error" : "input"
         }`}
       />
       {state.errors?.twitter && (
@@ -338,7 +338,7 @@ const SpaceAdmins = ({
                   placeholder="vitalik.eth"
                   spellCheck="false"
                   className={`input w-full disabled:text-gray-400
-                ${isError ? "input-error" : "input focus:shadow-box"}`}
+                ${isError ? "input-error" : "input"}`}
                   disabled={index < 1}
                   value={admin}
                   onChange={(e) =>
@@ -370,7 +370,7 @@ const SpaceAdmins = ({
           );
         })}
         <button
-          className="btn btn-accent btn-outline w-fit"
+          className="btn btn-ghost underline w-fit"
           onClick={() => {
             dispatch({
               type: "addAdmin",

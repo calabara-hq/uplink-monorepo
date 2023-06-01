@@ -50,7 +50,7 @@ const VoterRewardsComponent = ({
         })}
       </div>
       <div>
-        <button className="btn" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-ghost underline" onClick={() => setIsModalOpen(true)}>
           add reward
         </button>
       </div>
@@ -192,7 +192,7 @@ const VoterRewardRow = ({
     <div className="flex flex-col lg:flex-row items-center w-full justify-between gap-2 bg-base-100 p-4 rounded-xl">
       <p className="text-center">Voters that accurately choose rank </p>
       <input
-        className={`input w-16 focus:bg-base-200 text-center ${
+        className={`input w-16 text-center ${
           errors?.duplicateRanks?.includes(index)
             ? "input-error"
             : "input-bordered"
@@ -203,7 +203,7 @@ const VoterRewardRow = ({
       />
       <p>will split</p>
       <input
-        className="input input-bordered focus:bg-base-200 text-center w-16 lg:w-24"
+        className="input input-bordered  text-center w-16 lg:w-24"
         type="number"
         value={reward[selectedToken.value].amount || ""}
         onChange={(e) =>

@@ -47,7 +47,7 @@ const VotingPolicy = ({
           <div className="flex flex-col lg:flex-row w-full gap-4">
             {state.votingPolicy.map((policy, index) => {
               return (
-                <div className="card w-full lg:w-1/4 bg-base-100 p-4 shadow-box">
+                <div className="card w-full lg:w-1/4 bg-base-100 p-4">
                   <div className="card-body justify-between p-0">
                     <h2 className="card-title justify-between">
                       {policy?.token?.symbol}
@@ -58,14 +58,16 @@ const VotingPolicy = ({
                         <PencilIcon className="w-4" />
                       </button>
                     </h2>
-                    <div className="flex flex-col items-end gap-2">
-                      <TokenBadge token={policy?.token} />
+                    <div className="flex gap-2 w-fit">
                       <p className="font-bold">{policy?.strategy?.type}</p>
 
                       <p className="">
                         {policy?.strategy?.type === "arcade" &&
                           policy?.strategy?.votingPower}
                       </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <TokenBadge token={policy?.token} />
                     </div>
                     <div className="card-actions justify-end">
                       <button

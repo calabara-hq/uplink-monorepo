@@ -132,7 +132,7 @@ const SubmissionLimit = ({
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 1
-              ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
+              ? "border-success border-2 hover:border-success hover:bg-transparent"
               : ""
           }`}
         >
@@ -144,7 +144,7 @@ const SubmissionLimit = ({
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 2
-              ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
+              ? "border-success border-2 hover:border-success hover:bg-transparent"
               : ""
           }`}
         >
@@ -156,7 +156,7 @@ const SubmissionLimit = ({
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 3
-              ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
+              ? "border-success border-2 hover:border-success hover:bg-transparent"
               : ""
           }`}
         >
@@ -168,7 +168,7 @@ const SubmissionLimit = ({
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 0
-              ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
+              ? "border-success border-2 hover:border-success hover:bg-transparent"
               : ""
           }`}
         >

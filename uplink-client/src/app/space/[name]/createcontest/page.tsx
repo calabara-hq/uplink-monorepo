@@ -15,7 +15,8 @@ const getSpace = async (name: string) => {
 
 
 export default async function Page({ params }: { params: { name: string } }) {
-  const result = await getSpace(params.name);
-  const spaceId = result.data.space.id;
-  return <ContestForm spaceId={spaceId} spaceName={params.name} />;
+  //const result = await getSpace(params.name);
+  //const contest = await getContest('435');
+  //const spaceId = result.data.space.id;
+  return <ContestForm spaceId={"0"} spaceName={params.name} />;
 }
