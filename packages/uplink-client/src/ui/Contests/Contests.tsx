@@ -4,7 +4,7 @@ import React, { use } from "react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import contestImage from "../../public/tns-sketch-contest.jpeg";
-import SubmissionCard from "../SubmissionCard/SubmissionCard";
+import SubmissionCard, { SubmissionCardText } from "../SubmissionCard/SubmissionCard";
 import { SubmissionCard2 } from "../SubmissionCard/SubmissionCard";
 import {
   SubmissionCardVote,
@@ -17,10 +17,12 @@ import {
   LockOpenIcon,
   ChevronUpIcon,
   ChevronDownIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/solid";
 import { is } from "date-fns/locale";
 import { set } from "date-fns";
 import { motion } from "framer-motion";
+import SubmissionViewer from "../SubmissionViewer/SubmissionViewer";
 
 export const getPromptData = async (contest: any) => {
   const promptData = await fetch(contest.promptUrl).then((res) => res.json());
@@ -224,22 +226,12 @@ export function SubmissionDisplay({ selectedSubs }: { selectedSubs: any }) {
         <h1 className="text-xl lg:text-3xl text-center font-bold">
           Submissions
         </h1>
+        <SubmissionViewer />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-evenly gap-4 lg:w-full w-full">
-        <div>
-          <SubmissionCardBoxSelect />
-        </div>
-        <div>
-          <SubmissionCard />
-        </div>
-        <div>
-          <SubmissionCard2 />
-        </div>
-        <div>
-          <SubmissionCardBoxSelect />
-        </div>
 
-        
+
+        <SubmissionCardText />
         <SubmissionCard />
         <SubmissionCard2 />
         <SubmissionCard />
@@ -478,7 +470,7 @@ export function VoterCart({
               className="tab tab-lg font-bold"
               onClick={() => setIsVotingCartVisible(false)}
             >
-              Close
+              <XCircleIcon className="w-5 h-5" />
             </a>
           </>
         )}
@@ -498,7 +490,7 @@ export function VoterCart({
                 >
                   {userCurrentSelection.length > 0 && (
                     <motion.div
-                      className="flex flex-col gap-4 p-4 m-2 max-h-80 overflow-y-auto bg-neutral rounded-lg"
+                      className="flex flex-col gap-4 p-2 m-2 max-h-80 overflow-y-auto bg-neutral rounded-lg"
                       variants={itemVariants}
                     >
                       <div className="flex flex-row w-full justify-between items-center">

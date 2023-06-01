@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { TrashIcon, CheckIcon, LockClosedIcon } from "@heroicons/react/24/solid";
+import {
+  TrashIcon,
+  CheckIcon,
+  LockClosedIcon,
+} from "@heroicons/react/24/solid";
 
 const subImage =
   "https://calabara.mypinata.cloud/ipfs/QmZfA7nc9KZ5RAtgYB3MVnzR8y9Jm3vzv8zRvezibb67kM?_gl=1*12l1tvo*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjMzOS4yNy4wLjA.";
@@ -30,6 +34,26 @@ export default function SubmissionCard() {
   );
 }
 
+export function SubmissionCardText() {
+  return (
+    <div
+      className="card card-compact h-96
+                      cursor-pointer "
+    >
+      <div className="card-body h-1/3 bg-base-100 rounded-xl">
+        <h2 className="card-title">
+          Hi fam, I made a cardboard mask craft for an unminted chocolate head
+          cosplay 🍫🔥 @thenounsquare @nounsdao A video of the process below⬇️
+        </h2>
+        <p>
+          is simply dummy text of the printing and typesetting industry. Lorem
+          Ipsum has been the industry's standard dummy text ever since the
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function SubmissionCard2() {
   return (
     <div
@@ -45,7 +69,7 @@ export function SubmissionCard2() {
         />
       </figure>
       <div className="card-body h-1/3 rounded-b-xl bg-base-100">
-        <h2 className="card-title">Submission #1</h2>
+        <h2 className="card-title">Submission #9</h2>
       </div>
     </div>
   );
@@ -129,10 +153,10 @@ export function LockedCardVote() {
           className="object-cover w-full rounded-l-xl"
         />
       </figure>
-        <div className="flex flex-row justify-evenly items-center gap-2 w-full">
-          <h2 className="">My Submission!</h2>
-          <p>10</p>
-        </div>
+      <div className="flex flex-row justify-evenly items-center gap-2 w-full">
+        <h2 className="">My Submission!</h2>
+        <p>10</p>
+      </div>
     </div>
   );
 }

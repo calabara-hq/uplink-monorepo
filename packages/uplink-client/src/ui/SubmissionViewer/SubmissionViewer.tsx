@@ -1,27 +1,34 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 
 const variants = {
   enter: (direction: number) => {
     return {
-      y: direction > 0 ? 1000 : -1000,
+      x: direction > 0 ? "100%" : "-100%",
       opacity: 0,
     };
   },
   center: {
     zIndex: 1,
-    y: 0,
+    x: 0,
     opacity: 1,
   },
   exit: (direction: number) => {
     return {
       zIndex: 0,
-      y: direction < 0 ? 1000 : -1000,
+      x: direction < 0 ? "100%" : "-100%",
       opacity: 0,
     };
   },
 };
+
+const subImage =
+  "https://calabara.mypinata.cloud/ipfs/QmZfA7nc9KZ5RAtgYB3MVnzR8y9Jm3vzv8zRvezibb67kM?_gl=1*12l1tvo*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjMzOS4yNy4wLjA.";
+
+const subImage2 =
+  "https://calabara.mypinata.cloud/ipfs/QmfSASTvVBNdAAqmQSgRXVK6wA7ap9EwW4JSKoGq1kKcmf?_gl=1*pam249*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjgzMi42MC4wLjA.";
 
 export default function SubmissionViewer() {
   const [modalIsOpen, setModalisOpen] = useState(false);
@@ -30,15 +37,15 @@ export default function SubmissionViewer() {
     setCurrentStep([currentStep + newDirection, newDirection]);
   };
 
-  const steps = [
+  const submissionCards = [
     {
-      component: <Tweet1 />,
+      component: <SubmissionCardModal />,
     },
     {
-      component: <Tweet2 />,
+      component: <SubmissionCardModal2 />,
     },
     {
-      component: <Tweet3 />,
+      component: <SubmissionCardModal />,
     },
   ];
 
@@ -60,20 +67,20 @@ export default function SubmissionViewer() {
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.1 },
             }}
-            className="flex flex-col w-full h-[600px] gap-4"
+            className="flex w-full h-[500px] lg:h-[650px] gap-1 lg:gap-4"
           >
             {currentStep > 0 && (
               <div
-                className="w-full h-[80px] bg-pink-700"
+                className=" w-1/6 h-full bg-base-100 hover:bg-base-200 cursor-pointer"
                 onClick={() => paginate(-1)}
               />
             )}
             <div className="w-full h-full bg-blue-600">
-              {steps[currentStep].component}
+              {submissionCards[currentStep].component}
             </div>
-            {currentStep < steps.length - 1 && (
+            {currentStep < submissionCards.length - 1 && (
               <div
-                className="w-full h-[80px] bg-green-700"
+                className=" w-1/6 h-full bg-base-100 hover:bg-base-200 cursor-pointer"
                 onClick={() => paginate(1)}
               />
             )}
@@ -119,7 +126,7 @@ const Modal = ({
         <div className="modal modal-open bg-transparent ">
           <div
             ref={modalRef}
-            className="modal-box max-w-2xl overflow-hidden bg-transparent p-0"
+            className="modal-box max-w-5xl overflow-hidden bg-transparent p-0"
           >
             {children}
           </div>
@@ -131,26 +138,51 @@ const Modal = ({
   return null;
 };
 
-const Tweet1 = () => {
+const SubmissionCardModal = () => {
   return (
-    <div>
-      <p>tweet 1</p>
+    <div
+      className="flex flex-col jusitfy-start min-w-fit h-full
+                    cursor-pointer "
+    >
+      <div className="flex flex-col  h-fit gap-2 p-4 bg-base-100">
+        <h2 className="card-title">Submission #1</h2>
+        <p>
+          is simply dummy text of the printing and typesetting industry. Lorem
+          Ipsum has been the industry's standard dummy text ever since the
+        </p>
+      </div>
+      <figure className="relative bg-base-100 h-full w-full ">
+        <Image
+          src={subImage}
+          alt="submission image"
+          fill
+          className="rounded-xl object-contain"
+        />
+      </figure>
     </div>
   );
 };
-
-const Tweet2 = () => {
+const SubmissionCardModal2 = () => {
   return (
-    <div>
-      <p>tweet 2</p>
-    </div>
-  );
-};
-
-const Tweet3 = () => {
-  return (
-    <div>
-      <p>tweet 3</p>
+    <div
+      className="flex flex-col jusitfy-start min-w-fit h-full
+                    cursor-pointer "
+    >
+      <div className="flex flex-col  h-fit gap-2 p-4 bg-base-100">
+        <h2 className="card-title">Submission #1</h2>
+        <p>
+          is simply dummy text of the printing and typesetting industry. Lorem
+          Ipsum has been the industry's standard dummy text ever since the
+        </p>
+      </div>
+      <div className="relative bg-base-100 h-full w-full ">
+        <Image
+          src={subImage2}
+          alt="submission image"
+          fill
+          className="rounded-xl object-contain"
+        />
+      </div>
     </div>
   );
 };
