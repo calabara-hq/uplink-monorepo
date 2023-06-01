@@ -1,46 +1,74 @@
 "use client";
-import handleMediaUpload from "@/lib/mediaUpload";
 import Editor from "@/ui/Editor/Editor";
 import { OutputData } from "@editorjs/editorjs";
 import { UserIcon } from "@heroicons/react/24/solid";
-import { useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef } from "react";
+import useHandleMutation from "@/hooks/useHandleMutation";
+import { CreateSubmissionDocument } from "@/lib/graphql/submit.gql";
 
-const initialState = {
+import {
+  SubmissionBuilderProps,
+  setField,
+  setErrors,
+  handleFileChange,
+  handleSubmit,
+} from "./studioHandler";
+
+const initialState: SubmissionBuilderProps = {
   title: "",
   primaryAsset: null,
   primaryAssetBlob: null,
   videoThumbnailUrl: null,
   videoThumbnailBlob: null,
   isVideo: false,
+  isUploading: false,
   submissionBody: null,
   errors: {},
 };
 
-const reducer = (state, action) => {
+const reducer = (state: SubmissionBuilderProps, action: any) => {
   switch (action.type) {
     case "SET_FIELD":
       return {
         ...state,
         [action.payload.field]: action.payload.value,
+        errors: {
+          ...state.errors,
+          [action.payload.field]: undefined,
+        },
+      };
+
+    case "SET_ERRORS":
+      return {
+        ...state,
+        errors: action.payload,
       };
     default:
       return state;
   }
 };
 
-const ErrorLabel = ({ error }) =>
-  error && (
-    <label className="label">
-      <span className="label-text-alt text-error">{error}</span>
-    </label>
-  );
+const ErrorLabel = ({ error }: { error?: string }) => {
+  if (error)
+    return (
+      <label className="label">
+        <span className="label-text-alt text-error">{error}</span>
+      </label>
+    );
+  return null;
+};
 
-const SubmissionTitle = ({ title, errors, dispatch }) => {
-  const handleTitleChange = (e) => {
-    dispatch({
-      type: "SET_FIELD",
-      payload: { field: "title", value: e.target.value },
-    });
+const SubmissionTitle = ({
+  title,
+  errors,
+  dispatch,
+}: {
+  title: string;
+  errors: SubmissionBuilderProps["errors"];
+  dispatch: React.Dispatch<any>;
+}) => {
+  const handleTitleChange = (e: any) => {
+    setField({ dispatch, field: "title", value: e.target.value });
   };
 
   return (
@@ -64,7 +92,19 @@ const SubmissionTitle = ({ title, errors, dispatch }) => {
   );
 };
 
-const PrimaryAsset = ({ isVideo, primaryAssetBlob, dispatch, errors }) => {
+const PrimaryAsset = ({
+  isUploading,
+  isVideo,
+  primaryAssetBlob,
+  errors,
+  dispatch,
+}: {
+  isUploading: SubmissionBuilderProps["isUploading"];
+  isVideo: SubmissionBuilderProps["isVideo"];
+  primaryAssetBlob: SubmissionBuilderProps["primaryAssetBlob"];
+  errors: SubmissionBuilderProps["errors"];
+  dispatch: React.Dispatch<any>;
+}) => {
   const imageUploader = useRef(null);
 
   return (
@@ -77,35 +117,7 @@ const PrimaryAsset = ({ isVideo, primaryAssetBlob, dispatch, errors }) => {
         type="file"
         accept="image/*, video/mp4"
         className="hidden"
-        onChange={(event) => {
-          handleMediaUpload(
-            event,
-            ["image", "video"],
-            (mimeType) => {
-              // check if video
-              if (mimeType.includes("video")) {
-                dispatch({
-                  type: "setIsVideo",
-                  payload: true,
-                });
-              }
-            },
-            (base64) => {
-              if (!isVideo) {
-                dispatch({
-                  type: "SET_FIELD",
-                  payload: { field: "primaryAssetBlob", value: base64 },
-                });
-              }
-            },
-            (ipfsUrl) => {
-              dispatch({
-                type: "SET_FIELD",
-                payload: { field: "primaryAssetUrl", value: ipfsUrl },
-              });
-            }
-          );
-        }}
+        onChange={(event) => handleFileChange({ event, dispatch, isVideo })}
         ref={imageUploader}
       />
       <div>
@@ -120,11 +132,12 @@ const PrimaryAsset = ({ isVideo, primaryAssetBlob, dispatch, errors }) => {
                 <UserIcon className="w-8 h-8" />
               </div>
             )}
+            {isUploading && <p>optimizing ...</p>}
           </div>
         )}
-        {isVideo && (
+        {isVideo && isUploading && (
           <div className="w-28 h-28 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all">
-            processing ...
+            optimizing ...
           </div>
         )}
       </div>
@@ -133,18 +146,23 @@ const PrimaryAsset = ({ isVideo, primaryAssetBlob, dispatch, errors }) => {
   );
 };
 
-const SubmissionBody = ({ submissionBody, errors, dispatch }) => {
-  const editorCallback = (data) => {
-    dispatch({
-      type: "SET_FIELD",
-      payload: { field: "submissionBody", value: data },
-    });
+const SubmissionBody = ({
+  submissionBody,
+  errors,
+  dispatch,
+}: {
+  submissionBody: SubmissionBuilderProps["submissionBody"];
+  errors: SubmissionBuilderProps["errors"];
+  dispatch: React.Dispatch<any>;
+}) => {
+  const editorCallback = (data: OutputData) => {
+    setField({ dispatch, field: "submissionBody", value: data });
   };
 
   return (
     <div className="flex flex-col w-full">
       <label className="text-sm p-1">Body</label>
-      <ErrorLabel error={errors.submissionBody} />
+      <ErrorLabel error={errors?.submissionBody} />
       <Editor
         data={submissionBody ?? undefined}
         editorCallback={editorCallback}
@@ -153,15 +171,38 @@ const SubmissionBody = ({ submissionBody, errors, dispatch }) => {
   );
 };
 
-export default function Page() {
+export default function Page({ params }: { params: { hash: number } }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { title, primaryAssetBlob, isVideo, submissionBody, errors } = state;
+  const {
+    title,
+    primaryAssetBlob,
+    isVideo,
+    submissionBody,
+    isUploading,
+    errors,
+  } = state;
+
+  const handleMutation = useHandleMutation(CreateSubmissionDocument);
 
   return (
     <div>
+      <button
+        className="btn btn-primary"
+        onClick={() =>
+          handleSubmit({
+            state,
+            dispatch,
+            handleMutation,
+            contestId: params.hash,
+          })
+        }
+      >
+        Publish
+      </button>
       <div>
         <SubmissionTitle title={title} errors={errors} dispatch={dispatch} />
         <PrimaryAsset
+          isUploading={isUploading}
           primaryAssetBlob={primaryAssetBlob}
           isVideo={isVideo}
           errors={errors}

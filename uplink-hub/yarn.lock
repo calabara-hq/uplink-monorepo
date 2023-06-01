@@ -7596,6 +7596,7 @@ __metadata:
     graphql: ^16.6.0
     graphql-tag: ^2.12.6
     jest: ^29.5.0
+    lib: "workspace:*"
     nodemon: ^2.0.20
     supertest: ^6.3.3
     ts-jest: ^29.0.5

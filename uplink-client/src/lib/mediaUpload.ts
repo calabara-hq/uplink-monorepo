@@ -6,7 +6,7 @@ export const IpfsUpload = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/media/upload`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/media/upload?filesize=${file.size}`, {
         method: 'POST',
         body: formData
     });
@@ -56,6 +56,16 @@ const handleMediaUpload = async (
         throw new Error(`Error reading file: ${error}`);
     };
 
+    const fileSize = file.size;
+
+    /*
+    const preUploadResponse = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/media/preupload?filesize=${fileSize}`, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    console.log(preUploadResponse);
+    */
     const ipfsUri = await IpfsUpload(file);
     if (!ipfsUri) throw new Error('Error uploading file to ipfs');
     ipfsCallback(ipfsUri);

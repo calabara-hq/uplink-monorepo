@@ -22,7 +22,8 @@
     "ethers": "5.7.2",
     "express-validator": "^7.0.1",
     "graphql": "^16.6.0",
-    "graphql-tag": "^2.12.6"
+    "graphql-tag": "^2.12.6",
+    "lib": "workspace:*"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
