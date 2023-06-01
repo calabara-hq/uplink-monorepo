@@ -82,6 +82,9 @@ const validateSubmissionPayload = async (
     const titleResult = validateTitle(title);
     const contentResult = await composeSubmission(previewAsset, videoAsset, body);
 
+    console.log("contentResult", contentResult)
+
+
     const errors = {
         ...(titleResult.error ? { title: titleResult.error } : {}),
         ...(contentResult.error ? { content: contentResult.error } : {}),

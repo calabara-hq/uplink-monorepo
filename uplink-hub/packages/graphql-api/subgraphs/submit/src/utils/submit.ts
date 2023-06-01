@@ -66,6 +66,12 @@ export const fetchUserSubmissions = async (
 
     const userSubmissions = await db.select({
         id: schema.submissions.id,
+        contestId: schema.submissions.contestId,
+        author: schema.submissions.author,
+        created: schema.submissions.created,
+        type: schema.submissions.type,
+        url: schema.submissions.url,
+        version: schema.submissions.version,
     })
         .from(schema.submissions)
         .where(sqlOps.and(sqlOps.eq(schema.submissions.contestId, contestId), sqlOps.eq(schema.submissions.author, user.address)));
@@ -277,11 +283,15 @@ export const submit = async (
 
     if (success) {
         const submissionId = await uploadSubmission(user, contestId, cleanPayload, contestType);
+        // get the users updated submissions
+        const updatedUserSubmissions = await fetchUserSubmissions(user, contestId);
+
+        console.log(updatedUserSubmissions)
 
         return {
             success: true,
             userSubmissionParams: {
-                userSubmissions: [...userSubmissions, { id: submissionId, ...cleanPayload }],
+                userSubmissions: updatedUserSubmissions,
                 remainingSubPower: remainingSubPower - 1,
                 maxSubPower
             }
