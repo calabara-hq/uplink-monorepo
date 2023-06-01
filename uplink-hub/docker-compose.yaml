@@ -1,6 +1,5 @@
 version: "3.9"
 services:
-
   proxy:
     container_name: proxy
     build:
@@ -15,8 +14,6 @@ services:
     build:
       context: .
       dockerfile: ./packages/auth/Dockerfile
-      args:
-        - LIB_PATH=/usr/src/app/packages/lib
     ports:
       - "5000:5000"
     volumes:
@@ -33,17 +30,17 @@ services:
       - TWITTER_CALLBACK_URL=${TWITTER_CALLBACK_URL}
 
   media:
-      container_name: media
-      build:
-        context: .
-        dockerfile: ./packages/media/Dockerfile
-      ports:
-        - "5001:5000"
-      volumes:
-        - ./packages/media:/usr/src/app
-      environment:
-        - PINATA_KEY=${PINATA_KEY}
-        - PINATA_SECRET=${PINATA_SECRET}
+    container_name: media
+    build:
+      context: .
+      dockerfile: ./packages/media/Dockerfile
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./packages/media/src:/usr/src/app/media/src
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - PINATA_JWT=${PINATA_JWT}
 
   graphql:
     container_name: graphql
@@ -122,6 +119,7 @@ services:
 
 volumes:
   spaces_node_modules:
+  media_node_modules:
     #auth_node_modules:
   contests_node_modules:
   submit_node_modules:

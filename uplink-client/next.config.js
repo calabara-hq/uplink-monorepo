@@ -13,6 +13,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'uplink.mypinata.cloud',
+        port: '',
+      },
+      {
+        protocol: 'https',
         hostname: 'pbs.twimg.com',
         port: '',
       }

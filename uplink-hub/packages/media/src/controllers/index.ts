@@ -1,50 +1,88 @@
-import stream from 'stream';
 import busboy from 'busboy';
-import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
+import FormData from 'form-data';
+import axios from 'axios';
+import { validationResult } from 'express-validator';
+import crypto, { randomUUID } from 'crypto';
+import { AuthorizationController } from 'lib';
+const logger = console
 dotenv.config();
 
-const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
 
+const authController = new AuthorizationController(process.env.REDIS_URL);
+
+
+export const preUpload = async (req, res) => {
+
+    const { filesize } = req.query;
+
+
+
+    // 1. authenticate the user
+    // 2. generate an upload ID
+    // 3. save the upload ID and file size in the database
+
+
+    // 1. authenticate the user
+
+    const user = await authController.getUser({ token: req.token });
+    if (!user) return res.status(401).json({ message: 'Unauthorized' });
+
+    // 2. generate an upload ID
+    const uploadId = randomUUID().slice(0, 8);
+    res.send({ uploadId, filesize }).status(200)
+
+
+}
 
 export const upload = async (req, res) => {
+    // 1. Extract the upload ID from the request
+    const { filesize } = req.query;
+
+    // 2. Retrieve the file size from the database using the upload ID
+    // If the upload ID is not in the database, send a 400 Bad Request response
+    // If there's an error, send a 500 Internal Server Error response
+    // 3. Initialize the uploaded bytes counter
+    let uploadedBytes = 0;
+
     const bb = busboy({ headers: req.headers });
-    const fileBuffer = new stream.PassThrough();
 
-    bb.on('file', (name, file, info) => {
+    bb.on('file', async (name, file, info) => {
         const { filename, encoding, mimeType } = info;
-        console.log(
-            `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
-            filename,
-            encoding,
-            mimeType
-        );
+        console.log(`File [${name}]: filename: %j, encoding: %j, mimeType: %j`, filename, encoding, mimeType);
+
+        const formData = new FormData();
+        formData.append('file', file, { filename, contentType: mimeType });
+
+        // Listen for data events on the file stream to update the uploaded bytes counter
         file.on('data', (data) => {
-            console.log(`File [${name}] got ${data.length} bytes`);
-            fileBuffer.write(data);
-        }).on('end', () => {
-            console.log(`File [${name}] done`);
-            fileBuffer.end();
+            uploadedBytes += data.length;
+            // Update the upload progress in the database
         });
-    });
 
-    bb.on('finish', async () => {
         try {
-
-            const options = {
-                pinataMetadata: {
-                    name: 'upload',
+            const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+                headers: {
+                    'Authorization': `Bearer ${process.env.PINATA_JWT}`,
+                    ...formData.getHeaders()
                 },
-                pinataOptions: {
-                    // Set your desired pinning options here
-                },
-            };
+                onUploadProgress: (progressEvent) => {
+                    // Calculate the upload progress based on the uploaded bytes and total file size
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / filesize);
+                    console.log('Upload progress:', percentCompleted);
 
-            const response = await pinata.pinFileToIPFS(fileBuffer, options);
-            res.status(200).json(response);
+                    // Update the upload progress in the database
+                }
+            });
+
+            console.log(`File [${filename}] done`);
+            console.log(response.data);
+            res.status(200).json(response.data);
         } catch (error) {
-            res.status(500).send(error.message);
+            console.error('Error uploading file:', error);
+            res.status(500).json({ message: 'Internal server error' });
         }
     });
+
     req.pipe(bb);
-}
+};

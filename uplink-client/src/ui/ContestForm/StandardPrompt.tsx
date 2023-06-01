@@ -43,6 +43,7 @@ const StandardPrompt = ({
               <div className="flex flex-col w-full">
                 <label className="text-sm p-1">Title</label>
                 <input
+
                   className={`input ${
                     state.errors.prompt?.title
                       ? "input-error"
@@ -76,6 +77,7 @@ const StandardPrompt = ({
                     handleMediaUpload(
                       event,
                       ["image"],
+                      (mimeType) => {},
                       (base64) => {
                         dispatch({
                           type: "setCoverBlob",
@@ -139,15 +141,3 @@ const StandardPrompt = ({
 };
 
 export default StandardPrompt;
-
-{
-  /*
-                  <div className="flex flex-col w-1/3">
-                    <label className="text-sm p-1">Label</label>
-                    <MenuSelect
-                      options={labelOptions}
-                      selected={selectedLabel}
-                      setSelected={setSelectedLabel}
-                    />
-  */
-}
