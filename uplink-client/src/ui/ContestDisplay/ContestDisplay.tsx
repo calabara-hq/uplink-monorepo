@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import TabGroup from "../TabGroup/TabGroup";
+import { DynamicLabel } from "../Contests/Contests";
+import Link from "next/link";
 
 const tabSelect = ["Active", "All Contests", "Closed"];
 // calculate label
@@ -23,55 +25,33 @@ function calculateStatus(startTime: string, voteTime: string, endTime: string) {
   }
 }
 
-export const ContestCard = ({ contest }: { contest: any }) => {
+export const ContestCard1 = ({ space, contest }: { contest: any, space: any }) => {
   const status = calculateStatus(
-    contest.startTime,
-    contest.voteTime,
-    contest.endTime
+    contest.deadlines.startTime,
+    contest.deadlines.voteTime,
+    contest.deadlines.endTime
   );
   return (
+    <Link href={`space/${space.displayName}/contests/${contest.id}`}>
     <div
       key={contest.id}
-      className="card bg-base-100 shadow-box
-    transition-all duration-300 ease-linear
-    cursor-pointer hover:scale-105 rounded-3xl p-4 w-full"
+      className="card bg-base-100 
+      transition-all duration-300 ease-linear
+      cursor-pointer hover:shadow-box hover:scale-105 rounded-3xl p-4 h-fit w-full"
     >
-      <div className="card-body  p-0">
-        <h2 className="card-title mb-0">{contest.prompt.title}</h2>
-        <p className="badge">{contest.category}</p>
-        <p>{status?.label}</p>
+      <div className="card-body items-center p-0">
+        <h2 className="card-title mb-0 normal-case">test prompt</h2>
+        <p className="badge lg:badge-lg lowercase">{contest.metadata.category}</p>
+        <p className="badge lg:badge-lg lowercase">{status?.label}</p>
         <p>{status?.timeRemaining}</p>
         <div className="card-actions justify-end"></div>
       </div>
     </div>
+    </Link>
   );
 };
 
-export const ContestCard1 = ({ contest }: { contest: any }) => {
-    const status = calculateStatus(
-      contest.startTime,
-      contest.voteTime,
-      contest.endTime
-    );
-    return (
-      <div
-        key={contest.id}
-        className="card bg-base-100 
-      transition-all duration-300 ease-linear
-      cursor-pointer hover:shadow-box hover:scale-105 rounded-3xl p-4 h-fit w-ful btn"
-      >
-        <div className="card-body items-center p-0">
-          <h2 className="card-title mb-0 normal-case">{contest.prompt.title}</h2>
-          <p className="badge lowercase">{contest.category}</p>
-          <p>{status?.label}</p>
-          <p>{status?.timeRemaining}</p>
-          <div className="card-actions justify-end"></div>
-        </div>
-      </div>
-    );
-  };
-
-export default function ContestDisplay({ contests }: { contests: any[] }) {
+export default function ContestDisplay({ contests, space }: { contests: any[], space: any }) {
   const [activeTab, setActiveTab] = useState(0);
   const [filteredContests, setFilteredContests] = useState(contests);
 
@@ -109,7 +89,7 @@ export default function ContestDisplay({ contests }: { contests: any[] }) {
   return (
     <div className="flex flex-col w-full lg:w-3/4 m-auto items-center gap-4">
       <div className="flex flex-col lg:flex-row w-full lg:justify-between items-center">
-        <h1 className="text-3xl">Contests</h1>
+        <h1 className="text-3xl font-bold">Contests</h1>
         <div
           tabIndex={0}
           className="tabs tabs-boxed content-center p-2 bg-transparent text-white font-bold"
@@ -136,7 +116,7 @@ export default function ContestDisplay({ contests }: { contests: any[] }) {
 
       <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full">
         {filteredContests.map((contest) => (
-          <ContestCard1 key={contest.id} contest={contest} />
+          <ContestCard1 key={contest.id} contest={contest} space={space} />
         ))}
       </div>
       {/*}

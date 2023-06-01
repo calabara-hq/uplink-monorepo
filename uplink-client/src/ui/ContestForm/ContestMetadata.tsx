@@ -46,7 +46,7 @@ const ContestMetadata = ({
             }}
             className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
               type === "standard"
-                ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
+                ? "border-success border-2 hover:border-success hover:bg-transparent"
                 : ""
             }`}
           >
@@ -68,7 +68,7 @@ const ContestMetadata = ({
             }}
             className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
               type === "twitter"
-                ? "border-twitter border-2 shadow-box hover:border-twitter hover:bg-transparent"
+                ? "border-twitter border-2 hover:border-twitter hover:bg-transparent"
                 : ""
             }`}
           >
@@ -89,7 +89,7 @@ const ContestMetadata = ({
             }}
             className={`btn btn-ghost border-2 border-border h-full card place-items-center ${
               el === category
-                ? "border-success border-2 shadow-box hover:border-success hover:bg-transparent"
+                ? "border-success border-2 hover:border-success hover:bg-transparent"
                 : ""
             }`}
           >

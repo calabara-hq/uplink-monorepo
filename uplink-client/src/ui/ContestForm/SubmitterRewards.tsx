@@ -80,7 +80,7 @@ const SubmitterRewardsComponent = ({
           );
         })}
       </div>
-      <button className="btn" onClick={() => setIsModalOpen(true)}>
+      <button className="btn btn-ghost underline" onClick={() => setIsModalOpen(true)}>
         add reward
       </button>
       <SubmitterRewardMatrix state={state} dispatch={dispatch} />
@@ -205,7 +205,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ETH ? (
                   <td className="text-center ">
                     <input
-                      className="input input-bordered focus:bg-base-200 text-center w-14 lg:w-28"
+                      className="input input-bordered text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ETH?.amount || ""}
                       onChange={(e) =>
@@ -218,7 +218,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC20 ? (
                   <td className="text-center ">
                     <input
-                      className="input input-bordered focus:bg-base-200 text-center w-14 lg:w-28"
+                      className="input input-bordered text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ERC20?.amount || ""}
                       onChange={(e) =>
@@ -231,7 +231,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC721 ? (
                   <td className="text-center">
                     <input
-                      className="input input-bordered focus:bg-base-200 text-center w-14 lg:w-28"
+                      className="input input-bordered text-center w-14 lg:w-28"
                       type="number"
                       value={
                         payout.ERC721?.tokenId !== null
@@ -248,7 +248,7 @@ const SubmitterRewardMatrix = ({
                 {payout.ERC1155 ? (
                   <td className="text-center">
                     <input
-                      className="input input-bordered focus:bg-base-200 text-center w-14 lg:w-28"
+                      className="input input-bordered text-center w-14 lg:w-28"
                       type="number"
                       value={payout.ERC1155?.amount || ""}
                       onChange={(e) =>

@@ -2,6 +2,8 @@ import Image from "next/image";
 import contestImage from "public/tns-sketch-contest.jpeg";
 import Modal from "@/ui/Modal/Modal";
 import Contests from "@/ui/Contests/Contests";
+import { ContestByIdDocument } from "@/lib/graphql/contests.gql";
+import graphqlClient from "@/lib/graphql/initUrql";
 
 const getContest = async (id: string) => {
   const contest = {
@@ -18,10 +20,10 @@ const getContest = async (id: string) => {
       type: "standard",
     },
     deadlines: {
-      startTime: new Date(Date.now()).toISOString(),
-      voteTime: new Date(Date.now() + 1 * 864e5).toISOString(),
+      startTime: new Date(Date.now() - 1 * 864e5).toISOString(),
+      voteTime: new Date(Date.now()).toISOString(),
       endTime: new Date(Date.now() + 2 * 864e5).toISOString(),
-      snapshot: new Date(Date.now()).toISOString(),
+      snapshot: new Date(Date.now() - 1 * 864e5).toISOString(),
     },
     submitterRewards: [
       {
@@ -59,8 +61,56 @@ const getContest = async (id: string) => {
   return { contest, space, selectedSubs };
 };
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const { contest, space, selectedSubs } = await getContest(params.id);
+const getSpace = () => {
+  return {
+    id: "1",
+    displayName: "Shark DAO",
+  };
+};
+
+const getselectedSubs = () => {
+  return [
+    {
+      id: "1",
+      name: "Sub1",
+      votes: '10',
+      image:
+        "https://calabara.mypinata.cloud/ipfs/QmfSASTvVBNdAAqmQSgRXVK6wA7ap9EwW4JSKoGq1kKcmf?_gl=1*pam249*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjgzMi42MC4wLjA.",
+    },
+    {
+      id: "2",
+      name: "Sub2",
+      votes: '10',
+      image:
+        "https://calabara.mypinata.cloud/ipfs/QmZfA7nc9KZ5RAtgYB3MVnzR8y9Jm3vzv8zRvezibb67kM?_gl=1*12l1tvo*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjMzOS4yNy4wLjA.",
+    },
+  ];
+};
+const getContest2 = async (contestId: string) => {
+  const results = await graphqlClient
+    .query(ContestByIdDocument, { contestId: parseInt(contestId) })
+    .toPromise();
+  console.log(results);
+  if (results.error) {
+    throw new Error(results.error.message);
+  }
+  return results;
+};
+
+export default async function Page({ params }: { params: { hash: string } }) {
+  const contest = await getContest2(params.hash).then((res) => {
+    return {
+      ...res.data.contest,
+      prompt: {
+        title: "Sketch a DAO",
+        body: "Draw a DAO",
+        coverUrl:
+          "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
+      },
+    };
+  });
+  const space = await getSpace();
+  const selectedSubs = await getselectedSubs();
   return (
     <Contests contest={contest} space={space} selectedSubs={selectedSubs} />
   );

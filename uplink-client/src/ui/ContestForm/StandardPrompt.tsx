@@ -43,8 +43,11 @@ const StandardPrompt = ({
               <div className="flex flex-col w-full">
                 <label className="text-sm p-1">Title</label>
                 <input
-                  className={`input focus:shadow-box ${
-                    state.errors.prompt?.title ? "input-error" : "input"
+
+                  className={`input ${
+                    state.errors.prompt?.title
+                      ? "input-error"
+                      : "input"
                   }`}
                   type="text"
                   value={state.prompt.title}

@@ -17,7 +17,7 @@ const TokenCard = ({
   handleRemove?: () => void;
 }) => {
   return (
-    <div className="card w-full lg:w-1/4 bg-base-100 p-4 shadow-box">
+    <div className="card w-full lg:w-1/4 bg-base-100 p-4">
       <div className="card-body justify-between p-0">
         <h2 className="card-title">{token.symbol}</h2>
         {token.type === "ETH" && <ETHCard token={token} />}

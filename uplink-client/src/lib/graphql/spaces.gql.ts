@@ -9,6 +9,7 @@ export const AllSpacesDocument = gql`
             admins{
                 address
             }
+            logoUrl
         }
     }
 `;
@@ -25,9 +26,19 @@ export const SpaceDocument = gql`
             admins{
                 address
             }
-            contests{
+            contests {
+                deadlines {
+                  endTime
+                  snapshot
+                  startTime
+                  voteTime
+                }
                 id
-            }
+                metadata {
+                  category
+                }
+                promptUrl
+              }
         }
     }
 `;

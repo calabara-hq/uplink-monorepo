@@ -3,10 +3,11 @@ import Image from "next/image";
 import { AllSpacesDocument } from "@/lib/graphql/spaces.gql";
 import graphqlClient from "@/lib/graphql/initUrql";
 
-import { AllSpaces} from "./data";
+import { AllSpaces } from "./data";
 import { SearchBar } from "@/ui/SearchBar/SearchBar";
 import { HomeIcon, PlusIcon } from "@heroicons/react/24/solid";
 import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton";
+import CreateThread from "@/ui/CreateThread/CreateThread";
 
 //console.log('revalidating')
 
@@ -16,7 +17,7 @@ import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton
 
 const getSpaces = async () => {
   const results = await graphqlClient.query(AllSpacesDocument, {}).toPromise();
-  console.log(results)
+  console.log(results);
   if (results.error) {
     throw new Error(results.error.message);
   }
@@ -27,27 +28,25 @@ export default async function Page() {
   const spaces = await getSpaces();
   console.log(spaces.data.spaces);
   return (
-    <div className="flex flex-col m-auto py-6 w-4/5 gap-4">
-      <div className="flex flex-col md:flex-row items-center p-1 gap-4 py-8">
+    <div className="flex flex-col w-full justify-center m-auto py-12 lg:w-4/5 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <Link className="btn" href="/">
           <HomeIcon className="h-6 w-6" />
           <p className="pl-2">home</p>
         </Link>
-        <Link className="btn btn-primary" href="/spacebuilder/create">
+        <Link className="btn btn-primary lg:mr-auto" href="/spacebuilder/create">
           <PlusIcon className="w-6 h-6" />
           <p className="pl-2">new space</p>
         </Link>
-        <Link className="btn btn-ghost" href={"/space/sharkdao/contests/1"}>
-          <p className="pl-2">contest 1</p>
-        </Link>
-        <Link className="btn btn-ghost" href={"/space/sharkdao/createcontest"}>
-          <p className="pl-2">create contest</p>
-        </Link>
 
         <SearchBar />
-        <TwitterConnectButton />
-
       </div>
+      
+      <div className="flex flex-row justify-evenly">
+        <TwitterConnectButton />
+        <CreateThread />
+      </div>
+    
       <AllSpaces spaces={spaces} />
     </div>
   );
