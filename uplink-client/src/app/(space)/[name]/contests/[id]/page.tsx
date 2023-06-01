@@ -97,8 +97,8 @@ const getContest2 = async (contestId: string) => {
   return results;
 };
 
-export default async function Page({ params }: { params: { hash: string } }) {
-  const contest = await getContest2(params.hash).then((res) => {
+export default async function Page({ params }: { params: { id: string } }) {
+  const contest = await getContest2(params.id).then((res) => {
     return {
       ...res.data.contest,
       prompt: {
