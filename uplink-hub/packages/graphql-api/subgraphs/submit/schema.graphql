@@ -1,0 +1,52 @@
+scalar Decimal
+scalar EditorData
+scalar SubmissionAssetUrl
+
+type Submission @key(fields: "id") {
+  id: ID!
+  contestId: ID!
+  created: String!
+  type: String!
+  version: String!
+  author: String!
+  url: String!
+}
+
+type UserSubmissionParams {
+  maxSubPower: Int!
+  remainingSubPower: Int!
+  userSubmissions: [Submission!]!
+}
+
+type Query {
+  getUserSubmissionParams(
+    walletAddress: String!
+    contestId: ID!
+  ): UserSubmissionParams!
+}
+
+type createSubmissionResponse {
+  success: Boolean!
+  errors: String
+  userSubmissionParams: UserSubmissionParams!
+}
+
+input SubmissionPayload {
+  title: String!
+  previewAsset: SubmissionAssetUrl
+  videoAsset: SubmissionAssetUrl
+  body: EditorData
+}
+
+type Mutation {
+  createSubmission(
+    contestId: ID!
+    submission: SubmissionPayload!
+  ): createSubmissionResponse!
+}
+
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.0"
+    import: ["@key", "@shareable"]
+  )
