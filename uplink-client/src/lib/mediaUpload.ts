@@ -17,7 +17,7 @@ export const IpfsUpload = async (file: File) => {
     }
 
     const data = await response.json();
-    return `https://calabara.mypinata.cloud/ipfs/${data.IpfsHash}`;
+    return `https://uplink.mypinata.cloud/ipfs/${data.IpfsHash}`;
 };
 
 const handleMediaUpload = async (
@@ -66,9 +66,9 @@ const handleMediaUpload = async (
 
     console.log(preUploadResponse);
     */
-    const ipfsUri = await IpfsUpload(file);
-    if (!ipfsUri) throw new Error('Error uploading file to ipfs');
-    ipfsCallback(ipfsUri);
+    const response = await IpfsUpload(file);
+    if (!response) throw new Error('Error uploading file to ipfs');
+    ipfsCallback(response);
 };
 
 export default handleMediaUpload;

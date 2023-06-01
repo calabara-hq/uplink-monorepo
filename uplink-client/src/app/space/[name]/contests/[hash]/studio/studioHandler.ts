@@ -5,7 +5,7 @@ import handleMediaUpload from "@/lib/mediaUpload";
 
 export type SubmissionBuilderProps = {
     title: string;
-    primaryAsset: string | null;
+    primaryAssetUrl: string | null;
     primaryAssetBlob: string | null;
     videoThumbnailUrl: string | null;
     videoThumbnailBlob: string | null;
@@ -20,6 +20,31 @@ export type SubmissionBuilderProps = {
         submissionBody?: string;
     };
 };
+
+
+
+export const reducer = (state: SubmissionBuilderProps, action: any) => {
+    switch (action.type) {
+        case "SET_FIELD":
+            return {
+                ...state,
+                [action.payload.field]: action.payload.value,
+                errors: {
+                    ...state.errors,
+                    [action.payload.field]: undefined,
+                },
+            };
+
+        case "SET_ERRORS":
+            return {
+                ...state,
+                errors: action.payload,
+            };
+        default:
+            return state;
+    }
+};
+
 
 export const setField = ({
     dispatch,
@@ -53,41 +78,62 @@ export const handleFileChange = ({
     event,
     dispatch,
     isVideo,
+    mode
 }: {
     event: any;
     dispatch: React.Dispatch<any>;
     isVideo: boolean;
+    mode: "primary" | "thumbnail";
 }) => {
-    setField({ dispatch, field: "isUploading", value: true });
 
-    handleMediaUpload(
-        event,
-        ["image", "video"],
-        (mimeType) => {
+    if (mode === "primary") {
+        setField({ dispatch, field: "isUploading", value: true });
+
+        handleMediaUpload(
+            event,
+            ["image", "video"],
+            (mimeType) => {
+                setField({
+                    dispatch,
+                    field: "isVideo",
+                    value: mimeType.includes("video"),
+                });
+            },
+            (base64) => {
+                if (!isVideo) {
+                    setField({ dispatch, field: "primaryAssetBlob", value: base64 });
+                }
+            },
+            (ipfsUrl) => {
+                setField({ dispatch, field: "primaryAssetUrl", value: ipfsUrl });
+                setField({ dispatch, field: "isUploading", value: false });
+            }
+        ).catch(() => {
+            setField({ dispatch, field: "isUploading", value: false });
             setField({
                 dispatch,
                 field: "isVideo",
-                value: mimeType.includes("video"),
+                value: false,
             });
-        },
-        (base64) => {
-            if (!isVideo) {
-                setField({ dispatch, field: "primaryAssetBlob", value: base64 });
-            }
-        },
-        (ipfsUrl) => {
-            setField({ dispatch, field: "primaryAssetUrl", value: ipfsUrl });
-            setField({ dispatch, field: "isUploading", value: false });
-        }
-    ).catch(() => {
-        setField({ dispatch, field: "isUploading", value: false });
-        setField({
-            dispatch,
-            field: "isVideo",
-            value: false,
         });
-    });
+    }
+    else if (mode === "thumbnail") {
+        handleMediaUpload(
+            event,
+            ["image"],
+            (mimeType) => { },
+            (base64) => {
+                setField({ dispatch, field: "videoThumbnailBlob", value: base64 });
+            },
+            (ipfsUrl) => {
+                setField({ dispatch, field: "videoThumbnailUrl", value: ipfsUrl });
+            }
+        ).catch(() => {
+
+        });
+    }
 };
+
 
 export const handleSubmit = async ({
     state,
