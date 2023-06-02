@@ -1,34 +1,18 @@
 "use client";
-import Editor from "@/ui/Editor/Editor";
 import { OutputData } from "@editorjs/editorjs";
 import { UserIcon } from "@heroicons/react/24/solid";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useRef } from "react";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateSubmissionDocument } from "@/lib/graphql/submit.gql";
-
-import {
-  SubmissionBuilderProps,
-  setField,
-  setErrors,
-  handleFileChange,
-  handleSubmit,
-  reducer,
-} from "./studioHandler";
+import { SubmissionBuilderProps } from "@/providers/ContestState";
+import dynamic from "next/dynamic";
+import { handleFileChange, handleSubmit } from "./studioHandler";
 import VideoPreview from "@/ui/VideoPlayer/VideoPlayer";
 import { VideoProvider } from "@/providers/VideoProvider";
-import Image from "next/image";
+import { useContestInteractionContext } from "@/providers/ContestState";
+import ContestSidebar from "@/ui/Contests/ContestSidebar";
 
-const initialState: SubmissionBuilderProps = {
-  title: "",
-  primaryAssetUrl: null,
-  primaryAssetBlob: null,
-  videoThumbnailUrl: null,
-  videoThumbnailBlob: null,
-  isVideo: false,
-  isUploading: false,
-  submissionBody: null,
-  errors: {},
-};
+const Editor = dynamic(() => import("@/ui/Editor/Editor"), { ssr: false });
 
 const ErrorLabel = ({ error }: { error?: string }) => {
   if (error)
@@ -43,14 +27,14 @@ const ErrorLabel = ({ error }: { error?: string }) => {
 const SubmissionTitle = ({
   title,
   errors,
-  dispatch,
+  setSubmissionField,
 }: {
   title: string;
   errors: SubmissionBuilderProps["errors"];
-  dispatch: React.Dispatch<any>;
+  setSubmissionField: React.Dispatch<any>;
 }) => {
   const handleTitleChange = (e: any) => {
-    setField({ dispatch, field: "title", value: e.target.value });
+    setSubmissionField({ field: "title", value: e.target.value });
   };
 
   return (
@@ -82,7 +66,7 @@ const PrimaryAsset = ({
   videoThumbnailBlob,
   videoThumbnailUrl,
   errors,
-  dispatch,
+  setSubmissionField,
 }: {
   isUploading: SubmissionBuilderProps["isUploading"];
   isVideo: SubmissionBuilderProps["isVideo"];
@@ -91,10 +75,10 @@ const PrimaryAsset = ({
   videoThumbnailBlob: SubmissionBuilderProps["videoThumbnailBlob"];
   videoThumbnailUrl: SubmissionBuilderProps["videoThumbnailUrl"];
   errors: SubmissionBuilderProps["errors"];
-  dispatch: React.Dispatch<any>;
+  setSubmissionField: React.Dispatch<any>;
 }) => {
-  const imageUploader = useRef(null);
-  const thumbnailUploader = useRef(null);
+  const imageUploader = useRef<HTMLInputElement>(null);
+  const thumbnailUploader = useRef<HTMLInputElement>(null);
 
   const Input = ({
     mode,
@@ -115,7 +99,7 @@ const PrimaryAsset = ({
         accept={mode === "primary" ? "image/*, video/mp4" : "image/*"}
         className="hidden"
         onChange={(event) =>
-          handleFileChange({ event, dispatch, isVideo, mode })
+          handleFileChange({ event, setSubmissionField, isVideo, mode })
         }
         ref={mode === "primary" ? imageUploader : thumbnailUploader}
       />
@@ -192,20 +176,21 @@ const PrimaryAsset = ({
 const SubmissionBody = ({
   submissionBody,
   errors,
-  dispatch,
+  setSubmissionField,
 }: {
   submissionBody: SubmissionBuilderProps["submissionBody"];
   errors: SubmissionBuilderProps["errors"];
-  dispatch: React.Dispatch<any>;
+  setSubmissionField: React.Dispatch<any>;
 }) => {
   const editorCallback = (data: OutputData) => {
-    setField({ dispatch, field: "submissionBody", value: data });
+    setSubmissionField({ field: "submissionBody", value: data });
   };
 
   return (
     <div className="flex flex-col w-full">
       <label className="text-sm p-1">Body</label>
       <ErrorLabel error={errors?.submissionBody} />
+
       <Editor
         data={submissionBody ?? undefined}
         editorCallback={editorCallback}
@@ -214,8 +199,45 @@ const SubmissionBody = ({
   );
 };
 
-export default function Page({ params }: { params: { hash: number } }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
+const StudioSubmitButton = ({ contestId }: { contestId: number }) => {
+  const {
+    userSubmission,
+    setSubmissionField,
+    setSubmissionErrors,
+    resetSubmission,
+  } = useContestInteractionContext();
+
+  const handleMutation = useHandleMutation(CreateSubmissionDocument);
+
+  return (
+    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
+      <button
+        onClick={() =>
+          handleSubmit({
+            state: userSubmission,
+            setSubmissionField,
+            setSubmissionErrors,
+            handleMutation,
+            contestId: contestId,
+          })
+        }
+        className="btn btn-primary flex flex-1"
+      >
+        Submit
+      </button>
+      <p className="mx-2 p-2 text-center">4 days</p>
+    </div>
+  );
+};
+
+export default function Page({ params }: { params: { id: string } }) {
+  const {
+    userSubmission,
+    setSubmissionField,
+    setSubmissionErrors,
+    resetSubmission,
+  } = useContestInteractionContext();
+
   const {
     title,
     primaryAssetBlob,
@@ -226,43 +248,36 @@ export default function Page({ params }: { params: { hash: number } }) {
     submissionBody,
     isUploading,
     errors,
-  } = state;
+  } = userSubmission;
 
   const handleMutation = useHandleMutation(CreateSubmissionDocument);
 
   return (
-    <div>
-      <button
-        className="btn btn-primary"
-        onClick={() =>
-          handleSubmit({
-            state,
-            dispatch,
-            handleMutation,
-            contestId: params.hash,
-          })
-        }
-      >
-        Publish
-      </button>
-      <div>
-        <SubmissionTitle title={title} errors={errors} dispatch={dispatch} />
-        <PrimaryAsset
-          isUploading={isUploading}
-          primaryAssetUrl={primaryAssetUrl}
-          primaryAssetBlob={primaryAssetBlob}
-          videoThumbnailUrl={videoThumbnailUrl}
-          videoThumbnailBlob={videoThumbnailBlob}
-          isVideo={isVideo}
-          errors={errors}
-          dispatch={dispatch}
-        />
-        <SubmissionBody
-          submissionBody={submissionBody}
-          errors={errors}
-          dispatch={dispatch}
-        />
+    <>
+      <div className="flex flex-col w-full lg:w-3/4 gap-4">
+        <div>
+          <SubmissionTitle
+            title={title}
+            errors={errors}
+            setSubmissionField={setSubmissionField}
+          />
+          <PrimaryAsset
+            isUploading={isUploading}
+            primaryAssetUrl={primaryAssetUrl}
+            primaryAssetBlob={primaryAssetBlob}
+            videoThumbnailUrl={videoThumbnailUrl}
+            videoThumbnailBlob={videoThumbnailBlob}
+            isVideo={isVideo}
+            errors={errors}
+            setSubmissionField={setSubmissionField}
+          />
+          <SubmissionBody
+            submissionBody={submissionBody}
+            errors={errors}
+            setSubmissionField={setSubmissionField}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

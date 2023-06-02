@@ -32,7 +32,7 @@ export const ContestCard1 = ({ space, contest }: { contest: any, space: any }) =
     contest.deadlines.endTime
   );
   return (
-    <Link href={`space/${space.displayName}/contests/${contest.id}`}>
+    <Link href={`${space.name}/contests/${contest.id}`}>
     <div
       key={contest.id}
       className="card bg-base-100 

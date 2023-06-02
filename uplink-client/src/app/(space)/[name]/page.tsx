@@ -145,7 +145,7 @@ export default async function Page({ params }: { params: { name: string } }) {
               <button className="btn btn-outline btn-accent">edit space</button>
             </Link>
             <br></br>
-            <Link href={`space/${params.name}/createcontest`}>
+            <Link href={`${params.name}/contests/create`}>
               <button className="btn btn-primary">create contest</button>
             </Link>
           </div>
