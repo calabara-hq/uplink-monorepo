@@ -82,18 +82,20 @@ type CastVoteResponse
 
 type Contest
   @join__type(graph: CONTESTS, key: "id")
+  @join__type(graph: SUBMIT, key: "id")
 {
   id: Int!
-  spaceId: Int!
-  created: String!
-  metadata: MetadataType!
-  deadlines: DeadlinesType!
-  promptUrl: IpfsUrl!
-  submitterRewards: [RewardType!]!
-  voterRewards: [RewardType!]!
-  submitterRestrictions: [SubmitterRestrictionType!]!
-  votingPolicy: [VotingPolicyType!]!
-  additionalParams: AdditionalParamsType!
+  spaceId: Int! @join__field(graph: CONTESTS)
+  created: String! @join__field(graph: CONTESTS)
+  metadata: MetadataType! @join__field(graph: CONTESTS)
+  deadlines: DeadlinesType! @join__field(graph: CONTESTS)
+  promptUrl: IpfsUrl! @join__field(graph: CONTESTS)
+  submitterRewards: [RewardType!]! @join__field(graph: CONTESTS)
+  voterRewards: [RewardType!]! @join__field(graph: CONTESTS)
+  submitterRestrictions: [SubmitterRestrictionType!]! @join__field(graph: CONTESTS)
+  votingPolicy: [VotingPolicyType!]! @join__field(graph: CONTESTS)
+  additionalParams: AdditionalParamsType! @join__field(graph: CONTESTS)
+  submissions: [Submission!]! @join__field(graph: SUBMIT)
 }
 
 input ContestBuilderProps
@@ -305,6 +307,8 @@ type Query
   activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
+  submission(submissionId: ID!): Submission @join__field(graph: SUBMIT)
+  contestSubmissions(contestId: ID!): [Submission!]! @join__field(graph: SUBMIT)
   getUserSubmissionParams(walletAddress: String!, contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
   testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTE)
   getUserVotingParams(walletAddress: String!, contestId: ID!): UserVotingParams! @join__field(graph: VOTE)

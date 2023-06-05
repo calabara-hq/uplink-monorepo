@@ -4,13 +4,15 @@ import { UserIcon } from "@heroicons/react/24/solid";
 import { useRef } from "react";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateSubmissionDocument } from "@/lib/graphql/submit.gql";
-import { SubmissionBuilderProps } from "@/providers/ContestState";
+import {
+  SubmissionBuilderProps,
+  useContestInteractionContext,
+} from "@/providers/ContestInteractionProvider";
 import dynamic from "next/dynamic";
 import { handleFileChange, handleSubmit } from "./studioHandler";
 import VideoPreview from "@/ui/VideoPlayer/VideoPlayer";
 import { VideoProvider } from "@/providers/VideoProvider";
-import { useContestInteractionContext } from "@/providers/ContestState";
-import ContestSidebar from "@/ui/Contests/ContestSidebar";
+import { useContestState } from "@/providers/ContestStateProvider";
 
 const Editor = dynamic(() => import("@/ui/Editor/Editor"), { ssr: false });
 
@@ -199,7 +201,13 @@ const SubmissionBody = ({
   );
 };
 
-const StudioSubmitButton = ({ contestId }: { contestId: number }) => {
+const StudioSubmitButton = ({
+  spaceName,
+  contestId,
+}: {
+  spaceName: string;
+  contestId: number;
+}) => {
   const {
     userSubmission,
     setSubmissionField,
@@ -208,7 +216,7 @@ const StudioSubmitButton = ({ contestId }: { contestId: number }) => {
   } = useContestInteractionContext();
 
   const handleMutation = useHandleMutation(CreateSubmissionDocument);
-
+  const { contestState, stateRemainingTime } = useContestState();
   return (
     <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
       <button
@@ -225,7 +233,23 @@ const StudioSubmitButton = ({ contestId }: { contestId: number }) => {
       >
         Submit
       </button>
-      <p className="mx-2 p-2 text-center">4 days</p>
+      <p className="mx-2 p-2 text-center">{stateRemainingTime}</p>
+    </div>
+  );
+};
+
+const StudioSidebar = ({
+  spaceName,
+  contestId,
+}: {
+  spaceName: string;
+  contestId: number;
+}) => {
+  return (
+    <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+      <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
+        <StudioSubmitButton spaceName={spaceName} contestId={contestId} />
+      </div>
     </div>
   );
 };
@@ -251,33 +275,40 @@ export default function Page({ params }: { params: { id: string } }) {
   } = userSubmission;
 
   const handleMutation = useHandleMutation(CreateSubmissionDocument);
+  const { contestState, stateRemainingTime } = useContestState();
 
-  return (
-    <>
-      <div className="flex flex-col w-full lg:w-3/4 gap-4">
-        <div>
-          <SubmissionTitle
-            title={title}
-            errors={errors}
-            setSubmissionField={setSubmissionField}
-          />
-          <PrimaryAsset
-            isUploading={isUploading}
-            primaryAssetUrl={primaryAssetUrl}
-            primaryAssetBlob={primaryAssetBlob}
-            videoThumbnailUrl={videoThumbnailUrl}
-            videoThumbnailBlob={videoThumbnailBlob}
-            isVideo={isVideo}
-            errors={errors}
-            setSubmissionField={setSubmissionField}
-          />
-          <SubmissionBody
-            submissionBody={submissionBody}
-            errors={errors}
-            setSubmissionField={setSubmissionField}
-          />
+  if (contestState === "submitting") {
+    return (
+      <>
+        <div className="flex flex-col w-full lg:w-3/4 gap-4">
+          <div>
+            <SubmissionTitle
+              title={title}
+              errors={errors}
+              setSubmissionField={setSubmissionField}
+            />
+            <PrimaryAsset
+              isUploading={isUploading}
+              primaryAssetUrl={primaryAssetUrl}
+              primaryAssetBlob={primaryAssetBlob}
+              videoThumbnailUrl={videoThumbnailUrl}
+              videoThumbnailBlob={videoThumbnailBlob}
+              isVideo={isVideo}
+              errors={errors}
+              setSubmissionField={setSubmissionField}
+            />
+            <SubmissionBody
+              submissionBody={submissionBody}
+              errors={errors}
+              setSubmissionField={setSubmissionField}
+            />
+          </div>
         </div>
-      </div>
-    </>
-  );
+        <StudioSidebar spaceName={params.id} contestId={1} />
+      </>
+    );
+  } else if (contestState && contestState !== "submitting") {
+    return <p>not accepting submissions</p>;
+  }
+  return <p>loading...</p>;
 }

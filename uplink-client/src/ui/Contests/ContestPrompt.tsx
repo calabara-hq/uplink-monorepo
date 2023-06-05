@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { DynamicLabel } from "@/ui/Contests/DynamicLabel";
+import { StatusLabel } from "@/ui/Contests/StatusLabel";
 import { ParseBlocks } from "@/lib/blockParser";
 const Prompt = async ({
   contestId,
@@ -41,7 +41,7 @@ const Prompt = async ({
           </h2>
           <div className="flex flex-row items-center gap-2 lg:ml-auto">
             <p className="badge lg:badge-lg">{metadata.category}</p>
-            <DynamicLabel status={status} />
+            <StatusLabel status={status} />
           </div>
         </div>
         <div className="flex flex-col lg:flex-row justify-between items-start  gap-2 w-full">

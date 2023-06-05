@@ -20,6 +20,15 @@ const ContestByIdDocument = gql`
                 endTime
                 snapshot
             }
+            submissions {
+                id
+                contestId
+                author
+                created
+                type
+                url
+                version
+            }
             submitterRestrictions {
                 restrictionType
                 tokenRestriction {

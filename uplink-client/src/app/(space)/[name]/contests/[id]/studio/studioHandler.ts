@@ -1,7 +1,7 @@
 import { OutputData } from "@editorjs/editorjs";
 import { toast } from "react-hot-toast";
 import handleMediaUpload from "@/lib/mediaUpload";
-import { SubmissionBuilderProps } from "@/providers/ContestState";
+import { SubmissionBuilderProps } from "@/providers/ContestInteractionProvider";
 
 export const handleFileChange = ({
     event,

@@ -1,23 +1,25 @@
-import ContestSidebar from "@/ui/Contests/ContestSidebar";
-import { ContestInteractionProvider } from "@/providers/ContestState";
+import { ContestInteractionProvider } from "@/providers/ContestInteractionProvider";
+import { getContestById } from "@/lib/fetch/contest";
+import { ContestStateProvider } from "@/providers/ContestStateProvider";
 
-export default function Layout({
+export default async function Layout({
   children,
-  dynamicSidebar,
   params,
 }: {
   children: React.ReactNode;
-  dynamicSidebar: React.ReactNode;
   params: { name: string; id: string };
 }) {
+  const contest = await getContestById(parseInt(params.id));
+  const { metadata, deadlines, promptUrl } = contest.data.contest;
   return (
     <div className="m-auto w-[80vw] flex flex-col items-center border-2 border-purple-500">
-      <ContestInteractionProvider>
-        <div className="flex justify-center gap-4 m-auto w-[80vw] lg:py-6">
-          <div className="flex flex-col w-full lg:w-3/4 gap-4">{children}</div>
-          {dynamicSidebar}
-        </div>
-      </ContestInteractionProvider>
+      <div className="flex justify-center gap-4 m-auto w-[80vw] lg:py-6">
+        <ContestInteractionProvider>
+          <ContestStateProvider deadlines={deadlines}>
+            {children}
+          </ContestStateProvider>
+        </ContestInteractionProvider>
+      </div>
     </div>
   );
 }

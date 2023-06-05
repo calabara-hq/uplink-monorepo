@@ -1,9 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import ReactPlayer from "react-player";
 import useWindowSize from "@/hooks/useWindowSize";
 import { useInView } from "react-intersection-observer";
 import { useVideoContext } from "@/providers/VideoProvider";
+import dynamic from "next/dynamic";
+
+const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
+
 interface VideoPreviewProps {
   url: string;
   id: string;
