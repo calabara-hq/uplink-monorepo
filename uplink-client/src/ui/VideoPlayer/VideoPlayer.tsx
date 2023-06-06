@@ -1,15 +1,24 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import ReactPlayer from "react-player";
 import useWindowSize from "@/hooks/useWindowSize";
 import { useInView } from "react-intersection-observer";
 import { useVideoContext } from "@/providers/VideoProvider";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+
+const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
+
 interface VideoPreviewProps {
   url: string;
   id: string;
+  thubmnailUrl?: string;
 }
 
-const VideoPreview: React.FC<VideoPreviewProps> = ({ url, id }) => {
+const VideoPreview: React.FC<VideoPreviewProps> = ({
+  url,
+  id,
+  thubmnailUrl,
+}) => {
   const [mute, setMute] = useState<boolean>(true);
   const size = useWindowSize();
   const { playingId, setPlayingId } = useVideoContext();
@@ -43,10 +52,20 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ url, id }) => {
   return (
     <div
       ref={ref}
-      className="relative"
+      className=""
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      {thubmnailUrl && playingId !== id && (
+        <div className="absolute inset-0">
+          <Image
+            src={thubmnailUrl}
+            alt="nonsense"
+            fill
+            className="rounded-t-xl object-fit w-full"
+          />
+        </div>
+      )}
       <ReactPlayer
         url={url}
         muted={mute}

@@ -4,7 +4,9 @@ import React, { use } from "react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import contestImage from "../../public/tns-sketch-contest.jpeg";
-import SubmissionCard, { SubmissionCardText } from "../SubmissionCard/SubmissionCard";
+import SubmissionCard, {
+  SubmissionCardText,
+} from "../SubmissionCard/SubmissionCard";
 import { SubmissionCard2 } from "../SubmissionCard/SubmissionCard";
 import {
   SubmissionCardVote,
@@ -72,7 +74,10 @@ export default function Contests({
   //const promptData = getPromptData(contest);
   const status = CalculateStatus(contest);
 
-  return (
+  return <SubmissionDisplay selectedSubs={selectedSubs} />;
+
+  {
+    /*
     <div className="flex justify-center gap-4 m-auto w-[80vw] lg:py-6">
       <div className="flex flex-col w-full lg:w-3/4 gap-4">
         <Prompt
@@ -82,7 +87,6 @@ export default function Contests({
           space={space}
           coverUrl={contest.prompt.coverUrl}
         />
-
         <SubmissionDisplay selectedSubs={selectedSubs} />
       </div>
       <SideBar
@@ -93,9 +97,11 @@ export default function Contests({
       />
     </div>
   );
+  */
+  }
 }
 
-export function Prompt({
+export function Prompt2({
   promptData,
   metadata,
   status,
@@ -160,6 +166,83 @@ export function Prompt({
   );
 }
 
+export const Prompt = ({ contestId }: { contestId: string }) => {
+  //TODO:
+  // fetch the prompt data
+  // render a loading state
+  // render the prompt
+
+  const space = {
+    displayName: "Shark DAO",
+  };
+
+  const contest = {
+    id: "1",
+    metadata: {
+      type: "standard",
+      category: "art",
+    },
+    prompt: {
+      title: "📺 Nouns AI Youtube Banner 📺",
+      body: "Draw a DAO",
+      coverUrl:
+        "https://calabara.mypinata.cloud/ipfs/QmdwVF6xpqxgBqdhoswoY1piVHvGZTTeNam1s9opAS1YtB",
+    },
+  };
+
+  const status = "submitting";
+
+  return (
+    <div className="card lg:card-side bg-transparent gap-4 h-min">
+      <div className="card-body w-full lg:w-full border-2 border-border shadow-box rounded-lg p-4 lg:p-4">
+        <div className="flex flex-col-reverse lg:flex-row gap-4 items-center">
+          <div className="avatar">
+            <div className=" w-20 lg:w-24 rounded-full bg-transparent">
+              <Image
+                src={
+                  "https://calabara.mypinata.cloud/ipfs/QmUtZj7ksJumBa3amYnQb2tsCE7pdQcLLeD1SNWP1Jir9S"
+                }
+                alt={"org avatar"}
+                height={300}
+                width={300}
+              />
+            </div>
+          </div>
+          <h2 className="card-title text-xl lg:text-3xl">
+            {space.displayName}
+          </h2>
+          <div className="flex flex-row items-center gap-2 lg:ml-auto">
+            <p className="badge lg:badge-lg">{contest.metadata.category}</p>
+            <DynamicLabel status={status} />
+          </div>
+        </div>
+        <div className="flex flex-col lg:flex-row justify-between items-start  gap-2 w-full">
+          <div className="flex flex-col p-1 lg:p-4 gap-4 w-3/4">
+            <h3 className="text-lg lg:text-2xl">{contest.prompt.title}</h3>
+            <p className="text-sm lg:text-xl">
+              {contest.prompt.body.length > 500
+                ? contest.prompt.body.substring(0, 500) + "..."
+                : contest.prompt.body}
+            </p>
+          </div>
+          {contest.prompt.coverUrl && (
+            <div className="w-fit lg:rounded-xl">
+              <figure className="relative w-56 h-56 ">
+                <Image
+                  src={contest.prompt.coverUrl}
+                  alt="contest image"
+                  fill
+                  className="object-fill rounded-xl"
+                />
+              </figure>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export function DynamicLabel({ status }: { status: string }) {
   if (status === "pending") {
     return <p className="badge lg:badge-lg">pending</p>;
@@ -174,7 +257,7 @@ export function DynamicLabel({ status }: { status: string }) {
   }
 }
 
-export function SideBar({
+export function SideBar2({
   coverUrl,
   status,
   submitterRewards,
@@ -202,6 +285,29 @@ export function SideBar({
     </>
   );
 }
+
+export const SideBar = ({ contestId }: { contestId: string }) => {
+  const submitterRewards: any[] = [];
+  const selectedSubs: any[] = [];
+  const status = "submitting";
+
+  return (
+    <>
+      <div className="lg:hidden fixed bottom-0 left-0 flex items-end w-full h-48 p-8 bg-gradient-to-t from-black to-transparent">
+        <SubmitButton />
+      </div>
+      <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+        <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
+          <DynamicSidebar
+            status={status}
+            submitterRewards={submitterRewards}
+            selectedSubs={selectedSubs}
+          />
+        </div>
+      </div>
+    </>
+  );
+};
 
 export function DynamicSidebar({
   status,
@@ -246,8 +352,6 @@ export function SubmissionDisplay({ selectedSubs }: { selectedSubs: any }) {
         <SubmissionViewer />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-evenly gap-4 lg:w-full w-full">
-
-
         <SubmissionCardText />
         <SubmissionCard />
         <SubmissionCard2 />
@@ -263,7 +367,6 @@ export function SubmissionDisplay({ selectedSubs }: { selectedSubs: any }) {
         <SubmissionCard />
         <SubmissionCard />
         <SubmissionCard />
-  
       </div>
     </div>
   );
@@ -539,7 +642,7 @@ export function VoterCart({
                   )}
 
                   {proposedSelection.length > 0 && (
-                    <motion.div  variants={itemVariants}>
+                    <motion.div variants={itemVariants}>
                       <div className="flex flex-row w-full justify-start items-center p-2">
                         <p className="">+ Your Proposed additions:</p>
                       </div>

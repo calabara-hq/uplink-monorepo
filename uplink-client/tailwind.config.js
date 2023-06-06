@@ -1,32 +1,32 @@
 
 const colors = {
-    
-    // Base Colors
-    base1: '#353F5B',
-    base2: '#535D79',
-    base3: '#717B97',
-    
-    // Neutral Colors
-    neutral1: '#5D6783',
-    neutral2: '#7B85A1',
-    neurtral3: '#99A3BF',
-    
-    // Accent Colors
-    primary: '#AB36BE',
-    secondary: '#CC0595',
-    accent1: '#57A89C',
-    accent2: '#57BAD7',
-    
-    // Text Colors
-    text1: '#FFFFFF',
-    text2: '#EBEBEB',
-    text3: '#A1A1AA',
-    
-    // Additional Colors
-    success: '#60B56C',
-    warning: '#FFB84D',
-    error: '#E44444',
-    info: '#5D9CEC',
+
+  // Base Colors
+  base1: '#353F5B',
+  base2: '#535D79',
+  base3: '#717B97',
+
+  // Neutral Colors
+  neutral1: '#5D6783',
+  neutral2: '#7B85A1',
+  neurtral3: '#99A3BF',
+
+  // Accent Colors
+  primary: '#AB36BE',
+  secondary: '#CC0595',
+  accent1: '#57A89C',
+  accent2: '#57BAD7',
+
+  // Text Colors
+  text1: '#FFFFFF',
+  text2: '#EBEBEB',
+  text3: '#A1A1AA',
+
+  // Additional Colors
+  success: '#60B56C',
+  warning: '#FFB84D',
+  error: '#E44444',
+  info: '#5D9CEC',
 }
 
 
@@ -46,7 +46,7 @@ module.exports = {
       fontFamily: {
         'virgil': ['Virgil', 'sans-serif'],
       },
-      colors:{
+      colors: {
         'twitter': '#00acee',
         //Box Border 
         'border': '#98a1c03d',
@@ -58,9 +58,15 @@ module.exports = {
       boxShadow: {
         'box': '0px 40px 120px rgba(76, 130, 251, 0.16);',
       },
+    },
+    keyframes: ({ theme }) => ({
+      shimmer: {
+        '100%': {
+          transform: 'translateX(100%)',
+        },
+      },
+    })
   },
-
-},
 
   daisyui: {
     themes: [
@@ -82,13 +88,13 @@ module.exports = {
           success: colors.success,
           warning: colors.warning,
           error: colors.error,
-  
+
 
         }
       }
     ]
   },
-    
+
   /*daisyui: {
     themes: ["dark",
     {

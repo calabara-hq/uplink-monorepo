@@ -14,7 +14,6 @@ const mutations = {
 
 
             const user = await authController.getUser(context);
-            console.log(user)
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'

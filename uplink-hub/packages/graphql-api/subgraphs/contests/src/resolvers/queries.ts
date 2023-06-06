@@ -226,7 +226,8 @@ const multiContestsBySpaceId = async (id: string) => {
             votingPolicy: [
                 ...arcadeVotingPolicy,
                 ...weightedVotingPolicy
-            ]        }
+            ]
+        }
     }));
     return result
 }

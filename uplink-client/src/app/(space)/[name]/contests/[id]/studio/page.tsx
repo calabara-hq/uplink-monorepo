@@ -93,8 +93,8 @@ const PrimaryAsset = ({
   errors: SubmissionBuilderProps["errors"];
   dispatch: React.Dispatch<any>;
 }) => {
-  const imageUploader = useRef(null);
-  const thumbnailUploader = useRef(null);
+  const imageUploader = useRef<HTMLInputElement>(null);
+  const thumbnailUploader = useRef<HTMLInputElement>(null);
 
   const Input = ({
     mode,

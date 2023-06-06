@@ -2,6 +2,11 @@ scalar Decimal
 scalar EditorData
 scalar SubmissionAssetUrl
 
+type Contest @key(fields: "id") {
+  id: Int!
+  submissions: [Submission!]!
+}
+
 type Submission @key(fields: "id") {
   id: ID!
   contestId: ID!
@@ -19,9 +24,11 @@ type UserSubmissionParams {
 }
 
 type Query {
+  submission(submissionId: ID!): Submission
+  contestSubmissions(contestId: ID!): [Submission!]!
   getUserSubmissionParams(
-    walletAddress: String!
     contestId: ID!
+    walletAddress: String
   ): UserSubmissionParams!
 }
 
