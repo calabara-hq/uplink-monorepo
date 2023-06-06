@@ -231,7 +231,7 @@ export default function Page({ params }: { params: { hash: number } }) {
   const handleMutation = useHandleMutation(CreateSubmissionDocument);
 
   return (
-    <div>
+    <div className="flex flex-col w-full lg:w-3/4 gap-4">
       <button
         className="btn btn-primary"
         onClick={() =>
