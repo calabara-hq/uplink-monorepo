@@ -73,8 +73,6 @@ const mutations = {
             const user = await authController.getUser(context);
             if (!user) throw new Error('Unauthorized');
 
-            console.log(user)
-
             const isSpaceAdmin = await verifyUserIsAdmin(user, args.contestData.spaceId)
             if (!isSpaceAdmin) throw new Error('Unauthorized');
 

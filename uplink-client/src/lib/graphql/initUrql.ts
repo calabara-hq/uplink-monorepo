@@ -8,7 +8,8 @@ const graphqlClient = createClient({
     fetchOptions: {
         credentials: 'include',
     },
-    requestPolicy: 'cache-and-network',
+    requestPolicy: 'network-only',
+    
     //exchanges: [dedupExchange, cacheExchange, multipartFetchExchange],
 });
 

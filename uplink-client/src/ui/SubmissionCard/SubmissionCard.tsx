@@ -107,15 +107,27 @@ export function SubmissionCardBoxSelect() {
   );
 }
 
-export function SubmissionCardVote() {
+export function SubmissionCardVote({ sub }: { sub: any }) {
+
   return (
     <div
       className="flex flex-row w-full max-h-28 bg-base-100 rounded-xl
                     cursor-pointer"
     >
+      {sub.type === "image" && <CartImageSubmission sub={sub} />}
+      {sub.type === "text" && <CartTextSubmission sub={sub} />}
+      {sub.type === "video" && <CartVideoSubmission sub={sub} />}
+      
+    </div>
+  );
+}
+
+const CartImageSubmission = ({ sub }: { sub: any }) => {
+  return (
+    <>
       <figure className="relative w-1/3 ">
         <Image
-          src={subImage}
+          src={sub.previewAsset}
           alt="submission image"
           fill
           className="object-cover w-full rounded-l-xl"
@@ -123,7 +135,7 @@ export function SubmissionCardVote() {
       </figure>
       <div className="flex items-center justify-evenly gap-2 p-4 h-full w-full">
         <div className="flex flex-col justify-evenly items-center gap-4 h-full">
-          <h2 className="">My Submission!</h2>
+          <h2 className="">{sub.title}</h2>
           <input
             type="text"
             placeholder="votes"
@@ -135,9 +147,62 @@ export function SubmissionCardVote() {
           <TrashIcon className="w-5 h-5" />
         </button>
       </div>
-    </div>
+    </>
   );
-}
+};
+
+const CartTextSubmission = ({ sub }: { sub: any }) => {
+  return (
+    <>
+      <figure className="relative w-1/3 ">
+        <p>text</p>
+      </figure>
+      <div className="flex items-center justify-evenly gap-2 p-4 h-full w-full">
+        <div className="flex flex-col justify-evenly items-center gap-4 h-full">
+          <h2 className="">{sub.title}</h2>
+          <input
+            type="text"
+            placeholder="votes"
+            className="input input-bordered w-1/2 text-center"
+          />
+        </div>
+
+        <button className="btn btn-sm btn-square btn-ghost">
+          <TrashIcon className="w-5 h-5" />
+        </button>
+      </div>
+    </>
+  );
+};
+
+const CartVideoSubmission = ({ sub }: { sub: any }) => {
+  return (
+    <>
+      <figure className="relative w-1/3 ">
+        <Image
+          src={sub.previewAsset}
+          alt="submission image"
+          fill
+          className="object-cover w-full rounded-l-xl"
+        />
+      </figure>
+      <div className="flex items-center justify-evenly gap-2 p-4 h-full w-full">
+        <div className="flex flex-col justify-evenly items-center gap-4 h-full">
+          <h2 className="">{sub.title}</h2>
+          <input
+            type="text"
+            placeholder="votes"
+            className="input input-bordered w-1/2 text-center"
+          />
+        </div>
+
+        <button className="btn btn-sm btn-square btn-ghost">
+          <TrashIcon className="w-5 h-5" />
+        </button>
+      </div>
+    </>
+  );
+};
 
 export function LockedCardVote() {
   return (

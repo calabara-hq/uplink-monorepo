@@ -24,7 +24,7 @@ type UserVotingParams {
 
 type Query {
   testEndpoint(id: ID!): SampleResponse!
-  getUserVotingParams(walletAddress: String!, contestId: ID!): UserVotingParams!
+  getUserVotingParams(contestId: ID!, walletAddress: String): UserVotingParams!
 }
 
 input CastVotePayload {

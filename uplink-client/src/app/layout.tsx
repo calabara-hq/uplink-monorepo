@@ -2,7 +2,7 @@ import Nav from "@/ui/Nav/Nav";
 import "@/styles/globals.css";
 import WalletProvider from "@/providers/WalletProvider";
 import { headers } from "next/headers";
-import { fetchData } from "@/utils /fetchData";
+import { fetchData } from "@/utils/fetchData";
 
 import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
@@ -26,7 +26,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getInitialSession();
-  console.log("layout re-render");
 
   return (
     <html lang="en" data-theme="mytheme">

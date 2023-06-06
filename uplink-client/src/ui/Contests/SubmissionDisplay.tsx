@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import { VideoSubmissionCard } from "./SubmissionCard";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+import SubmissionVoteButton from "./SubmissionVoteButton";
 
 const VideoPreview = dynamic(() => import("../VideoPlayer/VideoPlayer"), {
   loading: () => <SubmissionSkeleton />,
@@ -26,7 +28,12 @@ const SubmissionDisplay = async ({ contestId }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-evenly gap-4 lg:w-full w-full">
           {submissions.map(async (submission, idx) => {
             const data = await fetchSubmission(submission.url);
-            return <RenderVideoSubmission data={data} key={idx} />;
+            return (
+              <RenderSubmission
+                data={{ ...data, id: submission.id }}
+                key={idx}
+              />
+            );
           })}
         </div>
       </div>
@@ -34,29 +41,68 @@ const SubmissionDisplay = async ({ contestId }) => {
   );
 };
 
-const SubmissionWrapper = ({ children }) => {
-  return <div>{children}</div>;
+const RenderSubmission = ({ data }: { data: any }) => {
+  return (
+    <div className="card card-compact min-w-64 h-96 cursor-pointer">
+      {data.type === "video" && <RenderVideoSubmission data={data} />}
+      {data.type === "image" && <RenderImageSubmission data={data} />}
+      {data.type === "text" && <RenderTextSubmission data={data} />}
+      <SubmissionVoteButton data={data}/>
+    </div>
+  );
+};
+
+const RenderTextSubmission = ({ data }) => {
+  return (
+    <>
+      <div className="card-body h-32 bg-base-100 rounded-xl">
+        <h2 className="card-title">
+          Hi fam, I made a cardboard mask craft for an unminted chocolate head
+          cosplay 🍫🔥 @thenounsquare @nounsdao A video of the process below⬇️
+        </h2>
+        <p>
+          is simply dummy text of the printing and typesetting industry. Lorem
+          Ipsum has been the industry's standard dummy text ever since the
+        </p>
+      </div>
+    </>
+  );
+};
+
+const RenderImageSubmission = ({ data }) => {
+  return (
+    <>
+      <figure className="relative h-64 w-full">
+        <Image
+          src={data.previewAsset}
+          alt="submission image"
+          fill
+          className="rounded-t-xl object-cover w-full"
+        />
+      </figure>
+      <div className="card-body h-32 rounded-b-xl bg-base-100">
+        <h2 className="card-title">{data.title}</h2>
+      </div>
+    </>
+  );
 };
 
 const RenderVideoSubmission = ({ data }) => {
-  //return <pre>{JSON.stringify(data, null, 2)}</pre>;
-
-  //return <VideoSubmissionCard data={data} />;
-  //return <Image src={data.previewAsset} alt="nonsense" width={100} height={100}/>;
   return (
-    <div
-      className="card card-compact h-96
-              cursor-pointer"
-    >
-      <figure className="relative bg-red-800 h-2/3 w-full">
-        <VideoProvider>
-          <VideoPreview url={data.videoAsset} id={data.id} />
-        </VideoProvider>
-      </figure>
-      <div className="card-body h-1/3 rounded-b-xl bg-base-100">
-        <h2 className="card-title">Submission #9</h2>
-      </div>
-    </div>
+    <VideoProvider>
+      <>
+        <figure className="relative bg-base-100 h-64 w-full">
+          <VideoPreview
+            url={data.videoAsset}
+            thubmnailUrl={data.previewAsset}
+            id={data.id}
+          />
+        </figure>
+        <div className="card-body h-32 rounded-b-xl bg-base-100">
+          <h2 className="card-title">{data.title}</h2>
+        </div>
+      </>
+    </VideoProvider>
   );
 };
 

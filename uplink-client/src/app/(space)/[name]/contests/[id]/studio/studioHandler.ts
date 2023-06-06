@@ -1,44 +1,117 @@
 import { OutputData } from "@editorjs/editorjs";
 import { toast } from "react-hot-toast";
 import handleMediaUpload from "@/lib/mediaUpload";
-import { SubmissionBuilderProps } from "@/providers/ContestInteractionProvider";
+
+
+export type SubmissionBuilderProps = {
+    title: string;
+    primaryAssetUrl: string | null;
+    primaryAssetBlob: string | null;
+    videoThumbnailUrl: string | null;
+    videoThumbnailBlob: string | null;
+    isVideo: boolean;
+    isUploading: boolean;
+    submissionBody: OutputData | null;
+    errors: {
+        type?: string;
+        title?: string;
+        primaryAsset?: string;
+        videoThumbnail?: string;
+        submissionBody?: string;
+    };
+};
+
+
+
+export const reducer = (state: SubmissionBuilderProps, action: any) => {
+    switch (action.type) {
+        case "SET_FIELD":
+            return {
+                ...state,
+                [action.payload.field]: action.payload.value,
+                errors: {
+                    ...state.errors,
+                    [action.payload.field]: undefined,
+                },
+            };
+
+        case "SET_ERRORS":
+            return {
+                ...state,
+                errors: action.payload,
+            };
+        default:
+            return state;
+    }
+};
+
+
+export const setField = ({
+    dispatch,
+    field,
+    value,
+}: {
+    dispatch: React.Dispatch<any>;
+    field: string;
+    value: any;
+}) => {
+    dispatch({
+        type: "SET_FIELD",
+        payload: { field, value },
+    });
+};
+
+export const setErrors = ({
+    dispatch,
+    errors,
+}: {
+    dispatch: React.Dispatch<any>;
+    errors: any;
+}) => {
+    dispatch({
+        type: "SET_ERRORS",
+        payload: errors,
+    });
+};
 
 export const handleFileChange = ({
     event,
-    setSubmissionField,
+    dispatch,
     isVideo,
     mode
 }: {
     event: any;
-    setSubmissionField: React.Dispatch<any>;
+    dispatch: React.Dispatch<any>;
     isVideo: boolean;
     mode: "primary" | "thumbnail";
 }) => {
 
     if (mode === "primary") {
-        setSubmissionField({ field: "isUploading", value: true });
+        setField({ dispatch, field: "isUploading", value: true });
 
         handleMediaUpload(
             event,
             ["image", "video"],
             (mimeType) => {
-                setSubmissionField({
+                setField({
+                    dispatch,
                     field: "isVideo",
                     value: mimeType.includes("video"),
                 });
             },
             (base64) => {
                 if (!isVideo) {
-                    setSubmissionField({ field: "primaryAssetBlob", value: base64 });
+                    setField({ dispatch, field: "primaryAssetBlob", value: base64 });
                 }
             },
             (ipfsUrl) => {
-                setSubmissionField({ field: "primaryAssetUrl", value: ipfsUrl });
-                setSubmissionField({ field: "isUploading", value: false });
+                setField({ dispatch, field: "primaryAssetUrl", value: ipfsUrl });
+                setField({ dispatch, field: "isUploading", value: false });
             }
         ).catch(() => {
-            setSubmissionField({ field: "isUploading", value: false });
-            setSubmissionField({
+            setField({ dispatch, field: "isUploading", value: false });
+            setField({
+                dispatch,
                 field: "isVideo",
                 value: false,
             });
@@ -50,10 +123,10 @@ export const handleFileChange = ({
             ["image"],
             (mimeType) => { },
             (base64) => {
-                setSubmissionField({ field: "videoThumbnailBlob", value: base64 });
+                setField({ dispatch, field: "videoThumbnailBlob", value: base64 });
             },
             (ipfsUrl) => {
-                setSubmissionField({ field: "videoThumbnailUrl", value: ipfsUrl });
+                setField({ dispatch, field: "videoThumbnailUrl", value: ipfsUrl });
             }
         ).catch(() => {
 
@@ -64,14 +137,12 @@ export const handleFileChange = ({
 
 export const handleSubmit = async ({
     state,
-    setSubmissionField,
-    setSubmissionErrors,
+    dispatch,
     handleMutation,
     contestId,
 }: {
     state: SubmissionBuilderProps;
-    setSubmissionField: React.Dispatch<any>;
-    setSubmissionErrors: React.Dispatch<any>;
+    dispatch: React.Dispatch<any>;
     handleMutation: any;
     contestId: number;
 }) => {
@@ -82,7 +153,7 @@ export const handleSubmit = async ({
         // handle the special case of the type field since it doesn't belong to one single field
         if (errors?.type) return toast.error(errors.type);
         // handle the rest of the fields
-        return setSubmissionErrors({ errors: errors });
+        return setErrors({ dispatch, errors: errors });
     }
 
     const res = await handleMutation({

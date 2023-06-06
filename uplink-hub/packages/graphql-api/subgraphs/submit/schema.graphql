@@ -27,8 +27,8 @@ type Query {
   submission(submissionId: ID!): Submission
   contestSubmissions(contestId: ID!): [Submission!]!
   getUserSubmissionParams(
-    walletAddress: String!
     contestId: ID!
+    walletAddress: String
   ): UserSubmissionParams!
 }
 

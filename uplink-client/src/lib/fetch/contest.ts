@@ -98,14 +98,82 @@ const ContestByIdDocument = gql`
                 }
             }
         }
-    }`;
+    }
+`;
 
+const UserSubmissionParamsDocument = gql`
+    query Query($contestId: ID!) {
+    getUserSubmissionParams(contestId: $contestId) {
+        maxSubPower
+        remainingSubPower
+        userSubmissions {
+            author
+            contestId
+            created
+            id
+            type
+            url
+            version
+        }
+    }
+    }
+`;
+
+
+const UserVotingParamsDocument = gql`
+    query Query($contestId: ID!) {
+    getUserVotingParams(contestId: $contestId) {
+        totalVotingPower
+        userVotes {
+            votes
+            submissionId
+        }
+        votesRemaining
+        votesSpent
+    }
+    }
+`;
 
 // these are static params. we should cache them every time
 export const getContestById = cache(async (contestId: number) => {
-    console.log('getContestById')
     const response = await graphqlClient.query(ContestByIdDocument, { contestId })
         .toPromise();
     return response
 })
+
+// TODO this is client side code. remove this
+
+export const getUserSubmissionParams = async (contestId: number) => {
+    const response = await graphqlClient.query(UserSubmissionParamsDocument, { contestId })
+        .toPromise()
+        .then(res => res)
+        .catch((e) => {
+            console.log(e)
+            return {
+                userSubmissions: [],
+                maxSubPower: 0,
+                remainingSubPower: 0
+            }
+        })
+
+    return response
+}
+
+export const getUserVotingParams = async (contestId: number) => {
+    console.log('calling getUserVotingParams')
+    const response = await graphqlClient.query(UserVotingParamsDocument, { contestId })
+        .toPromise()
+        .then(res => res)
+        .catch((e) => {
+            console.log(e)
+            return {
+                totalVotingPower: "0",
+                votesRemaining: "0",
+                votesSpent: "0",
+                userVotes: []
+            }
+        })
+    return response
+}
+
 
