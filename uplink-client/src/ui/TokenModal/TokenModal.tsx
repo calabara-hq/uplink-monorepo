@@ -205,7 +205,7 @@ const QuickAddToken = ({
       ) : (
         <div className="alert alert-warning justify-start shadow-lg">
           <ExclamationTriangleIcon className="w-6 h-6" />
-          <p>hmm.. I couldn't find that token</p>
+          <p>{`hmm.. I couldn't find that token`}</p>
         </div>
       )}
       <div>

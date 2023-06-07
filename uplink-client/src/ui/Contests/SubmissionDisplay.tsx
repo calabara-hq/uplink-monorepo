@@ -47,7 +47,7 @@ const RenderSubmission = ({ data }: { data: any }) => {
       {data.type === "video" && <RenderVideoSubmission data={data} />}
       {data.type === "image" && <RenderImageSubmission data={data} />}
       {data.type === "text" && <RenderTextSubmission data={data} />}
-      <SubmissionVoteButton data={data}/>
+      <SubmissionVoteButton data={{ ...data, submissionId: data.id }} />
     </div>
   );
 };
@@ -56,14 +56,8 @@ const RenderTextSubmission = ({ data }) => {
   return (
     <>
       <div className="card-body h-32 bg-base-100 rounded-xl">
-        <h2 className="card-title">
-          Hi fam, I made a cardboard mask craft for an unminted chocolate head
-          cosplay 🍫🔥 @thenounsquare @nounsdao A video of the process below⬇️
-        </h2>
-        <p>
-          is simply dummy text of the printing and typesetting industry. Lorem
-          Ipsum has been the industry's standard dummy text ever since the
-        </p>
+        <h2 className="card-title">{data.title}</h2>
+        <p>is simply dummy text of the printing and typesetting industry.</p>
       </div>
     </>
   );

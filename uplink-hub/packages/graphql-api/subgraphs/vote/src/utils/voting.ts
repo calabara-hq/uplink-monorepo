@@ -256,7 +256,7 @@ export const insertVotes = async (user: any, contestId: any, payload: any) => {
                 submissionId: el.submissionId,
                 voter: user.address,
                 created: new Date().toISOString(),
-                amount: el.quantity.toString(),
+                amount: el.votes.toString(),
             } as schema.dbNewVoteType
         });
 
@@ -291,7 +291,7 @@ export const castVotes = async (
     contestId: number,
     payload: {
         submissionId: number,
-        quantity: Decimal,
+        votes: Decimal,
     }[]
 ) => {
     const contestParams = await fetchContestParams(contestId);
@@ -304,10 +304,12 @@ export const castVotes = async (
     }
 
     const votingPower = await calculateTotalVotingPower(user, contestId, contestParams.deadlines);
-    const proposedVotes = payload.reduce((acc: Decimal, el: any) => acc.plus(el.quantity), new Decimal(0));
+    const proposedVoteTotal = payload.reduce((acc: Decimal, el: { submissionId: number, votes: Decimal }) => acc.plus(el.votes), new Decimal(0));
 
+    console.log('proposed vote total', proposedVoteTotal.toString())
+    console.log('voting power', votingPower.toString())
 
-    if (proposedVotes > votingPower) throw new GraphQLError('Insufficient voting power', {
+    if (proposedVoteTotal.greaterThan(votingPower)) throw new GraphQLError('Insufficient voting power', {
         extensions: {
             code: 'INSUFFICIENT_VOTING_POWER'
         }

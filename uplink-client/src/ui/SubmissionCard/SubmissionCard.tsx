@@ -7,6 +7,7 @@ import {
   CheckIcon,
   LockClosedIcon,
 } from "@heroicons/react/24/solid";
+import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
 
 const subImage =
   "https://calabara.mypinata.cloud/ipfs/QmZfA7nc9KZ5RAtgYB3MVnzR8y9Jm3vzv8zRvezibb67kM?_gl=1*12l1tvo*rs_ga*ZjMxY2Y4NzUtMDhmNS00ZjdlLTg4M2UtNjQ4ZTQ3MTY5YWVh*rs_ga_5RMPXG14TE*MTY4MzA1NjMwNi41LjEuMTY4MzA1NjMzOS4yNy4wLjA.";
@@ -47,7 +48,6 @@ export function SubmissionCardText() {
         </h2>
         <p>
           is simply dummy text of the printing and typesetting industry. Lorem
-          Ipsum has been the industry's standard dummy text ever since the
         </p>
       </div>
     </div>
@@ -107,8 +107,33 @@ export function SubmissionCardBoxSelect() {
   );
 }
 
-export function SubmissionCardVote({ sub }: { sub: any }) {
+const SubmissionVoteInput = ({ sub }: { sub: any }) => {
+  const { updateProposedVoteAmount } = useVoteProposalContext();
 
+  return (
+    <input
+      type="number"
+      placeholder="votes"
+      className="input input-bordered w-1/2 text-center"
+      value={sub.votes}
+      onChange={(e) => updateProposedVoteAmount(sub.submissionId, e.target.value)}
+    />
+  );
+};
+
+const SubmissionVoteTrash = ({ sub }: { sub: any }) => {
+  const { removeProposedVote } = useVoteProposalContext();
+
+  return (
+    <button className="btn btn-sm btn-square btn-ghost cursor-pointer">
+      <TrashIcon
+        onClick={() => removeProposedVote(sub.submissionId)}
+      />
+    </button>
+  );
+};
+
+export function SubmissionCardVote({ sub }: { sub: any }) {
   return (
     <div
       className="flex flex-row w-full max-h-28 bg-base-100 rounded-xl
@@ -117,12 +142,13 @@ export function SubmissionCardVote({ sub }: { sub: any }) {
       {sub.type === "image" && <CartImageSubmission sub={sub} />}
       {sub.type === "text" && <CartTextSubmission sub={sub} />}
       {sub.type === "video" && <CartVideoSubmission sub={sub} />}
-      
     </div>
   );
 }
 
 const CartImageSubmission = ({ sub }: { sub: any }) => {
+  const { updateProposedVoteAmount } = useVoteProposalContext();
+
   return (
     <>
       <figure className="relative w-1/3 ">
@@ -136,16 +162,10 @@ const CartImageSubmission = ({ sub }: { sub: any }) => {
       <div className="flex items-center justify-evenly gap-2 p-4 h-full w-full">
         <div className="flex flex-col justify-evenly items-center gap-4 h-full">
           <h2 className="">{sub.title}</h2>
-          <input
-            type="text"
-            placeholder="votes"
-            className="input input-bordered w-1/2 text-center"
-          />
+          <SubmissionVoteInput sub={sub} />
         </div>
 
-        <button className="btn btn-sm btn-square btn-ghost">
-          <TrashIcon className="w-5 h-5" />
-        </button>
+        <SubmissionVoteTrash sub={sub} />
       </div>
     </>
   );
@@ -160,16 +180,10 @@ const CartTextSubmission = ({ sub }: { sub: any }) => {
       <div className="flex items-center justify-evenly gap-2 p-4 h-full w-full">
         <div className="flex flex-col justify-evenly items-center gap-4 h-full">
           <h2 className="">{sub.title}</h2>
-          <input
-            type="text"
-            placeholder="votes"
-            className="input input-bordered w-1/2 text-center"
-          />
+          <SubmissionVoteInput sub={sub} />
         </div>
 
-        <button className="btn btn-sm btn-square btn-ghost">
-          <TrashIcon className="w-5 h-5" />
-        </button>
+        <SubmissionVoteTrash sub={sub} />
       </div>
     </>
   );
@@ -189,16 +203,10 @@ const CartVideoSubmission = ({ sub }: { sub: any }) => {
       <div className="flex items-center justify-evenly gap-2 p-4 h-full w-full">
         <div className="flex flex-col justify-evenly items-center gap-4 h-full">
           <h2 className="">{sub.title}</h2>
-          <input
-            type="text"
-            placeholder="votes"
-            className="input input-bordered w-1/2 text-center"
-          />
+          <SubmissionVoteInput sub={sub} />
         </div>
 
-        <button className="btn btn-sm btn-square btn-ghost">
-          <TrashIcon className="w-5 h-5" />
-        </button>
+        <SubmissionVoteTrash sub={sub} />
       </div>
     </>
   );

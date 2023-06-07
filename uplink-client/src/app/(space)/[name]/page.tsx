@@ -220,7 +220,7 @@ const ContestCard = ({
   );
 };
 
-export const Stats = () => {
+const Stats = () => {
   return (
     <div className="flex flex-col items-center gap-4 w-3/4 lg:m-auto">
       <div className="stats stats-vertical lg:stats-horizontal w-full bg-transparent border-2 border-border shadow-box">

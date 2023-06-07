@@ -70,7 +70,7 @@ input CastVotePayload
   @join__type(graph: VOTE)
 {
   submissionId: ID!
-  quantity: Decimal!
+  votes: Decimal!
 }
 
 type CastVoteResponse
@@ -511,7 +511,7 @@ type Vote
 {
   id: ID!
   submissionId: ID!
-  quantity: Decimal!
+  votes: Decimal!
 }
 
 type VoteObject

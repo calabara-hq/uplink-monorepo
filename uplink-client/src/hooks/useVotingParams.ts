@@ -9,12 +9,12 @@ type UserVote = {
   submissionId: string;
 }
 
-export interface UserVotingParams {
-  maxVotingPower: string;
+export type UserVotingParams = {
+  totalVotingPower: string;
   votesRemaining: string;
   votesSpent: string;
-  userVotes: UserVote[];
-}
+  userVotes: UserVote[] | [];
+} | undefined
 
 
 
@@ -68,12 +68,10 @@ const useVotingParams = (contestId: number) => {
     ? [`/api/userVotingParams/${contestId}`, session.user.address]
     : null;
 
-  const { data: userVotingParams }: { data: any } = useSWR(swrKey, () => getUserVotingParams(contestId));
+  const { data: userVotingParams, isLoading, mutate }: { data: UserVotingParams, isLoading: boolean, mutate: any } = useSWR(swrKey, () => getUserVotingParams(contestId));
 
-  return userVotingParams;
+  return { userVotingParams, isLoading, mutate };
 };
-
-
 
 
 export default useVotingParams;

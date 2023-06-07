@@ -380,7 +380,6 @@ export function Pending() {
       </div>
       <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
         <p className="font-bold">
-          This contest hasn't started yet. Check back soon!
         </p>
       </div>
     </div>

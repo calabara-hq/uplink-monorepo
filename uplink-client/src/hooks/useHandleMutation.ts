@@ -27,6 +27,7 @@ export default function useHandleMutation(query: DocumentNode) {
 
     const knownErrors = {
         'UNAUTHORIZED': 'You are not authorized to perform this action',
+        'SELF_VOTING_DISABLED': 'Self voting is disabled for this contest',
     }
 
     const handleErrors = (result: ResultObject) => {
