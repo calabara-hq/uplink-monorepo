@@ -310,6 +310,7 @@ const ContestForm = ({
 
             return (
               <div
+                key={index}
                 className={`${stepClass.style} cursor-pointer p-2 rounded-lg text-left`}
                 onClick={() => setCurrentStep(index)}
               >

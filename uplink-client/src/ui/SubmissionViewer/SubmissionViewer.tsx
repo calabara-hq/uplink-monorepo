@@ -148,7 +148,7 @@ const SubmissionCardModal = () => {
         <h2 className="card-title">Submission #1</h2>
         <p>
           is simply dummy text of the printing and typesetting industry. Lorem
-          Ipsum has been the industry's standard dummy text ever since the
+          Ipsum has been the standard dummy text ever since the
         </p>
       </div>
       <figure className="relative bg-base-100 h-full w-full ">
@@ -172,7 +172,7 @@ const SubmissionCardModal2 = () => {
         <h2 className="card-title">Submission #1</h2>
         <p>
           is simply dummy text of the printing and typesetting industry. Lorem
-          Ipsum has been the industry's standard dummy text ever since the
+          Ipsum has been the standard dummy text ever since the
         </p>
       </div>
       <div className="relative bg-base-100 h-full w-full ">

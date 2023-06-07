@@ -31,8 +31,8 @@ up-subgraphs:
 .PHONY: run-router-local
 run-router-local:
 	@set -x; \
-	 ./router --version && \
-	 ./router --dev \
+	 ./supergraph/router --version && \
+	 ./supergraph/router --dev \
 	  -c ./supergraph/router.yaml \
 	  -s ./supergraph/schema/local.graphql \
 	  --log info

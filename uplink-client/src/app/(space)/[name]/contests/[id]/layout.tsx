@@ -17,7 +17,9 @@ export default async function Layout({
     <div className="m-auto w-[80vw] flex flex-col items-center border-2 border-purple-500">
       <div className="flex justify-center gap-4 m-auto w-[80vw] lg:py-6">
         <ContestStateProvider deadlines={deadlines}>
-          <VoteProposalProvider>{children}</VoteProposalProvider>
+          <VoteProposalProvider contestId={parseInt(params.id)}>
+            {children}
+          </VoteProposalProvider>
         </ContestStateProvider>
       </div>
     </div>
