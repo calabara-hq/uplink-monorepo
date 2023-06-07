@@ -3,7 +3,7 @@ scalar Decimal
 type Vote @key(fields: "id") {
   id: ID!
   submissionId: ID!
-  quantity: Decimal!
+  votes: Decimal!
 }
 
 type SampleResponse {
@@ -29,7 +29,7 @@ type Query {
 
 input CastVotePayload {
   submissionId: ID!
-  quantity: Decimal!
+  votes: Decimal!
 }
 
 type CastVoteResponse {

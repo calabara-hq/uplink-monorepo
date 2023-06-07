@@ -231,9 +231,9 @@ describe('voting utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 0;
             const payload = [
-                { submissionId: 1, quantity: new Decimal('10') },
-                { submissionId: 2, quantity: new Decimal('30') },
-                { submissionId: 3, quantity: new Decimal('60') }
+                { submissionId: 1, votes: new Decimal('10') },
+                { submissionId: 2, votes: new Decimal('30') },
+                { submissionId: 3, votes: new Decimal('60') }
             ]
 
             const result = votingUtils.castVotes(user, contestId, payload);
@@ -247,9 +247,9 @@ describe('voting utils test suite', () => {
 
         test('throw insufficient voting power error', async () => {
             jest.spyOn(votingUtils, 'fetchUserVotes').mockResolvedValue([
-                { submissionId: 0, quantity: 3 },
-                { submissionId: 1, quantity: 2 },
-                { submissionId: 2, quantity: 1 }
+                { submissionId: 0, votes: 3 },
+                { submissionId: 1, votes: 2 },
+                { submissionId: 2, votes: 1 }
             ]);
             jest.spyOn(votingUtils, 'calculateTotalVotingPower').mockResolvedValue(new Decimal('100'));
             jest.spyOn(votingUtils, 'calculateUserVotingParams').mockResolvedValue({
@@ -265,9 +265,9 @@ describe('voting utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 0;
             const payload = [
-                { submissionId: 1, quantity: new Decimal('10') },
-                { submissionId: 2, quantity: new Decimal('30') },
-                { submissionId: 3, quantity: new Decimal('65') }
+                { submissionId: 1, votes: new Decimal('10') },
+                { submissionId: 2, votes: new Decimal('30') },
+                { submissionId: 3, votes: new Decimal('65') }
             ]
 
             const result = votingUtils.castVotes(user, contestId, payload);
@@ -282,9 +282,9 @@ describe('voting utils test suite', () => {
 
         test('throw invalid submission id error', async () => {
             jest.spyOn(votingUtils, 'fetchUserVotes').mockResolvedValue([
-                { submissionId: 0, quantity: 3 },
-                { submissionId: 1, quantity: 2 },
-                { submissionId: 2, quantity: 1 }
+                { submissionId: 0, votes: 3 },
+                { submissionId: 1, votes: 2 },
+                { submissionId: 2, votes: 1 }
             ]);
             jest.spyOn(votingUtils, 'insertVotes').mockResolvedValue(true);
             jest.spyOn(votingUtils, 'fetchContestParams').mockResolvedValue({ selfVote: true, deadlines: {} })
@@ -301,9 +301,9 @@ describe('voting utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 0;
             const payload = [
-                { submissionId: 1, quantity: new Decimal('10') },
-                { submissionId: 2, quantity: new Decimal('30') },
-                { submissionId: 6, quantity: new Decimal('60') }
+                { submissionId: 1, votes: new Decimal('10') },
+                { submissionId: 2, votes: new Decimal('30') },
+                { submissionId: 6, votes: new Decimal('60') }
             ]
 
             const result = votingUtils.castVotes(user, contestId, payload);
@@ -332,9 +332,9 @@ describe('voting utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 0;
             const payload = [
-                { submissionId: 1, quantity: new Decimal('10') },
-                { submissionId: 2, quantity: new Decimal('30') },
-                { submissionId: 3, quantity: new Decimal('60') }
+                { submissionId: 1, votes: new Decimal('10') },
+                { submissionId: 2, votes: new Decimal('30') },
+                { submissionId: 3, votes: new Decimal('60') }
             ]
 
             const result = votingUtils.castVotes(user, contestId, payload);
@@ -348,9 +348,9 @@ describe('voting utils test suite', () => {
 
         test('throw insert votes error', async () => {
             jest.spyOn(votingUtils, 'fetchUserVotes').mockResolvedValue([
-                { submissionId: 0, quantity: 3 },
-                { submissionId: 1, quantity: 2 },
-                { submissionId: 2, quantity: 1 }
+                { submissionId: 0, votes: 3 },
+                { submissionId: 1, votes: 2 },
+                { submissionId: 2, votes: 1 }
             ]);
             jest.spyOn(votingUtils, 'insertVotes').mockImplementation((user: any, contestId: any, paylaod: any) => {
                 throw new GraphQLError('Failed to create votes', {
@@ -373,9 +373,9 @@ describe('voting utils test suite', () => {
             const user = { address: 'nickdodson.eth' };
             const contestId = 0;
             const payload = [
-                { submissionId: 1, quantity: new Decimal('10') },
-                { submissionId: 2, quantity: new Decimal('30') },
-                { submissionId: 3, quantity: new Decimal('60') }
+                { submissionId: 1, votes: new Decimal('10') },
+                { submissionId: 2, votes: new Decimal('30') },
+                { submissionId: 3, votes: new Decimal('60') }
             ]
 
             const result = votingUtils.castVotes(user, contestId, payload);
@@ -389,9 +389,9 @@ describe('voting utils test suite', () => {
 
         test('successfully traverse function', async () => {
             jest.spyOn(votingUtils, 'fetchUserVotes').mockResolvedValue([
-                { submissionId: 0, quantity: 3 },
-                { submissionId: 1, quantity: 2 },
-                { submissionId: 2, quantity: 1 }
+                { submissionId: 0, votes: 3 },
+                { submissionId: 1, votes: 2 },
+                { submissionId: 2, votes: 1 }
             ]);
             jest.spyOn(votingUtils, 'insertVotes').mockResolvedValue(true);
             jest.spyOn(votingUtils, 'fetchContestParams').mockResolvedValue({ selfVote: true, deadlines: {} })
@@ -404,17 +404,17 @@ describe('voting utils test suite', () => {
                 votesSpent: new Decimal('100'),
                 votesRemaining: new Decimal('0'),
                 userVotes: [
-                    { submissionId: 1, quantity: 10 },
-                    { submissionId: 2, quantity: 30 },
-                    { submissionId: 3, quantity: 60 }
+                    { submissionId: 1, votes: 10 },
+                    { submissionId: 2, votes: 30 },
+                    { submissionId: 3, votes: 60 }
                 ],
             });
             const user = { address: 'nickdodson.eth' };
             const contestId = 0;
             const payload = [
-                { submissionId: 1, quantity: new Decimal('10') },
-                { submissionId: 2, quantity: new Decimal('30') },
-                { submissionId: 3, quantity: new Decimal('60') }
+                { submissionId: 1, votes: new Decimal('10') },
+                { submissionId: 2, votes: new Decimal('30') },
+                { submissionId: 3, votes: new Decimal('60') }
             ]
 
             const result = await votingUtils.castVotes(user, contestId, payload);
@@ -425,9 +425,9 @@ describe('voting utils test suite', () => {
                     votesSpent: new Decimal('100'),
                     votesRemaining: new Decimal('0'),
                     userVotes: [
-                        { submissionId: 1, quantity: 10 },
-                        { submissionId: 2, quantity: 30 },
-                        { submissionId: 3, quantity: 60 }
+                        { submissionId: 1, votes: 10 },
+                        { submissionId: 2, votes: 30 },
+                        { submissionId: 3, votes: 60 }
                     ],
                 }
             });

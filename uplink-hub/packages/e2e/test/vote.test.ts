@@ -225,7 +225,7 @@ describe('e2e vote', () => {
     test('cast unauthorized vote', async () => {
         const castVotePayload = [{
             submissionId: '1',
-            quantity: '1'
+            votes: '1'
         }];
 
         const result = castVotes('1', castVotePayload, false);
@@ -289,11 +289,11 @@ describe('e2e vote', () => {
 
         const castVotePayload = [{
             submissionId: submissionIds[0],
-            quantity: '8'
+            votes: '8'
         },
         {
             submissionId: submissionIds[1],
-            quantity: '2'
+            votes: '2'
         }
         ];
 
@@ -330,11 +330,11 @@ describe('e2e vote', () => {
 
         const castVotePayload = [{
             submissionId: submissionIds[0],
-            quantity: '8'
+            votes: '8'
         },
         {
             submissionId: submissionIds[1],
-            quantity: '100'
+            votes: '100'
         }
         ];
         const result = castVotes(contestId, castVotePayload, true);
@@ -368,7 +368,7 @@ describe('e2e vote', () => {
         const invalidSubmissionId = submissionIds[0] + '10000';
         const castVotePayload = [{
             submissionId: invalidSubmissionId,
-            quantity: '1'
+            votes: '1'
         }];
         const result = castVotes(contestId, castVotePayload, true);
         await expect(result).rejects.toMatchObject({
@@ -401,7 +401,7 @@ describe('e2e vote', () => {
 
         const castVotePayload = [{
             submissionId: submissionIds[0],
-            quantity: '1'
+            votes: '1'
         }];
         const result = castVotes(contestId + 100000, castVotePayload, true);
         await expect(result).rejects.toMatchObject({
@@ -555,11 +555,11 @@ describe('e2e vote', () => {
 
         const castVotePayload = [{
             submissionId: submissionIds[0],
-            quantity: '8'
+            votes: '8'
         },
         {
             submissionId: submissionIds[1],
-            quantity: '2'
+            votes: '2'
         }
         ];
 
