@@ -7,6 +7,7 @@ import { useContestState } from "@/providers/ContestStateProvider";
 type UserVote = {
   votes: string;
   submissionId: string;
+  submissionUrl: string;
 }
 
 export type UserVotingParams = {
@@ -25,6 +26,7 @@ const UserVotingParamsDocument = gql`
       userVotes {
         votes
         submissionId
+        submissionUrl
       }
       votesRemaining
       votesSpent

@@ -48,7 +48,8 @@ export const fetchUserVotes = async (user: any, contestId: any) => {
         id: schema.votes.id,
         submissionId: schema.votes.submissionId,
         votes: schema.votes.amount,
-    }).from(schema.votes)
+        submissionUrl: schema.submissions.url
+    }).from(schema.votes).leftJoin(schema.submissions, sqlOps.eq(schema.votes.submissionId, schema.submissions.id))
         .where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
 
     return userVotes.map((el: any) => {

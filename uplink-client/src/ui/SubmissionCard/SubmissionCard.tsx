@@ -212,32 +212,17 @@ const CartVideoSubmission = ({ sub }: { sub: any }) => {
   );
 };
 
-export function LockedCardVote() {
+export function LockedCardVote({sub}: {sub: any}) {
+  console.log('rendering locked card with sub', sub)
   return (
     <div
       className="flex flex-row w-full min-h-16 bg-base-100 rounded-xl
                     cursor-pointer-none"
     >
-      <figure className="relative w-1/3 ">
-        <Image
-          src={subImage}
-          alt="submission image"
-          fill
-          className="object-cover w-full rounded-l-xl"
-        />
-      </figure>
-      <div className="flex flex-row justify-evenly items-center gap-2 w-full">
-        <h2 className="">My Submission!</h2>
-        <p>10</p>
-      </div>
+      {/** TODO: fill this in  */}
+      {sub.type === "image" && <CartImageSubmission sub={sub} />}
+      {sub.type === "text" && <CartTextSubmission sub={sub} />}
+  {sub.type === "video" && <CartVideoSubmission sub={sub} />}
     </div>
   );
 }
-
-/*
-          <div className="card-actions justify-end">
-            <button className="btn btn-primary">Vote</button>
-          </div>
-
-          transition-all duration-300 ease-linear hover:scale-110
-*/

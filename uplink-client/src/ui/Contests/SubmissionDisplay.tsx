@@ -1,36 +1,40 @@
+"use client"
 import { getContestById } from "@/lib/fetch/contest";
 import { VideoProvider } from "@/providers/VideoProvider";
-//import VideoPreview from "../VideoPlayer/VideoPlayer";
+import VideoPreview from "../VideoPlayer/VideoPlayer";
 import { Suspense } from "react";
 import { VideoSubmissionCard } from "./SubmissionCard";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
 import SubmissionVoteButton from "./SubmissionVoteButton";
+import useTrackSubmissions from "@/hooks/useTrackSubmissions";
 
+/*
 const VideoPreview = dynamic(() => import("../VideoPlayer/VideoPlayer"), {
   loading: () => <SubmissionSkeleton />,
 });
-
+*/
+/*
 const fetchSubmission = async (url: string) => {
   console.log("fetching submission from", url);
   return fetch(url, { cache: "no-store" }).then((res) => res.json());
 };
+*/
 
-const SubmissionDisplay = async ({ contestId }) => {
-  const contest = await getContestById(contestId);
-  const { submissions } = contest.data.contest;
+const SubmissionDisplay = ({contestId} : {contestId: number}) => {
+  // init useSWR here
 
+  const {liveSubmissions, isLoading, error} = useTrackSubmissions(contestId)
   return (
     <div className="flex flex-col gap-4 w-full">
       <h1 className="text-xl lg:text-3xl text-center font-bold">Submissions</h1>
       <div className="flex w-full justify-evenly items-center">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-evenly gap-4 lg:w-full w-full">
-          {submissions.map(async (submission, idx) => {
-            const data = await fetchSubmission(submission.url);
-            return (
+          {liveSubmissions.map((submission, idx) => {
+            return(
               <RenderSubmission
-                data={{ ...data, id: submission.id }}
+                data={submission.data}
                 key={idx}
               />
             );
@@ -40,6 +44,7 @@ const SubmissionDisplay = async ({ contestId }) => {
     </div>
   );
 };
+
 
 const RenderSubmission = ({ data }: { data: any }) => {
   return (

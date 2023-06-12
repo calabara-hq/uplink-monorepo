@@ -118,6 +118,7 @@ const findManySpaces = async () => {
 const queries = {
     Query: {
         async spaces() {
+            console.log('entering heree!')
             return findManySpaces();
         },
         async space(parent, { id, name }, contextValue, info) {

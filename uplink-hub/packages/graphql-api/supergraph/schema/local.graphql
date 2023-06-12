@@ -228,6 +228,7 @@ input IPayout
 scalar IpfsUrl
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
+  @join__type(graph: VOTE)
 
 scalar ISODateString
   @join__type(graph: CONTESTS)
@@ -551,8 +552,10 @@ type Vote
 type VoteObject
   @join__type(graph: VOTE)
 {
-  submissionId: ID!
+  id: ID!
   votes: Decimal!
+  submissionId: ID!
+  submissionUrl: IpfsUrl!
 }
 
 input VoterRewards

@@ -1,4 +1,5 @@
 scalar Decimal
+scalar IpfsUrl
 
 type Vote @key(fields: "id") {
   id: ID!
@@ -11,8 +12,10 @@ type SampleResponse {
 }
 
 type VoteObject {
-  submissionId: ID!
+  id: ID!
   votes: Decimal!
+  submissionId: ID!
+  submissionUrl: IpfsUrl!
 }
 
 type UserVotingParams {

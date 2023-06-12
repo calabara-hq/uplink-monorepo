@@ -33,6 +33,7 @@ const CastVotesDocument = gql`
         votesSpent
         userVotes {
           submissionId
+          submissionUrl
           votes
         }
       }

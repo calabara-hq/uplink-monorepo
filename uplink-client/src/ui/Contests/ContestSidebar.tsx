@@ -20,6 +20,7 @@ import {
 import useVotingParams from "@/hooks/useVotingParams";
 import useSubmitParams from "@/hooks/useSubmitParams";
 import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+import useTrackSubmissions from "@/hooks/useTrackSubmissions";
 /**
  *
  * the standard sidebar for the main contest view
@@ -148,10 +149,12 @@ const itemVariants = {
 };
 
 const VoteTab = ({
+  contestId,
   editMode,
   proposedSelection,
   renderEditButton,
 }: {
+  contestId: number;
   editMode: boolean;
   proposedSelection: any[];
   renderEditButton: () => React.ReactNode;
@@ -164,9 +167,12 @@ const VoteTab = ({
     votesSpent,
     votesRemaining,
   } = userVotingState;
+  const {liveSubmissions} = useTrackSubmissions(contestId)
+
 
   const [votesSpentColor, setVotesSpentColor] = useState("");
   const [votesRemainingColor, setVotesRemainingColor] = useState("");
+  
   /*
 
   some color fun
@@ -222,11 +228,17 @@ const VoteTab = ({
               {renderEditButton()}
             </div>
             <div className="flex flex-col gap-2 transition-opacity">
+
               {currentVotes.map((sub: any, idx: number) => {
                 if (editMode) {
-                  return <SubmissionCardVote key={idx} sub={sub} />;
+                  console.log('edit mode m8')
+                  return <SubmissionCardVote key={idx} sub={liveSubmissions.find(
+                    el => el.id === sub.submissionId
+                  ).data} />;
                 } else {
-                  return <LockedCardVote key={idx} />;
+                  return <LockedCardVote key={idx} sub={liveSubmissions.find(
+                    el => el.id === sub.submissionId
+                  ).data}/>;
                 }
               })}
             </div>
@@ -265,6 +277,8 @@ const VoteTab = ({
     </>
   );
 };
+
+
 
 const DetailTab = ({}) => {
   return (
@@ -338,6 +352,7 @@ export function VoterCart({ contestId }: { contestId: number }) {
           {activeTab === "votes" && isVotingCartVisible && (
             <>
               <VoteTab
+              contestId={contestId}
                 editMode={editMode}
                 proposedSelection={proposedSelection}
                 renderEditButton={renderEditButton}
@@ -383,7 +398,7 @@ const SidebarSkeleton = () => {
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
       <div className="flex flex-col justify-between bg-base-100  rounded-lg w-full">
-        <div className="space-y-2 p-4">
+       <div className="space-y-2 p-4">
           <div className={`h-6 w-1/3 mb-4 rounded-lg bg-neutral ${shimmer}`} />
           <div className={`h-4 w-1/2 rounded-lg bg-neutral ${shimmer}`} />
           <div className={`h-4 w-1/2 rounded-lg bg-neutral ${shimmer}`} />
