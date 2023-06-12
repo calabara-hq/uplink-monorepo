@@ -1,7 +1,7 @@
 "use client";
 import Editor from "@/ui/Editor/Editor";
 import { OutputData } from "@editorjs/editorjs";
-import { UserIcon } from "@heroicons/react/24/solid";
+import { PhotoIcon, CameraIcon } from "@heroicons/react/24/solid";
 import { useEffect, useReducer, useRef, useState } from "react";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateSubmissionDocument } from "@/lib/graphql/submit.gql";
@@ -53,11 +53,17 @@ const SubmissionTitle = ({
     setField({ dispatch, field: "title", value: e.target.value });
   };
 
+  const handleTextareaResize = (e: any) => {
+    e.target.style.height = "auto";
+    e.target.style.height = `${e.target.scrollHeight}px`;
+  };
+
   return (
     <div>
       <label className="label">
         <span className="label-text">Title</span>
       </label>
+      {/*}
       <input
         type="text"
         autoComplete="off"
@@ -65,10 +71,25 @@ const SubmissionTitle = ({
         value={title}
         onChange={handleTitleChange}
         placeholder="Nouns"
-        className={`input w-full max-w-xs ${
-          errors?.title ? "input-error" : "input-bordered"
+        className={`input w-[450px] ${
+          errors?.title ? "input-error" : "input"
         }`}
       />
+      */}
+      <textarea
+        rows={1}
+        placeholder="What's happening?"
+        className={`mt-1 p-2 textarea textarea-lg resize-none w-full lg:w-[450px] overflow-y-hidden ${
+          errors?.title ? "textarea-error" : "textarea textarea-lg"
+        }`}
+        style={{ height: "auto" }}
+        value={title}
+        onChange={handleTitleChange}
+        onInput={handleTextareaResize}
+      />
+      <p className="text-gray-500 text-sm text-right">
+        {100 - title.length} characters remaining
+      </p>
       <ErrorLabel error={errors?.title} />
     </div>
   );
@@ -106,7 +127,7 @@ const PrimaryAsset = ({
     <div>
       <label className="label">
         <span className="label-text">
-          {mode === "primary" ? "Primary Asset" : "thumbnail"}
+          {mode === "primary" ? "Primary Asset" : "Thumbnail"}
         </span>
       </label>
       <input
@@ -129,13 +150,15 @@ const PrimaryAsset = ({
         <Input mode="primary">
           <div>
             <div
-              className="w-28 h-28 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all"
+              className="w-28 h-28 lg:w-36 lg:h-36 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all rounded-xl"
               onClick={() => imageUploader.current?.click()}
             >
-              {primaryAssetBlob && <img src={primaryAssetBlob} />}
+              {primaryAssetBlob && (
+                <img src={primaryAssetBlob} className="rounded-xl" />
+              )}
               {!primaryAssetBlob && (
                 <div className="flex justify-center items-center w-full h-full">
-                  <UserIcon className="w-8 h-8" />
+                  <CameraIcon className="w-8 h-8" />
                 </div>
               )}
             </div>
@@ -145,18 +168,19 @@ const PrimaryAsset = ({
       );
     } else if (isVideo && isUploading) {
       return (
-        <div className="w-28 h-28 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all">
+        <div className="w-28 h-28 lg:w-36 lg:h-36 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all rounded-xl">
           optimizing ...
+          <span className="loading loading-spinner text-primary"></span>
         </div>
       );
     } else if (isVideo && !isUploading && primaryAssetUrl) {
       return (
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row justify-between gap-4">
           <div className="flex flex-col">
             <label className="label">
               <span className="label-text">Primary Asset</span>
             </label>
-            <div className="w-28 h-28 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all">
+            <div className="w-28 h-28 lg:w-36 lg:h-36 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all rounded-xl">
               <VideoProvider>
                 <VideoPreview url={primaryAssetUrl} id="primary-asset" />
               </VideoProvider>
@@ -164,13 +188,15 @@ const PrimaryAsset = ({
           </div>
           <Input mode="thumbnail">
             <div
-              className="w-28 h-28 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all"
+              className="w-28 h-28 lg:w-36 lg:h-36 cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all rounded-xl"
               onClick={() => thumbnailUploader.current?.click()}
             >
-              {videoThumbnailBlob && <img src={videoThumbnailBlob} />}
+              {videoThumbnailBlob && (
+                <img src={videoThumbnailBlob} className="rounded-xl" />
+              )}
               {!videoThumbnailBlob && (
                 <div className="flex justify-center items-center w-full h-full">
-                  <UserIcon className="w-8 h-8" />
+                  <PhotoIcon className="w-8 h-8" />
                 </div>
               )}
             </div>
@@ -204,7 +230,7 @@ const SubmissionBody = ({
 
   return (
     <div className="flex flex-col w-full">
-      <label className="text-sm p-1">Body</label>
+      <label className="text-sm p-1 mb-2">Body</label>
       <ErrorLabel error={errors?.submissionBody} />
       <Editor
         data={submissionBody ?? undefined}
@@ -246,17 +272,19 @@ export default function Page({ params }: { params: { hash: number } }) {
         Publish
       </button>
       <div>
-        <SubmissionTitle title={title} errors={errors} dispatch={dispatch} />
-        <PrimaryAsset
-          isUploading={isUploading}
-          primaryAssetUrl={primaryAssetUrl}
-          primaryAssetBlob={primaryAssetBlob}
-          videoThumbnailUrl={videoThumbnailUrl}
-          videoThumbnailBlob={videoThumbnailBlob}
-          isVideo={isVideo}
-          errors={errors}
-          dispatch={dispatch}
-        />
+        <div className="flex flex-col lg:flex-row w-full justify-between gap-2">
+          <SubmissionTitle title={title} errors={errors} dispatch={dispatch} />
+          <PrimaryAsset
+            isUploading={isUploading}
+            primaryAssetUrl={primaryAssetUrl}
+            primaryAssetBlob={primaryAssetBlob}
+            videoThumbnailUrl={videoThumbnailUrl}
+            videoThumbnailBlob={videoThumbnailBlob}
+            isVideo={isVideo}
+            errors={errors}
+            dispatch={dispatch}
+          />
+        </div>
         <SubmissionBody
           submissionBody={submissionBody}
           errors={errors}
