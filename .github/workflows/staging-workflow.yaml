@@ -60,19 +60,15 @@ jobs:
         draft: true
         prerelease: true
 
-    - name: Create Release Branch
-      run: |
-        git checkout -b release-${{ steps.create_tag.outputs.new_tag }} ${{ github.sha }}
-        git push origin release-${{ steps.create_tag.outputs.new_tag }}
-
-    - name: Create Pull Request
+    - name: Create Release Branch and PR
       uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         branch: release-${{ steps.create_tag.outputs.new_tag }}
-        base: main
+        commit-message: 'Release ${{ steps.create_tag.outputs.new_tag }}'
         title: 'Release ${{ steps.create_tag.outputs.new_tag }}'
         body: 'Release of version ${{ steps.create_tag.outputs.new_tag }}'
         draft: true
+        base: main
 
 
