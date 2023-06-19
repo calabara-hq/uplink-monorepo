@@ -44,14 +44,31 @@ jobs:
         WITH_V: false
         DEFAULT_BUMP: patch
         
-    - name: Create Release Branch and Pull Request
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.create_tag.outputs.new_tag }}
+        release_name: Release ${{ steps.create_tag.outputs.new_tag }}
+        draft: true
+        prerelease: true
+
+    - name: Create Release Branch
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git checkout -b release-${{ steps.create_tag.outputs.new_tag }}
+        git push origin release-${{ steps.create_tag.outputs.new_tag }}
+
+    - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         branch: release-${{ steps.create_tag.outputs.new_tag }}
         base: main
         title: 'Release ${{ steps.create_tag.outputs.new_tag }}'
-        commit-message: 'Release ${{ steps.create_tag.outputs.new_tag }}'
-        body: 'This is the release of version ${{ steps.create_tag.outputs.new_tag }}'
+        body: 'Release of version ${{ steps.create_tag.outputs.new_tag }}'
     
     
