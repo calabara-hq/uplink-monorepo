@@ -4,54 +4,71 @@ on:
   push:
     branches: [ staging ]
 
-jobs:
-  changes:
+jobs:         
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+#       - name: Get short sha
+#         id: get_sha
+#         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v1
+        
+#       - name: Login to DockerHub
+#         uses: docker/login-action@v1
+#         with:
+#           username: ${{ secrets.DOCKER_USERNAME }}
+#           password: ${{ secrets.DOCKER_PASSWORD }}
+
+#       - name: Build and push docker images
+#         run: |
+#           export GITHUB_SHA_TAG=${{ steps.get_sha.outputs.sha_short }}
+#           docker-compose -f uplink-hub/docker-compose.yaml build
+#           docker-compose -f uplink-hub/docker-compose.yaml push
+          
+
+          
+  create-release:
+    #needs: [build]
     runs-on: ubuntu-latest
-    # Set job outputs to values from filter step
-    outputs:
-      auth: ${{ steps.filter.outputs.auth }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: detect changes
-      uses: dorny/paths-filter@v2.2.0
-      id: filter
-      with:
-        base: ${{ github.ref_name }}
-        filters: |
-          auth:
-            - 'uplink-hub/packages/auth/**'
-            
-  auth_service:
-    needs: changes
-    if: ${{ needs.changes.outputs.auth == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Bump version and push tag
-        id: auth_create_tag
-        uses: anothrNick/github-tag-action@1.64.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          DEFAULT_BUMP: patch
-          TAG_PREFIX: auth-
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+    - name: Bump version and push tag
+      id: create_tag
+      uses: anothrNick/github-tag-action@1.64.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: false
+        DEFAULT_BUMP: patch
         
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.create_tag.outputs.new_tag }}
+        release_name: Release ${{ steps.create_tag.outputs.new_tag }}
+        draft: true
+        prerelease: true
 
-      - name: Build and push auth
-        run: |
-          docker-compose -f uplink-hub/docker-compose.yaml build auth
-          docker images
-          echo "New tag: ${{ steps.auth_create_tag.outputs.new_tag }}"
-          docker tag uplink-hub_auth:latest nickdodson/auth-service:${{ steps.auth_create_tag.outputs.new_tag }}
-          docker push nickdodson/auth-service:${{ steps.auth_create_tag.outputs.new_tag }}
+    - name: Create Release Branch
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git checkout -b release-${{ steps.create_tag.outputs.new_tag }}
+        git push origin release-${{ steps.create_tag.outputs.new_tag }}
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: release-${{ steps.create_tag.outputs.new_tag }}
+        base: main
+        title: 'Release ${{ steps.create_tag.outputs.new_tag }}'
+        body: 'Release of version ${{ steps.create_tag.outputs.new_tag }}'
+    
+    
