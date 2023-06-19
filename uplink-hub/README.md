@@ -15,4 +15,4 @@ The Makefile in the hub root contains recipes to target various setups. In a loc
 make run-supergraph-local
 ```
 
-trigger changes 3
+trigger changes 4
