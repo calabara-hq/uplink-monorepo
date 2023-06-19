@@ -15,5 +15,5 @@ The Makefile in the hub root contains recipes to target various setups. In a loc
 make run-supergraph-local
 ```
 
-trigger changes 8
+trigger changes 9
 
