@@ -22,11 +22,19 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push docker images
-        run: |
-          export GITHUB_SHA_TAG=${{ steps.get_sha.outputs.sha_short }}
-          docker-compose -f uplink-hub/docker-compose.yaml build
-          docker-compose -f uplink-hub/docker-compose.yaml push
+      - name: Set up Docker Compose
+        uses: docker/compose-action@v1
+        with:
+          compose-file: ./uplink-hub/docker-compose.yaml
+
+      - name: Build and Push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./uplink-hub
+          push: true
+          tags: |
+            nickdodson/auth-service:${{ steps.get_sha.outputs.sha_short }}
+            nickdodson/media-service:${{ steps.get_sha.outputs.sha_short }}
           
       - name: Bump version and push tag
         id: create_branch_tag
