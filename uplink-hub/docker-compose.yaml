@@ -5,25 +5,26 @@ services:
     build:
       context: .
       dockerfile: ./packages/auth/Dockerfile
+    image: nickdodson/auth-service:${GITHUB_SHA_TAG}
 
   media:
     container_name: media
     build:
       context: .
       dockerfile: ./packages/media/Dockerfile
-    image: nickdodson/media-service:1.0.0
+    image: nickdodson/media-service:${GITHUB_SHA_TAG}
 
-  router:
-    container_name: router
-    build:
-      context: .
-      dockerfile: ./packages/graphql-api/Dockerfile
-    image: nickdodson/router-service:1.0.4
+  # router:
+  #   container_name: router
+  #   build:
+  #     context: .
+  #     dockerfile: ./packages/graphql-api/Dockerfile
+  #   image: nickdodson/router-service:1.0.4
 
 
-  spaces:
-    container_name: spaces
-    build:
-      context: .
-      dockerfile: ./packages/graphql-api/subgraphs/spaces/Dockerfile
-    image: nickdodson/spaces-service:1.0.0
+  # spaces:
+  #   container_name: spaces
+  #   build:
+  #     context: .
+  #     dockerfile: ./packages/graphql-api/subgraphs/spaces/Dockerfile
+  #   image: nickdodson/spaces-service:1.0.0
