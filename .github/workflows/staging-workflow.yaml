@@ -2,20 +2,37 @@ name: Staging CI/CD
 
 on:
   push:
-    branches:
-      - staging
+    branches: [ staging ]
 
 jobs:
-  auth_service:
+  changes:
     runs-on: ubuntu-latest
-    if: contains(toJSON(github.event.commits.*.modified), 'packages/auth')
+    # Set job outputs to values from filter step
+    outputs:
+      auth: ${{ steps.filter.outputs.auth }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: detect changes
+      uses: dorny/paths-filter@v2.2.0
+      id: filter
+      with:
+        base: ${{ github.ref_name }}
+        filters: |
+          auth:
+            - 'uplink-hub/packages/auth/**'
+            
+  auth_service:
+    needs: changes
+    if: ${{ needs.changes.outputs.auth == 'true' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Bump version and push tag
         id: auth_create_tag
-        uses: anothrNick/github-tag-action@1.34.0
+        uses: anothrNick/github-tag-action@1.64.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
@@ -26,13 +43,15 @@ jobs:
         uses: docker/setup-buildx-action@v1
         
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push auth
         run: |
-          docker-compose build auth
-          docker tag auth:latest nickdodson/auth-service:${{ steps.auth_create_tag.outputs.new_tag }}
+          docker-compose -f uplink-hub/docker-compose.yaml build auth
+          docker images
+          echo "New tag: ${{ steps.auth_create_tag.outputs.new_tag }}"
+          docker tag uplink-hub_auth:latest nickdodson/auth-service:${{ steps.auth_create_tag.outputs.new_tag }}
           docker push nickdodson/auth-service:${{ steps.auth_create_tag.outputs.new_tag }}

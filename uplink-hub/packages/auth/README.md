@@ -1,1 +1,1 @@
-trigger CI/CD
+trigger CI/CD (create pre release)
