@@ -1,18 +1,16 @@
-from node:alpine
-workdir /usr/src/app
-
-copy ./package.json ./
-copy ./.yarnrc.yml ./.yarnrc.yml
-copy ./.yarn ./.yarn
-copy ./yarn.lock ./
-
-copy ./packages/lib ./packages/lib
-
+# ---- App Build Stage ----
+from node:18-alpine as app-build
+workdir /app
 copy ./packages/auth ./packages/auth
+workdir /app/packages/auth
 run yarn install
+run yarn build
 
-run yarn workspace lib build
+# ---- App Run Stage ----
+from node:18-alpine
+workdir /app
+copy --from=app-build /app/packages/auth/dist ./dist
+copy --from=app-build /app/packages/auth/package.json ./
+run yarn install
+cmd ["yarn", "start"]
 
-workdir /usr/src/app/packages/auth
-expose 5000
-CMD ["yarn", "dev"]

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router
+  namespace: staging
+  labels:
+    app: router
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: router
+  template:
+    metadata:
+      labels:
+        app: router
+    spec:
+      containers:
+      - name: router
+        image: nickdodson/router-service:1.0.4
+        ports:
+          - containerPort: 8080
+        env:
+          - name: SUPERGRAPH_SERVICE_PORT
+            value: "8080"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+  namespace: staging
+spec:
+  type: ClusterIP
+  selector:
+    app: router
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

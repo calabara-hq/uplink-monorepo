@@ -13,7 +13,7 @@ export default function WalletConnectButton() {
           case "unauthenticated":
             return (
               <button className="btn lowercase" onClick={openConnectModal}>
-                connect
+                sign in
               </button>
             );
           case "authenticated":

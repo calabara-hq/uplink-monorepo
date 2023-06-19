@@ -6,8 +6,9 @@ import Redis from 'ioredis';
 import RedisStore from 'connect-redis';
 import dotenv from 'dotenv';
 dotenv.config();
-const port = 5000
 const app = express();
+
+const port = process.env.AUTH_SERVICE_PORT
 
 export const redisClient = new Redis(process.env.REDIS_URL);
 

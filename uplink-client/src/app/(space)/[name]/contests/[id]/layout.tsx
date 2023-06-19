@@ -14,8 +14,8 @@ export default async function Layout({
   const contest = await getContestById(parseInt(params.id));
   const { deadlines } = contest.data.contest;
   return (
-    <div className="m-auto w-[80vw] flex flex-col items-center border-2 border-purple-500">
-      <div className="flex justify-center gap-4 m-auto w-[80vw] lg:py-6">
+    <div className="m-auto w-[80vw] flex flex-col items-center">
+      <div className="flex justify-center gap-6 m-auto w-[80vw] lg:py-6">
         <ContestStateProvider deadlines={deadlines}>
           <VoteProposalProvider contestId={parseInt(params.id)}>
             {children}

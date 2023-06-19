@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.prod.yaml -o kub_manifest/
+    kompose.version: 1.28.0 (c4137012e)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: media
+  name: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: media
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.prod.yaml -o kub_manifest/
+        kompose.version: 1.28.0 (c4137012e)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/uplink-hub-default: "true"
+        io.kompose.service: media
+    spec:
+      containers:
+        - env:
+            - name: PINATA_JWT
+              value: ${PINATA_JWT}
+            - name: REDIS_URL
+              value: ${REDIS_URL}
+          image: media
+          name: media
+          ports:
+            - containerPort: 5000
+          resources: {}
+      restartPolicy: Always
+status: {}

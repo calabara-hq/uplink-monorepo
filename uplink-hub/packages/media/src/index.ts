@@ -1,8 +1,11 @@
 import express from 'express';
 import media from './routes.js';
 import bodyParser from 'body-parser';
-const port = 5000
+import dotenv from 'dotenv';
+dotenv.config();
 const app = express();
+const port = process.env.MEDIA_SERVICE_PORT;
+
 
 app.use(bodyParser.json())
 

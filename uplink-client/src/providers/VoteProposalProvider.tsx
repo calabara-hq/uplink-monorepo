@@ -11,15 +11,24 @@ import { mutate } from "swr";
 export interface VotingStateProps {
   userVotingState: {
     currentVotes: any[];
+    proposedUserVotes: any[];
     totalVotingPower: string;
     votesSpent: string;
     votesRemaining: string;
-    proposedUserVotes: any[];
     isLoading: boolean;
   };
-  removeProposedVote: (id: number) => void;
+  areCurrentVotesDirty: boolean;
+  removeSingleVote: (
+    submissionId: number,
+    mode: "current" | "proposed"
+  ) => void;
+  removeAllVotes: () => void;
   addProposedVote: (el: any) => void;
-  updateProposedVoteAmount: (id: number, amount: string) => void;
+  updateVoteAmount: (
+    id: number,
+    amount: string,
+    mode: "current" | "proposed"
+  ) => void;
   submitVotes: () => void;
 }
 
@@ -36,6 +45,44 @@ const CastVotesDocument = gql`
           submissionUrl
           votes
         }
+      }
+    }
+  }
+`;
+
+const removeSingleVoteDocument = gql`
+  mutation Mutation($submissionId: ID!, $contestId: ID!) {
+    removeSingleVote(submissionId: $submissionId, contestId: $contestId) {
+      success
+      userVotingParams {
+        totalVotingPower
+        userVotes {
+          submissionUrl
+          submissionId
+          id
+          votes
+        }
+        votesRemaining
+        votesSpent
+      }
+    }
+  }
+`;
+
+const removeAllVotesDocument = gql`
+  mutation RemoveAllVotes($contestId: ID!) {
+    removeAllVotes(contestId: $contestId) {
+      success
+      userVotingParams {
+        votesSpent
+        votesRemaining
+        userVotes {
+          id
+          submissionId
+          submissionUrl
+          votes
+        }
+        totalVotingPower
       }
     }
   }
@@ -58,7 +105,12 @@ export const VoteProposalProvider = ({
   const [votesSpent, setVotesSpent] = useState<string>("0");
   const [votesRemaining, setVotesRemaining] = useState<string>("0");
   const [totalVotingPower, setTotalVotingPower] = useState<string>("0");
-  const handleMutation = useHandleMutation(CastVotesDocument);
+  const [areCurrentVotesDirty, setAreCurrentVotesDirty] =
+    useState<boolean>(false);
+
+  const handleCastVotes = useHandleMutation(CastVotesDocument);
+  const handleRemoveSingleVote = useHandleMutation(removeSingleVoteDocument);
+  const handleRemoveAllVotes = useHandleMutation(removeAllVotesDocument);
 
   useEffect(() => {
     if (userVotingParams) {
@@ -66,6 +118,16 @@ export const VoteProposalProvider = ({
       setVotesSpent(userVotingParams.votesSpent);
       setVotesRemaining(userVotingParams.votesRemaining);
       setTotalVotingPower(userVotingParams.totalVotingPower);
+      // if proposed votes are non empty, remove fields from array that appear in current votes (user added votes before signing in)
+      if (proposedVotes.length > 0) {
+        const newProposedVotes = proposedVotes.filter(
+          (el) =>
+            !userVotingParams?.userVotes.find(
+              (vote) => vote.submissionId === el.submissionId
+            )
+        );
+        setProposedVotes(newProposedVotes);
+      }
     }
   }, [userVotingParams]);
 
@@ -77,18 +139,61 @@ export const VoteProposalProvider = ({
       )
     )
       return toast.error("This selection is already in your cart.");
-    setProposedVotes([
-      ...proposedVotes,
-      { ...el, submissionId: el.id, votes: "" },
-    ]);
+    setProposedVotes([...proposedVotes, { ...el, votes: "" }]);
   };
 
-  const removeProposedVote = (id: number) => {
-    setProposedVotes(proposedVotes.filter((el) => el.submissionId !== id));
+  const removeSingleVote = async (
+    submissionId: number,
+    mode: "current" | "proposed"
+  ) => {
+    if (mode === "proposed") {
+      setProposedVotes(
+        proposedVotes.filter((el) => el.submissionId !== submissionId)
+      );
+    }
+
+    if (mode === "current") {
+      const response = await handleRemoveSingleVote({
+        contestId,
+        submissionId,
+      });
+      if (!response) return;
+      const { success, userVotingParams: newUserVotingParams } =
+        response.data.removeSingleVote;
+      if (!success)
+        return toast.error("There was a problem removing your vote.");
+      if (success) {
+        toast.success("Successfully removed your vote.");
+        mutate({ ...newUserVotingParams });
+      }
+    }
   };
 
-  const updateProposedVoteAmount = (id: number, newAmount: string) => {
-    setProposedVotes((prevVotes) => {
+  const removeAllVotes = async () => {
+    const response = await handleRemoveAllVotes({
+      contestId,
+    });
+    if (!response) return;
+    const { success, userVotingParams: newUserVotingParams } =
+      response.data.removeAllVotes;
+    if (!success)
+      return toast.error("There was a problem removing your votes.");
+    if (success) {
+      toast.success("Successfully removed all votes.");
+      mutate({ ...newUserVotingParams });
+      setProposedVotes([]);
+    }
+  };
+
+  const updateVoteAmount = (
+    id: number,
+    newAmount: string,
+    mode: "current" | "proposed"
+  ) => {
+    const updateAction =
+      mode === "current" ? setCurrentVotes : setProposedVotes;
+
+    updateAction((prevVotes) => {
       const newVotes = [...prevVotes];
       const voteToUpdate = newVotes.find((vote) => vote.submissionId === id);
       if (!voteToUpdate) return prevVotes;
@@ -114,23 +219,33 @@ export const VoteProposalProvider = ({
   };
 
   const prepareVotes = () => {
-    const votePayload = [...currentVotes, ...proposedVotes].map((el) => {
+    let runningSum = new Decimal(0);
+    let castVotePayload = [];
+
+    for (const el of [...currentVotes, ...proposedVotes]) {
       const decimalAmount = new Decimal(el.votes || "0");
-      if (decimalAmount.greaterThan(0))
-        return {
+      if (decimalAmount.greaterThan(0)) {
+        runningSum = runningSum.plus(decimalAmount);
+        castVotePayload.push({
           submissionId: el.submissionId,
           votes: el.votes,
-        };
-    });
-    console.log(votePayload);
-    return votePayload;
+        });
+      }
+    }
+
+    return {
+      runningSum,
+      castVotePayload,
+    };
   };
 
   const submitVotes = async () => {
-    const castVotePayload = prepareVotes();
+    const { runningSum, castVotePayload } = prepareVotes();
     if (castVotePayload.length === 0)
-      return toast.error("You have not selected any votes to submit.");
-    const response = await handleMutation({
+      return toast.error("Please add votes to your selections");
+    if (runningSum.greaterThan(totalVotingPower))
+      return toast.error("Insufficient voting power");
+    const response = await handleCastVotes({
       contestId,
       castVotePayload,
     });
@@ -157,9 +272,11 @@ export const VoteProposalProvider = ({
           proposedUserVotes: proposedVotes,
           isLoading,
         },
+        areCurrentVotesDirty,
         addProposedVote,
-        removeProposedVote,
-        updateProposedVoteAmount,
+        removeSingleVote,
+        removeAllVotes,
+        updateVoteAmount,
         submitVotes,
       }}
     >
