@@ -8,7 +8,7 @@ on:
 jobs:
   auth_service:
     runs-on: ubuntu-latest
-    if: contains(toJSON(github.event.commits.*.modified), 'packages/auth')
+    if: contains(toJSON(github.event.commits.*.modified), 'uplink-hub/packages/auth')
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
