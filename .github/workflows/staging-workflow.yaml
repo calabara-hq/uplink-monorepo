@@ -56,7 +56,7 @@ jobs:
 
     - name: Create Release Branch
       run: |
-        git checkout -b release-${{ steps.create_tag.outputs.new_tag }}
+        git checkout -b release-${{ steps.create_tag.outputs.new_tag }} ${{ github.sha }}
         git push origin release-${{ steps.create_tag.outputs.new_tag }}
 
     - name: Create Pull Request
