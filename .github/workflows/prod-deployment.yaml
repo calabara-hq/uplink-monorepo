@@ -1,11 +1,15 @@
 name: prod deploy
 
 on:
-  push:
-    branches: [ main ]
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
     
 jobs:
   create-release:
+    if: github.event.pull_request.merged
     #needs: [build]
     runs-on: ubuntu-latest
     steps:
