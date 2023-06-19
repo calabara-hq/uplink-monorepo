@@ -60,6 +60,11 @@ jobs:
         draft: true
         prerelease: true
 
+    - name: Create Release Branch
+      run: |
+        git checkout -b release-${{ steps.create_tag.outputs.new_tag }} ${{ github.sha }}
+        git push origin release-${{ steps.create_tag.outputs.new_tag }}
+        
     - name: Create Release Branch and PR
       uses: actions/github-script@v6
       with:
