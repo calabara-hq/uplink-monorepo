@@ -2,8 +2,9 @@ name: Staging CI/CD
 
 on:
   push:
-    branches:
-      - staging
+    branches: [ staging ]
+  pull_request:
+    branches: [ staging ]
 
 jobs:
   changes:
