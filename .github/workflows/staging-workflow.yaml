@@ -3,8 +3,6 @@ name: Staging CI/CD
 on:
   push:
     branches: [ staging ]
-  pull_request:
-    branches: [ staging ]
 
 jobs:
   changes:
@@ -17,6 +15,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
+    - uses: actions/checkout@v2
     # For pull requests it's not necessary to checkout the code
     - uses: dorny/paths-filter@v2.2.0
       id: filter
