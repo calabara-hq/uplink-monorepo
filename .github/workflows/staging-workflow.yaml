@@ -24,9 +24,9 @@ jobs:
 
       - name: Build and push docker images
         run: |
-          docker-compose -f uplink-hub/docker-compose.yaml -e GITHUB_SHA_TAG=${{ steps.get_sha.outputs.sha_short }}  build
-          echo "SHA TAG: ${{ steps.get_sha.outputs.sha_short }}"
-          docker-compose -f uplink-hub/docker-compose.yaml -e GITHUB_SHA_TAG=${{ steps.get_sha.outputs.sha_short }} push
+          export GITHUB_SHA_TAG=${{ steps.get_sha.outputs.sha_short }}
+          docker-compose -f uplink-hub/docker-compose.yaml build
+          docker-compose -f uplink-hub/docker-compose.yaml push
           
       - name: Bump version and push tag
         id: create_branch_tag
