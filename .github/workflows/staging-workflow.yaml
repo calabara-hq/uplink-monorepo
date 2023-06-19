@@ -33,7 +33,7 @@ jobs:
           
 
           
-  create-release:
+  create-prerelease:
     #needs: [build]
     runs-on: ubuntu-latest
     steps:
