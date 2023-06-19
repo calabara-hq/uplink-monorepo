@@ -45,7 +45,7 @@ jobs:
         DEFAULT_BUMP: patch  # you can change this to 'minor' or 'major' as per your needs
     - name: Generate Release Tag
       id: gen_release_tag
-      run: echo "release_tag=${{ steps.create_tag.outputs.new_tag#v }}" >> $GITHUB_OUTPUT
+      run: echo "release_tag=${ steps.create_tag.outputs.new_tag#v }" >> $GITHUB_OUTPUT
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
