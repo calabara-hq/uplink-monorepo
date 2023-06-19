@@ -32,9 +32,9 @@ jobs:
 
       - name: Bump version and push tag
         id: auth_create_tag
-        uses: anothrNick/github-tag-action@1.34.0
+        uses: anothrNick/github-tag-action@1.64.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
           DEFAULT_BUMP: patch
           TAG_PREFIX: auth-
@@ -43,7 +43,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
         
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v1 1. 
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -54,5 +54,5 @@ jobs:
           docker images
           echo "New tag: ${{ steps.auth_create_tag.outputs.new_tag }}"
           docker tag uplink-hub_auth:latest nickdodson/auth-service:latest-${{ steps.auth_create_tag.outputs.new_tag }}
-          docker push nickdodson/auth-service:latest-${{ steps.auth_create_tag.outputs.new_tag }}
+          docker push nickdodson/auth-service:${{ steps.auth_create_tag.outputs.new_tag }}
 
