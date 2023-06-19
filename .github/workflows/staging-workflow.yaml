@@ -10,7 +10,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+      - name: Get short sha
+        run: echo "SHORT_SHA=$("${{ github.sha }}".SubString(0, 8))" >> $env:GITHUB_ENV
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         
@@ -22,9 +23,9 @@ jobs:
 
       - name: Build and push docker images
         run: |
-          docker-compose -f uplink-hub/docker-compose.yaml -e GITHUB_SHA_TAG=${{ github.sha }} build
-          echo "SHA TAG: ${GITHUB_SHA::8}"
-          docker-fompose -f uplink-hub/docker-compose.yaml -e -e GITHUB_SHA_TAG=${{ github.sha }} push
+          docker-compose -f uplink-hub/docker-compose.yaml -e GITHUB_SHA_TAG=${{ env.SHORT_SHA }}  build
+          echo "SHA TAG: ${{ env.SHORT_SHA }}"
+          docker-compose -f uplink-hub/docker-compose.yaml -e GITHUB_SHA_TAG=${{ env.SHORT_SHA }} push
           
       - name: Bump version and push tag
         id: create_branch_tag
