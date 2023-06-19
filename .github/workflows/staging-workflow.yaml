@@ -1,8 +1,9 @@
 name: Staging CI/CD
 
 on:
-  push:
-    branches: [ staging ]
+  issues:
+    types: 
+      - opened
 
 jobs:         
 #   build:
