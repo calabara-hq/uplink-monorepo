@@ -28,15 +28,21 @@ export default async function RootLayout({
   const session = await getInitialSession();
 
   return (
-    <html lang="en" data-theme="mytheme">
+    <html lang="en" data-theme="uplinkDark">
       <head />
-      <body className="bg-gradient-vertical min-h-screen">
+      <body className="bg-base min-h-screen overflow-hidden">
         <WalletProvider session={session}>
-          <Nav />
-          {/*<Sidebar />*/}
-          <ToastProvider>
-            <main className="">{children}</main>
-          </ToastProvider>
+          <div className="flex flex-col md:grid md:grid-cols-[64px_auto] h-screen">
+            <Sidebar />
+            <ToastProvider>
+              <main className="overflow-auto">
+                <Nav />
+                <div className="flex flex-col items-center justify-center pb-20 md:pb-0">
+                  {children}
+                </div>
+              </main>
+            </ToastProvider>
+          </div>
         </WalletProvider>
       </body>
     </html>
@@ -44,3 +50,26 @@ export default async function RootLayout({
 
   return;
 }
+
+/*
+  return (
+    <html lang="en" data-theme="uplinkDark">
+      <head />
+      <body className="bg-base min-h-screen w-full">
+        <WalletProvider session={session}>
+          <div className="flex w-full h-screen ">
+            <Sidebar />
+            <ToastProvider>
+              <div className="flex flex-col flex-grow ">
+                <Nav />
+                <div className="flex flex-col items-center justify-center">
+                  {children}
+                </div>
+              </div>
+            </ToastProvider>
+          </div>
+        </WalletProvider>
+      </body>
+    </html>
+  );
+*/

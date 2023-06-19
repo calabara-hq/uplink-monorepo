@@ -1,18 +1,23 @@
-from node:alpine
-workdir /usr/src/app
+FROM node:18-alpine
+WORKDIR /app
 
-copy ./package.json ./
-copy ./.yarnrc.yml ./.yarnrc.yml
-copy ./.yarn ./.yarn
-copy ./yarn.lock ./
+# Copy all the necessary files for install
+COPY ./package.json ./
+COPY ./.yarnrc.yml ./.yarnrc.yml
+COPY ./.yarn ./.yarn
+COPY ./yarn.lock ./
 
-copy ./packages/lib ./packages/lib
+# Copy the source code of the workspaces
+COPY ./packages/lib ./packages/lib
+COPY ./packages/media ./packages/media
 
-copy ./packages/media ./packages/media
-run yarn install
+# Install all dependencies
+RUN yarn install
 
-run yarn workspace lib build
+# Build the workspaces
+RUN yarn workspace lib build
+RUN yarn workspace media build
 
-workdir /usr/src/app/packages/media
-expose 5000
-CMD ["yarn", "dev"]
+workdir /app/packages/media
+
+CMD ["yarn", "start"]

@@ -1,5 +1,6 @@
 import { GraphQLScalarType, Kind, ValueNode } from 'graphql';
-import { OutputData, OutputBlockData } from '@editorjs/editorjs';
+import { OutputBlockData } from '@editorjs/editorjs';
+
 
 interface IEditorBlockData<T extends object = object> extends OutputBlockData<string, T> { }
 

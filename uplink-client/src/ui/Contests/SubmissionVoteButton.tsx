@@ -2,11 +2,16 @@
 
 import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
 
-const SubmissionVoteButton = ({ data }: { data: any }) => {
+const SubmissionVoteButton = ({ submission }: { submission: any }) => {
   const { addProposedVote } = useVoteProposalContext();
   return (
     <div>
-      <button className="btn" onClick={() => addProposedVote(data)}>
+      <button
+        className="btn"
+        onClick={() =>
+          addProposedVote({ ...submission, submissionId: submission.id })
+        }
+      >
         add to cart
       </button>
     </div>

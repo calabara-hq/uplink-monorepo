@@ -1,0 +1,119 @@
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+{
+  query: Query
+  mutation: Mutation
+}
+
+directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+type Admin
+  @join__type(graph: SPACES)
+{
+  id: Int!
+  spaceId: Int!
+  address: String!
+}
+
+scalar IpfsUrl
+  @join__type(graph: SPACES)
+
+scalar join__FieldSet
+
+enum join__Graph {
+  SPACES @join__graph(name: "spaces", url: "http://spaces.svc.cluster.local:8080")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+type Mutation
+  @join__type(graph: SPACES)
+{
+  createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse!
+  editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse!
+}
+
+type Query
+  @join__type(graph: SPACES)
+{
+  space(id: ID, name: String): Space
+  spaces: [Space!]!
+}
+
+type Space
+  @join__type(graph: SPACES, key: "id")
+{
+  id: ID!
+  name: String!
+  displayName: String!
+  members: Int!
+  logoUrl: String!
+  twitter: String
+  website: String
+  admins: [Admin!]!
+  spaceTokens: [SpaceToken!]!
+}
+
+type SpaceBuilderErrors
+  @join__type(graph: SPACES)
+{
+  name: String
+  logoUrl: String
+  website: String
+  twitter: String
+  admins: String
+}
+
+input SpaceBuilderInput
+  @join__type(graph: SPACES)
+{
+  name: String!
+  logoUrl: IpfsUrl!
+  website: String
+  twitter: String
+  admins: [String!]!
+}
+
+type SpaceMutationResponse
+  @join__type(graph: SPACES)
+{
+  spaceName: String
+  success: Boolean!
+  errors: SpaceBuilderErrors
+}
+
+type SpaceToken
+  @join__type(graph: SPACES)
+{
+  id: Int!
+  tokenHash: String!
+  symbol: String!
+  decimals: Int!
+  address: String
+  tokenId: String
+}

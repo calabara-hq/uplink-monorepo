@@ -1,6 +1,6 @@
 FROM debian:bullseye-slim
 
-ARG ROUTER_RELEASE=latest
+ARG ROUTER_RELEASE=v1.20.0
 ARG DEBUG_IMAGE=false
 
 WORKDIR /dist
@@ -27,9 +27,9 @@ RUN curl -sSL https://router.apollo.dev/download/nix/${ROUTER_RELEASE}/ | sh
 # Make directories for config and schema
 RUN mkdir config schema
 
-# Copy configuration for docker image
+# Copy configuration for kubernetes image
 COPY ./packages/graphql-api/supergraph/router.yaml config
-COPY ./packages/graphql-api/supergraph/schema/docker.graphql /dist/schema
+COPY ./packages/graphql-api/supergraph/schema/kubernetes.graphql /dist/schema
 LABEL org.opencontainers.image.authors="Apollo Graph, Inc. https://github.com/apollographql/router"
 LABEL org.opencontainers.image.source="https://github.com/apollographql/router"
 
@@ -51,4 +51,4 @@ RUN \
 RUN chmod 755 /dist/router_wrapper.sh
 
 # Default executable is the wrapper script
-ENTRYPOINT ["/dist/router_wrapper.sh", "-s", "schema/docker.graphql", "--dev"]
+ENTRYPOINT ["/dist/router_wrapper.sh", "-s", "schema/kubernetes.graphql", "--dev"]

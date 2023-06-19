@@ -744,7 +744,7 @@ export const arraysSubtract = (arr1: IToken[], arr2: IToken[], strictTypes?: str
 }
 
 export const validateStep = (state: ContestBuilderProps, step: number) => {
-    const errors = {}
+
     switch (step) {
         case 0:
             return validateContestMetadata(state.metadata);
@@ -765,7 +765,6 @@ export const validateStep = (state: ContestBuilderProps, step: number) => {
         case 8:
             return { isError: false, errors: {} }
     }
-    return errors
 }
 
 

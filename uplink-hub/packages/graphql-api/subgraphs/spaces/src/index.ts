@@ -6,8 +6,11 @@ import { readFileSync } from "fs";
 import resolvers from "./resolvers/index.js";
 const typeDefs = gql(readFileSync("./schema.graphql").toString('utf-8'));
 import cookie from 'cookie';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const port = 4000
+const port = parseInt(process.env.SPACE_SERVICE_PORT)
+
 //const server = new ApolloServer({ schema: buildSubgraphSchema({ typeDefs, resolvers })});
 
 
@@ -17,7 +20,7 @@ const server = new ApolloServer({
 });
 
 const { url } = await startStandaloneServer(server, {
-  listen: { port: port },
+  listen: { port },
   context: async ({ req }) => {
     // get the user token from the headers
     // get the 'session-cookie' header from the request

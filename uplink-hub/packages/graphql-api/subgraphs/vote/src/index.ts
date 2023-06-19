@@ -6,9 +6,10 @@ import { readFileSync } from "fs";
 import resolvers from "./resolvers/index.js";
 const typeDefs = gql(readFileSync("./schema.graphql").toString('utf-8'));
 import cookie from 'cookie';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const port = 4000
-//const server = new ApolloServer({ schema: buildSubgraphSchema({ typeDefs, resolvers })});
+const port = parseInt(process.env.VOTE_SERVICE_PORT)
 
 
 // initialize the apollo server with buildSubgraphSchema and context

@@ -27,8 +27,6 @@ const variants = {
   },
 };
 
-
-
 export default function CreateThread() {
   const [modalIsOpen, setModalisOpen] = useState(false);
   const [[currentStep, direction], setCurrentStep] = useState([0, 0]);
@@ -44,13 +42,12 @@ export default function CreateThread() {
       setCurrentStep([nextStep, newDirection]);
     }
   };
-  
+
   const steps = Array.from({ length: maxSteps }).map((_, index) => {
     return {
       component: <Tweet key={index} />,
     };
   });
-  
 
   return (
     <div>
@@ -79,7 +76,7 @@ export default function CreateThread() {
               />
             )}
             <div className="w-full h-full bg-base-100 p-4">
-            <p className="float-right">{currentStep}</p>
+              <p className="float-right">{currentStep}</p>
 
               {steps[currentStep].component}
             </div>
@@ -115,11 +112,12 @@ const Tweet = () => {
 
   const handleImageUpload = (e: any) => {
     const files = Array.from(e.target.files).slice(0, 4);
-    const images = files.map((file) => URL.createObjectURL(file));
+    const images = files.map((file: Blob | MediaSource) =>
+      URL.createObjectURL(file)
+    );
     setUploadedImages(images);
   };
   const [uploadedImages, setUploadedImages] = useState([]);
-
 
   return (
     <div className="bg-base-100 rounded-lg h-full">

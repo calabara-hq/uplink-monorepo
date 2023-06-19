@@ -30,6 +30,13 @@ const colors = {
 }
 
 
+const colors2 = {
+  base1: '#1c1f26',
+  base2: '#a8b3cf33',
+  base3: 'red'
+}
+
+
 
 module.exports = {
   content: [
@@ -38,10 +45,15 @@ module.exports = {
 
   theme: {
     extend: {
+      backgroundColor: {
+        "base": "#0e1217",
+      },
       backgroundImage: {
         'landing': "url('/landing-bg.svg')",
         'gradient-vertical': 'linear-gradient(to bottom, rgb(32, 39, 56) 0%, rgb(7, 8, 22) 100%)',
-
+      },
+      backgroundRepeat: {
+        'repeat': 'repeat',
       },
       fontFamily: {
         'virgil': ['Virgil', 'sans-serif'],
@@ -90,6 +102,19 @@ module.exports = {
           error: colors.error,
 
 
+        },
+        uplinkDark: {
+          primary: colors.primary,
+          secondary: colors.secondary,
+          accent: colors.accent2,
+          'base-100': colors2.base1,
+          'base-200': colors2.base2,
+          'base-300': colors2.base3,
+          neutral: colors.neutral1,
+          info: colors.info,
+          success: colors.success,
+          warning: colors.warning,
+          error: colors.error,
         }
       }
     ]

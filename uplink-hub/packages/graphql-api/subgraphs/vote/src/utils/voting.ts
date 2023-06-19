@@ -261,15 +261,15 @@ export const insertVotes = async (user: any, contestId: any, payload: any) => {
             } as schema.dbNewVoteType
         });
 
-        console.log('preparedPayload', preparedPayload)
-        await db.insert(schema.votes).values(preparedPayload).onDuplicateKeyUpdate({
-            set: {
-                amount: sqlOps.sql`values(amount)`,
-            }
+
+        await db.transaction(async (tx) => {
+            // delete all user votes
+            await tx.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
+            // set new votes
+            await tx.insert(schema.votes).values(preparedPayload);
         });
-        return true;
+
     } catch (err) {
-        console.log('PRINTING HERE')
         console.log(err)
         throw new GraphQLError('Failed to create votes', {
             extensions: {
