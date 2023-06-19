@@ -52,6 +52,6 @@ jobs:
         run: |
           docker-compose -f uplink-hub/docker-compose.yaml build auth
           docker images
-          docker tag uplink-hub-auth:latest nickdodson/auth-service:latest-${{ steps.auth_create_tag.outputs.new_tag }}
+          docker tag uplink-hub_auth:latest nickdodson/auth-service:latest-${{ steps.auth_create_tag.outputs.new_tag }}
           docker push nickdodson/auth-service:latest-${{ steps.auth_create_tag.outputs.new_tag }}
 
