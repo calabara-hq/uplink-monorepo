@@ -6,6 +6,7 @@
 *.cert
 *.crt
 *.key
+router
 drizzle.config.json
 migrations/
 node_modules/
