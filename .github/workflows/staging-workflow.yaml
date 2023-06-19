@@ -6,9 +6,28 @@ on:
       - staging
 
 jobs:
-  auth_service:
+  changes:
     runs-on: ubuntu-latest
-    if: contains(toJSON(github.event.commits.*.modified), 'uplink-hub/packages/auth')
+    # Required permissions
+    permissions:
+      pull-requests: read
+    # Set job outputs to values from filter step
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+    # For pull requests it's not necessary to checkout the code
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          auth:
+            - 'uplink-hub/packages/auth/**'
+            
+  auth_service:
+    needs: changes
+    if: ${{ needs.changes.outputs.auth == 'true' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
