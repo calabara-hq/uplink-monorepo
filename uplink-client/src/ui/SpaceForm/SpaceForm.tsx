@@ -172,6 +172,8 @@ const SpaceLogo = ({
         accept="image/*"
         className="hidden"
         onChange={async (event) => {
+          // TODO: handle media upload
+          /*
           handleMediaUpload(
             event,
             ["image"],
@@ -188,6 +190,7 @@ const SpaceLogo = ({
               });
             }
           );
+          */
         }}
         ref={imageUploader}
       />

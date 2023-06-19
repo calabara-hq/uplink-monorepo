@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.prod.yaml -o kub_manifest/
+    kompose.version: 1.28.0 (c4137012e)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: auth
+  name: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: auth
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.prod.yaml -o kub_manifest/
+        kompose.version: 1.28.0 (c4137012e)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/uplink-hub-default: "true"
+        io.kompose.service: auth
+    spec:
+      containers:
+        - env:
+            - name: REDIS_URL
+              value: ${REDIS_URL}
+            - name: TWITTER_ACCESS_TOKEN_KEY
+              value: ${TWITTER_ACCESS_TOKEN_KEY}
+            - name: TWITTER_ACCESS_TOKEN_SECRET
+              value: ${TWITTER_ACCESS_TOKEN_SECRET}
+            - name: TWITTER_BEARER
+              value: ${TWITTER_BEARER}
+            - name: TWITTER_CALLBACK_URL
+              value: ${TWITTER_CALLBACK_URL}
+            - name: TWITTER_CONSUMER_KEY
+              value: ${TWITTER_CONSUMER_KEY}
+            - name: TWITTER_CONSUMER_SECRET
+              value: ${TWITTER_CONSUMER_SECRET}
+            - name: TWITTER_OAUTH_CLIENT_ID
+              value: ${TWITTER_OAUTH_CLIENT_ID}
+            - name: TWITTER_OAUTH_CLIENT_SECRET
+              value: ${TWITTER_OAUTH_CLIENT_SECRET}
+          image: auth
+          name: auth
+          ports:
+            - containerPort: 5000
+          resources: {}
+      restartPolicy: Always
+status: {}

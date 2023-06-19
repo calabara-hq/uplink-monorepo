@@ -1,11 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useContestState } from "@/providers/ContestStateProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   SubmissionCardVote,
-  SubmissionCardBoxSelect,
   LockedCardVote,
 } from "../SubmissionCard/SubmissionCard";
 
@@ -16,11 +15,16 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   XCircleIcon,
+  PhotoIcon,
+  PlusIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/solid";
 import useVotingParams from "@/hooks/useVotingParams";
 import useSubmitParams from "@/hooks/useSubmitParams";
 import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
 import useTrackSubmissions from "@/hooks/useTrackSubmissions";
+import { useSession } from "@/providers/SessionProvider";
+import WalletConnectButton from "../ConnectButton/ConnectButton";
 /**
  *
  * the standard sidebar for the main contest view
@@ -107,7 +111,7 @@ const VoterTabBar = ({
         }`}
         onClick={() => handleTabClick("votes")}
       >
-        Voting Cart
+        My Selections
         {proposedSelection.length > 0 && (
           <span className="indicator-item badge badge-secondary">
             {proposedSelection.length}
@@ -159,7 +163,7 @@ const VoteTab = ({
   proposedSelection: any[];
   renderEditButton: () => React.ReactNode;
 }) => {
-  const { userVotingState } = useVoteProposalContext();
+  const { userVotingState, removeAllVotes } = useVoteProposalContext();
   const {
     currentVotes,
     proposedUserVotes,
@@ -167,12 +171,11 @@ const VoteTab = ({
     votesSpent,
     votesRemaining,
   } = userVotingState;
-  const {liveSubmissions} = useTrackSubmissions(contestId)
-
+  const { liveSubmissions } = useTrackSubmissions(contestId);
 
   const [votesSpentColor, setVotesSpentColor] = useState("");
   const [votesRemainingColor, setVotesRemainingColor] = useState("");
-  
+
   /*
 
   some color fun
@@ -218,6 +221,13 @@ const VoteTab = ({
         initial="hidden"
         animate="visible"
       >
+        {proposedUserVotes.length > 0 && (
+          <div className="flex flex-row w-full justify-end items-center p-2">
+            <button className="btn btn-sm btn-ghost" onClick={removeAllVotes}>
+              remove all
+            </button>
+          </div>
+        )}
         {currentVotes.length > 0 && (
           <motion.div
             className="flex flex-col gap-4 p-2 m-2 max-h-80 overflow-y-auto bg-neutral rounded-lg"
@@ -228,17 +238,32 @@ const VoteTab = ({
               {renderEditButton()}
             </div>
             <div className="flex flex-col gap-2 transition-opacity">
-
-              {currentVotes.map((sub: any, idx: number) => {
+              {currentVotes.map((submission: any, idx: number) => {
                 if (editMode) {
-                  console.log('edit mode m8')
-                  return <SubmissionCardVote key={idx} sub={liveSubmissions.find(
-                    el => el.id === sub.submissionId
-                  ).data} />;
+                  return (
+                    <SubmissionCardVote
+                      key={idx}
+                      mode={"current"}
+                      submission={{
+                        ...submission,
+                        data: liveSubmissions.find(
+                          (el) => el.id === submission.submissionId
+                        ).data,
+                      }}
+                    />
+                  );
                 } else {
-                  return <LockedCardVote key={idx} sub={liveSubmissions.find(
-                    el => el.id === sub.submissionId
-                  ).data}/>;
+                  return (
+                    <LockedCardVote
+                      key={idx}
+                      submission={{
+                        ...submission,
+                        data: liveSubmissions.find(
+                          (el) => el.id === submission.submissionId
+                        ).data,
+                      }}
+                    />
+                  );
                 }
               })}
             </div>
@@ -248,37 +273,74 @@ const VoteTab = ({
         {proposedUserVotes.length > 0 && (
           <motion.div variants={itemVariants}>
             <div className="flex flex-row w-full justify-start items-center p-2">
-              <p className="">+ Your Proposed additions:</p>
+              <p className="">+ Your proposed additions</p>
             </div>
             <div className="flex flex-col gap-4 p-2 max-h-80 overflow-y-auto">
-              {proposedUserVotes.map((sub: any, idx: number) => (
-                <SubmissionCardVote key={idx} sub={sub} />
+              {proposedUserVotes.map((submission: any, idx: number) => (
+                <SubmissionCardVote
+                  key={idx}
+                  submission={submission}
+                  mode={"proposed"}
+                />
               ))}
             </div>
           </motion.div>
         )}
+
+        {proposedUserVotes.length === 0 && currentVotes.length === 0 && (
+          <motion.div variants={itemVariants}>
+            <div className="p-10"></div>
+            <div className="relative flex flex-col items-center justify-center w-full">
+              <SparklesIcon className="absolute top-0 right-28 w-6 h-6 text-accent" />
+              <SparklesIcon className="absolute top-32 left-28 w-6 h-6 text-accent" />
+              <div className="relative flex flex-col items-center justify-center w-36 h-36 bg-base-100 rounded-xl">
+                <PhotoIcon className="w-24 h-24" />
+                <div className="space-y-2 w-full">
+                  <div className="h-3 w-1/3 rounded-lg bg-gray-500 shimmer ml-2" />
+                  <div className="h-2 w-1/2 rounded-lg bg-gray-500 shimmer ml-2" />
+                </div>
+                <PlusIcon className="absolute bottom-0 right-0 w-6 h-6 ml-auto m-2 text-accent" />
+              </div>
+              <div className="p-4"></div>
+              <h1>No entries selected</h1>
+              <p className="text-center">
+                Select entries by clicking the plus sign in the bottom right
+                corner.
+              </p>
+            </div>
+            <div className="p-10"></div>
+          </motion.div>
+        )}
+
         <motion.div className="flex flex-col gap-2 p-2" variants={itemVariants}>
-          <div className="grid grid-cols-3 justify-items-center justify-evenly gap-2 w-full font-bold text-center">
+          <div className="grid grid-cols-3 justify-items-center justify-evenly gap-4 font-bold text-center">
+            {/*
             <p>Voting Power</p>
             <p>Votes Spent</p>
-            <p>Remaining</p>
+            <p>Votes Remaining</p>
             <p>{totalVotingPower}</p>
             <p className={votesSpentColor}>{votesSpent}</p>
             <p className={votesRemainingColor}>{votesRemaining}</p>
+        */}
+
+            <div className="flex flex-col items-center p-2 bg-base-100 w-full rounded">
+              <p className="text-sm text-gray-500">Voting Power</p>
+              <p>{totalVotingPower}</p>
+            </div>
+            <div className="flex flex-col items-center p-2 bg-base-100 w-full rounded">
+              <p className="text-sm text-gray-500">Votes Spent</p>
+              <p className={votesSpentColor}>{votesSpent}</p>
+            </div>
+            <div className="flex flex-col items-center p-2 bg-base-100 w-full rounded">
+              <p className="text-sm text-gray-500">Votes Remaining</p>
+              <p className={votesRemainingColor}>{votesRemaining}</p>
+            </div>
           </div>
         </motion.div>
-
-        {proposedUserVotes.length > 0 && (
-          <div className="flex flex-row w-full justify-end items-center p-2">
-            <button className="btn btn-sm btn-ghost">remove all</button>
-          </div>
-        )}
       </motion.div>
     </>
   );
 };
-
-
 
 const DetailTab = ({}) => {
   return (
@@ -352,15 +414,12 @@ export function VoterCart({ contestId }: { contestId: number }) {
           {activeTab === "votes" && isVotingCartVisible && (
             <>
               <VoteTab
-              contestId={contestId}
+                contestId={contestId}
                 editMode={editMode}
                 proposedSelection={proposedSelection}
                 renderEditButton={renderEditButton}
               />
-              <div className="p-2 " />
-              {(userVotingState.proposedUserVotes.length > 0 || editMode) && (
-                <VoteButton />
-              )}
+              <VoteButton />
             </>
           )}
           {activeTab === "details" && <DetailTab />}
@@ -371,14 +430,29 @@ export function VoterCart({ contestId }: { contestId: number }) {
 }
 
 export function VoteButton() {
-  const { userVotingState, submitVotes } = useVoteProposalContext();
+  const { userVotingState, submitVotes, areCurrentVotesDirty } =
+    useVoteProposalContext();
+
+  const { status } = useSession();
+
+  const isVoteButtonEnabled =
+    areCurrentVotesDirty || userVotingState.proposedUserVotes.length > 0;
+
   const handleSubmit = () => {
     submitVotes();
   };
+
+  if (status !== "authenticated") {
+    return <WalletConnectButton />;
+  }
   return (
-    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
-      <button className="btn btn-secondary flex flex-1" onClick={handleSubmit}>
-        Submit Batch Vote
+    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-9/10 m-2">
+      <button
+        className="btn btn-secondary flex flex-1"
+        onClick={handleSubmit}
+        disabled={!isVoteButtonEnabled}
+      >
+        Cast Votes
       </button>
       <p className="mx-2 p-2 text-center">1 days</p>
     </div>
@@ -398,7 +472,7 @@ const SidebarSkeleton = () => {
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
       <div className="flex flex-col justify-between bg-base-100  rounded-lg w-full">
-       <div className="space-y-2 p-4">
+        <div className="space-y-2 p-4">
           <div className={`h-6 w-1/3 mb-4 rounded-lg bg-neutral ${shimmer}`} />
           <div className={`h-4 w-1/2 rounded-lg bg-neutral ${shimmer}`} />
           <div className={`h-4 w-1/2 rounded-lg bg-neutral ${shimmer}`} />

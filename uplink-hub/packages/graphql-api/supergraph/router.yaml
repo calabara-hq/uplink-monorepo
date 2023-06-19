@@ -1,5 +1,5 @@
 supergraph:
-  listen: 0.0.0.0:4000
+  listen: 0.0.0.0:${env.SUPERGRAPH_SERVICE_PORT}
 
 headers:
   # Header rules for all subgraphs

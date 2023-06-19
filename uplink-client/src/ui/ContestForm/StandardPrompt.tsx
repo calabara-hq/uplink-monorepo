@@ -74,6 +74,8 @@ const StandardPrompt = ({
                   accept="image/*"
                   className="hidden"
                   onChange={(event) => {
+                    // TODO: handle media upload
+                    /*
                     handleMediaUpload(
                       event,
                       ["image"],
@@ -91,6 +93,7 @@ const StandardPrompt = ({
                         });
                       }
                     );
+                    */
                   }}
                   ref={imageUploader}
                 />

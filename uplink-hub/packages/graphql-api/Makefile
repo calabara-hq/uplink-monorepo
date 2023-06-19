@@ -7,14 +7,14 @@ export SUBGRAPH_BOOT_TIME=2
 .PHONY: config
 config:
 	scripts/config.sh "localhost" > ./supergraph/schema/local.yaml 2>/dev/null
-	scripts/config.sh "docker-compose" > ./supergraph/schema/docker.yaml 2>/dev/null
+	scripts/config.sh "kubernetes" > ./supergraph/schema/kubernetes.yaml 2>/dev/null
 
 .PHONY: compose
 compose:
 	@set -x; cd supergraph/schema; \
 	  rover supergraph compose --elv2-license=accept --config local.yaml > local.graphql
 	@set -x; cd supergraph/schema; \
-	  rover supergraph compose --elv2-license=accept --config docker.yaml > docker.graphql
+	  rover supergraph compose --elv2-license=accept --config kubernetes.yaml > kubernetes.graphql
 
 .PHONY: integration
 integration:
