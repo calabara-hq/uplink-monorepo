@@ -43,18 +43,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: false
         DEFAULT_BUMP: patch
+        PRERELEASE: true
         
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.create_tag.outputs.new_tag }}
-        release_name: Release ${{ steps.create_tag.outputs.new_tag }}
-        draft: true
-        prerelease: true
-
     - name: Create Release Branch
       run: |
         git config --local user.email "action@github.com"
