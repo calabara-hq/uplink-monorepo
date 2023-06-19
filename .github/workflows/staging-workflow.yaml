@@ -43,9 +43,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
         DEFAULT_BUMP: patch  # you can change this to 'minor' or 'major' as per your needs
-    - name: Generate Release Tag
-      id: gen_release_tag
-      run: echo "release_tag=${ steps.create_tag.outputs.new_tag#v }" >> $GITHUB_OUTPUT
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
@@ -53,14 +50,14 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.create_tag.outputs.new_tag }}
-        release_name: Release ${{ steps.gen_release_tag.outputs.release_tag }}
+        release_name: Release ${{ steps.create_tag.outputs.new_tag }}
         draft: true
         prerelease: true
 
     - name: Create Release Branch
       run: |
-        git checkout -b release-${{ steps.gen_release_tag.outputs.release_tag }}
-        git push origin release-${{ steps.gen_release_tag.outputs.release_tag }}
+        git checkout -b release-${{ steps.create_tag.outputs.new_tag }}
+        git push origin release-${{ steps.create_tag.outputs.new_tag }}
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
@@ -68,7 +65,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         branch: release-${{ steps.create_tag.outputs.new_tag }}
         base: main
-        title: 'Release ${{ steps.gen_release_tag.outputs.release_tag }}'
+        title: 'Release ${{ steps.create_tag.outputs.new_tag }}'
         body: 'Release of version ${{ steps.create_tag.outputs.new_tag }}'
         draft: true
 
