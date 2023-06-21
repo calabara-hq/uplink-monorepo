@@ -91,8 +91,14 @@ jobs:
           project_id: ${{ secrets.GKE_PROJECT }}
           location: ${{ env.GKE_ZONE }}
           
-      - name: print tag
-        run: echo "${{ needs.build.steps.bump_tag.outputs.new_tag }}"
+      - name: Download version artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: version
+
+      - name: Read version artifact
+        id: read_version
+        run: echo "::set-output name=version::$(cat version.txt)"
       
       - name: Set up helm
         uses: azure/setup-helm@v3
@@ -104,9 +110,9 @@ jobs:
       - name: Deploy staging
         run: |
           cd uplink-hub/helm
-          helm package --app-version=${{ needs.build.steps.bump_tag.outputs.new_tag }} ./uplink-charts/ \
+          helm package --app-version=${{ steps.read_version.outputs.version }} ./uplink-charts/ \
           | helm upgrade -i uplink-hub ./uplink-charts-0.1.0.tgz -n staging \
-          -f ./uplink-charts/values.staging.yaml --set image_version_tag=${{ needs.build.steps.bump_tag.outputs.new_tag }}
+          -f ./uplink-charts/values.staging.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
           
       - name: Upload chart artifact
         uses: actions/upload-artifact@v2
