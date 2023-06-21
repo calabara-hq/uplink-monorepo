@@ -39,7 +39,16 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             WITH_V: true
             DEFAULT_BUMP: minor
-
+            
+        - name: Save version to file
+          run: echo "${{ steps.bump_tag.outputs.new_tag }}" > version.txt
+          
+        - name: Upload version artifact
+          uses: actions/upload-artifact@v2
+          with:
+            name: version
+            path: version.txt
+          
         - name: Build and push docker images
           run: |
             export GITHUB_VERSION_TAG=${{ steps.bump_tag.outputs.new_tag }}
