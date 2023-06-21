@@ -139,10 +139,20 @@ jobs:
           curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
           chmod u+x ./kustomize
 
+      - name: Download version artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: version
+
+      - name: Read version artifact
+        id: read_version
+        run: echo "::set-output name=version::$(cat version.txt)"
+
+
       - name: Deploy Prod
         run: |
           cd uplink-hub/k8s
-          (cd overlays/production/auth && kustomize edit set image nickdodson/auth-service:${{needs.build.steps.bump_tag.outputs.new_tag}})
+          (cd overlays/production/auth && kustomize edit set image nickdodson/auth-service:${{ steps.read_version.outputs.version }})
           kubectl apply -k overlays/production
           kubectl get svc -n production -o wide
           kubectl get deploy -n production -o wide
@@ -153,7 +163,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.build.steps.bump_tag.outputs.new_tag }}
-          release_name: Release ${{ needs.build.steps.bump_tag.outputs.new_tag }}
+          tag_name: ${{ steps.read_version.outputs.version }}
+          release_name: Release ${{ steps.read_version.outputs.version }}
           draft: false
           prerelease: false
