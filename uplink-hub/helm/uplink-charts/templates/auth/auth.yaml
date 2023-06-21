@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: auth
 spec:
-  replicas: 3
+  replicas: {{ .Values.auth.replicaCount }}
   selector:
     matchLabels:
       app: auth
@@ -15,6 +15,9 @@ spec:
       containers:
       - name: auth
         image: "{{ .Values.auth.image.repository }}:{{ .Values.image_version_tag }}"
+        resources:
+          requests:
+            cpu: "20m"
         env:
           - name: AUTH_SERVICE_PORT
             value: "8080"
