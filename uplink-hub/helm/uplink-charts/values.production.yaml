@@ -16,7 +16,7 @@ router:
     maxReplicas: 5
     targetCpuPercentage: 80
 
-space:
+spaces:
   image:
     repository: nickdodson/spaces-service
   replicaCount: 3
