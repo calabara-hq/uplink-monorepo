@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth
+  name: spaces
 spec:
-  replicas: {{ .Values.auth.replicaCount }}
+  replicas: {{ .Values.spaces.replicaCount }}
   selector:
     matchLabels:
-      app: auth
+      app: spaces
   template:
     metadata:
       labels:
-        app: auth
+        app: spaces
     spec:
       containers:
-      - name: auth
-        image: "{{ .Values.auth.image.repository }}:{{ .Values.image_version_tag }}"
+      - name: spaces
+        image: "{{ .Values.spaces.image.repository }}:{{ .Values.image_version_tag }}"
         resources:
           requests:
             cpu: "20m"
         env:
-          - name: AUTH_SERVICE_PORT
+          - name: SPACE_SERVICE_PORT
             value: "8080"
         envFrom:
           - secretRef:
@@ -30,11 +30,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth
+  name: spaces
 spec:
   type: ClusterIP
   selector:
-    app: auth
+    app: spaces
   ports:
     - protocol: TCP
       port: 8080
