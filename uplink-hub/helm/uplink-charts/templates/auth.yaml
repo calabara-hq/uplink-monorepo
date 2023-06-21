@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+      - name: auth
+        image: "{{ .Values.auth.image.repository }}:{{ .Values.image_version_tag }}"
+        env:
+          - name: AUTH_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: {{ .Values.sealedSecretName }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: auth
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
