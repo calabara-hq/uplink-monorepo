@@ -1,0 +1,9 @@
+auth:
+  image:
+    repository: nickdodson/auth-service
+
+ingress:
+  host: hub.uplink.wtf
+
+
+sealedSecretName: production-sealed-secret

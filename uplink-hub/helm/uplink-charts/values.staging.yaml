@@ -2,4 +2,8 @@ auth:
   image:
     repository: nickdodson/auth-service
 
+ingress:
+  host: staging.hub.uplink.wtf
+
+
 sealedSecretName: staging-sealed-secret
