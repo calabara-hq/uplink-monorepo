@@ -168,16 +168,6 @@ jobs:
           cd uplink-hub/helm
           helm upgrade -i uplink-hub-production ./**.tgz -n production \
           -f ./uplink-charts/values.production.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
-
-
-      - name: Deploy Prod
-        run: |
-          cd uplink-hub/k8s
-          (cd overlays/production/auth && kustomize edit set image nickdodson/auth-service:${{ steps.read_version.outputs.version }})
-          kubectl apply -k overlays/production
-          kubectl get svc -n production -o wide
-          kubectl get deploy -n production -o wide
-          kubectl get deploy -n production -o wide
           
       - name: Create GitHub Release
         uses: actions/create-release@v1
