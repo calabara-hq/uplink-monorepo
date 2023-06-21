@@ -1,0 +1,88 @@
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+
+env:
+  PROJECT_ID: vertical-karma-390021
+  PROJECT_NUMBER: 913726373244
+  CLUSTER: uplink-hub-cluster
+  CLUSTER_ZONE: us-east4-a
+
+
+jobs:
+  build:
+      name: Build
+      if: github.event.pull_request.merged
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+          with:
+            ref: ${{ github.sha }}
+            fetch-depth: 0
+
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v1
+
+        - name: Login to DockerHub
+          uses: docker/login-action@v1
+          with:
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+
+        - name: Build docker images
+          run: docker-compose -f uplink-hub/docker-compose.yaml build
+          
+        - name: Bump version and push tag
+          id: bump_tag
+          uses: anothrNick/github-tag-action@1.64.0
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            WITH_V: true
+            DEFAULT_BUMP: minor
+
+        - name: Push docker images
+          run: |
+            export GITHUB_VERSION_TAG=${{ steps.bump_tag.outputs.new_tag }}
+            docker-compose -f uplink-hub/docker-compose.yaml push
+
+
+  deploy-staging:
+    name: Deploy to Staging
+    if: github.event.pull_request.merged
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      
+      - name: obtain cluster access
+        id: cluster-access
+        uses: 'google-github-actions/auth@v0'
+        with:
+          create_credentials_file: true
+          token_format: access_token
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github-actions-oidc
+          service_account: github-actions-workflow@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+
+      - name: connect to GKE
+        uses: google-github-actions/get-gke-credentials@v0
+        with:
+          cluster_name: ${{ env.CLUSTER }}
+          location: ${{ env.CLUSTER_ZONE }}
+
+      - name: update image tags and deploy
+        run: |
+          cd uplink-hub/k8s
+          (cd overlays/staging/auth && kustomize edit set image nickdodson/auth-service:${{needs.build.steps.bump_tag.outputs.new_tag}})
+          kubectl apply -k overlays/staging
+          kubectl 
+          kubectl get svc -n staging -o wide
+          kubectl get deploy -n staging -o wide

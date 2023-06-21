@@ -34,7 +34,7 @@ scalar IpfsUrl
 scalar join__FieldSet
 
 enum join__Graph {
-  SPACES @join__graph(name: "spaces", url: "http://spaces.svc.cluster.local:8080")
+  SPACES @join__graph(name: "spaces", url: "http://spaces:8080")
 }
 
 scalar link__Import

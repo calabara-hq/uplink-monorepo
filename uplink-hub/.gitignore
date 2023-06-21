@@ -7,6 +7,7 @@
 *.crt
 *.key
 router
+*.pem
 drizzle.config.json
 migrations/
 node_modules/
