@@ -14,7 +14,6 @@ env:
 
 jobs:
   build:
-      name: Build
       if: github.event.pull_request.merged
       runs-on: ubuntu-latest
       steps:
@@ -49,9 +48,9 @@ jobs:
 
 
   deploy-staging:
-    name: Deploy to Staging
     if: github.event.pull_request.merged
     runs-on: ubuntu-latest
+    environment: staging
     permissions:
       id-token: write
       contents: read
@@ -86,12 +85,66 @@ jobs:
           curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
           chmod u+x ./kustomize
           
-      - name: update image tags and deploy
+      - name: Deploy staging
         run: |
           cd uplink-hub/k8s
           (cd overlays/staging/auth && kustomize edit set image nickdodson/auth-service:${{needs.build.steps.bump_tag.outputs.new_tag}})
           kubectl apply -k overlays/staging
-          kubectl 
           kubectl get svc -n staging -o wide
           kubectl get deploy -n staging -o wide
           kubectl get deploy -n staging -o wide
+
+
+  deploy-production:
+    if: github.event.pull_request.merged
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [build, deploy-staging]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+          
+      - name: init gcloud CLI
+        uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      - name: connect to GKE
+        uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+          location: ${{ env.GKE_ZONE }}
+          
+      - name: Set up Kustomize
+        run: |-
+          curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
+          chmod u+x ./kustomize
+
+      - name: Deploy Prod
+        run: |
+          cd uplink-hub/k8s
+          (cd overlays/production/auth && kustomize edit set image nickdodson/auth-service:${{needs.build.steps.bump_tag.outputs.new_tag}})
+          kubectl apply -k overlays/production
+          kubectl get svc -n production -o wide
+          kubectl get deploy -n production -o wide
+          kubectl get deploy -n production -o wide
+          
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.build.steps.bump_tag.outputs.new_tag }}
+          release_name: Release ${{ needs.build.steps.bump_tag.outputs.new_tag }}
+          draft: false
+          prerelease: false
