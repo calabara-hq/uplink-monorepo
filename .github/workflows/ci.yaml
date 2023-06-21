@@ -100,7 +100,7 @@ jobs:
         run: |
           cd uplink-hub/helm
           helm package --app-version=${{ needs.build.steps.bump_tag.outputs.new_tag }} ./uplink-charts/ \
-          | helm upgrade -i staging-uplink-hub ./uplink-charts -n staging \
+          | helm upgrade -i uplink-hub ./uplink-charts -n staging \
           -f ./uplink-charts/values.staging.yaml --set image_version_tag=${{ needs.build.steps.bump_tag.outputs.new_tag }}
           
       - name: Upload chart artifact
@@ -165,7 +165,7 @@ jobs:
       - name: Deploy Production
         run: |
           cd uplink-hub/helm
-          helm upgrade -i uplink-hub-production ./**.tgz -n production \
+          helm upgrade -i uplink-hub ./**.tgz -n production \
           -f ./uplink-charts/values.production.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
           
       - name: Create GitHub Release
