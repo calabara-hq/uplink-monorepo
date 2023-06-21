@@ -1,12 +1,12 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: auth-hpa
+  name: spaces-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: auth
-  minReplicas: {{ .Values.auth.hpa.minReplicas }}
-  maxReplicas: {{ .Values.auth.hpa.maxReplicas }}
-  targetCPUUtilizationPercentage: {{ .Values.auth.hpa.targetCpuPercentage }}
+    name: spaces
+  minReplicas: {{ .Values.spaces.hpa.minReplicas }}
+  maxReplicas: {{ .Values.spaces.hpa.maxReplicas }}
+  targetCPUUtilizationPercentage: {{ .Values.spaces.hpa.targetCpuPercentage }}
