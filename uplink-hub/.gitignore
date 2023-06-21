@@ -9,7 +9,6 @@
 router
 *.pem
 drizzle.config.json
-packages/graphql-api/supgraph/router
 migrations/
 node_modules/
 dist/

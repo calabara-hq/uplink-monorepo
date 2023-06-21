@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router
+  labels:
+    app: router
+spec:
+  replicas: {{ .Values.router.replicaCount }}
+  selector:
+    matchLabels:
+      app: router
+  template:
+    metadata:
+      labels:
+        app: router
+    spec:
+      containers:
+      - name: router
+        image: "{{ .Values.router.image.repository }}:{{ .Values.image_version_tag }}"
+        resources:
+          requests:
+            cpu: "20m"
+        ports:
+          - containerPort: 8080
+        env:
+          - name: SUPERGRAPH_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: {{ .Values.sealedSecretName }}
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+  namespace: staging
+spec:
+  type: ClusterIP
+  selector:
+    app: router
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: router-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: router
+  minReplicas: {{ .Values.router.hpa.minReplicas }}
+  maxReplicas: {{ .Values.router.hpa.maxReplicas }}
+  targetCPUUtilizationPercentage: {{ .Values.router.hpa.targetCpuPercentage }}
