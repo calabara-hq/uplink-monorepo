@@ -62,7 +62,12 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
-      
+          
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+          
       - name: init gcloud CLI
         uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
         with:
