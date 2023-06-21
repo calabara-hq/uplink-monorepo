@@ -14,6 +14,7 @@ env:
 
 jobs:
   build:
+      name: build
       if: github.event.pull_request.merged
       runs-on: ubuntu-latest
       steps:
@@ -57,6 +58,7 @@ jobs:
 
 
   deploy-staging:
+    name: staging
     if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     environment: staging
@@ -112,6 +114,7 @@ jobs:
         
 
   deploy-production:
+    name: production
     if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     environment: production
