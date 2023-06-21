@@ -1,6 +1,29 @@
 auth:
   image:
     repository: nickdodson/auth-service
+  replicaCount: 3
+  hpa:
+    minReplicas: 1
+    maxReplicas: 5
+    targetCpuPercentage: 80
+    
+router:
+  image:
+    repository: nickdodson/router-service
+  replicaCount: 3
+  hpa:
+    minReplicas: 1
+    maxReplicas: 5
+    targetCpuPercentage: 80
+
+space:
+  image:
+    repository: nickdodson/spaces-service
+  replicaCount: 3
+  hpa:
+    minReplicas: 1
+    maxReplicas: 5
+    targetCpuPercentage: 80
 
 ingress:
   host: hub.uplink.wtf
