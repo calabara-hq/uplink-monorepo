@@ -33,9 +33,6 @@ jobs:
           with:
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
-
-        - name: Build docker images
-          run: docker-compose -f uplink-hub/docker-compose.yaml build
           
         - name: Bump version and push tag
           id: bump_tag
@@ -45,9 +42,10 @@ jobs:
             WITH_V: true
             DEFAULT_BUMP: minor
 
-        - name: Push docker images
+        - name: Build and push docker images
           run: |
             export GITHUB_VERSION_TAG=${{ steps.bump_tag.outputs.new_tag }}
+            docker-compose -f uplink-hub/docker-compose.yaml build
             docker-compose -f uplink-hub/docker-compose.yaml push
 
 
