@@ -101,14 +101,14 @@ jobs:
         run: |
           cd uplink-hub/helm
           helm package --app-version=${{ needs.build.steps.bump_tag.outputs.new_tag }} ./uplink-charts/ \
-          | helm upgrade -i uplink-hub ./uplink-charts -n staging \
+          | helm upgrade -i uplink-hub ./uplink-charts-0.1.0.tgz -n staging \
           -f ./uplink-charts/values.staging.yaml --set image_version_tag=${{ needs.build.steps.bump_tag.outputs.new_tag }}
           
       - name: Upload chart artifact
         uses: actions/upload-artifact@v2
         with:
           name: chart
-          path: uplink-hub/helm/*.tgz
+          path: uplink-hub/helm/uplink-charts-0.1.0.tgz
         
 
   deploy-production:
@@ -166,7 +166,7 @@ jobs:
       - name: Deploy Production
         run: |
           cd uplink-hub/helm
-          helm upgrade -i uplink-hub ./**.tgz -n production \
+          helm upgrade -i uplink-hub ./uplink-charts-0.1.0.tgz -n production \
           -f ./uplink-charts/values.production.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
           
       - name: Create GitHub Release
