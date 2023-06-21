@@ -7,15 +7,13 @@ on:
 
 
 env:
-  PROJECT_ID: vertical-karma-390021
-  PROJECT_NUMBER: 913726373244
-  CLUSTER: uplink-hub-cluster
-  CLUSTER_ZONE: us-east4-a
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: uplink-hub-cluster
+  GKE_ZONE: us-east4-a
 
 
 jobs:
   build:
-      name: Build
       if: github.event.pull_request.merged
       runs-on: ubuntu-latest
       steps:
@@ -41,7 +39,16 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             WITH_V: true
             DEFAULT_BUMP: minor
-
+            
+        - name: Save version to file
+          run: echo "${{ steps.bump_tag.outputs.new_tag }}" > version.txt
+          
+        - name: Upload version artifact
+          uses: actions/upload-artifact@v2
+          with:
+            name: version
+            path: version.txt
+          
         - name: Build and push docker images
           run: |
             export GITHUB_VERSION_TAG=${{ steps.bump_tag.outputs.new_tag }}
@@ -50,7 +57,6 @@ jobs:
 
 
   deploy-staging:
-    name: Deploy to Staging
     if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     permissions:
@@ -63,28 +69,111 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
-      
-      - name: obtain cluster access
-        id: cluster-access
-        uses: 'google-github-actions/auth@v0'
+          
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
         with:
-          create_credentials_file: true
-          token_format: access_token
-          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github-actions-oidc
-          service_account: github-actions-workflow@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+          
+      - name: init gcloud CLI
+        uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
 
       - name: connect to GKE
-        uses: google-github-actions/get-gke-credentials@v0
+        uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
         with:
-          cluster_name: ${{ env.CLUSTER }}
-          location: ${{ env.CLUSTER_ZONE }}
-
-      - name: update image tags and deploy
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+          location: ${{ env.GKE_ZONE }}
+          
+      
+      - name: Set up helm
+        uses: azure/setup-helm@v3
+        with:
+           version: '3.11.0'
+           token: ${{ secrets.GITHUB_TOKEN }}
+        id: install
+          
+      - name: Deploy staging
         run: |
-          cd uplink-hub/k8s
-          (cd overlays/staging/auth && kustomize edit set image nickdodson/auth-service:${{needs.build.steps.bump_tag.outputs.new_tag}})
-          kubectl apply -k overlays/staging
-          kubectl 
-          kubectl get svc -n staging -o wide
-          kubectl get deploy -n staging -o wide
-          kubectl get deploy -n staging -o wide
+          cd uplink-hub/helm
+          helm package --app-version=${{ needs.build.steps.bump_tag.outputs.new_tag }} ./uplink-charts/ \
+          | helm upgrade -i staging-uplink-hub ./uplink-charts -n staging \
+          -f ./uplink-charts/values.staging.yaml --set image_version_tag=${{ needs.build.steps.bump_tag.outputs.new_tag }}
+          
+      - name: Upload chart artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: chart
+          path: uplink-hub/helm/*.tgz
+        
+
+  deploy-production:
+    if: github.event.pull_request.merged
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [build, deploy-staging]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+          
+      - name: init gcloud CLI
+        uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      - name: connect to GKE
+        uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+          location: ${{ env.GKE_ZONE }}
+
+      - name: Download version artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: version
+
+      - name: Read version artifact
+        id: read_version
+        run: echo "::set-output name=version::$(cat version.txt)"
+        
+      - name: Download chart artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: chart 
+          path: uplink-hub/helm
+
+      - name: Set up helm
+        uses: azure/setup-helm@v3
+        with:
+           version: '3.11.0'
+           token: ${{ secrets.GITHUB_TOKEN }}
+        id: install
+          
+      - name: Deploy Production
+        run: |
+          cd uplink-hub/helm
+          helm upgrade -i uplink-hub-production ./**.tgz -n production \
+          -f ./uplink-charts/values.production.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
+          
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.read_version.outputs.version }}
+          release_name: Release ${{ steps.read_version.outputs.version }}
+          draft: false
+          prerelease: false

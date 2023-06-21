@@ -7,24 +7,24 @@ services:
       dockerfile: ./packages/auth/Dockerfile
     image: nickdodson/auth-service:${GITHUB_VERSION_TAG}
 
-  media:
-    container_name: media
-    build:
-      context: .
-      dockerfile: ./packages/media/Dockerfile
-    image: nickdodson/media-service:${GITHUB_VERSION_TAG}
+  # media:
+  #   container_name: media
+  #   build:
+  #     context: .
+  #     dockerfile: ./packages/media/Dockerfile
+  #   image: nickdodson/media-service:${GITHUB_VERSION_TAG}
 
-  router:
-    container_name: router
-    build:
-      context: .
-      dockerfile: ./packages/graphql-api/Dockerfile
-    image: nickdodson/router-service:${GITHUB_VERSION_TAG}
+  # router:
+  #   container_name: router
+  #   build:
+  #     context: .
+  #     dockerfile: ./packages/graphql-api/Dockerfile
+  #   image: nickdodson/router-service:${GITHUB_VERSION_TAG}
 
 
-  spaces:
-    container_name: spaces
-    build:
-      context: .
-      dockerfile: ./packages/graphql-api/subgraphs/spaces/Dockerfile
-    image: nickdodson/spaces-service:${GITHUB_VERSION_TAG}
+  # spaces:
+  #   container_name: spaces
+  #   build:
+  #     context: .
+  #     dockerfile: ./packages/graphql-api/subgraphs/spaces/Dockerfile
+  #   image: nickdodson/spaces-service:${GITHUB_VERSION_TAG}
