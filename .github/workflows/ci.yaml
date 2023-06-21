@@ -91,6 +91,8 @@ jobs:
           project_id: ${{ secrets.GKE_PROJECT }}
           location: ${{ env.GKE_ZONE }}
           
+      - name: print tag
+        run: echo "${{ needs.build.steps.bump_tag.outputs.new_tag }}"
       
       - name: Set up helm
         uses: azure/setup-helm@v3
