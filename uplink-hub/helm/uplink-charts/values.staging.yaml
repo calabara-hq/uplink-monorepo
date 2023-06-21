@@ -1,0 +1,5 @@
+auth:
+  image:
+    repository: nickdodson/auth-service
+
+sealedSecretName: staging-sealed-secret
