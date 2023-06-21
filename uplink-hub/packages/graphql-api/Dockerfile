@@ -1,3 +1,18 @@
+# ---- Graph Build Stage ----
+
+FROM debian:bullseye-slim as graph-build
+ARG ROVER_RELEASE=v0.11.0
+run apt-get update && apt-get install -y curl make
+workdir /app
+copy ./packages/graphql-api ./packages/graphql-api
+workdir /app/packages/graphql-api
+RUN curl -sSL https://rover.apollo.dev/nix/${ROVER_RELEASE} | sh
+ENV PATH="/root/.rover/bin:${PATH}"
+RUN make config compose
+
+
+
+
 FROM debian:bullseye-slim
 
 ARG ROUTER_RELEASE=v1.20.0
@@ -28,8 +43,9 @@ RUN curl -sSL https://router.apollo.dev/download/nix/${ROUTER_RELEASE}/ | sh
 RUN mkdir config schema
 
 # Copy configuration for kubernetes image
+COPY --from=graph-build /app/packages/graphql-api/supergraph/schema/kubernetes.graphql /dist/schema
 COPY ./packages/graphql-api/supergraph/router.yaml config
-COPY ./packages/graphql-api/supergraph/schema/kubernetes.graphql /dist/schema
+
 LABEL org.opencontainers.image.authors="Apollo Graph, Inc. https://github.com/apollographql/router"
 LABEL org.opencontainers.image.source="https://github.com/apollographql/router"
 

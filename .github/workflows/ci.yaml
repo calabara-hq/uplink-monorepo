@@ -86,3 +86,4 @@ jobs:
           kubectl 
           kubectl get svc -n staging -o wide
           kubectl get deploy -n staging -o wide
+          kubectl get deploy -n staging -o wide

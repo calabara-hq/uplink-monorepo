@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  labels:
+    app: auth
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+      - name: auth
+        image: nickdodson/auth-service:01a460f
+        ports:
+          - containerPort: 8080
+        env:
+          - name: AUTH_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: production-sealed-secret
