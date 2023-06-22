@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: media
+spec:
+  replicas: {{ .Values.media.replicaCount }}
+  selector:
+    matchLabels:
+      app: media
+  template:
+    metadata:
+      labels:
+        app: media
+    spec:
+      containers:
+      - name: media
+        image: "{{ .Values.media.image.repository }}:{{ .Values.image_version_tag }}"
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: MEDIA_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: {{ .Values.sealedSecretName }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: media
+spec:
+  type: ClusterIP
+  selector:
+    app: media
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: media-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: media
+  minReplicas: {{ .Values.media.hpa.minReplicas }}
+  maxReplicas: {{ .Values.media.hpa.maxReplicas }}
+  targetCPUUtilizationPercentage: {{ .Values.media.hpa.targetCpuPercentage }}

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contests
+spec:
+  replicas: {{ .Values.contests.replicaCount }}
+  selector:
+    matchLabels:
+      app: contests
+  template:
+    metadata:
+      labels:
+        app: contests
+    spec:
+      containers:
+      - name: contests
+        image: "{{ .Values.contests.image.repository }}:{{ .Values.image_version_tag }}"
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: CONTEST_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: {{ .Values.sealedSecretName }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: contests
+spec:
+  type: ClusterIP
+  selector:
+    app: contests
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: contests-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: contests
+  minReplicas: {{ .Values.contests.hpa.minReplicas }}
+  maxReplicas: {{ .Values.contests.hpa.maxReplicas }}
+  targetCPUUtilizationPercentage: {{ .Values.contests.hpa.targetCpuPercentage }}
