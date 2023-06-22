@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--no-warnings --loader ts-node/esm' nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/index.ts",
     "build": "rm -rf ./dist && tsc",
-    "start": "yarn run build && node ./dist/index.js",
+    "start": "node ./dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch"
   },

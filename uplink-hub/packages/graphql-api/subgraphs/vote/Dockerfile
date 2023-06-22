@@ -1,26 +1,22 @@
-FROM node:alpine
-WORKDIR /usr/src/app
+FROM node:18-alpine
+WORKDIR /app
 
-# Copy root package.json, .yarnrc.yml, and .yarn directory
+# Copy all the necessary files for install
 COPY ./package.json ./
 COPY ./.yarnrc.yml ./.yarnrc.yml
 COPY ./.yarn ./.yarn
-COPY ./yarn.lock ./ 
+COPY ./yarn.lock ./
 
-# Copy lib
+# Copy the source code of the workspaces
 COPY ./packages/lib ./packages/lib
 
 # Copy vote service
 COPY ./packages/graphql-api/subgraphs/vote ./packages/vote
-
-# Install dependencies for the vote service
 RUN yarn install
-
 RUN yarn workspace lib build
+RUN yarn workspace vote build
 
-# Set the working directory for the vote service
-WORKDIR /usr/src/app/packages/vote
+WORKDIR /app/packages/vote
 
-EXPOSE 4000
-CMD ["yarn", "dev"]
+CMD ["yarn", "start"]
 

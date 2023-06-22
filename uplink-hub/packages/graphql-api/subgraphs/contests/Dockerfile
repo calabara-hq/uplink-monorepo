@@ -1,26 +1,22 @@
-FROM node:alpine
-WORKDIR /usr/src/app
+FROM node:18-alpine
+WORKDIR /app
 
-# Copy root package.json, .yarnrc.yml, and .yarn directory
+# Copy all the necessary files for install
 COPY ./package.json ./
 COPY ./.yarnrc.yml ./.yarnrc.yml
 COPY ./.yarn ./.yarn
-COPY ./yarn.lock ./ 
+COPY ./yarn.lock ./
 
-# Copy lib
+# Copy the source code of the workspaces
 COPY ./packages/lib ./packages/lib
 
 # Copy contests service
 COPY ./packages/graphql-api/subgraphs/contests ./packages/contests
-
-# Install dependencies for the contests service
 RUN yarn install
-
 RUN yarn workspace lib build
+RUN yarn workspace contests build
 
-# Set the working directory for the contests service
-WORKDIR /usr/src/app/packages/contests
+WORKDIR /app/packages/contests
 
-EXPOSE 4000
-CMD ["yarn", "dev"]
+CMD ["yarn", "start"]
 
