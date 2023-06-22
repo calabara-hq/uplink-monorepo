@@ -4,7 +4,7 @@ import { OutputBlockData } from '@editorjs/editorjs';
 
 interface IEditorBlockData<T extends object = object> extends OutputBlockData<string, T> { }
 
-interface IEditorDataWithBlocks {
+export interface IEditorDataWithBlocks {
     time: number;
     blocks: Array<{
         type: string;
