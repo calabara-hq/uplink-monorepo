@@ -1,0 +1,440 @@
+---
+# Source: uplink-charts/templates/auth.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+spec:
+  type: ClusterIP
+  selector:
+    app: auth
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# Source: uplink-charts/templates/contests.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: contests
+spec:
+  type: ClusterIP
+  selector:
+    app: contests
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# Source: uplink-charts/templates/media.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: media
+spec:
+  type: ClusterIP
+  selector:
+    app: media
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# Source: uplink-charts/templates/router.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+spec:
+  type: ClusterIP
+  selector:
+    app: router
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# Source: uplink-charts/templates/spaces.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: spaces
+spec:
+  type: ClusterIP
+  selector:
+    app: spaces
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# Source: uplink-charts/templates/submit.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: submit
+spec:
+  type: ClusterIP
+  selector:
+    app: submit
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# Source: uplink-charts/templates/vote.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote
+spec:
+  type: ClusterIP
+  selector:
+    app: vote
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# Source: uplink-charts/templates/auth.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+      - name: auth
+        image: "nickdodson/auth-service:v0.20.0"
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: AUTH_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: production-sealed-secret
+---
+# Source: uplink-charts/templates/contests.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contests
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contests
+  template:
+    metadata:
+      labels:
+        app: contests
+    spec:
+      containers:
+      - name: contests
+        image: "nickdodson/contests-service:v0.20.0"
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: CONTEST_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: production-sealed-secret
+---
+# Source: uplink-charts/templates/media.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: media
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: media
+  template:
+    metadata:
+      labels:
+        app: media
+    spec:
+      containers:
+      - name: media
+        image: "nickdodson/media-service:v0.20.0"
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: MEDIA_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: production-sealed-secret
+---
+# Source: uplink-charts/templates/router.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router
+  labels:
+    app: router
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: router
+  template:
+    metadata:
+      labels:
+        app: router
+    spec:
+      containers:
+      - name: router
+        image: "nickdodson/router-service:v0.20.0"
+        resources:
+          requests:
+            cpu: "20m"
+        ports:
+          - containerPort: 8080
+        env:
+          - name: SUPERGRAPH_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: production-sealed-secret
+---
+# Source: uplink-charts/templates/spaces.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spaces
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: spaces
+  template:
+    metadata:
+      labels:
+        app: spaces
+    spec:
+      containers:
+      - name: spaces
+        image: "nickdodson/spaces-service:v0.20.0"
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: SPACE_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: production-sealed-secret
+---
+# Source: uplink-charts/templates/submit.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: submit
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: submit
+  template:
+    metadata:
+      labels:
+        app: submit
+    spec:
+      containers:
+      - name: submit
+        image: "nickdodson/submit-service:v0.20.0"
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: SUBMIT_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: production-sealed-secret
+---
+# Source: uplink-charts/templates/vote.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vote
+  template:
+    metadata:
+      labels:
+        app: vote
+    spec:
+      containers:
+      - name: vote
+        image: "nickdodson/vote-service:v0.20.0"
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: VOTE_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: production-sealed-secret
+---
+# Source: uplink-charts/templates/auth.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: auth-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: auth
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+---
+# Source: uplink-charts/templates/contests.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: contests-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: contests
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+---
+# Source: uplink-charts/templates/media.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: media-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: media
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+---
+# Source: uplink-charts/templates/router.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: router-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: router
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+---
+# Source: uplink-charts/templates/spaces.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: spaces-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: spaces
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+---
+# Source: uplink-charts/templates/submit.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: submit-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: submit
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+---
+# Source: uplink-charts/templates/vote.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: vote-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vote
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+---
+# Source: uplink-charts/templates/ingress.yaml
+apiVersion:  networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    cert-manager.io/cluster-issuer: letsencrypt-production    
+spec:
+  tls:
+  - hosts:
+    - hub.uplink.wtf
+    secretName: production-tls
+  rules:
+  - host: hub.uplink.wtf
+    http:
+      paths:
+
+      - path: /api/auth/
+        pathType: Prefix
+        backend:
+          service:
+            name: auth
+            port:
+              number: 8080
+
+      - path: /api/media/
+        pathType: Prefix
+        backend:
+          service:
+            name: media
+            port:
+              number: 8080
+
+      - path: /api/graphql
+        pathType: Prefix
+        backend:
+          service:
+            name: router
+            port:
+              number: 8080

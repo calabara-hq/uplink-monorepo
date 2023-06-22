@@ -4,3 +4,15 @@ subgraphs:
     routing_url: http://spaces:8080
     schema:
       file: ../../subgraphs/spaces/schema.graphql
+  contests:
+    routing_url: http://contests:8080
+    schema:
+      file: ../../subgraphs/contests/schema.graphql
+  submit:
+    routing_url: http://submit:8080
+    schema:
+      file: ../../subgraphs/submit/schema.graphql
+  vote:
+    routing_url: http://vote:8080
+    schema:
+      file: ../../subgraphs/vote/schema.graphql
