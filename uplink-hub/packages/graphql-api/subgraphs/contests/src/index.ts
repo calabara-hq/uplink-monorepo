@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const port = parseInt(process.env.CONTEST_SERVICE_PORT)
+
 //const server = new ApolloServer({ schema: buildSubgraphSchema({ typeDefs, resolvers })});
 
 

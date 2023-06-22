@@ -1,3 +1,9 @@
+ingress:
+  host: staging.hub.uplink.wtf
+
+
+sealedSecretName: staging-sealed-secret
+
 auth:
   image:
     repository: nickdodson/auth-service
@@ -7,6 +13,15 @@ auth:
     maxReplicas: 2
     targetCpuPercentage: 80
     
+media:
+  image:
+    repository: nickdodson/media-service
+  replicaCount: 1
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCpuPercentage: 80
+
 router:
   image:
     repository: nickdodson/router-service
@@ -25,8 +40,29 @@ spaces:
     maxReplicas: 2
     targetCpuPercentage: 80
 
-ingress:
-  host: staging.hub.uplink.wtf
+contests:
+  image:
+    repository: nickdodson/contests-service
+  replicaCount: 1
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCpuPercentage: 80
 
+submit:
+  image:
+    repository: nickdodson/submit-service
+  replicaCount: 1
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCpuPercentage: 80
 
-sealedSecretName: staging-sealed-secret
+vote:
+  image:
+    repository: nickdodson/vote-service
+  replicaCount: 1
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCpuPercentage: 80
