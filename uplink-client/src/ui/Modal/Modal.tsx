@@ -5,11 +5,13 @@ const Modal = ({
   children,
   onClose,
   title,
+  disableClickOutside,
 }: {
   isModalOpen: boolean;
   children: React.ReactNode;
   onClose: () => void;
   title?: string;
+  disableClickOutside?: boolean;
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -19,7 +21,7 @@ const Modal = ({
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        disableClickOutside ? null : onClose();
       }
     };
 
@@ -33,11 +35,11 @@ const Modal = ({
     return (
       <div className="fixed inset-0 flex items-center justify-center z-50 w-full ">
         <div className="modal modal-open">
-          <div ref={modalRef} className="modal-box bg-start shadow-2xl">
+          <div ref={modalRef} className="modal-box bg-base-200 shadow-2xl">
             {children}
           </div>
         </div>
-        <div className="fixed inset-0 bg-black opacity-50"></div>
+        <div className="fixed inset-0 bg-black opacity-90"></div>
       </div>
     );
   }

@@ -136,6 +136,7 @@ const UserVotingParamsDocument = gql`
 
 // these are static params. we should cache them every time
 export const getContestById = cache(async (contestId: number) => {
+    console.log('calling getContestById from inside cache')
     const response = await graphqlClient.query(ContestByIdDocument, { contestId })
         .toPromise();
     return response

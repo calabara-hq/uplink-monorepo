@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/planetscale-serverless';
 import { connect } from '@planetscale/database';
 import { sql } from 'drizzle-orm';
-import { and, asc, desc, eq, or, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, or, ne, lt, gt } from 'drizzle-orm';
 
 export * as schema from './schema.js';
 
@@ -19,6 +19,6 @@ export class DatabaseController {
         });
 
         this.db = drizzle(this.connection);
-        this.sqlOps = { and, asc, desc, eq, or, sql, ne };
+        this.sqlOps = { and, asc, desc, eq, or, sql, ne, lt, gt };
     }
 }

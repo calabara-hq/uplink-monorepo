@@ -52,12 +52,13 @@ const SideBarIcon = ({
   text: string;
   path: string;
 }) => (
-  <div
+  <Link
+    href={path}
     className="relative flex items-center justify-center h-12 w-12 mt-2 mb-2 mx-auto
   hover:bg-accent bg-gray-800 text-accent hover:text-black 
   hover:rounded-xl rounded-3xl transition-all duration-300 ease-linear cursor-pointer shadow-lg group"
   >
-    <Link href={path}>{icon}</Link>
+    {icon}
     <span
       className="absolute w-auto p-2 m-2 min-w-max left-14 
     text-white bg-gray-600 text-xs font-bold
@@ -65,7 +66,7 @@ const SideBarIcon = ({
     >
       {text}
     </span>
-  </div>
+  </Link>
 );
 
 const Divider = () => (

@@ -1,6 +1,8 @@
-import { DatabaseController, schema } from "lib";
+import { DatabaseController, schema, revalidateClientCache } from "lib";
 import { GraphQLError } from "graphql";
 import dotenv from 'dotenv';
+import axios from "axios";
+
 dotenv.config();
 
 const databaseController = new DatabaseController(process.env.DATABASE_HOST, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
@@ -46,6 +48,12 @@ export const createDbSpace = async (
                 .where(sqlOps.eq(schema.spaces.id, spaceId));
             return result[0].name
         });
+
+        await revalidateClientCache({
+            host: process.env.FRONTEND_HOST,
+            secret: process.env.FRONTEND_API_SECRET,
+            tags: ['spaces']
+        })
 
         return spaceName
     } catch (e) {

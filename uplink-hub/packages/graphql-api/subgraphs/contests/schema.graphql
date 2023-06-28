@@ -84,6 +84,7 @@ type Contest @key(fields: "id") {
   submitterRestrictions: [SubmitterRestrictionType!]!
   votingPolicy: [VotingPolicyType!]!
   additionalParams: AdditionalParamsType!
+  tweetId: String
 }
 
 type ActiveContest {
@@ -222,6 +223,17 @@ input AdditionalParams {
   subLimit: Int!
 }
 
+input ThreadMedia {
+  type: String!
+  url: IpfsUrl
+}
+
+input ThreadItemType {
+  id: String!
+  text: String
+  media: ThreadMedia
+}
+
 input ContestBuilderProps {
   spaceId: String!
   metadata: Metadata!
@@ -232,6 +244,7 @@ input ContestBuilderProps {
   submitterRestrictions: [SubmitterRestriction!]!
   votingPolicy: [VotingPolicy!]!
   additionalParams: AdditionalParams!
+  tweetThread: [ThreadItemType!]!
 }
 
 type ContestErrorData {

@@ -1,5 +1,4 @@
 import { EditorOutputData, IToken, DatabaseController, schema, isERCToken } from "lib";
-import { TwitterApi } from 'twitter-api-v2';
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -9,7 +8,6 @@ const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecre
 const databaseController = new DatabaseController(process.env.DATABASE_HOST, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
 export const db = databaseController.db;
 export const sqlOps = databaseController.sqlOps;
-
 
 type Metadata = {
     type: string;
@@ -85,6 +83,16 @@ interface VotingPolicy {
     strategy: ArcadeStrategy | WeightedStrategy;
 }
 
+type ThreadItem = {
+    id: string;
+    text: string;
+    media: {
+        type: "image" | "video";
+        url?: string;
+    } | null;
+};
+
+
 type ContestData = {
     spaceId: string;
     metadata: Metadata;
@@ -96,6 +104,7 @@ type ContestData = {
     voterRewards: VoterRewards;
     submitterRestrictions: SubmitterRestriction[];
     votingPolicy: VotingPolicy[];
+    tweetThread: ThreadItem[] | [];
 }
 
 // simple object hash function
@@ -118,6 +127,13 @@ export const prepareContestPromptUrl = async (contestPrompt: Prompt) => {
     })
 }
 
+// TODO: parse for issues
+export const prepareTweetThread = (metadata: Metadata, tweetThread: ThreadItem[]) => {
+    const { type } = metadata;
+    if (type !== 'twitter') return [];
+    return tweetThread;
+
+}
 
 const insertSubRewards = async (contestId, submitterRewards, tx) => {
 
@@ -235,56 +251,6 @@ const insertSpaceToken = async (spaceId, tokenId) => {
 
 
 
-class TwitterController {
-
-    private client: any;
-
-    constructor(accessToken: string) {
-        this.client = new TwitterApi(accessToken);
-    }
-
-    public async validateSession() {
-        try {
-            const session = await this.client.v2.me();
-            return session;
-        } catch (e) {
-            throw new Error(`failed to establish a twitter session`)
-        }
-    }
-
-    public async processThread(thread: any) {
-        const processedThread = thread.map((el) => {
-            const { text, media } = el;
-            return {
-                ...(text && { text }),
-                ...(media && { media: { media_ids: [media.media_id] } }),
-            }
-        });
-        if (!processedThread || processedThread.length === 0) throw new Error('invalid thread');
-        return processedThread;
-    }
-
-    public async sendTweet(thread: any) {
-        try {
-            await this.validateSession();
-            const processedThread = await this.processThread(thread);
-            const tweetResponse = await this.client.v2.tweetThread(processedThread);
-            return tweetResponse[0].data.id;
-
-        } catch (err) {
-            console.log(err);
-            if (err.message === 'invalid thread') {
-                throw err;
-            } else if (err.message === 'failed to establish a twitter session') {
-                throw err;
-            } else {
-                throw new Error('failed to send tweet');
-            }
-        }
-    }
-
-}
-
 export const createDbContest = async (contest: ContestData, user: any) => {
     const spaceId = parseInt(contest.spaceId);
     const promptUrl = await prepareContestPromptUrl(contest.prompt);
@@ -369,6 +335,7 @@ export const createDbContest = async (contest: ContestData, user: any) => {
     const adjustedVoterRewards = await prepareContestRewards(contest.submitterRewards);
     const adjustedVotingPolicy = await prepareRestrictionsAndPolicies(contest.votingPolicy);
     const adjustedSubmitterRestrictions = await prepareRestrictionsAndPolicies(contest.submitterRestrictions);
+    const tweetThread = prepareTweetThread(contest.metadata, contest.tweetThread);
 
     const newContest: schema.dbNewContestType = {
         spaceId: spaceId,
@@ -379,13 +346,17 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         voteTime: new Date(contest.deadlines.voteTime).toISOString(),
         endTime: new Date(contest.deadlines.endTime).toISOString(),
         snapshot: new Date(contest.deadlines.snapshot).toISOString(),
-        anonSubs: contest.additionalParams.anonSubs,
-        visibleVotes: contest.additionalParams.visibleVotes,
-        selfVote: contest.additionalParams.selfVote,
+        anonSubs: contest.additionalParams.anonSubs ? 1 : 0,
+        visibleVotes: contest.additionalParams.visibleVotes ? 1 : 0,
+        selfVote: contest.additionalParams.selfVote ? 1 : 0,
         subLimit: contest.additionalParams.subLimit,
         created: new Date().toISOString(),
+        tweetId: null
     }
 
+
+
+    /*
 
     const sendAnnouncementTweet = async (contestId, user, thread) => {
 
@@ -393,16 +364,14 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.expiresAt ?? now > now);
         if (!isTwitterAuth) throw new Error('twitter is expired');
 
-        const twitterController = new TwitterController(user.twitter.accessToken);
-        const tweet_id = await twitterController.sendTweet(thread);
-        console.log('TWEET ID IS', tweet_id)
+
 
 
         // 1. check user is still auth'd
 
         // 2. process the thread
     }
-
+    */
 
 
     try {
@@ -415,12 +384,20 @@ export const createDbContest = async (contest: ContestData, user: any) => {
             await insertVotingPolicies(contestId, adjustedVotingPolicy, tx);
 
             if (newContest.type === "twitter") {
-                await sendAnnouncementTweet(contestId, user, [{ text: "this is another test tweet" }])
-                    .catch(err => {
-                        console.log(err);
-                        tx.rollback();
-                        throw err;
-                    })
+                if (!user.twitter) throw new Error('twitter is expired');
+                const { accessToken, accessSecret } = user.twitter;
+                const hasMedia = tweetThread.some((tweet: ThreadItem) => tweet.media);
+                const tweetJob: schema.dbNewTweetQueueType = {
+                    contestId: contestId,
+                    author: user.address,
+                    jobContext: 'contest',
+                    payload: tweetThread,
+                    accessToken: accessToken,
+                    accessSecret: accessSecret,
+                    retries: 0,
+                    status: 0
+                }
+                await tx.insert(schema.tweetQueue).values(tweetJob);
             }
             return contestId;
         });

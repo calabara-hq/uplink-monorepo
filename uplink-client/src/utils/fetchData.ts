@@ -17,6 +17,7 @@ export async function fetchData<T = any>(
         const res = await fetch(url, {
             credentials: 'include',
             ...options,
+            cache: 'no-store'
         })
         const data = await res.json()
         if (!res.ok) throw data

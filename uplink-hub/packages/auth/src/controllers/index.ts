@@ -2,12 +2,15 @@ import { randomBytes, randomUUID } from 'crypto';
 import { generateNonce, SiweMessage } from 'siwe';
 import { TwitterApi } from 'twitter-api-v2';
 import dotenv from 'dotenv';
-import { redisClient } from '../index.js';
+import { CipherController } from 'lib'
 dotenv.config();
 
 
-const twitterClient = new TwitterApi({ clientId: process.env.TWITTER_OAUTH_CLIENT_ID, clientSecret: process.env.TWITTER_OAUTH_CLIENT_SECRET });
-const twitterRedirect = "https://localhost:443/api/auth/twitter/oauth2"
+
+const cipherController = new CipherController(process.env.APP_SECRET)
+const twitterClient = new TwitterApi({ appKey: process.env.TWITTER_CONSUMER_KEY, appSecret: process.env.TWITTER_CONSUMER_SECRET, accessToken: process.env.TWITTER_ACCESS_TOKEN, accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET })
+
+const twitterRedirect = "http://localhost:8080/api/auth/twitter/oauth"
 const twitterScopes = {
     write: ['tweet.read', 'users.read', 'tweet.write'],
     read: ['tweet.read', 'users.read']
@@ -33,7 +36,6 @@ export const getCsrfToken = function (req, res) {
 }
 
 
-// returns Session or {}
 export const getSession = function (req, res) {
     const session = req.session
     res.send(
@@ -71,10 +73,11 @@ export const signOut = async (req, res) => {
         return res.send(true)
     })
 }
+/*
 
 export const initiateTwitterAuth = async (req, res) => {
-    console.log('initiate session', req.sessionID)
     const { scope } = req.body;
+    if (!req.session.user) return res.status(401).send('You must be logged in to initiate Twitter OAuth2')
     const { url, codeVerifier, state: stateVerifier } = twitterClient.generateOAuth2AuthLink(twitterRedirect, { scope: twitterScopes[scope] });
     req.session.SIWT = {
         codeVerifier,
@@ -121,8 +124,64 @@ export const twitterOauth2 = async (req, res) => {
                 expiresAt: expiresAt,
                 accessToken: accessToken,
             }
+            //TODO: send html page with success message
+            return res.sendStatus(200)
+        })
+        .catch((err) => {
+            console.log(err)
+            //TODO: send html page with error message
+            res.status(403).send('Invalid verifier or access tokens!')
+        });
+
+}
+
+*/
+
+export const initiateTwitterAuth = async (req, res) => {
+    const { scope } = req.body;
+    if (!req.session.user) return res.status(401).send('You must be logged in to initiate Twitter OAuth')
+    const data = await twitterClient.generateAuthLink(twitterRedirect, { linkMode: 'authorize' });
+
+    const { url, oauth_token, oauth_token_secret } = data;
+
+    req.session.SIWT = {
+        oauth_token,
+        oauth_token_secret
+    }
+
+    res.send({ url, scope })
+}
+
+
+export const oauthCallback = async (req, res) => {
+    const { oauth_token, oauth_verifier } = req.query;
+    const { oauth_token_secret } = req.session.SIWT;
+
+    if (!oauth_token || !oauth_verifier || !oauth_token_secret) {
+        return res.status(400).send('You denied the app or your session expired!');
+    }
+
+    // Obtain the persistent tokens
+    // Create a client from temporary tokens
+    const client = new TwitterApi({
+        appKey: process.env.TWITTER_CONSUMER_KEY,
+        appSecret: process.env.TWITTER_CONSUMER_SECRET,
+        accessToken: oauth_token,
+        accessSecret: oauth_token_secret,
+    });
+
+    client.login(oauth_verifier)
+        .then(async ({ client: loggedClient, accessToken, accessSecret }) => {
+            console.log(JSON.stringify(loggedClient, null, 2))
+
+            const { data: userObject } = await loggedClient.v2.me({ "user.fields": ["profile_image_url"] });
+            req.session.user.twitter = {
+                ...userObject,
+                accessToken: cipherController.encrypt(accessToken),
+                accessSecret: cipherController.encrypt(accessSecret),
+            }
+            //TODO: send html page with success message
             return res.sendStatus(200)
         })
         .catch(() => res.status(403).send('Invalid verifier or access tokens!'));
-
 }

@@ -1,3 +1,4 @@
+import { ThreadItem } from "@/hooks/useThreadCreator";
 import { IToken, IERCToken, INativeToken } from "@/types/token";
 import { OutputData } from "@editorjs/editorjs";
 
@@ -79,6 +80,7 @@ export type Metadata = {
     category: string | null;
 }
 
+
 export interface ContestBuilderProps {
     metadata: Metadata;
     deadlines: Deadlines;
@@ -89,6 +91,7 @@ export interface ContestBuilderProps {
     submitterRestrictions: SubmitterRestriction[] | [];
     votingPolicy: VotingPolicyType[] | [];
     additionalParams: AdditionalParams;
+    tweetThread: ThreadItem[] | null;
     errors: ContestBuilderErrors;
 }
 
@@ -700,6 +703,16 @@ export const reducer = (state: any, action: any) => {
 
         case "setSubLimit": return { ...state, additionalParams: { ...state.additionalParams, subLimit: action.payload } };
 
+        case "setTweetThread": {
+            return {
+                ...state,
+                tweetThread: action.payload,
+            }
+        }
+
+
+
+
         case "validateStep": {
             const stepIndex = action.payload;
             const newErrors = validateStep(state, stepIndex);
@@ -864,10 +877,10 @@ export const validatePrompt = (prompt: ContestBuilderProps['prompt']) => {
     const isTitle = prompt.title.length > 0;
     const isBody = prompt.body?.blocks?.length ?? 0 > 0;
 
-    const pattern = /^https:\/\/calabara\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+/;
+    const pattern = /^https:\/\/uplink\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+/;
+
 
     const isValidCoverUrl = prompt?.coverUrl ? pattern.test(prompt.coverUrl) : true;
-    const isValidBody = prompt.body?.blocks?.length ?? 0 > 0;
 
     const isError = !isTitle || !isBody || !isValidCoverUrl;
 

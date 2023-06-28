@@ -1,8 +1,10 @@
 "use client";
 import { twitterSignIn, useSession } from "@/providers/SessionProvider";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 
 const TwitterConnectButton = ({}) => {
+  const { openConnectModal } = useConnectModal();
   const { data: session, status } = useSession();
   const handleClick = async () => {
     const res = await twitterSignIn("write");
@@ -12,23 +14,17 @@ const TwitterConnectButton = ({}) => {
   };
 
   return (
-    <div>
-      <button className="btn bg-twitter" onClick={handleClick}>
-        Twitter
-      </button>
-      <div>
-        <p>Twitter</p>
-        {session?.user?.twitter?.name}
-        {session?.user?.twitter?.profile_image_url && (
-          <Image
-            className="rounded-full"
-            width={50}
-            height={50}
-            src={session?.user?.twitter?.profile_image_url}
-            alt={"weekly sub"}
-          />
-        )}
-      </div>
+    <div className="flex gap-2">
+      {!session?.user && (
+        <button className="btn btn-primary" onClick={openConnectModal}>
+          sign in
+        </button>
+      )}
+      {session?.user && (
+        <button className="btn bg-twitter" onClick={handleClick}>
+          Connect Twitter
+        </button>
+      )}
     </div>
   );
 };

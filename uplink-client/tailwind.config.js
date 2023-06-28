@@ -12,7 +12,7 @@ const colors = {
   neurtral3: '#99A3BF',
 
   // Accent Colors
-  primary: '#AB36BE',
+  primary: '#5d9cec',
   secondary: '#CC0595',
   accent1: '#57A89C',
   accent2: '#57BAD7',
@@ -23,16 +23,16 @@ const colors = {
   text3: '#A1A1AA',
 
   // Additional Colors
-  success: '#60B56C',
+  success: '#36d399',
   warning: '#FFB84D',
-  error: '#E44444',
+  error: '#f87272',
   info: '#5D9CEC',
 }
 
 
 const colors2 = {
   base1: '#1c1f26',
-  base2: '#a8b3cf33',
+  base2: '#2b303b',
   base3: 'red'
 }
 

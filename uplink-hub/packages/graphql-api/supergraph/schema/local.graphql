@@ -102,6 +102,7 @@ type Contest
   submitterRestrictions: [SubmitterRestrictionType!]! @join__field(graph: CONTESTS)
   votingPolicy: [VotingPolicyType!]! @join__field(graph: CONTESTS)
   additionalParams: AdditionalParamsType! @join__field(graph: CONTESTS)
+  tweetId: String @join__field(graph: CONTESTS)
   submissions: [Submission!]! @join__field(graph: SUBMIT)
 }
 
@@ -117,6 +118,7 @@ input ContestBuilderProps
   submitterRestrictions: [SubmitterRestriction!]!
   votingPolicy: [VotingPolicy!]!
   additionalParams: AdditionalParams!
+  tweetThread: [ThreadItemType!]!
 }
 
 type ContestErrorData
@@ -489,6 +491,21 @@ input SubmitterRewards
   ERC721: IERCToken
   ERC1155: IERCToken
   payouts: [IPayout!]
+}
+
+input ThreadItemType
+  @join__type(graph: CONTESTS)
+{
+  id: String!
+  text: String
+  media: ThreadMedia
+}
+
+input ThreadMedia
+  @join__type(graph: CONTESTS)
+{
+  type: String!
+  url: IpfsUrl
 }
 
 type TokenRestrictionType

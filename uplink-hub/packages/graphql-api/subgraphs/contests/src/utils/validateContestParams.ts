@@ -83,6 +83,17 @@ export type Metadata = {
     category: string;
 }
 
+export type ThreadItem = {
+    id: string;
+    text: string;
+    media: {
+        type: "image" | "video";
+        url?: string;
+    } | null;
+};
+
+
+
 export interface ContestBuilderProps {
     metadata: Metadata;
     deadlines: Deadlines;
@@ -92,6 +103,7 @@ export interface ContestBuilderProps {
     submitterRestrictions: SubmitterRestriction[] | [];
     votingPolicy: VotingPolicy[] | [];
     additionalParams: AdditionalParams;
+    tweetThread: ThreadItem[] | [];
 }
 
 
@@ -408,4 +420,25 @@ export const validateAdditionalParams = (additionalParams: ContestBuilderProps['
 
     return { additionalParams };
 
+}
+
+
+export const validateTweetThread = (metadata: ContestBuilderProps['metadata'], tweetThread: ContestBuilderProps['tweetThread']) => {
+    const { type } = metadata;
+    if (type !== 'twitter') return { tweetThread };
+    const errorArr: string[] = [];
+    if (tweetThread.length === 0) {
+        errorArr.push('Tweet thread cannot be empty');
+    }
+    tweetThread.forEach((tweet: ThreadItem, index) => {
+        if (tweet.text.length > 280) {
+            errorArr.push(`Tweet ${index} exceeds 280 characters`);
+        }
+        if (tweet.text.length === 0 && !tweet.media) {
+            errorArr.push(`Tweet ${index} cannot be empty`);
+        }
+    });
+
+    const error = errorArr.length > 0 ? errorArr.join(", ") : undefined;
+    return { tweetThread, error };
 }

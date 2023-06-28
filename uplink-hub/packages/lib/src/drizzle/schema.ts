@@ -1,4 +1,4 @@
-import { mysqlTable, index, serial, boolean, text, varchar, int, uniqueIndex } from 'drizzle-orm/mysql-core';
+import { mysqlTable, index, serial, tinyint, json, varchar, int, text, uniqueIndex } from 'drizzle-orm/mysql-core';
 import { InferModel } from 'drizzle-orm';
 
 
@@ -37,10 +37,11 @@ export const contests = mysqlTable('contests', {
     endTime: varchar('endTime', { length: 255 }).notNull(),
     snapshot: varchar('snapshot', { length: 255 }).notNull(),
     promptUrl: varchar('promptUrl', { length: 255 }).notNull(),
-    anonSubs: boolean('anonSubs').notNull(),
-    visibleVotes: boolean('visibleVotes').notNull(),
-    selfVote: boolean('selfVote').notNull(),
+    anonSubs: tinyint('anonSubs').notNull(),
+    visibleVotes: tinyint('visibleVotes').notNull(),
+    selfVote: tinyint('selfVote').notNull(),
     subLimit: int('subLimit').notNull(),
+    tweetId: varchar('tweetId', { length: 255 }),
 }, (contests) => ({
     spaceIdIndex: index("contest_space_id_idx").on(contests.spaceId),
 }))
@@ -162,6 +163,23 @@ export const votes = mysqlTable('votes', {
 }));
 
 
+// upload media and send tweets
+
+export const tweetQueue = mysqlTable('tweetQueue', {
+    id: serial('id').primaryKey(),
+    contestId: int('contestId').notNull(),
+    author: varchar('author', { length: 255 }).notNull(),
+    jobContext: varchar('jobContext', { length: 255 }).notNull(),   // 'submission' or 'contest'
+    payload: json('payload').notNull().default('[]'),
+    accessToken: varchar('accessToken', { length: 255 }).notNull(),
+    accessSecret: varchar('accessSecret', { length: 255 }).notNull(),
+    retries: int('retries').notNull(),
+    status: tinyint('status').notNull(),                        // 0 = pending, 1 = failed, 2 = success
+});
+
+
+
+
 export type dbSpaceType = InferModel<typeof spaces>
 export type dbNewSpaceType = InferModel<typeof spaces, 'insert'>
 
@@ -204,4 +222,6 @@ export type dbNewSubmissionType = InferModel<typeof submissions, 'insert'>
 export type dbVoteType = InferModel<typeof votes>
 export type dbNewVoteType = InferModel<typeof votes, 'insert'>
 
+export type dbTweetQueueType = InferModel<typeof tweetQueue>
+export type dbNewTweetQueueType = InferModel<typeof tweetQueue, 'insert'>
 

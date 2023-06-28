@@ -8,6 +8,7 @@ import { OutputData } from "@editorjs/editorjs";
 import { BlockWrapper } from "./ContestForm";
 let Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
 import { PhotoIcon } from "@heroicons/react/24/solid";
+import { toast } from "react-hot-toast";
 
 const labelOptions: Option[] = [
   { value: "art", label: "art" },
@@ -73,13 +74,13 @@ const StandardPrompt = ({
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(event) => {
-                    // TODO: handle media upload
-                    /*
+                  onChange={async (event) => {
                     handleMediaUpload(
                       event,
                       ["image"],
-                      (mimeType) => {},
+                      (mimeType) => {
+                        console.log(mimeType);
+                      },
                       (base64) => {
                         dispatch({
                           type: "setCoverBlob",
@@ -92,9 +93,13 @@ const StandardPrompt = ({
                           payload: ipfsUrl,
                         });
                       }
-                    );
-                    */
+                    ).catch((err) => {
+                      
+                      return toast.error("couldn't upload your image");
+                    });
                   }}
+
+
                   ref={imageUploader}
                 />
                 <div className="avatar">

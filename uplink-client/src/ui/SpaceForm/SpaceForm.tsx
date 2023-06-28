@@ -91,13 +91,13 @@ export default function SpaceForm({
         }
       );
       router.refresh();
-      router.push(`/space/${spaceName}`);
+      router.push(`/${spaceName}`);
     }
   };
 
   return (
     <div className="flex flex-col w-full px-2 pt-2 pb-6 rounded-lg justify-center items-center">
-      <div className="flex flex-col gap-2  w-full lg:w-2/5 border-2 border-border p-6 rounded-xl shadow-box">
+      <div className="flex flex-col gap-2  w-full border-2 border-border p-6 rounded-xl shadow-box">
         <h2 className="text-3xl font-bold text-center">Space Builder</h2>
         <SpaceLogo state={state} dispatch={dispatch} />
         <SpaceName state={state} dispatch={dispatch} />
@@ -172,11 +172,10 @@ const SpaceLogo = ({
         accept="image/*"
         className="hidden"
         onChange={async (event) => {
-          // TODO: handle media upload
-          /*
           handleMediaUpload(
             event,
             ["image"],
+            (mimeType) => {},
             (base64) => {
               dispatch({
                 type: "setLogoBlob",
@@ -189,8 +188,9 @@ const SpaceLogo = ({
                 payload: ipfsUrl,
               });
             }
-          );
-          */
+          ).catch((err) => {
+            return toast.error("couldn't upload your image");
+          });
         }}
         ref={imageUploader}
       />
@@ -340,7 +340,7 @@ const SpaceAdmins = ({
                   type="text"
                   placeholder="vitalik.eth"
                   spellCheck="false"
-                  className={`input w-full disabled:text-gray-400
+                  className={`input w-full
                 ${isError ? "input-error" : "input"}`}
                   disabled={index < 1}
                   value={admin}

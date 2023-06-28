@@ -1,32 +1,35 @@
 import Link from "next/link";
 import Image from "next/image";
-import { AllSpacesDocument } from "@/lib/graphql/spaces.gql";
-import graphqlClient from "@/lib/graphql/initUrql";
-
-import { AllSpaces } from "./data";
+import { nanoid } from "nanoid";
 import { SearchBar } from "@/ui/SearchBar/SearchBar";
 import { HomeIcon, PlusIcon } from "@heroicons/react/24/solid";
 import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton";
-import CreateThread from "@/ui/CreateThread/CreateThread";
-
-//console.log('revalidating')
-
-//export const revalidate = 10;
-//export const dynamic = "force-static";
-//export const revalidate = 10;
 
 const getSpaces = async () => {
-  const results = await graphqlClient.query(AllSpacesDocument, {}).toPromise();
-  console.log(results);
-  if (results.error) {
-    throw new Error(results.error.message);
-  }
-  return results;
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+      query Spaces{
+        spaces{
+            name
+            displayName
+            members
+            logoUrl
+        }
+    }`,
+    }),
+    next: { tags: ["spaces"], revalidate: 60 },
+  }).then((res) => res.json());
+  return data;
 };
+
 
 export default async function Page() {
   const spaces = await getSpaces();
-  console.log(spaces.data.spaces);
   return (
     <div className="flex flex-col w-full justify-center m-auto py-12 lg:w-4/5 gap-4">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -34,20 +37,72 @@ export default async function Page() {
           <HomeIcon className="h-6 w-6" />
           <p className="pl-2">home</p>
         </Link>
-        <Link className="btn btn-primary lg:mr-auto" href="/spacebuilder/create">
+        <Link
+          className="btn btn-primary lg:mr-auto"
+          href="/spacebuilder/create"
+        >
           <PlusIcon className="w-6 h-6" />
           <p className="pl-2">new space</p>
         </Link>
 
         <SearchBar />
       </div>
-      
+
       <div className="flex flex-row justify-evenly">
         <TwitterConnectButton />
-        <CreateThread />
       </div>
-    
+
       <AllSpaces spaces={spaces} />
+    </div>
+  );
+}
+
+function AllSpaces({ spaces }: any) {
+  return (
+    <div
+      className="grid gap-12 py-6
+      grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-2/3 md:w-10/12 lg:w-full mr-auto ml-auto"
+    >
+      {spaces.data.spaces.map((space: any, index: number) => {
+        return (
+          <div
+            key={index}
+            className="card card-compact rounded-xl bg-base-100 border border-border"
+          >
+            <Link
+              href={`${space.name}`}
+              prefetch={false}
+              className="relative h-56 transition-all duration-150 ease-linear
+              cursor-pointer hover:scale-105 rounded-3xl"
+            >
+              <Image
+                src={space.logoUrl}
+                alt="space logo"
+                fill
+                className="rounded-xl object-cover w-full"
+              />
+            </Link>
+            <div className="card-body h-fit rounded-b-xl w-full">
+              <div>
+                <Link
+                  prefetch={false}
+                  href={`${space.name}`}
+                  className="card-title text-2xl hover:text-white"
+                >
+                  {space.name}
+                </Link>
+                <div className="flex items-center w-fit gap-1">
+                  <p>{space.members} members</p>
+                  <span className="text-gray-500 ml-2">•</span>
+                  <button className="btn btn-sm btn-ghost underline mr-auto lowercase">
+                    Join
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -123,7 +123,7 @@ export const VoteProposalProvider = ({
         const newProposedVotes = proposedVotes.filter(
           (el) =>
             !userVotingParams?.userVotes.find(
-              (vote) => vote.submissionId === el.submissionId
+              (vote) => /*vote?.submissionId*/ 1 === el.submissionId
             )
         );
         setProposedVotes(newProposedVotes);

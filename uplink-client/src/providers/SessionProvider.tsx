@@ -130,7 +130,6 @@ export const getSession = async (params?: GetSessionParams) => {
   if (params?.broadcast ?? true) {
     broadcast.post({ event: "session", data: { trigger: "getSession" } });
   }
-  console.log("current session is: ", session);
   return session;
 };
 
@@ -189,7 +188,7 @@ export const signOut = async () => {
 
 export const twitterSignIn = async (scope: string) => {
   // Logic to sign in with Twitter goes here
-  const res = await fetch(
+  return await fetch(
     `${process.env.NEXT_PUBLIC_HUB_URL}/auth/twitter/initiate_twitter_auth`,
     {
       method: "POST",
@@ -199,11 +198,11 @@ export const twitterSignIn = async (scope: string) => {
       credentials: "include",
       body: JSON.stringify({ scope: scope }),
     }
-  );
-
-  const data = await res.json();
-  //if (res.ok) await _SessionStore._getSession({ event: "storage" });
-  return data;
+  )
+    .then((res) => res.json())
+    .catch((error) => {
+      console.log(error);
+    });
 };
 
 type SessionProviderProps = {
@@ -251,7 +250,7 @@ export function SessionProvider(props: SessionProviderProps) {
         // triggered which updates it
         // If the client doesn't have a session then we don't need to call
         // the server to check if it does (if they have signed in via another
-        // tab or window that will come through as a "stroage" event
+        // tab or window that will come through as a "storage" event
         // event anyway)
         // Bail out early if the client session is not stale yet
         if (

@@ -94,8 +94,11 @@ const EditSpaceDocument = gql`
 `;
 
 
+
+
+
 export const getSpace = async (spaceName: string) => {
-    console.log('getting space')
+    //console.log('getting space')
     const response = await graphqlClient.query(SpaceDocument, { name: spaceName })
         .toPromise();
     return response

@@ -15,7 +15,7 @@ export default function ToastProvider({
           className:
             "border-solid border-2 border-amber-900 p-4 text-amber-900",
           iconTheme: {
-            primary: "#713200",
+            primary: "black",
             secondary: "#FFFAEE",
           },
           duration: 5000,
