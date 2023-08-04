@@ -9,7 +9,7 @@ import { IToken } from "@/types/token";
 import { useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
-import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { HiTrash, HiPencil } from "react-icons/hi2";
 
 const SubmitterRestrictions = ({
   state,
@@ -44,7 +44,7 @@ const SubmitterRestrictions = ({
                       className="btn btn-sm btn-ghost link"
                       onClick={() => handleEditRestriction(index)}
                     >
-                      <PencilIcon className="w-4" />
+                      <HiPencil className="w-4" />
                     </button>
                   </div>
                   <p className="">Threshold: {restriction.threshold}</p>
@@ -62,7 +62,7 @@ const SubmitterRestrictions = ({
                       }}
                     >
                       remove
-                      <TrashIcon className="w-4 ml-2" />
+                      <HiTrash className="w-4 ml-2" />
                     </button>
                   </div>
                 </div>
@@ -188,6 +188,7 @@ const SubmitterRestrictionManager = ({
             setIsModalOpen(false);
           }}
           confirmLabel="Save"
+          cancelLabel="Cancel"
           confirmDisabled={!currentRestriction.threshold}
         />
       </>

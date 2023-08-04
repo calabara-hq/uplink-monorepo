@@ -1,10 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  HomeIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-} from "@heroicons/react/24/solid";
+import { HiHome, HiMagnifyingGlass, HiPlus } from "react-icons/hi2";
 import uplinkLogo from "../../../public/uplink-logo.svg";
 import Logo from "../Logo/Logo";
 
@@ -23,12 +19,12 @@ export default function Sidebar() {
         <div className="py-1"></div>
         <Divider />
         <SideBarIcon
-          icon={<PlusIcon className="h-6 w-6" />}
+          icon={<HiPlus className="h-6 w-6" />}
           text="Create a space"
           path={"/spacebuilder/create"}
         />
         <SideBarIcon
-          icon={<MagnifyingGlassIcon className="h-6 w-6" />}
+          icon={<HiMagnifyingGlass className="h-6 w-6" />}
           text="Explore"
           path={"/explore"}
         />
@@ -85,12 +81,12 @@ const MobileMenu = () => {
   return (
     <div className="flex flex-row w-full justify-between p-2">
       <MobileCard>
-        <HomeIcon className="h-8 w-8" />
+        <HiHome className="h-8 w-8" />
         <p>home</p>
       </MobileCard>
       <div className="bg-border w-[1px]"></div>
       <MobileCard>
-        <MagnifyingGlassIcon className="h-8 w-8" />
+        <HiMagnifyingGlass className="h-8 w-8" />
         <p>explore</p>
       </MobileCard>
       <div className="bg-border w-[1px]"></div>

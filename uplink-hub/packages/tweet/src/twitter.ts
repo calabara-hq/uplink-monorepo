@@ -15,7 +15,7 @@ type ThreadItem = {
     text: string;
     media?: {
         type: string;
-        //   size: number;
+        size: string;
         url: string;
     }
 }
@@ -61,8 +61,8 @@ export class TwitterController {
             'media/upload.json',
             {
                 command: 'INIT',
-                total_bytes: 97806, // Change this to the actual size of your media file
-                media_type: 'image/png',
+                total_bytes: parseInt(tweet.media.size), 
+                media_type: tweet.media.type,
             },
             { prefix: 'https://upload.twitter.com/1.1/' }
         );
@@ -84,7 +84,6 @@ export class TwitterController {
                 },
                 { prefix: 'https://upload.twitter.com/1.1/' }
             );
-            console.log(res)
             index++;
         }
 
@@ -139,26 +138,26 @@ export class TwitterController {
         }
     }
 
-    /*
-        public async sendTweet(thread: ThreadItem[], quoteTweetId?: string) {
-            try {
-                await this.validateSession();
-                const processedThread: SendTweetV2Params[] = await this.processThread(thread);
-                if (quoteTweetId) processedThread[0].quote_tweet_id = quoteTweetId;
-                const tweetResponse = await this.client.v2.tweetThread(processedThread);
-                return tweetResponse[0].data.id;
-    
-            } catch (err) {
-                console.log(err);
-                if (err.message === 'invalid thread') {
-                    throw err;
-                } else if (err.message === 'failed to establish a twitter session') {
-                    throw err;
-                } else {
-                    throw new Error('failed to send tweet');
-                }
+
+    public async sendTweet(thread: SendTweetV2Params[], quoteTweetId?: string) {
+        try {
+            await this.validateSession();
+            const processedThread: SendTweetV2Params[] = await this.processThread(thread);
+            if (quoteTweetId) processedThread[0].quote_tweet_id = quoteTweetId;
+            const tweetResponse = await this.client.v2.tweetThread(processedThread);
+            return tweetResponse[0].data.id;
+
+        } catch (err) {
+            console.log(err);
+            if (err.message === 'invalid thread') {
+                throw err;
+            } else if (err.message === 'failed to establish a twitter session') {
+                throw err;
+            } else {
+                throw new Error('failed to send tweet');
             }
         }
-        */
+    }
+
 
 }

@@ -1,11 +1,7 @@
 import { useState, useRef, useEffect, useReducer } from "react";
 import MenuSelect from "../MenuSelect/MenuSelect";
 import { IERCToken, isERCToken, IToken } from "@/types/token";
-import {
-  ArrowPathIcon,
-  ExclamationTriangleIcon,
-  PlusIcon,
-} from "@heroicons/react/24/solid";
+import { HiArrowPath, HiExclamationTriangle } from "react-icons/hi2";
 import { useTokenManager } from "@/hooks/useTokenManager";
 import Modal, { ModalActions } from "../Modal/Modal";
 
@@ -110,6 +106,7 @@ export const TokenManager = ({
           onCancel={handleCloseAndReset}
           onConfirm={handleModalConfirm}
           confirmLabel="Confirm"
+          cancelLabel="Cancel"
         />
       </>
     );
@@ -126,6 +123,8 @@ export const TokenManager = ({
           onCancel={handleCloseAndReset}
           onConfirm={handleModalConfirm}
           confirmLabel="Confirm"
+          cancelLabel="Cancel"
+
         />
       </>
     );
@@ -141,6 +140,8 @@ export const TokenManager = ({
           onCancel={handleCloseAndReset}
           onConfirm={handleAddToken}
           confirmLabel="Swap"
+          cancelLabel="Cancel"
+
         />
       </>
     );
@@ -204,7 +205,7 @@ const QuickAddToken = ({
         </ul>
       ) : (
         <div className="alert alert-warning justify-start shadow-lg">
-          <ExclamationTriangleIcon className="w-6 h-6" />
+          <HiExclamationTriangle className="w-6 h-6" />
           <p>{`hmm.. I couldn't find that token`}</p>
         </div>
       )}
@@ -274,7 +275,7 @@ const TokenSwap = ({
       <div className="alert alert-warning shadow-lg">
         <div>
           <span>
-            <ExclamationTriangleIcon className="w-6" />
+            <HiExclamationTriangle className="w-6" />
           </span>
           <span>
             You already have <b>1</b> {token.type} token in your list. To use
@@ -292,7 +293,7 @@ const TokenSwap = ({
           </h2>
         </div>
         <div className="divider lg:divider-horizontal">
-          <ArrowPathIcon className="w-24" />
+          <HiArrowPath className="w-24" />
         </div>
         <div className="relative flex-grow h-32 card bg-base-200 rounded-box justify-center items-center">
           <div className="absolute top-0 left-0 bg-success text-xs text-black px-1 py-0.5 rounded-br-md rounded-tl-md">

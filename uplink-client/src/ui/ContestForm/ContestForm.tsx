@@ -33,18 +33,17 @@ import { CreateContestDocument } from "@/lib/graphql/contests.gql";
 import { toast } from "react-hot-toast";
 import AdditionalParameters from "./AdditionalParameters";
 import {
-  CheckBadgeIcon,
-  XCircleIcon,
-  PencilSquareIcon,
-  EllipsisHorizontalCircleIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/solid";
+  HiCheckBadge,
+  HiXCircle,
+  HiPencilSquare,
+  HiEllipsisHorizontalCircle,
+  HiExclamationTriangle,
+} from "react-icons/hi2";
 
 import InfoAlert from "../InfoAlert/InfoAlert";
 import { TypeAnimation } from "react-type-animation";
 
 import { useRouter } from "next/navigation";
-import CreateContestTweet from "./CreateContestTweet";
 import CreateThread from "../CreateThread/CreateThread";
 import { ThreadItem } from "@/hooks/useThreadCreator";
 import { nanoid } from "nanoid";
@@ -249,30 +248,28 @@ const ContestForm = ({
 
               const stepClass = isActive
                 ? {
-                    icon: (
-                      <PencilSquareIcon className="w-3 h-3 lg:w-6 lg:h-6" />
-                    ),
+                    icon: <HiPencilSquare className="w-3 h-3 lg:w-6 lg:h-6" />,
                     style:
                       "btn btn-xs lg:btn-lg btn-ghost underline w-fit normal-case",
                   }
                 : isCompleted
                 ? {
                     icon: (
-                      <CheckBadgeIcon className="w-3 h-3 lg:w-6 lg:h-6 fill-success" />
+                      <HiCheckBadge className="w-3 h-3 lg:w-6 lg:h-6 fill-success" />
                     ),
                     style: "btn btn-xs lg:btn-lg btn-ghost w-fit normal-case",
                   }
                 : hasErrors
                 ? {
                     icon: (
-                      <XCircleIcon className="w-3 h-3 lg:w-6 lg:h-6  fill-error" />
+                      <HiXCircle className="w-3 h-3 lg:w-6 lg:h-6  fill-error" />
                     ),
                     style:
                       "btn btn-xs lg:btn btn-ghost underline w-fit normal-case",
                   }
                 : {
                     icon: (
-                      <EllipsisHorizontalCircleIcon className="w-3 h-3 lg:w-6 lg:h-6 fill-neutral" />
+                      <HiEllipsisHorizontalCircle className="w-3 h-3 lg:w-6 lg:h-6 fill-neutral" />
                     ),
                     style: "btn btn-xs lg:btn-lg btn-ghost  w-fit normal-case",
                   };
@@ -350,13 +347,15 @@ const composeInferredThread = (state) => {
     {
       id: nanoid(),
       text: title,
-      media: coverUrl
-        ? {
-            type: "image",
-            url: coverUrl,
-            blob: coverBlob,
-          }
-        : null,
+      primaryAssetUrl: coverUrl ?? null,
+      primaryAssetBlob: null,
+      videoThumbnailUrl: null,
+      videoThumbnailBlobIndex: null,
+      videoThumbnailOptions: null,
+      assetSize: null,
+      assetType: null,
+      isVideo: false,
+      isUploading: false,
     },
   ];
   return thread;
@@ -378,6 +377,7 @@ const Finalize = ({
     state.metadata.type === "twitter" ? composeInferredThread(state) : null;
   const handleMutation = useHandleMutation(CreateContestDocument);
   const router = useRouter();
+  const [isTweetModalOpen, setIsTweetModalOpen] = useState(false);
 
   const handleFormSubmit = async () => {
     const {
@@ -485,7 +485,7 @@ const Finalize = ({
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="flex items-center justify-end "
               >
-                <CheckBadgeIcon className="w-10 h-10 fill-success" />
+                <HiCheckBadge className="w-10 h-10 fill-success" />
               </motion.div>
             </motion.div>
             <div className="h-0.5 w-full bg-base-100" />
@@ -509,7 +509,7 @@ const Finalize = ({
                 </div>
               </div>
               <div className="flex items-center justify-end ">
-                <CheckBadgeIcon className="w-10 h-10 fill-success" />
+                <HiCheckBadge className="w-10 h-10 fill-success" />
               </div>
             </div>
             <div className="h-0.5 w-full bg-base-100" />
@@ -532,7 +532,7 @@ const Finalize = ({
                 </div>
               </div>
               <div className="flex items-center justify-end ">
-                <CheckBadgeIcon className="w-10 h-10 fill-success" />
+                <HiCheckBadge className="w-10 h-10 fill-success" />
               </div>
             </div>
             <div className="h-0.5 w-full bg-base-100" />
@@ -545,25 +545,30 @@ const Finalize = ({
                 </div>
                 <div className="flex flex-col rounded-xl p-4 gap-4 shadow-lg border border-border">
                   <p>Add a tweet to announce your contest</p>
+                  <button
+                    onClick={() => setIsTweetModalOpen(true)}
+                    className="btn btn-primary"
+                  >
+                    Create Tweet
+                  </button>
                   <CreateThread
                     initialThread={initialThread}
+                    isModalOpen={isTweetModalOpen}
+                    setIsModalOpen={setIsTweetModalOpen}
                     confirmLabel="Save"
                     onConfirm={(thread) => {
                       dispatch({
                         type: "setTweetThread",
-                        payload: thread.map(
-                          ({ media: { blob, ...restMedia }, ...rest }) => ({
-                            ...rest,
-                            media: restMedia,
-                          })
-                        ),
+                        payload: thread.map(({ ...rest }) => ({
+                          ...rest,
+                        })),
                       });
                     }}
                   />
                 </div>
                 <div className="flex items-center justify-end  gap-2">
                   <p className="text-s text-warning">needs your attention</p>
-                  <ExclamationTriangleIcon className="w-10 h-10 fill-warning" />
+                  <HiExclamationTriangle className="w-10 h-10 fill-warning" />
                 </div>
               </div>
             )}

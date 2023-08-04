@@ -1,74 +1,371 @@
+import {
+  CategoryLabel,
+  ContestCategory,
+  RemainingTimeLabel,
+  StatusLabel,
+} from "@/ui/ContestLabels/ContestLabels";
+import { RenderSubmission } from "@/ui/SubmissionCard/SubmissionCard";
+import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
-import weeklySub from "../../public/9999-winner.jpeg";
-export default async function Page() {
+import Link from "next/link";
+import { Suspense, useEffect } from "react";
+
+const getActiveContests = async () => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+      query ActiveContests {
+        activeContests {
+          id
+          promptUrl
+          deadlines {
+            startTime
+            voteTime
+            endTime
+          }
+          metadata {
+            type
+            category
+          }
+          space {
+            logoUrl
+            displayName
+            name
+          }
+        }
+      }`,
+    }),
+    cache: "no-store",
+    next: { tags: ["activeContests"], revalidate: 60 },
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.activeContests);
+  return data;
+};
+
+const getPopularSubmissions = async () => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+      query PopularSubmissions {
+        popularSubmissions {
+          author
+          contestCategory
+          spaceDisplayName
+          spaceName
+          contestId
+          created
+          id
+          type
+          url
+          version
+        }
+      }`,
+    }),
+    cache: "no-store",
+    next: { tags: ["popularSubmissions"], revalidate: 60 },
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.popularSubmissions);
+  return data;
+};
+
+const BannerSection = () => {
   return (
-    <div>
-      <div className="relative">
-        <div className="flex flex-col lg:flex-row justify-center items-center ml-auto mr-auto z-10 top-6 left-0 right-0 gap-20 px-10  w-8/12 ">
-          <div className="w-1/2">
-            <h1 className="text-5xl font-bold text-white">Uplink</h1>
-            <p className="py-6 text-white">
-              Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-              excepturi exercitationem quasi. In deleniti eaque aut repudiandae
-              et a id nisi.
-            </p>
-            <button className="btn">Get Started</button>
-          </div>
-          </div>
-          </div>
-          </div>
-  )
-
-{/*
-        </div>
-        <div className="relative z-0 pointer-events-none">
-          <svg
-            className="w-full h-auto -mt-[34vw]"
-            id="visual"
-            viewBox="0 0 1920 1080"
-            width="1920"
-            height="1080"
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.1"
-          >
-            <path
-              d="M0 733L45.7 733.8C91.3 734.7 182.7 736.3 274.2 739.7C365.7 743 457.3 748 548.8 729.3C640.3 710.7 731.7 668.3 823 645.7C914.3 623 1005.7 620 1097 635.8C1188.3 651.7 1279.7 686.3 1371.2 678.5C1462.7 670.7 1554.3 620.3 1645.8 597C1737.3 573.7 1828.7 577.3 1874.3 579.2L1920 581L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#fa7268"
-            ></path>
-            <path
-              d="M0 737L45.7 731.5C91.3 726 182.7 715 274.2 729.2C365.7 743.3 457.3 782.7 548.8 800.3C640.3 818 731.7 814 823 813.2C914.3 812.3 1005.7 814.7 1097 811C1188.3 807.3 1279.7 797.7 1371.2 776.8C1462.7 756 1554.3 724 1645.8 712.7C1737.3 701.3 1828.7 710.7 1874.3 715.3L1920 720L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#ef5f67"
-            ></path>
-            <path
-              d="M0 734L45.7 752.3C91.3 770.7 182.7 807.3 274.2 819.5C365.7 831.7 457.3 819.3 548.8 809.2C640.3 799 731.7 791 823 796.5C914.3 802 1005.7 821 1097 822.5C1188.3 824 1279.7 808 1371.2 814.8C1462.7 821.7 1554.3 851.3 1645.8 862C1737.3 872.7 1828.7 864.3 1874.3 860.2L1920 856L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#e34c67"
-            ></path>
-            <path
-              d="M0 949L45.7 933.5C91.3 918 182.7 887 274.2 888.3C365.7 889.7 457.3 923.3 548.8 929.8C640.3 936.3 731.7 915.7 823 896.2C914.3 876.7 1005.7 858.3 1097 859.5C1188.3 860.7 1279.7 881.3 1371.2 885.5C1462.7 889.7 1554.3 877.3 1645.8 869.3C1737.3 861.3 1828.7 857.7 1874.3 855.8L1920 854L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#d53867"
-            ></path>
-            <path
-              d="M0 991L45.7 981.2C91.3 971.3 182.7 951.7 274.2 953.8C365.7 956 457.3 980 548.8 992.3C640.3 1004.7 731.7 1005.3 823 1004C914.3 1002.7 1005.7 999.3 1097 999.5C1188.3 999.7 1279.7 1003.3 1371.2 995.3C1462.7 987.3 1554.3 967.7 1645.8 954.5C1737.3 941.3 1828.7 934.7 1874.3 931.3L1920 928L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#c62368"
-            ></path>
-          </svg>
-        </div>
-        <div className="relative flex flex-col w-7/12 mr-auto ml-auto -mt-48 backdrop-blur-md bg-white/30 text-white px-2 py-2 rounded-lg">
-          <div className="p-5">
-            <h1 className="text-2xl font-bold">Active Contests</h1>
-          </div>
-
-          <div className="flex flex-col p-4 gap-2">
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
+    <div className="from-[#CC059590] to-[#CC0595] text-white grid place-items-center items-end bg-gradient-to-br pt-5">
+      <div className="relative hero-content col-start-1 row-start-1 w-full max-w-7xl flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row  lg:gap-0 xl:gap-20 ">
+        <div className="lg:pl-10 ">
+          <div className="mb-2 py-4 text-center lg:text-left">
+            <h1 className="font-title mb-2 text-4xl font-extrabold sm:text-5xl lg:text-6xl">
+              uplink - blah blah blah
+            </h1>
+            <h2 className="font-title text-lg font-extrabold sm:text-xl lg:text-2xl">
+              Use uplink to blah blah blah
+            </h2>
           </div>
         </div>
       </div>
+      <svg
+        className="fill-[#FF638D] col-start-1 row-start-1 h-auto w-full"
+        width="1600"
+        height="410"
+        viewBox="0 0 1600 410"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M0 338L53.3 349.2C106.7 360.3 213.3 382.7 320 393.8C426.7 405 533.3 405 640 359.3C746.7 313.7 853.3 222.3 960 189.2C1066.7 156 1173.3 181 1280 159.2C1386.7 137.3 1493.3 68.7 1546.7 34.3L1600 0V595H1546.7C1493.3 595 1386.7 595 1280 595C1173.3 595 1066.7 595 960 595C853.3 595 746.7 595 640 595C533.3 595 426.7 595 320 595C213.3 595 106.7 595 53.3 595H0V338Z"></path>
+      </svg>
+    </div>
+  );
+};
 
-  */}      
+const ContentSection = async () => {
+  const activeContests = await getActiveContests();
 
+  return (
+    <div className="relative flex flex-col">
+      <div className="h-[20vh] bg-[#FF638D]" />
+      <div className="absolute flex flex-col gap-2 w-10/12 glass rounded-xl m-auto p-2 left-0 right-0">
+        <h1 className="font-bold text-3xl text-white">Active Contests</h1>
+        <div className="grid grid-cols-4 gap-4">
+          {activeContests.map((contest) => {
+            return (
+              <ContestCard
+                key={contest.id}
+                contestId={contest.id}
+                promptUrl={contest.promptUrl}
+                spaceName={contest.space.name}
+                spaceDisplayName={contest.space.displayName}
+                spaceLogo={contest.space.logoUrl}
+                linkTo={`${contest.space.name}/contests/${contest.id}`}
+                metadata={contest.metadata}
+                deadlines={contest.deadlines}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ContentSection2 = async () => {
+  const activeContests = await getActiveContests();
+  const popularSubmissions = await getPopularSubmissions();
+
+  return (
+    <div className="relative flex flex-col">
+      <div className="h-[10vh] bg-[#FF638D]" />
+      <div className="flex flex-col gap-2 w-10/12 m-auto p-2">
+        <h1>submissions</h1>
+        <div className="grid grid-cols-4 gap-4">
+          {popularSubmissions.map((submission, idx) => {
+            return (
+              /*@ts-expect-error*/
+              <SubmissionCard
+                key={idx}
+                submissionId={submission.id}
+                spaceName={submission.spaceName}
+                spaceDisplayName={submission.spaceDisplayName}
+                author={submission.author}
+                type={submission.type}
+                url={submission.url}
+                version={submission.version}
+                created={submission.created}
+                contestId={submission.contestId}
+                contestCategory={submission.contestCategory}
+              />
+            );
+          })}
+        </div>
+
+        <h1 className="text-3xl text-white">Active Contests</h1>
+        <div className="grid grid-cols-4 grid-rows-1 overflow-scroll gap-4">
+          {activeContests.map((contest) => {
+            return (
+              <>
+                <ContestCard
+                  key={contest.id}
+                  contestId={contest.id}
+                  promptUrl={contest.promptUrl}
+                  spaceName={contest.space.name}
+                  spaceDisplayName={contest.space.displayName}
+                  spaceLogo={contest.space.logoUrl}
+                  linkTo={`${contest.space.name}/contests/${contest.id}`}
+                  metadata={contest.metadata}
+                  deadlines={contest.deadlines}
+                />
+                <ContestCard
+                  key={contest.id}
+                  contestId={contest.id}
+                  promptUrl={contest.promptUrl}
+                  spaceName={contest.space.name}
+                  spaceDisplayName={contest.space.displayName}
+                  spaceLogo={contest.space.logoUrl}
+                  linkTo={`${contest.space.name}/contests/${contest.id}`}
+                  metadata={contest.metadata}
+                  deadlines={contest.deadlines}
+                />
+                <ContestCard
+                  key={contest.id}
+                  contestId={contest.id}
+                  promptUrl={contest.promptUrl}
+                  spaceName={contest.space.name}
+                  spaceDisplayName={contest.space.displayName}
+                  spaceLogo={contest.space.logoUrl}
+                  linkTo={`${contest.space.name}/contests/${contest.id}`}
+                  metadata={contest.metadata}
+                  deadlines={contest.deadlines}
+                />
+                <ContestCard
+                  key={contest.id}
+                  contestId={contest.id}
+                  promptUrl={contest.promptUrl}
+                  spaceName={contest.space.name}
+                  spaceDisplayName={contest.space.displayName}
+                  spaceLogo={contest.space.logoUrl}
+                  linkTo={`${contest.space.name}/contests/${contest.id}`}
+                  metadata={contest.metadata}
+                  deadlines={contest.deadlines}
+                />
+                <ContestCard
+                  key={contest.id}
+                  contestId={contest.id}
+                  promptUrl={contest.promptUrl}
+                  spaceName={contest.space.name}
+                  spaceDisplayName={contest.space.displayName}
+                  spaceLogo={contest.space.logoUrl}
+                  linkTo={`${contest.space.name}/contests/${contest.id}`}
+                  metadata={contest.metadata}
+                  deadlines={contest.deadlines}
+                />
+                <ContestCard
+                  key={contest.id}
+                  contestId={contest.id}
+                  promptUrl={contest.promptUrl}
+                  spaceName={contest.space.name}
+                  spaceDisplayName={contest.space.displayName}
+                  spaceLogo={contest.space.logoUrl}
+                  linkTo={`${contest.space.name}/contests/${contest.id}`}
+                  metadata={contest.metadata}
+                  deadlines={contest.deadlines}
+                />
+              </>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SubmissionCard = async ({
+  submissionId,
+  spaceName,
+  spaceDisplayName,
+  author,
+  type,
+  url,
+  version,
+  created,
+  contestId,
+  contestCategory,
+}: {
+  submissionId: string;
+  spaceName: string;
+  spaceDisplayName: string;
+  author: string;
+  type: string;
+  url: string;
+  version: string;
+  created: string;
+  contestId: string;
+  contestCategory: string;
+}) => {
+  const { type: submissionFormat, ...submission } = await fetch(url, {
+    cache: "no-store",
+  }).then((res) => res.json());
+
+  if (type === "twitter") {
+    return (
+      <RenderSubmission
+        context={"preview"}
+        submissionType={submissionFormat}
+        title={submission.title}
+        author={author}
+        video={submission.video}
+        thumbnail={submission.thumbnail}
+        image={submission.image}
+        text={submission.text}
+      />
+    );
+  } else if (type === "standard") {
+  } else return null;
+};
+
+const ContestCard = ({
+  contestId,
+  promptUrl,
+  linkTo,
+  metadata,
+  deadlines,
+  spaceName,
+  spaceDisplayName,
+  spaceLogo,
+}: {
+  contestId: string;
+  promptUrl: string;
+  linkTo: string;
+  metadata: { category: ContestCategory; type: string };
+  deadlines: { startTime: string; voteTime: string; endTime: string };
+  spaceName: string;
+  spaceDisplayName: string;
+  spaceLogo: string;
+}) => {
+  const showSpace = spaceName && spaceDisplayName && spaceLogo;
+  const { contestState, stateRemainingTime } =
+    calculateContestStatus(deadlines);
+  return (
+    <Link
+      className="card bg-base-100 
+    cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full shimmer-hover"
+      href={linkTo}
+    >
+      <div className="card-body items-center p-0">
+        <div className="flex flex-col gap-2 items-center">
+          <div className="avatar online">
+            <Image
+              src={spaceLogo}
+              width={82}
+              height={82}
+              alt="spaceLogo"
+              className="mask mask-squircle"
+            />
+          </div>
+          <h1 className="font-bold text-2xl">{spaceDisplayName}</h1>
+        </div>
+        <Suspense fallback={<div>Loading...</div>}>
+          {/*@ts-expect-error*/}
+          <PromptSummary promptUrl={promptUrl} />
+        </Suspense>
+        <div className="flex flex-row gap-2">
+          <CategoryLabel category={metadata.category} />
+          <StatusLabel status={contestState} />
+        </div>
+        <RemainingTimeLabel remainingTime={stateRemainingTime} />
+      </div>
+    </Link>
+  );
+};
+
+const PromptSummary = async ({ promptUrl }: { promptUrl: string }) => {
+  const { title } = await fetch(promptUrl, { cache: "no-store" }).then((res) =>
+    res.json()
+  );
+
+  return (
+    <div className="flex-grow overflow-hidden">
+      <h2 className="card-title mb-0 normal-case whitespace-nowrap overflow-ellipsis overflow-hidden">
+        {title}
+      </h2>
+    </div>
+  );
+};
+
+export default async function Page() {
+  return (
+    <div className="flex flex-col w-full h-screen ">
+      <BannerSection />
+      {/*@ts-expect-error*/}
+      <ContentSection2 />
+    </div>
+  );
 }

@@ -85,7 +85,6 @@ const mutations = {
 
 
             if (contestData.metadata.type === 'twitter') {
-                const now = new Date().toISOString();
                 const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.accessSecret ?? null);
 
                 if (!isTwitterAuth) return {

@@ -97,7 +97,7 @@ export const VoteProposalProvider = ({
   contestId,
 }: {
   children: React.ReactNode;
-  contestId: number;
+  contestId: string;
 }) => {
   const { userVotingParams, isLoading, mutate } = useVotingParams(contestId);
   const [proposedVotes, setProposedVotes] = useState<any[]>([]);

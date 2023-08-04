@@ -1,22 +1,21 @@
 import Image from "next/image";
-import { StatusLabel } from "@/ui/Contests/StatusLabel";
 import { ParseBlocks } from "@/lib/blockParser";
+import { CategoryLabel, StatusLabel } from "../ContestLabels/ContestLabels";
+import { calculateContestStatus } from "@/utils/staticContestState";
 const Prompt = async ({
   contestId,
+  space,
   metadata,
   deadlines,
   promptUrl,
 }: {
   contestId: string;
+  space: any;
   metadata: any;
   deadlines: any;
   promptUrl: string;
 }) => {
-  //TODO: remove these hardcoded values
-  const space = {
-    displayName: "Shark DAO",
-  };
-  const status = "submitting";
+  const { contestState: status } = calculateContestStatus(deadlines);
 
   const prompt = await fetch(promptUrl).then((res) => res.json());
 
@@ -27,9 +26,7 @@ const Prompt = async ({
           <div className="avatar">
             <div className=" w-20 lg:w-24 rounded-full bg-transparent">
               <Image
-                src={
-                  "https://calabara.mypinata.cloud/ipfs/QmUtZj7ksJumBa3amYnQb2tsCE7pdQcLLeD1SNWP1Jir9S"
-                }
+                src={space.logoUrl}
                 alt={"org avatar"}
                 height={300}
                 width={300}
@@ -40,7 +37,7 @@ const Prompt = async ({
             {space.displayName}
           </h2>
           <div className="flex flex-row items-center gap-2 lg:ml-auto">
-            <p className="badge lg:badge-lg">{metadata.category}</p>
+            <CategoryLabel category={metadata.category} />
             <StatusLabel status={status} />
           </div>
         </div>

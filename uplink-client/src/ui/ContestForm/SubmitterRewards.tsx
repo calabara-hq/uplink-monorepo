@@ -9,7 +9,7 @@ import { BlockWrapper } from "./ContestForm";
 import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import TokenCard from "../TokenCard/TokenCard";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { HiTrash } from "react-icons/hi2";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
@@ -265,7 +265,7 @@ const SubmitterRewardMatrix = ({
                       className="btn btn-square btn-ghost"
                       onClick={() => removeRank(index)}
                     >
-                      <TrashIcon className="w-6 h-6" />
+                      <HiTrash className="w-6 h-6" />
                     </button>
                   </td>
                 ) : (

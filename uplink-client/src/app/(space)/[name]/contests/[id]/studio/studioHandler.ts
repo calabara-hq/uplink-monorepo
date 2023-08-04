@@ -135,50 +135,6 @@ export const handleFileChange = ({
 };
 
 
-export const handleSubmit = async ({
-    state,
-    dispatch,
-    handleMutation,
-    contestId,
-}: {
-    state: SubmissionBuilderProps;
-    dispatch: React.Dispatch<any>;
-    handleMutation: any;
-    contestId: number;
-}) => {
-    const { isError, errors, payload } = validateSubmission(state);
-
-    // handle the client-side validation errors
-    if (isError) {
-        // handle the special case of the type field since it doesn't belong to one single field
-        if (errors?.type) return toast.error(errors.type);
-        // handle the rest of the fields
-        return setErrors({ dispatch, errors: errors });
-    }
-
-    const res = await handleMutation({
-        contestId: contestId,
-        submission: payload,
-    });
-
-    if (!res) return;
-    const { errors: mutationErrors, success } = res.data.createSubmission;
-
-    if (!success) {
-        toast.error(
-            "Oops, something went wrong. Please check the fields and try again."
-        );
-        console.log(mutationErrors);
-    }
-
-    if (success) {
-        toast.success("Submission created successfully", {
-            icon: "🎉",
-        });
-    }
-};
-
-
 export const validateSubmission = (submissionState: any) => {
     const {
         title,

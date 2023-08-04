@@ -198,6 +198,9 @@ export const validateSubmitterRewards = async (submitterRewards: ContestBuilderP
         return { submitterRewards, error: "At least one payout must be defined" };
     }
 
+
+
+
     await Promise.all(Object.keys(tokens).map(async (token) => {
         const tokenData = tokens[token];
 
@@ -233,6 +236,7 @@ export const validateSubmitterRewards = async (submitterRewards: ContestBuilderP
 
     }));
 
+
     payouts.forEach((payout, index) => {
         const rank = payout.rank;
         if (seenRanks.has(rank)) {
@@ -245,9 +249,10 @@ export const validateSubmitterRewards = async (submitterRewards: ContestBuilderP
             const fungiblePayout = payout[token as keyof IPayout] as FungiblePayout;
             if (fungiblePayout?.amount) {
                 const amount = parseFloat(fungiblePayout.amount);
-                if (amount <= 0) {
+                if (amount <= 0 || !amount) {
                     errorArr.push(`Invalid ${token} amount for rank ${rank} at index ${index}`);
                 }
+
                 fungiblePayout.amount = amount.toString();
             }
         }
@@ -320,7 +325,7 @@ export const validateVoterRewards = async (voterRewards: ContestBuilderProps['vo
         const fungiblePayout = payout.ERC20 as FungiblePayout;
         if (fungiblePayout?.amount) {
             const amount = parseFloat(fungiblePayout.amount);
-            if (amount <= 0) {
+            if (amount <= 0 || !amount) {
                 errorArr.push(`Invalid ERC20 amount for rank ${rank} at index ${index}`);
             }
         }

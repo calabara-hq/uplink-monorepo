@@ -11,7 +11,7 @@ import TokenModal from "../TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import { useEffect, useState } from "react";
 import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { HiTrash } from "react-icons/hi2";
 
 const VoterRewardsComponent = ({
   state,
@@ -221,7 +221,7 @@ const VoterRewardRow = ({
         className="btn btn-sm lg:btn-square btn-ghost ml-auto lg:m-0"
         onClick={removeRank}
       >
-        <TrashIcon className="w-4 h-4 lg:w-6 lg:h-6" />
+        <HiTrash className="w-4 h-4 lg:w-6 lg:h-6" />
       </button>
     </div>
   );

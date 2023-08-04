@@ -11,6 +11,7 @@ export type UserTwitterObject = {
   name: string;
   username: string;
   profile_image_url: string;
+  profile_image_url_large: string;
 };
 
 export interface Session {
@@ -157,6 +158,7 @@ export const signIn = async (credentials: SignInParams) => {
     body: JSON.stringify({
       ...credentials,
     }),
+    cache: "no-store",
   });
   const data = await res.json();
   if (res.ok) await _SessionStore._getSession({ event: "storage" });

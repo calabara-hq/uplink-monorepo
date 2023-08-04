@@ -5,7 +5,7 @@ import graphqlClient from '@/lib/graphql/initUrql';
 
 
 const ContestSubmissionsDocument = gql`
-  query Query($contestId: Int!) {
+  query Query($contestId: ID!) {
     contest(contestId: $contestId) {
         submissions {
             id
@@ -25,7 +25,7 @@ const fetchSubmissionData = async (submissionUrl: string) => {
     return fetch(submissionUrl).then((res) => res.json());
 }
 
-const getSubmissions = async (contestId: number) => {
+const getSubmissions = async (contestId: string) => {
     // hit graphql endpoint
     // return submissions
     // fetch the submission data for each returned sub
@@ -45,8 +45,8 @@ const getSubmissions = async (contestId: number) => {
     return response
 }
 
-const useTrackSubmissions = (contestId: number) => {
-    const {data: liveSubmissions, isLoading, error}: {data: any, isLoading: boolean, error: any} = useSWR(`/ipfs/submissions/${contestId}`, () => getSubmissions(contestId), {refreshInterval: 60000})
+const useTrackSubmissions = (contestId: string) => {
+    const {data: liveSubmissions, isLoading, error}: {data: any, isLoading: boolean, error: any} = useSWR(`/ipfs/submissions/${contestId}`, () => getSubmissions(contestId), {refreshInterval: 10000})
 
     return {liveSubmissions, isLoading, error}
 }

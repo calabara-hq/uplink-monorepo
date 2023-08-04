@@ -1,134 +1,163 @@
-"use client";
-
-import Image from "next/image";
-import { useState } from "react";
 import {
-  TrashIcon,
-  CheckIcon,
-  LockClosedIcon,
-  DocumentTextIcon,
-} from "@heroicons/react/24/solid";
-import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+  MediaController,
+  MediaControlBar,
+  MediaTimeRange,
+  MediaTimeDisplay,
+  MediaPlayButton,
+  MediaMuteButton,
+} from "media-chrome/dist/react";
+import Image from "next/image";
 
-const SubmissionVoteInput = ({
-  submission,
-  mode,
+import { formatAddress } from "@/utils/formatAddress";
+import {
+  SubmissionTypeBadge,
+  SubmissionVotesBadge,
+  UserSubmissionSelectBadge,
+} from "../SubmissionBadges/SubmissionBadges";
+
+export const RenderSubmission = ({
+  context,
+  submissionType,
+  title,
+  author,
+  video,
+  thumbnail,
+  image,
+  text,
 }: {
-  submission: any;
-  mode: "current" | "proposed";
+  context: "preview" | "live";
+  submissionType: "video" | "image" | "text";
+  title: string;
+  author?: string;
+  video?: string;
+  thumbnail?: string;
+  image?: string;
+  text?: React.ReactNode; // can be editor data or simple <p> tag
 }) => {
-  console.log(submission);
-  const { updateVoteAmount } = useVoteProposalContext();
-
-  return (
-    <input
-      type="number"
-      placeholder="votes"
-      className="input input-bordered text-center w-24 py-1 text-sm"
-      value={submission.votes}
-      onWheel={(e: React.WheelEvent<HTMLElement>) => {
-        (e.target as HTMLElement).blur();
-      }}
-      onChange={(e) =>
-        updateVoteAmount(submission.submissionId, e.target.value, mode)
-      }
-    />
-  );
-};
-
-const SubmissionVoteTrash = ({
-  submission,
-  mode,
-}: {
-  submission: any;
-  mode: "current" | "proposed";
-}) => {
-  const { removeSingleVote } = useVoteProposalContext();
-
-  return (
-    <div
-      className="btn btn-ghost w-auto h-full rounded-xl text-white ml-auto"
-      onClick={() => removeSingleVote(submission.submissionId, mode)}
-    >
-      <TrashIcon className="w-5 h-5" />
-    </div>
-  );
-};
-
-export function SubmissionCardVote({
-  submission,
-  mode,
-}: {
-  submission: any;
-  mode: "current" | "proposed";
-}) {
-  return (
-    <div className="flex flex-row w-full h-24 max-h-24 gap-1">
-      <div
-        className="flex flex-row w-full bg-base-100 rounded-xl
-                    cursor-pointer"
-      >
-        {submission.data.type === "text" && (
-          <CartTextSubmission submission={submission} />
-        )}
-        {submission.data.type !== "text" && (
-          <CartMediaSubmission submission={submission} />
-        )}
-        <div className="flex flex-col justify-between items-center gap-4 h-full p-2 w-full">
-          <h2 className="text-base overflow-hidden overflow-ellipsis whitespace-nowrap text-center w-3/4">
-            {submission.data.title}
-          </h2>
-          <SubmissionVoteInput submission={submission} mode={mode} />
-        </div>
+  if (submissionType === "video") {
+    return (
+      <div className="card card-compact cursor-pointer border border-border rounded-xl bg-base-100">
+        <RenderVideoCard video={video} thumbnail={thumbnail} />
+        <SubmissionBody title={title} author={author} />
+        <SubmissionFooter {...{ submissionType, context }} />
       </div>
-      <SubmissionVoteTrash submission={submission} mode={mode} />
-    </div>
-  );
-}
+    );
+  } else if (submissionType === "image") {
+    return (
+      <div className="card card-compact cursor-pointer border border-border rounded-xl bg-base-100">
+        <RenderImageCard image={image} />
+        <SubmissionBody title={title} author={author} />
+        <SubmissionFooter {...{ submissionType, context }} />
+      </div>
+    );
+  } else if (submissionType === "text") {
+    <RenderTextCard text={text} title={title} author={author} />;
+    <SubmissionFooter {...{ submissionType, context }} />;
+  }
+  return null;
+};
 
-const CartMediaSubmission = ({ submission }: { submission: any }) => {
+const RenderVideoCard = ({
+  video,
+  thumbnail,
+}: {
+  video: string;
+  thumbnail: string;
+}) => {
   return (
-    <figure className="relative w-1/4 md:w-1/2 p-2 m-2 rounded-xl">
-      <Image
-        src={submission.data.previewAsset}
-        alt="submission image"
-        fill
-        className="object-cover rounded-xl"
+    <MediaController className="rounded-t-xl">
+      <video
+        slot="media"
+        src={video}
+        poster={thumbnail}
+        preload="auto"
+        muted
+        crossOrigin=""
+        className="rounded-t-xl h-64 w-full object-cover"
       />
-    </figure>
+      <MediaControlBar>
+        <MediaPlayButton></MediaPlayButton>
+        <MediaTimeRange></MediaTimeRange>
+        <MediaTimeDisplay showDuration></MediaTimeDisplay>
+        <MediaMuteButton></MediaMuteButton>
+      </MediaControlBar>
+    </MediaController>
   );
 };
 
-const CartTextSubmission = ({ submission }: { submission: any }) => {
+const RenderImageCard = ({ image }: { image: string }) => {
   return (
-    <figure className="relative w-1/4 md:w-1/2 p-2 m-2 rounded-xl">
-      <DocumentTextIcon className="w-full h-full object-cover"/>
-    </figure>
-  );
-};
-
-export function LockedCardVote({ submission }: { submission: any }) {
-  console.log("rendering locked card with sub", submission);
-  return (
-    <div
-      className="flex flex-row w-full h-16 min-h-16 bg-base-100 rounded-xl
-                    cursor-pointer-none"
-    >
-      {submission.data.type === "text" && (
-        <CartTextSubmission submission={submission} />
-      )}
-      {submission.data.type !== "text" && (
-        <CartMediaSubmission submission={submission} />
-      )}
-      <div className="flex flex-row justify-center items-center gap-4 p-2 w-full">
-        <h2 className="text-base overflow-hidden overflow-ellipsis whitespace-nowrap text-center w-3/4">
-          {submission.data.title}
-        </h2>
-        {/*<SubmissionVoteInput submission={submission} mode={mode} />*/}
-        <div className="flex flex-col items-center justify-center ml-auto gap-1 px-2">
-          <p>{submission.votes}</p>
-        </div>
-      </div>
+    <div className="flex flex-col">
+      <Image
+        src={image}
+        alt="submission preview"
+        width={640}
+        height={360}
+        className="rounded-t-xl"
+      />
     </div>
   );
-}
+};
+
+const RenderTextCard = ({
+  text,
+  title,
+  author,
+}: {
+  text: React.ReactNode;
+  title: string;
+  author: string;
+}) => {
+  return (
+    <div className="card-body h-64 bg-white/90 rounded-xl text-black/80 gap-1 w-full overflow-auto">
+      <h2 className="break-word font-bold text-2xl">
+        {title || "My awesome new submission"}
+      </h2>
+      <h3 className="break-all italic">
+        {author ? formatAddress(author) : "anonymous"}
+      </h3>
+      <section className="break-all">{text}</section>
+    </div>
+  );
+};
+
+const SubmissionBody = ({
+  title,
+  author,
+}: {
+  title: string;
+  author?: string;
+}) => {
+  return (
+    <div className="card-body h-28 rounded-b-xl w-full">
+      <h2 className={`card-title text-md ${title ? "" : "text-gray-500"}`}>
+        {title || "My awesome new submission"}
+      </h2>
+      <p className="text-sm"> {author ? formatAddress(author) : "anonymous"}</p>
+    </div>
+  );
+};
+
+const SubmissionFooter = ({
+  submissionType,
+  context,
+}: {
+  submissionType: "video" | "image" | "text";
+  context: "preview" | "live";
+}) => {
+  return (
+    <div className="grid grid-cols-3 w-full gap-6">
+      <SubmissionTypeBadge {...{ submissionType }} />
+      {context === "live" && (
+        <>
+          <SubmissionVotesBadge />
+          <UserSubmissionSelectBadge
+            submission={{
+              id: "123",
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
+};

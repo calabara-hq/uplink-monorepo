@@ -70,6 +70,9 @@ module.exports = {
       boxShadow: {
         'box': '0px 40px 120px rgba(76, 130, 251, 0.16);',
       },
+      animation: {
+        'springUp': 'springUp 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
+      }
     },
     keyframes: ({ theme }) => ({
       shimmer: {
@@ -77,6 +80,17 @@ module.exports = {
           transform: 'translateX(100%)',
         },
       },
+      springUp: {
+        '0%': {
+          transform: 'translateY(100%)',
+          opacity: '0'
+        },
+        '100%': {
+          transform: 'translateY(0)',
+          opacity: '1'
+        }
+      }
+
     })
   },
 
@@ -124,31 +138,31 @@ module.exports = {
     themes: ["dark",
     {
       
-
+  
       mytheme: {
-
+  
         "primary": "#b2c3ff",
-
+  
         "secondary": "#3e2596",
-
+  
         "accent": "#6f76d6",
-
+  
         "neutral": "#1D2734",
-
+  
         "base-100": "#393239",
-
+  
         "info": "#759CF0",
-
+  
         "success": "#17C488",
-
+  
         "warning": "#FAC36B",
-
+  
         "error": "#DD2622",
       },
     },
     
   ],
-
+  
   },*/
 
   plugins: [

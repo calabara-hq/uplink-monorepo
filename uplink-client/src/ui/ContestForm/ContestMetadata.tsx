@@ -1,12 +1,9 @@
 import { BlockWrapper } from "./ContestForm";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  CheckBadgeIcon,
-} from "@heroicons/react/24/solid";
+import { HiCheckBadge } from "react-icons/hi2";
 import { ContestBuilderProps } from "@/lib/contestHandler";
+import { ContestCategory } from "@/ui/ContestLabels/ContestLabels";
 
-const categories = [
+const categories: ContestCategory[] = [
   "art",
   "music",
   "writing",
@@ -38,7 +35,7 @@ const ContestMetadata = ({
               type === "standard" ? "visible" : "hidden"
             }`}
           >
-            <CheckBadgeIcon className="w-8 text-success" />
+            <HiCheckBadge className="w-8 text-success" />
           </span>
           <button
             onClick={() => {
@@ -60,7 +57,7 @@ const ContestMetadata = ({
               type === "twitter" ? "visible" : "hidden"
             }`}
           >
-            <CheckBadgeIcon className="w-8 text-twitter" />
+            <HiCheckBadge className="w-8 text-twitter" />
           </span>
           <button
             onClick={() => {

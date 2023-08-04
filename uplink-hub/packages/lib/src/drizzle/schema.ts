@@ -168,6 +168,7 @@ export const votes = mysqlTable('votes', {
 export const tweetQueue = mysqlTable('tweetQueue', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
+    created: varchar('created', { length: 255 }).notNull(),
     author: varchar('author', { length: 255 }).notNull(),
     jobContext: varchar('jobContext', { length: 255 }).notNull(),   // 'submission' or 'contest'
     payload: json('payload').notNull().default('[]'),
@@ -175,6 +176,8 @@ export const tweetQueue = mysqlTable('tweetQueue', {
     accessSecret: varchar('accessSecret', { length: 255 }).notNull(),
     retries: int('retries').notNull(),
     status: tinyint('status').notNull(),                        // 0 = pending, 1 = failed, 2 = success
+    error: json('error'),
+
 });
 
 

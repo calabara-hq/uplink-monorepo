@@ -97,7 +97,6 @@ type ContestData = {
     spaceId: string;
     metadata: Metadata;
     deadlines: Deadlines;
-    //created: string;
     prompt: Prompt;
     additionalParams: AdditionalParams;
     submitterRewards: SubmitterRewards;
@@ -121,7 +120,7 @@ export const prepareContestPromptUrl = async (contestPrompt: Prompt) => {
     const prompt = { ...contestPrompt, version: 'uplink-v1' }
 
     return pinata.pinJSONToIPFS(prompt).then((result) => {
-        return `https://calabara.mypinata.cloud/ipfs/${result.IpfsHash}`;
+        return `https://uplink.mypinata.cloud/ipfs/${result.IpfsHash}`;
     }).catch((err) => {
         throw new Error(err);
     })
@@ -332,7 +331,7 @@ export const createDbContest = async (contest: ContestData, user: any) => {
 
 
     const adjustedSubmitterRewards = await prepareContestRewards(contest.submitterRewards);
-    const adjustedVoterRewards = await prepareContestRewards(contest.submitterRewards);
+    const adjustedVoterRewards = await prepareContestRewards(contest.voterRewards);
     const adjustedVotingPolicy = await prepareRestrictionsAndPolicies(contest.votingPolicy);
     const adjustedSubmitterRestrictions = await prepareRestrictionsAndPolicies(contest.submitterRestrictions);
     const tweetThread = prepareTweetThread(contest.metadata, contest.tweetThread);
@@ -354,26 +353,6 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         tweetId: null
     }
 
-
-
-    /*
-
-    const sendAnnouncementTweet = async (contestId, user, thread) => {
-
-        const now = new Date().toISOString();
-        const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.expiresAt ?? now > now);
-        if (!isTwitterAuth) throw new Error('twitter is expired');
-
-
-
-
-        // 1. check user is still auth'd
-
-        // 2. process the thread
-    }
-    */
-
-
     try {
         return await db.transaction(async (tx) => {
             const contest = await tx.insert(schema.contests).values(newContest)
@@ -386,10 +365,10 @@ export const createDbContest = async (contest: ContestData, user: any) => {
             if (newContest.type === "twitter") {
                 if (!user.twitter) throw new Error('twitter is expired');
                 const { accessToken, accessSecret } = user.twitter;
-                const hasMedia = tweetThread.some((tweet: ThreadItem) => tweet.media);
                 const tweetJob: schema.dbNewTweetQueueType = {
                     contestId: contestId,
                     author: user.address,
+                    created: new Date().toISOString(),
                     jobContext: 'contest',
                     payload: tweetThread,
                     accessToken: accessToken,
@@ -405,3 +384,8 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         throw new Error("database error: " + err.message)
     }
 };
+
+
+
+
+

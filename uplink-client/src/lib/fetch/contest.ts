@@ -4,7 +4,7 @@ import gql from 'graphql-tag';
 import { cache } from 'react';
 
 const ContestByIdDocument = gql`
-    query Query($contestId: Int!){
+    query Query($contestId: ID!){
         contest(contestId: $contestId){
             id
             spaceId
@@ -135,7 +135,7 @@ const UserVotingParamsDocument = gql`
 `;
 
 // these are static params. we should cache them every time
-export const getContestById = cache(async (contestId: number) => {
+export const getContestById = cache(async (contestId: string) => {
     console.log('calling getContestById from inside cache')
     const response = await graphqlClient.query(ContestByIdDocument, { contestId })
         .toPromise();
@@ -144,7 +144,7 @@ export const getContestById = cache(async (contestId: number) => {
 
 // TODO this is client side code. remove this
 
-export const getUserSubmissionParams = async (contestId: number) => {
+export const getUserSubmissionParams = async (contestId: string) => {
     const response = await graphqlClient.query(UserSubmissionParamsDocument, { contestId })
         .toPromise()
         .then(res => res)
@@ -160,7 +160,7 @@ export const getUserSubmissionParams = async (contestId: number) => {
     return response
 }
 
-export const getUserVotingParams = async (contestId: number) => {
+export const getUserVotingParams = async (contestId: string) => {
     console.log('calling getUserVotingParams')
     const response = await graphqlClient.query(UserVotingParamsDocument, { contestId })
         .toPromise()

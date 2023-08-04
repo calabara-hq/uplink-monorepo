@@ -1,189 +1,381 @@
 import { useEffect, useReducer, useState } from "react";
 import { nanoid } from 'nanoid';
+import handleMediaUpload, { IpfsUpload, MediaUploadError } from "@/lib/mediaUpload";
+import { toast } from "react-hot-toast";
+import { set } from "date-fns";
 
 
 
 export type ThreadItem = {
     id: string;
     text: string;
-    media: {
-        type: "image" | "video";
-        url?: string;
-        blob?: string;
-    } | null;
+    primaryAssetUrl: string | null;
+    primaryAssetBlob: string | null;
+    videoThumbnailUrl: string | null;
+    videoThumbnailBlobIndex: number | null;
+    videoThumbnailOptions: string[] | null;
+    assetSize: string | null;
+    assetType: string | null;
+    isVideo: boolean;
+    isUploading: boolean;
+    error?: string;
 };
-
-
-
-export type ThreadAction =
-    | { type: "setTweetText"; payload: { id: string, text: ThreadItem['text'] } }
-    | { type: "setTweetMediaUrl"; payload: { id: string, media: ThreadItem['media'] } }
-    | { type: "setTweetMediaBlob"; payload: { id: string, media: ThreadItem['media'] } }
-    | { type: "addTweet"; payload: ThreadItem }
-    | { type: "removeTweet"; payload: string }
-    | { type: "removeTweetMedia"; payload: string }
-    | { type: "reset", payload: ThreadItem[] };
 
 
 const threadReducer = (
     state: ThreadItem[],
-    action: ThreadAction
+    action: any
 ): ThreadItem[] => {
     switch (action.type) {
-        case "setTweetText": {
-            const { id, text } = action.payload;
+        case "SET_FIELD":
             return state.map((item) => {
-                if (item.id === id) {
+                if (item.id === action.payload.id) {
                     return {
                         ...item,
-                        text,
+                        [action.payload.field]: action.payload.value,
+                        error: undefined,
                     };
+                } else {
+                    return item;
                 }
-                return item;
             });
-        }
-        case "setTweetMediaUrl": {
-            const { id, media } = action.payload;
-            return state.map((item) => {
-                if (item.id === id) {
-                    return {
-                        ...item,
-                        media,
-                    };
-                }
-                return item;
-            })
-        }
 
-        case "setTweetMediaBlob": {
-            const { id, media } = action.payload;
-            return state.map((item) => {
-                if (item.id === id) {
-                    return {
-                        ...item,
-                        media,
-                    };
-                }
-                return item;
-            })
-        }
-        case "addTweet": {
+        case "ADD_TWEET":
             return [...state, action.payload];
-        }
-        case "removeTweet": {
+        case "REMOVE_TWEET":
             return state.filter((item) => item.id !== action.payload);
-        }
-
-        case "removeTweetMedia": {
+        case "SET_ERROR":
             return state.map((item) => {
-                if (item.id === action.payload) {
+                if (item.id === action.payload.id) {
                     return {
                         ...item,
-                        media: null,
-                    };
+                        error: action.payload,
+                    }
                 }
-                return item;
-            })
-        }
-
-        case "reset": {
+                else {
+                    return item;
+                }
+            });
+        case "RESET":
             return action.payload;
-        }
+        default:
+            return state;
     }
 }
 
 
 
-export const useThreadCreator = (initialThread?: ThreadItem[] | []) => {
+export const useThreadCreator = (initialThread?: ThreadItem[]) => {
 
     const [state, dispatch] = useReducer(threadReducer,
-        initialThread.map((tweet) => {
-            return {            // if initialThread is passed, insert id to each tweet
+        initialThread ? initialThread.map((tweet) => {
+            return {            // if initialThread is passed, do nothing
                 ...tweet,
-                id: nanoid(),
             }
-        }) ?? [{                // if initialThread is undefined, then use this default value
+        }) : [{                // if initialThread is null, then use this default value
             id: nanoid(),
             text: "",
-            media: null,
+            primaryAssetUrl: null,
+            primaryAssetBlob: null,
+            videoThumbnailUrl: null,
+            videoThumbnailBlobIndex: null,
+            videoThumbnailOptions: null,
+            assetSize: null,
+            assetType: null,
+            isVideo: false,
+            isUploading: false,
         }]);
 
     useEffect(() => {
         return () => {
-            dispatch({          // reset to some default value on unmount
-                type: "reset", payload: [{
-                    id: nanoid(),
-                    text: "",
-                    media: null,
-                }]
-            });
+            reset();
         }
     }, [])
 
     const addTweet = () => {
         dispatch({
-            type: "addTweet",
+            type: "ADD_TWEET",
             payload: {
                 id: nanoid(),
                 text: "",
-                media: null,
+                primaryAssetUrl: null,
+                primaryAssetBlob: null,
+                videoThumbnailUrl: null,
+                videoThumbnailBlobIndex: null,
+                videoThumbnailOptions: null,
+                assetSize: null,
+                assetType: null,
+                isVideo: false,
+                isUploading: false,
             }
         });
     }
 
     const removeTweet = (id: string) => {
         dispatch({
-            type: "removeTweet",
+            type: "REMOVE_TWEET",
             payload: id,
         });
     }
 
     const setTweetText = (id: string, text: string) => {
         dispatch({
-            type: "setTweetText",
-            payload: { id, text },
+            type: "SET_FIELD",
+            payload: { id, field: 'text', value: text },
+        });
+
+    }
+
+    const setTweetPrimaryAssetUrl = (id: string, url: string) => {
+        dispatch({
+            type: "SET_FIELD",
+            payload: { id, field: 'primaryAssetUrl', value: url },
         });
     }
 
-    const setTweetMediaUrl = (id: string, media: ThreadItem['media']) => {
+    const setTweetPrimaryAssetBlob = (id: string, blob: string) => {
         dispatch({
-            type: "setTweetMediaUrl",
-            payload: { id, media },
+            type: "SET_FIELD",
+            payload: { id, field: 'primaryAssetBlob', value: blob },
         });
     }
 
-    const setTweetMediaBlob = (id: string, media: ThreadItem['media']) => {
+    const setTweetVideoThumbnailUrl = (id: string, url: string) => {
         dispatch({
-            type: "setTweetMediaBlob",
-            payload: { id, media },
+            type: "SET_FIELD",
+            payload: { id, field: 'videoThumbnailUrl', value: url },
         });
+    }
+
+    const setTweetVideoThumbnailBlobIndex = (id: string, index: number | null) => {
+        dispatch({
+            type: "SET_FIELD",
+            payload: { id, field: 'videoThumbnailBlobIndex', value: index },
+        });
+    }
+
+    const setTweetVideoThumbnailOptions = (id: string, options: string[]) => {
+        dispatch({
+            type: "SET_FIELD",
+            payload: { id, field: 'videoThumbnailOptions', value: options },
+        });
+    }
+
+    const setTweetAssetSize = (id: string, size: string) => {
+        dispatch({
+            type: "SET_FIELD",
+            payload: { id, field: 'assetSize', value: size }
+        })
+    }
+
+
+    const setTweetAssetType = (id: string, type: string) => {
+        dispatch({
+            type: "SET_FIELD",
+            payload: { id, field: 'assetType', value: type }
+        })
     }
 
     const removeTweetMedia = (id: string) => {
+        setIsUploading(id, false);
+        setIsVideo(id, false);
+        setTweetPrimaryAssetUrl(id, null);
+        setTweetPrimaryAssetBlob(id, null);
+        setTweetVideoThumbnailUrl(id, null);
+        setTweetVideoThumbnailBlobIndex(id, null);
+        setTweetVideoThumbnailOptions(id, null);
+        setTweetAssetSize(id, null);
+        setTweetAssetType(id, null);
+    }
+
+
+    const setIsUploading = (id: string, isUploading: boolean) => {
         dispatch({
-            type: "removeTweetMedia",
-            payload: id,
+            type: "SET_FIELD",
+            payload: { id, field: 'isUploading', value: isUploading },
         });
     }
 
+    const setIsVideo = (id: string, isVideo: boolean) => {
+        dispatch({
+            type: "SET_FIELD",
+            payload: { id, field: 'isVideo', value: isVideo },
+        });
+    }
+
+
     const reset = () => {
         dispatch({
-            type: "reset", payload: [{
+            type: "RESET",
+            payload: [{
                 id: nanoid(),
                 text: "",
-                media: null,
+                primaryAssetUrl: null,
+                primaryAssetBlob: null,
+                videoThumbnailUrl: null,
+                videoThumbnailBlobIndex: null,
+                assetSize: null,
+                assetType: null,
+                isVideo: false,
+                isUploading: false,
             }]
         });
+    }
+
+    const handleFileChange = ({
+        id,
+        event,
+        isVideo,
+        mode
+    }: {
+        id: string;
+        event: any;
+        isVideo: boolean;
+        mode: "primary" | "thumbnail";
+    }) => {
+        if (mode === "primary") {
+            setIsUploading(id, true)
+
+            handleMediaUpload(
+                event,
+                ["image", "video"],
+                (mimeType) => {
+                    setIsVideo(id, mimeType.includes("video"));
+                    setTweetAssetType(id, mimeType)
+                },
+                (base64) => {
+                    if (!isVideo) {
+                        setTweetPrimaryAssetBlob(id, base64);
+                    }
+                },
+                (ipfsUrl) => {
+                    setTweetPrimaryAssetUrl(id, ipfsUrl);
+                    setIsUploading(id, false);
+                },
+                (thumbnails) => {
+                    setTweetVideoThumbnailOptions(id, thumbnails);
+                    setTweetVideoThumbnailBlobIndex(id, 0);
+                },
+                (size) => {
+                    setTweetAssetSize(id, size)
+                }
+            ).catch((err) => {
+
+                if (err instanceof MediaUploadError) {
+                    // toast the message
+                    toast.error(err.message)
+                }
+                else {
+                    // log the message and toast a generic error
+                    console.log(err)
+                    toast.error('Something went wrong. Please try again later.')
+                }
+
+                // clear out all the fields for the users next attempt
+                removeTweetMedia(id);
+
+            });
+        }
+        else if (mode === "thumbnail") {
+            handleMediaUpload(
+                event,
+                ["image"],
+                (mimeType) => { },
+                (base64) => {
+                    const existingThumbnailOptions = state.filter((item) => item.id === id)[0].videoThumbnailOptions;
+                    setTweetVideoThumbnailOptions(id, [...existingThumbnailOptions, base64])
+                    setTweetVideoThumbnailBlobIndex(id, existingThumbnailOptions.length);
+                },
+                (ipfsUrl) => {
+                    setTweetVideoThumbnailUrl(id, ipfsUrl);
+                },
+
+            ).catch(() => {
+
+            });
+        }
+    };
+
+
+
+    // check for errors and produce a clean thread object
+    const validateThread = async () => {
+
+        if (state.length === 0 || !state) {
+            return {
+                isError: true,
+            }
+        }
+
+
+        if (state.some((item) => item.isUploading)) {
+            toast.error('One of your tweets is still uploading. Please wait for it to finish before submitting.')
+            return {
+                isError: true,
+            }
+        }
+
+
+        for await (const item of state) {
+
+            const hasText = item.text.trim().length > 0;
+            const hasMedia = item.primaryAssetUrl !== null || item.primaryAssetBlob !== null;
+
+            if (!hasText && !hasMedia) {
+                toast.error('One of your tweets is empty. Please add text or media to continue.')
+                return {
+                    isError: true,
+                }
+            }
+
+            if (hasText) {
+                if (item.text.length > 280) {
+                    toast.error('One of your tweets is too long. Please shorten it to continue.')
+                    return {
+                        isError: true,
+                    }
+                }
+            }
+
+            if (hasMedia) {
+                if (item.isVideo) {
+                    if (!item.videoThumbnailOptions[item.videoThumbnailBlobIndex]) {
+                        toast.error('One of your tweets is missing a video thumbnail. Please add a thumbnail to continue.')
+                        return {
+                            isError: true,
+                        }
+                    }
+                    else { // if there is a thumbnail, upload the blob and add it to the thread
+                        const file = new File([item.videoThumbnailOptions[item.videoThumbnailBlobIndex]], 'videoThumbnail');
+                        await IpfsUpload(file).then(url => {
+                            item.videoThumbnailUrl = url;
+                        }).catch(err => {
+                            console.log(err)
+                            toast.error('Something went wrong. Please try again.')
+                            return {
+                                isError: true,
+                            }
+                        })
+                    }
+                }
+            }
+        }
+
+        return {
+            isError: false,
+        }
+
     }
 
     return {
         thread: state,
         addTweet,
         removeTweet,
-        setTweetText,
-        setTweetMediaUrl,
-        setTweetMediaBlob,
         removeTweetMedia,
+        setTweetText,
+        setTweetVideoThumbnailBlobIndex,
+        handleFileChange,
+        validateThread,
         resetThread: reset
     }
 

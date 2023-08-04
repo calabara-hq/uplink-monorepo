@@ -8,32 +8,28 @@ import dynamic from "next/dynamic";
 import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
 import SubmissionVoteButton from "./SubmissionVoteButton";
 import useTrackSubmissions from "@/hooks/useTrackSubmissions";
+import Output from "editorjs-react-renderer";
 import {
-  CheckBadgeIcon,
-  MinusCircleIcon,
-  PlusCircleIcon,
-  DocumentChartBarIcon,
-  PlusIcon,
-} from "@heroicons/react/24/solid";
+  MediaController,
+  MediaControlBar,
+  MediaTimeRange,
+  MediaTimeDisplay,
+  MediaPlayButton,
+  MediaMuteButton,
+} from "media-chrome/dist/react";
 
-/*
-const VideoPreview = dynamic(() => import("../VideoPlayer/VideoPlayer"), {
-  loading: () => <SubmissionSkeleton />,
-});
-*/
-/*
-const fetchSubmission = async (url: string) => {
-  console.log("fetching submission from", url);
-  return fetch(url, { cache: "no-store" }).then((res) => res.json());
-};
-*/
+import { HiCheckBadge, HiPlus } from "react-icons/hi2";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import SubmissionViewer from "../SubmissionViewer/SubmissionViewer2";
 
-const SubmissionDisplay = ({ contestId }: { contestId: number }) => {
+const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
   // init useSWR here
 
   const { liveSubmissions, isLoading, error } = useTrackSubmissions(contestId);
   return (
     <div className="flex flex-col gap-4 w-full">
+      <SubmissionViewer />
       <h1 className="text-xl lg:text-3xl text-center font-bold">Submissions</h1>
       <div className="flex w-full justify-evenly items-center">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-full w-full">
@@ -47,19 +43,29 @@ const SubmissionDisplay = ({ contestId }: { contestId: number }) => {
 };
 
 const SubmissionCard = ({ submission }: { submission: any }) => {
+  const pathname = usePathname();
   return (
-    <div className="card card-compact cursor-pointer border border-border rounded-xl bg-base-100">
+    <Link
+      className="card card-compact cursor-pointer border border-border rounded-xl bg-base-100"
+      href={`${pathname}/submission/${submission.id}`}
+    >
       {submission.data.type === "video" && (
-        <RenderVideoSubmission submission={submission} />
+        <>
+          <RenderVideoSubmission submission={submission} />
+          <SubmissionBody submission={submission} />
+        </>
       )}
       {submission.data.type === "image" && (
-        <RenderImageSubmission submission={submission} />
+        <>
+          <RenderImageSubmission submission={submission} />
+          <SubmissionBody submission={submission} />
+        </>
       )}
       {submission.data.type === "text" && (
         <RenderTextSubmission submission={submission} />
       )}
       <SubmissionFooter submission={submission} />
-    </div>
+    </Link>
   );
 };
 
@@ -77,6 +83,15 @@ const SubmissionTypeBadge = ({
   return (
     <div className={`badge rounded badge-outline badge-${badgeType}`}>
       {type}
+    </div>
+  );
+};
+
+const SubmissionBody = ({ submission }) => {
+  return (
+    <div className="card-body h-24 rounded-b-xl w-full">
+      <h2 className="card-title">{submission.data.title}</h2>
+      <h3>{submission.data.author}</h3>
     </div>
   );
 };
@@ -107,34 +122,30 @@ const SubmissionFooter = ({ submission }) => {
   };
 
   return (
-    <div className="card-body h-36 rounded-b-xl w-full">
-      <h2 className="card-title">{submission.data.title}</h2>
-      <h3>author</h3>
-      <div className="absolute bottom-0 left-0 grid grid-cols-3 w-full gap-6">
-        <div className="flex items-center justify-center">
-          <SubmissionTypeBadge type={submission.data.type} />
+    <div className="grid grid-cols-3 w-full gap-6">
+      <div className="flex items-center justify-center">
+        <SubmissionTypeBadge type={submission.data.type} />
+      </div>
+      <div className="flex items-center justify-center">
+        <div className="badge rounded badge-outline badge-warning">
+          {submission.votes} votes
         </div>
-        <div className="flex items-center justify-center">
-          <div className="badge rounded badge-outline badge-warning">
-            {submission.votes} votes
-          </div>
-        </div>
+      </div>
 
-        <div
-          className="flex items-center justify-center lg:tooltip"
-          data-tip={isSelected ? "item is in your cart" : "add to cart"}
-        >
-          {isSelected && (
-            <button className="btn btn-ghost w-full">
-              <CheckBadgeIcon className="h-6 w-6 text-border" />
-            </button>
-          )}
-          {!isSelected && (
-            <button className="btn btn-ghost w-full" onClick={handleSelect}>
-              <PlusIcon className="h-6 w-6" />
-            </button>
-          )}
-        </div>
+      <div
+        className="flex items-center justify-center lg:tooltip"
+        data-tip={isSelected ? "item is in your cart" : "add to cart"}
+      >
+        {isSelected && (
+          <button className="btn btn-ghost w-full">
+            <HiCheckBadge className="h-6 w-6 text-border" />
+          </button>
+        )}
+        {!isSelected && (
+          <button className="btn btn-ghost w-full" onClick={handleSelect}>
+            <HiPlus className="h-6 w-6" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -142,9 +153,12 @@ const SubmissionFooter = ({ submission }) => {
 
 const RenderTextSubmission = ({ submission }) => {
   return (
-    <div className="card-body h-32 bg-base-100 rounded-xl">
-      <h2 className="card-title">{submission.data.title}</h2>
-      <p>is simply dummy text of the printing and typesetting industry.</p>
+    <div className="card-body h-64 bg-white/90 rounded-xl text-black/80 gap-1 w-full overflow-auto">
+      <h2 className="break-all font-bold text-2xl">{submission.data.title}</h2>
+      <h3 className="break-all italic">{submission.author}</h3>
+      <section className="break-all">
+        <Output data={submission.data.body} />
+      </section>
     </div>
   );
 };
@@ -164,15 +178,23 @@ const RenderImageSubmission = ({ submission }) => {
 
 const RenderVideoSubmission = ({ submission }) => {
   return (
-    <VideoProvider>
-      <figure className="relative bg-base-100 h-64 w-full">
-        <VideoPreview
-          url={submission.data.videoAsset}
-          thubmnailUrl={submission.data.previewAsset}
-          id={submission.data.id}
-        />
-      </figure>
-    </VideoProvider>
+    <MediaController className="rounded-t-xl">
+      <video
+        slot="media"
+        src={submission.data.videoAsset}
+        poster={submission.data.previewAsset}
+        preload="auto"
+        muted
+        crossOrigin=""
+        className="rounded-t-xl h-64 w-full object-cover"
+      />
+      <MediaControlBar>
+        <MediaPlayButton></MediaPlayButton>
+        <MediaTimeRange></MediaTimeRange>
+        <MediaTimeDisplay showDuration></MediaTimeDisplay>
+        <MediaMuteButton></MediaMuteButton>
+      </MediaControlBar>
+    </MediaController>
   );
 };
 

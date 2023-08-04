@@ -2,8 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { nanoid } from "nanoid";
 import { SearchBar } from "@/ui/SearchBar/SearchBar";
-import { HomeIcon, PlusIcon } from "@heroicons/react/24/solid";
-import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton";
+import { HiHome, HiPlus } from "react-icons/hi2";
 
 const getSpaces = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -27,31 +26,25 @@ const getSpaces = async () => {
   return data;
 };
 
-
 export default async function Page() {
   const spaces = await getSpaces();
   return (
     <div className="flex flex-col w-full justify-center m-auto py-12 lg:w-4/5 gap-4">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <Link className="btn" href="/">
-          <HomeIcon className="h-6 w-6" />
+          <HiHome className="h-6 w-6" />
           <p className="pl-2">home</p>
         </Link>
         <Link
           className="btn btn-primary lg:mr-auto"
           href="/spacebuilder/create"
         >
-          <PlusIcon className="w-6 h-6" />
+          <HiPlus className="w-6 h-6" />
           <p className="pl-2">new space</p>
         </Link>
 
         <SearchBar />
       </div>
-
-      <div className="flex flex-row justify-evenly">
-        <TwitterConnectButton />
-      </div>
-
       <AllSpaces spaces={spaces} />
     </div>
   );

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import {
   differenceInSeconds,
@@ -11,6 +11,8 @@ import {
 export interface ContestStateProps {
   contestState: string | null;
   stateRemainingTime: string;
+  category: string;
+  type: string;
 }
 
 const ContestStateContext = createContext<ContestStateProps | undefined>(
@@ -20,6 +22,7 @@ const ContestStateContext = createContext<ContestStateProps | undefined>(
 export function ContestStateProvider({
   children,
   deadlines,
+  metadata,
 }: {
   children: React.ReactNode;
   deadlines: {
@@ -27,10 +30,14 @@ export function ContestStateProvider({
     voteTime: string;
     endTime: string;
   };
+  metadata: {
+    category: string;
+    type: "twitter" | "standard";
+  };
 }) {
   const [contestState, setContestState] = useState<string | null>(null);
   const [stateRemainingTime, setStateRemainingTime] = useState<string>("");
-
+  const {category, type} = metadata;
   useEffect(() => {
     const { startTime, voteTime, endTime } = deadlines;
     const start = parseISO(startTime);
@@ -50,7 +57,7 @@ export function ContestStateProvider({
       } else if (now < end) {
         setContestState("voting");
       } else {
-        setContestState("end");
+        setContestState("closed");
       }
 
       const seconds = differenceInSeconds(nextDeadline, now);
@@ -75,7 +82,7 @@ export function ContestStateProvider({
   }, [deadlines]);
 
   return (
-    <ContestStateContext.Provider value={{ contestState, stateRemainingTime }}>
+    <ContestStateContext.Provider value={{ contestState, stateRemainingTime, category, type }}>
       {children}
     </ContestStateContext.Provider>
   );

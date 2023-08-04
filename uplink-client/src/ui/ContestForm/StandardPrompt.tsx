@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import { OutputData } from "@editorjs/editorjs";
 import { BlockWrapper } from "./ContestForm";
 let Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
-import { PhotoIcon } from "@heroicons/react/24/solid";
+import { HiPhoto } from "react-icons/hi2";
 import { toast } from "react-hot-toast";
 
 const labelOptions: Option[] = [
@@ -112,7 +112,7 @@ const StandardPrompt = ({
                     )}
                     {!state.prompt.coverBlob && (
                       <div className="flex justify-center items-center w-full h-full rounded-lg bg-base-100 hover:bg-base-200 transition-all">
-                        <PhotoIcon className="w-10 h-10" />
+                        <HiPhoto className="w-10 h-10" />
                       </div>
                     )}
                   </div>

@@ -11,11 +11,7 @@ import { IToken } from "@/types/token";
 import { useEffect, useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
-import {
-  TrashIcon,
-  ArrowPathIcon,
-  PencilIcon,
-} from "@heroicons/react/24/solid";
+import { HiTrash, HiArrowPath, HiPencil } from "react-icons/hi2";
 
 const VotingPolicy = ({
   state,
@@ -47,7 +43,10 @@ const VotingPolicy = ({
           <div className="flex flex-col lg:flex-row w-full gap-4">
             {state.votingPolicy.map((policy, index) => {
               return (
-                <div className="card w-full lg:w-1/4 bg-base-100 p-4" key={index}>
+                <div
+                  className="card w-full lg:w-1/4 bg-base-100 p-4"
+                  key={index}
+                >
                   <div className="card-body justify-between p-0">
                     <h2 className="card-title justify-between">
                       {policy?.token?.symbol}
@@ -55,7 +54,7 @@ const VotingPolicy = ({
                         className="btn btn-sm btn-ghost link"
                         onClick={() => handleEditStrategy(index)}
                       >
-                        <PencilIcon className="w-4" />
+                        <HiPencil className="w-4" />
                       </button>
                     </h2>
                     <div className="flex gap-2 w-fit">
@@ -80,7 +79,7 @@ const VotingPolicy = ({
                         }}
                       >
                         remove
-                        <TrashIcon className="w-4 ml-2" />
+                        <HiTrash className="w-4 ml-2" />
                       </button>
                     </div>
                   </div>
@@ -209,6 +208,7 @@ const VotingPolicyManager = ({
           onCancel={() => setIsModalOpen(false)}
           onConfirm={handleSubmitStrategy}
           confirmLabel="confirm"
+          cancelLabel="Cancel"
           confirmDisabled={selectedStrategy === "arcade" ? !votingPower : false}
         />
       </>
@@ -248,7 +248,7 @@ const StrategyManager = ({
             Arcade
           </button>
           <div className="divider lg:divider-horizontal text-primary-content">
-            <ArrowPathIcon className="w-16 lg:w-24" />
+            <HiArrowPath className="w-16 lg:w-24" />
           </div>
 
           <button

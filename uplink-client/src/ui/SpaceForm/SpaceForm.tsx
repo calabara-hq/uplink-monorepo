@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { XCircleIcon, TrashIcon, UserIcon } from "@heroicons/react/24/solid";
+import { HiTrash, HiUser } from "react-icons/hi2";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import {
@@ -15,10 +15,10 @@ import {
   SpaceBuilderProps,
   validateSpaceBuilderProps,
 } from "@/app/spacebuilder/spaceHandler";
-import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 import { useRouter } from "next/navigation";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import toast from "react-hot-toast";
+import WalletConnectButton from "../ConnectButton/ConnectButton";
 
 export default function SpaceForm({
   initialState,
@@ -105,12 +105,14 @@ export default function SpaceForm({
         <SpaceTwitter state={state} dispatch={dispatch} />
         <SpaceAdmins state={state} dispatch={dispatch} />
         <div className="p-2" />
-        <ConnectWithCallback
-          callback={() => {
-            onFormSubmit(state);
-          }}
-          buttonLabel="submit"
-        />
+        <WalletConnectButton>
+          <button
+            className="btn btn-primary"
+            onClick={() => onFormSubmit(state)}
+          >
+            submit
+          </button>
+        </WalletConnectButton>
       </div>
     </div>
   );
@@ -202,7 +204,7 @@ const SpaceLogo = ({
           {state.logoBlob && <img src={state.logoBlob} />}
           {!state.logoBlob && (
             <div className="flex justify-center items-center w-full h-full">
-              <UserIcon className="w-8 h-8" />
+              <HiUser className="w-8 h-8" />
             </div>
           )}
         </div>
@@ -358,7 +360,7 @@ const SpaceAdmins = ({
                     }}
                     className="btn btn-square btn-ghost"
                   >
-                    <TrashIcon className="w-6" />
+                    <HiTrash className="w-6" />
                   </button>
                 )}
               </div>
@@ -386,13 +388,3 @@ const SpaceAdmins = ({
     </div>
   );
 };
-
-const AdminInput = ({
-  state,
-  dispatch,
-  index,
-}: {
-  state: SpaceBuilderProps;
-  dispatch: any;
-  index: number;
-}) => {};

@@ -6,11 +6,27 @@ export const CreateSubmissionDocument = gql`
             errors
             success
             userSubmissionParams {
-            maxSubPower
-            remainingSubPower
-            userSubmissions {
-                type
+                maxSubPower
+                remainingSubPower
+                userSubmissions {
+                    type
+                }
             }
+        }
+    }
+`;
+
+export const CreateTwitterSubmissionDocument = gql`
+    mutation CreateTwitterSubmission($contestId: ID!, $submission: TwitterSubmissionPayload!) {
+        createTwitterSubmission(contestId: $contestId, submission: $submission) {
+            errors
+            success
+            userSubmissionParams {
+                maxSubPower
+                remainingSubPower
+                userSubmissions {
+                    type
+                }
             }
         }
     }

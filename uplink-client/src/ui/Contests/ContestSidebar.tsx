@@ -3,28 +3,26 @@ import { useCallback, useEffect, useState } from "react";
 import { useContestState } from "@/providers/ContestStateProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { SubmissionCardVote, LockedCardVote } from "../VoteCard/VoteCard";
+import { Decimal } from "decimal.js";
 import {
-  SubmissionCardVote,
-  LockedCardVote,
-} from "../SubmissionCard/SubmissionCard";
-
-import {
-  BuildingStorefrontIcon,
-  LockClosedIcon,
-  LockOpenIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  XCircleIcon,
-  PhotoIcon,
-  PlusIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/solid";
+  HiLockClosed,
+  HiLockOpen,
+  HiXCircle,
+  HiPhoto,
+  HiPlus,
+  HiSparkles,
+  HiQuestionMarkCircle,
+} from "react-icons/hi2";
 import useVotingParams from "@/hooks/useVotingParams";
 import useSubmitParams from "@/hooks/useSubmitParams";
 import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
 import useTrackSubmissions from "@/hooks/useTrackSubmissions";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "../ConnectButton/ConnectButton";
+import Modal from "../Modal/Modal";
+import { BiInfoCircle } from "react-icons/bi";
+import { sub } from "date-fns";
 /**
  *
  * the standard sidebar for the main contest view
@@ -48,13 +46,27 @@ const Pending = () => {
   );
 };
 
-const Closed = () => {
+const Closed = ({
+  submitterRewards,
+  voterRewards,
+  openRewardsModal,
+}: {
+  submitterRewards: any;
+  voterRewards: any;
+  openRewardsModal: () => void;
+}) => {
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+      <ContestRewards
+        submitterRewards={submitterRewards}
+        voterRewards={voterRewards}
+        openRewardsModal={openRewardsModal}
+      />
       <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
         <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
           Contest Closed
         </div>
+
         <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
           <button className="btn btn-outline">Download Winners</button>
         </div>
@@ -66,16 +78,23 @@ const Closed = () => {
 const Submitting = ({
   spaceName,
   contestId,
+  submitterRewards,
+  openRewardsModal,
 }: {
   spaceName: string;
-  contestId: number;
+  contestId: string;
+  submitterRewards: any;
+  openRewardsModal: () => void;
 }) => {
   const { stateRemainingTime } = useContestState();
-  const userSubmitParams = useSubmitParams(contestId);
 
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
       <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
+        <ContestRewards
+          submitterRewards={submitterRewards}
+          openRewardsModal={openRewardsModal}
+        />
         <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
           <Link
             href={`${spaceName}/contests/${contestId}/studio`}
@@ -91,23 +110,21 @@ const Submitting = ({
 };
 
 const VoterTabBar = ({
-  activeTab,
   handleTabClick,
   isVotingCartVisible,
   setIsVotingCartVisible,
   proposedSelection,
 }: {
-  activeTab: string;
   handleTabClick: (tab: string) => void;
   isVotingCartVisible: boolean;
   setIsVotingCartVisible: (visible: boolean) => void;
   proposedSelection: any[];
 }) => {
   return (
-    <div className="tabs items-center w-full">
+    <div className="tabs w-full">
       <a
-        className={`tab tab-lg font-bold indicator indicator-secondary ${
-          activeTab === "votes" ? "tab-active" : ""
+        className={`tab tab-md font-bold indicator indicator-secondary ${
+          isVotingCartVisible ? "tab-active" : ""
         }`}
         onClick={() => handleTabClick("votes")}
       >
@@ -120,23 +137,12 @@ const VoterTabBar = ({
       </a>
 
       {isVotingCartVisible && (
-        <>
-          <a
-            className={`tab tab-lg font-bold ${
-              activeTab === "details" ? "tab-active" : ""
-            }`}
-            onClick={() => handleTabClick("details")}
-          >
-            Details
-          </a>
-
-          <a
-            className="tab tab-lg font-bold"
-            onClick={() => setIsVotingCartVisible(false)}
-          >
-            <XCircleIcon className="w-5 h-5" />
-          </a>
-        </>
+        <a
+          className="tab tab-md font-bold"
+          onClick={() => setIsVotingCartVisible(false)}
+        >
+          <HiXCircle className="w-5 h-5" />
+        </a>
       )}
     </div>
   );
@@ -157,11 +163,13 @@ const VoteTab = ({
   editMode,
   proposedSelection,
   renderEditButton,
+  openVotingPolicyModal,
 }: {
-  contestId: number;
+  contestId: string;
   editMode: boolean;
   proposedSelection: any[];
   renderEditButton: () => React.ReactNode;
+  openVotingPolicyModal: () => void;
 }) => {
   const { userVotingState, removeAllVotes } = useVoteProposalContext();
   const {
@@ -291,15 +299,15 @@ const VoteTab = ({
           <motion.div variants={itemVariants}>
             <div className="p-10"></div>
             <div className="relative flex flex-col items-center justify-center w-full">
-              <SparklesIcon className="absolute top-0 right-28 w-6 h-6 text-accent" />
-              <SparklesIcon className="absolute top-32 left-28 w-6 h-6 text-accent" />
+              <HiSparkles className="absolute top-0 right-28 w-6 h-6 text-accent" />
+              <HiSparkles className="absolute top-32 left-28 w-6 h-6 text-accent" />
               <div className="relative flex flex-col items-center justify-center w-36 h-36 bg-base-100 rounded-xl">
-                <PhotoIcon className="w-24 h-24" />
+                <HiPhoto className="w-24 h-24" />
                 <div className="space-y-2 w-full">
                   <div className="h-3 w-1/3 rounded-lg bg-gray-500 shimmer ml-2" />
                   <div className="h-2 w-1/2 rounded-lg bg-gray-500 shimmer ml-2" />
                 </div>
-                <PlusIcon className="absolute bottom-0 right-0 w-6 h-6 ml-auto m-2 text-accent" />
+                <HiPlus className="absolute bottom-0 right-0 w-6 h-6 ml-auto m-2 text-accent" />
               </div>
               <div className="p-4"></div>
               <h1>No entries selected</h1>
@@ -328,13 +336,21 @@ const VoteTab = ({
               <p>{totalVotingPower}</p>
             </div>
             <div className="flex flex-col items-center p-2 bg-base-100 w-full rounded">
-              <p className="text-sm text-gray-500">Votes Spent</p>
+              <p className="text-sm text-gray-500">Spent</p>
               <p className={votesSpentColor}>{votesSpent}</p>
             </div>
             <div className="flex flex-col items-center p-2 bg-base-100 w-full rounded">
-              <p className="text-sm text-gray-500">Votes Remaining</p>
+              <p className="text-sm text-gray-500">Remaining</p>
               <p className={votesRemainingColor}>{votesRemaining}</p>
             </div>
+          </div>
+          <div className="flex gap-2 items-center justify-center bg-base-100 p-2 rounded text-gray-500">
+            <a
+              className="underline cursor-pointer hover:text-gray-400"
+              onClick={openVotingPolicyModal}
+            >
+              How is voting power calculated?
+            </a>
           </div>
         </motion.div>
       </motion.div>
@@ -342,16 +358,19 @@ const VoteTab = ({
   );
 };
 
-const DetailTab = ({}) => {
-  return (
-    <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-      <p className="text-lg font-bold"></p>
-      <p className="text-lg font-bold text-center">Arcade style</p>
-    </div>
-  );
-};
-
-export function VoterCart({ contestId }: { contestId: number }) {
+export function VoterCart({
+  contestId,
+  voterRewards,
+  votingPolicy,
+  openRewardsModal,
+  openVotingPolicyModal,
+}: {
+  contestId: string;
+  voterRewards: any;
+  votingPolicy: any;
+  openRewardsModal: () => void;
+  openVotingPolicyModal: () => void;
+}) {
   const [activeTab, setActiveTab] = useState("votes");
   const [editMode, setEditMode] = useState(false);
   const [proposedSelection, setProposedSelection] = useState<any>([]);
@@ -385,13 +404,13 @@ export function VoterCart({ contestId }: { contestId: number }) {
     if (editMode) {
       return (
         <button className="btn btn-sm btn-ghost" onClick={handleCancelClick}>
-          <LockOpenIcon className="w-4 h-4" />
+          <HiLockOpen className="w-4 h-4" />
         </button>
       );
     } else {
       return (
         <button className="btn btn-sm btn-ghost" onClick={handleEditClick}>
-          <LockClosedIcon className="w-4 h-4 mr-2" />
+          <HiLockClosed className="w-4 h-4 mr-2" />
           Edit
         </button>
       );
@@ -402,27 +421,30 @@ export function VoterCart({ contestId }: { contestId: number }) {
 
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+      <ContestRewards
+        voterRewards={voterRewards}
+        openRewardsModal={openRewardsModal}
+      />
       <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
         <VoterTabBar
-          activeTab={activeTab}
           handleTabClick={handleTabClick}
           isVotingCartVisible={isVotingCartVisible}
           setIsVotingCartVisible={setIsVotingCartVisible}
           proposedSelection={proposedSelection}
         />
         <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
-          {activeTab === "votes" && isVotingCartVisible && (
+          {isVotingCartVisible && (
             <>
               <VoteTab
                 contestId={contestId}
                 editMode={editMode}
                 proposedSelection={proposedSelection}
                 renderEditButton={renderEditButton}
+                openVotingPolicyModal={openVotingPolicyModal}
               />
               <VoteButton />
             </>
           )}
-          {activeTab === "details" && <DetailTab />}
         </div>
       </div>
     </div>
@@ -459,24 +481,320 @@ export function VoteButton() {
   );
 }
 
-const shimmer = `relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.5s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent`;
+// Helper function to process rewards
+interface TokenReward {
+  amount: string;
+  token: {
+    symbol?: string;
+    type: string;
+  };
+}
 
-/**
- *
- *
- *
- *
- */
+interface Reward {
+  rank: number;
+  tokenReward: TokenReward;
+}
 
+// Helper function to process rewards
+function processRewards(rewards: Reward[]): Record<string, Decimal> {
+  const rewardSummary: Record<string, Decimal> = {};
+  console.log(rewards);
+  rewards.forEach((reward) => {
+    const tokenType =
+      reward.tokenReward.token.symbol || reward.tokenReward.token.type;
+    if (rewardSummary[tokenType]) {
+      rewardSummary[tokenType] = rewardSummary[tokenType].plus(
+        new Decimal(reward.tokenReward.amount)
+      );
+    } else {
+      rewardSummary[tokenType] = new Decimal(reward.tokenReward.amount);
+    }
+  });
+
+  return rewardSummary;
+}
+
+const ContestRewards = ({
+  submitterRewards,
+  voterRewards,
+  openRewardsModal,
+}: {
+  submitterRewards?: Reward[];
+  voterRewards?: Reward[];
+  openRewardsModal?: () => void;
+}) => {
+  const processedSubmitterRewards = processRewards(submitterRewards ?? []);
+  const processedVoterRewards = processRewards(voterRewards ?? []);
+  const componentVisible =
+    submitterRewards?.length > 0 || voterRewards?.length > 0;
+
+  if (componentVisible) {
+    return (
+      <div className="rounded-lg flex flex-col gap-2 w-full bg-base-100">
+        <div className="flex items-center">
+          <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+            <p>Rewards</p>
+          </div>
+          <BiInfoCircle
+            className="w-6 h-6 ml-auto mr-2 cursor-pointer"
+            onClick={openRewardsModal}
+          />
+        </div>
+        <div className="flex flex-col p-4">
+          {submitterRewards?.length > 0 && (
+            <div className="flex justify-between">
+              <span className="font-bold">Submitter Rewards</span>
+              {Object.entries(processedSubmitterRewards).map(
+                ([token, amount]) => (
+                  <span key={token}>
+                    {amount.toString()} {token}
+                  </span>
+                )
+              )}
+            </div>
+          )}
+
+          {voterRewards?.length > 0 && (
+            <div className="flex justify-between">
+              <span className="font-bold">Voter Rewards</span>
+              {Object.entries(processedVoterRewards).map(([token, amount]) => (
+                <span key={token}>
+                  {amount.toString()} {token}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  } else return null;
+};
 const SidebarSkeleton = () => {
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
       <div className="flex flex-col justify-between bg-base-100  rounded-lg w-full">
         <div className="space-y-2 p-4">
-          <div className={`h-6 w-1/3 mb-4 rounded-lg bg-neutral ${shimmer}`} />
-          <div className={`h-4 w-1/2 rounded-lg bg-neutral ${shimmer}`} />
-          <div className={`h-4 w-1/2 rounded-lg bg-neutral ${shimmer}`} />
+          <div className={"h-6 w-1/3 mb-4 rounded-lg bg-neutral shimmer"} />
+          <div className={"h-4 w-1/2 rounded-lg bg-neutral shimmer"} />
+          <div className={"h-4 w-1/2 rounded-lg bg-neutral shimmer"} />
         </div>
+      </div>
+    </div>
+  );
+};
+
+const ExpandedSubmitterRewards = (rewards: Reward[]) => {
+  interface RewardElement {
+    ETH?: {
+      symbol: string;
+      amount: string;
+    };
+    ERC20?: {
+      symbol: string;
+      amount: string;
+    };
+    ERC721?: {
+      symbol: string;
+      amount: string;
+    };
+    ERC1155?: {
+      symbol: string;
+      amount: string;
+    };
+  }
+  const rewardSummary: Record<number, RewardElement> = {};
+
+  rewards.forEach((reward) => {
+    const tokenType = reward.tokenReward.token.type;
+    if (rewardSummary[reward.rank]) {
+      rewardSummary[reward.rank][tokenType] = {
+        symbol: reward.tokenReward.token.symbol,
+        amount: reward.tokenReward.amount,
+      };
+    } else {
+      rewardSummary[reward.rank] = {
+        [tokenType]: {
+          symbol: reward.tokenReward.token.symbol,
+          amount: reward.tokenReward.amount,
+        },
+      };
+    }
+  });
+
+  return rewardSummary;
+};
+
+const RewardsModalContent = ({
+  submitterRewards,
+  voterRewards,
+}: {
+  submitterRewards: Reward[];
+  voterRewards: Reward[];
+}) => {
+  const [tab, setTab] = useState(0); // 0 = submitting, 1 = voting
+  const subRewards = ExpandedSubmitterRewards(submitterRewards);
+
+  console.log(subRewards);
+
+  return (
+    <div className="tabs tabs-boxed gap-2 bg-base">
+      <a
+        className={`tab ${tab === 0 ? "tab-active" : ""} `}
+        onClick={() => setTab(0)}
+      >
+        Submitter Rewards
+      </a>
+      <a
+        className={`tab ${tab === 1 ? "tab-active" : ""}`}
+        onClick={() => setTab(1)}
+      >
+        Voter Rewards
+      </a>
+      {tab === 0 && (
+        <div className="overflow-x-auto w-full flex flex-col gap-4">
+          <div className="flex items-center gap-4 p-2 rounded-xl border border-border">
+            <HiSparkles className="w-6 h-6 text-primary" />
+            <p className="">
+              Submitter rewards are allocated to submissions that finish in the
+              following ranks.
+            </p>
+          </div>
+          {submitterRewards.length === 0 && (
+            <p>There are no submitter rewards for this contest</p>
+          )}
+          {submitterRewards.length > 0 && (
+            <table className="table w-full">
+              {/* head */}
+              <thead>
+                <tr>
+                  <th className="bg-base-100 text-center">rank</th>
+                  <th className="bg-gray-600 text-center">ETH</th>
+                  <th className="bg-gray-700 text-center">ERC20</th>
+                  <th className="bg-gray-800 text-center">ERC721</th>
+                  <th className="bg-gray-900 text-center">ERC1155</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(subRewards).map(([rank, reward]) => (
+                  <tr key={rank}>
+                    <td className="bg-base-100 text-center">{rank}</td>
+                    <td className="bg-gray-600 text-center">
+                      {reward.ETH?.amount ?? ""}
+                    </td>
+
+                    <td className="bg-gray-700 text-center">
+                      {reward.ERC20?.amount ?? ""} {reward.ERC20?.symbol ?? ""}
+                    </td>
+
+                    <td className="bg-gray-800 text-center">
+                      {" "}
+                      {reward.ERC721?.amount ?? ""}{" "}
+                      {reward.ERC721?.symbol ?? ""}
+                    </td>
+
+                    <td className="bg-gray-900 text-center">
+                      {" "}
+                      {reward.ERC1155?.amount ?? ""}{" "}
+                      {reward.ERC1155?.symbol ?? ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+      {tab === 1 && (
+        <div className="overflow-x-auto w-full flex flex-col gap-4">
+          <div className="flex items-center gap-4 p-2 rounded-xl border border-border">
+            <HiSparkles className="w-6 h-6 text-primary" />
+            <p className="">
+              Voter rewards are split amongst voters that allocate votes to
+              submissions that finish in the following ranks.
+            </p>
+          </div>
+          {voterRewards.length === 0 && (
+            <p>There are no voter rewards for this contest</p>
+          )}
+          {voterRewards.length > 0 && (
+            <table className="table w-full">
+              <tbody>
+                {voterRewards.map((reward, idx) => (
+                  <tr key={reward.rank} className="w-full">
+                    <td className="w-full">
+                      voters that accurately choose rank {reward.rank} will
+                      split {reward.tokenReward.amount}{" "}
+                      {reward.tokenReward.token.symbol}.
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const VotingPolicyModalContent = ({ votingPolicy }: { votingPolicy: any }) => {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1 italic text-md border border-gray-600 p-2 rounded">
+        <p>strategy types:</p>
+
+        <p>arcade = uniform voting power for all token holders</p>
+        <p>weighted = voting power corresponds to user token balance</p>
+      </div>
+      <div className="grid grid-cols-2">
+        {votingPolicy.map((el, index) => {
+          const strategyType = el.strategyType;
+          const objectReference =
+            strategyType === "arcade"
+              ? el.arcadeVotingPolicy
+              : el.weightedVotingPolicy;
+          return (
+            <div
+              key={index}
+              className="flex flex-col gap-1 bg-base-100 p-2 rounded"
+            >
+              <div className="badge badge-secondary">{index + 1}</div>
+              <p>
+                <a className="font-bold">strategy type: </a> {strategyType}
+              </p>
+              <p>
+                <a className="font-bold">symbol: </a>
+                <a
+                  className={
+                    objectReference.token.symbol === "ETH"
+                      ? ""
+                      : "underline cursor-pointer hover:text-gray-300"
+                  }
+                  onClick={
+                    objectReference.token.symbol === "ETH"
+                      ? () => {}
+                      : () => {
+                          window.open(
+                            `https://etherscan.io/token/${objectReference.token.address}`,
+                            "_blank"
+                          );
+                        }
+                  }
+                >
+                  {" "}
+                  {objectReference.token.symbol}
+                </a>
+                {strategyType === "arcade" && (
+                  <p>
+                    <a className="font-bold">Voting Power: </a>
+                    {objectReference.votingPower.toString()}
+                  </p>
+                )}
+              </p>
+              <p></p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -485,19 +803,91 @@ const SidebarSkeleton = () => {
 const ContestSidebar = ({
   spaceName,
   contestId,
+  submitterRewards,
+  voterRewards,
+  votingPolicy,
 }: {
   spaceName: string;
-  contestId: number;
+  contestId: string;
+  submitterRewards: any;
+  voterRewards: any;
+  votingPolicy: any;
 }) => {
   const { contestState } = useContestState();
   const { userVotingState } = useVoteProposalContext();
+  const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
+  const [isVotingPolicyModalOpen, setIsVotingPolicyModalOpen] = useState(false);
+  const openRewardsModal = () => {
+    setIsRewardModalOpen(true);
+  };
+
+  const openVotingPolicyModal = () => {
+    setIsVotingPolicyModalOpen(true);
+  };
+
+  return (
+    <>
+      {!contestState && <SidebarSkeleton />}
+      {contestState === "pending" && <Pending />}
+      {contestState === "submitting" && (
+        <Submitting
+          spaceName={spaceName}
+          contestId={contestId}
+          submitterRewards={submitterRewards}
+          openRewardsModal={openRewardsModal}
+        />
+      )}
+      {contestState === "voting" && !userVotingState.isLoading && (
+        <VoterCart
+          contestId={contestId}
+          voterRewards={voterRewards}
+          votingPolicy={votingPolicy}
+          openRewardsModal={openRewardsModal}
+          openVotingPolicyModal={openVotingPolicyModal}
+        />
+      )}
+      {contestState === "closed" && (
+        <Closed
+          submitterRewards={submitterRewards}
+          voterRewards={voterRewards}
+          openRewardsModal={openRewardsModal}
+        />
+      )}
+      <Modal
+        isModalOpen={isRewardModalOpen}
+        onClose={() => {
+          setIsRewardModalOpen(false);
+        }}
+      >
+        <RewardsModalContent
+          submitterRewards={submitterRewards}
+          voterRewards={voterRewards}
+        />
+      </Modal>
+      <Modal
+        isModalOpen={isVotingPolicyModalOpen}
+        onClose={() => {
+          setIsVotingPolicyModalOpen(false);
+        }}
+      >
+        <VotingPolicyModalContent votingPolicy={votingPolicy} />
+      </Modal>
+    </>
+  );
+  /*
   if (contestState === "pending") return <Pending />;
   else if (contestState === "submitting")
-    return <Submitting spaceName={spaceName} contestId={contestId} />;
+    return (
+      <Submitting
+        spaceName={spaceName}
+        contestId={contestId}
+      />
+    );
   else if (contestState === "voting" && !userVotingState.isLoading)
     return <VoterCart contestId={contestId} />;
-  else if (contestState === "end") return <Closed />;
+  else if (contestState === "closed") return <Closed />;
   else return <SidebarSkeleton />;
+  */
 };
 
 export default ContestSidebar;

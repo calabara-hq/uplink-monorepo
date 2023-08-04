@@ -3,8 +3,12 @@ scalar EditorData
 scalar SubmissionAssetUrl
 
 type Contest @key(fields: "id") {
-  id: Int!
+  id: ID!
   submissions: [Submission!]!
+}
+
+type Space @key(fields: "id"){
+  id: ID!
 }
 
 type Submission @key(fields: "id") {
@@ -17,15 +21,53 @@ type Submission @key(fields: "id") {
   url: String!
 }
 
+type PopularSubmission @key(fields: "id") {
+  id: ID!
+  contestId: ID!
+  created: String!
+  type: String!
+  version: String!
+  author: String!
+  url: String!
+  contestCategory: String!
+  spaceName: String!
+  spaceDisplayName: String!
+}
+
+type Token {
+  type: String!
+  decimals: Int!
+  symbol: String!
+  address: String
+  tokenId: String
+}
+
+type TokenRestriction {
+  token: Token!
+  threshold: Decimal!
+}
+
+type Restriction {
+  restrictionType: String!
+  tokenRestriction: TokenRestriction
+}
+
+type RestrictionResult {
+  restriction: Restriction!
+  result: Boolean!
+}
+
 type UserSubmissionParams {
   maxSubPower: Int!
   remainingSubPower: Int!
+  restrictionResults: [RestrictionResult!]!
   userSubmissions: [Submission!]!
 }
 
 type Query {
   submission(submissionId: ID!): Submission
   contestSubmissions(contestId: ID!): [Submission!]!
+  popularSubmissions: [PopularSubmission!]!
   getUserSubmissionParams(
     contestId: ID!
     walletAddress: String
@@ -45,10 +87,28 @@ input SubmissionPayload {
   body: EditorData
 }
 
+
+input ThreadPayload {
+  text: String
+  previewAsset: SubmissionAssetUrl
+  videoAsset: SubmissionAssetUrl
+  assetSize: String
+  assetType: String
+}
+
+input TwitterSubmissionPayload {
+  title: String!
+  thread: [ThreadPayload!]!
+}
+
 type Mutation {
   createSubmission(
     contestId: ID!
     submission: SubmissionPayload!
+  ): createSubmissionResponse!
+  createTwitterSubmission(
+    contestId: ID!
+    submission: TwitterSubmissionPayload!
   ): createSubmissionResponse!
 }
 

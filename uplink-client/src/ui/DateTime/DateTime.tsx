@@ -174,6 +174,8 @@ export default function DateTimeSelector({
             onCancel={handleHardReset}
             onConfirm={handleModalConfirm}
             confirmLabel={progress < 1 ? "Next" : "Confirm"}
+            cancelLabel="Cancel"
+
           />
         </>
       </Modal>

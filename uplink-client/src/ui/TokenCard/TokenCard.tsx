@@ -2,12 +2,7 @@ import { IToken, INativeToken, IERCToken } from "@/types/token";
 import TokenBadge from "../TokenBadge/TokenBadge";
 import Image from "next/image";
 import EthLogo from "../../../public/eth-logo.png";
-import {
-  TrashIcon,
-  LinkIcon,
-  ArrowTopRightOnSquareIcon,
-
-} from "@heroicons/react/24/solid";
+import { HiTrash } from "react-icons/hi2";
 
 const TokenCard = ({
   token,
@@ -26,7 +21,7 @@ const TokenCard = ({
           {handleRemove && (
             <button className="btn btn-xs btn-ghost" onClick={handleRemove}>
               remove
-              <TrashIcon className="w-4 ml-2" />
+              <HiTrash className="w-4 ml-2" />
             </button>
           )}
         </div>

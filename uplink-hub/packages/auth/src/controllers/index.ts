@@ -177,6 +177,7 @@ export const oauthCallback = async (req, res) => {
             const { data: userObject } = await loggedClient.v2.me({ "user.fields": ["profile_image_url"] });
             req.session.user.twitter = {
                 ...userObject,
+                profile_image_url_large: userObject.profile_image_url.replace('_normal', '_400x400'),
                 accessToken: cipherController.encrypt(accessToken),
                 accessSecret: cipherController.encrypt(accessSecret),
             }

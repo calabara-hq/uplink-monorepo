@@ -912,7 +912,21 @@ export const validateSubmitterRewards = (submitterRewards: ContestBuilderProps['
     const duplicateRanks: number[] = [];
     const seenRanks: number[] = [];
 
-    const payouts = submitterRewards.payouts;
+    const payouts = submitterRewards.payouts.map(el => {
+        const { ETH, ERC20, ERC721, ERC1155, rank } = el;
+        let obj: any = { rank };
+        if (ETH?.amount) { obj.ETH = ETH; }
+        if (ERC20?.amount && ERC20.amount !== '') obj.ERC20 = ERC20;
+        if (ERC721?.tokenId !== null && ERC721?.tokenId !== undefined) obj.ERC721 = ERC721;
+        if (ERC1155?.amount && ERC1155.amount !== '') obj.ERC1155 = ERC1155;
+
+        return obj;
+    }).filter(el => Object.keys(el).length > 1); // Filter out objects that only have the rank
+
+    console.log(payouts)
+
+
+
     const ranks = payouts ? payouts.map((payout) => payout.rank) : [];
     ranks.forEach((rank, index) => {
         if (seenRanks.includes(rank)) {
@@ -946,7 +960,16 @@ export const validateVoterRewards = (voterRewards: ContestBuilderProps['voterRew
     const duplicateRanks: number[] = [];
     const seenRanks: number[] = [];
 
-    const payouts = voterRewards.payouts;
+    // const payouts = voterRewards.payouts;
+
+    let payouts = voterRewards.payouts.map(el => {
+        const { ETH, ERC20, rank } = el;
+        let obj: any = { rank };
+        if (ETH?.amount) { obj.ETH = ETH; }
+        if (ERC20?.amount && ERC20.amount !== '') obj.ERC20 = ERC20;
+
+        return obj;
+    }).filter(el => Object.keys(el).length > 1); // Filter out objects that only have the rank
     const ranks = payouts ? payouts.map((payout) => payout.rank) : [];
 
     ranks.forEach((rank, index) => {

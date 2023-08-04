@@ -73,8 +73,9 @@ type AdditionalParamsType {
 }
 
 type Contest @key(fields: "id") {
-  id: Int!
-  spaceId: Int!
+  id: ID!
+  spaceId: ID!
+  space: Space!
   created: String!
   metadata: MetadataType!
   deadlines: DeadlinesType!
@@ -87,21 +88,10 @@ type Contest @key(fields: "id") {
   tweetId: String
 }
 
-type ActiveContest {
-  id: Int!
-  spaceId: Int!
-  tag: String!
-  start: String!
-  vote: String!
-  end: String!
-  created: String!
-  spaceLink: Space!
-}
-
 extend type Query {
-  contest(contestId: Int!): Contest
+  contest(contestId: ID!): Contest
   #spaceContests(spaceId: Int, spaceName: String): [Contest!]!
-  activeContests: [ActiveContest!]!
+  activeContests: [Contest!]!
 }
 
 enum ContestType {
@@ -235,7 +225,7 @@ input ThreadItemType {
 }
 
 input ContestBuilderProps {
-  spaceId: String!
+  spaceId: ID!
   metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
@@ -261,7 +251,7 @@ type ContestErrorData {
 
 type ContestMutationResponse {
   success: Boolean!
-  contestId: Int
+  contestId: ID
   errors: ContestErrorData
 }
 

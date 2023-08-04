@@ -5,45 +5,55 @@ import gql from "graphql-tag";
 import { useContestState } from "@/providers/ContestStateProvider";
 
 
-
-const UserSubmissionParamsDocument = gql`
-    query Query($contestId: ID!) {
-    getUserSubmissionParams(contestId: $contestId) {
-        maxSubPower
-        remainingSubPower
-        userSubmissions {
-            author
-            contestId
-            created
-            id
-            type
-            url
-            version
-        }
-    }
-    }
-`;
-
-
-export const getUserSubmissionParams = async (contestId: number) => {
-    const response = await graphqlClient.query(UserSubmissionParamsDocument, { contestId })
-        .toPromise()
+const getUserSubmissionParams = async (contestId: string, walletAddress: string) => {
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            query: `
+            query GetUserSubmissionParams($contestId: ID!, $walletAddress: String) {
+                getUserSubmissionParams(contestId: $contestId, walletAddress: $walletAddress) {
+                  maxSubPower
+                  remainingSubPower
+                  restrictionResults {
+                    result
+                    restriction {
+                      restrictionType
+                      tokenRestriction {
+                        token {
+                          address
+                          decimals
+                          symbol
+                          tokenId
+                          type
+                        }
+                        threshold
+                      }
+                    }
+                  }
+                }
+              }`,
+            variables: {
+                contestId,
+                walletAddress
+            },
+        }),
+        //next: { tags: [`space/${name}`], revalidate: 60 },
+    })
+        .then((res) => res.json())
         .then(res => res.data.getUserSubmissionParams)
-        .catch((e) => {
-            console.log(e)
+        .catch(err => {
             return {
                 userSubmissions: [],
                 maxSubPower: 0,
                 remainingSubPower: 0
             }
         })
+};
 
-    return response
-}
-
-
-
-const useSubmitParams = (contestId: number) => {
+const useSubmitParams = (contestId: string) => {
     const { data: session, status } = useSession();
     const { contestState } = useContestState();
 
@@ -56,9 +66,9 @@ const useSubmitParams = (contestId: number) => {
         ? [`/api/userSubmitParams/${contestId}`, session.user.address]
         : null;
 
-    const { data: userSubmitParams }: { data: any } = useSWR(swrKey, () => getUserSubmissionParams(contestId));
+    const { data: userSubmitParams, isLoading }: { data: any, isLoading: any } = useSWR(swrKey, () => getUserSubmissionParams(contestId, session.user.address));
 
-    return userSubmitParams;
+    return { userSubmitParams, isLoading };
 };
 
 

@@ -7,45 +7,206 @@ import ContestSidebar from "@/ui/Contests/ContestSidebar";
 import { SWRConfig } from "swr";
 import SwrProvider from "@/providers/SwrProvider";
 
-const fetchSubmission = async (url: string) => {
-  console.log("fetching submission from", url);
-  return fetch(url, { cache: "no-store" }).then((res) => res.json());
+const getContest = async (contestId: string) => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+      query Query($contestId: ID!){
+        contest(contestId: $contestId){
+            id
+            space{
+                id
+                name
+                displayName
+                logoUrl
+            }
+            created
+            promptUrl
+            metadata {
+                category
+                type
+            }
+            deadlines {
+                startTime
+                voteTime
+                endTime
+                snapshot
+            }
+            submitterRestrictions {
+                restrictionType
+                tokenRestriction {
+                    threshold
+                    token {
+                        address
+                        decimals
+                        symbol
+                        tokenHash
+                        tokenId
+                        type
+                    }
+                }
+            }            
+            submitterRewards {
+                rank
+                tokenReward {
+                    amount
+                    token {
+                        tokenHash
+                        symbol
+                        decimals
+                        address
+                        tokenId
+                        type
+                    }
+                    tokenId
+                }
+            }
+            voterRewards {
+                rank
+                tokenReward {
+                    amount
+                    tokenId
+                    token {
+                        tokenHash
+                        type
+                        address
+                        symbol
+                        decimals
+                        tokenId
+                    }
+                }
+            }
+            votingPolicy {
+                strategyType
+                arcadeVotingPolicy {
+                    token {
+                        tokenHash
+                        type
+                        address
+                        symbol
+                        decimals
+                        tokenId
+                    }
+                    votingPower
+                }
+                weightedVotingPolicy {
+                    token {
+                        tokenHash
+                        type
+                        address
+                        symbol
+                        decimals
+                        tokenId
+                    }
+                }
+            }
+        }
+    }`,
+      variables: {
+        contestId,
+      },
+    }),
+    next: { tags: [`contest/${contestId}`] }, // always cache the contest data
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.contest);
+  return data;
 };
 
+// get the submissions by contestID:
+
+const getSubmissions = async (contestId: string) => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+      query Query($contestId: ID!){
+        contest(contestId: $contestId){
+            submissions {
+                id
+                contestId
+                author
+                created
+                type
+                url
+                version
+            }
+        }
+    }`,
+      variables: {
+        contestId,
+      },
+    }),
+    next: { tags: [`submissions/${contestId}`], revalidate: 60 }, // cache submissions for 60 seconds
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.contest.submissions);
+  return data;
+};
+
+const fetchSubmission = async (url: string) => {
+  return fetch(url).then((res) => res.json()); // cache every submission request as we don't yet allow editing
+};
 
 export default async function Page({
   params,
 }: {
   params: { id: string; name: string };
 }) {
-  const contest = await getContestById(parseInt(params.id));
-  const { contestId, metadata, deadlines, promptUrl, submissions } =contest.data.contest;
+  const [
+    {
+      contestId,
+      metadata,
+      deadlines,
+      promptUrl,
+      space,
+      submitterRewards,
+      voterRewards,
+      votingPolicy,
+    },
+    submissions,
+  ] = await Promise.all([getContest(params.id), getSubmissions(params.id)]);
 
-  
-  const resolvedSubmissions = await Promise.all(submissions.map(async (submission, idx) => {
-    const data = await fetchSubmission(submission.url)
-    return { ...submission, data: data }
-  }))
+  const resolvedSubmissions = await Promise.all(
+    submissions.map(async (submission, idx) => {
+      const data = await fetchSubmission(submission.url);
+      return { ...submission, data: data };
+    })
+  );
 
   const fallback = {
-    [`/ipfs/submissions/${params.id}`]: resolvedSubmissions
-  }
+    [`/ipfs/submissions/${params.id}`]: resolvedSubmissions,
+  };
 
   return (
     <>
-      <div className="flex flex-col w-full lg:w-3/4 gap-4">
+      <div className="flex flex-col w-full gap-4">
         {/*@ts-expect-error*/}
         <Prompt
+          space={space}
           contestId={contestId}
           metadata={metadata}
           deadlines={deadlines}
           promptUrl={promptUrl}
         />
         <SwrProvider fallback={fallback}>
-          <SubmissionDisplay contestId={parseInt(params.id)}/>
+          <SubmissionDisplay contestId={params.id} />
         </SwrProvider>
       </div>
-      <ContestSidebar contestId={parseInt(params.id)} spaceName={params.name} />
+      <ContestSidebar
+        contestId={params.id}
+        spaceName={params.name}
+        submitterRewards={submitterRewards}
+        voterRewards={voterRewards}
+        votingPolicy={votingPolicy}
+      />
     </>
   );
 }

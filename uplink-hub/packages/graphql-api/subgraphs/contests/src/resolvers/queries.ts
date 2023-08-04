@@ -1,7 +1,7 @@
 import { Decimal, schema } from "lib";
 import { sqlOps, db } from '../utils/database.js';
 
-const fetchContestTopLevel = async (contestId?: number, spaceId?: number) => {
+const fetchContestTopLevel = async (contestId?: string, spaceId?: string) => {
     const where = contestId
         ? sqlOps.eq(schema.contests.id, contestId)
         : spaceId
@@ -14,6 +14,7 @@ const fetchContestTopLevel = async (contestId?: number, spaceId?: number) => {
     const result = await db.select({
         id: schema.contests.id,
         spaceId: schema.contests.spaceId,
+        space: schema.spaces,
         promptUrl: schema.contests.promptUrl,
         created: schema.contests.created,
         metadata: {
@@ -34,13 +35,45 @@ const fetchContestTopLevel = async (contestId?: number, spaceId?: number) => {
         },
     })
         .from(schema.contests)
+        .leftJoin(schema.spaces, sqlOps.eq(schema.spaces.id, schema.contests.spaceId))
         .where(where);
 
     return result;
 }
 
+const fetchActiveContests = async () => {
+    const result = await db.select({
+        id: schema.contests.id,
+        spaceId: schema.contests.spaceId,
+        space: schema.spaces,
+        promptUrl: schema.contests.promptUrl,
+        created: schema.contests.created,
+        metadata: {
+            type: schema.contests.type,
+            category: schema.contests.category,
+        },
+        deadlines: {
+            startTime: schema.contests.startTime,
+            voteTime: schema.contests.voteTime,
+            endTime: schema.contests.endTime,
+            snapshot: schema.contests.snapshot,
+        },
+        additionalParams: {
+            anonSubs: schema.contests.anonSubs,
+            visibleVotes: schema.contests.visibleVotes,
+            selfVote: schema.contests.selfVote,
+            subLimit: schema.contests.subLimit,
+        },
+    })
+        .from(schema.contests)
+        .leftJoin(schema.spaces, sqlOps.eq(schema.spaces.id, schema.contests.spaceId))
+        .where(sqlOps.gt(schema.contests.endTime, new Date().toISOString()));
 
-const fetchSubmitterRewards = async (contestId: number) => {
+    return result;
+}
+
+
+const fetchSubmitterRewards = async (contestId: string) => {
     const submitterRewards = await db.select({
         id: schema.rewards.id,
         contestId: schema.rewards.contestId,
@@ -57,6 +90,7 @@ const fetchSubmitterRewards = async (contestId: number) => {
         .leftJoin(schema.tokens, sqlOps.eq(schema.tokens.id, schema.tokenRewards.tokenLink))
         .where(sqlOps.and(sqlOps.eq(schema.rewards.contestId, contestId), sqlOps.eq(schema.rewards.recipient, "submitter")));
 
+
     return submitterRewards.map((reward) => {
         return {
             ...reward,
@@ -68,7 +102,7 @@ const fetchSubmitterRewards = async (contestId: number) => {
     });
 }
 
-const fetchVoterRewards = async (contestId: number) => {
+const fetchVoterRewards = async (contestId: string) => {
     const voterRewards = await db.select({
         id: schema.rewards.id,
         contestId: schema.rewards.contestId,
@@ -78,7 +112,7 @@ const fetchVoterRewards = async (contestId: number) => {
             ...schema.tokenRewards,
             amount: schema.tokenRewards.amount,
             token: schema.tokens
-        } as any
+        }
     })
         .from(schema.rewards)
         .leftJoin(schema.tokenRewards, sqlOps.eq(schema.tokenRewards.rewardId, schema.rewards.id))
@@ -97,7 +131,8 @@ const fetchVoterRewards = async (contestId: number) => {
 }
 
 
-const fetchSubmitterRestrictions = async (contestId: number) => {
+
+const fetchSubmitterRestrictions = async (contestId: string) => {
     const submitterRestrictions = await db.select({
         id: schema.submitterRestrictions.id,
         contestId: schema.submitterRestrictions.contestId,
@@ -126,7 +161,7 @@ const fetchSubmitterRestrictions = async (contestId: number) => {
 }
 
 
-const fetchArcadeVotingPolicy = async (contestId: number) => {
+const fetchArcadeVotingPolicy = async (contestId: string) => {
     const arcadeVotingPolicy = await db.select({
         id: schema.votingPolicy.id,
         contestId: schema.votingPolicy.contestId,
@@ -154,7 +189,7 @@ const fetchArcadeVotingPolicy = async (contestId: number) => {
     })
 }
 
-const fetchWeightedVotingPolicy = async (contestId: number) => {
+const fetchWeightedVotingPolicy = async (contestId: string) => {
     const weightedVotingPolicy = await db.select({
         id: schema.votingPolicy.id,
         contestId: schema.votingPolicy.contestId,
@@ -181,8 +216,7 @@ const fetchWeightedVotingPolicy = async (contestId: number) => {
 
 
 
-const singleContestByContestId = async (id: string) => {
-    const contestId = parseInt(id);
+const singleContestByContestId = async (contestId: string) => {
 
     const [contestTopLevel, submitterRewards, voterRewards, submitterRestrictions, arcadeVotingPolicy, weightedVotingPolicy] = await Promise.all([
         fetchContestTopLevel(contestId, null),
@@ -193,7 +227,7 @@ const singleContestByContestId = async (id: string) => {
         fetchWeightedVotingPolicy(contestId)
     ])
 
-    return {
+    const data = {
         ...contestTopLevel[0],
         submitterRewards,
         voterRewards,
@@ -204,11 +238,12 @@ const singleContestByContestId = async (id: string) => {
         ]
     }
 
+    return data
+
 }
 
 
-const multiContestsBySpaceId = async (id: string) => {
-    const spaceId = parseInt(id);
+const multiContestsBySpaceId = async (spaceId: string) => {
     const contestTopLevel = await fetchContestTopLevel(null, spaceId);
     const result = await Promise.all(contestTopLevel.map(async (contest) => {
         const [submitterRewards, voterRewards, submitterRestrictions, arcadeVotingPolicy, weightedVotingPolicy] = await Promise.all([
@@ -242,8 +277,11 @@ const queries = {
             return contest;
         },
 
-        activeContests() {
-            return contests.filter(contest => contest.deadlines.startTime > '0')
+        async activeContests() {
+            const active = await fetchActiveContests();
+            return await Promise.all(active.map(contest => {
+                return singleContestByContestId(contest.id)
+            }))
         }
 
     },
@@ -251,7 +289,8 @@ const queries = {
     // used to resolve contests to spaces
     Space: {
         contests(space) {
-            console.log('IN HERE')
+            console.log('got a space')
+            console.log(space)
             return multiContestsBySpaceId(space.id);
         }
     },
@@ -268,40 +307,6 @@ const queries = {
 
 };
 
-const contests = [
-    {
-        id: 1,
-        spaceId: 1,
-        metadata: {
-            type: 'contest',
-            category: 'art'
-        },
-        deadlines: {
-            startTime: '2021-05-01T00:00:00.000Z',
-            voteTime: '2021-05-08T00:00:00.000Z',
-            endTime: '2021-05-15T00:00:00.000Z',
-            snapshot: '2021-04-30T00:00:00.000Z'
-        },
-        created: '2021-04-01T00:00:00.000Z',
-        promptUrl: 'https://calabara.mypinata.cloud/ipfs/QmUVdqmqf1KDy6syiZeYXBZcn7a849qssJckRwxr35MMDd',
-        submitterRewards: [
-            {
-                rank: 1,
-                rewards: [
-                    {
-                        token: {
-                            address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-                            symbol: 'DAI',
-                            decimals: 18,
-                            type: 'ERC20'
-                        },
-                        tokenId: 100
-                    }
-                ]
-            }
-        ]
-    },
-];
 
 
 

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { twitterSignIn, useSession } from "@/providers/SessionProvider";
 import handleMediaUpload from "@/lib/mediaUpload";
-import { PhotoIcon } from "@heroicons/react/24/solid";
+import { HiPhoto } from "react-icons/hi2";
 
 const variants = {
   enter: (direction: number) => {
@@ -187,7 +187,7 @@ const Tweet = () => {
               htmlFor="image-upload"
               className="flex items-center btn btn-square btn-sm btn-ghost"
             >
-              <PhotoIcon className="w-6 h-6" />
+              <HiPhoto className="w-6 h-6" />
               <input
                 type="file"
                 id="image-upload"

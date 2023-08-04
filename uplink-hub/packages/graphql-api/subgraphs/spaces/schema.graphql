@@ -13,13 +13,13 @@ type Space @key(fields: "id") {
 }
 
 type Admin {
-  id: Int!
-  spaceId: Int!
+  id: ID!
+  spaceId: ID!
   address: String!
 }
 
 type SpaceToken {
-  id: Int!
+  id: ID!
   tokenHash: String!
   symbol: String!
   decimals: Int!

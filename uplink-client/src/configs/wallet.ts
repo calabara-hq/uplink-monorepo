@@ -23,9 +23,6 @@ const wagmiClient = createClient({
   provider,
 });
 
-const formatAddress = (address: string): string => {
-  return `${address.substring(0, 4)}\u2026${address.substring(address.length - 4)}`
-}
 
 const formatENS = (name: string): string => {
   const parts = name.split('.');
@@ -36,4 +33,4 @@ const formatENS = (name: string): string => {
   return `${parts.join('.')}.${last}`;
 }
 
-export { wagmiClient, chains, formatAddress };
+export { wagmiClient, chains };
