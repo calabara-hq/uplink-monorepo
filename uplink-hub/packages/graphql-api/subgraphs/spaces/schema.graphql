@@ -9,7 +9,7 @@ type Space @key(fields: "id") {
   twitter: String
   website: String
   admins: [Admin!]!
-  spaceTokens: [SpaceToken!]!
+  spaceTokens: [SpaceTokenMap!]!
 }
 
 type Admin {
@@ -26,6 +26,14 @@ type SpaceToken {
   address: String
   tokenId: String
 }
+
+type SpaceTokenMap {
+  id: ID!
+  spaceId: ID!
+  tokenLink: Int!
+  token: SpaceToken!
+}
+
 
 type Query {
   space(id: ID, name: String): Space

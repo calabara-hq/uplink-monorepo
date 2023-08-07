@@ -423,7 +423,7 @@ type Space
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
   admins: [Admin!]! @join__field(graph: SPACES)
-  spaceTokens: [SpaceToken!]! @join__field(graph: SPACES)
+  spaceTokens: [SpaceTokenMap!]! @join__field(graph: SPACES)
 }
 
 type SpaceBuilderErrors
@@ -463,6 +463,15 @@ type SpaceToken
   decimals: Int!
   address: String
   tokenId: String
+}
+
+type SpaceTokenMap
+  @join__type(graph: SPACES)
+{
+  id: ID!
+  spaceId: ID!
+  tokenLink: Int!
+  token: SpaceToken!
 }
 
 type Submission

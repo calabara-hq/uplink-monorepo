@@ -229,13 +229,13 @@ const insertVotingPolicies = async (contestId, votingPolicy, tx) => {
     };
 }
 
-// update the many-to-many mapping of spacesToTokens
+// update the many-to-many mapping of spaceTokens
 const insertSpaceToken = async (spaceId, tokenId) => {
-    const existingLink = await db.select({ id: schema.spacesToTokens.id })
-        .from(schema.spacesToTokens)
+    const existingLink = await db.select({ id: schema.spaceTokens.id })
+        .from(schema.spaceTokens)
         .where(sqlOps.and(
-            sqlOps.eq(schema.spacesToTokens.spaceId, spaceId),
-            sqlOps.eq(schema.spacesToTokens.tokenLink, tokenId)
+            sqlOps.eq(schema.spaceTokens.spaceId, spaceId),
+            sqlOps.eq(schema.spaceTokens.tokenLink, tokenId)
         ));
 
     if (!existingLink[0]) {
@@ -244,7 +244,7 @@ const insertSpaceToken = async (spaceId, tokenId) => {
             spaceId: spaceId,
             tokenLink: tokenId,
         }
-        await db.insert(schema.spacesToTokens).values(newSpaceToken);
+        await db.insert(schema.spaceTokens).values(newSpaceToken);
     }
 }
 

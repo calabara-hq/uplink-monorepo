@@ -1,6 +1,5 @@
 import { mysqlTable, index, serial, tinyint, json, varchar, int, text, uniqueIndex } from 'drizzle-orm/mysql-core';
-import { InferModel } from 'drizzle-orm';
-
+import { InferModel, relations } from 'drizzle-orm';
 
 export const spaces = mysqlTable('spaces', {
     id: serial('id').primaryKey(),
@@ -26,6 +25,7 @@ export const admins = mysqlTable('admins', {
     spaceIdIndex: index("admins_space_id_idx").on(admins.spaceId),
 }))
 
+
 export const contests = mysqlTable('contests', {
     id: serial('id').primaryKey(),
     spaceId: int('spaceId').notNull(),
@@ -46,6 +46,7 @@ export const contests = mysqlTable('contests', {
     spaceIdIndex: index("contest_space_id_idx").on(contests.spaceId),
 }))
 
+
 export const rewards = mysqlTable('rewards', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
@@ -54,6 +55,7 @@ export const rewards = mysqlTable('rewards', {
 }, (rewards) => ({
     contestIdIndex: index("rewards_contest_id_idx").on(rewards.contestId),
 }));
+
 
 export const submitterRestrictions = mysqlTable('submitterRestrictions', {
     id: serial('id').primaryKey(),
@@ -78,13 +80,14 @@ export const tokens = mysqlTable('tokens', {
     )
 }))
 
-export const spacesToTokens = mysqlTable('spacesToTokens', {
+export const spaceTokens = mysqlTable('spaceTokens', {
     id: serial('id').primaryKey(),
     spaceId: int('spaceId').notNull(),
     tokenLink: int('tokenLink').notNull(),
-}, (spacesToTokens) => ({
-    spacesToTokensIdIndex: uniqueIndex("spacesToTokens_id_idx").on(spacesToTokens.spaceId, spacesToTokens.tokenLink),
+}, (spaceTokens) => ({
+    spaceTokensIdIndex: uniqueIndex("spaceTokens_id_idx").on(spaceTokens.spaceId, spaceTokens.tokenLink),
 }));
+
 
 export const tokenRestrictions = mysqlTable('tokenRestrictions', {
     id: serial('id').primaryKey(),
@@ -106,7 +109,6 @@ export const tokenRewards = mysqlTable('tokenRewards', {
     tokenRewardsRewardIdIndex: uniqueIndex("tokenRewards_reward_id_idx").on(tokenRewards.rewardId),
     tokenRewardsTokenLinkIndex: index("tokenRewards_token_link_idx").on(tokenRewards.tokenLink),
 }));
-
 
 export const votingPolicy = mysqlTable('votingPolicy', {
     id: serial('id').primaryKey(),
@@ -181,7 +183,134 @@ export const tweetQueue = mysqlTable('tweetQueue', {
 });
 
 
+export const spacesRelations = relations(spaces, ({ many }) => ({
+    admins: many(admins),
+    spaceTokens: many(spaceTokens)
+}));
 
+export const adminsRelations = relations(admins, ({ one }) => ({
+    space: one(spaces, {
+        fields: [admins.spaceId],
+        references: [spaces.id]
+    })
+}));
+
+export const contestsRelations = relations(contests, ({ many }) => ({
+    rewards: many(rewards),
+    submitterRestrictions: many(submitterRestrictions),
+    votingPolicy: many(votingPolicy),
+    submissions: many(submissions),
+}));
+
+export const rewardsRelations = relations(rewards, ({ one, many }) => ({
+    contest: one(contests, {
+        fields: [rewards.contestId],
+        references: [contests.id]
+    }),
+    tokenReward: one(tokenRewards, {
+        fields: [rewards.id],
+        references: [tokenRewards.rewardId]
+    })
+}));
+
+export const submitterRestrictionsRelations = relations(submitterRestrictions, ({ one }) => ({
+    contest: one(contests, {
+        fields: [submitterRestrictions.contestId],
+        references: [contests.id]
+    }),
+    tokenRestriction: one(tokenRestrictions, {
+        fields: [submitterRestrictions.id],
+        references: [tokenRestrictions.restrictionId]
+    })
+}));
+
+
+
+export const spaceTokensRelations = relations(spaceTokens, ({ one }) => ({
+    space: one(spaces, {
+        fields: [spaceTokens.spaceId],
+        references: [spaces.id],
+    }),
+    token: one(tokens, {
+        fields: [spaceTokens.tokenLink],
+        references: [tokens.id],
+    }),
+}));
+
+export const tokensRelations = relations(tokens, ({ many }) => ({
+    spaceTokens: many(spaceTokens),
+}));
+
+export const tokenRewardsRelations = relations(tokenRewards, ({ one }) => ({
+    reward: one(rewards, {
+        fields: [tokenRewards.rewardId],
+        references: [rewards.id],
+    }),
+    token: one(tokens, {
+        fields: [tokenRewards.tokenLink],
+        references: [tokens.id],
+    }),
+}));
+
+export const tokenRestrictionsRelations = relations(tokenRestrictions, ({ one }) => ({
+    submitterRestriction: one(submitterRestrictions, {
+        fields: [tokenRestrictions.restrictionId],
+        references: [submitterRestrictions.id],
+    }),
+    token: one(tokens, {
+        fields: [tokenRestrictions.tokenLink],
+        references: [tokens.id],
+    }),
+}));
+
+
+export const votingPolicyRelations = relations(votingPolicy, ({ one }) => ({
+    contest: one(contests, {
+        fields: [votingPolicy.contestId],
+        references: [contests.id],
+    }),
+    weightedVotingStrategy: one(weightedVotingStrategy, {
+        fields: [votingPolicy.id],
+        references: [weightedVotingStrategy.votingPolicyId],
+    }),
+    arcadeVotingStrategy: one(arcadeVotingStrategy, {
+        fields: [votingPolicy.id],
+        references: [arcadeVotingStrategy.votingPolicyId],
+    }),
+}));
+
+export const weightedVotingStrategyRelations = relations(weightedVotingStrategy, ({ one }) => ({
+    votingPolicy: one(votingPolicy, {
+        fields: [weightedVotingStrategy.votingPolicyId],
+        references: [votingPolicy.id],
+    }),
+    token: one(tokens, {
+        fields: [weightedVotingStrategy.tokenLink],
+        references: [tokens.id],
+    }),
+}));
+
+export const arcadeVotingStrategyRelations = relations(arcadeVotingStrategy, ({ one }) => ({
+    votingPolicy: one(votingPolicy, {
+        fields: [arcadeVotingStrategy.votingPolicyId],
+        references: [votingPolicy.id],
+    }),
+    token: one(tokens, {
+        fields: [arcadeVotingStrategy.tokenLink],
+        references: [tokens.id],
+    }),
+}));
+
+export const submissionsRelations = relations(submissions, ({ one }) => ({
+    contest: one(contests, {
+        fields: [submissions.contestId],
+        references: [contests.id],
+    }),
+    votes: one(votes, {
+        fields: [submissions.id],
+        references: [votes.submissionId],
+    }),
+}));
 
 export type dbSpaceType = InferModel<typeof spaces>
 export type dbNewSpaceType = InferModel<typeof spaces, 'insert'>
@@ -201,8 +330,8 @@ export type dbNewSubmitterRestrictionType = InferModel<typeof submitterRestricti
 export type dbTokenType = InferModel<typeof tokens>
 export type dbNewTokenType = InferModel<typeof tokens, 'insert'>
 
-export type dbSpaceToTokenType = InferModel<typeof spacesToTokens>
-export type dbNewSpaceToTokenType = InferModel<typeof spacesToTokens, 'insert'>
+export type dbSpaceToTokenType = InferModel<typeof spaceTokens>
+export type dbNewSpaceToTokenType = InferModel<typeof spaceTokens, 'insert'>
 
 export type dbTokenRestrictionType = InferModel<typeof tokenRestrictions>
 export type dbNewTokenRestrictionType = InferModel<typeof tokenRestrictions, 'insert'>
