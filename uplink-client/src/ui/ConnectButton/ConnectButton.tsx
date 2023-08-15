@@ -7,8 +7,10 @@ import { BiLink } from "react-icons/bi";
 
 export default function WalletConnectButton({
   children,
+  style,
 }: {
   children?: React.ReactNode;
+  style?: string;
 }) {
   const { data: session, status } = useSession();
 
@@ -21,7 +23,10 @@ export default function WalletConnectButton({
           switch (status) {
             case "unauthenticated":
               return (
-                <button className="btn lowercase" onClick={openConnectModal}>
+                <button
+                  className={`btn lowercase ${style}`}
+                  onClick={openConnectModal}
+                >
                   sign in
                 </button>
               );

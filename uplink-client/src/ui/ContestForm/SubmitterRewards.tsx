@@ -1,133 +1,194 @@
-import {
-  arraysSubtract,
-  ContestBuilderProps,
-  rewardsObjectToArray,
-  SubmitterRewards,
-} from "@/lib/contestHandler";
 import { useState, useEffect, useReducer, Fragment } from "react";
-import { BlockWrapper } from "./ContestForm";
+import { BlockWrapper } from "./Entrypoint";
 import TokenModal from "@/ui/TokenModal/TokenModal";
 import { IToken } from "@/types/token";
 import TokenCard from "../TokenCard/TokenCard";
 import { HiTrash } from "react-icons/hi2";
+import { AiOutlinePlus } from "react-icons/ai";
+import {
+  arraysSubtract,
+  ContestBuilderProps,
+  rewardsObjectToArray,
+  validateSubmitterRewards,
+  SubmitterRewards,
+  RewardError,
+} from "@/ui/ContestForm/contestHandler";
 
 /**
  * submitter rewards should first allow the user to select from a list of space tokens or add new ones
  * after choosing the proper tokens, the user should be able to select the amount of tokens to be distributed to each rank
  * the user must choose at least 1 token to be distributed to each rank (eth, erc20, erc721, erc1155)
- * more than 1 token can be distributed to each rank, but not more than 1 token type
+ * more than 1 token can be distributed to each rank, but not more than 1 of each unique standard (ERC20 etc)
  */
 
-// type the reducer functions
-
-type AddSubRankAction = {
-  type: "addSubRank";
-};
-
-type RemoveSubRankAction = {
-  type: "removeSubRank";
-  payload: number;
-};
-
-type UpdateSubRankAction = {
-  type: "updateSubRank";
-  payload: { index: number; rank: number };
-};
-
-type UpdateSubRewardAction = {
-  type: "updateSubRewardAmount";
-  payload: { index: number; tokenType: keyof SubmitterRewards; amount: string };
-};
-
-type UpdateERC721TokenIdAction = {
-  type: "updateERC721TokenId";
-  payload: { index: number; tokenId: number | null };
-};
-
-const SubmitterRewardsComponent = ({
-  state,
-  dispatch,
+const SubmitterRewards = ({
+  initialSubmitterRewards,
+  spaceTokens,
+  handleConfirm,
+  errors,
+  setErrors
 }: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  initialSubmitterRewards: SubmitterRewards;
+  spaceTokens: IToken[];
+  handleConfirm: (submitterRewards: SubmitterRewards) => void;
+  errors: RewardError;
+  setErrors: (errors: RewardError) => void;
 }) => {
+  const [rewards, setRewards] = useState<SubmitterRewards>(
+    initialSubmitterRewards
+  );
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleSaveCallback = (data: IToken) => {
-    return dispatch({ type: "addSubmitterReward", payload: { token: data } });
+
+  const handleAddToken = (token: IToken) => {
+    setRewards({
+      ...rewards,
+      [token.type]: token,
+      // add the type to each payout
+      payouts: (
+        rewards?.payouts ?? [
+          {
+            rank: 1,
+            [token.type]:
+              token.type === "ERC721" ? { tokenId: null } : { amount: "" },
+          },
+        ]
+      ).map((payout: any) => {
+        return {
+          ...payout,
+          [token.type]: {
+            ...payout[token.type],
+            ...(token.type === "ERC721"
+              ? { tokenId: payout[token.type]?.tokenId ?? null }
+              : { amount: payout[token.type]?.amount ?? "" }),
+          },
+        };
+      }),
+    });
   };
 
-  const handleRemove = (token: IToken) => {
-    dispatch({
-      type: "removeSubmitterReward",
-      payload: { token: token },
+  const handleRemoveToken = (token: IToken) => {
+    const { [token.type]: _, payouts, ...updatedRewards } = rewards;
+    const hasOtherRewardTypes = Object.keys(updatedRewards).length > 0;
+    const updatedPayouts = hasOtherRewardTypes ? [] : null;
+    if (hasOtherRewardTypes) {
+      for (let i = 0; i < rewards.payouts.length; i++) {
+        const payout = rewards.payouts[i];
+        const { [token.type]: _, ...updatedPayout } = payout;
+        if (Object.keys(updatedPayout).length > 0) {
+          if (updatedPayouts !== null) {
+            updatedPayouts.push(updatedPayout);
+          }
+        }
+      }
+    }
+    setRewards({
+      ...updatedRewards,
+      ...(updatedPayouts !== null && { payouts: updatedPayouts }),
     });
+  };
+
+  const onSubmit = () => {
+    const { errors, isError, data } = validateSubmitterRewards(rewards);
+    if (isError) return setErrors(errors);
+    handleConfirm(data);
   };
 
   return (
     <BlockWrapper
       title="Submitter Rewards"
-      info="Select the tokens that will be distributed to the top X submitters
-    "
+      info="Define the winning submissions and the rewards they will receive"
     >
-      <div className="flex flex-col lg:flex-row w-full gap-4">
-        {rewardsObjectToArray(state.submitterRewards).map((token, index) => {
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5 sm gap-4">
+        <div
+      className="card btn bg-base-200 h-24"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <div className="flex flex-row gap-2 items-center">
+            <AiOutlinePlus className="w-6 h-6" />
+
+            <p>add reward</p>
+          </div>
+        </div>
+        {rewardsObjectToArray(rewards).map((token, index) => {
           return (
             <TokenCard
               key={index}
               token={token}
-              handleRemove={() => handleRemove(token)}
+              handleRemove={() => handleRemoveToken(token)}
             />
           );
         })}
       </div>
-      <button className="btn btn-ghost underline" onClick={() => setIsModalOpen(true)}>
-        add reward
-      </button>
-      <SubmitterRewardMatrix state={state} dispatch={dispatch} />
+      <SubmitterRewardMatrix
+        rewards={rewards}
+        setRewards={setRewards}
+        errors={errors}
+      />
       <TokenModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        saveCallback={handleSaveCallback}
-        existingTokens={rewardsObjectToArray(state.submitterRewards)}
+        saveCallback={handleAddToken}
+        existingTokens={rewardsObjectToArray(rewards)}
         quickAddTokens={arraysSubtract(
-          state.spaceTokens,
-          rewardsObjectToArray(state.submitterRewards)
+          spaceTokens,
+          rewardsObjectToArray(rewards)
         )}
         uniqueStandard={true}
         continuous={false}
       />
+      <button
+        onClick={onSubmit}
+        className="btn btn-primary lowercase mt-4 self-end"
+      >
+        Confirm
+      </button>
     </BlockWrapper>
   );
 };
 
 const SubmitterRewardMatrix = ({
-  state,
-  dispatch,
+  rewards,
+  setRewards,
+  errors,
 }: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<
-    | AddSubRankAction
-    | RemoveSubRankAction
-    | UpdateSubRankAction
-    | UpdateSubRewardAction
-    | UpdateERC721TokenIdAction
-  >;
+  rewards: ContestBuilderProps["submitterRewards"];
+  setRewards: (rewards: ContestBuilderProps["submitterRewards"]) => void;
+  errors: { duplicateRanks: number[] };
 }) => {
-  const { submitterRewards, errors } = state;
-
   const addRank = () => {
-    dispatch({ type: "addSubRank" });
+    setRewards({
+      ...rewards,
+      payouts: [
+        ...rewards.payouts,
+        {
+          rank: rewards.payouts.length + 1,
+          ...(rewards.ETH ? { ETH: { amount: "" } } : {}),
+          ...(rewards.ERC20 ? { ERC20: { amount: "" } } : {}),
+          ...(rewards.ERC721 ? { ERC721: { tokenId: null } } : {}),
+          ...(rewards.ERC1155 ? { ERC1155: { amount: "" } } : {}),
+        },
+      ],
+    });
   };
 
   const removeRank = (index: number) => {
-    dispatch({ type: "removeSubRank", payload: index });
+    setRewards({
+      ...rewards,
+      payouts: rewards.payouts.filter((_, i) => i !== index),
+    });
   };
 
   const updateRank = (index: number, rank: number) => {
     if (Number.isInteger(rank)) {
-      dispatch({
-        type: "updateSubRank",
-        payload: { index, rank: rank },
+      setRewards({
+        ...rewards,
+        payouts: rewards.payouts.map((payout, i) => {
+          if (i === index) {
+            return { ...payout, rank: rank };
+          }
+          return payout;
+        }),
       });
     }
   };
@@ -137,9 +198,20 @@ const SubmitterRewardMatrix = ({
     tokenType: keyof SubmitterRewards,
     amount: string
   ) => {
-    dispatch({
-      type: "updateSubRewardAmount",
-      payload: { index, tokenType, amount },
+    setRewards({
+      ...rewards,
+      payouts: rewards.payouts.map((payout, i) => {
+        if (i === index) {
+          return {
+            ...payout,
+            [tokenType]: {
+              ...payout[tokenType],
+              amount: amount,
+            },
+          };
+        }
+        return payout;
+      }),
     });
   };
 
@@ -147,21 +219,27 @@ const SubmitterRewardMatrix = ({
     let roundedTokenId =
       tokenId.trim() === "" ? null : Math.round(Number(tokenId));
 
-    dispatch({
-      type: "updateERC721TokenId",
-      payload: { index, tokenId: tokenId === "" ? null : roundedTokenId },
+    setRewards({
+      ...rewards,
+      payouts: rewards.payouts.map((payout, i) => {
+        if (i === index) {
+          return {
+            ...payout,
+            ERC721: {
+              ...payout.ERC721,
+              tokenId: tokenId === "" ? null : roundedTokenId,
+            },
+          };
+        }
+        return payout;
+      }),
     });
   };
 
-  if (
-    submitterRewards.ETH ||
-    submitterRewards.ERC20 ||
-    submitterRewards.ERC721 ||
-    submitterRewards.ERC1155
-  ) {
+  if (rewards.ETH || rewards.ERC20 || rewards.ERC721 || rewards.ERC1155) {
     return (
       <div className="overflow-x-auto w-full">
-        {errors?.submitterRewards?.duplicateRanks?.length ?? 0 > 0 ? (
+        {errors.duplicateRanks.length > 0 ? (
           <div className="text-red-500">
             <p>oops, you have some duplicate ranks</p>
           </div>
@@ -171,28 +249,26 @@ const SubmitterRewardMatrix = ({
           <thead>
             <tr>
               <th className="text-center">Rank</th>
-              {submitterRewards.ETH ? (
-                <th className="text-center">ETH Payout</th>
-              ) : null}
-              {submitterRewards.ERC20 ? (
+              {rewards.ETH ? <th className="text-center">ETH Payout</th> : null}
+              {rewards.ERC20 ? (
                 <th className="text-center">ERC20 Payout</th>
               ) : null}
-              {submitterRewards.ERC721 ? (
+              {rewards.ERC721 ? (
                 <th className="text-center">ERC721 Token ID</th>
               ) : null}
-              {submitterRewards.ERC1155 ? (
+              {rewards.ERC1155 ? (
                 <th className="text-center">ERC1155 Payout</th>
               ) : null}
               <th className="text-center"></th>
             </tr>
           </thead>
           <tbody className="w-full">
-            {submitterRewards?.payouts?.map((payout, index) => (
+            {rewards?.payouts?.map((payout, index) => (
               <tr key={index}>
                 <th className="w-24 text-center">
                   <input
                     className={`input w-24 text-center ${
-                      errors?.submitterRewards?.duplicateRanks?.includes(index)
+                      errors.duplicateRanks.includes(index)
                         ? "input-error"
                         : "input-bordered"
                     }`}
@@ -258,8 +334,7 @@ const SubmitterRewardMatrix = ({
                   </td>
                 ) : null}
 
-                {submitterRewards?.payouts?.length &&
-                submitterRewards.payouts.length > 1 ? (
+                {rewards?.payouts?.length && rewards.payouts.length > 1 ? (
                   <td className="w-12">
                     <button
                       className="btn btn-square btn-ghost"
@@ -275,7 +350,7 @@ const SubmitterRewardMatrix = ({
             ))}
             <tr>
               <th>
-                <button className="btn btn-sm " onClick={addRank}>
+                <button className="btn btn-sm btn-ghost " onClick={addRank}>
                   Add Rank
                 </button>
               </th>
@@ -288,4 +363,4 @@ const SubmitterRewardMatrix = ({
   return null;
 };
 
-export default SubmitterRewardsComponent;
+export default SubmitterRewards;

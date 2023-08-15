@@ -2,10 +2,10 @@ import { randomBytes, randomUUID } from 'crypto';
 import { generateNonce, SiweMessage } from 'siwe';
 import { TwitterApi } from 'twitter-api-v2';
 import dotenv from 'dotenv';
-import { CipherController } from 'lib'
+import { CipherController, schema } from 'lib'
 dotenv.config();
 
-
+import { sqlOps, db } from "../utils/database.js";
 
 const cipherController = new CipherController(process.env.APP_SECRET)
 const twitterClient = new TwitterApi({ appKey: process.env.TWITTER_CONSUMER_KEY, appSecret: process.env.TWITTER_CONSUMER_SECRET, accessToken: process.env.TWITTER_ACCESS_TOKEN, accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET })
@@ -26,8 +26,16 @@ type Session = {
     expires: ISODateString;
 }
 
-
-
+const addUser = async (user: Session['user']) => {
+    try {
+        await db.insert(schema.users).values({
+            address: user.address,
+        })
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
 
 export const getCsrfToken = function (req, res) {
     let csrf = randomUUID().replace(/-/g, '')
@@ -54,6 +62,7 @@ export const verifySignature = async (req, res) => {
         const result = await siweMessage.verify({ signature, nonce: session.csrfToken })
         req.session.user = { address: result.data.address }
         const user = { address: result.data.address }
+        await addUser(user);
         res.send({ user: user, expires: req.session.cookie.expires })
     } catch (err) {
         console.error(err)

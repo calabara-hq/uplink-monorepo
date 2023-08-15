@@ -9,10 +9,12 @@ import {
 } from "date-fns";
 
 export interface ContestStateProps {
+  contestAdmins: string[];
   contestState: string | null;
-  stateRemainingTime: string;
+  stateRemainingTime: string | null;
   category: string;
   type: string;
+  tweetId: string | null;
 }
 
 const ContestStateContext = createContext<ContestStateProps | undefined>(
@@ -23,6 +25,8 @@ export function ContestStateProvider({
   children,
   deadlines,
   metadata,
+  tweetId,
+  contestAdmins,
 }: {
   children: React.ReactNode;
   deadlines: {
@@ -34,11 +38,19 @@ export function ContestStateProvider({
     category: string;
     type: "twitter" | "standard";
   };
+  tweetId: string | null;
+  contestAdmins: string[];
 }) {
   const [contestState, setContestState] = useState<string | null>(null);
   const [stateRemainingTime, setStateRemainingTime] = useState<string>("");
-  const {category, type} = metadata;
+    useState<number>(0);
+  const { category, type } = metadata;
   useEffect(() => {
+    if (metadata.type === "twitter" && !tweetId) {
+      setContestState("pending");
+      setStateRemainingTime(null);
+      return;
+    }
     const { startTime, voteTime, endTime } = deadlines;
     const start = parseISO(startTime);
     const vote = parseISO(voteTime);
@@ -82,7 +94,16 @@ export function ContestStateProvider({
   }, [deadlines]);
 
   return (
-    <ContestStateContext.Provider value={{ contestState, stateRemainingTime, category, type }}>
+    <ContestStateContext.Provider
+      value={{
+        contestState,
+        stateRemainingTime,
+        category,
+        type,
+        tweetId,
+        contestAdmins,
+      }}
+    >
       {children}
     </ContestStateContext.Provider>
   );

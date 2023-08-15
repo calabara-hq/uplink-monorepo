@@ -3,9 +3,19 @@ scalar EditorData
 scalar IpfsUrl
 scalar Decimal
 
-type Space @key(fields: "id") {
-  id: ID!
-  contests: [Contest!]!
+extend type Space @key(fields: "id") {
+  id: ID! @external
+  admins: [Admin!]! @external
+  contests: [Contest!]! @requires(fields: "admins { address }")
+}
+
+type Admin @key(fields: "id") {
+  id: ID! @external
+  address: String! @external
+}
+
+extend type SpaceStub @key(fields: "id") {
+  id: ID! @external
 }
 
 type MetadataType {
@@ -75,7 +85,7 @@ type AdditionalParamsType {
 type Contest @key(fields: "id") {
   id: ID!
   spaceId: ID!
-  space: Space!
+  space: SpaceStub!
   created: String!
   metadata: MetadataType!
   deadlines: DeadlinesType!
@@ -90,8 +100,8 @@ type Contest @key(fields: "id") {
 
 extend type Query {
   contest(contestId: ID!): Contest
-  #spaceContests(spaceId: Int, spaceName: String): [Contest!]!
   activeContests: [Contest!]!
+  isContestTweetQueued(contestId: ID!): Boolean!
 }
 
 enum ContestType {
@@ -213,15 +223,12 @@ input AdditionalParams {
   subLimit: Int!
 }
 
-input ThreadMedia {
-  type: String!
-  url: IpfsUrl
-}
-
-input ThreadItemType {
-  id: String!
+input ThreadItem {
   text: String
-  media: ThreadMedia
+  previewAsset: IpfsUrl
+  videoAsset: IpfsUrl
+  assetSize: String
+  assetType: String
 }
 
 input ContestBuilderProps {
@@ -234,7 +241,6 @@ input ContestBuilderProps {
   submitterRestrictions: [SubmitterRestriction!]!
   votingPolicy: [VotingPolicy!]!
   additionalParams: AdditionalParams!
-  tweetThread: [ThreadItemType!]!
 }
 
 type ContestErrorData {
@@ -246,7 +252,6 @@ type ContestErrorData {
   submitterRestrictions: String
   votingPolicy: String
   additionalParams: String
-  twitter: String
 }
 
 type ContestMutationResponse {
@@ -255,12 +260,22 @@ type ContestMutationResponse {
   errors: ContestErrorData
 }
 
+type ContestTweetResponse {
+  success: Boolean!
+  errors: String
+}
+
 type Mutation {
   createContest(contestData: ContestBuilderProps!): ContestMutationResponse!
+  createContestTweet(
+    contestId: ID!
+    spaceId: ID!
+    tweetThread: [ThreadItem!]!
+  ): ContestTweetResponse!
 }
 
 extend schema
   @link(
     url: "https://specs.apollo.dev/federation/v2.0"
-    import: ["@key", "@external", "@shareable"]
+    import: ["@key", "@external", "@shareable", "@requires"]
   )

@@ -1,41 +1,47 @@
 import handleMediaUpload from "@/lib/mediaUpload";
-import MenuSelect from "../MenuSelect/MenuSelect";
-import { useCallback, useRef, useState } from "react";
-import { Option } from "../MenuSelect/MenuSelect";
-import { ContestBuilderProps } from "@/lib/contestHandler";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { OutputData } from "@editorjs/editorjs";
-import { BlockWrapper } from "./ContestForm";
+import { BlockWrapper } from "./Entrypoint";
 let Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
 import { HiPhoto } from "react-icons/hi2";
 import { toast } from "react-hot-toast";
+import {
+  validatePrompt,
+  ContestBuilderProps,
+  PromptError,
+} from "./contestHandler";
+import Image from "next/image";
 
-const labelOptions: Option[] = [
-  { value: "art", label: "art" },
-  { value: "design", label: "design" },
-  { value: "misc", label: "misc" },
-];
-
-const StandardPrompt = ({
-  state,
-  dispatch,
+const Prompt = ({
+  initialPrompt,
+  handleConfirm,
+  errors,
+  setErrors,
 }: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  initialPrompt: ContestBuilderProps["prompt"];
+  handleConfirm: (prompt: ContestBuilderProps["prompt"]) => void;
+  errors: PromptError;
+  setErrors: (errors: PromptError) => void;
 }) => {
-  const [selectedLabel, setSelectedLabel] = useState<Option>(labelOptions[0]);
   const imageUploader = useRef<HTMLInputElement>(null);
+  const [promptData, setPromptData] = useState(initialPrompt);
+
   const editorCallback = (data: OutputData) => {
-    dispatch({
-      type: "setPromptBody",
-      payload: data,
-    });
+    setPromptData((prevPromptData) => ({ ...prevPromptData, body: data }));
+    setErrors({ ...errors, body: "" });
+  };
+
+  const onSubmit = () => {
+    const { data, isError, errors } = validatePrompt(promptData);
+    if (isError) return setErrors(errors);
+    handleConfirm(data);
   };
 
   return (
     <BlockWrapper
       title="Contest Prompt"
-      info="Choose a cover image, title, and body"
+      info="A call to action for your contest. What's it about?"
     >
       <div className="flex flex-col w-10/12">
         <div className="flex flex-col items-center w-full gap-6">
@@ -44,25 +50,21 @@ const StandardPrompt = ({
               <div className="flex flex-col w-full">
                 <label className="text-sm p-1">Title</label>
                 <input
-
-                  className={`input ${
-                    state.errors.prompt?.title
-                      ? "input-error"
-                      : "input"
-                  }`}
+                  className={`input ${errors.title ? "input-error" : "input"}`}
                   type="text"
-                  value={state.prompt.title}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "setPromptTitle",
-                      payload: e.target.value,
-                    })
-                  }
+                  value={promptData.title}
+                  onChange={(e) => {
+                    setPromptData((prevPromptData) => ({
+                      ...prevPromptData,
+                      title: e.target.value,
+                    }));
+                    setErrors({ ...errors, title: "" });
+                  }}
                 />
-                {state.errors.prompt?.title && (
+                {errors.title && (
                   <label className="label">
                     <span className="label-text-alt text-error">
-                      {state.errors.prompt?.title}
+                      {errors.title}
                     </span>
                   </label>
                 )}
@@ -82,24 +84,24 @@ const StandardPrompt = ({
                         console.log(mimeType);
                       },
                       (base64) => {
-                        dispatch({
-                          type: "setCoverBlob",
-                          payload: base64,
-                        });
+                        setPromptData((prevPromptData) => ({
+                          ...prevPromptData,
+                          coverBlob: base64,
+                        }));
                       },
                       (ipfsUrl) => {
-                        dispatch({
-                          type: "setCoverUrl",
-                          payload: ipfsUrl,
-                        });
+                        setPromptData((prevPromptData) => ({
+                          ...prevPromptData,
+                          coverUrl: ipfsUrl,
+                        }));
+                        setErrors({ ...errors, coverUrl: "" });
                       }
                     ).catch((err) => {
-                      
+                      console.log(err);
+                      setErrors({ ...errors, coverUrl: "" });
                       return toast.error("couldn't upload your image");
                     });
                   }}
-
-
                   ref={imageUploader}
                 />
                 <div className="avatar">
@@ -107,20 +109,25 @@ const StandardPrompt = ({
                     className="w-36 rounded-lg cursor-pointer flex justify-center items-center"
                     onClick={() => imageUploader.current?.click()}
                   >
-                    {state.prompt.coverBlob && (
-                      <img src={state.prompt.coverBlob} />
+                    {promptData.coverBlob && (
+                      <Image
+                        src={promptData.coverBlob}
+                        alt="prompt cover image"
+                        height={32}
+                        width={32}
+                      />
                     )}
-                    {!state.prompt.coverBlob && (
+                    {!promptData.coverBlob && (
                       <div className="flex justify-center items-center w-full h-full rounded-lg bg-base-100 hover:bg-base-200 transition-all">
                         <HiPhoto className="w-10 h-10" />
                       </div>
                     )}
                   </div>
                 </div>
-                {state.errors?.prompt?.coverUrl && (
+                {errors?.coverUrl && (
                   <label className="label">
                     <span className="label-text-alt text-error">
-                      {state.errors?.prompt?.coverUrl}
+                      {errors?.coverUrl}
                     </span>
                   </label>
                 )}
@@ -129,23 +136,29 @@ const StandardPrompt = ({
           </div>
           <div className="flex flex-col w-full xl:w-8/12">
             <label className="text-sm p-1">Body</label>
-            {state.errors.prompt?.body && (
+            {errors.body && (
               <label className="label pt-0">
                 <span className="label-text-alt text-error ">
-                  {state.errors.prompt?.body}
+                  {errors.body}
                 </span>
               </label>
             )}
             <Editor
-              data={state.prompt.body ?? undefined}
-              editorCallback={editorCallback}
+              data={promptData.body ?? undefined}
+              editorCallback={(data) => editorCallback(data)}
             />
           </div>
         </div>
         <div className="flex flex-col w-full lg:w-1/2"></div>
       </div>
+      <button
+        onClick={onSubmit}
+        className="btn btn-primary lowercase mt-4 self-end"
+      >
+        Confirm
+      </button>
     </BlockWrapper>
   );
 };
 
-export default StandardPrompt;
+export default Prompt;

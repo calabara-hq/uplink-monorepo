@@ -65,6 +65,8 @@ module.exports = {
         //Background Color
         'start': '#202738',
         'end': '#070816',
+        't1': '#c8cede',
+        't2': '#6b7280',
 
       },
       boxShadow: {

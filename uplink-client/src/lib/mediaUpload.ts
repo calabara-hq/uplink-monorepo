@@ -69,7 +69,7 @@ const handleMediaUpload = async (
 
     const acceptedMimeTypes = acceptedFormats.reduce((acc: string[], format: string) => {
         if (format === 'image') {
-            return [...acc, 'image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
+            return [...acc, 'image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/gif'];
         }
         if (format === 'video') {
             return [...acc, 'video/mp4'];
@@ -85,7 +85,7 @@ const handleMediaUpload = async (
     const mimeType = file.type;
     mimeTypeCallback(mimeType);
     const fileSize = file.size;
-    fileSizeCallback(fileSize)
+    if (fileSizeCallback) fileSizeCallback(fileSize)
 
     if (mimeType.includes("video")) {
         const video: any = await loadVideo(file);
@@ -97,6 +97,8 @@ const handleMediaUpload = async (
             console.log('thumbnails', thumbnails)
             videoThumbnailCallback(thumbnails);
         }
+    } else {
+        if (fileSize > 15000000) throw new MediaUploadError({ code: 2, message: 'Images must be less than 15MB' });
     }
 
     if (!acceptedMimeTypes.includes(mimeType)) throw new MediaUploadError({ code: 3, message: 'Invalid file type' });

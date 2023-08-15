@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { SubmissionCardVote, LockedCardVote } from "../VoteCard/VoteCard";
 import { Decimal } from "decimal.js";
+import { mutate } from "swr";
 import {
   HiLockClosed,
   HiLockOpen,
@@ -23,11 +24,140 @@ import WalletConnectButton from "../ConnectButton/ConnectButton";
 import Modal from "../Modal/Modal";
 import { BiInfoCircle } from "react-icons/bi";
 import { sub } from "date-fns";
+import useTweetQueueStatus from "@/hooks/useTweetQueueStatus";
+import CreateThread from "@/ui/CreateThread/CreateThread";
+import { ThreadItem } from "@/hooks/useThreadCreator";
+import { nanoid } from "nanoid";
+import CreateContestTweet from "../ContestForm/CreateContestTweet";
+import { OutputData } from "@editorjs/editorjs";
 /**
  *
  * the standard sidebar for the main contest view
  *
  */
+
+const TweetQueuedDialog = () => {
+  return (
+    <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+      <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
+        <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+          Tweet Queued
+        </div>
+        <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+          <p className="font-bold">{`The announcement tweet is queued. It will be tweeted within an hour of the contest start time.`}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TweetNotQueuedDialog = ({
+  startTime,
+  prompt,
+  contestId,
+  spaceName,
+  spaceId,
+}: {
+  startTime: string;
+  prompt: {
+    title: string;
+    body: OutputData | null;
+    coverUrl?: string;
+  };
+  contestId: string;
+  spaceName: string;
+  spaceId: string;
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleSuccess = () => {
+    mutate(`/api/tweetQueueStatus/${contestId}`);
+  };
+
+  return (
+    <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+      <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
+        <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+          Tweet Not Queued
+        </div>
+        <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+          <p className="font-bold">{`This contest requires an announcement tweet before it can begin.`}</p>
+          <button
+            className="btn lowercase"
+            onClick={() => setIsModalOpen(true)}
+          >
+            add a tweet
+          </button>
+        </div>
+      </div>
+      <CreateContestTweet
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        startTime={startTime}
+        prompt={prompt}
+        contestId={contestId}
+        spaceName={spaceName}
+        spaceId={spaceId}
+        onSuccess={handleSuccess}
+      />
+    </div>
+  );
+};
+
+const AdminsRequired = ({
+  contestId,
+  startTime,
+  prompt,
+  spaceName,
+  spaceId,
+}: {
+  startTime: string;
+  prompt: {
+    title: string;
+    body: OutputData | null;
+    coverUrl?: string;
+  };
+  contestId: string;
+  spaceName: string;
+  spaceId: string;
+}) => {
+  const { data: session, status } = useSession();
+  const { contestAdmins } = useContestState();
+  const { isTweetQueued, isLoading: isQueueStatusLoading } =
+    useTweetQueueStatus(contestId);
+  const isAdmin = contestAdmins.includes(session?.user?.address ?? "");
+
+  console.log(isTweetQueued);
+
+  if (status === "loading") return <SidebarSkeleton />;
+  else if (isAdmin) {
+    if (isQueueStatusLoading) return <SidebarSkeleton />;
+    else if (isTweetQueued) return <TweetQueuedDialog />;
+    else
+      return (
+        <TweetNotQueuedDialog
+          {...{ contestId, startTime, prompt, spaceName, spaceId }}
+        />
+      );
+  } else
+    return (
+      <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+        <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
+          <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+            Admins required
+          </div>
+          <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+            <p className="font-bold">{`Hang tight! A space admin is needed to launch the contest.`}</p>
+            {!session?.user?.address && (
+              <div className="flex flex-row items-center justify-start gap-2 w-full">
+                <p>Are you an admin?</p>
+                <WalletConnectButton style="btn-sm btn-ghost ml-auto" />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+};
 
 const Pending = () => {
   return (
@@ -803,17 +933,27 @@ const VotingPolicyModalContent = ({ votingPolicy }: { votingPolicy: any }) => {
 const ContestSidebar = ({
   spaceName,
   contestId,
+  spaceId,
+  startTime,
+  prompt,
   submitterRewards,
   voterRewards,
   votingPolicy,
 }: {
   spaceName: string;
   contestId: string;
+  spaceId: string;
+  startTime: string;
+  prompt: {
+    title: string;
+    body: OutputData | null;
+    coverUrl?: string;
+  };
   submitterRewards: any;
   voterRewards: any;
   votingPolicy: any;
 }) => {
-  const { contestState } = useContestState();
+  const { contestState, stateRemainingTime, type, tweetId } = useContestState();
   const { userVotingState } = useVoteProposalContext();
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
   const [isVotingPolicyModalOpen, setIsVotingPolicyModalOpen] = useState(false);
@@ -824,11 +964,22 @@ const ContestSidebar = ({
   const openVotingPolicyModal = () => {
     setIsVotingPolicyModalOpen(true);
   };
-
+  console.log(contestState, type, tweetId);
   return (
     <>
       {!contestState && <SidebarSkeleton />}
-      {contestState === "pending" && <Pending />}
+      {contestState === "pending" &&
+        (!tweetId ? (
+          type === "twitter" ? (
+            <AdminsRequired
+              {...{ contestId, spaceId, spaceName, startTime, prompt }}
+            />
+          ) : (
+            <Pending />
+          )
+        ) : (
+          <Pending />
+        ))}
       {contestState === "submitting" && (
         <Submitting
           spaceName={spaceName}

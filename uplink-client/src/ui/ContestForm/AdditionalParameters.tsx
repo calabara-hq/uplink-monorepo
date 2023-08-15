@@ -1,50 +1,65 @@
-import { ContestBuilderProps } from "@/lib/contestHandler";
-import { BlockWrapper } from "./ContestForm";
+"use client";
+import { ContestBuilderProps } from "./contestHandler";
+import { BlockWrapper } from "./Entrypoint";
+import { useState } from "react";
 
-const AdditionalParameters = ({
-  state,
-  dispatch,
+
+const Extras = ({
+  initialExtras,
+  handleConfirm,
 }: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  initialExtras: ContestBuilderProps["additionalParams"];
+  handleConfirm: (extras: ContestBuilderProps["additionalParams"]) => void;
 }) => {
+  const [additionalParams, setAdditionalParams] = useState(initialExtras);
+
+  const onSubmit = () => {
+    handleConfirm(additionalParams);
+  };
+
   return (
     <BlockWrapper title="Additional Parameters">
       <div className="flex flex-col w-full mt-2 gap-8">
         <AnonymousSubmissions
-          anonSubs={state.additionalParams.anonSubs}
-          dispatch={dispatch}
+          anonSubs={additionalParams.anonSubs}
+          setAdditionalParams={setAdditionalParams}
         />
         <VisibleVotes
-          visibleVotes={state.additionalParams.visibleVotes}
-          dispatch={dispatch}
+          visibleVotes={additionalParams.visibleVotes}
+          setAdditionalParams={setAdditionalParams}
         />
         <SelfVotes
-          selfVote={state.additionalParams.selfVote}
-          dispatch={dispatch}
+          selfVote={additionalParams.selfVote}
+          setAdditionalParams={setAdditionalParams}
         />
         <SubmissionLimit
-          subLimit={state.additionalParams.subLimit}
-          dispatch={dispatch}
+          subLimit={additionalParams.subLimit}
+          setAdditionalParams={setAdditionalParams}
         />
       </div>
+      <button
+        onClick={onSubmit}
+        className="btn btn-primary lowercase mt-4 self-end"
+      >
+        Confirm
+      </button>
     </BlockWrapper>
   );
 };
 
 const AnonymousSubmissions = ({
   anonSubs,
-  dispatch,
+  setAdditionalParams,
 }: {
   anonSubs: boolean;
-  dispatch: React.Dispatch<any>;
+  setAdditionalParams: React.Dispatch<any>;
 }) => {
   return (
     <div className="flex w-full ">
       <div className="flex flex-col w-full ">
         <p className="text-lg font-bold ">Anon Subs</p>
-        <p className="text-sm text-accent-content ml-2">
-          Should contest results be visible during voting?
+        <p className="text-sm text-t2">
+          Should submission authors be visible during voting?
         </p>
       </div>
 
@@ -52,7 +67,10 @@ const AnonymousSubmissions = ({
         <Toggle
           defaultState={anonSubs}
           onSelectCallback={(value) => {
-            dispatch({ type: "setAnonSubs", payload: value });
+            setAdditionalParams((prev) => ({
+              ...prev,
+              anonSubs: value,
+            }));
           }}
         />
       </div>
@@ -62,16 +80,16 @@ const AnonymousSubmissions = ({
 
 const VisibleVotes = ({
   visibleVotes,
-  dispatch,
+  setAdditionalParams,
 }: {
   visibleVotes: boolean;
-  dispatch: React.Dispatch<any>;
+  setAdditionalParams: React.Dispatch<any>;
 }) => {
   return (
     <div className="flex w-full ">
       <div className="flex flex-col w-full ">
         <p className="text-lg font-bold ">Visible Votes</p>
-        <p className="text-sm text-accent-content ml-2">
+        <p className="text-sm text-t2">
           Should contest results be visible during voting?
         </p>
       </div>
@@ -79,7 +97,10 @@ const VisibleVotes = ({
         <Toggle
           defaultState={visibleVotes}
           onSelectCallback={(value) => {
-            dispatch({ type: "setVisibleVotes", payload: value });
+            setAdditionalParams((prev) => ({
+              ...prev,
+              visibleVotes: value,
+            }));
           }}
         />
       </div>
@@ -89,16 +110,16 @@ const VisibleVotes = ({
 
 const SelfVotes = ({
   selfVote,
-  dispatch,
+  setAdditionalParams,
 }: {
   selfVote: boolean;
-  dispatch: React.Dispatch<any>;
+  setAdditionalParams: React.Dispatch<any>;
 }) => {
   return (
     <div className="flex w-full ">
       <div className="flex flex-col w-full ">
         <p className="text-lg font-bold ">Self Votes</p>
-        <p className="text-sm text-accent-content ml-2">
+        <p className="text-sm text-t2">
           Are participants able to vote on their own submissions?
         </p>
       </div>
@@ -107,7 +128,10 @@ const SelfVotes = ({
         <Toggle
           defaultState={selfVote}
           onSelectCallback={(value) => {
-            dispatch({ type: "setSelfVote", payload: value });
+            setAdditionalParams((prev) => ({
+              ...prev,
+              selfVote: value,
+            }));
           }}
         />
       </div>
@@ -117,10 +141,10 @@ const SelfVotes = ({
 
 const SubmissionLimit = ({
   subLimit,
-  dispatch,
+  setAdditionalParams,
 }: {
   subLimit: number;
-  dispatch: React.Dispatch<any>;
+  setAdditionalParams: React.Dispatch<any>;
 }) => {
   return (
     <div className="flex flex-col lg:flex-row w-full gap-2">
@@ -128,7 +152,10 @@ const SubmissionLimit = ({
       <div className="lg:ml-auto flex gap-2">
         <button
           onClick={() => {
-            dispatch({ type: "setSubLimit", payload: 1 });
+            setAdditionalParams((prev) => ({
+              ...prev,
+              subLimit: 1,
+            }));
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 1
@@ -140,7 +167,10 @@ const SubmissionLimit = ({
         </button>
         <button
           onClick={() => {
-            dispatch({ type: "setSubLimit", payload: 2 });
+            setAdditionalParams((prev) => ({
+              ...prev,
+              subLimit: 2,
+            }));
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 2
@@ -152,7 +182,10 @@ const SubmissionLimit = ({
         </button>
         <button
           onClick={() => {
-            dispatch({ type: "setSubLimit", payload: 3 });
+            setAdditionalParams((prev) => ({
+              ...prev,
+              subLimit: 3,
+            }));
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 3
@@ -164,7 +197,10 @@ const SubmissionLimit = ({
         </button>
         <button
           onClick={() => {
-            dispatch({ type: "setSubLimit", payload: 0 });
+            setAdditionalParams((prev) => ({
+              ...prev,
+              subLimit: 0,
+            }));
           }}
           className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 0
@@ -199,4 +235,4 @@ const Toggle = ({
   );
 };
 
-export default AdditionalParameters;
+export default Extras;

@@ -1,6 +1,6 @@
 "use client";
 import useSubmitParams from "@/hooks/useSubmitParams";
-import { ThreadItem } from "@/hooks/useThreadCreator";
+import { ThreadItem, ApiThreadItem } from "@/hooks/useThreadCreator";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
@@ -319,22 +319,15 @@ const PreviewModal = ({
 
   type TwitterSubmission = {
     title: string;
-    thread: ServerThreadItem[];
+    thread: ApiThreadItem[];
   };
 
-  type ServerThreadItem = {
-    text: string;
-    previewAsset?: string;
-    videoAsset?: string;
-    assetSize?: string;
-    assetType?: string;
-  };
 
   const handleSubmit = async () => {
     const submission: TwitterSubmission = {
       title: title,
       thread: thread.map((el) => {
-        const serverThreadItem: ServerThreadItem = {
+        const serverThreadItem: ApiThreadItem = {
           text: el.text,
           ...(el.assetSize ? { assetSize: el.assetSize.toString() } : {}),
           ...(el.assetType ? { assetType: el.assetType } : {}),

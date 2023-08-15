@@ -44,8 +44,10 @@ const getSpace = async (name: string) => {
                 id
                 metadata {
                   category
+                  type
                 }
                 promptUrl
+                tweetId
             }
           }
       }`,
@@ -53,7 +55,7 @@ const getSpace = async (name: string) => {
         name,
       },
     }),
-    next: { tags: [`space/${name}`] /*revalidate: 60 */ },
+    next: { tags: [`space/${name}`], revalidate: 60 },
   })
     .then((res) => res.json())
     .then((res) => res.data.space);
@@ -245,8 +247,11 @@ const ContestCard = ({
   spaceName: any;
 }) => {
   const { contestState, stateRemainingTime } = calculateContestStatus(
-    contest.deadlines
+    contest.deadlines,
+    contest.metadata.type,
+    contest.tweetId
   );
+  console.log(contestState)
   return (
     <Link href={`${spaceName}/contests/${contest.id}`} prefetch={false}>
       <div

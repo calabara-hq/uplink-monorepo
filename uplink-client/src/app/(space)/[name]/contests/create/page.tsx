@@ -1,22 +1,46 @@
-import ContestForm from "@/ui/ContestForm/ContestForm";
-import graphqlClient from "@/lib/graphql/initUrql";
-import { SpaceDocument } from "@/lib/graphql/spaces.gql";
-import { ContestByIdDocument } from "@/lib/graphql/contests.gql";
+import ContestForm from "@/ui/ContestForm/Entrypoint";
 
 const getSpace = async (name: string) => {
-  const results = await graphqlClient
-    .query(SpaceDocument, { name })
-    .toPromise();
-  if (results.error) {
-    throw new Error(results.error.message);
-  }
-  return results;
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+        query space($name: String!){
+          space(name: $name) {
+            id
+            spaceTokens {
+              token {
+                type
+                address
+                decimals
+                symbol
+                tokenId
+              }
+            }
+          }
+      }`,
+      variables: {
+        name,
+      },
+    }),
+    cache: "no-store",
+    next: { tags: [`space/${name}`] /*revalidate: 60 */ },
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.space);
+  return data;
 };
 
-
 export default async function Page({ params }: { params: { name: string } }) {
-  //const result = await getSpace(params.name);
-  //const contest = await getContest('435');
-  //const spaceId = result.data.space.id;
-  return <ContestForm spaceId={"20"} spaceName={params.name} />;
+  const { id, spaceTokens } = await getSpace(params.name);
+  return (
+    <ContestForm
+      spaceName={params.name}
+      spaceId={id}
+      spaceTokens={spaceTokens.map((t) => t.token)}
+    />
+  );
 }

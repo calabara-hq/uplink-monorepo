@@ -21,6 +21,34 @@ const deconstructIsoString = (isoString: ISODateString | "now") => {
   };
 };
 
+  // .rdp-day_selected, .rdp-day_selected:hover, .rdp-day_selected:focus {
+  //   background-color: #5d9cec;
+  //   color: black;
+  // }
+  // .rdp-day_selected:hover:not([disabled]) {
+  //   background-color: #5d9cec;
+  // }
+
+const css = `
+
+
+  .my-selected:not([disabled]) { 
+    font-weight: bold;
+    color: black;
+    background-color: #5d9cec;
+  }
+  .my-selected:hover:not([disabled]) { 
+    background-color: #1c1f26;
+  }
+  .my-today { 
+    text-decoration: underline;
+    font-size: 120%;
+    }
+  .rdp-day:not([disabled]):hover:not(.my-selected):hover{
+    background-color: #2b303b;
+  }
+`;
+
 const constructIsoString = (
   date: Date,
   hour: string,
@@ -151,13 +179,21 @@ export default function DateTimeSelector({
               {progress < 1 ? `select ${label} date` : `select ${label} time`}
             </h2>
             {progress === 0 && (
-              <DayPicker
-                mode="single"
-                selected={selectedDay}
-                onSelect={(day) => setSelectedDay(day as Date)}
-                disabled={disabledDays}
-                showOutsideDays
-              />
+              <>
+                <style>{css}</style>
+                <DayPicker
+                  mode="single"
+                  required
+                  selected={selectedDay}
+                  onSelect={(day) => setSelectedDay(day as Date)}
+                  disabled={disabledDays}
+                  showOutsideDays
+                  modifiersClassNames={{
+                    selected: 'my-selected',
+                    today: 'my-today'
+                  }}
+                />
+              </>
             )}
             {progress === 1 && (
               <TimeSelector
@@ -175,60 +211,9 @@ export default function DateTimeSelector({
             onConfirm={handleModalConfirm}
             confirmLabel={progress < 1 ? "Next" : "Confirm"}
             cancelLabel="Cancel"
-
           />
         </>
       </Modal>
-
-      {/*
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 w-fit">
-          <div className="modal modal-open">
-            <div ref={modalRef} className="modal-box">
-              <div className="w-full px-1 flex flex-col gap-2 items-center justify-center">
-                <h2 className="text-xl">
-                  {progress < 1
-                    ? `select ${label} date`
-                    : `select ${label} time`}
-                </h2>
-                {progress === 0 && (
-                  <DayPicker
-                    mode="single"
-                    selected={selectedDay}
-                    onSelect={(day) => setSelectedDay(day as Date)}
-                    disabled={disabledDays}
-                    showOutsideDays
-                  />
-                )}
-                {progress === 1 && (
-                  <TimeSelector
-                    hour={hour}
-                    minute={minute}
-                    meridiem={meridiem}
-                    setHour={setHour}
-                    setMinute={setMinute}
-                    setMeridiem={setMeridiem}
-                  />
-                )}
-              </div>
-              <div className="modal-action">
-                <button onClick={handleCloseAndReset} className="btn mr-auto">
-                  Cancel
-                </button>
-                <button
-                  disabled={progress < 1 ? !selectedDay : !hour || !minute}
-                  onClick={handleModalConfirm}
-                  className="btn"
-                >
-                  {progress < 1 ? "Next" : "Submit"}
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="fixed inset-0 bg-black opacity-50"></div>
-        </div>
-      )}
-      */}
     </div>
   );
 }
@@ -277,7 +262,7 @@ const TimeSelector = ({
         value={hour}
         onChange={handleHourChange}
         placeholder="hh"
-        className="input w-24 border"
+        className="input w-24 border bg-base-200 text-white"
       />
       <span className="px-2">:</span>
       <input
@@ -285,7 +270,7 @@ const TimeSelector = ({
         value={minute}
         onChange={handleMinuteChange}
         placeholder="mm"
-        className="input w-24 border"
+        className="input w-24 border bg-base-200 text-white"
         ref={minuteInputRef}
       />
       <div className="ml-4 ">
@@ -293,8 +278,8 @@ const TimeSelector = ({
           onClick={() => {
             setMeridiem("AM");
           }}
-          className={`btn-sm border-transparent border-2 text-white rounded-l-full fadeColor ${
-            meridiem === "AM" ? "bg-base-200" : "bg-base-100"
+          className={`btn-sm border-transparent border-2 rounded-l-full fadeColor ${
+            meridiem === "AM" ? "bg-primary text-black" : "bg-base-100 text-white"
           }`}
         >
           AM
@@ -303,8 +288,8 @@ const TimeSelector = ({
           onClick={() => {
             setMeridiem("PM");
           }}
-          className={`btn-sm border-transparent border-2 text-white rounded-r-full fadeColor ${
-            meridiem === "PM" ? "bg-base-200" : "bg-base-100"
+          className={`btn-sm border-transparent border-2 rounded-r-full fadeColor ${
+            meridiem === "PM" ? "bg-primary text-black" : "bg-base-100 text-white"
           }`}
         >
           PM

@@ -14,7 +14,15 @@ import {
  *
  */
 
-export const calculateContestStatus = (deadlines: any) => {
+export const calculateContestStatus = (deadlines: any, contestType: "standard" | "twitter", tweetId: string) => {
+
+    if (contestType === "twitter" && !tweetId) {
+        return {
+            contestState: "pending",
+            stateRemainingTime: null,
+        };
+    }
+
     const { startTime, voteTime, endTime } = deadlines;
     const start = parseISO(startTime);
     const vote = parseISO(voteTime);

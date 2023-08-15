@@ -1,6 +1,7 @@
 import { EditorOutputData, IToken, DatabaseController, schema, isERCToken } from "lib";
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
+import { nanoid } from 'nanoid';
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
@@ -83,14 +84,13 @@ interface VotingPolicy {
     strategy: ArcadeStrategy | WeightedStrategy;
 }
 
-type ThreadItem = {
-    id: string;
-    text: string;
-    media: {
-        type: "image" | "video";
-        url?: string;
-    } | null;
-};
+type TwitterThreadItem = {
+    text?: string,
+    previewAsset?: string,
+    videoAsset?: string,
+    assetType?: string,
+    assetSize?: string
+}
 
 
 type ContestData = {
@@ -103,7 +103,6 @@ type ContestData = {
     voterRewards: VoterRewards;
     submitterRestrictions: SubmitterRestriction[];
     votingPolicy: VotingPolicy[];
-    tweetThread: ThreadItem[] | [];
 }
 
 // simple object hash function
@@ -126,13 +125,6 @@ export const prepareContestPromptUrl = async (contestPrompt: Prompt) => {
     })
 }
 
-// TODO: parse for issues
-export const prepareTweetThread = (metadata: Metadata, tweetThread: ThreadItem[]) => {
-    const { type } = metadata;
-    if (type !== 'twitter') return [];
-    return tweetThread;
-
-}
 
 const insertSubRewards = async (contestId, submitterRewards, tx) => {
 
@@ -248,6 +240,52 @@ const insertSpaceToken = async (spaceId, tokenId) => {
     }
 }
 
+export const queueTweet = async (contestId: number, user: any, tweetThread: TwitterThreadItem[]) => {
+    type TweetQueueThreadItem = {
+        id: string;
+        text: string;
+        media: {
+            type: string;
+            size: string;
+            url?: string;
+        } | null;
+    };
+
+    const tweetQueueThread: TweetQueueThreadItem[] = tweetThread.map((item) => {
+        return {
+            id: nanoid(),
+            text: item.text || "",
+
+            media: item.videoAsset ? {
+                url: item.videoAsset,
+                type: item.assetType,
+                size: item.assetSize
+            } : item.previewAsset ? {
+                url: item.previewAsset,
+                type: item.assetType,
+                size: item.assetSize
+            } : null
+        }
+    });
+
+
+
+    const tweetJob: schema.dbNewTweetQueueType = {
+        contestId: contestId,
+        author: user.address,
+        created: new Date().toISOString(),
+        jobContext: 'contest',
+        payload: tweetQueueThread,
+        accessToken: user.twitter.accessToken,
+        accessSecret: user.twitter.accessSecret,
+        retries: 0,
+        status: 0
+    }
+    return await db.insert(schema.tweetQueue).values(tweetJob)
+        .catch((err) => {
+            throw new Error("database error: " + err.message)
+        })
+}
 
 
 export const createDbContest = async (contest: ContestData, user: any) => {
@@ -334,7 +372,6 @@ export const createDbContest = async (contest: ContestData, user: any) => {
     const adjustedVoterRewards = await prepareContestRewards(contest.voterRewards);
     const adjustedVotingPolicy = await prepareRestrictionsAndPolicies(contest.votingPolicy);
     const adjustedSubmitterRestrictions = await prepareRestrictionsAndPolicies(contest.submitterRestrictions);
-    const tweetThread = prepareTweetThread(contest.metadata, contest.tweetThread);
 
     const newContest: schema.dbNewContestType = {
         spaceId: spaceId,
@@ -362,22 +399,6 @@ export const createDbContest = async (contest: ContestData, user: any) => {
             await insertSubmitterRestrictions(contestId, adjustedSubmitterRestrictions, tx);
             await insertVotingPolicies(contestId, adjustedVotingPolicy, tx);
 
-            if (newContest.type === "twitter") {
-                if (!user.twitter) throw new Error('twitter is expired');
-                const { accessToken, accessSecret } = user.twitter;
-                const tweetJob: schema.dbNewTweetQueueType = {
-                    contestId: contestId,
-                    author: user.address,
-                    created: new Date().toISOString(),
-                    jobContext: 'contest',
-                    payload: tweetThread,
-                    accessToken: accessToken,
-                    accessSecret: accessSecret,
-                    retries: 0,
-                    status: 0
-                }
-                await tx.insert(schema.tweetQueue).values(tweetJob);
-            }
             return contestId;
         });
     } catch (err) {

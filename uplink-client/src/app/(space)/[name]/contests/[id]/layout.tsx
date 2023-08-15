@@ -15,6 +15,12 @@ const getContestById = async (contestId: string) => {
           spaceId
           created
           promptUrl
+          tweetId
+          space {
+            admins {
+              address
+            }
+          }
           metadata {
             category
             type
@@ -125,14 +131,17 @@ export default async function Layout({
   params: { name: string; id: string };
   modal: React.ReactNode;
 }) {
-  console.log(params)
   const contest = await getContestById(params.id);
-  console.log(contest)
-  const { deadlines, metadata } = contest
+  const { deadlines, metadata, tweetId, space } = contest;
   return (
     <div className="w-full lg:w-11/12 flex flex-col items-center p-4">
       <div className="flex justify-center gap-6 m-auto w-full lg:py-6">
-        <ContestStateProvider deadlines={deadlines} metadata={metadata}>
+        <ContestStateProvider
+          deadlines={deadlines}
+          metadata={metadata}
+          tweetId={tweetId}
+          contestAdmins={space.admins.map((admin) => admin.address)}
+        >
           <VoteProposalProvider contestId={params.id}>
             {children}
           </VoteProposalProvider>

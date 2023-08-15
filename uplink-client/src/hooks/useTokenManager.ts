@@ -4,7 +4,7 @@ import {
     tokenGetSymbolAndDecimal,
     verifyTokenStandard,
 } from "@/lib/contract";
-import { IERCToken, isERCToken, IToken } from "@/types/token";
+import { IERCToken, INativeToken, isERCToken, isNativeToken, IToken } from "@/types/token";
 
 export type ERCOptions = "ERC20" | "ERC721" | "ERC1155";
 
@@ -92,9 +92,10 @@ const tokenReducer = (
                 },
             };
         case "setQuickAddToken":
+            const token = isNativeToken(action.payload) ? { type: "ETH", symbol: "ETH", decimals: 18 } as INativeToken : action.payload;
             return {
                 ...state,
-                quickAddToken: action.payload,
+                quickAddToken: token,
             };
         case "setCustomTokenErrors":
             return {

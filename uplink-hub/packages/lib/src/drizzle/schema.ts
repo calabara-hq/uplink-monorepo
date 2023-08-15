@@ -182,6 +182,13 @@ export const tweetQueue = mysqlTable('tweetQueue', {
 
 });
 
+export const users = mysqlTable('users', {
+    id: serial('id').primaryKey(),
+    address: varchar('address', { length: 255 }).notNull(),
+}, (user) => ({
+    userAddressIndex: uniqueIndex("user_address_idx").on(user.address)
+}));
+
 
 export const spacesRelations = relations(spaces, ({ many }) => ({
     admins: many(admins),
@@ -312,6 +319,17 @@ export const submissionsRelations = relations(submissions, ({ one }) => ({
     }),
 }));
 
+// export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
+//     contest: one(contests, {
+//         fields: [tweetQueue.contestId],
+//         references: [contests.id],
+//     }),
+//     scheduledTweets: one(scheduledTweets, {
+//         fields: [tweetQueue.id],
+
+// }));
+
+
 export type dbSpaceType = InferModel<typeof spaces>
 export type dbNewSpaceType = InferModel<typeof spaces, 'insert'>
 
@@ -356,4 +374,8 @@ export type dbNewVoteType = InferModel<typeof votes, 'insert'>
 
 export type dbTweetQueueType = InferModel<typeof tweetQueue>
 export type dbNewTweetQueueType = InferModel<typeof tweetQueue, 'insert'>
+
+export type dbUserType = InferModel<typeof users>
+export type dbNewUserType = InferModel<typeof users, 'insert'>
+
 

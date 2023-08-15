@@ -8,14 +8,20 @@ const Prompt = async ({
   metadata,
   deadlines,
   promptUrl,
+  tweetId,
 }: {
   contestId: string;
   space: any;
   metadata: any;
   deadlines: any;
   promptUrl: string;
+  tweetId: string | null;
 }) => {
-  const { contestState: status } = calculateContestStatus(deadlines);
+  const { contestState: status } = calculateContestStatus(
+    deadlines,
+    metadata.type,
+    tweetId
+  );
 
   const prompt = await fetch(promptUrl).then((res) => res.json());
 

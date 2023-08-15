@@ -59,7 +59,7 @@ const dbExtras = {
 
 
 
-const dbSingleContestById = db.query.contests.findFirst({
+export const dbSingleContestById = db.query.contests.findFirst({
     where: (contest) => sqlOps.eq(contest.id, sqlOps.placeholder('contestId')),
     with: dbWith,
     extras: dbExtras
@@ -72,17 +72,20 @@ const dbMultiContestsBySpaceId = db.query.contests.findMany({
     extras: dbExtras
 }).prepare();
 
-
-
-
 const dbActiveContests = db.query.contests.findMany({
     where: (contest) => sqlOps.gt(contest.endTime, new Date().toISOString()),
     with: dbWith,
     extras: dbExtras
 }).prepare();
 
+export const dbContestTweetQueue = db.query.tweetQueue.findFirst({
+    where: (queue) => sqlOps.and(
+        sqlOps.eq(queue.contestId, sqlOps.placeholder('contestId')),
+        sqlOps.eq(queue.jobContext, 'contest')
+    )
+}).prepare();
 
-const postProcessContest = (contest) => {
+const postProcessContest = (contest, user) => {
     if (!contest) return null;
 
     const submitterRewards = [];
@@ -151,13 +154,19 @@ const queries = {
                 return await Promise.all(contests.map(postProcessContest))
             });
             return data;
-        }
+        },
 
+        async isContestTweetQueued(_, { contestId }, contextValue, info) {
+            const data = await dbContestTweetQueue.execute({ contestId });
+            console.log(data);
+            return !!data;
+        }
     },
 
     // used to resolve contests to spaces
     Space: {
         async contests(space) {
+            console.log(space)
             const data = await dbMultiContestsBySpaceId.execute({ spaceId: space.id })
                 .then(async (contests) => {
                     return await Promise.all(contests.map(postProcessContest))
@@ -166,9 +175,14 @@ const queries = {
         }
     },
 
+    Contest: {
+        space: async (contest) => {
+            return { id: contest.spaceId };
+        }
+    },
 
     ActiveContest: {
-        spaceLink(contest) {
+        space(contest) {
             return {
                 id: contest.spaceId,
                 name: contest.spaceName

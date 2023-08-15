@@ -1,32 +1,11 @@
-type User @key(fields: "address") {
-  address: ID!
-  isAuthenticated: Boolean!
-}
-
-type NonceResult {
-  nonce: Int!
+type User @key(fields: "id") {
+  id: ID
+  address: String
 }
 
 type Query {
-  me: User!
-  generateNonce: NonceResult!
-}
-
-input authDataInput {
-  message: String!
-  signature: String!
-}
-
-
-type signInResponse{
-  code: Int!
-  success: Boolean!
-  message: String!
-}
-
-
-type Mutation {
-  signIn(authData: authDataInput): signInResponse!
+  me: User
+  user(id: ID, address: String): User
 }
 
 extend schema

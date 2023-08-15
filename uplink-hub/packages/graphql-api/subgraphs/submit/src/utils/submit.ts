@@ -485,8 +485,7 @@ export const twitterSubmit = async (
         }
     });
 
-    const validatedPayloadResult = await validateTwitterSubmissionPayload(submission);
-    const { success, errors, cleanPayload } = validatedPayloadResult;
+    const { success, errors, cleanPayload } = await validateTwitterSubmissionPayload(submission);
 
     if (success) {
         const submissionId = await uploadTwitterSubmission(user, contestId, cleanPayload);

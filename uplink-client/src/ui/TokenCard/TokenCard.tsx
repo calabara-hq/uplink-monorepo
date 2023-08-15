@@ -2,57 +2,57 @@ import { IToken, INativeToken, IERCToken } from "@/types/token";
 import TokenBadge from "../TokenBadge/TokenBadge";
 import Image from "next/image";
 import EthLogo from "../../../public/eth-logo.png";
-import { HiTrash } from "react-icons/hi2";
-
+import { HiPencil, HiTrash } from "react-icons/hi2";
+import { LiaEthereum } from "react-icons/lia";
 const TokenCard = ({
   token,
   handleRemove,
+  editCallback,
+  children,
 }: {
   token: IToken;
   handleRemove?: () => void;
+  editCallback?: () => void;
+  children?: React.ReactNode;
 }) => {
   return (
-    <div className="card w-full lg:w-1/4 bg-base-100 p-4">
-      <div className="card-body justify-between p-0">
-        <h2 className="card-title">{token.symbol}</h2>
-        {token.type === "ETH" && <ETHCard token={token} />}
-        {token.type !== "ETH" && <ERCCard token={token} />}
-        <div className="card-actions justify-end">
+    <div className="card bg-base-100 p-2">
+      <div className="card-body gap-2 p-0">
+        <div className="flex flex-row gap-2 items-center">
+          <p className="text-t1 text-xl font-bold pl-3">{token.symbol}</p>
+          <TokenBadge token={token} />
+          {editCallback && (
+            <button
+              className="btn btn-xs btn-ghost text-t2"
+              onClick={editCallback}
+            >
+              <HiPencil className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <div className="pl-3">{children}</div>
+        <div className="flex flex-row items-center justify-between gap-2">
+          {token.type !== "ETH" && (
+            <a
+              className="btn btn-sm btn-ghost link lowercase text-t2"
+              href={`https://etherscan.io/token/${token.address}`}
+              target="_blank"
+            >
+              {token.address.substring(0, 4) +
+                "..." +
+                token.address.substring(35, 40)}
+            </a>
+          )}
           {handleRemove && (
-            <button className="btn btn-xs btn-ghost" onClick={handleRemove}>
-              remove
-              <HiTrash className="w-4 ml-2" />
+            <button
+              className="btn btn-xs btn-ghost text-t2 ml-auto"
+              onClick={handleRemove}
+            >
+              <HiTrash className="w-4 h-4" />
             </button>
           )}
         </div>
       </div>
-    </div>
-  );
-};
-
-const ETHCard = ({ token }: { token: INativeToken }) => {
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <Image src={EthLogo} alt={"eth logo"} />
-    </div>
-  );
-};
-
-const ERCCard = ({ token }: { token: IERCToken }) => {
-  return (
-    <div className="flex flex-col items-end gap-2">
-      <TokenBadge token={token} />
-
-      <a
-        className="btn btn-sm btn-ghost link"
-        href={`https://etherscan.io/token/${token.address}`}
-        target="_blank"
-      >
-        {" "}
-        {token.address.substring(0, 4) +
-          "..." +
-          token.address.substring(35, 40)}
-      </a>
     </div>
   );
 };

@@ -39,6 +39,10 @@ export default function useHandleMutation(query: DocumentNode) {
         'INVALID_SUBMISSION_ID': 'Invalid submission id',
         'SELF_VOTING_DISABLED': 'Self voting is disabled for this contest',
         'FAILED_TO_DELETE_VOTES': 'Failed to remove votes',
+        // tweeting
+        'NOT_TWITTER_CONTEST': 'This is not a twitter contest',
+        'CONTEST_TWEET_EXISTS': 'You have already tweeted for this contest',
+        'CONTEST_TWEET_QUEUED': 'A tweet is already queued for this contest',
     }
 
     const handleErrors = (result: ResultObject) => {
@@ -77,6 +81,7 @@ export default function useHandleMutation(query: DocumentNode) {
                 return result;
             } catch (err) {
                 // unknown error, handle it in the calling function
+                console.log(err)
                 throw new Error(err);
             }
         }, [handleErrors, query]);

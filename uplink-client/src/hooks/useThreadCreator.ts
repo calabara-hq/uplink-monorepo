@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 import { set } from "date-fns";
 
 
-
+// client context thread item
 export type ThreadItem = {
     id: string;
     text: string;
@@ -20,6 +20,15 @@ export type ThreadItem = {
     isUploading: boolean;
     error?: string;
 };
+
+// api context thread item
+export type ApiThreadItem = {
+    text: string;
+    previewAsset?: string;
+    videoAsset?: string;
+    assetSize?: string;
+    assetType?: string;
+  };
 
 
 const threadReducer = (

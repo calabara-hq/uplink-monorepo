@@ -33,13 +33,13 @@ const Modal = ({
 
   if (isModalOpen) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50 w-full ">
-        <div className="modal modal-open">
-          <div ref={modalRef} className="modal-box bg-base-200 shadow-2xl">
-            {children}
-          </div>
+      <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
+        <div
+          ref={modalRef}
+          className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] animate-springUp"
+        >
+          {children}
         </div>
-        <div className="fixed inset-0 bg-black opacity-90"></div>
       </div>
     );
   }
@@ -61,7 +61,10 @@ export const ModalActions = ({
 }) => {
   return (
     <div className="modal-action mt-8">
-      <button onClick={onCancel} className="btn btn-md btn-ghost lowercase mr-auto">
+      <button
+        onClick={onCancel}
+        className="btn btn-md btn-ghost lowercase mr-auto"
+      >
         {cancelLabel}
       </button>
       <button

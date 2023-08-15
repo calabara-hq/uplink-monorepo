@@ -29,7 +29,7 @@ const TweetModal = ({
 }) => {
   if (isModalOpen) {
     return (
-      <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
+      <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-[#00000080] transition-colors duration-300 ease-in-out">
         <div className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-2xl animate-springUp">
           {children}
         </div>
@@ -332,12 +332,19 @@ const CreateThread = ({
   initialThread,
   confirmLabel,
   onConfirm,
+  customDecorators,
 }: {
   isModalOpen: boolean;
   setIsModalOpen: (value: boolean) => void;
   initialThread: ThreadItem[];
   confirmLabel: string;
   onConfirm: (thread: ThreadItem[]) => void;
+  customDecorators?: {
+    type: "text";
+    data: string;
+    title: string;
+    icon: React.ReactNode;
+  }[];
 }) => {
   const {
     thread,
@@ -349,9 +356,12 @@ const CreateThread = ({
     handleFileChange,
     validateThread,
   } = useThreadCreator(initialThread);
+
+  console.log(thread)
+
+
   const [focusedTweet, setFocusedTweet] = useState(initialThread[0]?.id);
   const [title, setTitle] = useState("");
-
   const { data: session, status } = useSession();
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   useEffect(() => {
@@ -385,6 +395,16 @@ const CreateThread = ({
     handleClose();
   };
 
+  const handleDecoratorSelect = (decorator: any, threadIndex: string) => {
+    const { type, data } = decorator;
+    const currentTweet = thread.find((tweet) => {
+      return tweet.id === threadIndex;
+    });
+    if (type === "text") {
+      setTweetText(threadIndex, currentTweet?.text + data);
+    }
+  };
+
   return (
     <TweetModal isModalOpen={isModalOpen}>
       <button
@@ -393,16 +413,37 @@ const CreateThread = ({
       >
         <HiXMark className="w-5 h-5" />
       </button>
+
       <div className="flex flex-col w-full px-1 gap-4 mt-8">
         {!session?.user?.twitter && (
           <div className="flex flex-col items-center justify-center w-full gap-4">
             <h1>Please link your twitter account to get started</h1>
-            <TwitterConnectButton />
+            <div className="w-fit m-auto">
+              <TwitterConnectButton />
+            </div>
           </div>
         )}
-        {session?.user?.twitter &&
-          thread.map((tweet, index) => {
-            return (
+        {session?.user?.twitter && (
+          <>
+            {customDecorators && (
+              <ul className="absolute top-0 left-1/2 transform -translate-x-1/2  menu menu-horizontal bg-base-100 rounded-box">
+                {customDecorators.map((decorator, index) => (
+                  <li
+                    key={index}
+                    onClick={() =>
+                      handleDecoratorSelect(decorator, focusedTweet)
+                    }
+                  >
+                    <div className="menu-content flex flex-row gap-2">
+                      {decorator.icon}
+                      {decorator.title}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {thread.map((tweet, index) => (
               <div
                 key={index}
                 className={`grid grid-cols-[64px_auto] w-full ml-auto mr-auto overflow-hidden relative ${
@@ -447,8 +488,9 @@ const CreateThread = ({
                   />
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </>
+        )}
       </div>
     </TweetModal>
   );

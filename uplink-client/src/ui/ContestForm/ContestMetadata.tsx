@@ -1,7 +1,8 @@
-import { BlockWrapper } from "./ContestForm";
+import { BlockWrapper } from "./Entrypoint";
 import { HiCheckBadge } from "react-icons/hi2";
-import { ContestBuilderProps } from "@/lib/contestHandler";
 import { ContestCategory } from "@/ui/ContestLabels/ContestLabels";
+import { useState } from "react";
+import { validateMetadata, Metadata, MetadataError } from "./contestHandler";
 
 const categories: ContestCategory[] = [
   "art",
@@ -10,24 +11,43 @@ const categories: ContestCategory[] = [
   "video",
   "photography",
   "design",
-  "development",
   "other",
 ];
 
+
 const ContestMetadata = ({
-  state,
-  dispatch,
+  initialMetadata,
+  handleConfirm,
+  errors,
+  setErrors,
 }: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  initialMetadata: Metadata;
+  handleConfirm: (metadata: Metadata) => void;
+  errors: MetadataError;
+  setErrors: (errors: MetadataError) => void;
 }) => {
-  const { type, category } = state.metadata;
+  const [type, setType] = useState(initialMetadata.type);
+  const [category, setCategory] = useState(initialMetadata.category);
+  const handleTypeChange = (type: Metadata["type"]) => {
+    setType(type);
+    setErrors({ ...errors, type: "" });
+  };
+
+  const handleCategoryChange = (category: Metadata["category"]) => {
+    setCategory(category);
+    setErrors({ ...errors, category: "" });
+  };
+
+  const onSubmit = () => {
+    const { errors, isError, data } = validateMetadata({ type, category });
+    if (isError) return setErrors(errors);
+    handleConfirm(data);
+  };
 
   return (
-    <BlockWrapper
-      title="Choose a template"
-      info="Select what type of Contest you'd like to run"
-    >
+    <BlockWrapper title="Contest type & category">
+      {errors.type && <p className="text-error self-start">{errors.type}</p>}
+
       <div className="flex flex-col w-full lg:flex-row mt-2">
         <div className="indicator grid flex-grow w-full h-32">
           <span
@@ -35,11 +55,11 @@ const ContestMetadata = ({
               type === "standard" ? "visible" : "hidden"
             }`}
           >
-            <HiCheckBadge className="w-8 text-success" />
+            <HiCheckBadge className="w-8 h-8 text-success" />
           </span>
           <button
             onClick={() => {
-              dispatch({ type: "setType", payload: "standard" });
+              handleTypeChange("standard");
             }}
             className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
               type === "standard"
@@ -47,7 +67,7 @@ const ContestMetadata = ({
                 : ""
             }`}
           >
-            standard contest
+            <p>standard contest</p>
           </button>
         </div>
         <div className="divider lg:divider-horizontal">OR</div>
@@ -57,32 +77,32 @@ const ContestMetadata = ({
               type === "twitter" ? "visible" : "hidden"
             }`}
           >
-            <HiCheckBadge className="w-8 text-twitter" />
+            <HiCheckBadge className="w-8 h-8 text-primary" />
           </span>
           <button
             onClick={() => {
-              dispatch({ type: "setType", payload: "twitter" });
+              handleTypeChange("twitter");
             }}
             className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
               type === "twitter"
-                ? "border-twitter border-2 hover:border-twitter hover:bg-transparent"
+                ? "border-primary border-2 hover:border-primary hover:bg-transparent"
                 : ""
             }`}
           >
             twitter contest
           </button>
         </div>
-        {state.errors.metadata?.type && (
-          <p className="text-red-500">{state.errors.metadata?.type}</p>
-        )}
       </div>
+      {errors.category && (
+        <p className="text-error self-start">{errors.category}</p>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-5 w-full gap-4">
         {categories.map((el, index) => (
           <button
             key={index}
             onClick={() => {
-              dispatch({ type: "setCategory", payload: el });
+              handleCategoryChange(el);
             }}
             className={`btn btn-ghost border-2 border-border h-full card place-items-center ${
               el === category
@@ -93,10 +113,13 @@ const ContestMetadata = ({
             {el}
           </button>
         ))}
-        {state.errors.metadata?.category && (
-          <p className="text-red-500">{state.errors.metadata?.category}</p>
-        )}
       </div>
+      <button
+        onClick={onSubmit}
+        className="btn btn-primary lowercase mt-4 self-end"
+      >
+        Confirm
+      </button>
     </BlockWrapper>
   );
 };

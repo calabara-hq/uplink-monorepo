@@ -12,14 +12,36 @@ type Space @key(fields: "id") {
   spaceTokens: [SpaceTokenMap!]!
 }
 
-type Admin {
+# this is a stub for the federated space to avoid circular reference.
+# it's placed here since it may be used by other federated services in the future.
+type SpaceStub @key(fields: "id") {
+  id: ID!
+  name: String!
+  displayName: String!
+  members: Int!
+  logoUrl: String!
+  twitter: String
+  website: String
+  admins: [Admin!]!
+}
+
+type Admin @key(fields: "id"){
   id: ID!
   spaceId: ID!
   address: String!
 }
 
+
+enum TokenStandard {
+  ETH
+  ERC20
+  ERC721
+  ERC1155
+}
+
 type SpaceToken {
   id: ID!
+  type: TokenStandard!
   tokenHash: String!
   symbol: String!
   decimals: Int!
@@ -33,7 +55,6 @@ type SpaceTokenMap {
   tokenLink: Int!
   token: SpaceToken!
 }
-
 
 type Query {
   space(id: ID, name: String): Space

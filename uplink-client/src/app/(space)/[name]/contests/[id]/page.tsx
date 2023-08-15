@@ -151,6 +151,27 @@ const getSubmissions = async (contestId: string) => {
   return data;
 };
 
+const getTweetQueueStatus = async (contestId: string) => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+      query Query($contestId: ID!) {
+        isContestTweetQueued(contestId: $contestId)
+      }`,
+      variables: {
+        contestId,
+      },
+    }),
+  })
+    .then((res) => res.json())
+    .then((res) => res.data);
+  return data;
+};
+
 const fetchSubmission = async (url: string) => {
   return fetch(url).then((res) => res.json()); // cache every submission request as we don't yet allow editing
 };
@@ -162,7 +183,6 @@ export default async function Page({
 }) {
   const [
     {
-      contestId,
       metadata,
       deadlines,
       promptUrl,
@@ -170,9 +190,15 @@ export default async function Page({
       submitterRewards,
       voterRewards,
       votingPolicy,
+      tweetId,
     },
     submissions,
-  ] = await Promise.all([getContest(params.id), getSubmissions(params.id)]);
+    isContestTweetQueued,
+  ] = await Promise.all([
+    getContest(params.id),
+    getSubmissions(params.id),
+    getTweetQueueStatus(params.id),
+  ]);
 
   const resolvedSubmissions = await Promise.all(
     submissions.map(async (submission, idx) => {
@@ -180,6 +206,8 @@ export default async function Page({
       return { ...submission, data: data };
     })
   );
+
+  const promptData = await fetch(promptUrl).then((res) => res.json());
 
   const fallback = {
     [`/ipfs/submissions/${params.id}`]: resolvedSubmissions,
@@ -191,10 +219,11 @@ export default async function Page({
         {/*@ts-expect-error*/}
         <Prompt
           space={space}
-          contestId={contestId}
+          contestId={params.id}
           metadata={metadata}
           deadlines={deadlines}
           promptUrl={promptUrl}
+          tweetId={tweetId}
         />
         <SwrProvider fallback={fallback}>
           <SubmissionDisplay contestId={params.id} />
@@ -203,6 +232,9 @@ export default async function Page({
       <ContestSidebar
         contestId={params.id}
         spaceName={params.name}
+        spaceId={space.id}
+        startTime={deadlines.startTime}
+        prompt={promptData}
         submitterRewards={submitterRewards}
         voterRewards={voterRewards}
         votingPolicy={votingPolicy}
