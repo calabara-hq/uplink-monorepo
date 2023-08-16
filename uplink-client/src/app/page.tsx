@@ -21,6 +21,7 @@ const getActiveContests = async () => {
       query ActiveContests {
         activeContests {
           id
+          tweetId
           promptUrl
           deadlines {
             startTime
@@ -39,8 +40,7 @@ const getActiveContests = async () => {
         }
       }`,
     }),
-    cache: "no-store",
-    next: { tags: ["activeContests"], revalidate: 60 },
+    next: { revalidate: 60 },
   })
     .then((res) => res.json())
     .then((res) => res.data.activeContests);
@@ -70,8 +70,7 @@ const getPopularSubmissions = async () => {
         }
       }`,
     }),
-    cache: "no-store",
-    next: { tags: ["popularSubmissions"], revalidate: 60 },
+    next: { revalidate: 60 },
   })
     .then((res) => res.json())
     .then((res) => res.data.popularSubmissions);
@@ -128,6 +127,7 @@ const ContentSection = async () => {
                 linkTo={`${contest.space.name}/contests/${contest.id}`}
                 metadata={contest.metadata}
                 deadlines={contest.deadlines}
+                tweetId={contest.tweetId}
               />
             );
           })}
@@ -182,6 +182,7 @@ const ContentSection2 = async () => {
                   linkTo={`${contest.space.name}/contests/${contest.id}`}
                   metadata={contest.metadata}
                   deadlines={contest.deadlines}
+                  tweetId={contest.tweetId}
                 />
                 <ContestCard
                   key={contest.id}
@@ -193,6 +194,7 @@ const ContentSection2 = async () => {
                   linkTo={`${contest.space.name}/contests/${contest.id}`}
                   metadata={contest.metadata}
                   deadlines={contest.deadlines}
+                  tweetId={contest.tweetId}
                 />
                 <ContestCard
                   key={contest.id}
@@ -204,6 +206,7 @@ const ContentSection2 = async () => {
                   linkTo={`${contest.space.name}/contests/${contest.id}`}
                   metadata={contest.metadata}
                   deadlines={contest.deadlines}
+                  tweetId={contest.tweetId}
                 />
                 <ContestCard
                   key={contest.id}
@@ -215,6 +218,7 @@ const ContentSection2 = async () => {
                   linkTo={`${contest.space.name}/contests/${contest.id}`}
                   metadata={contest.metadata}
                   deadlines={contest.deadlines}
+                  tweetId={contest.tweetId}
                 />
                 <ContestCard
                   key={contest.id}
@@ -226,6 +230,7 @@ const ContentSection2 = async () => {
                   linkTo={`${contest.space.name}/contests/${contest.id}`}
                   metadata={contest.metadata}
                   deadlines={contest.deadlines}
+                  tweetId={contest.tweetId}
                 />
                 <ContestCard
                   key={contest.id}
@@ -237,6 +242,7 @@ const ContentSection2 = async () => {
                   linkTo={`${contest.space.name}/contests/${contest.id}`}
                   metadata={contest.metadata}
                   deadlines={contest.deadlines}
+                  tweetId={contest.tweetId}
                 />
               </>
             );
@@ -270,9 +276,9 @@ const SubmissionCard = async ({
   contestId: string;
   contestCategory: string;
 }) => {
-  const { type: submissionFormat, ...submission } = await fetch(url, {
-    cache: "no-store",
-  }).then((res) => res.json());
+  const { type: submissionFormat, ...submission } = await fetch(url).then(
+    (res) => res.json()
+  );
 
   if (type === "twitter") {
     return (
@@ -300,19 +306,24 @@ const ContestCard = ({
   spaceName,
   spaceDisplayName,
   spaceLogo,
+  tweetId,
 }: {
   contestId: string;
   promptUrl: string;
   linkTo: string;
-  metadata: { category: ContestCategory; type: string };
+  metadata: { category: ContestCategory; type: "twitter" | "standard" };
   deadlines: { startTime: string; voteTime: string; endTime: string };
   spaceName: string;
   spaceDisplayName: string;
   spaceLogo: string;
+  tweetId: string | null;
 }) => {
   const showSpace = spaceName && spaceDisplayName && spaceLogo;
-  const { contestState, stateRemainingTime } =
-    calculateContestStatus(deadlines);
+  const { contestState, stateRemainingTime } = calculateContestStatus(
+    deadlines,
+    metadata.type,
+    tweetId
+  );
   return (
     <Link
       className="card bg-base-100 
@@ -347,9 +358,7 @@ const ContestCard = ({
 };
 
 const PromptSummary = async ({ promptUrl }: { promptUrl: string }) => {
-  const { title } = await fetch(promptUrl, { cache: "no-store" }).then((res) =>
-    res.json()
-  );
+  const { title } = await fetch(promptUrl).then((res) => res.json());
 
   return (
     <div className="flex-grow overflow-hidden">
@@ -365,7 +374,7 @@ export default async function Page() {
     <div className="flex flex-col w-full h-screen ">
       <BannerSection />
       {/*@ts-expect-error*/}
-      <ContentSection2 />
+      <ContentSection />
     </div>
   );
 }

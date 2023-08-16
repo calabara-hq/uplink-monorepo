@@ -42,12 +42,12 @@ const getSpace = async (name: string) => {
                   voteTime
                 }
                 id
+                tweetId
                 metadata {
                   category
                   type
                 }
                 promptUrl
-                tweetId
             }
           }
       }`,
@@ -246,12 +246,12 @@ const ContestCard = ({
   contest: any;
   spaceName: any;
 }) => {
+  console.log('LOOK HERE', contest.metadata.type, contest.tweetId);
   const { contestState, stateRemainingTime } = calculateContestStatus(
     contest.deadlines,
     contest.metadata.type,
     contest.tweetId
   );
-  console.log(contestState)
   return (
     <Link href={`${spaceName}/contests/${contest.id}`} prefetch={false}>
       <div

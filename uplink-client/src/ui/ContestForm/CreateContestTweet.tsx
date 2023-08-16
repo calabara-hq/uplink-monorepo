@@ -20,7 +20,7 @@ const composeInferredThread = (prompt: {
     {
       id: nanoid(),
       text: title,
-      primaryAssetUrl: coverUrl ?? null,
+      primaryAssetUrl: coverUrl ?? null, //TODO: if mimetype is not svg, then use the coverUrl
       primaryAssetBlob: null,
       videoThumbnailUrl: null,
       videoThumbnailBlobIndex: null,

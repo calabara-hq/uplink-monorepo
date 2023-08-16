@@ -114,8 +114,7 @@ const getContestById = async (contestId: string) => {
         contestId,
       },
     }),
-    cache: "no-store",
-    next: { tags: [`contest/${contestId}`] /*revalidate: 60 */ },
+    next: { tags: [`contest/${contestId}`] },
   })
     .then((res) => res.json())
     .then((res) => res.data.contest);

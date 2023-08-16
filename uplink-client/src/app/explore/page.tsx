@@ -50,7 +50,9 @@ export default async function Page() {
   );
 }
 
+
 function AllSpaces({ spaces }: any) {
+  
   return (
     <div
       className="grid gap-12 py-6
@@ -84,13 +86,14 @@ function AllSpaces({ spaces }: any) {
                 >
                   {space.name}
                 </Link>
+                {/* TODO: will be added in a future release 
                 <div className="flex items-center w-fit gap-1">
                   <p>{space.members} members</p>
                   <span className="text-gray-500 ml-2">•</span>
                   <button className="btn btn-sm btn-ghost underline mr-auto lowercase">
                     Join
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

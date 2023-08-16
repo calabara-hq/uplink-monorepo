@@ -72,10 +72,22 @@ const dbMultiContestsBySpaceId = db.query.contests.findMany({
     extras: dbExtras
 }).prepare();
 
+
+// don't show contests that are waiting for announcement tweets
 const dbActiveContests = db.query.contests.findMany({
-    where: (contest) => sqlOps.gt(contest.endTime, new Date().toISOString()),
+    where: (contest) => sqlOps.and(
+        sqlOps.gt(contest.endTime, new Date().toISOString()),
+        sqlOps.or(
+            sqlOps.and(
+                sqlOps.eq(contest.type, 'twitter'),
+                sqlOps.not(sqlOps.isNull(contest.tweetId)),
+            ),
+            sqlOps.eq(contest.type, 'standard')
+        )
+    ),
     with: dbWith,
-    extras: dbExtras
+    extras: dbExtras,
+    limit: 10,
 }).prepare();
 
 export const dbContestTweetQueue = db.query.tweetQueue.findFirst({
@@ -153,6 +165,7 @@ const queries = {
             const data = await dbActiveContests.execute().then(async (contests) => {
                 return await Promise.all(contests.map(postProcessContest))
             });
+            console.log(data)
             return data;
         },
 

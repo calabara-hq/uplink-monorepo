@@ -69,10 +69,13 @@ const handleMediaUpload = async (
 
     const acceptedMimeTypes = acceptedFormats.reduce((acc: string[], format: string) => {
         if (format === 'image') {
-            return [...acc, 'image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/gif'];
+            return [...acc, 'image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
         }
         if (format === 'video') {
             return [...acc, 'video/mp4'];
+        }
+        if (format === 'svg') {
+            return [...acc, 'image/svg+xml'];
         }
         return acc;
     }, []);
@@ -101,7 +104,7 @@ const handleMediaUpload = async (
         if (fileSize > 15000000) throw new MediaUploadError({ code: 2, message: 'Images must be less than 15MB' });
     }
 
-    if (!acceptedMimeTypes.includes(mimeType)) throw new MediaUploadError({ code: 3, message: 'Invalid file type' });
+    if (!acceptedMimeTypes.includes(mimeType)) throw new MediaUploadError({ code: 3, message: 'Invalid file type.' });
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
