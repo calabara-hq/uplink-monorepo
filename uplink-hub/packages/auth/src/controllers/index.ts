@@ -39,7 +39,9 @@ const addUser = async (user: Session['user']) => {
 
 export const getCsrfToken = function (req, res) {
     let csrf = randomUUID().replace(/-/g, '')
+    console.log('session1', req.session, '\n')
     req.session.csrfToken = csrf
+    console.log('session2', req.session, '\n')
     res.send({ csrfToken: csrf })
 }
 

@@ -18,6 +18,7 @@ const getContest = async (contestId: string) => {
       query Query($contestId: ID!){
         contest(contestId: $contestId){
             id
+            tweetId
             space{
                 id
                 name

@@ -24,13 +24,12 @@ app.use(session({
   name: "uplink-hub",
   secret: "SESS_SECRET",
   store: redisStore,
-  //store: new session.MemoryStore,
   saveUninitialized: false,
   resave: false,
   cookie: {
     sameSite: 'lax',
     secure: process.env.NODE_ENV === "production",
-    expires: new Date(Date.now() + 60 * 60 * 1000),
+    maxAge: 2 * 60 * 60 * 1000, // 2 hours
     httpOnly: true,
   },
 }))

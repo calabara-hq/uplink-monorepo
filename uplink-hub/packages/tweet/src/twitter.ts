@@ -43,7 +43,7 @@ export class TwitterController {
             const { text, media } = el;
             return {
                 ...(text && { text }),
-                ...(media && { media: { media_ids: media.media_ids } }),
+                ...(media && { media }),
             }
         });
         if (!processedThread || processedThread.length === 0) throw new Error('invalid thread');
@@ -57,19 +57,24 @@ export class TwitterController {
         await this.validateSession();
         // INIT
         const mediaUrl = tweet.media.url;
+
+        const acceptedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'video/mp4'];
+        if (!acceptedMimeTypes.includes(tweet.media.type)) throw new Error('invalid media type');
+
         const initResponse = await this.client.v1.post(
             'media/upload.json',
             {
                 command: 'INIT',
-                total_bytes: parseInt(tweet.media.size), 
+                total_bytes: tweet.media.size,
                 media_type: tweet.media.type,
+                additional_owners: ['1539985534327595008']
             },
             { prefix: 'https://upload.twitter.com/1.1/' }
         );
 
         // APPEND
         const mediaStream = await axios.get(mediaUrl, { responseType: 'stream' });
-        const chunks = mediaStream.data.pipe(new stream.PassThrough());
+        const chunks = mediaStream.data.pipe(new stream.PassThrough({ highWaterMark: 64 * 1024 }));
         let index = 0;
 
         for await (const chunk of chunks) {
@@ -90,10 +95,9 @@ export class TwitterController {
         // FINALIZE
         const finalizeResponse = await this.client.v1.post(
             'media/upload.json',
-            { command: 'FINALIZE', media_id: initResponse.media_id_string },
+            { command: 'FINALIZE', media_id: initResponse.media_id_string, allow_async: true },
             { prefix: 'https://upload.twitter.com/1.1/' }
         );
-
 
         // WAIT FOR PROCESSING
         if (finalizeResponse.processing_info && finalizeResponse.processing_info.state !== 'succeeded') {
@@ -109,8 +113,9 @@ export class TwitterController {
 
     async waitForUploadCompletion(mediaData: MediaStatusV1Result) {
         while (true) {
-            mediaData = await this.client.v1.mediaInfo(mediaData.media_id_string);
-            const { processing_info } = mediaData;
+            const status = await this.client.v1.mediaInfo(mediaData.media_id_string);
+            console.log('CURRENT MEDIA DATA \n', JSON.stringify(status, null, 2))
+            const { processing_info } = status;
 
             if (!processing_info || processing_info.state === 'succeeded') {
                 // Ok, completed!
@@ -140,23 +145,11 @@ export class TwitterController {
 
 
     public async sendTweet(thread: SendTweetV2Params[], quoteTweetId?: string) {
-        try {
-            await this.validateSession();
-            const processedThread: SendTweetV2Params[] = await this.processThread(thread);
-            if (quoteTweetId) processedThread[0].quote_tweet_id = quoteTweetId;
-            const tweetResponse = await this.client.v2.tweetThread(processedThread);
-            return tweetResponse[0].data.id;
-
-        } catch (err) {
-            console.log(err);
-            if (err.message === 'invalid thread') {
-                throw err;
-            } else if (err.message === 'failed to establish a twitter session') {
-                throw err;
-            } else {
-                throw new Error('failed to send tweet');
-            }
-        }
+        await this.validateSession();
+        const processedThread: SendTweetV2Params[] = await this.processThread(thread);
+        if (quoteTweetId) processedThread[0].quote_tweet_id = quoteTweetId;
+        const tweetResponse = await this.client.v2.tweetThread(processedThread);
+        return tweetResponse[0].data.id;
     }
 
 

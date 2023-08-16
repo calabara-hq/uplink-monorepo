@@ -348,9 +348,8 @@ const PreviewModal = ({
       .then((res) => {
         if (!res) return;
         if (res.error) return; // known error handled by the mutation hook (didn't throw)
-        const { errors: mutationErrors, success } = res.data?.createSubmission;
+        const { success } = res.data?.createSubmission;
         if (!success) {
-          console.log(mutationErrors);
           return toast.error(
             "Oops, something went wrong. Please check your inputs and try again."
           );

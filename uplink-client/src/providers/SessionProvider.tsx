@@ -1,8 +1,16 @@
+/**
+ * Copyright (c) 2022-2023, Balázs Orbán
+ * ISC License
+ *
+ * the following is a modified version of the nextAuth session provider
+ *
+ **/
+
 "use client";
 import { unixNow } from "@/utils/time";
 import { createContext, useEffect, useState, useMemo, useContext } from "react";
 import { BroadcastChannel } from "@/utils/broadcast";
-import { CtxOrReq, fetchData } from "@/utils/fetchData";
+import { IncomingMessage } from "http";
 
 export type ISODateString = string;
 
@@ -26,6 +34,11 @@ interface ISessionStore {
   _lastSync: number;
   _session?: Session | null | undefined;
   _getSession: (...args: any[]) => any;
+}
+
+interface CtxOrReq {
+  req?: IncomingMessage;
+  ctx?: { req: IncomingMessage };
 }
 
 // context definition
@@ -127,7 +140,17 @@ export type GetSessionParams = CtxOrReq & {
 // fetch the current session from the server
 
 export const getSession = async (params?: GetSessionParams) => {
-  const session = await fetchData<Session>("/auth/session");
+  const session = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/auth/session`, {
+      credentials: "include",
+      cache: "no-store",
+  })
+    .then((res) => res.json())
+    .then((data) => (Object.keys(data).length > 0 ? data : null))
+    .catch((err) => {
+      console.log(err);
+      return null;
+    });
+
   if (params?.broadcast ?? true) {
     broadcast.post({ event: "session", data: { trigger: "getSession" } });
   }
@@ -137,8 +160,13 @@ export const getSession = async (params?: GetSessionParams) => {
 // fetch a csrf from the server
 
 export const getCsrfToken = async (params?: CtxOrReq) => {
-  const response = await fetchData<{ csrfToken: string }>("/auth/csrf");
-  return response?.csrfToken;
+  return await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/auth/csrf`, {
+    credentials: "include",
+    cache: "no-store",
+  })
+    .then((res) => res.json())
+    .then((data) => data.csrfToken)
+    .catch((err) => console.log(err));
 };
 
 export type SignInParams = {
@@ -171,6 +199,7 @@ export const signIn = async (credentials: SignInParams) => {
 // sign out
 
 export const signOut = async () => {
+  const csrfToken = await getCsrfToken();
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_HUB_URL}/auth/sign_out`,
     {
@@ -179,8 +208,7 @@ export const signOut = async () => {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      //body: JSON.stringify({ csrfToken: 'hello thisis a test' }),
-      body: JSON.stringify({ csrfToken: await getCsrfToken() }),
+      body: JSON.stringify({ csrfToken }),
     }
   );
   const data = await response.json();
@@ -216,6 +244,8 @@ type SessionProviderProps = {
 };
 
 export function SessionProvider(props: SessionProviderProps) {
+  console.log("initializing session provider");
+  console.log(props);
   const { children, refetchInterval, refetchWhenOffline } = props;
 
   const hasInitialSession = props.session !== undefined;
@@ -232,6 +262,7 @@ export function SessionProvider(props: SessionProviderProps) {
 
   // on initial mount
   useEffect(() => {
+    console.log("got initial mount, initializing get session");
     _SessionStore._getSession = async ({ event } = {}) => {
       try {
         const storageEvent = event === "storage";
@@ -309,8 +340,10 @@ export function SessionProvider(props: SessionProviderProps) {
     // and makes our tab visible again, re-fetch the session, but only if
     // this feature is not disabled.
     const visibilityHandler = () => {
-      if (refetchOnWindowFocus && document.visibilityState === "visible")
+      if (refetchOnWindowFocus && document.visibilityState === "visible") {
+        console.log("refetching on window focus");
         _SessionStore._getSession({ event: "visibilitychange" });
+      }
     };
     document.addEventListener("visibilitychange", visibilityHandler, false);
     return () =>
@@ -325,13 +358,20 @@ export function SessionProvider(props: SessionProviderProps) {
   const shouldRefetch = refetchWhenOffline !== false || isOnline;
 
   useEffect(() => {
+    console.log("refetch effect called");
+    console.log(refetchInterval, shouldRefetch);
     if (refetchInterval && shouldRefetch) {
+      console.log("inside refetch interval");
       const refetchIntervalTimer = setInterval(() => {
         if (_SessionStore._session) {
+          console.log("refetching session");
           _SessionStore._getSession({ event: "poll" });
         }
       }, refetchInterval * 1000);
-      return () => clearInterval(refetchIntervalTimer);
+      return () => {
+        console.log("clearing interval on unmount");
+        clearInterval(refetchIntervalTimer);
+      };
     }
   }, [refetchInterval, shouldRefetch]);
 

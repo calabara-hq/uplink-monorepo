@@ -240,7 +240,7 @@ const insertSpaceToken = async (spaceId, tokenId) => {
     }
 }
 
-export const queueTweet = async (contestId: number, user: any, tweetThread: TwitterThreadItem[]) => {
+export const queueTweet = async (contestId: number, user: any, startTime: string, tweetThread: TwitterThreadItem[]) => {
     type TweetQueueThreadItem = {
         id: string;
         text: string;
@@ -273,7 +273,7 @@ export const queueTweet = async (contestId: number, user: any, tweetThread: Twit
     const tweetJob: schema.dbNewTweetQueueType = {
         contestId: contestId,
         author: user.address,
-        created: new Date().toISOString(),
+        created: startTime, // set created to startTime so that the job will be picked up by the scheduler close to the start time
         jobContext: 'contest',
         payload: tweetQueueThread,
         accessToken: user.twitter.accessToken,

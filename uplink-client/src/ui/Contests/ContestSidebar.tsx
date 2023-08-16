@@ -44,7 +44,7 @@ const TweetQueuedDialog = () => {
           Tweet Queued
         </div>
         <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-          <p className="font-bold">{`The announcement tweet is queued. It will be tweeted within an hour of the contest start time.`}</p>
+          <p className="font-bold">{`The announcement tweet is queued. It will be tweeted within 5 minutes of the contest start time.`}</p>
         </div>
       </div>
     </div>
