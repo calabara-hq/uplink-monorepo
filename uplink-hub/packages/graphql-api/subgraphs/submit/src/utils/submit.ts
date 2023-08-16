@@ -8,8 +8,6 @@ import dotenv from 'dotenv';
 import { validateSubmissionPayload, validateTwitterSubmissionPayload } from "./validatePayload.js";
 import { nanoid } from 'nanoid';
 import axios from "axios";
-import { dbNewSubmissionType } from "lib/dist/drizzle/schema.js";
-import { isIpfsUrl } from "lib";
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });

@@ -22,17 +22,45 @@ type ThreadItem = {
     }
 }
 
+// job status levels
+const statusMap = {
+    ready: 0,
+    failed: 1,
+    pending: 2,
+    success: 3
+}
+
+
+const getJobs = db.query.tweetQueue.findMany({
+    with: { contest: true },
+    where: (tweetQueue) =>
+        sqlOps.and(
+            sqlOps.lt(schema.tweetQueue.status, 2),
+            sqlOps.or(
+                sqlOps.and(
+                    sqlOps.eq(schema.tweetQueue.jobContext, 'contest'),
+                    sqlOps.or(   // pluck contests that are close to starting or have technically already started. ignore contests that are far in the future
+                        sqlOps.and(
+                            sqlOps.gte(schema.tweetQueue.created, sqlOps.placeholder('adjustedTime')),
+                            sqlOps.lte(schema.tweetQueue.created, sqlOps.placeholder('currentTime'))
+                        ),
+                        sqlOps.gt(sqlOps.placeholder('currentTime'), schema.tweetQueue.created)
+                    )
+                ),
+                sqlOps.eq(schema.tweetQueue.jobContext, 'submission')
+            )),
+    orderBy: (jobs => [
+        sqlOps.asc(jobs.jobContext), // give priority to announcement tweets
+        sqlOps.asc(jobs.created)   // give priority to oldest jobs
+    ]),
+
+    limit: 15,
+}).prepare();
+
+
 
 const setJobStatus = async (id: number, status: 'ready' | 'failed' | 'pending' | 'success') => {
-    const statusMap = {
-        ready: 0,
-        failed: 1,
-        pending: 2,
-        success: 3
-    }
-
     await db.update(schema.tweetQueue).set({ status: statusMap[status] }).where(sqlOps.eq(schema.tweetQueue.id, id))
-
 }
 
 
@@ -41,26 +69,15 @@ const setJobError = async (id: number, error: string) => {
 }
 
 const setJobRetries = async (id: number) => {
-    await db.update(schema.tweetQueue).set({ retries: schema.tweetQueue.retries + 1 }).where(sqlOps.eq(schema.tweetQueue.id, id))
+    await db.update(schema.tweetQueue).set({ retries: sqlOps.sql`${schema.tweetQueue.retries} + 1` }).where(sqlOps.eq(schema.tweetQueue.id, id))
 }
 
-const getJobQuoteTweetId = async (contestId: string) => {
+const getJobQuoteTweetId = async (contestId: number) => {
     const quoteTweetId = await db.select({
         tweetId: schema.contests.tweetId
     }).from(schema.contests).where(sqlOps.eq(schema.contests.id, contestId))
     return quoteTweetId;
 }
-
-
-// id: serial('id').primaryKey(),
-// contestId: int('contestId').notNull(),
-// author: varchar('author', { length: 255 }).notNull(),
-// jobContext: varchar('jobContext', { length: 255 }).notNull(),   // 'submission' or 'contest'
-// payload: json('payload').notNull().default('[]'),
-// accessToken: varchar('accessToken', { length: 255 }).notNull(),
-// accessSecret: varchar('accessSecret', { length: 255 }).notNull(),
-// retries: int('retries').notNull(),
-// status: tinyint('status').notNull(),                        // 0 = ready, 1 = failed, 2 = pending, 3 = success
 
 const triageJobs = async () => {
     const jobs = await db.select({
@@ -74,7 +91,17 @@ const triageJobs = async () => {
         retries: schema.tweetQueue.retries,
         status: schema.tweetQueue.status,
     }).from(schema.tweetQueue)
-        .where(sqlOps.lt(schema.tweetQueue.status, 2))
+        .where(
+            sqlOps.and(
+                sqlOps.lt(schema.tweetQueue.status, 2),
+                sqlOps.or(
+                    sqlOps.and(
+                        sqlOps.eq(schema.tweetQueue.jobContext, 'contest'),
+                        sqlOps.gte(schema.tweetQueue.created, sqlOps.sql`NOW() - INTERVAL '5 minutes'`)
+                    ),
+                    sqlOps.eq(schema.tweetQueue.jobContext, 'submission')
+                ))
+        )
         .orderBy(sqlOps.asc(schema.tweetQueue.jobContext))  // give priority to announcement tweets
         .orderBy(sqlOps.asc(schema.tweetQueue.created))   // give priority to oldest jobs
         .limit(15);
@@ -123,9 +150,15 @@ const handleJob = async (job: schema.dbTweetQueueType) => {
 }
 
 const mainLoop = async () => {
-    const jobs = await triageJobs();
-    await Promise.all(jobs.map(async (job) => {
-        await handleJob(job);
+    //const jobs = await triageJobs();
+    //const adjustedTime = new Date(Date.now() - 5 * 60 * 1000);
+    // create an adjustedTime to be now - 5 minutes
+    const adjustedTime = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const currentTime = new Date().toISOString();
+    const jobs = await getJobs.execute({ adjustedTime, currentTime });
+
+    await Promise.all(jobs.map(async ({ contest, ...job }) => {
+        await handleJob(job as schema.dbTweetQueueType);
     }));
 }
 

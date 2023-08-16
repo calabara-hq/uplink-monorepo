@@ -207,6 +207,7 @@ export const contestsRelations = relations(contests, ({ many }) => ({
     submitterRestrictions: many(submitterRestrictions),
     votingPolicy: many(votingPolicy),
     submissions: many(submissions),
+    scheduledTweets: many(tweetQueue),
 }));
 
 export const rewardsRelations = relations(rewards, ({ one, many }) => ({
@@ -319,15 +320,12 @@ export const submissionsRelations = relations(submissions, ({ one }) => ({
     }),
 }));
 
-// export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
-//     contest: one(contests, {
-//         fields: [tweetQueue.contestId],
-//         references: [contests.id],
-//     }),
-//     scheduledTweets: one(scheduledTweets, {
-//         fields: [tweetQueue.id],
-
-// }));
+export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
+    contest: one(contests, {
+        fields: [tweetQueue.contestId],
+        references: [contests.id],
+    }),
+}));
 
 
 export type dbSpaceType = InferModel<typeof spaces>

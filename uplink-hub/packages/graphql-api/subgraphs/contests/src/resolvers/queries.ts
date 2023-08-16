@@ -158,7 +158,6 @@ const queries = {
 
         async isContestTweetQueued(_, { contestId }, contextValue, info) {
             const data = await dbContestTweetQueue.execute({ contestId });
-            console.log(data);
             return !!data;
         }
     },
@@ -166,7 +165,6 @@ const queries = {
     // used to resolve contests to spaces
     Space: {
         async contests(space) {
-            console.log(space)
             const data = await dbMultiContestsBySpaceId.execute({ spaceId: space.id })
                 .then(async (contests) => {
                     return await Promise.all(contests.map(postProcessContest))

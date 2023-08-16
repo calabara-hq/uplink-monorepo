@@ -34,18 +34,13 @@ const mutations = {
         createContest: async (_: any, args: any, context: any) => {
             const user = await authController.getUser(context);
             if (!user) throw new Error('Unauthorized');
-            console.time('verifyUserIsAdmin')
             const isSpaceAdmin = await verifyUserIsAdmin(user, args.contestData.spaceId)
             if (!isSpaceAdmin) throw new Error('Unauthorized');
-            console.timeEnd('verifyUserIsAdmin')
 
             const { contestData } = args;
-            console.time('validateContestParams')
             const result = await validateContestParams(contestData);
-            console.timeEnd('validateContestParams')
             let contestId
 
-            console.time('createDbContest')
             if (result.success) {
                 const data = {
                     spaceId: contestData.spaceId,
@@ -59,7 +54,6 @@ const mutations = {
                     votingPolicy: contestData.votingPolicy,
                 }
                 contestId = await createDbContest(data, user)
-                console.timeEnd('createDbContest')
             } else {
                 contestId = null
             }
@@ -114,10 +108,9 @@ const mutations = {
 
 
             const { cleanPayload, errors, success } = validateTweetThread(args.tweetThread);
-            console.log(cleanPayload, errors, success)
 
             if (success) {
-                await queueTweet(contest.id, user, cleanPayload);
+                await queueTweet(contest.id, user, contest.startTime, cleanPayload);
                 return { success: true }
             }
 

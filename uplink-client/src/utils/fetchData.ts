@@ -13,10 +13,11 @@ export async function fetchData<T = any>(
 
     const url = process.env.NEXT_PUBLIC_HUB_URL + path;
     try {
+        console.log(cookie)
         const options = cookie ? { headers: { cookie: cookie } } : {};
         const res = await fetch(url, {
             credentials: 'include',
-            ...options,
+            //...options,
             cache: 'no-store'
         })
         const data = await res.json()
