@@ -3,6 +3,7 @@ import uplinkLogo from "../../../public/uplink-logo.svg";
 //import Logo from "../Logo/Logo";
 
 import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
+import WalletConnectButton2 from "../ConnectButton/ConnectButton2";
 import Link from "next/link";
 export interface INav {}
 
@@ -16,7 +17,7 @@ const Nav: React.FC<INav> = () => {
           <div className="badge badge-xs bg-gray-700 border-0 p-2 text-gray-400">1.0.1</div>
         </div>
         <div className="flex items-center justify-center ml-auto">
-          <WalletConnectButton />
+          <WalletConnectButton2 />
         </div>
       </div>
     </nav>
