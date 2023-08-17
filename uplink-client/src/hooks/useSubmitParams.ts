@@ -38,7 +38,6 @@ const getUserSubmissionParams = async (contestId: string, walletAddress: string)
         walletAddress
       },
     }),
-    //next: { tags: [`space/${name}`], revalidate: 60 },
   })
     .then((res) => res.json())
     .then(res => res.data.getUserSubmissionParams)

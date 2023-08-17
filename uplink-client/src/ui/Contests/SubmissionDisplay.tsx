@@ -1,5 +1,4 @@
 "use client";
-import { getContestById } from "@/lib/fetch/contest";
 import { VideoProvider } from "@/providers/VideoProvider";
 import VideoPreview from "../VideoPlayer/VideoPlayer";
 import { Suspense, useEffect, useState } from "react";
@@ -22,18 +21,20 @@ import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import SubmissionViewer from "../SubmissionViewer/SubmissionViewer2";
+import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
+import { Submission } from "@/providers/ContestInteractionProvider";
 
 const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
   // init useSWR here
 
-  const { liveSubmissions, isLoading, error } = useTrackSubmissions(contestId);
+  const { submissions } = useContestInteractionState();
   return (
     <div className="flex flex-col gap-4 w-full">
       <SubmissionViewer />
       <h1 className="text-xl lg:text-3xl text-center font-bold">Submissions</h1>
       <div className="flex w-full justify-evenly items-center">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-full w-full">
-          {liveSubmissions.map((submission, idx) => {
+          {submissions.map((submission, idx) => {
             return <SubmissionCard submission={submission} key={idx} />;
           })}
         </div>
@@ -42,7 +43,7 @@ const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
   );
 };
 
-const SubmissionCard = ({ submission }: { submission: any }) => {
+const SubmissionCard = ({ submission }: { submission: Submission }) => {
   const pathname = usePathname();
   return (
     <Link
@@ -151,23 +152,31 @@ const SubmissionFooter = ({ submission }) => {
   );
 };
 
-const RenderTextSubmission = ({ submission }) => {
+const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
   return (
     <div className="card-body h-64 bg-white/90 rounded-xl text-black/80 gap-1 w-full overflow-auto">
       <h2 className="break-all font-bold text-2xl">{submission.data.title}</h2>
       <h3 className="break-all italic">{submission.author}</h3>
       <section className="break-all">
-        <Output data={submission.data.body} />
+        {submission.type === "twitter" ? (
+          <p>{submission.data.thread[0].text}</p>
+        ) : (
+          <Output data={submission.data.body} />
+        )}
       </section>
     </div>
   );
 };
 
-const RenderImageSubmission = ({ submission }) => {
+const RenderImageSubmission = ({ submission }: { submission: Submission }) => {
   return (
     <figure className="relative h-64 w-full">
       <Image
-        src={submission.data.previewAsset}
+        src={
+          submission.type === "standard"
+            ? submission.data.previewAsset
+            : submission.data.thread[0].previewAsset
+        }
         alt="submission image"
         fill
         className="rounded-t-xl object-cover w-full"
@@ -176,13 +185,21 @@ const RenderImageSubmission = ({ submission }) => {
   );
 };
 
-const RenderVideoSubmission = ({ submission }) => {
+const RenderVideoSubmission = ({ submission }: { submission: Submission }) => {
   return (
     <MediaController className="rounded-t-xl">
       <video
         slot="media"
-        src={submission.data.videoAsset}
-        poster={submission.data.previewAsset}
+        src={
+          submission.type === "twitter"
+            ? submission.data.thread[0].videoAsset
+            : submission.data.videoAsset
+        }
+        poster={
+          submission.type === "twitter"
+            ? submission.data.thread[0].previewAsset
+            : submission.data.previewAsset
+        }
         preload="auto"
         muted
         crossOrigin=""

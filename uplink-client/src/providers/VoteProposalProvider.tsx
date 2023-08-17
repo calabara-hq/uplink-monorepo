@@ -6,7 +6,7 @@ import Decimal from "decimal.js";
 import gql from "graphql-tag";
 import graphqlClient from "@/lib/graphql/initUrql";
 import useHandleMutation from "@/hooks/useHandleMutation";
-import { mutate } from "swr";
+import { useContestInteractionState } from "./ContestInteractionProvider";
 
 export interface VotingStateProps {
   userVotingState: {
@@ -99,7 +99,11 @@ export const VoteProposalProvider = ({
   children: React.ReactNode;
   contestId: string;
 }) => {
-  const { userVotingParams, isLoading, mutate } = useVotingParams(contestId);
+  const {
+    userVoteParams: userVotingParams,
+    areUserVotingParamsLoading: isLoading,
+    mutateUserVotingParams: mutate,
+  } = useContestInteractionState();
   const [proposedVotes, setProposedVotes] = useState<any[]>([]);
   const [currentVotes, setCurrentVotes] = useState<any[]>([]);
   const [votesSpent, setVotesSpent] = useState<string>("0");
@@ -123,7 +127,7 @@ export const VoteProposalProvider = ({
         const newProposedVotes = proposedVotes.filter(
           (el) =>
             !userVotingParams?.userVotes.find(
-              (vote) => /*vote?.submissionId*/ 1 === el.submissionId
+              (vote) => vote?.submissionId === el.submissionId
             )
         );
         setProposedVotes(newProposedVotes);

@@ -15,8 +15,6 @@ import {
   HiSparkles,
   HiQuestionMarkCircle,
 } from "react-icons/hi2";
-import useVotingParams from "@/hooks/useVotingParams";
-import useSubmitParams from "@/hooks/useSubmitParams";
 import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
 import useTrackSubmissions from "@/hooks/useTrackSubmissions";
 import { useSession } from "@/providers/SessionProvider";

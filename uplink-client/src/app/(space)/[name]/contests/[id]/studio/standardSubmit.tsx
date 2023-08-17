@@ -19,14 +19,14 @@ import { VideoProvider } from "@/providers/VideoProvider";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { useSession } from "@/providers/SessionProvider";
-import useSubmitParams from "@/hooks/useSubmitParams";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { BiInfoCircle } from "react-icons/bi";
 import Modal from "@/ui/Modal/Modal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
-
+import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
+import { Decimal } from "decimal.js";
 const initialState: SubmissionBuilderProps = {
   title: "",
   primaryAssetUrl: null,
@@ -256,7 +256,8 @@ const StudioSidebar = ({
   const [isRestrictionModalOpen, setIsRestrictionModalOpen] = useState(false);
   const router = useRouter();
 
-  const { userSubmitParams, isLoading } = useSubmitParams(contestId);
+  const { userSubmitParams, areUserSubmitParamsLoading: isLoading } =
+    useContestInteractionState();
   const { stateRemainingTime } = useContestState();
 
   const handleSubmit = async () => {
@@ -339,7 +340,8 @@ const StudioSidebar = ({
                   <p>status</p>
                   {userSubmitParams.restrictionResults.some(
                     (el) => el.result === true
-                  ) && userSubmitParams.maxSubPower > 0 ? (
+                  ) &&
+                  new Decimal(userSubmitParams.maxSubPower).greaterThan(0) ? (
                     <p className="ml-auto">eligible</p>
                   ) : (
                     <p className="ml-auto"> not eligible</p>
@@ -485,4 +487,4 @@ const StandardSubmit = ({
   }
 };
 
-export default StandardSubmit
+export default StandardSubmit;
