@@ -6,7 +6,6 @@ import { useSession } from "@/providers/SessionProvider";
 import {
   CreateSpaceDocument,
   EditSpaceDocument,
-  IsEnsValidDocument,
 } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import handleMediaUpload from "@/lib/mediaUpload";

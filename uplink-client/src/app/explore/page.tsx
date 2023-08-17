@@ -50,9 +50,7 @@ export default async function Page() {
   );
 }
 
-
 function AllSpaces({ spaces }: any) {
-  
   return (
     <div
       className="grid gap-12 py-6

@@ -1,9 +1,6 @@
-import { SpaceDocument } from "@/lib/graphql/spaces.gql";
-import graphqlClient from "@/lib/graphql/initUrql";
 import Link from "next/link";
 import Image from "next/image";
 import TokenBadge from "@/ui/TokenBadge/TokenBadge";
-// import { getSpace } from "@/lib/fetch/space";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import {
   CategoryLabel,

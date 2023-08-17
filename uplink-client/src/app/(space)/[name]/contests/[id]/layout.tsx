@@ -1,7 +1,10 @@
 import { ContestStateProvider } from "@/providers/ContestStateProvider";
 import { VoteProposalProvider } from "@/providers/VoteProposalProvider";
+import { getContestById } from "./fetchContest";
+import { ContestInteractionProvider } from "@/providers/ContestInteractionProvider";
+import SwrProvider from "@/providers/SwrProvider";
 
-const getContestById = async (contestId: string) => {
+const getSubmissions = async (contestId: string) => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
@@ -9,115 +12,35 @@ const getContestById = async (contestId: string) => {
     },
     body: JSON.stringify({
       query: `
-      query Contest($contestId: ID!) {
-        contest(contestId: $contestId) {
-          id
-          spaceId
-          created
-          promptUrl
-          tweetId
-          space {
-            admins {
-              address
-            }
-          }
-          metadata {
-            category
-            type
-          }
-          deadlines {
-            startTime
-            voteTime
-            endTime
-            snapshot
-          }
-          submissions {
-            id
-            contestId
-            author
-            created
-            type
-            url
-            version
-          }
-          submitterRestrictions {
-            restrictionType
-            tokenRestriction {
-              threshold
-              token {
-                address
-                decimals
-                symbol
-                tokenHash
-                tokenId
+      query Query($contestId: ID!){
+        contest(contestId: $contestId){
+            submissions {
+                id
+                contestId
+                author
+                created
                 type
-              }
+                url
+                version
             }
-          }
-          submitterRewards {
-            rank
-            tokenReward {
-              amount
-              token {
-                tokenHash
-                symbol
-                decimals
-                address
-                tokenId
-                type
-              }
-              tokenId
-            }
-          }
-          voterRewards {
-            rank
-            tokenReward {
-              amount
-              tokenId
-              token {
-                tokenHash
-                type
-                address
-                symbol
-                decimals
-                tokenId
-              }
-            }
-          }
-          votingPolicy {
-            strategyType
-            arcadeVotingPolicy {
-              token {
-                tokenHash
-                type
-                address
-                symbol
-                decimals
-                tokenId
-              }
-              votingPower
-            }
-            weightedVotingPolicy {
-              token {
-                tokenHash
-                type
-                address
-                symbol
-                decimals
-                tokenId
-              }
-            }
-          }
         }
-      }`,
+    }`,
       variables: {
         contestId,
       },
     }),
-    next: { tags: [`contest/${contestId}`] },
+    next: { tags: [`submissions/${contestId}`], revalidate: 60 }, // cache submissions for 60 seconds
   })
     .then((res) => res.json())
-    .then((res) => res.data.contest);
+    .then((res) => res.data.contest.submissions)
+    .then(async (submissions) => {
+      return await Promise.all(
+        submissions.map(async (submission, idx) => {
+          const data = await fetch(submission.url).then((res) => res.json());
+          return { ...submission, data: data };
+        })
+      );
+    });
   return data;
 };
 
@@ -130,7 +53,14 @@ export default async function Layout({
   params: { name: string; id: string };
   modal: React.ReactNode;
 }) {
+  // TODO: combine these 2 queries into 1 with relational query
   const contest = await getContestById(params.id);
+  const submissions = await getSubmissions(params.id);
+
+  const fallback = {
+    [`/ipfs/submissions/${params.id}`]: submissions,
+  };
+
   const { deadlines, metadata, tweetId, space } = contest;
   return (
     <div className="w-full lg:w-11/12 flex flex-col items-center p-4">
@@ -141,9 +71,13 @@ export default async function Layout({
           tweetId={tweetId}
           contestAdmins={space.admins.map((admin) => admin.address)}
         >
-          <VoteProposalProvider contestId={params.id}>
-            {children}
-          </VoteProposalProvider>
+          <SwrProvider fallback={fallback}>
+            <ContestInteractionProvider contestId={params.id}>
+              <VoteProposalProvider contestId={params.id}>
+                {children}
+              </VoteProposalProvider>
+            </ContestInteractionProvider>
+          </SwrProvider>
         </ContestStateProvider>
         {modal}
       </div>

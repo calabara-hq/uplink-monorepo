@@ -1,5 +1,4 @@
 "use client";
-import useSubmitParams from "@/hooks/useSubmitParams";
 import { ThreadItem, ApiThreadItem } from "@/hooks/useThreadCreator";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useSession } from "@/providers/SessionProvider";
@@ -27,6 +26,8 @@ import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateTwitterSubmissionDocument } from "@/lib/graphql/submit.gql";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
+import { Decimal } from "decimal.js";
 
 const StepBox = ({ step }: { step: number }) => {
   return (
@@ -38,7 +39,8 @@ const StepBox = ({ step }: { step: number }) => {
 
 const Step1 = ({ contestId }: { contestId: string }) => {
   const { data: session, status } = useSession();
-  const { userSubmitParams, isLoading } = useSubmitParams(contestId);
+  const { userSubmitParams, areUserSubmitParamsLoading: isLoading } =
+    useContestInteractionState();
 
   return (
     <div className="flex gap-2 justify-between">
@@ -56,7 +58,9 @@ const Step1 = ({ contestId }: { contestId: string }) => {
               <p>status</p>
               <div className="flex flex-row gap-2 items-center">
                 {userSubmitParams ? (
-                  userSubmitParams.remainingSubPower > 0 ? (
+                  new Decimal(userSubmitParams.remainingSubPower).greaterThan(
+                    0
+                  ) ? (
                     <>
                       <p className="ml-auto">eligible</p>
                       <HiCheckBadge className="text-success w-5 h-5" />
@@ -113,12 +117,12 @@ const Step1 = ({ contestId }: { contestId: string }) => {
 
 const Step2 = ({ contestId }: { contestId: string }) => {
   const { data: session, status } = useSession();
-  const { userSubmitParams, isLoading } = useSubmitParams(contestId);
-
+  const { userSubmitParams, areUserSubmitParamsLoading: isLoading } =
+    useContestInteractionState();
   const isDisabled =
     status !== "authenticated" ||
     !userSubmitParams ||
-    userSubmitParams.remainingSubPower <= 0;
+    new Decimal(userSubmitParams.remainingSubPower).lessThanOrEqualTo(0);
 
   const disabledClass = isDisabled ? "opacity-50 pointer-events-none" : "";
 
@@ -188,7 +192,8 @@ const Step3 = ({
 }) => {
   const { data: session, status } = useSession();
   const isReady = status === "authenticated" && session?.user?.twitter !== null;
-  const { userSubmitParams, isLoading } = useSubmitParams(contestId);
+  const { userSubmitParams, areUserSubmitParamsLoading: isLoading } =
+    useContestInteractionState();
   const [title, setTitle] = useState("");
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isTweetModalOpen, setIsTweetModalOpen] = useState(false);
@@ -212,7 +217,7 @@ const Step3 = ({
     status !== "authenticated" ||
     !session?.user?.twitter ||
     !userSubmitParams ||
-    userSubmitParams.remainingSubPower <= 0;
+    new Decimal(userSubmitParams.remainingSubPower).lessThanOrEqualTo(0);
 
   const disabledClass = isDisabled ? "opacity-50 pointer-events-none" : "";
 
@@ -322,7 +327,6 @@ const PreviewModal = ({
     thread: ApiThreadItem[];
   };
 
-
   const handleSubmit = async () => {
     const submission: TwitterSubmission = {
       title: title,
@@ -348,7 +352,7 @@ const PreviewModal = ({
       .then((res) => {
         if (!res) return;
         if (res.error) return; // known error handled by the mutation hook (didn't throw)
-        const { success } = res.data?.createSubmission;
+        const { success } = res.data?.createTwitterSubmission;
         if (!success) {
           return toast.error(
             "Oops, something went wrong. Please check your inputs and try again."
