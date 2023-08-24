@@ -7,6 +7,7 @@ import {
   StatusLabel,
   RemainingTimeLabel,
   ContestCategory,
+  ContestState,
 } from "@/ui/ContestLabels/ContestLabels";
 import { BiPencil, BiWorld } from "react-icons/bi";
 import { FaTwitter } from "react-icons/fa";
@@ -78,7 +79,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
       </div>
       <div className="flex flex-col items-center gap-2">
         <div className="flex flex-row gap-2">
-          <h2 className="card-title text-3xl">{displayName}</h2>
+          <h2 className="card-title text-3xl text-center">{displayName}</h2>
         </div>
         <div className="flex flex-row gap-2">
           {twitter && (
@@ -223,52 +224,70 @@ const ContestDisplay = ({
       )}
       {filteredContests.length > 0 && (
         <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full">
-          {filteredContests.map((contest) => (
-            <ContestCard
-              key={contest.id}
-              contest={contest}
-              spaceName={spaceName}
-            />
-          ))}
+          {filteredContests.map((contest) => {
+            const { contestState, stateRemainingTime } = calculateContestStatus(
+              contest.deadlines,
+              contest.metadata.type,
+              contest.tweetId
+            );
+            return (
+              <ContestCard
+                key={contest.id}
+                spaceName={spaceName}
+                contestId={contest.id}
+                // Update prompt url fetch
+                contestTitle="test prompt"
+                category={contest.metadata.category}
+                contestState={contestState}
+                remainingTime={stateRemainingTime}
+              />
+            );
+          })}
         </div>
       )}
     </div>
   );
 };
 
-const ContestCard = ({
+export const ContestCard = ({
   spaceName,
-  contest,
+  contestId,
+  contestTitle,
+  category,
+  contestState,
+  remainingTime,
 }: {
-  contest: any;
-  spaceName: any;
+  spaceName: string;
+  contestId: string;
+  contestTitle: string;
+  category: ContestCategory;
+  contestState: ContestState;
+  remainingTime: string | null;
 }) => {
-  console.log('LOOK HERE', contest.metadata.type, contest.tweetId);
-  const { contestState, stateRemainingTime } = calculateContestStatus(
-    contest.deadlines,
-    contest.metadata.type,
-    contest.tweetId
-  );
   return (
-    <Link href={`${spaceName}/contests/${contest.id}`} prefetch={false}>
+    <Link href={`${spaceName}/contests/${contestId}`} prefetch={false}>
       <div
-        key={contest.id}
+        key={contestId}
         className="card bg-base-100 
-        cursor-pointer border border-border rounded-2xl p-4 h-fit max-h-36 overflow-hidden w-full shimmer-hover"
+        cursor-pointer border border-border rounded-2xl p-4 h-full max-h-36 overflow-hidden w-full shimmer-hover"
       >
         <div className="card-body items-start p-0">
           <div className="flex w-full">
-            <div className="flex-grow overflow-hidden">
-              <h2 className="card-title mb-0 normal-case whitespace-nowrap overflow-ellipsis overflow-hidden">
-                test prompt
+            <div className="flex-grow ">
+              <h2
+                className={`card-title mb-0 normal-case break-all line-clamp-2`}
+              >
+                {contestTitle}
               </h2>
             </div>
-            <div className="ml-4">
-              <CategoryLabel category={contest.metadata.category} />
+            <div className="ml-2">
+              <CategoryLabel category={category} />
             </div>
           </div>
-          <StatusLabel status={contestState} />
-          <RemainingTimeLabel remainingTime={stateRemainingTime} />
+          <div>
+            <StatusLabel status={contestState} />
+          </div>
+          <RemainingTimeLabel remainingTime={remainingTime} />
         </div>
       </div>
     </Link>

@@ -1,5 +1,5 @@
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
-import Nav, { INav } from "./Nav";
+import Nav, { INav } from "../Nav/Nav";
 
 export default {
   title: "ui/Nav",

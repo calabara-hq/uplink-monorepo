@@ -1,5 +1,5 @@
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
-import SpaceForm from "./SpaceForm";
+import SpaceForm from "../SpaceForm/SpaceForm";
 export default {
   title: "ui/SpaceForm",
   component: SpaceForm,
