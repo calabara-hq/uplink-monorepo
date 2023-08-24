@@ -43,7 +43,7 @@ export function ContestStateProvider({
 }) {
   const [contestState, setContestState] = useState<string | null>(null);
   const [stateRemainingTime, setStateRemainingTime] = useState<string>("");
-    useState<number>(0);
+  useState<number>(0);
   const { category, type } = metadata;
   useEffect(() => {
     if (metadata.type === "twitter" && !tweetId) {
@@ -56,10 +56,11 @@ export function ContestStateProvider({
     const vote = parseISO(voteTime);
     const end = parseISO(endTime);
 
+    if (new Date() > end) return setContestState("closed");
+
     const interval = setInterval(() => {
       const now = new Date();
       let nextDeadline = end;
-
       if (now < start) {
         setContestState("pending");
         nextDeadline = start;
@@ -76,16 +77,17 @@ export function ContestStateProvider({
       const minutes = differenceInMinutes(nextDeadline, now);
       const hours = differenceInHours(nextDeadline, now);
       const days = differenceInDays(nextDeadline, now);
-
+      console.log(days, hours, minutes, seconds)
       if (days > 0) {
         setStateRemainingTime(`${days} days`);
       } else if (hours > 0) {
         setStateRemainingTime(`${hours} hrs`);
-      } else if (minutes > 0) {
+      } else if (minutes > 1) {
         setStateRemainingTime(`${minutes} mins`);
-      } else {
+      } else if (seconds > 0){
         setStateRemainingTime(`${seconds} s`);
       }
+      else clearInterval(interval);
     }, 1000);
 
     return () => {

@@ -3,6 +3,7 @@ import { VoteProposalProvider } from "@/providers/VoteProposalProvider";
 import { getContestById } from "./fetchContest";
 import { ContestInteractionProvider } from "@/providers/ContestInteractionProvider";
 import SwrProvider from "@/providers/SwrProvider";
+import { VoteActionProvider } from "@/providers/VoteActionProvider";
 
 const getSubmissions = async (contestId: string) => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -18,6 +19,8 @@ const getSubmissions = async (contestId: string) => {
                 id
                 contestId
                 author
+                totalVotes
+                rank
                 created
                 type
                 url
@@ -58,7 +61,7 @@ export default async function Layout({
   const submissions = await getSubmissions(params.id);
 
   const fallback = {
-    [`/ipfs/submissions/${params.id}`]: submissions,
+    [`submissions/${params.id}`]: submissions,
   };
 
   const { deadlines, metadata, tweetId, space } = contest;
@@ -73,9 +76,9 @@ export default async function Layout({
         >
           <SwrProvider fallback={fallback}>
             <ContestInteractionProvider contestId={params.id}>
-              <VoteProposalProvider contestId={params.id}>
+              <VoteActionProvider contestId={params.id}>
                 {children}
-              </VoteProposalProvider>
+              </VoteActionProvider>
             </ContestInteractionProvider>
           </SwrProvider>
         </ContestStateProvider>

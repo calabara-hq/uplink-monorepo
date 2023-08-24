@@ -2,6 +2,7 @@
 
 // used to manage contest interaction state
 // track dynamic submissions, user submission parameters, and user voting parameters
+// these values may be forwarded to child providers to manage state for specific contest interactions
 
 import { createContext, useContext } from "react";
 import useSWR from "swr";
@@ -18,6 +19,8 @@ type BaseSubmission = {
   url: string;
   version: string;
   author?: string;
+  totalVotes: string | null;
+  rank: number | null;
 };
 
 type TwitterSubmission = BaseSubmission & {
@@ -89,7 +92,9 @@ export interface ContestInteractionProps {
   userVoteParams: UserVotingParams;
   areUserVotingParamsLoading: boolean;
   isUserVotingParamsError: any;
-  mutateUserVotingParams: (newParams: UserVotingParams) => void;
+  mutateUserVotingParams: any; //(newParams: UserVotingParams, options?: any) => void;
+  downloadGnosisResults: () => void;
+  downloadUtopiaResults: () => void;
 }
 
 // fetcher functions
@@ -112,6 +117,8 @@ const getSubmissions = async (contestId: string) => {
                   type
                   url
                   version
+                  totalVotes
+                  rank
               }
           }
       }`,
@@ -228,6 +235,54 @@ const getUserVotingParams = async (
   return response;
 };
 
+const getGnosisResults = async (contestId: string) => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+        query Query($contestId: ID!){
+          contest(contestId: $contestId){
+            gnosisResults
+          }
+      }`,
+      variables: {
+        contestId,
+      },
+    }),
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.contest.gnosisResults);
+
+  return data;
+};
+
+const getUtopiaResults = async (contestId: string) => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+        query Query($contestId: ID!){
+          contest(contestId: $contestId){
+            utopiaResults
+          }
+      }`,
+      variables: {
+        contestId,
+      },
+    }),
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.contest.utopiaResults);
+
+  return data;
+};
+
 const ContestInteractionContext = createContext<
   ContestInteractionProps | undefined
 >(undefined);
@@ -244,6 +299,7 @@ export function ContestInteractionProvider({
   const isAuthed = status === "authenticated";
   const isSubmitPeriod = contestState === "submitting";
   const isVotingPeriod = contestState === "voting";
+
   const submitParamsSwrKey =
     isAuthed && isSubmitPeriod && session?.user?.address
       ? [`/api/userSubmitParams/${contestId}`, session.user.address]
@@ -253,13 +309,13 @@ export function ContestInteractionProvider({
       ? [`/api/userVotingParams/${contestId}`, session.user.address]
       : null;
 
-  // dynamic submissions
+  // dynamic submissions. only active when contest is in submitting or voting stage
   const {
     data: liveSubmissions,
     isLoading: areSubmissionsLoading,
     error: isSubmissionError,
   }: { data: any; isLoading: boolean; error: any } = useSWR(
-    `/ipfs/submissions/${contestId}`,
+    `submissions/${contestId}`,
     () => getSubmissions(contestId),
     { refreshInterval: 10000 }
   );
@@ -292,6 +348,27 @@ export function ContestInteractionProvider({
     getUserVotingParams(contestId, session.user.address)
   );
 
+  const postProcessCsvResults = (results: string, type: string) => {
+    const endcodedUri = encodeURI(results);
+    const link = document.createElement("a");
+    link.setAttribute("href", endcodedUri);
+    link.setAttribute("download", `${contestId}-${type}-results.csv`);
+    document.body.appendChild(link);
+    link.click();
+  };
+
+  const downloadGnosisResults = () => {
+    getGnosisResults(contestId).then((res: string) =>
+      postProcessCsvResults(res, "gnosis")
+    );
+  };
+
+  const downloadUtopiaResults = () => {
+    getUtopiaResults(contestId).then((res: string) =>
+      postProcessCsvResults(res, "utopia")
+    );
+  };
+
   return (
     <ContestInteractionContext.Provider
       value={{
@@ -305,6 +382,8 @@ export function ContestInteractionProvider({
         areUserVotingParamsLoading,
         isUserVotingParamsError,
         mutateUserVotingParams,
+        downloadGnosisResults,
+        downloadUtopiaResults,
       }}
     >
       {children}

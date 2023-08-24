@@ -2,12 +2,31 @@ scalar Decimal
 scalar EditorData
 scalar SubmissionAssetUrl
 
-type Contest @key(fields: "id") {
+extend type Contest @key(fields: "id") {
   id: ID!
+  deadlines: DeadlinesType! @external
+  additionalParams: AdditionalParamsType! @external
   submissions: [Submission!]!
+    @requires(
+      fields: "deadlines {startTime, voteTime, endTime, snapshot}, additionalParams {anonSubs, visibleVotes}"
+    )
+  gnosisResults: String @requires(fields: "deadlines {endTime}")
+  utopiaResults: String @requires(fields: "deadlines {endTime}")
 }
 
-type Space @key(fields: "id"){
+type DeadlinesType {
+  startTime: String! @external
+  voteTime: String! @external
+  endTime: String! @external
+  snapshot: String! @external
+}
+
+type AdditionalParamsType {
+  anonSubs: Boolean! @external
+  visibleVotes: Boolean! @external
+}
+
+type Space @key(fields: "id") {
   id: ID!
 }
 
@@ -17,8 +36,10 @@ type Submission @key(fields: "id") {
   created: String!
   type: String!
   version: String!
-  author: String!
+  author: String
   url: String!
+  totalVotes: Decimal
+  rank: Int
 }
 
 type PopularSubmission @key(fields: "id") {
@@ -87,7 +108,6 @@ input SubmissionPayload {
   body: EditorData
 }
 
-
 input ThreadPayload {
   text: String
   previewAsset: SubmissionAssetUrl
@@ -115,5 +135,5 @@ type Mutation {
 extend schema
   @link(
     url: "https://specs.apollo.dev/federation/v2.0"
-    import: ["@key", "@shareable"]
+    import: ["@key", "@shareable", "@external", "@requires"]
   )

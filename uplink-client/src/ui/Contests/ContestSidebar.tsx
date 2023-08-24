@@ -15,7 +15,7 @@ import {
   HiSparkles,
   HiQuestionMarkCircle,
 } from "react-icons/hi2";
-import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import useTrackSubmissions from "@/hooks/useTrackSubmissions";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "../ConnectButton/ConnectButton";
@@ -28,6 +28,11 @@ import { ThreadItem } from "@/hooks/useThreadCreator";
 import { nanoid } from "nanoid";
 import CreateContestTweet from "../ContestForm/CreateContestTweet";
 import { OutputData } from "@editorjs/editorjs";
+import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
+import formatDecimal from "@/lib/formatDecimal";
+import { useRouter } from "next/navigation";
+import Vote from "./Vote";
+import SidebarVote from "./Vote";
 /**
  *
  * the standard sidebar for the main contest view
@@ -183,6 +188,9 @@ const Closed = ({
   voterRewards: any;
   openRewardsModal: () => void;
 }) => {
+  const { downloadGnosisResults, downloadUtopiaResults } =
+    useContestInteractionState();
+  const [downloadClicked, setDownloadClicked] = useState(false);
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
       <ContestRewards
@@ -196,7 +204,36 @@ const Closed = ({
         </div>
 
         <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-          <button className="btn btn-outline">Download Winners</button>
+          {!downloadClicked && (
+            <button
+              className="btn btn-primary normal-case"
+              onClick={() => setDownloadClicked(true)}
+            >
+              Download Winners
+            </button>
+          )}
+          {downloadClicked && (
+            <div className="flex gap-2 items-center">
+              <button
+                className="btn btn-md btn-outline btn-primary normal-case"
+                onClick={downloadGnosisResults}
+              >
+                Gnosis
+              </button>
+              <button
+                className="btn btn-md btn-outline btn-secondary normal-case"
+                onClick={downloadUtopiaResults}
+              >
+                Utopia
+              </button>
+              <button
+                className="btn btn-ghost btn-sm text-t2"
+                onClick={() => setDownloadClicked(false)}
+              >
+                <HiXCircle className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -237,378 +274,6 @@ const Submitting = ({
   );
 };
 
-const VoterTabBar = ({
-  handleTabClick,
-  isVotingCartVisible,
-  setIsVotingCartVisible,
-  proposedSelection,
-}: {
-  handleTabClick: (tab: string) => void;
-  isVotingCartVisible: boolean;
-  setIsVotingCartVisible: (visible: boolean) => void;
-  proposedSelection: any[];
-}) => {
-  return (
-    <div className="tabs w-full">
-      <a
-        className={`tab tab-md font-bold indicator indicator-secondary ${
-          isVotingCartVisible ? "tab-active" : ""
-        }`}
-        onClick={() => handleTabClick("votes")}
-      >
-        My Selections
-        {proposedSelection.length > 0 && (
-          <span className="indicator-item badge badge-secondary">
-            {proposedSelection.length}
-          </span>
-        )}
-      </a>
-
-      {isVotingCartVisible && (
-        <a
-          className="tab tab-md font-bold"
-          onClick={() => setIsVotingCartVisible(false)}
-        >
-          <HiXCircle className="w-5 h-5" />
-        </a>
-      )}
-    </div>
-  );
-};
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.5 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-};
-
-const VoteTab = ({
-  contestId,
-  editMode,
-  proposedSelection,
-  renderEditButton,
-  openVotingPolicyModal,
-}: {
-  contestId: string;
-  editMode: boolean;
-  proposedSelection: any[];
-  renderEditButton: () => React.ReactNode;
-  openVotingPolicyModal: () => void;
-}) => {
-  const { userVotingState, removeAllVotes } = useVoteProposalContext();
-  const {
-    currentVotes,
-    proposedUserVotes,
-    totalVotingPower,
-    votesSpent,
-    votesRemaining,
-  } = userVotingState;
-  const { liveSubmissions } = useTrackSubmissions(contestId);
-
-  const [votesSpentColor, setVotesSpentColor] = useState("");
-  const [votesRemainingColor, setVotesRemainingColor] = useState("");
-
-  /*
-
-  some color fun
-
-
-
-  const [prevVotesSpent, setPrevVotesSpent] = useState(votesSpent);
-  const [prevVotesRemaining, setPrevVotesRemaining] = useState(votesRemaining);
-
-  useEffect(() => {
-    if (votesSpent > prevVotesSpent) {
-      setVotesSpentColor("text-green-400"); // green for increase
-    } else if (votesSpent < prevVotesSpent) {
-      setVotesSpentColor("text-red-400"); // red for decrease
-    }
-    setPrevVotesSpent(votesSpent);
-
-    // clear color after 1 second
-    const timeoutId = setTimeout(() => setVotesSpentColor(""), 1000);
-    return () => clearTimeout(timeoutId);
-  }, [votesSpent]);
-
-  useEffect(() => {
-    if (votesRemaining > prevVotesRemaining) {
-      setVotesRemainingColor("text-green-400"); // green for increase
-    } else if (votesRemaining < prevVotesRemaining) {
-      setVotesRemainingColor("text-red-400"); // red for decrease
-    }
-    setPrevVotesRemaining(votesRemaining);
-
-    // clear color after 1 second
-    const timeoutId = setTimeout(() => setVotesRemainingColor(""), 1000);
-    return () => clearTimeout(timeoutId);
-  }, [votesRemaining]);
-
-*/
-
-  return (
-    <>
-      <motion.div
-        className="container"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {proposedUserVotes.length > 0 && (
-          <div className="flex flex-row w-full justify-end items-center p-2">
-            <button className="btn btn-sm btn-ghost" onClick={removeAllVotes}>
-              remove all
-            </button>
-          </div>
-        )}
-        {currentVotes.length > 0 && (
-          <motion.div
-            className="flex flex-col gap-4 p-2 m-2 max-h-80 overflow-y-auto bg-neutral rounded-lg"
-            variants={itemVariants}
-          >
-            <div className="flex flex-row w-full justify-between items-center">
-              <p className="">Your current selections</p>
-              {renderEditButton()}
-            </div>
-            <div className="flex flex-col gap-2 transition-opacity">
-              {currentVotes.map((submission: any, idx: number) => {
-                if (editMode) {
-                  return (
-                    <SubmissionCardVote
-                      key={idx}
-                      mode={"current"}
-                      submission={{
-                        ...submission,
-                        data: liveSubmissions.find(
-                          (el) => el.id === submission.submissionId
-                        ).data,
-                      }}
-                    />
-                  );
-                } else {
-                  return (
-                    <LockedCardVote
-                      key={idx}
-                      submission={{
-                        ...submission,
-                        data: liveSubmissions.find(
-                          (el) => el.id === submission.submissionId
-                        ).data,
-                      }}
-                    />
-                  );
-                }
-              })}
-            </div>
-          </motion.div>
-        )}
-
-        {proposedUserVotes.length > 0 && (
-          <motion.div variants={itemVariants}>
-            <div className="flex flex-row w-full justify-start items-center p-2">
-              <p className="">+ Your proposed additions</p>
-            </div>
-            <div className="flex flex-col gap-4 p-2 max-h-80 overflow-y-auto">
-              {proposedUserVotes.map((submission: any, idx: number) => (
-                <SubmissionCardVote
-                  key={idx}
-                  submission={submission}
-                  mode={"proposed"}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {proposedUserVotes.length === 0 && currentVotes.length === 0 && (
-          <motion.div variants={itemVariants}>
-            <div className="p-10"></div>
-            <div className="relative flex flex-col items-center justify-center w-full">
-              <HiSparkles className="absolute top-0 right-28 w-6 h-6 text-accent" />
-              <HiSparkles className="absolute top-32 left-28 w-6 h-6 text-accent" />
-              <div className="relative flex flex-col items-center justify-center w-36 h-36 bg-base-100 rounded-xl">
-                <HiPhoto className="w-24 h-24" />
-                <div className="space-y-2 w-full">
-                  <div className="h-3 w-1/3 rounded-lg bg-gray-500 shimmer ml-2" />
-                  <div className="h-2 w-1/2 rounded-lg bg-gray-500 shimmer ml-2" />
-                </div>
-                <HiPlus className="absolute bottom-0 right-0 w-6 h-6 ml-auto m-2 text-accent" />
-              </div>
-              <div className="p-4"></div>
-              <h1>No entries selected</h1>
-              <p className="text-center">
-                Select entries by clicking the plus sign in the bottom right
-                corner.
-              </p>
-            </div>
-            <div className="p-10"></div>
-          </motion.div>
-        )}
-
-        <motion.div className="flex flex-col gap-2 p-2" variants={itemVariants}>
-          <div className="grid grid-cols-3 justify-items-center justify-evenly gap-4 font-bold text-center">
-            {/*
-            <p>Voting Power</p>
-            <p>Votes Spent</p>
-            <p>Votes Remaining</p>
-            <p>{totalVotingPower}</p>
-            <p className={votesSpentColor}>{votesSpent}</p>
-            <p className={votesRemainingColor}>{votesRemaining}</p>
-        */}
-
-            <div className="flex flex-col items-center p-2 bg-base-100 w-full rounded">
-              <p className="text-sm text-gray-500">Voting Power</p>
-              <p>{totalVotingPower}</p>
-            </div>
-            <div className="flex flex-col items-center p-2 bg-base-100 w-full rounded">
-              <p className="text-sm text-gray-500">Spent</p>
-              <p className={votesSpentColor}>{votesSpent}</p>
-            </div>
-            <div className="flex flex-col items-center p-2 bg-base-100 w-full rounded">
-              <p className="text-sm text-gray-500">Remaining</p>
-              <p className={votesRemainingColor}>{votesRemaining}</p>
-            </div>
-          </div>
-          <div className="flex gap-2 items-center justify-center bg-base-100 p-2 rounded text-gray-500">
-            <a
-              className="underline cursor-pointer hover:text-gray-400"
-              onClick={openVotingPolicyModal}
-            >
-              How is voting power calculated?
-            </a>
-          </div>
-        </motion.div>
-      </motion.div>
-    </>
-  );
-};
-
-export function VoterCart({
-  contestId,
-  voterRewards,
-  votingPolicy,
-  openRewardsModal,
-  openVotingPolicyModal,
-}: {
-  contestId: string;
-  voterRewards: any;
-  votingPolicy: any;
-  openRewardsModal: () => void;
-  openVotingPolicyModal: () => void;
-}) {
-  const [activeTab, setActiveTab] = useState("votes");
-  const [editMode, setEditMode] = useState(false);
-  const [proposedSelection, setProposedSelection] = useState<any>([]);
-  const [isVotingCartVisible, setIsVotingCartVisible] = useState(true);
-  const [collapsed, setCollapsed] = useState(false);
-
-  const { userVotingState } = useVoteProposalContext();
-
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
-    if (tab === "votes" && !isVotingCartVisible) {
-      setIsVotingCartVisible(true);
-    }
-  };
-
-  const handleEditClick = () => {
-    setEditMode(true);
-    setCollapsed(false);
-  };
-
-  const handleCancelClick = () => {
-    setEditMode(false);
-  };
-
-  const handleCollapseClick = () => {
-    setCollapsed(!collapsed);
-    setEditMode(false);
-  };
-
-  const renderEditButton = () => {
-    if (editMode) {
-      return (
-        <button className="btn btn-sm btn-ghost" onClick={handleCancelClick}>
-          <HiLockOpen className="w-4 h-4" />
-        </button>
-      );
-    } else {
-      return (
-        <button className="btn btn-sm btn-ghost" onClick={handleEditClick}>
-          <HiLockClosed className="w-4 h-4 mr-2" />
-          Edit
-        </button>
-      );
-    }
-  };
-
-  if (userVotingState.isLoading) return <p>Loading ...</p>;
-
-  return (
-    <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
-      <ContestRewards
-        voterRewards={voterRewards}
-        openRewardsModal={openRewardsModal}
-      />
-      <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
-        <VoterTabBar
-          handleTabClick={handleTabClick}
-          isVotingCartVisible={isVotingCartVisible}
-          setIsVotingCartVisible={setIsVotingCartVisible}
-          proposedSelection={proposedSelection}
-        />
-        <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
-          {isVotingCartVisible && (
-            <>
-              <VoteTab
-                contestId={contestId}
-                editMode={editMode}
-                proposedSelection={proposedSelection}
-                renderEditButton={renderEditButton}
-                openVotingPolicyModal={openVotingPolicyModal}
-              />
-              <VoteButton />
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function VoteButton() {
-  const { userVotingState, submitVotes, areCurrentVotesDirty } =
-    useVoteProposalContext();
-
-  const { status } = useSession();
-
-  const isVoteButtonEnabled =
-    areCurrentVotesDirty || userVotingState.proposedUserVotes.length > 0;
-
-  const handleSubmit = () => {
-    submitVotes();
-  };
-
-  if (status !== "authenticated") {
-    return <WalletConnectButton />;
-  }
-  return (
-    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-9/10 m-2">
-      <button
-        className="btn btn-secondary flex flex-1"
-        onClick={handleSubmit}
-        disabled={!isVoteButtonEnabled}
-      >
-        Cast Votes
-      </button>
-      <p className="mx-2 p-2 text-center">1 days</p>
-    </div>
-  );
-}
-
 // Helper function to process rewards
 interface TokenReward {
   amount: string;
@@ -642,7 +307,7 @@ function processRewards(rewards: Reward[]): Record<string, Decimal> {
   return rewardSummary;
 }
 
-const ContestRewards = ({
+export const ContestRewards = ({
   submitterRewards,
   voterRewards,
   openRewardsModal,
@@ -865,69 +530,6 @@ const RewardsModalContent = ({
   );
 };
 
-const VotingPolicyModalContent = ({ votingPolicy }: { votingPolicy: any }) => {
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-1 italic text-md border border-gray-600 p-2 rounded">
-        <p>strategy types:</p>
-
-        <p>arcade = uniform voting power for all token holders</p>
-        <p>weighted = voting power corresponds to user token balance</p>
-      </div>
-      <div className="grid grid-cols-2">
-        {votingPolicy.map((el, index) => {
-          const strategyType = el.strategyType;
-          const objectReference =
-            strategyType === "arcade"
-              ? el.arcadeVotingPolicy
-              : el.weightedVotingPolicy;
-          return (
-            <div
-              key={index}
-              className="flex flex-col gap-1 bg-base-100 p-2 rounded"
-            >
-              <div className="badge badge-secondary">{index + 1}</div>
-              <p>
-                <a className="font-bold">strategy type: </a> {strategyType}
-              </p>
-              <p>
-                <a className="font-bold">symbol: </a>
-                <a
-                  className={
-                    objectReference.token.symbol === "ETH"
-                      ? ""
-                      : "underline cursor-pointer hover:text-gray-300"
-                  }
-                  onClick={
-                    objectReference.token.symbol === "ETH"
-                      ? () => {}
-                      : () => {
-                          window.open(
-                            `https://etherscan.io/token/${objectReference.token.address}`,
-                            "_blank"
-                          );
-                        }
-                  }
-                >
-                  {" "}
-                  {objectReference.token.symbol}
-                </a>
-                {strategyType === "arcade" && (
-                  <p>
-                    <a className="font-bold">Voting Power: </a>
-                    {objectReference.votingPower.toString()}
-                  </p>
-                )}
-              </p>
-              <p></p>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
 const ContestSidebar = ({
   spaceName,
   contestId,
@@ -952,7 +554,7 @@ const ContestSidebar = ({
   votingPolicy: any;
 }) => {
   const { contestState, stateRemainingTime, type, tweetId } = useContestState();
-  const { userVotingState } = useVoteProposalContext();
+  const { areUserVotingParamsLoading } = useContestInteractionState();
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
   const [isVotingPolicyModalOpen, setIsVotingPolicyModalOpen] = useState(false);
   const openRewardsModal = () => {
@@ -986,15 +588,19 @@ const ContestSidebar = ({
           openRewardsModal={openRewardsModal}
         />
       )}
-      {contestState === "voting" && !userVotingState.isLoading && (
-        <VoterCart
-          contestId={contestId}
-          voterRewards={voterRewards}
-          votingPolicy={votingPolicy}
-          openRewardsModal={openRewardsModal}
-          openVotingPolicyModal={openVotingPolicyModal}
-        />
-      )}
+      {contestState === "voting" &&
+        (areUserVotingParamsLoading ? (
+          <SidebarSkeleton />
+        ) : (
+          <SidebarVote
+            spaceName={spaceName}
+            contestId={contestId}
+            voterRewards={voterRewards}
+            votingPolicy={votingPolicy}
+            openRewardsModal={openRewardsModal}
+            openVotingPolicyModal={openVotingPolicyModal}
+          />
+        ))}
       {contestState === "closed" && (
         <Closed
           submitterRewards={submitterRewards}
@@ -1012,14 +618,6 @@ const ContestSidebar = ({
           submitterRewards={submitterRewards}
           voterRewards={voterRewards}
         />
-      </Modal>
-      <Modal
-        isModalOpen={isVotingPolicyModalOpen}
-        onClose={() => {
-          setIsVotingPolicyModalOpen(false);
-        }}
-      >
-        <VotingPolicyModalContent votingPolicy={votingPolicy} />
       </Modal>
     </>
   );

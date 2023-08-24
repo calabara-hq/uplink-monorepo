@@ -8,6 +8,12 @@ import graphqlClient from "@/lib/graphql/initUrql";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import { useContestInteractionState } from "./ContestInteractionProvider";
 
+
+
+// inherit voting params from contest interaction provider
+// provide an API for managing user votes
+
+
 export interface VotingStateProps {
   userVotingState: {
     currentVotes: any[];
@@ -289,7 +295,7 @@ export const VoteProposalProvider = ({
   );
 };
 
-export function useVoteProposalContext() {
+export function useVoteActionContext() {
   const context = useContext(VoteProposalContext);
   if (context === undefined) {
     throw new Error("useVotingState must be used within a VotingStateProvider");

@@ -190,7 +190,7 @@ const queries = {
     Contest: {
         space: async (contest) => {
             return { id: contest.spaceId };
-        }
+        },
     },
 
     ActiveContest: {
