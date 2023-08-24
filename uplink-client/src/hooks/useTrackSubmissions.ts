@@ -19,6 +19,7 @@ const getSubmissions = async (contestId: string) => {
                   id
                   contestId
                   author
+                  totalVotes
                   created
                   type
                   url
@@ -44,28 +45,9 @@ const getSubmissions = async (contestId: string) => {
     return data;
 };
 
-// const getSubmissions = async (contestId: string) => {
-//     // hit graphql endpoint
-//     // return submissions
-//     // fetch the submission data for each returned sub
-
-//     const response = await graphqlClient.query(ContestSubmissionsDocument, { contestId })
-//         .toPromise()
-//         .then(res => res.data.contest.submissions)
-//         .then(async submissions => {
-//             return await Promise.all(submissions.map(async (submission, idx) => {
-//                 const data = await fetchSubmissionData(submission.url)
-//                 return { ...submission, data: data } 
-//         }))})
-//         .catch(e => {
-//             console.log(e);
-//             return []
-//         })
-//     return response
-// }
-
 const useTrackSubmissions = (contestId: string) => {
-    const { data: liveSubmissions, isLoading, error }: { data: any, isLoading: boolean, error: any } = useSWR(`/ipfs/submissions/${contestId}`, () => getSubmissions(contestId), { refreshInterval: 10000 })
+    const { data: liveSubmissions, isLoading, error }: { data: any, isLoading: boolean, error: any } = useSWR(`submissions/${contestId}`, () => getSubmissions(contestId), { refreshInterval: 10000 })
+    //const {data: contestResults, isLoading: areContestResultsLoading, error: contestResultsError} = useSWR(`contestResults/${contestId}`, () => getContestResults(contestId))
 
     return { liveSubmissions, isLoading, error }
 }

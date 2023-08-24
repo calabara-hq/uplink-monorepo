@@ -207,6 +207,7 @@ export const contestsRelations = relations(contests, ({ many }) => ({
     submitterRestrictions: many(submitterRestrictions),
     votingPolicy: many(votingPolicy),
     submissions: many(submissions),
+    votes: many(votes),
     scheduledTweets: many(tweetQueue),
 }));
 
@@ -231,8 +232,6 @@ export const submitterRestrictionsRelations = relations(submitterRestrictions, (
         references: [tokenRestrictions.restrictionId]
     })
 }));
-
-
 
 export const spaceTokensRelations = relations(spaceTokens, ({ one }) => ({
     space: one(spaces, {
@@ -271,7 +270,6 @@ export const tokenRestrictionsRelations = relations(tokenRestrictions, ({ one })
     }),
 }));
 
-
 export const votingPolicyRelations = relations(votingPolicy, ({ one }) => ({
     contest: one(contests, {
         fields: [votingPolicy.contestId],
@@ -309,14 +307,23 @@ export const arcadeVotingStrategyRelations = relations(arcadeVotingStrategy, ({ 
     }),
 }));
 
-export const submissionsRelations = relations(submissions, ({ one }) => ({
+export const submissionsRelations = relations(submissions, ({ one, many }) => ({
     contest: one(contests, {
         fields: [submissions.contestId],
         references: [contests.id],
     }),
-    votes: one(votes, {
-        fields: [submissions.id],
-        references: [votes.submissionId],
+    votes: many(votes),
+}));
+
+
+export const votesRelations = relations(votes, ({ one }) => ({
+    contest: one(contests, {
+        fields: [votes.contestId],
+        references: [contests.id],
+    }),
+    submission: one(submissions, {
+        fields: [votes.submissionId],
+        references: [submissions.id],
     }),
 }));
 

@@ -31,11 +31,12 @@ input AdditionalParams
 
 type AdditionalParamsType
   @join__type(graph: CONTESTS)
+  @join__type(graph: SUBMIT)
 {
-  anonSubs: Boolean!
-  visibleVotes: Boolean!
-  selfVote: Boolean!
-  subLimit: Int!
+  anonSubs: Boolean! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  visibleVotes: Boolean! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  selfVote: Boolean! @join__field(graph: CONTESTS)
+  subLimit: Int! @join__field(graph: CONTESTS)
 }
 
 type Admin
@@ -70,22 +71,24 @@ type CastVoteResponse
 
 type Contest
   @join__type(graph: CONTESTS, key: "id")
-  @join__type(graph: SUBMIT, key: "id")
+  @join__type(graph: SUBMIT, key: "id", extension: true)
 {
   id: ID!
   spaceId: ID! @join__field(graph: CONTESTS)
   space: SpaceStub! @join__field(graph: CONTESTS)
   created: String! @join__field(graph: CONTESTS)
   metadata: MetadataType! @join__field(graph: CONTESTS)
-  deadlines: DeadlinesType! @join__field(graph: CONTESTS)
+  deadlines: DeadlinesType! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
   promptUrl: IpfsUrl! @join__field(graph: CONTESTS)
   submitterRewards: [RewardType!]! @join__field(graph: CONTESTS)
   voterRewards: [RewardType!]! @join__field(graph: CONTESTS)
   submitterRestrictions: [SubmitterRestrictionType!]! @join__field(graph: CONTESTS)
   votingPolicy: [VotingPolicyType!]! @join__field(graph: CONTESTS)
-  additionalParams: AdditionalParamsType! @join__field(graph: CONTESTS)
+  additionalParams: AdditionalParamsType! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
   tweetId: String @join__field(graph: CONTESTS)
-  submissions: [Submission!]! @join__field(graph: SUBMIT)
+  submissions: [Submission!]! @join__field(graph: SUBMIT, requires: "deadlines {startTime, voteTime, endTime, snapshot}, additionalParams {anonSubs, visibleVotes}")
+  gnosisResults: String @join__field(graph: SUBMIT, requires: "deadlines {endTime}")
+  utopiaResults: String @join__field(graph: SUBMIT, requires: "deadlines {endTime}")
 }
 
 input ContestBuilderProps
@@ -156,11 +159,12 @@ input Deadlines
 
 type DeadlinesType
   @join__type(graph: CONTESTS)
+  @join__type(graph: SUBMIT)
 {
-  startTime: String!
-  voteTime: String!
-  endTime: String!
-  snapshot: String!
+  startTime: String! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  voteTime: String! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  endTime: String! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  snapshot: String! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
 }
 
 scalar Decimal
@@ -478,8 +482,10 @@ type Submission
   created: String!
   type: String!
   version: String!
-  author: String!
+  author: String
   url: String!
+  totalVotes: Decimal
+  rank: Int
 }
 
 scalar SubmissionAssetUrl

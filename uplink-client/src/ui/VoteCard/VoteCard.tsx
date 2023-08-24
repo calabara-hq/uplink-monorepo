@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import { HiTrash, HiDocumentText } from "react-icons/hi2";
-import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+import { useVoteActionContext } from "@/providers/VoteActionProvider";
+import formatDecimal from "@/lib/formatDecimal";
 
 const SubmissionVoteInput = ({
   submission,
@@ -13,7 +14,7 @@ const SubmissionVoteInput = ({
   mode: "current" | "proposed";
 }) => {
   console.log(submission);
-  const { updateVoteAmount } = useVoteProposalContext();
+  const { updateVoteAmount } = useVoteActionContext();
 
   return (
     <input
@@ -38,7 +39,7 @@ const SubmissionVoteTrash = ({
   submission: any;
   mode: "current" | "proposed";
 }) => {
-  const { removeSingleVote } = useVoteProposalContext();
+  const { removeSingleVote } = useVoteActionContext();
 
   return (
     <div
@@ -103,7 +104,7 @@ const CartTextSubmission = ({ submission }: { submission: any }) => {
 };
 
 export function LockedCardVote({ submission }: { submission: any }) {
-  console.log("rendering locked card with sub", submission);
+  const displayableVotes = formatDecimal(submission.votes);
   return (
     <div
       className="flex flex-row w-full h-16 min-h-16 bg-base-100 rounded-xl
@@ -121,7 +122,7 @@ export function LockedCardVote({ submission }: { submission: any }) {
         </h2>
         {/*<SubmissionVoteInput submission={submission} mode={mode} />*/}
         <div className="flex flex-col items-center justify-center ml-auto gap-1 px-2">
-          <p>{submission.votes}</p>
+          <p>{displayableVotes.short}</p>
         </div>
       </div>
     </div>

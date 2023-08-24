@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 
 export const SubmissionTypeBadge = ({
@@ -32,7 +32,7 @@ export const SubmissionVotesBadge = ({}) => {
 };
 
 export const UserSubmissionSelectBadge = ({ submission }) => {
-  const { addProposedVote, userVotingState } = useVoteProposalContext();
+  const { addProposedVote, userVotingState } = useVoteActionContext();
   const [isSelected, setIsSelected] = useState(false);
 
   useEffect(() => {

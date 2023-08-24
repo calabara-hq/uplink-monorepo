@@ -1,9 +1,9 @@
 "use client";
 
-import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+import { useVoteActionContext } from "@/providers/VoteActionProvider";
 
 const SubmissionVoteButton = ({ submission }: { submission: any }) => {
-  const { addProposedVote } = useVoteProposalContext();
+  const { addProposedVote } = useVoteActionContext();
   return (
     <div>
       <button

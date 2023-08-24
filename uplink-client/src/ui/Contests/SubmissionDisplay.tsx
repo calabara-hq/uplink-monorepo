@@ -4,9 +4,10 @@ import VideoPreview from "../VideoPlayer/VideoPlayer";
 import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import SubmissionVoteButton from "./SubmissionVoteButton";
 import useTrackSubmissions from "@/hooks/useTrackSubmissions";
+import { Decimal } from "decimal.js";
 import Output from "editorjs-react-renderer";
 import {
   MediaController,
@@ -23,10 +24,11 @@ import Link from "next/link";
 import SubmissionViewer from "../SubmissionViewer/SubmissionViewer2";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 import { Submission } from "@/providers/ContestInteractionProvider";
+import { useContestState } from "@/providers/ContestStateProvider";
+import { BiBadge } from "react-icons/bi";
+import { FaBurst } from "react-icons/fa6";
 
 const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
-  // init useSWR here
-
   const { submissions } = useContestInteractionState();
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -45,11 +47,24 @@ const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
 
 const SubmissionCard = ({ submission }: { submission: Submission }) => {
   const pathname = usePathname();
+
   return (
     <Link
-      className="card card-compact cursor-pointer border border-border rounded-xl bg-base-100"
+      className={`relative card card-compact cursor-pointer border ${
+        submission.rank ? "border-yellow-600" : "border-border"
+      } border-border rounded-xl bg-base-100`}
       href={`${pathname}/submission/${submission.id}`}
     >
+      {submission.rank && (
+        <span className="absolute flex items-center justify-center -top-0 -right-0 z-10 ">
+          <div className="relative">
+            <FaBurst className="w-10 h-10 absolute text-yellow-400 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            <p className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black font-bold text-xl">
+              {submission.rank}
+            </p>
+          </div>
+        </span>
+      )}
       {submission.data.type === "video" && (
         <>
           <RenderVideoSubmission submission={submission} />
@@ -92,23 +107,23 @@ const SubmissionBody = ({ submission }) => {
   return (
     <div className="card-body h-24 rounded-b-xl w-full">
       <h2 className="card-title">{submission.data.title}</h2>
-      <h3>{submission.data.author}</h3>
+      <h3>{submission.data.author ?? "anonymous"}</h3>
     </div>
   );
 };
 
 const SubmissionFooter = ({ submission }) => {
-  const { addProposedVote, userVotingState } = useVoteProposalContext();
+  const { addProposedVote, currentVotes, proposedVotes } =
+    useVoteActionContext();
   const [isSelected, setIsSelected] = useState(false);
 
   useEffect(() => {
     setIsSelected(
-      [
-        ...userVotingState.currentVotes,
-        ...userVotingState.proposedUserVotes,
-      ].some((vote) => vote.submissionId === submission.id)
+      [...currentVotes, ...proposedVotes].some(
+        (vote) => vote.submissionId === submission.id
+      )
     );
-  }, [userVotingState, submission.id]);
+  }, [currentVotes, proposedVotes, submission.id]);
 
   const handleSelect = () => {
     if (!isSelected) {
@@ -122,17 +137,22 @@ const SubmissionFooter = ({ submission }) => {
     visible: { opacity: 1 },
   };
 
+  console.log(submission);
+
   return (
     <div className="grid grid-cols-3 w-full gap-6">
       <div className="flex items-center justify-center">
         <SubmissionTypeBadge type={submission.data.type} />
       </div>
-      <div className="flex items-center justify-center">
-        <div className="badge rounded badge-outline badge-warning">
-          {submission.votes} votes
+      {new Decimal(submission.totalVotes ?? "0").greaterThan(0) ? (
+        <div className="flex items-center justify-center">
+          <div className="badge rounded badge-outline badge-warning">
+            {submission.totalVotes} votes
+          </div>
         </div>
-      </div>
-
+      ) : (
+        <span /> // placeholder
+      )}
       <div
         className="flex items-center justify-center lg:tooltip"
         data-tip={isSelected ? "item is in your cart" : "add to cart"}
@@ -156,7 +176,7 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
   return (
     <div className="card-body h-64 bg-white/90 rounded-xl text-black/80 gap-1 w-full overflow-auto">
       <h2 className="break-all font-bold text-2xl">{submission.data.title}</h2>
-      <h3 className="break-all italic">{submission.author}</h3>
+      <h3 className="break-all italic">{submission.author ?? "anonymous"} </h3>
       <section className="break-all">
         {submission.type === "twitter" ? (
           <p>{submission.data.thread[0].text}</p>
