@@ -22,7 +22,8 @@ const getSpaces = async () => {
     }`,
     }),
     next: { tags: ["spaces"], revalidate: 60 },
-  }).then((res) => res.json());
+  }).then((res) => res.json())
+  .then(res => res.data.spaces)
   return data;
 };
 
@@ -51,40 +52,41 @@ export default async function Page() {
 }
 
 
-function AllSpaces({ spaces }: any) {
+export function AllSpaces({ spaces }: any) {
   
   return (
     <div
       className="grid gap-12 py-6
-      grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-2/3 md:w-10/12 lg:w-full mr-auto ml-auto"
+      grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-2/3 md:w-10/12 lg:w-full mr-auto ml-auto "
     >
-      {spaces.data.spaces.map((space: any, index: number) => {
+      {spaces.map((space: any, index: number) => {
         return (
           <div
             key={index}
-            className="card card-compact rounded-xl bg-base-100 border border-border"
+            className="card card-compact rounded-xl bg-base-100 border border-border overflow-hidden "
           >
             <Link
               href={`${space.name}`}
               prefetch={false}
-              className="relative h-56 transition-all duration-150 ease-linear
-              cursor-pointer hover:scale-105 rounded-3xl"
+              className="relative h-56  rounded-3xl transition-all duration-150 ease-linear transform-gpu hover:scale-105"
             >
               <Image
                 src={space.logoUrl}
                 alt="space logo"
                 fill
-                className="rounded-xl object-cover w-full"
+                className="rounded-t-xl object-cover w-full "
               />
             </Link>
-            <div className="card-body h-fit rounded-b-xl w-full">
-              <div>
+            <div className="card-body h-fit rounded-b-xl">
+              <div className="">
                 <Link
                   prefetch={false}
                   href={`${space.name}`}
-                  className="card-title text-2xl hover:text-white"
+                  className={`card-title hover:text-white ${
+                    space.name.length > 25 ? 'text-xl' : 'text-2xl'
+                  } w-full `}
                 >
-                  {space.name}
+                  <p className="w-full truncate">{space.name}</p>
                 </Link>
                 {/* TODO: will be added in a future release 
                 <div className="flex items-center w-fit gap-1">
@@ -102,3 +104,5 @@ function AllSpaces({ spaces }: any) {
     </div>
   );
 }
+
+
