@@ -69,7 +69,8 @@ export const dbSingleContestById = db.query.contests.findFirst({
 const dbMultiContestsBySpaceId = db.query.contests.findMany({
     where: (contest) => sqlOps.eq(contest.spaceId, sqlOps.placeholder('spaceId')),
     with: dbWith,
-    extras: dbExtras
+    extras: dbExtras,
+    orderBy: sqlOps.desc(schema.contests.created),
 }).prepare();
 
 

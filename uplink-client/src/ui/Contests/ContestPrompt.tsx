@@ -17,14 +17,11 @@ const Prompt = async ({
   promptUrl: string;
   tweetId: string | null;
 }) => {
-  console.log("contest tweet ID is ", tweetId);
   const { contestState: status } = calculateContestStatus(
     deadlines,
     metadata.type,
     tweetId
   );
-
-  console.log(status);
 
   const prompt = await fetch(promptUrl).then((res) => res.json());
 

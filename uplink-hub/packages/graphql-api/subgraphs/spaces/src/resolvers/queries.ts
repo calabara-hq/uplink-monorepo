@@ -50,7 +50,6 @@ const queries = {
 
     Space: {
         async __resolveReference(space) {
-            console.log(space)
             const data = await singleSpaceById.execute({ id: space.id });
             return data;
         },
@@ -58,7 +57,6 @@ const queries = {
 
     SpaceStub: {
         async __resolveReference(space) {
-            console.log(space)
             const data = await singleSpaceById.execute({ id: space.id });
             return data;
         },

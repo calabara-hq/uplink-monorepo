@@ -244,8 +244,6 @@ type SessionProviderProps = {
 };
 
 export function SessionProvider(props: SessionProviderProps) {
-  console.log("initializing session provider");
-  console.log(props);
   const { children, refetchInterval, refetchWhenOffline } = props;
 
   const hasInitialSession = props.session !== undefined;
@@ -262,7 +260,6 @@ export function SessionProvider(props: SessionProviderProps) {
 
   // on initial mount
   useEffect(() => {
-    console.log("got initial mount, initializing get session");
     _SessionStore._getSession = async ({ event } = {}) => {
       try {
         const storageEvent = event === "storage";
@@ -341,7 +338,6 @@ export function SessionProvider(props: SessionProviderProps) {
     // this feature is not disabled.
     const visibilityHandler = () => {
       if (refetchOnWindowFocus && document.visibilityState === "visible") {
-        console.log("refetching on window focus");
         _SessionStore._getSession({ event: "visibilitychange" });
       }
     };
@@ -358,18 +354,13 @@ export function SessionProvider(props: SessionProviderProps) {
   const shouldRefetch = refetchWhenOffline !== false || isOnline;
 
   useEffect(() => {
-    console.log("refetch effect called");
-    console.log(refetchInterval, shouldRefetch);
     if (refetchInterval && shouldRefetch) {
-      console.log("inside refetch interval");
       const refetchIntervalTimer = setInterval(() => {
         if (_SessionStore._session) {
-          console.log("refetching session");
           _SessionStore._getSession({ event: "poll" });
         }
       }, refetchInterval * 1000);
       return () => {
-        console.log("clearing interval on unmount");
         clearInterval(refetchIntervalTimer);
       };
     }
