@@ -30,14 +30,17 @@ import { FaBurst } from "react-icons/fa6";
 
 const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
   const { submissions } = useContestInteractionState();
+  const { addProposedVote, currentVotes, proposedVotes } =
+  useVoteActionContext();
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <SubmissionViewer />
       <h1 className="text-xl lg:text-3xl text-center font-bold">Submissions</h1>
       <div className="flex w-full justify-evenly items-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-full w-full">
+        <div className="grid auto-rows-fr grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-full w-full">
           {submissions.map((submission, idx) => {
-            return <SubmissionCard submission={submission} key={idx} />;
+          return <SubmissionCard submission={submission} key={idx} addProposedVote={addProposedVote} currentVotes={currentVotes} proposedVotes={proposedVotes} />;
           })}
         </div>
       </div>
@@ -45,7 +48,7 @@ const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
   );
 };
 
-const SubmissionCard = ({ submission }: { submission: Submission }) => {
+export const SubmissionCard = ({ submission, addProposedVote, currentVotes, proposedVotes  }: { submission: Submission, addProposedVote: any, currentVotes: any, proposedVotes: any   }) => {
   const pathname = usePathname();
 
   return (
@@ -80,7 +83,7 @@ const SubmissionCard = ({ submission }: { submission: Submission }) => {
       {submission.data.type === "text" && (
         <RenderTextSubmission submission={submission} />
       )}
-      <SubmissionFooter submission={submission} />
+      <SubmissionFooter submission={submission} addProposedVote={addProposedVote} currentVotes={currentVotes} proposedVotes={proposedVotes}/>
     </Link>
   );
 };
@@ -112,9 +115,7 @@ const SubmissionBody = ({ submission }) => {
   );
 };
 
-const SubmissionFooter = ({ submission }) => {
-  const { addProposedVote, currentVotes, proposedVotes } =
-    useVoteActionContext();
+const SubmissionFooter = ({ submission, addProposedVote, currentVotes, proposedVotes }) => {
   const [isSelected, setIsSelected] = useState(false);
 
   useEffect(() => {
@@ -154,12 +155,12 @@ const SubmissionFooter = ({ submission }) => {
         <span /> // placeholder
       )}
       <div
-        className="flex items-center justify-center lg:tooltip"
+        className="flex items-center justify-center lg:tooltip p-2"
         data-tip={isSelected ? "item is in your cart" : "add to cart"}
       >
         {isSelected && (
-          <button className="btn btn-ghost w-full">
-            <HiCheckBadge className="h-6 w-6 text-border" />
+          <button className="btn btn-ghost cursor-default no-animation w-full">
+            <HiCheckBadge className="h-6 w-6 text-success" />
           </button>
         )}
         {!isSelected && (
@@ -174,12 +175,12 @@ const SubmissionFooter = ({ submission }) => {
 
 const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
   return (
-    <div className="card-body h-64 bg-white/90 rounded-xl text-black/80 gap-1 w-full overflow-auto">
-      <h2 className="break-all font-bold text-2xl">{submission.data.title}</h2>
+    <div className="h-[352px] card-body bg-white/90 rounded-xl text-black/80 gap-1 w-full">
+      <h2 className="break-word font-bold text-2xl">{submission.data.title}</h2>
       <h3 className="break-all italic">{submission.author ?? "anonymous"} </h3>
-      <section className="break-all">
+      <section className="break-word">
         {submission.type === "twitter" ? (
-          <p>{submission.data.thread[0].text}</p>
+          <p className="line-clamp-[8] lg:line-clamp-[12]">{submission.data.thread[0].text}</p>
         ) : (
           <Output data={submission.data.body} />
         )}
