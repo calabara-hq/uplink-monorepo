@@ -1,3 +1,4 @@
+"use client";
 import Output from "editorjs-react-renderer";
 import Image from "next/image";
 import {
@@ -8,53 +9,130 @@ import {
   MediaPlayButton,
   MediaMuteButton,
 } from "media-chrome/dist/react";
+import { Submission } from "@/providers/ContestInteractionProvider";
+import { SubmissionTypeBadge } from "../SubmissionBadges/SubmissionBadges";
+import { BiBorderRadius } from "react-icons/bi";
+// const BigSubmission = ({ submission }: { submission: Submission }) => {
+//   if (submission.data.type === "text") {
+//     return (<div>
+//       <RenderTitle submission={submission} />
+//     <RenderSubmissionBody submission={submission} />
+//     </div>);
+//   }
+//   if (submission.data.type === "image") {
+//     return (
+//       <div>
+//         <RenderBigImageSubmission submission={submission} />
+//         <RenderSubmissionBody submission={submission} />
+//       </div>
+//     );
+//   }
+//   if (submission.data.type === "video") {
+//     return (
+//       <div>
+//         <RenderBigVideoSubmission submission={submission} />
+//         <RenderSubmissionBody submission={submission} />
+//       </div>
+//     );
+//   }
 
-const BigSubmission = ({ submission }: { submission: any }) => {
-  if (submission.type === "text") {
-    return <RenderBigTextSubmission submission={submission} />;
-  }
-  if (submission.type === "image") {
-    return <RenderBigImageSubmission submission={submission} />;
-  }
-  if (submission.type === "video") {
-    return <RenderBigVideoSubmission submission={submission} />;
-  }
+//   return null;
+// };
 
-  return null;
+const BigSubmission = ({ submission }: { submission: Submission }) => {
+  return (
+    <div className="flex flex-col w-full h-full items-center gap-4">
+      <h2 className="text-3xl">{submission.data.title}</h2>
+       <h3 className="lg:text-xl">{submission.author ?? "anonymous"}</h3>
+      {submission.data.type === "video" && (
+        <RenderBigVideoSubmission submission={submission} />
+      )}
+      {submission.data.type === "image" && (
+        <RenderBigImageSubmission submission={submission} />
+      )}
+      <RenderSubmissionBody submission={submission} />
+    </div>
+  );
 };
 
-const RenderBigTextSubmission = ({ submission }: { submission: any }) => {
+const RenderTitle = ({ submission }: { submission: Submission }) => {
   return (
-    <div className="card-body h-64 bg-white/90 rounded-xl text-black/80 gap-1 w-full overflow-auto">
-      <h2 className="break-all font-bold text-2xl">{submission.title}</h2>
-      <h3 className="break-all italic">{submission.author}</h3>
-      <section className="break-all">
-        <Output data={submission.body} />
+    <div className="">
+      <p className="text-3xl">{submission.data.title}</p>
+    </div>
+  );
+};
+
+const RenderSubmissionBody = ({ submission }: { submission: Submission }) => {
+  return (
+    <div className="">
+      <section className="break-word">
+        {submission.type === "twitter" ? (
+          <p className="">{submission.data.thread[0].text}</p>
+        ) : (
+          <Output data={submission.data.body} />
+        )}
       </section>
     </div>
   );
 };
 
-const RenderBigImageSubmission = ({ submission }: { submission: any }) => {
+const RenderBigImageSubmission = ({
+  submission,
+}: {
+  submission: Submission;
+}) => {
+  console.log(submission);
   return (
-    <figure className="relative h-full w-full">
-      <Image
-        src={submission.previewAsset}
+    <div className="relative w-full h-1/2">
+      {/* <Image
+        src={
+          submission.type === "standard"
+            ? submission.data.previewAsset
+            : submission.data.thread[0].previewAsset
+        }
         alt="submission image"
+        style={{width: "50%", height: "auto"}}
+        width={500}
+        height={500}
+        className="rounded-xl "
+      /> 
+      */}
+      <Image
+        src={
+          submission.type === "standard"
+            ? submission.data.previewAsset
+            : submission.data.thread[0].previewAsset
+        }
+        alt="submission image"
+        //style={{borderRadius: "12px"}}
         fill
-        className="rounded-t-xl object-contain w-full"
+        className="rounded-xl object-contain"
       />
-    </figure>
+      
+    </div>
   );
 };
 
-const RenderBigVideoSubmission = ({ submission }: { submission: any }) => {
+const RenderBigVideoSubmission = ({
+  submission,
+}: {
+  submission: Submission;
+}) => {
   return (
     <MediaController className="aspect-video-16:9">
       <video
         slot="media"
-        src={submission.videoAsset}
-        poster={submission.previewAsset}
+        src={
+          submission.type === "twitter"
+            ? submission.data.thread[0].videoAsset
+            : submission.data.videoAsset
+        }
+        poster={
+          submission.type === "twitter"
+            ? submission.data.thread[0].previewAsset
+            : submission.data.previewAsset
+        }
         preload="auto"
         muted
         crossOrigin=""

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { VoteTab } from "@/ui/Contests/Vote";
 import { getContestById } from "../fetchContest";
 import { HiArrowNarrowLeft } from "react-icons/hi";
@@ -23,13 +24,15 @@ export default async function Page({
     tweetId,
   } = await getContestById(params.id);
 
-
   return (
     <div className="w-full flex flex-col items-center justify-center gap-4 ">
-      <button className="btn btn-ghost mr-auto">
+      <Link
+        className="btn btn-ghost mr-auto"
+        href={`/${params.name}/contests/${params.id}`}
+      >
         <HiArrowNarrowLeft className="h-6 w-6 mr-1" />
-        <a href={`/${params.name}/contests/${params.id}`}>Back to Contest</a>
-      </button>
+        Back to Contest
+      </Link>
 
       <div className=" w-full md:w-3/4 lg:w-2/5 flex flex-col items-center justify-center border-2 border-border rounded-lg">
         <VoteTab contestId={params.id} votingPolicy={votingPolicy} />
