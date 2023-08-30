@@ -52,27 +52,35 @@ export const ModalActions = ({
   confirmLabel,
   cancelLabel,
   confirmDisabled,
+  isLoading,
 }: {
   onCancel: () => void;
   onConfirm: () => void;
   confirmLabel: string;
   cancelLabel: string;
   confirmDisabled?: boolean;
+  isLoading?: boolean;
 }) => {
   return (
     <div className="modal-action mt-8">
       <button
         onClick={onCancel}
-        className="btn btn-md btn-ghost lowercase mr-auto"
+        className="btn btn-md btn-ghost normal-case mr-auto"
       >
         {cancelLabel}
       </button>
       <button
         disabled={confirmDisabled}
         onClick={onConfirm}
-        className="btn btn-primary btn-md lowercase"
+        className="btn btn-primary btn-md normal-case"
       >
         {confirmLabel}
+        {isLoading && (
+          <div
+            className="inline-block h-4 w-4 animate-spin rounded-full border-2 ml-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          />
+        )}
       </button>
     </div>
   );

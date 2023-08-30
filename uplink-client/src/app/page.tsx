@@ -8,7 +8,6 @@ import { RenderSubmission } from "@/ui/SubmissionCard/SubmissionCard";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useEffect } from "react";
 
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -43,7 +42,11 @@ const getActiveContests = async () => {
     next: { revalidate: 60 },
   })
     .then((res) => res.json())
-    .then((res) => res.data.activeContests);
+    .then((res) => res.data.activeContests)
+    .catch((err) => {
+      console.log(err);
+      return [];
+    });
   return data;
 };
 
@@ -73,27 +76,31 @@ const getPopularSubmissions = async () => {
     next: { revalidate: 60 },
   })
     .then((res) => res.json())
-    .then((res) => res.data.popularSubmissions);
+    .then((res) => res.data.popularSubmissions)
+    .catch((err) => {
+      console.log(err);
+      return [];
+    });
   return data;
 };
 
 const BannerSection = () => {
   return (
-    <div className="from-[#CC059590] to-[#CC0595] text-white grid place-items-center items-end bg-gradient-to-br pt-5">
-      <div className="relative hero-content col-start-1 row-start-1 w-full max-w-7xl flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row  lg:gap-0 xl:gap-20 ">
+    <div className="from-[#CC059590] to-[#CC0595] text-white grid place-items-center items-center bg-gradient-to-br pt-5">
+      <div className="relative hero-content col-start-1 row-start-1 w-full max-w-7xl flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row  lg:gap-0 xl:gap-20  ">
         <div className="lg:pl-10 ">
-          <div className="mb-2 py-4 text-center lg:text-left">
-            <h1 className="font-title mb-2 text-4xl font-extrabold sm:text-5xl lg:text-6xl">
-              uplink - blah blah blah
+          <div className="mb-2 py-4 text-center lg:text-left ">
+            <h1 className="font-title mb-2 text-4xl sm:text-5xl lg:text-6xl font-[900] font-virgil">
+              Uplink
             </h1>
             <h2 className="font-title text-lg font-extrabold sm:text-xl lg:text-2xl">
-              Use uplink to blah blah blah
+              Where creatives get <u>fun</u>ded
             </h2>
           </div>
         </div>
       </div>
       <svg
-        className="fill-[#FF638D] col-start-1 row-start-1 h-auto w-full"
+        className="fill-[#FF638D] col-start-1 row-start-1 h-auto w-full self-end"
         width="1600"
         height="410"
         viewBox="0 0 1600 410"
@@ -145,7 +152,6 @@ const ContentSection2 = async () => {
     <div className="relative flex flex-col">
       <div className="h-[10vh] bg-[#FF638D]" />
       <div className="flex flex-col gap-2 w-10/12 m-auto p-2">
-        <h1>submissions</h1>
         <div className="grid grid-cols-4 gap-4">
           {popularSubmissions.map((submission, idx) => {
             return (
@@ -168,7 +174,27 @@ const ContentSection2 = async () => {
         </div>
 
         <h1 className="text-3xl text-white">Active Contests</h1>
-        <div className="grid grid-cols-4 grid-rows-1 overflow-scroll gap-4">
+
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {activeContests.map((contest, idx) => {
+            return (
+              <ContestCard
+                key={idx}
+                contestId={contest.id}
+                promptUrl={contest.promptUrl}
+                spaceName={contest.space.name}
+                spaceDisplayName={contest.space.displayName}
+                spaceLogo={contest.space.logoUrl}
+                linkTo={`${contest.space.name}/contests/${contest.id}`}
+                metadata={contest.metadata}
+                deadlines={contest.deadlines}
+                tweetId={contest.tweetId}
+              />
+            );
+          })}
+        </div>
+
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-hidden gap-4 p-4">
           {activeContests.map((contest) => {
             return (
               <>
@@ -247,7 +273,7 @@ const ContentSection2 = async () => {
               </>
             );
           })}
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -327,7 +353,8 @@ const ContestCard = ({
   return (
     <Link
       className="card bg-base-100 
-    cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full shimmer-hover"
+    cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full transform 
+    transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
       href={linkTo}
     >
       <div className="card-body items-center p-0">
@@ -343,10 +370,8 @@ const ContestCard = ({
           </div>
           <h1 className="font-bold text-2xl">{spaceDisplayName}</h1>
         </div>
-        <Suspense fallback={<div>Loading...</div>}>
-          {/*@ts-expect-error*/}
-          <PromptSummary promptUrl={promptUrl} />
-        </Suspense>
+        {/*@ts-expect-error*/}
+        <PromptSummary promptUrl={promptUrl} />
         <div className="flex flex-row gap-2">
           <CategoryLabel category={metadata.category} />
           <StatusLabel status={contestState} />
@@ -374,7 +399,7 @@ export default async function Page() {
     <div className="flex flex-col w-full h-screen ">
       <BannerSection />
       {/*@ts-expect-error*/}
-      <ContentSection />
+      <ContentSection2 />
     </div>
   );
 }

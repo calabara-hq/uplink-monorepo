@@ -446,7 +446,7 @@ const CreateThread = ({
             {thread.map((tweet, index) => (
               <div
                 key={index}
-                className={`grid grid-cols-[64px_auto] w-full ml-auto mr-auto overflow-hidden relative ${
+                className={`grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] w-full ml-auto mr-auto overflow-hidden relative ${
                   focusedTweet !== tweet.id ? "opacity-50" : ""
                 }`}
                 onClick={() => setFocusedTweet(tweet.id)}

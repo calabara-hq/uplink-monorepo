@@ -21,13 +21,13 @@ const deconstructIsoString = (isoString: ISODateString | "now") => {
   };
 };
 
-  // .rdp-day_selected, .rdp-day_selected:hover, .rdp-day_selected:focus {
-  //   background-color: #5d9cec;
-  //   color: black;
-  // }
-  // .rdp-day_selected:hover:not([disabled]) {
-  //   background-color: #5d9cec;
-  // }
+// .rdp-day_selected, .rdp-day_selected:hover, .rdp-day_selected:focus {
+//   background-color: #5d9cec;
+//   color: black;
+// }
+// .rdp-day_selected:hover:not([disabled]) {
+//   background-color: #5d9cec;
+// }
 
 const css = `
 
@@ -80,25 +80,12 @@ export default function DateTimeSelector({
   const [meridiem, setMeridiem] = useState(iMeridiem);
   const [progress, setProgress] = useState<number>(0);
 
-  const createReadableDate = (isNow: boolean) => {
-    if (isNow) {
+  const createReadableDate = () => {
+    if (isoString === "now") {
       return "now";
     }
-    return format(
-      new Date(
-        selectedDay.getFullYear(),
-        selectedDay.getMonth(),
-        selectedDay.getDate(),
-        (parseInt(hour) % 12) + (meridiem === "PM" ? 12 : 0),
-        parseInt(minute)
-      ),
-      "MMM d, yyyy h:mm aa"
-    );
+    return format(new Date(isoString), "MMM d, yyyy h:mm aa");
   };
-
-  const [readableDate, setReadableDate] = useState<string>(
-    createReadableDate(isoString === "now")
-  );
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -142,7 +129,6 @@ export default function DateTimeSelector({
     if (progress < 1 && selectedDay) {
       setProgress(1);
     } else {
-      setReadableDate(createReadableDate(false)); // Pass false to update the date/time
       const isoString = constructIsoString(selectedDay, hour, minute, meridiem);
       callback(isoString);
       setIsModalOpen(false);
@@ -160,7 +146,7 @@ export default function DateTimeSelector({
         <input
           type="text"
           readOnly
-          value={readableDate}
+          value={createReadableDate()}
           className={`input w-full max-w-xs disabled:text-gray-300 cursor-pointer ${
             error ? "input-error" : "input"
           }`}
@@ -189,8 +175,8 @@ export default function DateTimeSelector({
                   disabled={disabledDays}
                   showOutsideDays
                   modifiersClassNames={{
-                    selected: 'my-selected',
-                    today: 'my-today'
+                    selected: "my-selected",
+                    today: "my-today",
                   }}
                 />
               </>
@@ -209,6 +195,7 @@ export default function DateTimeSelector({
           <ModalActions
             onCancel={handleHardReset}
             onConfirm={handleModalConfirm}
+            confirmDisabled={minute === "" || hour === ""}
             confirmLabel={progress < 1 ? "Next" : "Confirm"}
             cancelLabel="Cancel"
           />
@@ -279,7 +266,9 @@ const TimeSelector = ({
             setMeridiem("AM");
           }}
           className={`btn-sm border-transparent border-2 rounded-l-full fadeColor ${
-            meridiem === "AM" ? "bg-primary text-black" : "bg-base-100 text-white"
+            meridiem === "AM"
+              ? "bg-primary text-black"
+              : "bg-base-100 text-white"
           }`}
         >
           AM
@@ -289,7 +278,9 @@ const TimeSelector = ({
             setMeridiem("PM");
           }}
           className={`btn-sm border-transparent border-2 rounded-r-full fadeColor ${
-            meridiem === "PM" ? "bg-primary text-black" : "bg-base-100 text-white"
+            meridiem === "PM"
+              ? "bg-primary text-black"
+              : "bg-base-100 text-white"
           }`}
         >
           PM

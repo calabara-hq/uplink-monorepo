@@ -46,7 +46,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundColor: {
-        "base": "#0e1217",
+        "base": "#121212",
       },
       backgroundImage: {
         'landing': "url('/landing-bg.svg')",
@@ -120,7 +120,7 @@ module.exports = {
 
         },
         uplinkDark: {
-          primary: colors.primary,
+          primary: colors.accent2,
           secondary: colors.secondary,
           accent: colors.accent2,
           'base-100': colors2.base1,

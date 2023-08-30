@@ -2,7 +2,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { SubmissionCardVote, LockedCardVote } from "../VoteCard/VoteCard";
 import {
   HiLockClosed,
   HiLockOpen,
@@ -21,6 +20,169 @@ import formatDecimal from "@/lib/formatDecimal";
 import { useRouter } from "next/navigation";
 import { ContestRewards } from "./ContestSidebar";
 import { useContestState } from "@/providers/ContestStateProvider";
+import Image from "next/image";
+import { HiTrash, HiDocumentText } from "react-icons/hi2";
+
+const SubmissionVoteInput = ({
+  submission,
+  mode,
+}: {
+  submission: any;
+  mode: "current" | "proposed";
+}) => {
+  console.log(submission);
+  const { updateVoteAmount } = useVoteActionContext();
+
+  return (
+    <input
+      type="number"
+      placeholder="votes"
+      className="input  text-center w-full py-1 text-sm rounded-none rounded-br-xl"
+      value={submission.votes}
+      onWheel={(e: React.WheelEvent<HTMLElement>) => {
+        (e.target as HTMLElement).blur();
+      }}
+      onChange={(e) =>
+        updateVoteAmount(submission.submissionId, e.target.value, mode)
+      }
+    />
+  );
+};
+
+const SubmissionVoteTrash = ({
+  submission,
+  mode,
+}: {
+  submission: any;
+  mode: "current" | "proposed";
+}) => {
+  const { removeSingleVote } = useVoteActionContext();
+
+  return (
+    <>
+      <button
+        className="btn btn-ghost w-auto h-full rounded-xl ml-auto md:hidden lg:flex"
+        onClick={() => removeSingleVote(submission.submissionId, mode)}
+      >
+        <HiTrash className="w-5 h-5 text-t2 " />
+      </button>
+      <button
+        className="absolute top-0 right-0 btn btn-ghost rounded-full ml-auto btn-sm lg:hidden"
+        onClick={() => removeSingleVote(submission.submissionId, mode)}
+      >
+        <HiTrash className="w-4 h-4 text-t2" />
+      </button>
+    </>
+  );
+};
+
+const SubmissionCardVote = ({
+  submission,
+  mode,
+}: {
+  submission: any;
+  mode: "current" | "proposed";
+}) => {
+  return (
+    <div className="grid grid-cols-3 w-full h-24 max-h-24">
+      <div className="flex flex-col items-center justify-center rounded-l-xl bg-base-100 h-full w-full p-1">
+        {submission.data.type === "text" && (
+          <CartTextSubmission submission={submission} />
+        )}
+        {submission.data.type !== "text" && (
+          <CartMediaSubmission submission={submission} />
+        )}
+      </div>
+      <div className="flex flex-col items-start justify-center bg-base-100 h-full w-full p-1 break-all">
+        <p className="text-base line-clamp-3 text-t1">
+          {submission.data.title}
+        </p>
+      </div>
+      <div className="grid grid-cols-[1px_auto] rounded-r-xl bg-base h-full w-full border border-gray-500 border-l-0">
+        <div className="bg-gray-500" />
+        <div className="grid grid-rows-2 ">
+          <div className=" rounded-tr-xl">
+            <button className="btn btn-ghost normal-case w-full rounded-none rounded-tr-xl text-error">
+              <p className="text-error font-[500]">remove</p>
+            </button>
+          </div>
+          <div className="rounded-br-xl">
+            <SubmissionVoteInput submission={submission} mode={mode} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="relative flex flex-row w-full h-24 max-h-24 gap-1">
+      <div
+        className="flex flex-row w-full bg-base-100 rounded-xl
+                    cursor-pointer"
+      >
+        {submission.data.type === "text" && (
+          <CartTextSubmission submission={submission} />
+        )}
+        {submission.data.type !== "text" && (
+          <CartMediaSubmission submission={submission} />
+        )}
+        <div className="flex flex-col justify-between items-start gap-4 h-full p-2 w-full">
+          <h2 className="text-base overflow-hidden overflow-ellipsis whitespace-nowrap w-3/4 text-left">
+            {submission.data.title}
+          </h2>
+          <SubmissionVoteInput submission={submission} mode={mode} />
+        </div>
+      </div>
+      <SubmissionVoteTrash submission={submission} mode={mode} />
+    </div>
+  );
+};
+
+const CartMediaSubmission = ({ submission }: { submission: any }) => {
+  return (
+    <figure className="relative w-full h-full rounded-xl">
+      <Image
+        src={submission.data.previewAsset}
+        alt="submission image"
+        fill
+        className="object-contain rounded-xl"
+      />
+    </figure>
+  );
+};
+
+const CartTextSubmission = ({ submission }: { submission: any }) => {
+  return (
+    <HiDocumentText className="h-full w-full max-w-[80%] text-t2 object-contain text-center " />
+  );
+  return null; //<HiDocumentText className="w-full h-full text-t2 object-contain text-center p-4" />;
+};
+
+const LockedCardVote = ({ submission }: { submission: any }) => {
+  const displayableVotes = formatDecimal(submission.votes);
+  return (
+    <div
+      className="flex flex-row w-full h-16 min-h-16 bg-base-100 rounded-xl
+                    cursor-pointer-none"
+    >
+      {submission.data.type === "text" && (
+        <CartTextSubmission submission={submission} />
+      )}
+      {submission.data.type !== "text" && (
+        <CartMediaSubmission submission={submission} />
+      )}
+      <div className="flex flex-row justify-center items-center gap-4 p-2 w-full">
+        <h2 className="text-base overflow-hidden overflow-ellipsis whitespace-nowrap text-center w-3/4">
+          {submission.data.title}
+        </h2>
+        {/*<SubmissionVoteInput submission={submission} mode={mode} />*/}
+        <div className="flex flex-col items-center justify-center ml-auto gap-1 px-2">
+          <p>{displayableVotes.short}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const VotingPolicyModalContent = ({ votingPolicy }: { votingPolicy: any }) => {
   return (
@@ -169,15 +331,15 @@ const VoterTabBar = ({
       >
         My Selections
         {proposedVotes.length > 0 && (
-          <span className="indicator-item badge badge-secondary">
-            {proposedVotes.length}
+          <span className="indicator-item badge badge-warning rounded-full">
+            <p>{proposedVotes.length}</p>
           </span>
         )}
       </a>
 
       {isVotingCartVisible && (
         <a
-          className="tab tab-md font-bold"
+          className="tab tab-md font-bold ml-auto"
           onClick={() => setIsVotingCartVisible(false)}
         >
           <HiXCircle className="w-5 h-5" />
@@ -229,8 +391,11 @@ export const VoteTab = ({
     >
       {[...proposedVotes, ...currentVotes].length > 0 && (
         <div className="flex flex-row w-full justify-end items-center p-2">
-          <button className="btn btn-sm btn-ghost" onClick={removeAllVotes}>
-            remove all
+          <button
+            className="btn btn-sm btn-ghost normal-case"
+            onClick={removeAllVotes}
+          >
+            Remove All
           </button>
         </div>
       )}
@@ -278,9 +443,11 @@ export const VoteTab = ({
 
       {proposedVotes.length > 0 && (
         <motion.div variants={itemVariants}>
-          <div className="flex flex-row w-full justify-start items-center p-2">
-            <p className="">+ Your proposed additions</p>
-          </div>
+          {currentVotes.length > 0 && (
+            <div className="flex flex-row w-full justify-start items-center p-2 text-t2">
+              <p className="">+ Your proposed additions</p>
+            </div>
+          )}
           <div className="flex flex-col gap-4 p-2 max-h-80 overflow-y-auto">
             {proposedVotes.map((submission: any, idx: number) => (
               <SubmissionCardVote
@@ -323,30 +490,30 @@ export const VoteTab = ({
       )}
 
       <motion.div className="flex flex-col gap-2 p-2" variants={itemVariants}>
-        <div className="grid grid-cols-3 justify-items-center justify-evenly gap-4 font-bold text-center">
+        <div className="grid grid-cols-3 justify-items-center justify-evenly gap-2 font-bold text-center">
           <div
-            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded"
+            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded text-t2"
             data-tip={displayableTotalVotingPower.long}
           >
-            <p className="text-sm text-gray-500">Voting Power</p>
+            <p className="text-sm">Voting Power</p>
             <p>{displayableTotalVotingPower.short}</p>
           </div>
           <div
-            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded"
+            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded text-t2"
             data-tip={displayableVotesSpent.long}
           >
             <p className="text-sm text-gray-500">Spent</p>
             <p className="mt-auto">{displayableVotesSpent.short}</p>
           </div>
           <div
-            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded"
+            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded text-t2"
             data-tip={displayableVotesRemaining.long}
           >
             <p className="text-sm text-gray-500">Remaining</p>
             <p className="mt-auto">{displayableVotesRemaining.short}</p>
           </div>
         </div>
-        <div className="flex gap-2 items-center justify-center bg-base-100 p-2 rounded text-gray-500">
+        <div className="flex gap-2 items-center justify-center bg-base-100 p-2 rounded text-t2">
           <a
             className="underline cursor-pointer hover:text-gray-400"
             onClick={() => setIsVotingPolicyModalOpen(true)}
@@ -394,49 +561,25 @@ const SidebarVote = ({
     }
   };
 
-  // render the sidebar / footerbar in parallel
   return (
-    <>
-      {proposedVotes.length > 0 && (
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="absolute flex items-center justify-center bottom-12 h-20 lg:hidden bg-base w-8/12 p-2"
-        >
-          <Link
-            className="btn btn-primary indicator w-full rounded-xl p-2 normal-case"
-            href={`${spaceName}/contests/${contestId}/vote`}
-          >
-            Vote
-            {proposedVotes.length > 0 && (
-              <span className="indicator-item badge badge-secondary">
-                {proposedVotes.length}
-              </span>
-            )}
-          </Link>
-        </motion.div>
-      )}
-
-      <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
-        <ContestRewards
-          voterRewards={voterRewards}
-          openRewardsModal={openRewardsModal}
+    <div className="hidden lg:flex lg:flex-col lg:w-5/12 xl:w-1/3 items-center gap-4">
+      <ContestRewards
+        voterRewards={voterRewards}
+        openRewardsModal={openRewardsModal}
+      />
+      <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
+        <VoterTabBar
+          handleTabClick={handleTabClick}
+          isVotingCartVisible={isVotingCartVisible}
+          setIsVotingCartVisible={setIsVotingCartVisible}
         />
-        <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
-          <VoterTabBar
-            handleTabClick={handleTabClick}
-            isVotingCartVisible={isVotingCartVisible}
-            setIsVotingCartVisible={setIsVotingCartVisible}
-          />
-          <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
-            {isVotingCartVisible && (
-              <VoteTab contestId={contestId} votingPolicy={votingPolicy} />
-            )}
-          </div>
+        <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
+          {isVotingCartVisible && (
+            <VoteTab contestId={contestId} votingPolicy={votingPolicy} />
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

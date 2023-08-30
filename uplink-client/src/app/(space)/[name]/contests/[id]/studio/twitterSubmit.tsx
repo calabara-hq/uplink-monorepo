@@ -10,8 +10,16 @@ import { set } from "date-fns";
 import { nanoid } from "nanoid";
 import Image from "next/image";
 import { useEffect, useReducer, useState } from "react";
-import { BiInfoCircle, BiLink } from "react-icons/bi";
-import { HiCheckBadge, HiXCircle, HiXMark } from "react-icons/hi2";
+import { BiInfoCircle, BiLink, BiPlusCircle } from "react-icons/bi";
+import useSWRMutation from "swr/mutation";
+import {
+  HiCheckBadge,
+  HiXCircle,
+  HiXMark,
+  HiOutlineLightBulb,
+  HiPhoto,
+  HiOutlineTrash,
+} from "react-icons/hi2";
 import {
   MediaController,
   MediaControlBar,
@@ -28,6 +36,56 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 import { Decimal } from "decimal.js";
+import { IoMdCreate } from "react-icons/io";
+import { HiArrowNarrowLeft, HiBadgeCheck } from "react-icons/hi";
+import Link from "next/link";
+import { handleMutationError } from "@/lib/handleMutationError";
+
+async function postTwitterSubmission(
+  url,
+  {
+    arg,
+  }: {
+    arg: {
+      contestId: string;
+      submission: {
+        title: string;
+        thread: ApiThreadItem[];
+      };
+    };
+  }
+) {
+  return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      query: `
+      mutation Mutation($contestId: ID!, $submission: TwitterSubmissionPayload!) {
+        createTwitterSubmission(contestId: $contestId, submission: $submission) {
+          errors
+          success
+          userSubmissionParams {
+              maxSubPower
+              remainingSubPower
+              userSubmissions {
+                  type
+              }
+          }
+        }
+      }`,
+      variables: {
+        contestId: arg.contestId,
+        submission: arg.submission,
+      },
+    }),
+  })
+    .then((res) => res.json())
+    .then(handleMutationError)
+    .then((res) => res.data.createTwitterSubmission);
+}
 
 const StepBox = ({ step }: { step: number }) => {
   return (
@@ -43,12 +101,12 @@ const Step1 = ({ contestId }: { contestId: string }) => {
     useContestInteractionState();
 
   return (
-    <div className="flex gap-2 justify-between">
-      <div className="flex flex-row gap-2 items-center">
+    <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="flex flex-row md:flex-col lg:flex-row gap-2 ">
         <StepBox step={1} />
         <div className="flex flex-col">
-          <p>Check your eligibility</p>
-          <p>Verify that you meet the entrance requirements</p>
+          <p className="text-xl text-t1">Check your eligibility</p>
+          <p className="text-t2">Verify that you meet the entry requirements</p>
         </div>
       </div>
       <div className="w-56 h-56">
@@ -82,29 +140,35 @@ const Step1 = ({ contestId }: { contestId: string }) => {
             </div>
           }
           layer2={
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 h-full">
               <p className="font-bold">Eligibility</p>
               <WalletConnectButton />
               {userSubmitParams && (
-                <div className="flex flex-col text-xs">
-                  {userSubmitParams.restrictionResults.map((el, idx) => {
-                    return (
-                      <div
-                        key={idx}
-                        className="flex flex-row gap-2 items-center m-1"
-                      >
-                        <p>
-                          {el.restriction.tokenRestriction.threshold.toString()}{" "}
-                          {el.restriction.tokenRestriction.token.symbol}
-                        </p>
-                        {el.result === true ? (
-                          <HiCheckBadge className="text-success w-5 h-5 ml-auto" />
-                        ) : (
-                          <HiXCircle className="w-5 h-5 ml-auto" />
-                        )}
-                      </div>
-                    );
-                  })}
+                <div className="flex flex-col items-center justify-center h-full">
+                  {userSubmitParams.restrictionResults.length === 0 ? (
+                    <div className="flex flex-row gap-2 items-center">
+                      <p className="text-t2">No entry requirements</p>
+                    </div>
+                  ) : (
+                    userSubmitParams.restrictionResults.map((el, idx) => {
+                      return (
+                        <div
+                          key={idx}
+                          className="flex flex-row gap-2 items-center m-1"
+                        >
+                          <p>
+                            {el.restriction.tokenRestriction.threshold.toString()}{" "}
+                            {el.restriction.tokenRestriction.token.symbol}
+                          </p>
+                          {el.result === true ? (
+                            <HiCheckBadge className="text-success w-5 h-5 ml-auto" />
+                          ) : (
+                            <HiXCircle className="w-5 h-5 ml-auto" />
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               )}
             </div>
@@ -128,12 +192,12 @@ const Step2 = ({ contestId }: { contestId: string }) => {
 
   return (
     <div
-      className={`flex gap-2 justify-between transition duration-300 ${disabledClass}`}
+      className={`flex flex-col md:flex-row-reverse  gap-4 justify-between items-center transition duration-300 ${disabledClass}`}
     >
-      <div className="flex flex-row gap-2 items-center">
+      <div className="flex flex-row md:flex-col lg:flex-row gap-2 items-center md:items-end lg:items-center">
         <StepBox step={2} />
         <div className="flex flex-col">
-          <p>Link your Twitter</p>
+          <p className="text-xl text-t1">Link your Twitter</p>
         </div>
       </div>
       <div className="w-56 h-56">
@@ -160,7 +224,7 @@ const Step2 = ({ contestId }: { contestId: string }) => {
             <div className="flex flex-col gap-2 h-full">
               <p className="font-bold">Twitter</p>
               {session?.user?.twitter ? (
-                <div className="flex flex-col gap-2 items-center justify-center h-full">
+                <div className="flex flex-col gap-2 items-center justify-between h-full ">
                   <Image
                     src={session?.user?.twitter?.profile_image_url_large}
                     alt="twitter profile image"
@@ -197,6 +261,7 @@ const Step3 = ({
   const [title, setTitle] = useState("");
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isTweetModalOpen, setIsTweetModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [thread, setThread] = useState<ThreadItem[]>([
     {
       id: nanoid(),
@@ -231,12 +296,12 @@ const Step3 = ({
   return (
     <>
       <div
-        className={`flex gap-2 justify-between transition duration-300 ${disabledClass}`}
+        className={`flex flex-col md:flex-row gap-4 justify-between items-center transition duration-300 ${disabledClass}`}
       >
-        <div className="flex flex-row gap-2 items-center">
-          <StepBox step={2} />
+        <div className="flex flex-row md:flex-col lg:flex-row gap-2 items-center md:items-start lg:items-center">
+          <StepBox step={3} />
           <div className="flex flex-col">
-            <p>Compose your submission!</p>
+            <p className="text-xl text-t1">Create your submission!</p>
           </div>
         </div>
         <div className="w-56 h-56">
@@ -245,15 +310,15 @@ const Step3 = ({
               <div className="flex flex-row justify-between text-xs font-bold items-center">
                 <p>status</p>
                 <div className="flex flex-row gap-2 items-center">
-                  {session?.user?.twitter ? (
+                  {isCreating ? (
                     <>
-                      <p className="ml-auto">connected</p>
-                      <HiCheckBadge className="text-success w-5 h-5" />
+                      <p className="ml-auto">creating</p>
+                      <IoMdCreate className="text-primary w-5 h-5" />
                     </>
                   ) : (
                     <>
-                      <p className="ml-auto"> not connected</p>
-                      <HiXCircle className="w-5 h-5 text-gray-500" />
+                      <p className="ml-auto">brainstorming</p>
+                      <HiOutlineLightBulb className="w-5 h-5 opacity-50" />
                     </>
                   )}
                 </div>
@@ -263,8 +328,11 @@ const Step3 = ({
               <div className="flex flex-col gap-2 h-full">
                 <p className="font-bold">Create</p>
                 <button
-                  className="btn btn-primary"
-                  onClick={() => setIsTweetModalOpen(true)}
+                  className="btn btn-primary normal-case"
+                  onClick={() => {
+                    setIsTweetModalOpen(true);
+                    setIsCreating(true);
+                  }}
                 >
                   Add Tweet
                 </button>
@@ -321,14 +389,61 @@ const PreviewModal = ({
 }) => {
   const handleMutation = useHandleMutation(CreateTwitterSubmissionDocument);
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const { trigger, data, error, isMutating, reset } = useSWRMutation(
+    [`/api/userSubmitParams/${contestId}`, session?.user?.address],
+    postTwitterSubmission,
+    {
+      onError: (err) => {
+        console.log(err);
+        onClose();
+      },
+    }
+  );
 
-  type TwitterSubmission = {
-    title: string;
-    thread: ApiThreadItem[];
+  useEffect(() => {
+    return reset();
+  }, []);
+
+  const onClose = () => {
+    handleClose();
+    reset();
+  };
+
+  const handleSubmit2 = async () => {
+    const submission: {
+      title: string;
+      thread: ApiThreadItem[];
+    } = {
+      title: title,
+      thread: thread.map((el) => {
+        const serverThreadItem: ApiThreadItem = {
+          text: el.text,
+          ...(el.assetSize ? { assetSize: el.assetSize.toString() } : {}),
+          ...(el.assetType ? { assetType: el.assetType } : {}),
+        };
+        if (el.isVideo) {
+          serverThreadItem.previewAsset = el.videoThumbnailUrl;
+          serverThreadItem.videoAsset = el.primaryAssetUrl;
+        } else if (el.primaryAssetUrl) {
+          serverThreadItem.previewAsset = el.primaryAssetUrl;
+        }
+        return serverThreadItem;
+      }),
+    };
+    try {
+      await trigger({ contestId, submission });
+    } catch (err) {
+      console.log(err);
+      onClose();
+    }
   };
 
   const handleSubmit = async () => {
-    const submission: TwitterSubmission = {
+    const submission: {
+      title: string;
+      thread: ApiThreadItem[];
+    } = {
       title: title,
       thread: thread.map((el) => {
         const serverThreadItem: ApiThreadItem = {
@@ -371,7 +486,7 @@ const PreviewModal = ({
       });
   };
 
-  if (isModalOpen) {
+  if (isModalOpen && !data) {
     return (
       <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
         <div className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-2xl animate-springUp">
@@ -433,15 +548,35 @@ const PreviewModal = ({
           <ModalActions
             confirmLabel="submit"
             cancelLabel="edit tweet"
-            confirmDisabled={!title}
-            onConfirm={handleSubmit}
-            onCancel={handleRevert}
+            confirmDisabled={!title || isMutating}
+            isLoading={isMutating}
+            onConfirm={handleSubmit2}
+            onCancel={() => {
+              handleRevert();
+              onClose();
+            }}
           />
         </div>
       </div>
     );
   }
-  return null;
+  if (isModalOpen && data && data.success)
+    return (
+      <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
+        <div className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-2xl animate-springUp">
+          <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 m-auto rounded-xl">
+            <HiBadgeCheck className="w-32 h-32 text-success" />
+            <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
+            <Link
+              href={`/${spaceName}/contests/${contestId}`}
+              className="btn btn-ghost text-t2 normal-case"
+            >
+              Go to contest
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
 };
 
 const RenderPreview = ({
@@ -573,16 +708,110 @@ const RenderVideoPreview = ({
   );
 };
 
+const ExplainerSection = () => {
+  return (
+    <div className="from-[#00223390] to-[#002233] text-white grid place-items-center items-center bg-gradient-to-br rounded-xl">
+      <div className="relative hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row  lg:gap-0 xl:gap-20  ">
+        <div className="lg:pl-10 ">
+          <div className="mb-2 py-4 text-center lg:text-left ">
+            <h1 className="font-title mb-2 text-4xl sm:text-5xl lg:text-6xl font-virgil">
+              Twitter Contest
+            </h1>
+            <h2 className="font-title text-lg font-extrabold sm:text-xl lg:text-2xl text-t1">
+              Create a submission in 3 easy steps.
+              <br />
+              When you're done, we'll tweet it
+              <br />
+              for you!
+            </h2>
+          </div>
+        </div>
+        <div className="w-full max-w-sm">
+          <div className="mockup-window bg-base-100">
+            <div className="grid grid-rows grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
+              <Image
+                src={"/swim-shady.png"}
+                alt="swim shady"
+                width={50}
+                height={50}
+                className="rounded-full"
+              />
+              <div className="w-10/12 flex flex-col gap-2">
+                <p className="text-t1">Noun 9999 in 3333D!</p>
+                <div className="flex flex-col w-10/12 m-auto">
+                  <div className="relative">
+                    <span className="absolute top-0 right-0 mt-[-10px] mr-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg">
+                      <HiOutlineTrash className="w-5 h-5" />
+                    </span>
+                    <Image
+                      src={"/9999-winner.jpeg"}
+                      alt="twitter submission"
+                      width={200}
+                      height={200}
+                      className="rounded-lg object-contain"
+                    />
+                  </div>
+                </div>
+                <div className="w-full h-0.5 bg-border"></div>
+                <div className="flex items-center justify-start w-full">
+                  <HiPhoto className="w-5 h-5 opacity-50" />
+                  <BiPlusCircle className="w-5 h-5 opacity-50 ml-auto mr-2" />
+                  <button
+                    className="btn btn-xs btn-primary normal-case"
+                    disabled
+                  >
+                    Submitting
+                    <div
+                      className="text-xs ml-1 inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                      role="status"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <svg
+        className="fill-[#57BAD7] col-start-1 row-start-1 h-auto w-full self-end rounded-t-xl"
+        width="1600"
+        height="410"
+        viewBox="0 0 1600 410"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M0 338L53.3 349.2C106.7 360.3 213.3 382.7 320 393.8C426.7 405 533.3 405 640 359.3C746.7 313.7 853.3 222.3 960 189.2C1066.7 156 1173.3 181 1280 159.2C1386.7 137.3 1493.3 68.7 1546.7 34.3L1600 0V595H1546.7C1493.3 595 1386.7 595 1280 595C1173.3 595 1066.7 595 960 595C853.3 595 746.7 595 640 595C533.3 595 426.7 595 320 595C213.3 595 106.7 595 53.3 595H0V338Z"></path>
+      </svg>
+    </div>
+  );
+};
+
 const TwitterSubmit = ({
   params,
 }: {
   params: { name: string; id: string };
 }) => {
   return (
-    <div className="flex flex-col border border-border w-full gap-16">
-      <Step1 contestId={params.id} />
-      <Step2 contestId={params.id} />
-      <Step3 contestId={params.id} spaceName={params.name} />
+    <div className="flex flex-col w-full">
+      <Link
+        href={`/${params.name}/contests/${params.id}`}
+        className="btn btn-ghost normal-case text-t2 w-fit mb-1"
+      >
+        <HiArrowNarrowLeft className="w-5 h-5" />
+        <span className="w-1" />
+        <p className="hidden lg:flex">Back to Contest</p>
+      </Link>
+      <ExplainerSection />
+      <div className="h-[20vh] bg-[#57BAD7] rounded-b-xl mb-8" />
+      <div className="w-full bg-base border-2 border-base-100 rounded-xl p-4">
+        <div className="flex flex-col w-full md:w-3/4 xl:w-1/2 m-auto gap-8">
+          <Step1 contestId={params.id} />
+          <div className="h-0.5 w-full flex  bg-base-100" />
+          <Step2 contestId={params.id} />
+          <div className="h-0.5 w-full  bg-base-100" />
+          <Step3 contestId={params.id} spaceName={params.name} />
+        </div>
+      </div>
     </div>
   );
 };

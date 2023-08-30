@@ -1,5 +1,6 @@
 
 import { ThreadItem } from "@/hooks/useThreadCreator";
+import { handleMutationError } from "@/lib/handleMutationError";
 import { IToken, IERCToken, INativeToken } from "@/types/token";
 import { OutputData } from "@editorjs/editorjs";
 
@@ -300,7 +301,6 @@ export const validatePrompt = (prompt: Prompt) => {
     };
 
     const pattern = /^https:\/\/uplink\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+/;
-    console.log(body)
     if (!title) errors.title = "Please enter a title";
     if (!body || body?.blocks.length < 1) errors.body = "Please enter a prompt body";
     if (coverUrl) {
@@ -353,7 +353,6 @@ export const validateSubmitterRewards = (submitterRewards: SubmitterRewards) => 
     });
 
     const cleanedRewards = cleanSubmitterRewards(submitterRewards);
-
     return {
         errors,
         isError: errors.duplicateRanks.length > 0,
@@ -496,3 +495,42 @@ export const ContestReducer = (state, action) => {
     }
 };
 
+export const postContest = async (url,
+    {
+        arg,
+    }: {
+        arg: any
+    }
+) => {
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            query: `
+                mutation CreateContest($contestData: ContestBuilderProps!){
+                    createContest(contestData: $contestData){
+                        success
+                        contestId
+                        errors{
+                            metadata
+                            deadlines
+                            prompt
+                            submitterRewards
+                            voterRewards
+                            submitterRestrictions
+                            votingPolicy
+                        }
+                    }
+                }`,
+            variables: {
+                contestData: arg.contestData,
+            },
+        }),
+    })
+        .then((res) => res.json())
+        .then(handleMutationError)
+        .then((res) => res.data.createContest);
+}

@@ -5,6 +5,7 @@ import { SubmissionDisplaySkeleton } from "@/ui/Contests/SubmissionDisplay";
 import ContestSidebar from "@/ui/Contests/ContestSidebar";
 import SwrProvider from "@/providers/SwrProvider";
 import { getContestById } from "./fetchContest";
+import MobileActions from "@/ui/Contests/MobileActions";
 
 export default async function Page({
   params,
@@ -36,6 +37,7 @@ export default async function Page({
           promptUrl={promptUrl}
           tweetId={tweetId}
         />
+        <MobileActions contestId={params.id} spaceName={params.name} />
         <SubmissionDisplay contestId={params.id} />
       </div>
       <ContestSidebar
