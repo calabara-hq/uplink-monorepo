@@ -82,7 +82,7 @@ export default async function Layout({
             </ContestInteractionProvider>
           </SwrProvider>
         </ContestStateProvider>
-        {modal}
+        {/* {modal} */}
       </div>
     </div>
   );
