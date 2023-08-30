@@ -1,41 +1,37 @@
 import Image from "next/image";
 import Link from "next/link";
-import { HiHome, HiMagnifyingGlass, HiPlus } from "react-icons/hi2";
+import {
+  HiHome,
+  HiMagnifyingGlass,
+  HiOutlineRectangleGroup,
+  HiPlus,
+} from "react-icons/hi2";
 import uplinkLogo from "../../../public/uplink-logo.svg";
-import Logo from "../Logo/Logo";
+import WalletConnectButton2 from "../ConnectButton/ConnectButton2";
 
 export default function Sidebar() {
   return (
-    <>
-      {/* large screen menu bar */}
-      <div className="h-screen w-16 bg-base-100 shadow-lg hidden md:flex md:flex-col py-2">
-        <SideBarIcon
-          icon={
-            <Image src={uplinkLogo} alt="uplink logo" height={28} width={28} />
-          }
-          text="Home"
-          path={"/"}
-        />
-        <div className="py-1"></div>
-        <Divider />
-        <SideBarIcon
-          icon={<HiPlus className="h-6 w-6" />}
-          text="Create a space"
-          path={"/spacebuilder/create"}
-        />
-        <SideBarIcon
-          icon={<HiMagnifyingGlass className="h-6 w-6" />}
-          text="Explore"
-          path={"/explore"}
-        />
-      </div>
-
-      {/* small screen menu bar */}
-      <div className="fixed bottom-0 h-16 z-20 w-full bg-base-100 md:hidden">
-        <div className="bg-border h-[1px] w-full"></div>
-        <MobileMenu />
-      </div>
-    </>
+    <div className="h-full w-full bg-base-100 shadow-lg hidden md:flex md:flex-col py-2">
+      <SideBarIcon
+        icon={
+          <Image src={uplinkLogo} alt="uplink logo" height={28} width={28} />
+        }
+        text="Home"
+        path={"/"}
+      />
+      <div className="py-1"></div>
+      <Divider />
+      <SideBarIcon
+        icon={<HiOutlineRectangleGroup className="h-6 w-6" />}
+        text="Spaces"
+        path={"/explore"}
+      />
+      <SideBarIcon
+        icon={<HiPlus className="h-6 w-6" />}
+        text="Create a space"
+        path={"/spacebuilder/create"}
+      />
+    </div>
   );
 }
 
@@ -56,11 +52,11 @@ const SideBarIcon = ({
   >
     {icon}
     <span
-      className="absolute w-auto p-2 m-2 min-w-max left-14 
-    text-white bg-gray-600 text-xs font-bold
+      className="absolute flex items-center justify-center z-10 bg-black w-auto p-2 m-2 min-w-max left-14 normal-case
+    text-t1 text-sm font-bold
     rounded-md shadow-md transition-all duration-300 scale-0 origin-left group-hover:scale-100"
     >
-      {text}
+      <p>{text}</p>
     </span>
   </Link>
 );
@@ -68,31 +64,3 @@ const SideBarIcon = ({
 const Divider = () => (
   <hr className="bg-gray-200 border border-gray-600 mx-2" />
 );
-
-const MobileCard = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex flex-col items-center justify-center w-1/3 btn btn-ghost rounded-full">
-      {children}
-    </div>
-  );
-};
-
-const MobileMenu = () => {
-  return (
-    <div className="flex flex-row w-full justify-between p-2">
-      <MobileCard>
-        <HiHome className="h-8 w-8" />
-        <p>home</p>
-      </MobileCard>
-      <div className="bg-border w-[1px]"></div>
-      <MobileCard>
-        <HiMagnifyingGlass className="h-8 w-8" />
-        <p>explore</p>
-      </MobileCard>
-      <div className="bg-border w-[1px]"></div>
-      <MobileCard>
-        <p>my spaces</p>
-      </MobileCard>
-    </div>
-  );
-};

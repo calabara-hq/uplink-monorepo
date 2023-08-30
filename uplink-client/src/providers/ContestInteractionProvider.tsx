@@ -23,7 +23,7 @@ type BaseSubmission = {
   rank: number | null;
 };
 
-type TwitterSubmission = BaseSubmission & {
+export type TwitterSubmission = BaseSubmission & {
   type: "twitter";
   data: {
     type: SubmissionFormat;
@@ -38,7 +38,7 @@ type TwitterSubmission = BaseSubmission & {
   };
 };
 
-type StandardSubmission = BaseSubmission & {
+export type StandardSubmission = BaseSubmission & {
   type: "standard";
   data: {
     type: SubmissionFormat;
@@ -51,7 +51,7 @@ type StandardSubmission = BaseSubmission & {
 
 export type Submission = TwitterSubmission | StandardSubmission;
 
-type UserSubmissionParams = {
+export type UserSubmissionParams = {
   maxSubPower: string;
   remainingSubPower: string;
   userSubmissions: { id: string }[];

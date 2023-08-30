@@ -51,7 +51,7 @@ const getPopularSubmissions = async () => {
         submissionId: schema.votes.submissionId,
     }).from(schema.votes)
         .groupBy(schema.votes.submissionId)
-        .having(sqlOps.gt(sqlOps.sql<number>`count(*)`, 5))
+        .having(sqlOps.gt(sqlOps.sql<number>`count(*)`, 0))
         .then(res => res.map(el => el.submissionId))
 
 

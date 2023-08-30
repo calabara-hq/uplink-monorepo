@@ -7,11 +7,9 @@ import { HiArrowNarrowLeft } from "react-icons/hi";
 // it's mainly used for mobile devices only, but can be called from desktop as well.
 
 export default async function Page({
-  children,
   params,
 }: {
-  children: React.ReactNode;
-  params: { id: string; name: string };
+  params: { id: string };
 }) {
   const {
     metadata,

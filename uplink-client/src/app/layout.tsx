@@ -4,6 +4,7 @@ import WalletProvider from "@/providers/WalletProvider";
 
 import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
+import MobileNav from "@/ui/MobileNav/MobileNav";
 
 export default function RootLayout({
   children,
@@ -13,19 +14,22 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="uplinkDark">
       <head />
-      <body className="bg-base min-h-screen overflow-hidden">
+      <body className="bg-base">
         <WalletProvider refetchInterval={60} session={undefined}>
-          <div className="flex flex-col md:grid md:grid-cols-[64px_auto] h-screen">
-            <Sidebar />
-            <ToastProvider>
-              <main className="overflow-auto">
+          <ToastProvider>
+            <div className="h-full">
+              <div className="hidden md:flex h-full w-[64px] z-30 flex-col fixed inset-y-0">
+                <Sidebar />
+              </div>
+              <div className="btm-nav z-10 md:hidden">
+                <MobileNav />
+              </div>
+              <main className="pb-20 md:pb-0 md:pl-[64px] h-full">
                 <Nav />
-                <div className="flex flex-col flex-grow items-center justify-center pb-20 md:pb-0">
-                  {children}
-                </div>
+                {children}
               </main>
-            </ToastProvider>
-          </div>
+            </div>
+          </ToastProvider>
         </WalletProvider>
       </body>
     </html>

@@ -47,13 +47,13 @@ export type ContestState = "pending" | "submitting" | "voting" | "closed";
 const contestStatusColor = (contestState: ContestState) => {
   switch (contestState) {
     case "pending":
-      return "text-gray-300";
+      return "text-purple-500";
     case "submitting":
       return "text-green-300";
     case "voting":
-      return "text-yellow-300";
+      return "text-yellow-500";
     case "closed":
-      return "text-red-500";
+      return "text-gray-600";
   }
 };
 

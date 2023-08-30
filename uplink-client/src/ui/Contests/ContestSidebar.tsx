@@ -1,43 +1,24 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useContestState } from "@/providers/ContestStateProvider";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { SubmissionCardVote, LockedCardVote } from "../VoteCard/VoteCard";
 import { Decimal } from "decimal.js";
 import { mutate } from "swr";
 import {
-  HiLockClosed,
-  HiLockOpen,
   HiXCircle,
-  HiPhoto,
-  HiPlus,
   HiSparkles,
-  HiQuestionMarkCircle,
 } from "react-icons/hi2";
-import { useVoteActionContext } from "@/providers/VoteActionProvider";
-import useTrackSubmissions from "@/hooks/useTrackSubmissions";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "../ConnectButton/ConnectButton";
 import Modal from "../Modal/Modal";
 import { BiInfoCircle } from "react-icons/bi";
-import { sub } from "date-fns";
 import useTweetQueueStatus from "@/hooks/useTweetQueueStatus";
-import CreateThread from "@/ui/CreateThread/CreateThread";
-import { ThreadItem } from "@/hooks/useThreadCreator";
-import { nanoid } from "nanoid";
 import CreateContestTweet from "../ContestForm/CreateContestTweet";
 import { OutputData } from "@editorjs/editorjs";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
-import formatDecimal from "@/lib/formatDecimal";
-import { useRouter } from "next/navigation";
-import Vote from "./Vote";
 import SidebarVote from "./Vote";
-/**
- *
- * the standard sidebar for the main contest view
- *
- */
+
+// sidebar for the main contest view
 
 const TweetQueuedDialog = () => {
   return (
@@ -253,24 +234,27 @@ const Submitting = ({
 }) => {
   const { stateRemainingTime } = useContestState();
 
+  // render the mobile footer + fs sidebar in parallel
   return (
-    <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
-      <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
-        <ContestRewards
-          submitterRewards={submitterRewards}
-          openRewardsModal={openRewardsModal}
-        />
-        <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
-          <Link
-            href={`${spaceName}/contests/${contestId}/studio`}
-            className="btn btn-accent flex flex-1"
-          >
-            Submit
-          </Link>
-          <p className="mx-2 p-2 text-center">{stateRemainingTime}</p>
+    <>
+      <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+        <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl">
+          <ContestRewards
+            submitterRewards={submitterRewards}
+            openRewardsModal={openRewardsModal}
+          />
+          <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
+            <Link
+              href={`${spaceName}/contests/${contestId}/studio`}
+              className="btn btn-accent flex flex-1"
+            >
+              Submit
+            </Link>
+            <p className="mx-2 p-2 text-center text-t2">{stateRemainingTime}</p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -621,20 +605,6 @@ const ContestSidebar = ({
       </Modal>
     </>
   );
-  /*
-  if (contestState === "pending") return <Pending />;
-  else if (contestState === "submitting")
-    return (
-      <Submitting
-        spaceName={spaceName}
-        contestId={contestId}
-      />
-    );
-  else if (contestState === "voting" && !userVotingState.isLoading)
-    return <VoterCart contestId={contestId} />;
-  else if (contestState === "closed") return <Closed />;
-  else return <SidebarSkeleton />;
-  */
 };
 
 export default ContestSidebar;

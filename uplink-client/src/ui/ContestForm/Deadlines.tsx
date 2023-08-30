@@ -73,7 +73,7 @@ const Deadlines = ({
       />
       <button
         onClick={onSubmit}
-        className="btn btn-primary lowercase mt-4 self-end"
+        className="btn btn-primary normal-case mt-4 self-end"
       >
         Confirm
       </button>

@@ -179,7 +179,6 @@ const mainLoop = async () => {
     const adjustedTime = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const currentTime = new Date().toISOString();
     const jobs = await getJobs.execute({ adjustedTime, currentTime });
-    
     await Promise.all(jobs.map(async ({ contest, ...job }) => {
         await handleJob(job as schema.dbTweetQueueType);
     }));

@@ -223,7 +223,7 @@ const ContestDisplay = ({
         </div>
       )}
       {filteredContests.length > 0 && (
-        <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full auto-rows-fr">
           {filteredContests.map((contest) => {
             const { contestState, stateRemainingTime } = calculateContestStatus(
               contest.deadlines,
@@ -269,7 +269,7 @@ export const ContestCard = ({
       <div
         key={contestId}
         className="card bg-base-100 
-        cursor-pointer border border-border rounded-2xl p-4 h-full max-h-36 overflow-hidden w-full shimmer-hover"
+        cursor-pointer border border-border rounded-2xl p-4 h-full max-h-36 overflow-hidden w-full transform transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
       >
         <div className="card-body items-start p-0">
           <div className="flex w-full">
@@ -284,10 +284,10 @@ export const ContestCard = ({
               <CategoryLabel category={category} />
             </div>
           </div>
-          <div>
+          <div className="flex flex-row gap-2">
             <StatusLabel status={contestState} />
+            <RemainingTimeLabel remainingTime={remainingTime} />
           </div>
-          <RemainingTimeLabel remainingTime={remainingTime} />
         </div>
       </div>
     </Link>
@@ -311,7 +311,7 @@ export default async function Page({
         <div className="flex flex-col w-full md:w-56 gap-4">
           {/*@ts-expect-error */}
           <SpaceInfo name={params.name} />
-          <Stats />
+          {/* <Stats /> */}
         </div>
         <div className="flex flex-col flex-grow">
           <ContestDisplay

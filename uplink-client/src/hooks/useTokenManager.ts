@@ -51,6 +51,7 @@ const initialTokenState: TokenState = {
         symbol: "",
         decimals: 0,
         address: "",
+        tokenId: null,
         errors: {
             address: null,
             tokenId: null,
@@ -269,8 +270,9 @@ export const useTokenManager = ({
     };
 
     const handleAddToken = () => {
-        const currentToken = state.quickAddToken || state.customToken;
-        saveCallback(currentToken as IToken);
+        const { errors, ...customToken } = state.customToken;
+        const currentToken = state.quickAddToken || customToken;
+        saveCallback(currentToken);
         if (!continuous) return handleClose();
     };
 

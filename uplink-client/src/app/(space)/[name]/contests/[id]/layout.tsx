@@ -66,7 +66,7 @@ export default async function Layout({
 
   const { deadlines, metadata, tweetId, space } = contest;
   return (
-    <div className="w-full lg:w-11/12 flex flex-col items-center p-4">
+    <div className="w-full flex flex-col items-center p-4">
       <div className="flex justify-center gap-6 m-auto w-full lg:py-6">
         <ContestStateProvider
           deadlines={deadlines}

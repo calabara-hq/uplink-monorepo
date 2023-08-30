@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useReducer, useState } from "react";
+import { Fragment, Suspense, useEffect, useReducer, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   initialState,
@@ -11,6 +11,7 @@ import {
   validateVoterRewards,
   validateVotingPolicy,
   ContestBuilderProps,
+  postContest,
 } from "@/ui/ContestForm/contestHandler";
 import { IToken } from "@/types/token";
 import ContestMetadata from "@/ui/ContestForm/ContestMetadata";
@@ -49,6 +50,8 @@ import { GrMoney } from "react-icons/gr";
 import { toast } from "react-hot-toast";
 import LoadingAnimation from "../LoadingAnimation/LoadingAnimation";
 import WalletConnectButton from "../ConnectButton/ConnectButton";
+import useSWRMutation from "swr/mutation";
+
 const validateContestParams = (contestState: ContestBuilderProps) => {
   const {
     errors: metadataErrors,
@@ -138,10 +141,12 @@ export const BlockWrapper = ({
     <div className="border-2 border-border shadow-box p-6 rounded-xl">
       <h1 className="text-2xl font-bold">{title}</h1>
       <div className="alert bg-transparent p-1 pl-0 w-fit text-primary">
-        <div className="flex flex-row gap-2 text-sm md:text-md lg:text-base w-full p-0">
-          <HiSparkles className="lg:w-5 lg:h-5 w-3 h-3" />
-          {info}
-        </div>
+        {info && (
+          <div className="flex flex-row gap-2 text-sm md:text-md lg:text-base w-full p-0">
+            <HiSparkles className="lg:w-5 lg:h-5 w-3 h-3" />
+            {info}
+          </div>
+        )}
       </div>
       <div className="flex flex-col items-center p-4 lg:p-8 gap-4">
         {children}
@@ -166,26 +171,24 @@ const ParamsCard = ({
   required?: boolean;
 }) => {
   return (
-    <motion.div
-      className={`box cursor-pointer bg-base-100 p-2 rounded-xl flex flex-col gap-2 items-center relative ${
+    <div
+      className={`box cursor-pointer bg-base-100 p-2 rounded-xl flex flex-col gap-2 items-center justify-evenly relative transform 
+      transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform ${
         error && "border-2 border-error"
       }`}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.9 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
       onClick={() => setCurrentStep(stepIndex)}
     >
-      <h2 className="font-bold text-t1 text-xl">{title}</h2>
+      <h2 className="font-bold text-t1 text-xl text-center">{title}</h2>
       {icon}
       {required && (
-        <div className="badge badge-outline text-t2 badge-xs font-medium p-2 absolute bottom-2 right-2">
+        <div className="badge badge-outline text-t2 badge-xs font-medium p-2 ml-auto">
           <p>required</p>
         </div>
       )}
       {error && (
         <HiXCircle className="text-error absolute -top-5 -right-5 h-8 w-8" />
       )}
-    </motion.div>
+    </div>
   );
 };
 
@@ -193,9 +196,9 @@ const ContestParamSectionCards = ({ steps, onSubmit }) => {
   return (
     <div className="flex flex-col gap-4 lg:gap-8 w-10/12 m-auto">
       <h1 className="text-3xl font-bold">Create a Contest</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr">
         {steps.map((step, idx) => {
-          return step.componentCard;
+          return <Fragment key={idx}>{step.componentCard}</Fragment>;
         })}
       </div>
       <div className="ml-auto w-fit">
@@ -220,20 +223,18 @@ const ContestForm = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(-1);
   const handleMutation = useHandleMutation(CreateContestDocument);
-  const [contestId, setContestId] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // add ETH to the spaceTokens array if it doesn't exist
-  const spaceTokensWithEth = spaceTokens.some(
+  const spaceTokensWithEth: IToken[] = spaceTokens.some(
     (token) => token.type === "ETH" && token.symbol === "ETH"
   )
     ? spaceTokens
     : [{ type: "ETH", symbol: "ETH", decimals: 18 }, ...spaceTokens];
 
-  const [contestState, setContestState] = useReducer(ContestReducer, {
-    ...initialState,
-    spaceTokens: spaceTokensWithEth,
-  });
+  const [contestState, setContestState] = useReducer(
+    ContestReducer,
+    initialState
+  );
   const setField = (field, value) => {
     setContestState({ type: "SET_FIELD", field, value });
   };
@@ -255,6 +256,50 @@ const ContestForm = ({
     });
     setCurrentStep(-1);
   };
+
+  const { trigger, data, error, isMutating, reset } = useSWRMutation(
+    `/api/createContest/${spaceId}`,
+    postContest,
+    {
+      onError: (err) => {
+        console.log(err);
+        reset();
+      },
+    }
+  );
+
+  const onSubmit = async () => {
+    //1. validate and clean data once more
+    //2. return early if validation fails
+    //3. if validation passes, send to server
+    //4. if server returns success, render success screen
+    //5. if server returns error, render error screen
+
+    const { errors, isError, data } = validateContestParams(contestState);
+    setTotalState({ ...data, errors });
+    if (isError) return;
+    try {
+      await trigger({
+        contestData: {
+          ...data,
+          prompt: {
+            title: data.prompt.title,
+            body: data.prompt.body,
+            coverUrl: data.prompt.coverUrl,
+          },
+          spaceId,
+        },
+      });
+    } catch (e) {
+      reset();
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      reset();
+    };
+  }, []);
 
   const steps = [
     {
@@ -354,7 +399,7 @@ const ContestForm = ({
       component: (
         <VotingPolicy
           initialVotingPolicy={contestState.votingPolicy}
-          spaceTokens={contestState.spaceTokens}
+          spaceTokens={spaceTokensWithEth}
           handleConfirm={(data) => {
             setField("votingPolicy", data);
             handleBack();
@@ -382,7 +427,7 @@ const ContestForm = ({
       component: (
         <SubmitterRewards
           initialSubmitterRewards={contestState.submitterRewards}
-          spaceTokens={contestState.spaceTokens}
+          spaceTokens={spaceTokensWithEth}
           handleConfirm={(data) => {
             setField("submitterRewards", data);
             handleBack();
@@ -409,7 +454,7 @@ const ContestForm = ({
       component: (
         <VoterRewards
           initialVoterRewards={contestState.voterRewards}
-          spaceTokens={contestState.spaceTokens}
+          spaceTokens={spaceTokensWithEth}
           handleConfirm={(data) => {
             setField("voterRewards", data);
             handleBack();
@@ -435,7 +480,7 @@ const ContestForm = ({
       component: (
         <SubmitterRestrictions
           initialSubmitterRestrictions={contestState.submitterRestrictions}
-          spaceTokens={contestState.spaceTokens}
+          spaceTokens={spaceTokensWithEth}
           handleConfirm={(data) => {
             setField("submitterRestrictions", data);
             handleBack();
@@ -476,75 +521,11 @@ const ContestForm = ({
     },
   ];
 
-  const postContest = async (values: ContestBuilderProps) => {
-    const contestData = {
-      spaceId,
-      ...values,
-      prompt: {
-        title: values.prompt.title,
-        body: values.prompt.body,
-        coverUrl: values.prompt.coverUrl,
-      },
-    };
-    try {
-      const res = await handleMutation({
-        contestData,
-      });
-      if (!res)
-        return {
-          success: false,
-          contestId: null,
-        };
-      const { errors, success, contestId } = res.data.createContest;
-      if (success) {
-        return {
-          success,
-          contestId,
-        };
-      } else {
-        console.log(errors);
-        return {
-          success,
-          contestId,
-        };
-      }
-    } catch (err) {
-      console.log(err);
-      return {
-        success: false,
-        contestId: null,
-      };
-    }
-  };
-
-  const onSubmit = async () => {
-    //1. validate and clean data once more
-    //2. return early if validation fails
-    //3. if validation passes, send to server
-    //4. if server returns success, render success screen
-    //5. if server returns error, render error screen
-
-    const { errors, isError, data } = validateContestParams(contestState);
-    console.log({ ...data, errors });
-    setTotalState({ ...data, errors });
-    if (isError) {
-      return toast.error("There were some errors. Please fix them.");
-    } else {
-      setIsLoading(true);
-      const { success, contestId } = await postContest(data);
-      setIsLoading(false);
-      if (success) {
-        toast.success("Contest created successfully!");
-        return setContestId(contestId);
-      }
-    }
-  };
-
-  if (isLoading) return <LoadingAnimation />;
+  if (isMutating) return <LoadingAnimation />;
   else
     return (
       <AnimatePresence mode="wait">
-        {!contestId && (
+        {!data && (
           <motion.div
             key={currentStep}
             initial={{ opacity: 0 }}
@@ -573,16 +554,17 @@ const ContestForm = ({
             )}
           </motion.div>
         )}
-        {contestId && ( // contest has been submitted
-          <motion.div className="flex flex-col gap-8 w-full h-screen items-center justify-center mr-16">
-            <FinalStep
-              contestState={contestState}
-              spaceName={spaceName}
-              contestId={contestId}
-              spaceId={spaceId}
-            />
-          </motion.div>
-        )}
+        {data &&
+          data.success && ( // contest has been submitted
+            <motion.div className="flex flex-col gap-8 w-full h-screen items-center justify-center mr-16">
+              <FinalStep
+                contestState={contestState}
+                spaceName={spaceName}
+                contestId={data.contestId}
+                spaceId={spaceId}
+              />
+            </motion.div>
+          )}
       </AnimatePresence>
     );
 };
@@ -771,7 +753,7 @@ const RenderSuccessScreen = ({ contestId, spaceName }) => {
   return (
     <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 md:w-1/3 h-1/2 bg-base-100 rounded-xl transition-colors duration-300 ease-in-out animate-springUp">
       <HiBadgeCheck className="w-32 h-32 text-success" />
-      <p className="text-2xl text-t1 text-center">Ok legend - you're all set</p>
+      <p className="text-2xl text-t1 text-center">{`Ok legend - you're all set`}</p>
       <button
         className="btn btn-ghost text-t2"
         onClick={() => {

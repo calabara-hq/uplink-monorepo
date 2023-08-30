@@ -468,7 +468,7 @@ const ERC1155FormElement = ({
         dispatch({
           type: "setCustomToken",
           payload: {
-            tokenId: Number(value),
+            tokenId: parseInt(value),
           },
         })
       }
