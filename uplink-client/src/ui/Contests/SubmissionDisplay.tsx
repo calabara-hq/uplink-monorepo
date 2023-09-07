@@ -81,7 +81,6 @@ const SubmissionDisplay = ({
   spaceName: string;
 }) => {
   const { submissions } = useContestInteractionState();
-  const voteActions = useVoteActionContext();
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -97,7 +96,6 @@ const SubmissionDisplay = ({
                 key={idx}
                 basePath={`${spaceName}/contests/${contestId}`}
                 submission={submission}
-                voteActions={voteActions}
                 footerChildren={<SubmissionFooter submission={submission} />}
               />
             );

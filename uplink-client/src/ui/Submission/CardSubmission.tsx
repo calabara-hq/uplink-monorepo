@@ -57,12 +57,10 @@ const SubmissionBody = ({
 const RenderTextSubmission = ({
   submission,
   isActive,
-  voteActions,
   footerChildren,
 }: {
   submission: Submission;
   isActive: boolean;
-  voteActions: VoteActionProps;
   footerChildren?: React.ReactNode;
 }) => {
   console.log(submission);
@@ -232,12 +230,10 @@ const RenderImageSubmission = ({ submission, isActive }) => {
 const CardSubmission = ({
   submission,
   basePath,
-  voteActions,
   footerChildren,
 }: {
   submission: Submission;
   basePath: string;
-  voteActions?: VoteActionProps;
   footerChildren?: React.ReactNode;
 }) => {
   const isMobileDevice = isMobile();
@@ -273,7 +269,6 @@ const CardSubmission = ({
         <RenderTextSubmission
           submission={submission}
           isActive={isActive}
-          voteActions={voteActions}
           footerChildren={isActive ? footerChildren : null}
         />
       )}
