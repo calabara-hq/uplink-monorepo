@@ -9,6 +9,8 @@ import useSWR from "swr";
 import { useSession } from "./SessionProvider";
 import { useContestState } from "./ContestStateProvider";
 import { IToken } from "@/types/token";
+import { OutputData } from "@editorjs/editorjs";
+import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
 
 type SubmissionFormat = "video" | "image" | "text";
 
@@ -45,7 +47,7 @@ export type StandardSubmission = BaseSubmission & {
     title: string;
     previewAsset?: string;
     videoAsset?: string;
-    body?: string;
+    body?: OutputData;
   };
 };
 
@@ -98,47 +100,6 @@ export interface ContestInteractionProps {
 }
 
 // fetcher functions
-
-const getSubmissions = async (contestId: string) => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `
-        query Query($contestId: ID!){
-          contest(contestId: $contestId){
-              submissions {
-                  id
-                  contestId
-                  author
-                  created
-                  type
-                  url
-                  version
-                  totalVotes
-                  rank
-              }
-          }
-      }`,
-      variables: {
-        contestId,
-      },
-    }),
-  })
-    .then((res) => res.json())
-    .then((res) => res.data.contest.submissions)
-    .then(async (submissions) => {
-      return await Promise.all(
-        submissions.map(async (submission, idx) => {
-          const data = await fetch(submission.url).then((res) => res.json());
-          return { ...submission, data: data };
-        })
-      );
-    });
-  return data;
-};
 
 const getUserSubmissionParams = async (
   contestId: string,
@@ -316,7 +277,7 @@ export function ContestInteractionProvider({
     error: isSubmissionError,
   }: { data: any; isLoading: boolean; error: any } = useSWR(
     `submissions/${contestId}`,
-    () => getSubmissions(contestId),
+    () => fetchSubmissions(contestId),
     { refreshInterval: 10000 }
   );
 

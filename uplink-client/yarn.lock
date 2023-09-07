@@ -9557,10 +9557,10 @@ media-captions@0.0.18:
   resolved "https://registry.yarnpkg.com/media-captions/-/media-captions-0.0.18.tgz#ad2de78b06d6d222407057279a1595f8b0408a7e"
   integrity sha512-JW18P6FuHdyLSGwC4TQ0kF3WdNj/+wMw2cKOb8BnmY6vSJGtnwJ+vkYj+IjHOV34j3XMc70HDeB/QYKR7E7fuQ==
 
-media-chrome@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/media-chrome/-/media-chrome-1.1.3.tgz#5ddcc90d498dc13ac52ac7958bd6c178d7edbe76"
-  integrity sha512-06JiIuvJ3ZtCETd4xXPtp0qHmPvo3aEdIH/wh9ARIBe3S6G6p9M/yU0sCl3vbD9XyMGTPghRIS0mpgwYiE0nFQ==
+media-chrome@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/media-chrome/-/media-chrome-1.4.2.tgz#9f1b9363f7ba7f9b12b1e75ba77223e35c378720"
+  integrity sha512-WfyNpCvkqKyC0ObIe6rUMxMOYmiyQJVkJ4koLyl87120LbN/X0UMKpoIqkw2o5m9ABWTgzq8/UKQuObnLHHD0w==
 
 media-query-parser@^2.0.2:
   version "2.0.2"
@@ -11049,10 +11049,10 @@ react-inspector@^6.0.0:
   resolved "https://registry.yarnpkg.com/react-inspector/-/react-inspector-6.0.1.tgz#1a37f0165d9df81ee804d63259eaaeabe841287d"
   integrity sha512-cxKSeFTf7jpSSVddm66sKdolG90qURAX3g1roTeaN6x0YEbtWc8JpmFN9+yIqLNH2uEkYerWLtJZIXRIFuBKrg==
 
-react-intersection-observer@^9.4.3:
-  version "9.4.3"
-  resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-9.4.3.tgz#ec84ce0c25cad548075130ea045ac5c7adf908f3"
-  integrity sha512-WNRqMQvKpupr6MzecAQI0Pj0+JQong307knLP4g/nBex7kYfIaZsPpXaIhKHR+oV8z+goUbH9e10j6lGRnTzlQ==
+react-intersection-observer@^9.5.2:
+  version "9.5.2"
+  resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-9.5.2.tgz#f68363a1ff292323c0808201b58134307a1626d0"
+  integrity sha512-EmoV66/yvksJcGa1rdW0nDNc4I1RifDWkT50gXSFnPLYQ4xUptuDD4V7k+Rj1OgVAlww628KLGcxPXFlOkkU/Q==
 
 react-is@18.1.0:
   version "18.1.0"

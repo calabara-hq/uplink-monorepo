@@ -291,8 +291,10 @@ export const useStandardSubmissionCreator = () => {
                 };
             }
             else {
-                const file = new File([videoThumbnailOptions[videoThumbnailBlobIndex]], 'videoThumbnail');
-                await IpfsUpload(file).then(url => {
+                // convert the base64 to blob first
+                const blob = await fetch(videoThumbnailOptions[videoThumbnailBlobIndex]).then(r => r.blob())
+                await IpfsUpload(blob).then(url => {
+                    console.log(url)
                     setVideoThumbnailUrl(url)
                 }).catch(err => {
                     console.log(err)

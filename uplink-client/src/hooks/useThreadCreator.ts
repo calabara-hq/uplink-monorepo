@@ -28,7 +28,7 @@ export type ApiThreadItem = {
     videoAsset?: string;
     assetSize?: string;
     assetType?: string;
-  };
+};
 
 
 const threadReducer = (
@@ -354,9 +354,11 @@ export const useThreadCreator = (initialThread?: ThreadItem[]) => {
                             isError: true,
                         }
                     }
-                    else { // if there is a thumbnail, upload the blob and add it to the thread
-                        const file = new File([item.videoThumbnailOptions[item.videoThumbnailBlobIndex]], 'videoThumbnail');
-                        await IpfsUpload(file).then(url => {
+                    else {
+                        // if there is a thumbnail, upload the blob and add it to the thread
+                        // convert the base64 to blob first
+                        const blob = await fetch(item.videoThumbnailOptions[item.videoThumbnailBlobIndex]).then(r => r.blob())
+                        await IpfsUpload(blob).then(url => {
                             item.videoThumbnailUrl = url;
                         }).catch(err => {
                             console.log(err)

@@ -176,7 +176,7 @@ export const calculateTotalVotingPower = async (
     if (!user || !user.address) return new Decimal(0);
 
 
-    const cachedVotingPower = await getCacheTotalVotingPower(user, contestId);
+    const cachedVotingPower = null//await getCacheTotalVotingPower(user, contestId);
 
     if (cachedVotingPower !== null) return deadlineAdjustedVotingPower(cachedVotingPower, deadlines);
 

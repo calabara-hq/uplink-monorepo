@@ -17,7 +17,7 @@ import {
   MediaPlayButton,
   MediaMuteButton,
 } from "media-chrome/dist/react";
-
+import CardSubmission from "../Submission/CardSubmission";
 import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -28,19 +28,33 @@ import { useContestState } from "@/providers/ContestStateProvider";
 import { BiBadge } from "react-icons/bi";
 import { FaBurst } from "react-icons/fa6";
 
-const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
+const SubmissionDisplay = ({
+  contestId,
+  spaceName,
+}: {
+  contestId: string;
+  spaceName: string;
+}) => {
   const { submissions } = useContestInteractionState();
-  const { addProposedVote, currentVotes, proposedVotes } =
-  useVoteActionContext();
+  const voteActions = useVoteActionContext();
 
   return (
     <div className="flex flex-col gap-4 w-full">
       <SubmissionViewer />
-      <h1 className="text-xl lg:text-3xl text-center font-bold">Submissions</h1>
+      <h1 className="text-xl lg:text-3xl text-center font-bold text-t1">
+        Submissions
+      </h1>
       <div className="flex w-full justify-evenly items-center">
-        <div className="grid auto-rows-fr grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-full w-full">
+        <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 sm:auto-rows-fr">
           {submissions.map((submission, idx) => {
-          return <SubmissionCard submission={submission} key={idx} addProposedVote={addProposedVote} currentVotes={currentVotes} proposedVotes={proposedVotes} />;
+            return (
+              <CardSubmission
+                key={idx}
+                basePath={`${spaceName}/contests/${contestId}`}
+                submission={submission}
+                voteActions={voteActions}
+              />
+            );
           })}
         </div>
       </div>
@@ -48,7 +62,17 @@ const SubmissionDisplay = ({ contestId }: { contestId: string }) => {
   );
 };
 
-export const SubmissionCard = ({ submission, addProposedVote, currentVotes, proposedVotes  }: { submission: Submission, addProposedVote: any, currentVotes: any, proposedVotes: any   }) => {
+export const SubmissionCard = ({
+  submission,
+  addProposedVote,
+  currentVotes,
+  proposedVotes,
+}: {
+  submission: Submission;
+  addProposedVote: any;
+  currentVotes: any;
+  proposedVotes: any;
+}) => {
   const pathname = usePathname();
 
   return (
@@ -83,7 +107,12 @@ export const SubmissionCard = ({ submission, addProposedVote, currentVotes, prop
       {submission.data.type === "text" && (
         <RenderTextSubmission submission={submission} />
       )}
-      <SubmissionFooter submission={submission} addProposedVote={addProposedVote} currentVotes={currentVotes} proposedVotes={proposedVotes}/>
+      <SubmissionFooter
+        submission={submission}
+        addProposedVote={addProposedVote}
+        currentVotes={currentVotes}
+        proposedVotes={proposedVotes}
+      />
     </Link>
   );
 };
@@ -115,7 +144,12 @@ const SubmissionBody = ({ submission }) => {
   );
 };
 
-const SubmissionFooter = ({ submission, addProposedVote, currentVotes, proposedVotes }) => {
+const SubmissionFooter = ({
+  submission,
+  addProposedVote,
+  currentVotes,
+  proposedVotes,
+}) => {
   const [isSelected, setIsSelected] = useState(false);
 
   useEffect(() => {
@@ -180,7 +214,9 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
       <h3 className="break-all italic">{submission.author ?? "anonymous"} </h3>
       <section className="break-word">
         {submission.type === "twitter" ? (
-          <p className="line-clamp-[8] lg:line-clamp-[12]">{submission.data.thread[0].text}</p>
+          <p className="line-clamp-[8] lg:line-clamp-[12]">
+            {submission.data.thread[0].text}
+          </p>
         ) : (
           <Output data={submission.data.body} />
         )}

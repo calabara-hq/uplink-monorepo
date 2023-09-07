@@ -1,5 +1,5 @@
 import { generateVideoThumbnails } from "@rajesh896/video-thumbnails-generator";
-
+//import generateVideoThumbnails from "./generateVideoThumbnails";
 
 export class MediaUploadError {
     code: number;
@@ -10,11 +10,15 @@ export class MediaUploadError {
     }
 }
 
+export const dataURLtoBlob = (dataUrl: string) => {
+    return fetch(dataUrl)
+        .then(res => res.blob())
+}
 
 // This function is used to upload images to the ipfs network
 // the function takes a File object as input
 
-export const IpfsUpload = async (file: File) => {
+export const IpfsUpload = async (file: File | Blob) => {
 
     const formData = new FormData();
     formData.append('file', file);
@@ -97,7 +101,6 @@ const handleMediaUpload = async (
 
         if (videoThumbnailCallback) { // if its a video and caller wants thumbnails, generate thumbnails
             const thumbnails = await generateVideoThumbnails(file, 3, 'jpeg');
-            console.log('thumbnails', thumbnails)
             videoThumbnailCallback(thumbnails);
         }
     } else {

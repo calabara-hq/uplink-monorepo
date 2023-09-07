@@ -93,9 +93,9 @@ const BannerSection = () => {
             <h1 className="font-title mb-2 text-4xl sm:text-5xl lg:text-6xl font-[900] font-virgil">
               Uplink
             </h1>
-            <h2 className="font-title text-lg font-extrabold sm:text-xl lg:text-2xl">
+            {/* <h2 className="font-title text-lg font-extrabold sm:text-xl lg:text-2xl">
               Where creatives get <u>fun</u>ded
-            </h2>
+            </h2> */}
           </div>
         </div>
       </div>
@@ -152,7 +152,7 @@ const ContentSection2 = async () => {
     <div className="relative flex flex-col">
       <div className="h-[10vh] bg-[#FF638D]" />
       <div className="flex flex-col gap-2 w-10/12 m-auto p-2">
-        <div className="grid grid-cols-4 gap-4">
+        <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 sm:auto-rows-fr">
           {popularSubmissions.map((submission, idx) => {
             return (
               /*@ts-expect-error*/
