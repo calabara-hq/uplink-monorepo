@@ -36,7 +36,17 @@ export const ParseBlocks = ({
       );
     } else if (block.type === "image" && !omitImages) {
       return (
-        <Image key={index} src={block.data.file.url} alt="content media" />
+        <div className="relative media-grid-item w-full h-full">
+          <figure className="absolute inset-0 overflow-hidden rounded-xl">
+            <Image
+              key={index}
+              src={block.data.file.url}
+              alt="content media"
+              fill
+              className="object-contain"
+            />
+          </figure>
+        </div>
       );
     }
     return null;
