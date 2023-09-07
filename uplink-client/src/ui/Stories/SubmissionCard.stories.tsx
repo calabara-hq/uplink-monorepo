@@ -1,15 +1,17 @@
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
 import { SubmissionCard } from "../../ui/Contests/SubmissionDisplay";
+import  CardSubmission  from "../Submission/CardSubmission"
+
 
 export default {
-  title: "ui/SubmissionDisplay",
-  component: SubmissionCard,
+  title: "ui/CardSubmission",
+  component: CardSubmission,
   decorators: [SessionDecorator],
 };
 
 const Template = (args: any) => (
   <div className=" bg-pink-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-full w-full">
-    <SubmissionCard {...args} />
+    <CardSubmission {...args} />
   </div>
 );
 

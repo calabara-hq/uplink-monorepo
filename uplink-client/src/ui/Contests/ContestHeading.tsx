@@ -21,11 +21,11 @@ const Prompt = ({
     metadata.type,
     tweetId
   );
-
+console.log(JSON.stringify(prompt, null, 2))
   return (
     <div className="grid grid-cols-1 sm:grid-cols-[auto_25%] gap-6 w-full border border-border rounded-lg p-4">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-[600] text-t1">{prompt.title}</h2>
+      <div className="flex flex-col gap-2 break-word">
+        <h2 className="lg:text-3xl text-xl font-[600] text-t1">{prompt.title}</h2>
         <div className="flex flex-row gap-2 items-center">
           <Link
             className="relative w-8 h-8 flex flex-col"
@@ -47,9 +47,9 @@ const Prompt = ({
           <CategoryLabel category={metadata.category} />
           <StatusLabel status={status} />
         </div>
-        <section>
-          {ParseBlocks({ data: prompt.body, omitImages: true })}
-        </section>
+        <div className="grid grid-cols-1">
+          {ParseBlocks({ data: prompt.body, omitImages: false })}
+        </div>
       </div>
       <div className="grid grid-cols-1 w-full gap-2">
         {prompt.coverUrl && (
