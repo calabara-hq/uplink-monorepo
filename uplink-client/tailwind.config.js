@@ -33,7 +33,7 @@ const colors = {
 const colors2 = {
   base1: '#1c1f26',
   base2: '#2b303b',
-  base3: 'red'
+  base3: '#202020'
 }
 
 
@@ -168,7 +168,7 @@ module.exports = {
   },*/
 
   plugins: [
-    require("daisyui")
+    require("daisyui"),
   ],
 }
 

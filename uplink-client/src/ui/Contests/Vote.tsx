@@ -37,7 +37,7 @@ const SubmissionVoteInput = ({
     <input
       type="number"
       placeholder="votes"
-      className="input  text-center w-full py-1 text-sm rounded-none rounded-br-xl"
+      className="input input-bordered focus:ring-transparent text-center w-full py-1 text-sm bg-base-200 "
       value={submission.votes}
       onWheel={(e: React.WheelEvent<HTMLElement>) => {
         (e.target as HTMLElement).blur();
@@ -83,6 +83,8 @@ const SubmissionCardVote = ({
   submission: any;
   mode: "current" | "proposed";
 }) => {
+  const { removeSingleVote } = useVoteActionContext();
+
   return (
     <div className="grid grid-cols-3 w-full h-24 max-h-24">
       <div className="flex flex-col items-center justify-center rounded-l-xl bg-base-100 h-full w-full p-1">
@@ -98,11 +100,13 @@ const SubmissionCardVote = ({
           {submission.data.title}
         </p>
       </div>
-      <div className="grid grid-cols-[1px_auto] rounded-r-xl bg-base h-full w-full border border-gray-500 border-l-0">
-        <div className="bg-gray-500" />
-        <div className="grid grid-rows-2 ">
+      <div className="flex flex-col rounded-r-xl bg-base-100 h-full w-full">
+        <div className="grid grid-rows-2 gap-1 ">
           <div className=" rounded-tr-xl">
-            <button className="btn btn-ghost normal-case w-full rounded-none rounded-tr-xl text-error">
+            <button
+              className="btn btn-ghost normal-case w-full rounded-none rounded-tr-xl text-error"
+              onClick={() => removeSingleVote(submission.submissionId, mode)}
+            >
               <p className="text-error font-[500]">remove</p>
             </button>
           </div>

@@ -1,11 +1,8 @@
-import Prompt from "@/ui/Contests/ContestPrompt";
 import SubmissionDisplay from "@/ui/Contests/SubmissionDisplay";
-import { Suspense } from "react";
-import { SubmissionDisplaySkeleton } from "@/ui/Contests/SubmissionDisplay";
 import ContestSidebar from "@/ui/Contests/ContestSidebar";
-import SwrProvider from "@/providers/SwrProvider";
 import { getContestById } from "./fetchContest";
 import MobileActions from "@/ui/Contests/MobileActions";
+import ContestHeading from "@/ui/Contests/ContestHeading";
 
 export default async function Page({
   params,
@@ -28,17 +25,15 @@ export default async function Page({
   return (
     <>
       <div className="flex flex-col w-full gap-4">
-        {/*@ts-expect-error*/}
-        <Prompt
+        <ContestHeading
           space={space}
-          contestId={params.id}
           metadata={metadata}
           deadlines={deadlines}
-          promptUrl={promptUrl}
+          prompt={promptData}
           tweetId={tweetId}
         />
         <MobileActions contestId={params.id} spaceName={params.name} />
-        <SubmissionDisplay contestId={params.id} />
+        <SubmissionDisplay contestId={params.id} spaceName={params.name} />
       </div>
       <ContestSidebar
         contestId={params.id}

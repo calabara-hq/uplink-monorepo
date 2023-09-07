@@ -12,9 +12,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-theme="uplinkDark">
+    <html lang="en" data-theme="uplinkDark" className="bg-base">
       <head />
-      <body className="bg-base">
+      <body>
         <WalletProvider refetchInterval={60} session={undefined}>
           <ToastProvider>
             <div className="h-full">

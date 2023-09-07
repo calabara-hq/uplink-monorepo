@@ -1,8 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { HiArrowNarrowLeft } from "react-icons/hi";
-import { Submission } from "@/providers/ContestInteractionProvider";
-import BigSubmission from "@/ui/BigSubmission/BigSubmission";
+import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
 
 const getSubmission = async (submissionId: string) => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -33,39 +31,6 @@ const getSubmission = async (submissionId: string) => {
   return data;
 };
 
-const ExpandedSubmission = ({ submission }: { submission: Submission }) => {
-  return (
-    <div className="flex flex-col items-center w-3/4 h-screen border-2 border-border shadow-box gap-4 p-4 rounded-xl">
-      <p className="text-3xl mr-auto">{submission.data.title}</p>
-      {submission.data.type === "video" && (
-        <>
-          <video controls src={submission.url} />
-        </>
-      )}
-      {submission.data.type === "image" && (
-        <div className="relative flex flex-col w-full h-1/3 lg:w-2/5 lg:h-1/2 items-center">
-          {/* <Image
-              src={
-                submission.type === "standard"
-                  ? submission.data.previewAsset
-                  : submission.data.thread[0].previewAsset
-              }
-              alt="submission image"
-              fill
-              className="rounded-xl "
-            />  */}
-          <p>body</p>
-        </div>
-      )}
-      {submission.data.type === "text" && (
-        <>
-          <p>{submission.data.title}</p>
-        </>
-      )}
-    </div>
-  );
-};
-
 export default async function SubmissionPage({
   params: { name, id, submissionId },
 }: {
@@ -73,17 +38,12 @@ export default async function SubmissionPage({
 }) {
   const submission = await getSubmission(submissionId);
   submission.data = await fetch(submission.url).then((res) => res.json());
-  console.log(submission);
   return (
-    <div className="flex flex-col h-screen items-center w-full gap-4">
-      <Link className="btn btn-ghost mr-auto" href={`/${name}/contests/${id}`}>
-        <HiArrowNarrowLeft className="h-6 w-6 mr-1" />
-        Back to Contest
+    <div className="grid grid-cols-1 w-full gap-2 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full">
+      <Link href={`/${name}/contests/${id}`} className="mr-auto">
+        <HiArrowNarrowLeft className="w-6 h-6" />
       </Link>
-      {/* <ExpandedSubmission submission={submission} /> */}
-      <div className="flex flex-col h-full w-full lg:w-3/4 items-center gap-4">
-        <BigSubmission submission={submission} />
-      </div>
+      <ExpandedSubmission submission={submission} />
     </div>
   );
 }
