@@ -14,53 +14,6 @@ import { useEffect, useRef, useState } from "react";
 import { BiLeftArrowAlt, BiRightArrowAlt } from "react-icons/bi";
 import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 
-// const Modal = ({
-//   isModalOpen,
-//   children,
-//   onClose,
-//   title,
-// }: {
-//   isModalOpen: boolean;
-//   children: React.ReactNode;
-//   onClose: () => void;
-//   title?: string;
-// }) => {
-//   const modalRef = useRef<HTMLDivElement>(null);
-
-//   useEffect(() => {
-//     const handleClickOutside = (event: MouseEvent) => {
-//       if (
-//         modalRef.current &&
-//         !modalRef.current.contains(event.target as Node)
-//       ) {
-//         onClose();
-//       }
-//     };
-
-//     document.addEventListener("mousedown", handleClickOutside);
-//     return () => {
-//       document.removeEventListener("mousedown", handleClickOutside);
-//     };
-//   }, [modalRef]);
-
-//   if (isModalOpen) {
-//     return (
-//       <div className="fixed inset-0 flex items-center justify-center z-50 w-full">
-//         <div className="modal modal-open bg-transparent ">
-//           <div
-//             ref={modalRef}
-//             className="modal-box max-w-[80vw] w-full overflow-hidden bg-transparent p-0"
-//           >
-//             {children}
-//           </div>
-//         </div>
-//         <div className="fixed inset-0 bg-black opacity-50"></div>
-//       </div>
-//     );
-//   }
-//   return null;
-// };
-
 const Modal = ({
   isModalOpen,
   children,
@@ -184,9 +137,6 @@ export default function SubmissionModal({
   index: number;
 }) {
   const router = useRouter();
-  const { contestState } = useContestState();
-  const voteActions = useVoteActionContext();
-
   return (
     <Modal isModalOpen={true} onClose={() => router.back()}>
       <AnimatePresence mode="wait">

@@ -20,7 +20,7 @@ type BaseSubmission = {
   created: string;
   url: string;
   version: string;
-  author?: string;
+  author?: `0x${string}`;
   totalVotes: string | null;
   rank: number | null;
 };
