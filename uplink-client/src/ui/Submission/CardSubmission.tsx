@@ -14,7 +14,6 @@ import {
   MediaMuteButton,
   MediaTextDisplay,
 } from "media-chrome/dist/react";
-import Output from "editorjs-react-renderer";
 import { useEffect, useRef, useState } from "react";
 import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 import { Decimal } from "decimal.js";
@@ -26,6 +25,7 @@ import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
+import { ParseBlocks } from "@/lib/blockParser";
 
 const SubmissionBody = ({
   submission,
@@ -42,7 +42,7 @@ const SubmissionBody = ({
           <UserAvatar address={submission.author} size={28} />
           <AddressOrEns address={submission.author} />
           {new Decimal(submission.totalVotes ?? "0").greaterThan(0) ? (
-            <div className="badge rounded badge-warning font-semibold ml-auto">
+            <div className="badge rounded badge-warning font-semibold ">
               {submission.totalVotes} votes
             </div>
           ) : (
@@ -93,7 +93,7 @@ const RenderTextSubmission = ({
               {submission.data.thread[0].text}
             </p>
           ) : (
-            <Output data={submission.data.body} />
+            ParseBlocks({ data: submission.data.body, omitImages: false })
           )}
         </section>
       </div>

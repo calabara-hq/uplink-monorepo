@@ -249,7 +249,7 @@ const ContestDisplay = ({
   );
 };
 
-export const ContestCard = ({
+const ContestCard = ({
   spaceName,
   contestId,
   contestTitle,
@@ -304,7 +304,6 @@ export default async function Page({
   try {
     const { allContests: isAllContests } = searchParams;
     const space = await getSpace(params.name);
-    console.log(space);
     const { id, contests, displayName, logoUrl, twitter, website } = space;
     return (
       <div className="flex flex-col md:flex-row m-auto py-6 w-11/12 gap-4">
