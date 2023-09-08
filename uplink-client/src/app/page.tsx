@@ -1,13 +1,10 @@
-import { Submission } from "@/providers/ContestInteractionProvider";
 import {
   CategoryLabel,
   ContestCategory,
   RemainingTimeLabel,
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
-import Noggles from "@/ui/Noggles/Noggles";
 import CardSubmission from "@/ui/Submission/CardSubmission";
-import { RenderSubmission } from "@/ui/SubmissionCard/SubmissionCard";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
@@ -185,7 +182,6 @@ const ContentSection = async () => {
                 key={idx}
                 basePath={`${submission.spaceName}/contests/${submission.contestId}`}
                 submission={submission}
-                voteActions={null}
               />
             );
           })}

@@ -26,25 +26,7 @@ const getSpaces = async () => {
   return data;
 };
 
-export default async function Page() {
-  const spaces = await getSpaces();
-  return (
-    <div className="flex flex-col w-full justify-center m-auto py-12 lg:w-4/5 gap-4">
-      <div className="flex flex-col md:flex-row items-center gap-4 justify-center lg:justify-end font-bold">
-        <Link
-          className="btn btn-primary btn-outline normal-case"
-          href="/spacebuilder/create"
-        >
-          <HiPlus className="w-6 h-6" />
-          <p className="pl-2">New Space</p>
-        </Link>
-      </div>
-      <AllSpaces spaces={spaces} />
-    </div>
-  );
-}
-
-export function AllSpaces({ spaces }: any) {
+const AllSpaces = ({ spaces }: any) => {
   return (
     <div
       className="grid gap-8 py-6
@@ -78,6 +60,24 @@ export function AllSpaces({ spaces }: any) {
           </Link>
         );
       })}
+    </div>
+  );
+};
+
+export default async function Page() {
+  const spaces = await getSpaces();
+  return (
+    <div className="flex flex-col w-full justify-center m-auto py-12 lg:w-4/5 gap-4">
+      <div className="flex flex-col md:flex-row items-center gap-4 justify-center lg:justify-end font-bold">
+        <Link
+          className="btn btn-primary btn-outline normal-case"
+          href="/spacebuilder/create"
+        >
+          <HiPlus className="w-6 h-6" />
+          <p className="pl-2">New Space</p>
+        </Link>
+      </div>
+      <AllSpaces spaces={spaces} />
     </div>
   );
 }

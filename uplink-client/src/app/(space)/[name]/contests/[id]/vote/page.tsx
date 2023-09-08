@@ -9,7 +9,7 @@ import { HiArrowNarrowLeft } from "react-icons/hi";
 export default async function Page({
   params,
 }: {
-  params: { id: string };
+  params: { name: string; id: string };
 }) {
   const {
     metadata,

@@ -19,10 +19,9 @@ export const AddressOrEns = ({
 }: {
   address: null | undefined | string;
 }) => {
+  const { ensName, error, loading } = useEnsName(address);
   if (!address) return <span>anonymous</span>;
   const shortAddress = formatAddress(address);
-  const { ensName, error, loading } = useEnsName(address);
-
   if (ensName) return <span>{ensName}</span>;
   return <span>{shortAddress}</span>;
 };
