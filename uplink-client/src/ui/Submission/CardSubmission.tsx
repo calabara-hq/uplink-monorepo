@@ -26,6 +26,7 @@ import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
+import { ParseBlocks } from "@/lib/blockParser";
 
 const SubmissionBody = ({
   submission,
@@ -67,7 +68,7 @@ const RenderTextSubmission = ({
 }) => {
   console.log(submission);
   return (
-    <div className="relative h-full w-full rounded-xl text-white/80 gap-1 p-2">
+    <div className="relative h-full w-full min-h-[330px] rounded-xl text-white/80 gap-1 p-2">
       <div
         className={`p-2 w-full h-full flex flex-col gap-1 transition-transform duration-300 ease-in-out will-change-transform ${
           isActive ? "zoomIn" : ""
@@ -95,7 +96,10 @@ const RenderTextSubmission = ({
               {submission.data.thread[0].text}
             </p>
           ) : (
-            <Output data={submission.data.body} />
+            //<Output data={submission.data.body} />
+            <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
+              {ParseBlocks({ data: submission.data.body, omitImages: false })}
+            </div>
           )}
         </section>
       </div>

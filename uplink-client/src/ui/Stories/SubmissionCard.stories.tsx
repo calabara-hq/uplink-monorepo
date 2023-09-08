@@ -114,19 +114,38 @@ Text.args = {
     contestId: "57",
     author: "0xe9ad38d6E38E0A9970D6ebEc84C73DEA3e025da1",
     created: "2023-08-17T14:02:07.591Z",
-    type: "twitter",
+    type: "standard",
     url: "https://uplink.mypinata.cloud/ipfs/QmNVe2QcPiBhQFE9RGoaYE63oh7PUC7bvK1M2Gbqpr5i7w",
     version: "uplink-v1",
-    totalVotes: "0",
+    totalVotes: "1",
     rank: null,
     data: {
       type: "text",
       title: "X ".repeat(50),
-      thread: [
-        {
-          text: "Another brand new submission!!!!!! ",
-        },
-      ],
+      body: {
+        blocks: [
+          {
+            id: "3f4JQkc6y9",
+            type: "paragraph",
+            data: {
+              text: "this is a new test prompt".repeat(10),
+            },
+          },
+          {
+            id: "2f4JQkc6y9",
+            type: "image",
+            data: {
+              file: {
+                url: "https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/roadster_and_semi/roadster/hero.jpg",
+              },
+              caption: "Roadster // tesla.com",
+              withBorder: false,
+              withBackground: false,
+              stretched: true,
+            },
+          },
+        ],
+      },
     },
   },
 };
