@@ -40,7 +40,9 @@ const AddToCartButton = ({ submission, voteActions }) => {
     );
   }, [currentVotes, proposedVotes, submission.id]);
 
-  const handleSelect = () => {
+  const handleSelect = (event) => {
+    event.stopPropagation()
+    event.preventDefault()
     if (!isSelected) {
       addProposedVote({ ...submission, submissionId: submission.id });
     }
@@ -49,27 +51,52 @@ const AddToCartButton = ({ submission, voteActions }) => {
 
   if (isSelected) {
     return (
-      <button className=" btn btn-ghost btn-sm cursor-default no-animation ml-auto">
-        <HiCheckBadge className="h-6 w-6 text-black" />
-      </button>
+      <div className="animate-springUp flex absolute bottom-0 left-0 items-center w-full h-8 rounded-b-lg bg-warning px-1 bg-opacity-80 cursor-default no-animation">
+        <p className="text-black font-medium text-center ml-auto">
+          Item in Cart
+        </p>
+        <div className="w-0.5 h-full bg-base ml-auto" />
+
+        <span className="p-4   ">
+          <HiCheckBadge className="h-6 w-6 text-black" />
+        </span>
+      </div>
     );
   } else
     return (
-      <button className=" btn btn-ghost btn-sm ml-auto" onClick={handleSelect}>
-        <HiPlus className="h-6 w-6 text-black" />
-      </button>
+      <div onClick={(event)=>handleSelect(event)} className="animate-springUp flex absolute bottom-0 left-0 items-center w-full h-8 rounded-b-lg bg-warning px-1 hover:bg-opacity-80">
+        <p className="text-black font-medium text-center ml-auto">
+          Add to Cart
+        </p>
+        <div className="w-0.5 h-full bg-base ml-auto" />
+
+        <span className=" p-4" >
+          <HiPlus className="h-6 w-6 text-black font-medium" />
+        </span>
+      </div>
     );
 };
 
 const SubmissionFooter = ({ submission }) => {
   const { contestState } = useContestState();
   const voteActions = useVoteActionContext();
-  if (voteActions && contestState === "voting")
-    return (
-      <div className="animate-springUp flex absolute bottom-0 left-0 items-end w-full h-8 rounded-b-lg bg-secondary">
+  if (contestState) {
+    if (
+      voteActions && contestState === "voting"
+    )
+      return (
         <AddToCartButton submission={submission} voteActions={voteActions} />
-      </div>
-    );
+      );
+    else if (new Decimal(submission.totalVotes ?? "0").greaterThan(0))
+      return (
+        <div className="animate-springUp flex absolute bottom-0 left-0 items-end w-full h-8 rounded-b-lg bg-warning">
+          <div className="text-black font-medium m-auto">
+            {submission.totalVotes} votes
+          </div>
+        </div>
+      );
+  }
+
   return null;
 };
 
