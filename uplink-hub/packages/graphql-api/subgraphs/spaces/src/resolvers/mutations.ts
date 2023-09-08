@@ -60,7 +60,7 @@ const mutations = {
             const { spaceData } = args;
             const result = await processSpaceData(spaceData, user.address);
             const spaceName = result.success ? await createDbSpace(result.cleanedSpaceData) : null;
-
+            
             return {
                 spaceName: spaceName,
                 success: result.success,

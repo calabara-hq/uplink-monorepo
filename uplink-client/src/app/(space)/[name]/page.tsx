@@ -1,136 +1,163 @@
-import { SpaceDocument } from "@/lib/graphql/spaces.gql";
-import graphqlClient from "@/lib/graphql/initUrql";
 import Link from "next/link";
 import Image from "next/image";
 import TokenBadge from "@/ui/TokenBadge/TokenBadge";
-import { getSpace } from "@/lib/fetch/space";
+import { calculateContestStatus } from "@/utils/staticContestState";
 import {
-  differenceInSeconds,
-  differenceInMinutes,
-  differenceInHours,
-  differenceInDays,
-  parseISO,
-} from "date-fns";
-import { StatusLabel } from "@/ui/Contests/StatusLabel";
+  CategoryLabel,
+  StatusLabel,
+  RemainingTimeLabel,
+  ContestCategory,
+  ContestState,
+} from "@/ui/ContestLabels/ContestLabels";
+import { BiPencil, BiWorld } from "react-icons/bi";
+import { FaTwitter } from "react-icons/fa";
+import { HiSparkles } from "react-icons/hi2";
 
-export const fetchCache = "force-no-store";
+const getSpace = async (name: string) => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+        query space($name: String!){
+          space(name: $name) {
+            id
+            name
+            displayName
+            logoUrl
+            twitter
+            website
+            admins{
+                address
+            }
+            contests {
+                deadlines {
+                  endTime
+                  snapshot
+                  startTime
+                  voteTime
+                }
+                id
+                tweetId
+                metadata {
+                  category
+                  type
+                }
+                promptUrl
+            }
+          }
+      }`,
+      variables: {
+        name,
+      },
+    }),
+    next: { tags: [`space/${name}`], revalidate: 60 },
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.space);
+  return data;
+};
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { name: string };
-  searchParams: any;
-}) {
-  try {
-    const { allContests: isAllContests } = searchParams;
-    const space = await getSpace(params.name);
-    const { id, contests, displayName, logoUrl, twitter, website } =
-      space.data.space;
-    return (
-      <div className="flex flex-col items-center m-auto py-6 w-[90vw] gap-4">
-        <div className="flex flex-col lg:flex-row gap-4 m-auto items-center w-4/5">
-          <div className="avatar ">
-            <div className="w-24 rounded-full bg-base-100">
-              <Image
-                src={logoUrl}
-                alt={"org avatar"}
-                fill
-                className="object-cover rounded-full"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col">
-            <h2 className="card-title text-3xl">{displayName}</h2>
-            {twitter && (
-              <a
-                href={`https:/twitter.com/${twitter}`}
-                target="_blank"
-                className="lg:ml-4 m-auto link"
-              >
-                {twitter}
-              </a>
-            )}
-            {website && (
-              <a
-                href={`${website}`}
-                target="_blank"
-                className="lg:ml-4 m-auto link"
-              >
-                {website}
-              </a>
-            )}
-          </div>
-          <div className="flex flex-row justify-end gap-2 lg:ml-auto">
-            <Link href={`/spacebuilder/edit/${id}`}>
-              <button className="btn btn-outline btn-accent">edit space</button>
-            </Link>
-            <br></br>
-            <Link href={`${params.name}/contests/create`}>
-              <button className="btn btn-primary">create contest</button>
-            </Link>
-          </div>
+const SpaceInfo = async ({ name }: { name: string }) => {
+  const space = await getSpace(name);
+  const { id, contests, displayName, logoUrl, twitter, website } = space;
+
+  return (
+    <div className="flex flex-col gap-2 w-full items-center">
+      <div className="avatar">
+        <div className="w-48 rounded-xl bg-base-100">
+          <Image
+            src={logoUrl}
+            alt={"org avatar"}
+            width={192}
+            height={192}
+            className="rounded-xl"
+          />
         </div>
-        <div className="p-2" />
-        <Stats />
-        <div className="p-2" />
-        <ContestDisplay
-          contests={contests}
-          spaceName={params.name}
-          isAllContests={isAllContests}
-        />
       </div>
-    );
-  } catch (e) {
-    console.log(e);
-    return <h1 className="text-white">oops, we couldnt find that space!</h1>;
-  }
-}
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-row gap-2">
+          <h2 className="card-title text-3xl text-center">{displayName}</h2>
+        </div>
+        <div className="flex flex-row gap-2">
+          {twitter && (
+            <Link
+              href={`https://twitter.com/${twitter}`}
+              target="_blank"
+              className="link link-neutral "
+              prefetch={false}
+            >
+              <FaTwitter className="w-6 h-6" />
+            </Link>
+          )}
+          {website && (
+            <Link
+              href={`${website}`}
+              target="_blank"
+              className="link link-neutral"
+              prefetch={false}
+            >
+              <BiWorld className="w-6 h-6" />
+            </Link>
+          )}
+          <Link href={`/spacebuilder/edit/${id}`} className="link link-neutral">
+            <BiPencil className="w-6 h-6" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-function calculateStatus(deadlines: any) {
-  const { startTime, voteTime, endTime } = deadlines;
-  const start = parseISO(startTime);
-  const vote = parseISO(voteTime);
-  const end = parseISO(endTime);
+const Stats = () => {
+  return (
+    <div className="stats stats-horizontal md:stats-vertical w-full bg-transparent border-2 border-border shadow-box">
+      <div className="stat">
+        <div className="stat-figure text-primary">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="inline-block w-8 h-8 stroke-current"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            ></path>
+          </svg>
+        </div>
+        <div className="stat-title">ETH rewards</div>
+        <div className="stat-value text-primary">25.6K</div>
+        <div className="stat-desc"></div>
+      </div>
 
-  let contestState = null;
-  let remainingTime = null;
-
-  const now = new Date();
-  let nextDeadline = end;
-
-  if (now < start) {
-    contestState = "pending";
-    nextDeadline = start;
-  } else if (now < vote) {
-    contestState = "submitting";
-    nextDeadline = vote;
-  } else if (now < end) {
-    contestState = "voting";
-  } else {
-    contestState = "end";
-  }
-
-  const seconds = differenceInSeconds(nextDeadline, now);
-  const minutes = differenceInMinutes(nextDeadline, now);
-  const hours = differenceInHours(nextDeadline, now);
-  const days = differenceInDays(nextDeadline, now);
-
-  if (days > 0) {
-    remainingTime = `${days} days`;
-  } else if (hours > 0) {
-    remainingTime = `${hours} hrs`;
-  } else if (minutes > 0) {
-    remainingTime = `${minutes} mins`;
-  } else {
-    remainingTime = seconds > 0 ? `${seconds} s` : "";
-  }
-
-  return {
-    contestState,
-    stateRemainingTime: remainingTime,
-  };
-}
+      <div className="stat">
+        <div className="stat-figure text-secondary">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="inline-block w-8 h-8 stroke-current"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            ></path>
+          </svg>
+        </div>
+        <div className="stat-title">ERC rewards</div>
+        <div className="stat-value text-secondary">2.6M</div>
+        <div className="stat-desc">tokens + nfts</div>
+      </div>
+    </div>
+  );
+};
 
 const ContestDisplay = ({
   contests,
@@ -141,22 +168,20 @@ const ContestDisplay = ({
   spaceName: string;
   isAllContests: boolean;
 }) => {
-  console.log(contests);
+  const now = new Date().toISOString();
 
   const filteredContests = isAllContests
     ? contests
     : contests.filter((contest) => {
-        const status = calculateStatus(contest.deadlines);
-        return status.contestState !== "end";
+        return contest.deadlines.endTime > now;
       });
-
   return (
-    <div className="flex flex-col w-full lg:w-3/4 m-auto items-center gap-4">
+    <div className="flex flex-col w-full lg:w-3/4 ml-auto mr-auto items-center gap-4 border-2 border-border p-6 rounded-xl shadow-box min-h-[500px]">
       <div className="flex flex-col lg:flex-row w-full lg:justify-between items-center">
         <h1 className="text-3xl font-bold">Contests</h1>
         <div
           tabIndex={0}
-          className="tabs tabs-boxed content-center p-2 bg-transparent text-white font-bold"
+          className="tabs tabs-boxed content-center p-1 bg-transparent text-white font-bold"
         >
           <Link
             href={`${spaceName}`}
@@ -170,78 +195,134 @@ const ContestDisplay = ({
           >
             All Contests
           </Link>
+          <Link href={`${spaceName}/contests/create`} className="tab">
+            <span>New</span>
+            <HiSparkles className="h-5 w-5 text-secondary pl-0.5" />
+          </Link>
         </div>
       </div>
 
-      <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full">
-        {filteredContests.map((contest) => (
-          <ContestCard
-            key={contest.id}
-            contest={contest}
-            spaceName={spaceName}
-          />
-        ))}
-      </div>
+      {filteredContests.length === 0 && isAllContests && (
+        <div className="card bg-base-100 m-auto border-2 border-border">
+          <div className="card-body">
+            <p>This space has not yet hosted any contests. Check back later!</p>
+          </div>
+        </div>
+      )}
+      {filteredContests.length === 0 && !isAllContests && (
+        <div className="card bg-base-100 m-auto border-2 border-border">
+          <div className="card-body">
+            <p>No active contests</p>
+            <Link
+              href={`${spaceName}?allContests=true`}
+              className="btn btn-sm btn-primary lowercase"
+            >
+              view previous
+            </Link>
+          </div>
+        </div>
+      )}
+      {filteredContests.length > 0 && (
+        <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full auto-rows-fr">
+          {filteredContests.map((contest) => {
+            const { contestState, stateRemainingTime } = calculateContestStatus(
+              contest.deadlines,
+              contest.metadata.type,
+              contest.tweetId
+            );
+            return (
+              <ContestCard
+                key={contest.id}
+                spaceName={spaceName}
+                contestId={contest.id}
+                // Update prompt url fetch
+                contestTitle="test prompt"
+                category={contest.metadata.category}
+                contestState={contestState}
+                remainingTime={stateRemainingTime}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
 
 const ContestCard = ({
   spaceName,
-  contest,
+  contestId,
+  contestTitle,
+  category,
+  contestState,
+  remainingTime,
 }: {
-  contest: any;
-  spaceName: any;
+  spaceName: string;
+  contestId: string;
+  contestTitle: string;
+  category: ContestCategory;
+  contestState: ContestState;
+  remainingTime: string | null;
 }) => {
-  const { contestState, stateRemainingTime } = calculateStatus(
-    contest.deadlines
-  );
   return (
-    <Link href={`${spaceName}/contests/${contest.id}`}>
+    <Link href={`${spaceName}/contests/${contestId}`} prefetch={false}>
       <div
-        key={contest.id}
+        key={contestId}
         className="card bg-base-100 
-      transition-all duration-300 ease-linear
-      cursor-pointer hover:shadow-box hover:scale-105 rounded-3xl p-4 h-fit w-full"
+        cursor-pointer border border-border rounded-2xl p-4 h-full max-h-36 overflow-hidden w-full transform transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
       >
-        <div className="card-body items-center p-0">
-          <h2 className="card-title mb-0 normal-case">test prompt</h2>
-          <p className="badge lg:badge-lg lowercase">
-            {contest.metadata.category}
-          </p>
-
-          <StatusLabel status={contestState || "end"} />
-          {stateRemainingTime && <p>{stateRemainingTime}</p>}
-
-          <div className="card-actions justify-end"></div>
+        <div className="card-body items-start p-0">
+          <div className="flex w-full">
+            <div className="flex-grow ">
+              <h2
+                className={`card-title mb-0 normal-case break-all line-clamp-2`}
+              >
+                {contestTitle}
+              </h2>
+            </div>
+            <div className="ml-2">
+              <CategoryLabel category={category} />
+            </div>
+          </div>
+          <div className="flex flex-row gap-2">
+            <StatusLabel status={contestState} />
+            <RemainingTimeLabel remainingTime={remainingTime} />
+          </div>
         </div>
       </div>
     </Link>
   );
 };
 
-const Stats = () => {
-  return (
-    <div className="flex flex-col items-center gap-4 w-3/4 lg:m-auto">
-      <div className="stats stats-vertical lg:stats-horizontal w-full bg-transparent border-2 border-border shadow-box">
-        <div className="stat place-items-center">
-          <div className="stat-title">ETH</div>
-          <div className="stat-value">20</div>
-          <div className="stat-desc">Jan 1st to Feb 1st</div>
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: { name: string };
+  searchParams: any;
+}) {
+  try {
+    const { allContests: isAllContests } = searchParams;
+    const space = await getSpace(params.name);
+    const { id, contests, displayName, logoUrl, twitter, website } = space;
+    return (
+      <div className="flex flex-col md:flex-row m-auto py-6 w-11/12 gap-4">
+        <div className="flex flex-col w-full md:w-56 gap-4">
+          {/*@ts-expect-error */}
+          <SpaceInfo name={params.name} />
+          {/* <Stats /> */}
         </div>
-
-        <div className="stat place-items-center">
-          <div className="stat-title">Tokens & NFTs</div>
-          <div className="stat-value">5</div>
-          <div className="stat-desc text-accent">↗︎ 40 (2%)</div>
-        </div>
-
-        <div className="stat place-items-center">
-          <div className="stat-title">Twitter Impressions</div>
-          <div className="stat-value">1,200</div>
-          <div className="stat-desc">↘︎ 90 (14%)</div>
+        <div className="flex flex-col flex-grow">
+          <ContestDisplay
+            contests={contests}
+            spaceName={params.name}
+            isAllContests={isAllContests}
+          />
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  } catch (e) {
+    console.log(e);
+    return <h1 className="text-white">oops, we couldnt find that space!</h1>;
+  }
+}

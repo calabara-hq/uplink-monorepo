@@ -1,8 +1,16 @@
+/**
+ * Copyright (c) 2022-2023, Balázs Orbán
+ * ISC License
+ *
+ * the following is a modified version of the nextAuth session provider
+ *
+ **/
+
 "use client";
 import { unixNow } from "@/utils/time";
 import { createContext, useEffect, useState, useMemo, useContext } from "react";
 import { BroadcastChannel } from "@/utils/broadcast";
-import { CtxOrReq, fetchData } from "@/utils/fetchData";
+import { IncomingMessage } from "http";
 
 export type ISODateString = string;
 
@@ -11,6 +19,7 @@ export type UserTwitterObject = {
   name: string;
   username: string;
   profile_image_url: string;
+  profile_image_url_large: string;
 };
 
 export interface Session {
@@ -25,6 +34,11 @@ interface ISessionStore {
   _lastSync: number;
   _session?: Session | null | undefined;
   _getSession: (...args: any[]) => any;
+}
+
+interface CtxOrReq {
+  req?: IncomingMessage;
+  ctx?: { req: IncomingMessage };
 }
 
 // context definition
@@ -126,19 +140,33 @@ export type GetSessionParams = CtxOrReq & {
 // fetch the current session from the server
 
 export const getSession = async (params?: GetSessionParams) => {
-  const session = await fetchData<Session>("/auth/session");
+  const session = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/auth/session`, {
+      credentials: "include",
+      cache: "no-store",
+  })
+    .then((res) => res.json())
+    .then((data) => (Object.keys(data).length > 0 ? data : null))
+    .catch((err) => {
+      console.log(err);
+      return null;
+    });
+
   if (params?.broadcast ?? true) {
     broadcast.post({ event: "session", data: { trigger: "getSession" } });
   }
-  console.log("current session is: ", session);
   return session;
 };
 
 // fetch a csrf from the server
 
 export const getCsrfToken = async (params?: CtxOrReq) => {
-  const response = await fetchData<{ csrfToken: string }>("/auth/csrf");
-  return response?.csrfToken;
+  return await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/auth/csrf`, {
+    credentials: "include",
+    cache: "no-store",
+  })
+    .then((res) => res.json())
+    .then((data) => data.csrfToken)
+    .catch((err) => console.log(err));
 };
 
 export type SignInParams = {
@@ -158,6 +186,7 @@ export const signIn = async (credentials: SignInParams) => {
     body: JSON.stringify({
       ...credentials,
     }),
+    cache: "no-store",
   });
   const data = await res.json();
   if (res.ok) await _SessionStore._getSession({ event: "storage" });
@@ -170,6 +199,7 @@ export const signIn = async (credentials: SignInParams) => {
 // sign out
 
 export const signOut = async () => {
+  const csrfToken = await getCsrfToken();
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_HUB_URL}/auth/sign_out`,
     {
@@ -178,8 +208,7 @@ export const signOut = async () => {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      //body: JSON.stringify({ csrfToken: 'hello thisis a test' }),
-      body: JSON.stringify({ csrfToken: await getCsrfToken() }),
+      body: JSON.stringify({ csrfToken }),
     }
   );
   const data = await response.json();
@@ -189,7 +218,7 @@ export const signOut = async () => {
 
 export const twitterSignIn = async (scope: string) => {
   // Logic to sign in with Twitter goes here
-  const res = await fetch(
+  return await fetch(
     `${process.env.NEXT_PUBLIC_HUB_URL}/auth/twitter/initiate_twitter_auth`,
     {
       method: "POST",
@@ -199,11 +228,11 @@ export const twitterSignIn = async (scope: string) => {
       credentials: "include",
       body: JSON.stringify({ scope: scope }),
     }
-  );
-
-  const data = await res.json();
-  //if (res.ok) await _SessionStore._getSession({ event: "storage" });
-  return data;
+  )
+    .then((res) => res.json())
+    .catch((error) => {
+      console.log(error);
+    });
 };
 
 type SessionProviderProps = {
@@ -251,7 +280,7 @@ export function SessionProvider(props: SessionProviderProps) {
         // triggered which updates it
         // If the client doesn't have a session then we don't need to call
         // the server to check if it does (if they have signed in via another
-        // tab or window that will come through as a "stroage" event
+        // tab or window that will come through as a "storage" event
         // event anyway)
         // Bail out early if the client session is not stale yet
         if (
@@ -308,8 +337,9 @@ export function SessionProvider(props: SessionProviderProps) {
     // and makes our tab visible again, re-fetch the session, but only if
     // this feature is not disabled.
     const visibilityHandler = () => {
-      if (refetchOnWindowFocus && document.visibilityState === "visible")
+      if (refetchOnWindowFocus && document.visibilityState === "visible") {
         _SessionStore._getSession({ event: "visibilitychange" });
+      }
     };
     document.addEventListener("visibilitychange", visibilityHandler, false);
     return () =>
@@ -330,7 +360,9 @@ export function SessionProvider(props: SessionProviderProps) {
           _SessionStore._getSession({ event: "poll" });
         }
       }, refetchInterval * 1000);
-      return () => clearInterval(refetchIntervalTimer);
+      return () => {
+        clearInterval(refetchIntervalTimer);
+      };
     }
   }, [refetchInterval, shouldRefetch]);
 

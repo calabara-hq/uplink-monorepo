@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useState } from "react";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { HiMagnifyingGlass } from "react-icons/hi2";
 
 export interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -34,7 +34,7 @@ export function SearchBar({ spaces }: any) {
             className="input"
           />
           <button className="btn btn-square">
-            <MagnifyingGlassIcon className="w-6 h-6" />
+            <HiMagnifyingGlass className="w-6 h-6" />
           </button>
         </div>
       </div>

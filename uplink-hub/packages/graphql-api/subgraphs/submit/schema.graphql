@@ -2,9 +2,32 @@ scalar Decimal
 scalar EditorData
 scalar SubmissionAssetUrl
 
-type Contest @key(fields: "id") {
-  id: Int!
+extend type Contest @key(fields: "id") {
+  id: ID!
+  deadlines: DeadlinesType! @external
+  additionalParams: AdditionalParamsType! @external
   submissions: [Submission!]!
+    @requires(
+      fields: "deadlines {startTime, voteTime, endTime, snapshot}, additionalParams {anonSubs, visibleVotes}"
+    )
+  gnosisResults: String @requires(fields: "deadlines {endTime}")
+  utopiaResults: String @requires(fields: "deadlines {endTime}")
+}
+
+type DeadlinesType {
+  startTime: String! @external
+  voteTime: String! @external
+  endTime: String! @external
+  snapshot: String! @external
+}
+
+type AdditionalParamsType {
+  anonSubs: Boolean! @external
+  visibleVotes: Boolean! @external
+}
+
+type Space @key(fields: "id") {
+  id: ID!
 }
 
 type Submission @key(fields: "id") {
@@ -13,19 +36,59 @@ type Submission @key(fields: "id") {
   created: String!
   type: String!
   version: String!
+  author: String
+  url: String!
+  totalVotes: Decimal
+  rank: Int
+}
+
+type PopularSubmission @key(fields: "id") {
+  id: ID!
+  contestId: ID!
+  created: String!
+  type: String!
+  version: String!
   author: String!
   url: String!
+  contestCategory: String!
+  spaceName: String!
+  spaceDisplayName: String!
+}
+
+type Token {
+  type: String!
+  decimals: Int!
+  symbol: String!
+  address: String
+  tokenId: String
+}
+
+type TokenRestriction {
+  token: Token!
+  threshold: Decimal!
+}
+
+type Restriction {
+  restrictionType: String!
+  tokenRestriction: TokenRestriction
+}
+
+type RestrictionResult {
+  restriction: Restriction!
+  result: Boolean!
 }
 
 type UserSubmissionParams {
   maxSubPower: Int!
   remainingSubPower: Int!
+  restrictionResults: [RestrictionResult!]!
   userSubmissions: [Submission!]!
 }
 
 type Query {
   submission(submissionId: ID!): Submission
   contestSubmissions(contestId: ID!): [Submission!]!
+  popularSubmissions: [PopularSubmission!]!
   getUserSubmissionParams(
     contestId: ID!
     walletAddress: String
@@ -45,15 +108,32 @@ input SubmissionPayload {
   body: EditorData
 }
 
+input ThreadPayload {
+  text: String
+  previewAsset: SubmissionAssetUrl
+  videoAsset: SubmissionAssetUrl
+  assetSize: String
+  assetType: String
+}
+
+input TwitterSubmissionPayload {
+  title: String!
+  thread: [ThreadPayload!]!
+}
+
 type Mutation {
   createSubmission(
     contestId: ID!
     submission: SubmissionPayload!
+  ): createSubmissionResponse!
+  createTwitterSubmission(
+    contestId: ID!
+    submission: TwitterSubmissionPayload!
   ): createSubmissionResponse!
 }
 
 extend schema
   @link(
     url: "https://specs.apollo.dev/federation/v2.0"
-    import: ["@key", "@shareable"]
+    import: ["@key", "@shareable", "@external", "@requires"]
   )

@@ -6,7 +6,13 @@ import Decimal from "decimal.js";
 import gql from "graphql-tag";
 import graphqlClient from "@/lib/graphql/initUrql";
 import useHandleMutation from "@/hooks/useHandleMutation";
-import { mutate } from "swr";
+import { useContestInteractionState } from "./ContestInteractionProvider";
+
+
+
+// inherit voting params from contest interaction provider
+// provide an API for managing user votes
+
 
 export interface VotingStateProps {
   userVotingState: {
@@ -97,9 +103,13 @@ export const VoteProposalProvider = ({
   contestId,
 }: {
   children: React.ReactNode;
-  contestId: number;
+  contestId: string;
 }) => {
-  const { userVotingParams, isLoading, mutate } = useVotingParams(contestId);
+  const {
+    userVoteParams: userVotingParams,
+    areUserVotingParamsLoading: isLoading,
+    mutateUserVotingParams: mutate,
+  } = useContestInteractionState();
   const [proposedVotes, setProposedVotes] = useState<any[]>([]);
   const [currentVotes, setCurrentVotes] = useState<any[]>([]);
   const [votesSpent, setVotesSpent] = useState<string>("0");
@@ -123,7 +133,7 @@ export const VoteProposalProvider = ({
         const newProposedVotes = proposedVotes.filter(
           (el) =>
             !userVotingParams?.userVotes.find(
-              (vote) => vote.submissionId === el.submissionId
+              (vote) => vote?.submissionId === el.submissionId
             )
         );
         setProposedVotes(newProposedVotes);
@@ -285,7 +295,7 @@ export const VoteProposalProvider = ({
   );
 };
 
-export function useVoteProposalContext() {
+export function useVoteActionContext() {
   const context = useContext(VoteProposalContext);
   if (context === undefined) {
     throw new Error("useVotingState must be used within a VotingStateProvider");

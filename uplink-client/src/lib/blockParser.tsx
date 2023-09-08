@@ -1,4 +1,5 @@
 import { OutputData } from "@editorjs/editorjs";
+import Image from "next/image";
 import React from "react";
 
 function createTextLinks_(text: string) {
@@ -16,7 +17,13 @@ function createTextLinks_(text: string) {
   );
 }
 
-export const ParseBlocks = ({ data }: { data: OutputData }) => {
+export const ParseBlocks = ({
+  data,
+  omitImages = false,
+}: {
+  data: OutputData;
+  omitImages?: boolean;
+}) => {
   if (!data || data.blocks.length === 0) return null;
   return data.blocks.map((block, index) => {
     if (block.type === "paragraph") {
@@ -27,8 +34,21 @@ export const ParseBlocks = ({ data }: { data: OutputData }) => {
         { key: index },
         block.data.text
       );
-    } else if (block.type === "image") {
-    } //TODO: add this
+    } else if (block.type === "image" && !omitImages) {
+      return (
+        <div key={index} className="relative media-grid-item w-full h-full">
+          <figure className="absolute inset-0 overflow-hidden rounded-xl">
+            <Image
+              key={index}
+              src={block.data.file.url}
+              alt="content media"
+              fill
+              className="object-contain"
+            />
+          </figure>
+        </div>
+      );
+    }
     return null;
   });
 };

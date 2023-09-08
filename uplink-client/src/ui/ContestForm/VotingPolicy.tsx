@@ -1,102 +1,86 @@
-import {
-  ArcadeStrategy,
-  arraysSubtract,
-  ContestBuilderProps,
-  VotingPolicyType,
-  SubmitterRestriction,
-} from "@/lib/contestHandler";
 import TokenModal, { TokenManager } from "../TokenModal/TokenModal";
-import { BlockWrapper } from "./ContestForm";
+import { BlockWrapper } from "./Entrypoint";
 import { IToken } from "@/types/token";
 import { useEffect, useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
+import { HiTrash, HiArrowPath, HiPencil } from "react-icons/hi2";
 import {
-  TrashIcon,
-  ArrowPathIcon,
-  PencilIcon,
-} from "@heroicons/react/24/solid";
+  validateVotingPolicy,
+  ArcadeStrategy,
+  arraysSubtract,
+  ContestBuilderProps,
+  VotingPolicyType,
+} from "./contestHandler";
+import TokenCard from "../TokenCard/TokenCard";
+import { AiOutlinePlus } from "react-icons/ai";
 
 const VotingPolicy = ({
-  state,
-  dispatch,
+  initialVotingPolicy,
+  handleConfirm,
+  spaceTokens,
+  errors,
+  setErrors,
 }: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  initialVotingPolicy: ContestBuilderProps["votingPolicy"];
+  handleConfirm: (votingPolicy: ContestBuilderProps["votingPolicy"]) => void;
+  spaceTokens: IToken[];
+  errors: string;
+  setErrors: (errors: string) => void;
 }) => {
+  const [votingPolicy, setVotingPolicy] = useState(initialVotingPolicy);
   const [isTokenModalOpen, setIsTokenModalOpen] = useState<boolean>(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-
   const handleEditStrategy = (index: number) => {
     setEditIndex(index);
     setIsTokenModalOpen(true);
   };
 
-  useEffect(() => {
-    console.log("votingPolicy", state.votingPolicy);
-  }, [state.votingPolicy]);
+  const removeVotingPolicy = (index: number) => {
+    setVotingPolicy(votingPolicy.filter((_, i) => i !== index));
+  };
+
+  const onSubmit = () => {
+    const { errors, isError, data } = validateVotingPolicy(votingPolicy);
+    console.log({ errors, isError, data });
+    if (isError) return setErrors(errors);
+    handleConfirm(data);
+  };
 
   return (
     <BlockWrapper
       title="Voting Policy"
-      info="Voting credits determine how voting power is calculated, as well as
-    any restrictions on voting power."
+      info="Who can vote, and how much voting power do they have?"
     >
       <div className="flex flex-col items-center w-full gap-4">
-        {state.votingPolicy.length > 0 && (
-          <div className="flex flex-col lg:flex-row w-full gap-4">
-            {state.votingPolicy.map((policy, index) => {
-              return (
-                <div className="card w-full lg:w-1/4 bg-base-100 p-4" key={index}>
-                  <div className="card-body justify-between p-0">
-                    <h2 className="card-title justify-between">
-                      {policy?.token?.symbol}
-                      <button
-                        className="btn btn-sm btn-ghost link"
-                        onClick={() => handleEditStrategy(index)}
-                      >
-                        <PencilIcon className="w-4" />
-                      </button>
-                    </h2>
-                    <div className="flex gap-2 w-fit">
-                      <p className="font-bold">{policy?.strategy?.type}</p>
-
-                      <p className="">
-                        {policy?.strategy?.type === "arcade" &&
-                          policy?.strategy?.votingPower}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <TokenBadge token={policy?.token} />
-                    </div>
-                    <div className="card-actions justify-end">
-                      <button
-                        className="btn btn-xs btn-ghost"
-                        onClick={() => {
-                          dispatch({
-                            type: "removeVotingPolicy",
-                            payload: index,
-                          });
-                        }}
-                      >
-                        remove
-                        <TrashIcon className="w-4 ml-2" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+        {errors && <p className="text-error self-start">{errors}</p>}
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5 sm gap-4">
+          <div
+            className="card btn bg-base-200 h-28"
+            onClick={() => setIsTokenModalOpen(true)}
+          >
+            <div className="flex flex-row gap-2 items-center">
+              <AiOutlinePlus className="w-6 h-6" />
+              <p>add reward</p>
+            </div>
           </div>
-        )}
-        <button
-          className="btn btn-ghost underline"
-          onClick={() => {
-            setIsTokenModalOpen(true);
-          }}
-        >
-          Add Policy
-        </button>
+          {votingPolicy.map((policy, index) => {
+            return (
+              <TokenCard
+                key={index}
+                token={policy.token}
+                handleRemove={() => removeVotingPolicy(index)}
+                editCallback={() => handleEditStrategy(index)}
+              >
+                <p className="font-bold text-t1">
+                  {policy?.strategy?.type === "arcade"
+                    ? `credits: ${policy?.strategy?.votingPower}`
+                    : "weighted"}
+                </p>
+              </TokenCard>
+            );
+          })}
+        </div>
         <Modal
           isModalOpen={isTokenModalOpen}
           onClose={() => {
@@ -108,11 +92,19 @@ const VotingPolicy = ({
             isModalOpen={isTokenModalOpen}
             setIsModalOpen={setIsTokenModalOpen}
             editIndex={editIndex}
-            state={state}
-            dispatch={dispatch}
+            votingPolicy={votingPolicy}
+            setVotingPolicy={setVotingPolicy}
+            spaceTokens={spaceTokens}
+            setErrors={setErrors}
           />
         </Modal>
       </div>
+      <button
+        onClick={onSubmit}
+        className="btn btn-primary lowercase mt-4 self-end"
+      >
+        Confirm
+      </button>
     </BlockWrapper>
   );
 };
@@ -122,30 +114,33 @@ const VotingPolicy = ({
 const VotingPolicyManager = ({
   isModalOpen,
   setIsModalOpen,
-  state,
-  dispatch,
+  votingPolicy,
+  setVotingPolicy,
   editIndex,
+  spaceTokens,
+  setErrors,
 }: {
   isModalOpen: boolean;
   setIsModalOpen: (isModalOpen: boolean) => void;
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  votingPolicy: ContestBuilderProps["votingPolicy"];
+  setVotingPolicy: (votingPolicy: ContestBuilderProps["votingPolicy"]) => void;
   editIndex: number | null;
+  spaceTokens: IToken[];
+  setErrors: (error: string) => void;
 }) => {
   const isEdit = typeof editIndex === "number";
 
   const [strategyToken, setStrategyToken] = useState<IToken | null>(
-    isEdit ? state.votingPolicy[editIndex]?.token ?? null : null
+    isEdit ? votingPolicy[editIndex]?.token ?? null : null
   );
 
   const [selectedStrategy, setSelectedStrategy] = useState<
     "arcade" | "weighted" | null
-  >(isEdit ? state.votingPolicy[editIndex].strategy?.type || null : null);
+  >(isEdit ? votingPolicy[editIndex].strategy?.type || null : null);
 
   const [votingPower, setVotingPower] = useState<string>(
     isEdit && selectedStrategy === "arcade"
-      ? (state.votingPolicy[editIndex]?.strategy as ArcadeStrategy)
-          ?.votingPower ?? ""
+      ? (votingPolicy[editIndex]?.strategy as ArcadeStrategy)?.votingPower ?? ""
       : ""
   );
 
@@ -163,19 +158,14 @@ const VotingPolicyManager = ({
         type: selectedStrategy,
         ...(selectedStrategy === "arcade" ? { votingPower: votingPower } : {}),
       },
-    };
+    } as VotingPolicyType;
 
-    if (isEdit) {
-      dispatch({
-        type: "updateVotingPolicy",
-        payload: { index: editIndex, policy: policy },
-      });
-    } else {
-      dispatch({
-        type: "addVotingPolicy",
-        payload: { policy: policy },
-      });
-    }
+    isEdit
+      ? setVotingPolicy(
+          votingPolicy.map((p, i) => (i === editIndex ? policy : p))
+        )
+      : setVotingPolicy([...votingPolicy, policy]);
+    setErrors("");
     setIsModalOpen(false);
   };
 
@@ -184,12 +174,10 @@ const VotingPolicyManager = ({
       <TokenManager
         setIsModalOpen={setIsModalOpen}
         saveCallback={saveTokenCallback}
-        existingTokens={state.votingPolicy.map(
-          (policy) => policy.token as IToken
-        )}
+        existingTokens={votingPolicy.map((policy) => policy.token as IToken)}
         quickAddTokens={arraysSubtract(
-          state.spaceTokens,
-          state.votingPolicy.map((policy) => policy.token as IToken)
+          spaceTokens,
+          votingPolicy.map((policy) => policy.token as IToken)
         )}
         continuous={true}
         uniqueStandard={false}
@@ -209,7 +197,12 @@ const VotingPolicyManager = ({
           onCancel={() => setIsModalOpen(false)}
           onConfirm={handleSubmitStrategy}
           confirmLabel="confirm"
-          confirmDisabled={selectedStrategy === "arcade" ? !votingPower : false}
+          cancelLabel="Cancel"
+          confirmDisabled={
+            selectedStrategy === "arcade"
+              ? !votingPower || !(parseInt(votingPower) > 0)
+              : false
+          }
         />
       </>
     );
@@ -234,33 +227,42 @@ const StrategyManager = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-6">
         <label className="text-xl font-medium">Strategy</label>
-        <div className="flex justify-around items-center rounded-lg">
-          <button
-            className={`${
-              selectedStrategy === "arcade"
-                ? "btn btn-sm md:btn-md lg:btn-lg btn-active btn-success"
-                : "btn btn-sm md:btn-md lg:btn-lg btn-outline"
-            } px-4 py-2 rounded-md`}
-            onClick={() => handleStrategyChange("arcade")}
-          >
-            Arcade
-          </button>
-          <div className="divider lg:divider-horizontal text-primary-content">
-            <ArrowPathIcon className="w-16 lg:w-24" />
+        <div className="flex justify-around items-center">
+          <div className="flex flex-col gap-4 w-1/2">
+            <button
+              className={`${
+                selectedStrategy === "arcade"
+                  ? "btn btn-sm md:btn-md lg:btn-lg btn-active btn-success"
+                  : "btn btn-sm md:btn-md lg:btn-lg btn-outline"
+              } px-4 py-2 rounded-md`}
+              onClick={() => handleStrategyChange("arcade")}
+            >
+              Arcade
+            </button>
+            <p className="text-t2">
+              Configure a uniform voting power for all token holders.
+            </p>
           </div>
-
-          <button
-            className={`${
-              selectedStrategy === "weighted"
-                ? "btn btn-sm md:btn-md lg:btn-lg btn-active btn-success"
-                : "btn btn-sm sm:btn-sm md:btn-md lg:btn-lg btn-outline"
-            } px-4 py-2 rounded-md`}
-            onClick={() => handleStrategyChange("weighted")}
-          >
-            Weighted
-          </button>
+          <div className="divider lg:divider-horizontal">
+            <HiArrowPath className="w-24 h-24" />
+          </div>
+          <div className="flex flex-col gap-4 w-1/2">
+            <button
+              className={`${
+                selectedStrategy === "weighted"
+                  ? "btn btn-sm md:btn-md lg:btn-lg btn-active btn-success"
+                  : "btn btn-sm sm:btn-sm md:btn-md lg:btn-lg btn-outline"
+              } px-4 py-2 rounded-md`}
+              onClick={() => handleStrategyChange("weighted")}
+            >
+              Weighted
+            </button>
+            <p className="text-t2">
+              Voting power is 1:1 to user token balance.
+            </p>
+          </div>
         </div>
       </div>
       <div className="flex flex-col gap-4">
@@ -283,8 +285,8 @@ const StrategyParameterInput = ({
   setVotingPower: any;
   selectedStrategy: "arcade" | "weighted" | null;
 }) => {
-  const handleParameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVotingPower(e.target.value);
+  const handleParameterChange = (amount: number) => {
+    if (Number.isInteger(amount)) setVotingPower(amount.toString());
   };
 
   if (selectedStrategy === "arcade") {
@@ -292,12 +294,13 @@ const StrategyParameterInput = ({
       <>
         <label className="font-medium ">Voting Power</label>
         <input
-          className="input input-bordered w-full max-w-xs"
+          className="input input-primary w-full"
           type="number"
           value={votingPower || ""}
-          onChange={handleParameterChange}
+          onChange={(e) => {
+            handleParameterChange(Number(e.target.value));
+          }}
         />
-        <p>Voting credits are based on ETH or ERC-20 holdings.</p>
       </>
     );
   }

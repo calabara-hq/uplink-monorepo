@@ -38,7 +38,7 @@ const createTemplateType = (videoAsset: string | null, previewAsset?: string, bo
 }
 
 
-const composeSubmission = async (previewAsset: string | null, videoAsset: string | null, body: EditorOutputData | null) => {
+const composeSubmission = (previewAsset: string | null, videoAsset: string | null, body: EditorOutputData | null) => {
     const errorArr: string[] = [];
 
     const type = createTemplateType(videoAsset, previewAsset, body);
@@ -49,7 +49,7 @@ const composeSubmission = async (previewAsset: string | null, videoAsset: string
     }
 
     if (type === "video" && !previewAsset) {
-        errorArr.push("Preview asset is required");
+        errorArr.push("Video thumbnail is required");
     }
 
     const bodyResult = validateBody(body);
@@ -70,6 +70,59 @@ const composeSubmission = async (previewAsset: string | null, videoAsset: string
 
 
 
+const composeTwitterSubmission = (thread: {
+    text?: string,
+    previewAsset?: string,
+    videoAsset?: string,
+    assetType?: string,
+    assetSize?: string
+}[]) => {
+
+    const errorArr: string[] = [];
+
+    const createTemplateType = (videoAsset, previewAsset, text) => {
+        if (videoAsset) return "video";
+        else if (previewAsset) return "image";
+        else if (text.trim()) return "text";
+        else return null;
+    }
+
+    const cleanedThread = thread.map(({ text, previewAsset, videoAsset, assetType, assetSize }, index) => {
+
+        const type = createTemplateType(videoAsset, previewAsset, text);
+
+        if (!type) errorArr.push(`content required for thread item index ${index}`)
+
+        if (type === "video" && !previewAsset) {
+            errorArr.push("Video thumbnail is required");
+        }
+
+        if (text) {
+            if (text.length > 280) errorArr.push(`text must be less than 280 characters for thread item index ${index}`)
+        }
+
+        return {
+            ...(assetType ? { assetType } : {}),
+            ...(assetSize ? { assetSize } : {}),
+            ...(videoAsset ? { videoAsset } : {}),
+            ...(previewAsset ? { previewAsset } : {}),
+            ...(text ? { text } : {}),
+        }
+
+    })
+
+
+    const error = errorArr.length > 0 ? errorArr.join(", ") : undefined;
+
+    return {
+        error,
+        result: {
+            thread: cleanedThread
+        }
+    }
+
+}
+
 const validateSubmissionPayload = async (
     payload: {
         title: string,
@@ -80,10 +133,7 @@ const validateSubmissionPayload = async (
     const { title, previewAsset, videoAsset, body } = payload;
 
     const titleResult = validateTitle(title);
-    const contentResult = await composeSubmission(previewAsset, videoAsset, body);
-
-    console.log("contentResult", contentResult)
-
+    const contentResult = composeSubmission(previewAsset, videoAsset, body);
 
     const errors = {
         ...(titleResult.error ? { title: titleResult.error } : {}),
@@ -103,9 +153,46 @@ const validateSubmissionPayload = async (
     }
 }
 
+
+
+const validateTwitterSubmissionPayload = async (payload: {
+    title: string,
+    thread: {
+        text?: string,
+        previewAsset?: string,
+        videoAsset?: string,
+        assetType?: string,
+        assetSize?: string
+    }[]
+}) => {
+    const { title, thread } = payload;
+
+    const titleResult = validateTitle(title);
+    const contentResult = composeTwitterSubmission(thread);
+
+    const errors = {
+        ...(titleResult.error ? { title: titleResult.error } : {}),
+        ...(contentResult.error ? { content: contentResult.error } : {}),
+    }
+
+    const isSuccess = Object.keys(errors).length === 0;
+    const errorString = Object.values(errors).join(", ") || null;
+
+    return {
+        success: isSuccess,
+        errors: errorString,
+        cleanPayload: {
+            title: titleResult.result,
+            ...contentResult.result
+        }
+    }
+
+}
+
 export {
     validateTitle,
     validateBody,
     composeSubmission,
-    validateSubmissionPayload
+    validateSubmissionPayload,
+    validateTwitterSubmissionPayload
 }

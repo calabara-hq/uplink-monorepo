@@ -1,5 +1,5 @@
 import { validateEthAddress } from "../utils/ethAddress.js";
-import { SpaceProps, schema } from "lib";
+import { SpaceProps, schema, isIpfsUrl } from "lib";
 import { db, sqlOps } from './database.js'
 
 // validate space name
@@ -62,12 +62,6 @@ export const validateSpaceLogo = (logoUrl: SpaceProps["logoUrl"]) => {
     if (!response.value) {
         response.error = "Logo is required";
         return response;
-    }
-
-    const pattern = /^(https:\/\/(?:[a-z0-9]+\.(?:ipfs|ipns)\.[a-z]+|cloudflare-ipfs\.com\/ipfs\/[a-zA-Z0-9]+|cloud\.ipfs\.io\/ipfs\/[a-zA-Z0-9]+|ipfs\.infura\.io\/ipfs\/[a-zA-Z0-9]+|dweb\.link\/ipfs\/[a-zA-Z0-9]+|ipfs\.fsi\.cloud\/ipfs\/[a-zA-Z0-9]+|ipfs\.runfission\.com\/ipfs\/[a-zA-Z0-9]+|calabara\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+)|ipfs:\/\/[a-zA-Z0-9]+)/;
-
-    if (!pattern.test(response.value)) {
-        response.error = "Logo is not valid";
     }
 
     return response;

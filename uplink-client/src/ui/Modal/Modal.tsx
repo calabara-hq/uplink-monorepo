@@ -5,11 +5,13 @@ const Modal = ({
   children,
   onClose,
   title,
+  disableClickOutside,
 }: {
   isModalOpen: boolean;
   children: React.ReactNode;
   onClose: () => void;
   title?: string;
+  disableClickOutside?: boolean;
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -19,7 +21,7 @@ const Modal = ({
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        disableClickOutside ? null : onClose();
       }
     };
 
@@ -31,13 +33,13 @@ const Modal = ({
 
   if (isModalOpen) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50 w-full ">
-        <div className="modal modal-open">
-          <div ref={modalRef} className="modal-box bg-start shadow-2xl">
-            {children}
-          </div>
+      <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
+        <div
+          ref={modalRef}
+          className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] animate-springUp"
+        >
+          {children}
         </div>
-        <div className="fixed inset-0 bg-black opacity-50"></div>
       </div>
     );
   }
@@ -48,24 +50,37 @@ export const ModalActions = ({
   onCancel,
   onConfirm,
   confirmLabel,
+  cancelLabel,
   confirmDisabled,
+  isLoading,
 }: {
   onCancel: () => void;
   onConfirm: () => void;
   confirmLabel: string;
+  cancelLabel: string;
   confirmDisabled?: boolean;
+  isLoading?: boolean;
 }) => {
   return (
     <div className="modal-action mt-8">
-      <button onClick={onCancel} className="btn mr-auto">
-        Cancel
+      <button
+        onClick={onCancel}
+        className="btn btn-md btn-ghost normal-case mr-auto"
+      >
+        {cancelLabel}
       </button>
       <button
         disabled={confirmDisabled}
         onClick={onConfirm}
-        className="btn btn-primary"
+        className="btn btn-primary btn-md normal-case"
       >
         {confirmLabel}
+        {isLoading && (
+          <div
+            className="inline-block h-4 w-4 animate-spin rounded-full border-2 ml-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          />
+        )}
       </button>
     </div>
   );

@@ -1,52 +1,82 @@
-import { ContestBuilderProps } from "@/lib/contestHandler";
 import DateTimeSelector from "../DateTime/DateTime";
-import { BlockWrapper } from "./ContestForm";
+import { BlockWrapper } from "./Entrypoint";
+import { useState } from "react";
+import {
+  validateDeadlines,
+  ContestBuilderProps,
+  DeadlineError,
+} from "./contestHandler";
+
 const Deadlines = ({
-  state,
-  dispatch,
+  initialDeadlines,
+  handleConfirm,
+  errors,
+  setErrors,
 }: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  initialDeadlines: ContestBuilderProps["deadlines"];
+  handleConfirm: (deadlines: ContestBuilderProps["deadlines"]) => void;
+  errors: DeadlineError;
+  setErrors: (errors: DeadlineError) => void;
 }) => {
-  const { deadlines, errors } = state;
-  const { snapshot, startTime, voteTime, endTime } = deadlines;
+  const [deadlines, setDeadlines] = useState(initialDeadlines);
 
+  const { startTime, voteTime, endTime, snapshot } = deadlines;
 
+  const handleTimeChange = (
+    field: "startTime" | "voteTime" | "endTime" | "snapshot",
+    isoString: string
+  ) => {
+    setDeadlines({ ...deadlines, [field]: isoString });
+    setErrors({ ...errors, [field]: "" });
+  };
+
+  const onSubmit = () => {
+    const { errors, isError, data } = validateDeadlines(deadlines, false);
+    if (isError) return setErrors(errors);
+    handleConfirm(data);
+  };
   return (
-    <BlockWrapper title="Contest Dates" info="Select dates & times">
+    <BlockWrapper title="Deadlines">
       <DateTimeSelector
-        isoString={startTime !== 'now' ? startTime.slice(0, -5) + "Z": startTime}
+        isoString={
+          startTime !== "now" ? startTime.slice(0, -5) + "Z" : startTime
+        }
         label="start"
-        error={errors?.deadlines?.startTime}
+        error={errors.startTime}
         callback={(isoString) => {
-          dispatch({ type: "setStartTime", payload: isoString });
+          handleTimeChange("startTime", isoString);
         }}
       />
       <DateTimeSelector
-        isoString={voteTime !== 'now' ? voteTime.slice(0, -5) + "Z": voteTime}
+        isoString={voteTime !== "now" ? voteTime.slice(0, -5) + "Z" : voteTime}
         label="vote"
-        error={errors?.deadlines?.voteTime}
+        error={errors.voteTime}
         callback={(isoString) => {
-          console.log(isoString)
-          dispatch({ type: "setVoteTime", payload: isoString });
+          handleTimeChange("voteTime", isoString);
         }}
       />
       <DateTimeSelector
-        isoString={endTime !== 'now' ? endTime.slice(0, -5) + "Z": endTime}
+        isoString={endTime !== "now" ? endTime.slice(0, -5) + "Z" : endTime}
         label="end"
-        error={errors?.deadlines?.endTime}
+        error={errors.endTime}
         callback={(isoString) => {
-          dispatch({ type: "setEndTime", payload: isoString });
+          handleTimeChange("endTime", isoString);
         }}
       />
       <DateTimeSelector
-        isoString={snapshot !== 'now' ? snapshot.slice(0, -5) + "Z": snapshot}
+        isoString={snapshot !== "now" ? snapshot.slice(0, -5) + "Z" : snapshot}
         label="snapshot"
-        error={errors?.deadlines?.snapshot}
+        error={errors.snapshot}
         callback={(isoString) => {
-          dispatch({ type: "setSnapshot", payload: isoString });
+          handleTimeChange("snapshot", isoString);
         }}
       />
+      <button
+        onClick={onSubmit}
+        className="btn btn-primary normal-case mt-4 self-end"
+      >
+        Confirm
+      </button>
     </BlockWrapper>
   );
 };

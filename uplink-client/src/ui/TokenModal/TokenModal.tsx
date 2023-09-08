@@ -1,11 +1,7 @@
 import { useState, useRef, useEffect, useReducer } from "react";
 import MenuSelect from "../MenuSelect/MenuSelect";
 import { IERCToken, isERCToken, IToken } from "@/types/token";
-import {
-  ArrowPathIcon,
-  ExclamationTriangleIcon,
-  PlusIcon,
-} from "@heroicons/react/24/solid";
+import { HiArrowPath, HiExclamationTriangle } from "react-icons/hi2";
 import { useTokenManager } from "@/hooks/useTokenManager";
 import Modal, { ModalActions } from "../Modal/Modal";
 
@@ -72,12 +68,6 @@ export const TokenManager = ({
   strictTypes?: ERCOptions[];
 }) => {
   const handleCloseAndReset = () => {
-    /*
-    setIsModalOpen(false);
-    setProgress(0);
-    setConflictingToken(null);
-    dispatch({ type: "reset" });
-    */
     setIsModalOpen(false);
   };
 
@@ -95,6 +85,7 @@ export const TokenManager = ({
     saveCallback: saveCallback,
     handleClose: () => setIsModalOpen(false),
     continuous: continuous,
+    strictTypes: strictTypes,
   });
 
   if (progress === 0)
@@ -109,7 +100,9 @@ export const TokenManager = ({
         <ModalActions
           onCancel={handleCloseAndReset}
           onConfirm={handleModalConfirm}
+          confirmDisabled={!state.quickAddToken}
           confirmLabel="Confirm"
+          cancelLabel="Cancel"
         />
       </>
     );
@@ -126,6 +119,7 @@ export const TokenManager = ({
           onCancel={handleCloseAndReset}
           onConfirm={handleModalConfirm}
           confirmLabel="Confirm"
+          cancelLabel="Cancel"
         />
       </>
     );
@@ -141,6 +135,7 @@ export const TokenManager = ({
           onCancel={handleCloseAndReset}
           onConfirm={handleAddToken}
           confirmLabel="Swap"
+          cancelLabel="Cancel"
         />
       </>
     );
@@ -159,58 +154,39 @@ const QuickAddToken = ({
   dispatch: React.Dispatch<TokenAction>;
   setProgress: (progress: number) => void;
 }) => {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
-  // Filter the tokens based on the search query
-  const filteredTokens = quickAddTokens?.filter((token) =>
-    token.symbol.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
+  if (!quickAddTokens) return null;
   return (
     <div className="flex flex-col w-full px-1 gap-4">
-      <h2 className="text-2xl">Quick Add</h2>
-      <input
-        type="text"
-        className="input"
-        placeholder="Search tokens..."
-        value={searchQuery}
-        onChange={(event) => setSearchQuery(event.target.value)}
-      />
+      <h2 className="text-xl text-t1">Quick Add</h2>
 
-      {filteredTokens && filteredTokens.length > 0 ? (
-        <ul className="menu menu-compact lg:menu-normal bg-base-100 w-full gap-2 p-2 rounded-box">
-          {filteredTokens.map((el, index) => {
-            return (
-              <li key={index}>
-                <a
-                  className={`flex flex-row justify-between hover:bg-base-200 transition-all  ${
-                    JSON.stringify(state.quickAddToken) === JSON.stringify(el)
-                      ? "bg-base-200"
-                      : "bg-base-100"
-                  }`}
-                  onClick={() => {
-                    dispatch({
-                      type: "setQuickAddToken",
-                      payload: el,
-                    });
-                  }}
-                >
-                  <b>{el.symbol}</b>
-                  <TokenBadge token={el} />
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <div className="alert alert-warning justify-start shadow-lg">
-          <ExclamationTriangleIcon className="w-6 h-6" />
-          <p>{`hmm.. I couldn't find that token`}</p>
-        </div>
-      )}
-      <div>
+      <ul className="menu menu-compact lg:menu-normal bg-base-100 w-full gap-2 p-2 rounded-box">
+        {quickAddTokens.map((el, index) => {
+          return (
+            <li key={index}>
+              <a
+                className={`flex flex-row justify-between hover:bg-base-200 transition-all  ${
+                  JSON.stringify(state.quickAddToken) === JSON.stringify(el)
+                    ? "bg-base-200"
+                    : "bg-base-100"
+                }`}
+                onClick={() => {
+                  dispatch({
+                    type: "setQuickAddToken",
+                    payload: el,
+                  });
+                }}
+              >
+                <b>{el.symbol}</b>
+                <TokenBadge token={el} />
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="w-full text-center">
         <button
-          className="btn btn-sm btn-ghost underline"
+          className="btn btn-sm btn-ghost underline "
           onClick={() => setProgress(1)}
         >
           Manual Add
@@ -274,7 +250,7 @@ const TokenSwap = ({
       <div className="alert alert-warning shadow-lg">
         <div>
           <span>
-            <ExclamationTriangleIcon className="w-6" />
+            <HiExclamationTriangle className="w-6" />
           </span>
           <span>
             You already have <b>1</b> {token.type} token in your list. To use
@@ -292,7 +268,7 @@ const TokenSwap = ({
           </h2>
         </div>
         <div className="divider lg:divider-horizontal">
-          <ArrowPathIcon className="w-24" />
+          <HiArrowPath className="w-24 h-24" />
         </div>
         <div className="relative flex-grow h-32 card bg-base-200 rounded-box justify-center items-center">
           <div className="absolute top-0 left-0 bg-success text-xs text-black px-1 py-0.5 rounded-br-md rounded-tl-md">
@@ -492,7 +468,7 @@ const ERC1155FormElement = ({
         dispatch({
           type: "setCustomToken",
           payload: {
-            tokenId: Number(value),
+            tokenId: parseInt(value),
           },
         })
       }

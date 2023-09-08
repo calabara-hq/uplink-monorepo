@@ -1,23 +1,26 @@
-import {
-  arraysSubtract,
-  ContestBuilderProps,
-  SubmitterRestriction,
-} from "@/lib/contestHandler";
+import { arraysSubtract, SubmitterRestriction } from "./contestHandler";
 import TokenModal, { TokenManager } from "../TokenModal/TokenModal";
-import { BlockWrapper } from "./ContestForm";
+import { BlockWrapper } from "./Entrypoint";
 import { IToken } from "@/types/token";
 import { useReducer, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import TokenBadge from "../TokenBadge/TokenBadge";
-import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { HiTrash, HiPencil, HiInformationCircle } from "react-icons/hi2";
+import TokenCard from "../TokenCard/TokenCard";
+import { AiOutlinePlus } from "react-icons/ai";
 
 const SubmitterRestrictions = ({
-  state,
-  dispatch,
+  initialSubmitterRestrictions,
+  handleConfirm,
+  spaceTokens,
 }: {
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  initialSubmitterRestrictions: SubmitterRestriction[];
+  handleConfirm: (submitterRestrictions: SubmitterRestriction[]) => void;
+  spaceTokens: IToken[];
 }) => {
+  const [restrictions, setRestrictions] = useState<SubmitterRestriction[]>(
+    initialSubmitterRestrictions
+  );
   const [isTokenModalOpen, setIsTokenModalOpen] = useState<boolean>(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
@@ -26,51 +29,48 @@ const SubmitterRestrictions = ({
     setIsTokenModalOpen(true);
   };
 
+  const removeRestriction = (index: number) => {
+    setRestrictions((restrictions) => {
+      restrictions.splice(index, 1);
+      return [...restrictions];
+    });
+  };
+
+  const onSubmit = () => {
+    console.log(restrictions);
+    handleConfirm(restrictions);
+  };
+
   return (
     <BlockWrapper
       title="Submitter Restrictions"
-      info="Select the tokens and their respective thresholds that the submitter
-    must hold to be able to submit."
+      info="Define assets users must hold to submit. Users satisfying at least one restriction will be eligible."
     >
-      {state.submitterRestrictions.length > 0 && (
-        <div className="flex flex-col lg:flex-row w-full gap-4">
-          {state.submitterRestrictions.map((restriction, index) => {
-            return (
-              <div className="card w-full lg:w-1/4 bg-base-100 p-4" key={index}>
-                <div className="card-body justify-between p-0">
-                  <div className="card-title justify-between">
-                    {restriction?.token?.symbol}
-                    <button
-                      className="btn btn-sm btn-ghost link"
-                      onClick={() => handleEditRestriction(index)}
-                    >
-                      <PencilIcon className="w-4" />
-                    </button>
-                  </div>
-                  <p className="">Threshold: {restriction.threshold}</p>
-                  <div className="flex flex-col items-end gap-2">
-                    <TokenBadge token={restriction?.token} />
-                  </div>
-                  <div className="card-actions justify-end">
-                    <button
-                      className="btn btn-xs btn-ghost"
-                      onClick={() => {
-                        dispatch({
-                          type: "removeSubmitterRestriction",
-                          payload: index,
-                        });
-                      }}
-                    >
-                      remove
-                      <TrashIcon className="w-4 ml-2" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5 sm gap-4">
+        <div
+          className="card btn bg-base-200 h-28"
+          onClick={() => setIsTokenModalOpen(true)}
+        >
+          <div className="flex flex-row gap-2 items-center">
+            <AiOutlinePlus className="w-6 h-6" />
+            <p>add restriction</p>
+          </div>
         </div>
-      )}
+        {restrictions.map((restriction, index) => {
+          return (
+            <TokenCard
+              key={index}
+              token={restriction.token}
+              handleRemove={() => removeRestriction(index)}
+              editCallback={() => handleEditRestriction(index)}
+            >
+              <p className="text-t1">
+                threshold: <b>{restriction.threshold}</b>
+              </p>
+            </TokenCard>
+          );
+        })}
+      </div>
       <Modal
         isModalOpen={isTokenModalOpen}
         onClose={() => {
@@ -80,66 +80,59 @@ const SubmitterRestrictions = ({
       >
         <SubmitterRestrictionManager
           setIsModalOpen={setIsTokenModalOpen}
-          state={state}
-          dispatch={dispatch}
+          restrictions={restrictions}
+          setRestrictions={setRestrictions}
           editIndex={editIndex}
+          spaceTokens={spaceTokens}
         />
       </Modal>
-      <div className="flex flex-col items-center w-full gap-4">
-        <button
-          className="btn btn-ghost underline"
-          onClick={() => {
-            setIsTokenModalOpen(true);
-          }}
-        >
-          Add Restriction
-        </button>
-      </div>
+      <button
+        onClick={onSubmit}
+        className="btn btn-primary lowercase mt-4 self-end"
+      >
+        Confirm
+      </button>
     </BlockWrapper>
   );
 };
 
-const initialRestrictionState: SubmitterRestriction = {};
-
-type RestrictionAction =
-  | { type: "setToken"; payload: IToken }
-  | { type: "setThreshold"; payload: string };
-
-const restrictionReducer = (
-  state: SubmitterRestriction,
-  action: RestrictionAction
-): SubmitterRestriction => {
-  switch (action.type) {
-    case "setToken":
-      return { ...state, token: action.payload };
-    case "setThreshold":
-      return { ...state, threshold: action.payload };
-    default:
-      return state;
-  }
-};
-
 const SubmitterRestrictionManager = ({
   setIsModalOpen,
-  state,
-  dispatch,
+  restrictions,
+  setRestrictions,
   editIndex,
+  spaceTokens,
 }: {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  state: ContestBuilderProps;
-  dispatch: React.Dispatch<any>;
+  restrictions: SubmitterRestriction[];
+  setRestrictions: React.Dispatch<React.SetStateAction<SubmitterRestriction[]>>;
   editIndex: number | null;
+  spaceTokens: IToken[];
 }) => {
   const isEdit = typeof editIndex === "number";
-  const [currentRestriction, setCurrentRestriction] = useReducer(
-    restrictionReducer,
-    isEdit ? state.submitterRestrictions[editIndex] : initialRestrictionState
-  );
   const [progress, setProgress] = useState<number>(isEdit ? 1 : 0);
 
+  const [token, setToken] = useState<IToken | null>(
+    isEdit ? restrictions[editIndex].token : null
+  );
+  const [threshold, setThreshold] = useState<string>(
+    isEdit ? restrictions[editIndex].threshold : ""
+  );
+
   const saveTokenCallback = (token: IToken) => {
-    setCurrentRestriction({ type: "setToken", payload: token });
+    setToken(token);
     setProgress(1);
+  };
+
+  const updateSubmitterRestriction = () => {
+    setRestrictions((restrictions) => {
+      restrictions[editIndex] = { token, threshold };
+      return [...restrictions];
+    });
+  };
+
+  const addSubmitterRestriction = () => {
+    setRestrictions((restrictions) => [...restrictions, { token, threshold }]);
   };
 
   if (progress === 0) {
@@ -147,14 +140,12 @@ const SubmitterRestrictionManager = ({
       <TokenManager
         setIsModalOpen={setIsModalOpen}
         saveCallback={saveTokenCallback}
-        existingTokens={state.submitterRestrictions.map(
+        existingTokens={restrictions.map(
           (restriction) => restriction?.token as IToken
         )}
         quickAddTokens={arraysSubtract(
-          state.spaceTokens,
-          state.submitterRestrictions.map(
-            (restriction) => restriction?.token as IToken
-          )
+          spaceTokens,
+          restrictions.map((restriction) => restriction?.token as IToken)
         )}
         uniqueStandard={false}
         continuous={true}
@@ -166,29 +157,19 @@ const SubmitterRestrictionManager = ({
     return (
       <>
         <ThresholdManager
-          currentRestriction={currentRestriction}
-          setCurrentRestriction={setCurrentRestriction}
+          currentToken={token}
+          currentThreshold={threshold}
+          setCurrentThreshold={setThreshold}
         />
         <ModalActions
-          //TODO update confirm actions
           onCancel={() => setIsModalOpen(false)}
           onConfirm={() => {
-            isEdit
-              ? dispatch({
-                  type: "updateSubmitterRestriction",
-                  payload: {
-                    index: editIndex,
-                    restriction: currentRestriction,
-                  },
-                })
-              : dispatch({
-                  type: "addSubmitterRestriction",
-                  payload: currentRestriction,
-                });
+            isEdit ? updateSubmitterRestriction() : addSubmitterRestriction();
             setIsModalOpen(false);
           }}
           confirmLabel="Save"
-          confirmDisabled={!currentRestriction.threshold}
+          cancelLabel="Cancel"
+          confirmDisabled={!threshold || !(parseFloat(threshold) > 0)}
         />
       </>
     );
@@ -197,34 +178,35 @@ const SubmitterRestrictionManager = ({
 };
 
 const ThresholdManager = ({
-  currentRestriction,
-  setCurrentRestriction,
+  currentToken,
+  currentThreshold,
+  setCurrentThreshold,
 }: {
-  currentRestriction: SubmitterRestriction;
-  setCurrentRestriction: React.Dispatch<any>;
+  currentToken: IToken;
+  currentThreshold: string;
+  setCurrentThreshold: React.Dispatch<any>;
 }) => {
   const handleThresholdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentRestriction({
-      type: "setThreshold",
-      payload: e.target.value,
-    });
+    setCurrentThreshold(e.target.value);
   };
   return (
     <div className="flex flex-col gap-4">
-      <label className="text-xl font-medium">Threshold</label>
-      <div className="flex flex-col gap-2">
-        <p>{currentRestriction?.token?.symbol}</p>
-        <TokenBadge token={currentRestriction?.token} />
+      <div className="flex flex-row items-center gap-2">
+        <label className="text-xl font-medium">Threshold</label>
+        <div className="flex flex-row gap-2 items-center ml-auto">
+          <p className="font-bold">{currentToken.symbol}</p>
+          <TokenBadge token={currentToken} />
+        </div>
       </div>
-      <p>
-        The number of tokens a submitter must hold to be able to submit to this
+      <p className="text-t2">
+        The minimum amount of tokens a user must hold to submit
       </p>
       <input
-        className="input w-full max-w-xs"
+        className="input w-full  input-primary"
         type="number"
-        value={currentRestriction?.threshold || ""}
+        value={currentThreshold || ""}
         onChange={handleThresholdChange}
-      />{" "}
+      />
     </div>
   );
 };

@@ -83,6 +83,15 @@ export type Metadata = {
     category: string;
 }
 
+type TwitterThreadItem = {
+    text?: string,
+    previewAsset?: string,
+    videoAsset?: string,
+    assetType?: string,
+    assetSize?: string
+}
+
+
 export interface ContestBuilderProps {
     metadata: Metadata;
     deadlines: Deadlines;
@@ -186,6 +195,7 @@ export const validateSubmitterRewards = async (submitterRewards: ContestBuilderP
         return { submitterRewards, error: "At least one payout must be defined" };
     }
 
+
     await Promise.all(Object.keys(tokens).map(async (token) => {
         const tokenData = tokens[token];
 
@@ -221,6 +231,7 @@ export const validateSubmitterRewards = async (submitterRewards: ContestBuilderP
 
     }));
 
+
     payouts.forEach((payout, index) => {
         const rank = payout.rank;
         if (seenRanks.has(rank)) {
@@ -233,9 +244,10 @@ export const validateSubmitterRewards = async (submitterRewards: ContestBuilderP
             const fungiblePayout = payout[token as keyof IPayout] as FungiblePayout;
             if (fungiblePayout?.amount) {
                 const amount = parseFloat(fungiblePayout.amount);
-                if (amount <= 0) {
+                if (amount <= 0 || !amount) {
                     errorArr.push(`Invalid ${token} amount for rank ${rank} at index ${index}`);
                 }
+
                 fungiblePayout.amount = amount.toString();
             }
         }
@@ -308,7 +320,7 @@ export const validateVoterRewards = async (voterRewards: ContestBuilderProps['vo
         const fungiblePayout = payout.ERC20 as FungiblePayout;
         if (fungiblePayout?.amount) {
             const amount = parseFloat(fungiblePayout.amount);
-            if (amount <= 0) {
+            if (amount <= 0 || !amount) {
                 errorArr.push(`Invalid ERC20 amount for rank ${rank} at index ${index}`);
             }
         }
@@ -318,7 +330,6 @@ export const validateVoterRewards = async (voterRewards: ContestBuilderProps['vo
 
     return response;
 };
-
 
 export const validateSubmitterRestrictions = async (submitterRestrictions: ContestBuilderProps['submitterRestrictions']) => {
     if (!submitterRestrictions || submitterRestrictions.length === 0) {
@@ -337,6 +348,24 @@ export const validateSubmitterRestrictions = async (submitterRestrictions: Conte
             if (!isValid) {
                 errorArr.push(`Invalid ${token.type} token`);
             }
+
+            if (token.type === 'ERC1155') {
+                const isValidId = await tokenController.isValidERC1155TokenId({
+                    contractAddress: token.address,
+                    tokenId: token.tokenId
+                });
+                if (!isValidId) {
+                    errorArr.push(`Invalid ${token} token id`);
+                } else {
+                    const isFungible = await tokenController.isERC1155TokenFungible({
+                        contractAddress: token.address,
+                        tokenId: token.tokenId
+                    });
+                    if (!isFungible) {
+                        errorArr.push(`ERC1155 token is not fungible`);
+                    }
+                }
+            }
         }
 
         const floatThreshold = parseFloat(threshold);
@@ -353,8 +382,8 @@ export const validateSubmitterRestrictions = async (submitterRestrictions: Conte
 
 
 export const validateVotingPolicy = async (votingPolicy: ContestBuilderProps['votingPolicy']) => {
-    if (!votingPolicy) {
-        return { votingPolicy };
+    if (!votingPolicy || votingPolicy.length < 1) {
+        return { votingPolicy, error: "At least one voting policy must be defined" };
     }
 
     const errorArr: string[] = [];
@@ -408,4 +437,98 @@ export const validateAdditionalParams = (additionalParams: ContestBuilderProps['
 
     return { additionalParams };
 
+}
+
+
+export const validateTweetThread = (thread: TwitterThreadItem[]) => {
+
+    const contentResult = composeTweetThread(thread);
+
+    const errors = {
+        ...(contentResult.error ? { content: contentResult.error } : {}),
+    }
+
+    const isSuccess = Object.keys(errors).length === 0;
+    const errorString = Object.values(errors).join(", ") || null;
+
+    return {
+        success: isSuccess,
+        errors: errorString,
+        cleanPayload: contentResult.result
+    }
+
+}
+
+export const composeTweetThread = (thread: TwitterThreadItem[]) => {
+    const errorArr: string[] = [];
+
+    const createTemplateType = (videoAsset, previewAsset, text) => {
+        if (videoAsset) return "video";
+        else if (previewAsset) return "image";
+        else if (text.trim()) return "text";
+        else return null;
+    }
+
+    const cleanedThread = thread.map(({ text, previewAsset, videoAsset, assetType, assetSize }, index) => {
+
+        const type = createTemplateType(videoAsset, previewAsset, text);
+
+        if (!type) errorArr.push(`content required for thread item index ${index}`)
+
+        if (type === "video" && !previewAsset) {
+            errorArr.push("Video thumbnail is required");
+        }
+
+        if (text) {
+            if (text.length > 280) errorArr.push(`text must be less than 280 characters for thread item index ${index}`)
+        }
+
+        return {
+            ...(assetType ? { assetType } : {}),
+            ...(assetSize ? { assetSize } : {}),
+            ...(videoAsset ? { videoAsset } : {}),
+            ...(previewAsset ? { previewAsset } : {}),
+            ...(text ? { text } : {}),
+        }
+
+    })
+
+    const error = errorArr.length > 0 ? errorArr.join(", ") : undefined;
+
+    return {
+        error,
+        result: cleanedThread
+    }
+}
+
+
+export const validateContestParams = async (contestData: ContestBuilderProps) => {
+    const { metadata, deadlines, prompt, submitterRewards, voterRewards, submitterRestrictions, votingPolicy, additionalParams } = contestData;
+
+    const metadataResult = validateMetadata(metadata);
+    const deadlinesResult = validateDeadlines(deadlines);
+    const promptResult = validatePrompt(prompt);
+    const submitterRewardsResult = await validateSubmitterRewards(submitterRewards);
+    const voterRewardsResult = await validateVoterRewards(voterRewards);
+    const submitterRestrictionsResult = await validateSubmitterRestrictions(submitterRestrictions);
+    const votingPolicyResult = await validateVotingPolicy(votingPolicy);
+    const additionalParamsResult = validateAdditionalParams(additionalParams);
+
+    const errors = {
+        ...(metadataResult.error ? { metadata: metadataResult.error } : {}),
+        ...(deadlinesResult.error ? { deadlines: deadlinesResult.error } : {}),
+        ...(promptResult.error ? { prompt: promptResult.error } : {}),
+        ...(submitterRewardsResult.error ? { submitterRewards: submitterRewardsResult.error } : {}),
+        ...(voterRewardsResult.error ? { voterRewards: voterRewardsResult.error } : {}),
+        ...(submitterRestrictionsResult.error ? { submitterRestrictions: submitterRestrictionsResult.error } : {}),
+        ...(votingPolicyResult.error ? { votingPolicy: votingPolicyResult.error } : {}),
+        ...(additionalParamsResult.error ? { additionalParams: additionalParamsResult.error } : {}),
+    }
+
+    const isSuccess = Object.keys(errors).length === 0;
+
+    return {
+        success: isSuccess,
+        errors: errors,
+    }
 }

@@ -1,7 +1,7 @@
 import { EditorOutputData, IToken, DatabaseController, schema, isERCToken } from "lib";
-import { TwitterApi } from 'twitter-api-v2';
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
+import { nanoid } from 'nanoid';
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
@@ -9,7 +9,6 @@ const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecre
 const databaseController = new DatabaseController(process.env.DATABASE_HOST, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
 export const db = databaseController.db;
 export const sqlOps = databaseController.sqlOps;
-
 
 type Metadata = {
     type: string;
@@ -85,11 +84,19 @@ interface VotingPolicy {
     strategy: ArcadeStrategy | WeightedStrategy;
 }
 
+type TwitterThreadItem = {
+    text?: string,
+    previewAsset?: string,
+    videoAsset?: string,
+    assetType?: string,
+    assetSize?: string
+}
+
+
 type ContestData = {
     spaceId: string;
     metadata: Metadata;
     deadlines: Deadlines;
-    //created: string;
     prompt: Prompt;
     additionalParams: AdditionalParams;
     submitterRewards: SubmitterRewards;
@@ -112,7 +119,7 @@ export const prepareContestPromptUrl = async (contestPrompt: Prompt) => {
     const prompt = { ...contestPrompt, version: 'uplink-v1' }
 
     return pinata.pinJSONToIPFS(prompt).then((result) => {
-        return `https://calabara.mypinata.cloud/ipfs/${result.IpfsHash}`;
+        return `https://uplink.mypinata.cloud/ipfs/${result.IpfsHash}`;
     }).catch((err) => {
         throw new Error(err);
     })
@@ -214,13 +221,13 @@ const insertVotingPolicies = async (contestId, votingPolicy, tx) => {
     };
 }
 
-// update the many-to-many mapping of spacesToTokens
+// update the many-to-many mapping of spaceTokens
 const insertSpaceToken = async (spaceId, tokenId) => {
-    const existingLink = await db.select({ id: schema.spacesToTokens.id })
-        .from(schema.spacesToTokens)
+    const existingLink = await db.select({ id: schema.spaceTokens.id })
+        .from(schema.spaceTokens)
         .where(sqlOps.and(
-            sqlOps.eq(schema.spacesToTokens.spaceId, spaceId),
-            sqlOps.eq(schema.spacesToTokens.tokenLink, tokenId)
+            sqlOps.eq(schema.spaceTokens.spaceId, spaceId),
+            sqlOps.eq(schema.spaceTokens.tokenLink, tokenId)
         ));
 
     if (!existingLink[0]) {
@@ -229,61 +236,57 @@ const insertSpaceToken = async (spaceId, tokenId) => {
             spaceId: spaceId,
             tokenLink: tokenId,
         }
-        await db.insert(schema.spacesToTokens).values(newSpaceToken);
+        await db.insert(schema.spaceTokens).values(newSpaceToken);
     }
 }
 
+export const queueTweet = async (contestId: number, user: any, startTime: string, tweetThread: TwitterThreadItem[]) => {
+    type TweetQueueThreadItem = {
+        id: string;
+        text: string;
+        media: {
+            type: string;
+            size: string;
+            url?: string;
+        } | null;
+    };
 
+    const tweetQueueThread: TweetQueueThreadItem[] = tweetThread.map((item) => {
+        return {
+            id: nanoid(),
+            text: item.text || "",
 
-class TwitterController {
-
-    private client: any;
-
-    constructor(accessToken: string) {
-        this.client = new TwitterApi(accessToken);
-    }
-
-    public async validateSession() {
-        try {
-            const session = await this.client.v2.me();
-            return session;
-        } catch (e) {
-            throw new Error(`failed to establish a twitter session`)
+            media: item.videoAsset ? {
+                url: item.videoAsset,
+                type: item.assetType,
+                size: item.assetSize
+            } : item.previewAsset ? {
+                url: item.previewAsset,
+                type: item.assetType,
+                size: item.assetSize
+            } : null
         }
+    });
+
+
+
+    const tweetJob: schema.dbNewTweetQueueType = {
+        contestId: contestId,
+        author: user.address,
+        created: startTime, // set created to startTime so that the job will be picked up by the scheduler close to the start time
+        jobContext: 'contest',
+        payload: tweetQueueThread,
+        accessToken: user.twitter.accessToken,
+        accessSecret: user.twitter.accessSecret,
+        retries: 0,
+        status: 0
     }
-
-    public async processThread(thread: any) {
-        const processedThread = thread.map((el) => {
-            const { text, media } = el;
-            return {
-                ...(text && { text }),
-                ...(media && { media: { media_ids: [media.media_id] } }),
-            }
-        });
-        if (!processedThread || processedThread.length === 0) throw new Error('invalid thread');
-        return processedThread;
-    }
-
-    public async sendTweet(thread: any) {
-        try {
-            await this.validateSession();
-            const processedThread = await this.processThread(thread);
-            const tweetResponse = await this.client.v2.tweetThread(processedThread);
-            return tweetResponse[0].data.id;
-
-        } catch (err) {
-            console.log(err);
-            if (err.message === 'invalid thread') {
-                throw err;
-            } else if (err.message === 'failed to establish a twitter session') {
-                throw err;
-            } else {
-                throw new Error('failed to send tweet');
-            }
-        }
-    }
-
+    return await db.insert(schema.tweetQueue).values(tweetJob)
+        .catch((err) => {
+            throw new Error("database error: " + err.message)
+        })
 }
+
 
 export const createDbContest = async (contest: ContestData, user: any) => {
     const spaceId = parseInt(contest.spaceId);
@@ -294,8 +297,10 @@ export const createDbContest = async (contest: ContestData, user: any) => {
     const uniqueTokens = new Map();
 
     const insertUniqueToken = async (token) => {
+        console.log('the token is', JSON.stringify(token, null, 2))
         const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
 
+        console.log('the hash is', tokenHash)
         if (!uniqueTokens.has(tokenHash)) {
             const existingToken = await db
                 .select({ id: schema.tokens.id })
@@ -366,7 +371,7 @@ export const createDbContest = async (contest: ContestData, user: any) => {
 
 
     const adjustedSubmitterRewards = await prepareContestRewards(contest.submitterRewards);
-    const adjustedVoterRewards = await prepareContestRewards(contest.submitterRewards);
+    const adjustedVoterRewards = await prepareContestRewards(contest.voterRewards);
     const adjustedVotingPolicy = await prepareRestrictionsAndPolicies(contest.votingPolicy);
     const adjustedSubmitterRestrictions = await prepareRestrictionsAndPolicies(contest.submitterRestrictions);
 
@@ -379,31 +384,13 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         voteTime: new Date(contest.deadlines.voteTime).toISOString(),
         endTime: new Date(contest.deadlines.endTime).toISOString(),
         snapshot: new Date(contest.deadlines.snapshot).toISOString(),
-        anonSubs: contest.additionalParams.anonSubs,
-        visibleVotes: contest.additionalParams.visibleVotes,
-        selfVote: contest.additionalParams.selfVote,
+        anonSubs: contest.additionalParams.anonSubs ? 1 : 0,
+        visibleVotes: contest.additionalParams.visibleVotes ? 1 : 0,
+        selfVote: contest.additionalParams.selfVote ? 1 : 0,
         subLimit: contest.additionalParams.subLimit,
         created: new Date().toISOString(),
+        tweetId: null
     }
-
-
-    const sendAnnouncementTweet = async (contestId, user, thread) => {
-
-        const now = new Date().toISOString();
-        const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.expiresAt ?? now > now);
-        if (!isTwitterAuth) throw new Error('twitter is expired');
-
-        const twitterController = new TwitterController(user.twitter.accessToken);
-        const tweet_id = await twitterController.sendTweet(thread);
-        console.log('TWEET ID IS', tweet_id)
-
-
-        // 1. check user is still auth'd
-
-        // 2. process the thread
-    }
-
-
 
     try {
         return await db.transaction(async (tx) => {
@@ -414,17 +401,14 @@ export const createDbContest = async (contest: ContestData, user: any) => {
             await insertSubmitterRestrictions(contestId, adjustedSubmitterRestrictions, tx);
             await insertVotingPolicies(contestId, adjustedVotingPolicy, tx);
 
-            if (newContest.type === "twitter") {
-                await sendAnnouncementTweet(contestId, user, [{ text: "this is another test tweet" }])
-                    .catch(err => {
-                        console.log(err);
-                        tx.rollback();
-                        throw err;
-                    })
-            }
             return contestId;
         });
     } catch (err) {
         throw new Error("database error: " + err.message)
     }
 };
+
+
+
+
+

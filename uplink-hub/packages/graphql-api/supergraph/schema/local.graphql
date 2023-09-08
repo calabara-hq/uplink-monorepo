@@ -20,19 +20,6 @@ directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on
 
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
-type ActiveContest
-  @join__type(graph: CONTESTS)
-{
-  id: Int!
-  spaceId: Int!
-  tag: String!
-  start: String!
-  vote: String!
-  end: String!
-  created: String!
-  spaceLink: Space!
-}
-
 input AdditionalParams
   @join__type(graph: CONTESTS)
 {
@@ -44,19 +31,21 @@ input AdditionalParams
 
 type AdditionalParamsType
   @join__type(graph: CONTESTS)
+  @join__type(graph: SUBMIT)
 {
-  anonSubs: Boolean!
-  visibleVotes: Boolean!
-  selfVote: Boolean!
-  subLimit: Int!
+  anonSubs: Boolean! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  visibleVotes: Boolean! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  selfVote: Boolean! @join__field(graph: CONTESTS)
+  subLimit: Int! @join__field(graph: CONTESTS)
 }
 
 type Admin
-  @join__type(graph: SPACES)
+  @join__type(graph: CONTESTS, key: "id")
+  @join__type(graph: SPACES, key: "id")
 {
-  id: Int!
-  spaceId: Int!
-  address: String!
+  id: ID! @join__field(graph: CONTESTS, external: true) @join__field(graph: SPACES)
+  address: String! @join__field(graph: CONTESTS, external: true) @join__field(graph: SPACES)
+  spaceId: ID! @join__field(graph: SPACES)
 }
 
 type ArcadeVotingPolicyType
@@ -64,13 +53,6 @@ type ArcadeVotingPolicyType
 {
   token: TokenType
   votingPower: Decimal
-}
-
-input authDataInput
-  @join__type(graph: USER)
-{
-  message: String!
-  signature: String!
 }
 
 input CastVotePayload
@@ -89,26 +71,30 @@ type CastVoteResponse
 
 type Contest
   @join__type(graph: CONTESTS, key: "id")
-  @join__type(graph: SUBMIT, key: "id")
+  @join__type(graph: SUBMIT, key: "id", extension: true)
 {
-  id: Int!
-  spaceId: Int! @join__field(graph: CONTESTS)
+  id: ID!
+  spaceId: ID! @join__field(graph: CONTESTS)
+  space: SpaceStub! @join__field(graph: CONTESTS)
   created: String! @join__field(graph: CONTESTS)
   metadata: MetadataType! @join__field(graph: CONTESTS)
-  deadlines: DeadlinesType! @join__field(graph: CONTESTS)
+  deadlines: DeadlinesType! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
   promptUrl: IpfsUrl! @join__field(graph: CONTESTS)
   submitterRewards: [RewardType!]! @join__field(graph: CONTESTS)
   voterRewards: [RewardType!]! @join__field(graph: CONTESTS)
   submitterRestrictions: [SubmitterRestrictionType!]! @join__field(graph: CONTESTS)
   votingPolicy: [VotingPolicyType!]! @join__field(graph: CONTESTS)
-  additionalParams: AdditionalParamsType! @join__field(graph: CONTESTS)
-  submissions: [Submission!]! @join__field(graph: SUBMIT)
+  additionalParams: AdditionalParamsType! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  tweetId: String @join__field(graph: CONTESTS)
+  submissions: [Submission!]! @join__field(graph: SUBMIT, requires: "deadlines {startTime, voteTime, endTime, snapshot}, additionalParams {anonSubs, visibleVotes}")
+  gnosisResults: String @join__field(graph: SUBMIT, requires: "deadlines {endTime}")
+  utopiaResults: String @join__field(graph: SUBMIT, requires: "deadlines {endTime}")
 }
 
 input ContestBuilderProps
   @join__type(graph: CONTESTS)
 {
-  spaceId: String!
+  spaceId: ID!
   metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
@@ -130,15 +116,21 @@ type ContestErrorData
   submitterRestrictions: String
   votingPolicy: String
   additionalParams: String
-  twitter: String
 }
 
 type ContestMutationResponse
   @join__type(graph: CONTESTS)
 {
   success: Boolean!
-  contestId: Int
+  contestId: ID
   errors: ContestErrorData
+}
+
+type ContestTweetResponse
+  @join__type(graph: CONTESTS)
+{
+  success: Boolean!
+  errors: String
 }
 
 enum ContestType
@@ -167,11 +159,12 @@ input Deadlines
 
 type DeadlinesType
   @join__type(graph: CONTESTS)
+  @join__type(graph: SUBMIT)
 {
-  startTime: String!
-  voteTime: String!
-  endTime: String!
-  snapshot: String!
+  startTime: String! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  voteTime: String! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  endTime: String! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
+  snapshot: String! @join__field(graph: CONTESTS) @join__field(graph: SUBMIT, external: true)
 }
 
 scalar Decimal
@@ -275,14 +268,14 @@ type Mutation
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
   @join__type(graph: SUBMIT)
-  @join__type(graph: USER)
   @join__type(graph: VOTE)
 {
   createContest(contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
+  createContestTweet(contestId: ID!, spaceId: ID!, tweetThread: [ThreadItem!]!): ContestTweetResponse! @join__field(graph: CONTESTS)
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
-  signIn(authData: authDataInput): signInResponse! @join__field(graph: USER)
+  createTwitterSubmission(contestId: ID!, submission: TwitterSubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
   removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
   removeAllVotes(contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTE)
@@ -294,16 +287,25 @@ enum NativeTokenType
   ETH @join__enumValue(graph: CONTESTS)
 }
 
-type NonceResult
-  @join__type(graph: USER)
-{
-  nonce: Int!
-}
-
 input NonFungiblePayout
   @join__type(graph: CONTESTS)
 {
   tokenId: Int!
+}
+
+type PopularSubmission
+  @join__type(graph: SUBMIT, key: "id")
+{
+  id: ID!
+  contestId: ID!
+  created: String!
+  type: String!
+  version: String!
+  author: String!
+  url: String!
+  contestCategory: String!
+  spaceName: String!
+  spaceDisplayName: String!
 }
 
 input Prompt
@@ -321,15 +323,17 @@ type Query
   @join__type(graph: USER)
   @join__type(graph: VOTE)
 {
-  contest(contestId: Int!): Contest @join__field(graph: CONTESTS)
-  activeContests: [ActiveContest!]! @join__field(graph: CONTESTS)
+  contest(contestId: ID!): Contest @join__field(graph: CONTESTS)
+  activeContests: [Contest!]! @join__field(graph: CONTESTS)
+  isContestTweetQueued(contestId: ID!): Boolean! @join__field(graph: CONTESTS)
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
   submission(submissionId: ID!): Submission @join__field(graph: SUBMIT)
   contestSubmissions(contestId: ID!): [Submission!]! @join__field(graph: SUBMIT)
+  popularSubmissions: [PopularSubmission!]! @join__field(graph: SUBMIT)
   getUserSubmissionParams(contestId: ID!, walletAddress: String): UserSubmissionParams! @join__field(graph: SUBMIT)
-  me: User! @join__field(graph: USER)
-  generateNonce: NonceResult! @join__field(graph: USER)
+  me: User @join__field(graph: USER)
+  user(id: ID, address: String): User @join__field(graph: USER)
   testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTE)
   getUserVotingParams(contestId: ID!, walletAddress: String): UserVotingParams! @join__field(graph: VOTE)
 }
@@ -346,6 +350,20 @@ type RemoveSingleVoteResponse
 {
   success: Boolean!
   userVotingParams: UserVotingParams!
+}
+
+type Restriction
+  @join__type(graph: SUBMIT)
+{
+  restrictionType: String!
+  tokenRestriction: TokenRestriction
+}
+
+type RestrictionResult
+  @join__type(graph: SUBMIT)
+{
+  restriction: Restriction!
+  result: Boolean!
 }
 
 input RestrictionToken
@@ -380,28 +398,21 @@ type SampleResponse
   success: Boolean!
 }
 
-type signInResponse
-  @join__type(graph: USER)
-{
-  code: Int!
-  success: Boolean!
-  message: String!
-}
-
 type Space
-  @join__type(graph: CONTESTS, key: "id")
+  @join__type(graph: CONTESTS, key: "id", extension: true)
   @join__type(graph: SPACES, key: "id")
+  @join__type(graph: SUBMIT, key: "id")
 {
   id: ID!
-  contests: [Contest!]! @join__field(graph: CONTESTS)
+  admins: [Admin!]! @join__field(graph: CONTESTS, external: true) @join__field(graph: SPACES)
+  contests: [Contest!]! @join__field(graph: CONTESTS, requires: "admins { address }")
   name: String! @join__field(graph: SPACES)
   displayName: String! @join__field(graph: SPACES)
   members: Int! @join__field(graph: SPACES)
   logoUrl: String! @join__field(graph: SPACES)
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
-  admins: [Admin!]! @join__field(graph: SPACES)
-  spaceTokens: [SpaceToken!]! @join__field(graph: SPACES)
+  spaceTokens: [SpaceTokenMap!]! @join__field(graph: SPACES)
 }
 
 type SpaceBuilderErrors
@@ -432,15 +443,39 @@ type SpaceMutationResponse
   errors: SpaceBuilderErrors
 }
 
+type SpaceStub
+  @join__type(graph: CONTESTS, key: "id", extension: true)
+  @join__type(graph: SPACES, key: "id")
+{
+  id: ID!
+  name: String! @join__field(graph: SPACES)
+  displayName: String! @join__field(graph: SPACES)
+  members: Int! @join__field(graph: SPACES)
+  logoUrl: String! @join__field(graph: SPACES)
+  twitter: String @join__field(graph: SPACES)
+  website: String @join__field(graph: SPACES)
+  admins: [Admin!]! @join__field(graph: SPACES)
+}
+
 type SpaceToken
   @join__type(graph: SPACES)
 {
-  id: Int!
+  id: ID!
+  type: TokenStandard!
   tokenHash: String!
   symbol: String!
   decimals: Int!
   address: String
   tokenId: String
+}
+
+type SpaceTokenMap
+  @join__type(graph: SPACES)
+{
+  id: ID!
+  spaceId: ID!
+  tokenLink: Int!
+  token: SpaceToken!
 }
 
 type Submission
@@ -451,8 +486,10 @@ type Submission
   created: String!
   type: String!
   version: String!
-  author: String!
+  author: String
   url: String!
+  totalVotes: Decimal
+  rank: Int
 }
 
 scalar SubmissionAssetUrl
@@ -491,6 +528,43 @@ input SubmitterRewards
   payouts: [IPayout!]
 }
 
+input ThreadItem
+  @join__type(graph: CONTESTS)
+{
+  text: String
+  previewAsset: IpfsUrl
+  videoAsset: IpfsUrl
+  assetSize: String
+  assetType: String
+}
+
+input ThreadPayload
+  @join__type(graph: SUBMIT)
+{
+  text: String
+  previewAsset: SubmissionAssetUrl
+  videoAsset: SubmissionAssetUrl
+  assetSize: String
+  assetType: String
+}
+
+type Token
+  @join__type(graph: SUBMIT)
+{
+  type: String!
+  decimals: Int!
+  symbol: String!
+  address: String
+  tokenId: String
+}
+
+type TokenRestriction
+  @join__type(graph: SUBMIT)
+{
+  token: Token!
+  threshold: Decimal!
+}
+
 type TokenRestrictionType
   @join__type(graph: CONTESTS)
 {
@@ -506,6 +580,15 @@ type tokenRewardType
   token: TokenType!
 }
 
+enum TokenStandard
+  @join__type(graph: SPACES)
+{
+  ETH @join__enumValue(graph: SPACES)
+  ERC20 @join__enumValue(graph: SPACES)
+  ERC721 @join__enumValue(graph: SPACES)
+  ERC1155 @join__enumValue(graph: SPACES)
+}
+
 type TokenType
   @join__type(graph: CONTESTS)
 {
@@ -517,11 +600,18 @@ type TokenType
   tokenId: Int
 }
 
-type User
-  @join__type(graph: USER, key: "address")
+input TwitterSubmissionPayload
+  @join__type(graph: SUBMIT)
 {
-  address: ID!
-  isAuthenticated: Boolean!
+  title: String!
+  thread: [ThreadPayload!]!
+}
+
+type User
+  @join__type(graph: USER, key: "id")
+{
+  id: ID
+  address: String
 }
 
 type UserSubmissionParams
@@ -529,6 +619,7 @@ type UserSubmissionParams
 {
   maxSubPower: Int!
   remainingSubPower: Int!
+  restrictionResults: [RestrictionResult!]!
   userSubmissions: [Submission!]!
 }
 

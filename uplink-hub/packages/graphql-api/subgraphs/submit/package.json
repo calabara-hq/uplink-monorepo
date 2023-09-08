@@ -21,7 +21,8 @@
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "ioredis": "^5.3.2",
-    "lib": "workspace:*"
+    "lib": "workspace:*",
+    "nanoid": "^4.0.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",

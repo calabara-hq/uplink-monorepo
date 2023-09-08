@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import {
   differenceInSeconds,
@@ -9,8 +9,12 @@ import {
 } from "date-fns";
 
 export interface ContestStateProps {
+  contestAdmins: string[];
   contestState: string | null;
-  stateRemainingTime: string;
+  stateRemainingTime: string | null;
+  category: string;
+  type: string;
+  tweetId: string | null;
 }
 
 const ContestStateContext = createContext<ContestStateProps | undefined>(
@@ -20,6 +24,9 @@ const ContestStateContext = createContext<ContestStateProps | undefined>(
 export function ContestStateProvider({
   children,
   deadlines,
+  metadata,
+  tweetId,
+  contestAdmins,
 }: {
   children: React.ReactNode;
   deadlines: {
@@ -27,20 +34,33 @@ export function ContestStateProvider({
     voteTime: string;
     endTime: string;
   };
+  metadata: {
+    category: string;
+    type: "twitter" | "standard";
+  };
+  tweetId: string | null;
+  contestAdmins: string[];
 }) {
   const [contestState, setContestState] = useState<string | null>(null);
   const [stateRemainingTime, setStateRemainingTime] = useState<string>("");
-
+  useState<number>(0);
+  const { category, type } = metadata;
   useEffect(() => {
+    if (metadata.type === "twitter" && !tweetId) {
+      setContestState("pending");
+      setStateRemainingTime(null);
+      return;
+    }
     const { startTime, voteTime, endTime } = deadlines;
     const start = parseISO(startTime);
     const vote = parseISO(voteTime);
     const end = parseISO(endTime);
 
+    if (new Date() > end) return setContestState("closed");
+
     const interval = setInterval(() => {
       const now = new Date();
       let nextDeadline = end;
-
       if (now < start) {
         setContestState("pending");
         nextDeadline = start;
@@ -50,23 +70,24 @@ export function ContestStateProvider({
       } else if (now < end) {
         setContestState("voting");
       } else {
-        setContestState("end");
+        setContestState("closed");
       }
 
       const seconds = differenceInSeconds(nextDeadline, now);
       const minutes = differenceInMinutes(nextDeadline, now);
       const hours = differenceInHours(nextDeadline, now);
       const days = differenceInDays(nextDeadline, now);
-
+      console.log(days, hours, minutes, seconds)
       if (days > 0) {
         setStateRemainingTime(`${days} days`);
       } else if (hours > 0) {
         setStateRemainingTime(`${hours} hrs`);
-      } else if (minutes > 0) {
+      } else if (minutes > 1) {
         setStateRemainingTime(`${minutes} mins`);
-      } else {
+      } else if (seconds > 0){
         setStateRemainingTime(`${seconds} s`);
       }
+      else clearInterval(interval);
     }, 1000);
 
     return () => {
@@ -75,7 +96,16 @@ export function ContestStateProvider({
   }, [deadlines]);
 
   return (
-    <ContestStateContext.Provider value={{ contestState, stateRemainingTime }}>
+    <ContestStateContext.Provider
+      value={{
+        contestState,
+        stateRemainingTime,
+        category,
+        type,
+        tweetId,
+        contestAdmins,
+      }}
+    >
       {children}
     </ContestStateContext.Provider>
   );

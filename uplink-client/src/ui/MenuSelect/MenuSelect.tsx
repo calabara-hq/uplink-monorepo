@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowDownIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
+import { HiChevronDown } from "react-icons/hi2";
 
 export interface Option {
   value: string;
@@ -41,7 +41,7 @@ const MenuSelect = ({
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <p>{selected.label}</p>
-        <ChevronDownIcon className="w-5 ml-2" />
+        <HiChevronDown className="w-5 ml-2" />
       </div>
 
       {isOpen && (
@@ -54,7 +54,9 @@ const MenuSelect = ({
                 setIsOpen(false);
               }}
               className={`rounded-lg w-full ${
-                selected.value === option.value ? "bg-primary disabled:pointer-events-none" : ""
+                selected.value === option.value
+                  ? "bg-primary disabled:pointer-events-none"
+                  : ""
               }`}
             >
               <a className="">{option.label}</a>

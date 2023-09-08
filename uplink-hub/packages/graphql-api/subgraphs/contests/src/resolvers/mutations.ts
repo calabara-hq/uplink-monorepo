@@ -1,56 +1,18 @@
 
 import { AuthorizationController, schema } from "lib";
-import { createDbContest } from "../utils/database.js";
+import { createDbContest, queueTweet } from "../utils/database.js";
 import {
-    validateMetadata,
-    validateDeadlines,
-    validatePrompt,
-    validateSubmitterRestrictions,
-    validateSubmitterRewards,
-    validateVoterRewards,
-    validateVotingPolicy,
-    ContestBuilderProps,
-    validateAdditionalParams
+    validateContestParams, validateTweetThread
 } from "../utils/validateContestParams.js";
 
 import { GraphQLError } from "graphql";
 import { sqlOps, db } from '../utils/database.js';
 
 import dotenv from 'dotenv';
+import { dbContestTweetQueue, dbSingleContestById } from "./queries.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL);
-
-const processContestData = async (contestData: ContestBuilderProps) => {
-    const { metadata, deadlines, prompt, submitterRewards, voterRewards, submitterRestrictions, votingPolicy, additionalParams } = contestData;
-
-    const metadataResult = validateMetadata(metadata);
-    const deadlinesResult = validateDeadlines(deadlines);
-    const promptResult = validatePrompt(prompt);
-    const submitterRewardsResult = await validateSubmitterRewards(submitterRewards);
-    const voterRewardsResult = await validateVoterRewards(voterRewards);
-    const submitterRestrictionsResult = await validateSubmitterRestrictions(submitterRestrictions);
-    const votingPolicyResult = await validateVotingPolicy(votingPolicy);
-    const additionalParamsResult = await validateAdditionalParams(additionalParams);
-
-    const errors = {
-        ...(metadataResult.error ? { metadata: metadataResult.error } : {}),
-        ...(deadlinesResult.error ? { deadlines: deadlinesResult.error } : {}),
-        ...(promptResult.error ? { prompt: promptResult.error } : {}),
-        ...(submitterRewardsResult.error ? { submitterRewards: submitterRewardsResult.error } : {}),
-        ...(voterRewardsResult.error ? { voterRewards: voterRewardsResult.error } : {}),
-        ...(submitterRestrictionsResult.error ? { submitterRestrictions: submitterRestrictionsResult.error } : {}),
-        ...(votingPolicyResult.error ? { votingPolicy: votingPolicyResult.error } : {}),
-        ...(additionalParamsResult.error ? { additionalParams: additionalParamsResult.error } : {}),
-    }
-
-    const isSuccess = Object.keys(errors).length === 0;
-
-    return {
-        success: isSuccess,
-        errors: errors,
-    }
-}
 
 
 const verifyUserIsAdmin = async (user: any, spaceId: string) => {
@@ -72,29 +34,11 @@ const mutations = {
         createContest: async (_: any, args: any, context: any) => {
             const user = await authController.getUser(context);
             if (!user) throw new Error('Unauthorized');
-
             const isSpaceAdmin = await verifyUserIsAdmin(user, args.contestData.spaceId)
             if (!isSpaceAdmin) throw new Error('Unauthorized');
 
-
             const { contestData } = args;
-
-
-            if (contestData.metadata.type === 'twitter') {
-                const now = new Date().toISOString();
-                const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.expiresAt ?? now > now);
-
-                if (!isTwitterAuth) return {
-                    success: false,
-                    contestId: null,
-                    errors: {
-                        twitter: "account is unauthorized"
-                    }
-                }
-            }
-
-            const result = await processContestData(contestData);
-
+            const result = await validateContestParams(contestData);
             let contestId
 
             if (result.success) {
@@ -120,7 +64,68 @@ const mutations = {
                 contestId: contestId,
             }
         },
-    }
+        createContestTweet: async (_: any, args: any, context: any) => {
+            const user = await authController.getUser(context);
+            const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.accessSecret ?? null);
+
+            if (!user || !isTwitterAuth) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+            const isSpaceAdmin = await verifyUserIsAdmin(user, args.spaceId)
+
+            if (!isSpaceAdmin) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
+            const contest = await dbSingleContestById.execute({ contestId: args.contestId })
+
+            if (!contest) throw new GraphQLError('Contest not found', {
+                extensions: {
+                    code: 'CONTEST_DOES_NOT_EXIST'
+                }
+            })
+            if (contest.metadata.type !== 'twitter') throw new GraphQLError('Contest is not a twitter contest', {
+                extensions: {
+                    code: 'NOT_TWITTER_CONTEST'
+                }
+            })
+            if (contest.tweetId) throw new GraphQLError('Contest already has a tweet', {
+                extensions: {
+                    code: 'CONTEST_TWEET_EXISTS'
+                }
+            })
+
+            const tweetQueuedResult = await dbContestTweetQueue.execute({ contestId: args.contestId })
+            if (tweetQueuedResult) throw new GraphQLError('Contest tweet already queued', {
+                extensions: {
+                    code: 'CONTEST_TWEET_QUEUED'
+                }
+            })
+
+
+            const { cleanPayload, errors, success } = validateTweetThread(args.tweetThread);
+
+            if (success) {
+                await queueTweet(contest.id, user, contest.startTime, cleanPayload);
+                return { success: true }
+            }
+
+            else if (!success) {
+                return {
+                    success,
+                    errors
+                }
+            }
+
+        },
+    },
+
+
+
 }
 
 

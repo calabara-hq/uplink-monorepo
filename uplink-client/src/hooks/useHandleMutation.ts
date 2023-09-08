@@ -1,4 +1,4 @@
-// useHandleMutation.ts
+"use client";
 import { useCallback } from "react";
 import { DocumentNode } from "graphql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
@@ -27,33 +27,51 @@ export default function useHandleMutation(query: DocumentNode) {
 
     const knownErrors = {
         'UNAUTHORIZED': 'You are not authorized to perform this action',
+        'INTERNAL_SERVER_ERROR': 'Something went wrong', // catch all for database errors
+        // submitting
+        'IPFS_UPLOAD_ERROR': 'Error uploading submission to IPFS',
+        'INELIGIBLE_TO_SUBMIT': 'You are ineligible to submit to this contest',
+        'ENTRY_LIMIT_REACHED': 'You have reached the entry limit for this contest',
+        // voting
+        'FAILED_TO_CREATE_VOTES': 'Failed to create votes',
+        'CONTEST_DOES_NOT_EXIST': 'Contest does not exist',
+        'INSUFFICIENT_VOTING_POWER': 'Proposed votes are greater than your available voting power',
+        'INVALID_SUBMISSION_ID': 'Invalid submission id',
         'SELF_VOTING_DISABLED': 'Self voting is disabled for this contest',
+        'FAILED_TO_DELETE_VOTES': 'Failed to remove votes',
+        // tweeting
+        'NOT_TWITTER_CONTEST': 'This is not a twitter contest',
+        'CONTEST_TWEET_EXISTS': 'You have already tweeted for this contest',
+        'CONTEST_TWEET_QUEUED': 'A tweet is already queued for this contest',
     }
 
     const handleErrors = (result: ResultObject) => {
-        let errors = [];
+        if (result.error) {
+            // check for graphql errors
+            if (result.error?.graphQLErrors) {
+                for (const err of result.error.graphQLErrors) {
+                    const errorCode = err.extensions.code as string;
 
-        if (result.error?.graphQLErrors) {
-            for (const err of result.error.graphQLErrors) {
-                const errorCode = err.extensions.code as string;
-
-                if (errorCode in knownErrors) {
-                    console.log(err);
-                    toast.error(knownErrors[errorCode as keyof typeof knownErrors])
-                } else {
-                    console.log(err);
+                    // check for known errors
+                    if (errorCode in knownErrors) {
+                        console.log(err);
+                        toast.error(knownErrors[errorCode as keyof typeof knownErrors])
+                    } else {
+                        // unknown graphql error. throw
+                        throw new Error("unknown graphql error");
+                    }
                 }
             }
-        }
 
-        if (result.error) {
-            console.log(result.error);
-        }
+            else {
+                // unknown error. throw
+                throw new Error(result.error.message);
+            }
 
-        return null;
+        }
     };
     // if there are graphql errors that I know about in my error map, return the error
-    // if there are graphql errors that I don't know about, throw an unhandled error
+    // if there are graphql errors that I don't know about, throw an unknown error
 
     const handleMutation = useCallback(
         async (variables: any) => {
@@ -62,11 +80,9 @@ export default function useHandleMutation(query: DocumentNode) {
                 if (result.error) return handleErrors(result);
                 return result;
             } catch (err) {
-                console.log(`Error: ${err}`);
-                toast.error('Unhandled error', {
-                    icon: "🚀",
-                })
-                return null
+                // unknown error, handle it in the calling function
+                console.log(err)
+                throw new Error(err);
             }
         }, [handleErrors, query]);
 

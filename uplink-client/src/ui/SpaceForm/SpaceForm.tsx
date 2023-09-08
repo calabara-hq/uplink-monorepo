@@ -1,12 +1,11 @@
 "use client";
 import { useRef, useState } from "react";
-import { XCircleIcon, TrashIcon, UserIcon } from "@heroicons/react/24/solid";
+import { HiTrash, HiUser } from "react-icons/hi2";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import {
   CreateSpaceDocument,
   EditSpaceDocument,
-  IsEnsValidDocument,
 } from "@/lib/graphql/spaces.gql";
 import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import handleMediaUpload from "@/lib/mediaUpload";
@@ -15,10 +14,10 @@ import {
   SpaceBuilderProps,
   validateSpaceBuilderProps,
 } from "@/app/spacebuilder/spaceHandler";
-import ConnectWithCallback from "../ConnectWithCallback/ConnectWithCallback";
 import { useRouter } from "next/navigation";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import toast from "react-hot-toast";
+import WalletConnectButton from "../ConnectButton/ConnectButton";
 
 export default function SpaceForm({
   initialState,
@@ -91,13 +90,13 @@ export default function SpaceForm({
         }
       );
       router.refresh();
-      router.push(`/space/${spaceName}`);
+      router.push(`/${spaceName}`);
     }
   };
 
   return (
     <div className="flex flex-col w-full px-2 pt-2 pb-6 rounded-lg justify-center items-center">
-      <div className="flex flex-col gap-2  w-full lg:w-2/5 border-2 border-border p-6 rounded-xl shadow-box">
+      <div className="flex flex-col gap-2  w-full border-2 border-border p-6 rounded-xl shadow-box">
         <h2 className="text-3xl font-bold text-center">Space Builder</h2>
         <SpaceLogo state={state} dispatch={dispatch} />
         <SpaceName state={state} dispatch={dispatch} />
@@ -105,12 +104,14 @@ export default function SpaceForm({
         <SpaceTwitter state={state} dispatch={dispatch} />
         <SpaceAdmins state={state} dispatch={dispatch} />
         <div className="p-2" />
-        <ConnectWithCallback
-          callback={() => {
-            onFormSubmit(state);
-          }}
-          buttonLabel="submit"
-        />
+        <WalletConnectButton>
+          <button
+            className="btn btn-primary"
+            onClick={() => onFormSubmit(state)}
+          >
+            submit
+          </button>
+        </WalletConnectButton>
       </div>
     </div>
   );
@@ -172,11 +173,10 @@ const SpaceLogo = ({
         accept="image/*"
         className="hidden"
         onChange={async (event) => {
-          // TODO: handle media upload
-          /*
           handleMediaUpload(
             event,
             ["image"],
+            (mimeType) => {},
             (base64) => {
               dispatch({
                 type: "setLogoBlob",
@@ -189,8 +189,9 @@ const SpaceLogo = ({
                 payload: ipfsUrl,
               });
             }
-          );
-          */
+          ).catch((err) => {
+            return toast.error("couldn't upload your image");
+          });
         }}
         ref={imageUploader}
       />
@@ -202,7 +203,7 @@ const SpaceLogo = ({
           {state.logoBlob && <img src={state.logoBlob} />}
           {!state.logoBlob && (
             <div className="flex justify-center items-center w-full h-full">
-              <UserIcon className="w-8 h-8" />
+              <HiUser className="w-8 h-8" />
             </div>
           )}
         </div>
@@ -340,7 +341,7 @@ const SpaceAdmins = ({
                   type="text"
                   placeholder="vitalik.eth"
                   spellCheck="false"
-                  className={`input w-full disabled:text-gray-400
+                  className={`input w-full
                 ${isError ? "input-error" : "input"}`}
                   disabled={index < 1}
                   value={admin}
@@ -358,7 +359,7 @@ const SpaceAdmins = ({
                     }}
                     className="btn btn-square btn-ghost"
                   >
-                    <TrashIcon className="w-6" />
+                    <HiTrash className="w-6" />
                   </button>
                 )}
               </div>
@@ -386,13 +387,3 @@ const SpaceAdmins = ({
     </div>
   );
 };
-
-const AdminInput = ({
-  state,
-  dispatch,
-  index,
-}: {
-  state: SpaceBuilderProps;
-  dispatch: any;
-  index: number;
-}) => {};

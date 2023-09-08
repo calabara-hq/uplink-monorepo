@@ -20,8 +20,8 @@
   input[type="number"] {
     -moz-appearance: textfield;
   }
-}
 
+}
 
 .shimmer{
   @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.5s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent
@@ -29,4 +29,30 @@
 
 .fadeColor{
   @apply transition-colors duration-300 ease-in-out;
+}
+
+.zoomIn {
+  @apply transform scale-105 will-change-transform translate-x-0;
+}
+/* transition-transform duration-300 ease-in-out */
+.media-grid-item{
+  padding-top: 100%;
+}
+.glass,.glass:hover,.glass.btn-active {
+  border: none;
+  -webkit-backdrop-filter: blur(var(--glass-blur,40px));
+  backdrop-filter: blur(var(--glass-blur,40px));
+  background-color: transparent;
+  background-image: linear-gradient(135deg,rgb(255 255 255/var(--glass-opacity,30%)) 0%,rgb(0 0 0/0%) 100%),linear-gradient(var(--glass-reflex-degree,100deg),rgb(255 255 255/var(--glass-reflex-opacity,5%)) 25%,rgb(0 0 0/0%) 25%);
+  box-shadow: 0 0 0 1px rgb(255 255 255/var(--glass-border-opacity,10%)) inset,0 0 0 2px #0000000d;
+  text-shadow: 0 1px rgb(0 0 0/var(--glass-text-shadow-opacity,5%))
+}
+
+.shimmer-hover:hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  animation: shimmer 1.5s infinite;
+  background-image: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
 }

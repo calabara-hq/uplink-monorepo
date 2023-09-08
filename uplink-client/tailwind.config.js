@@ -12,7 +12,7 @@ const colors = {
   neurtral3: '#99A3BF',
 
   // Accent Colors
-  primary: '#AB36BE',
+  primary: '#5d9cec',
   secondary: '#CC0595',
   accent1: '#57A89C',
   accent2: '#57BAD7',
@@ -23,17 +23,17 @@ const colors = {
   text3: '#A1A1AA',
 
   // Additional Colors
-  success: '#60B56C',
+  success: '#36d399',
   warning: '#FFB84D',
-  error: '#E44444',
+  error: '#f87272',
   info: '#5D9CEC',
 }
 
 
 const colors2 = {
   base1: '#1c1f26',
-  base2: '#a8b3cf33',
-  base3: 'red'
+  base2: '#2b303b',
+  base3: '#202020'
 }
 
 
@@ -46,7 +46,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundColor: {
-        "base": "#0e1217",
+        "base": "#121212",
       },
       backgroundImage: {
         'landing': "url('/landing-bg.svg')",
@@ -65,11 +65,16 @@ module.exports = {
         //Background Color
         'start': '#202738',
         'end': '#070816',
+        't1': '#c8cede',
+        't2': '#6b7280',
 
       },
       boxShadow: {
         'box': '0px 40px 120px rgba(76, 130, 251, 0.16);',
       },
+      animation: {
+        'springUp': 'springUp 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
+      }
     },
     keyframes: ({ theme }) => ({
       shimmer: {
@@ -77,6 +82,17 @@ module.exports = {
           transform: 'translateX(100%)',
         },
       },
+      springUp: {
+        '0%': {
+          transform: 'translateY(100%)',
+          opacity: '0'
+        },
+        '100%': {
+          transform: 'translateY(0)',
+          opacity: '1'
+        }
+      }
+
     })
   },
 
@@ -104,7 +120,7 @@ module.exports = {
 
         },
         uplinkDark: {
-          primary: colors.primary,
+          primary: colors.accent2,
           secondary: colors.secondary,
           accent: colors.accent2,
           'base-100': colors2.base1,
@@ -124,35 +140,35 @@ module.exports = {
     themes: ["dark",
     {
       
-
+  
       mytheme: {
-
+  
         "primary": "#b2c3ff",
-
+  
         "secondary": "#3e2596",
-
+  
         "accent": "#6f76d6",
-
+  
         "neutral": "#1D2734",
-
+  
         "base-100": "#393239",
-
+  
         "info": "#759CF0",
-
+  
         "success": "#17C488",
-
+  
         "warning": "#FAC36B",
-
+  
         "error": "#DD2622",
       },
     },
     
   ],
-
+  
   },*/
 
   plugins: [
-    require("daisyui")
+    require("daisyui"),
   ],
 }
 

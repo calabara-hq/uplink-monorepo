@@ -1,254 +1,499 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSession } from "@/providers/SessionProvider";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
-import { twitterSignIn, useSession } from "@/providers/SessionProvider";
-import handleMediaUpload from "@/lib/mediaUpload";
-import { PhotoIcon } from "@heroicons/react/24/solid";
+import { ThreadItem, useThreadCreator } from "@/hooks/useThreadCreator";
+import { HiOutlineTrash, HiPhoto, HiXMark } from "react-icons/hi2";
+import TwitterConnectButton from "../TwitterConnectButton/TwitterConnectButton";
+import {
+  MediaController,
+  MediaControlBar,
+  MediaTimeRange,
+  MediaTimeDisplay,
+  MediaPlayButton,
+  MediaMuteButton,
+} from "media-chrome/dist/react";
+import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
+import { BiPlusCircle, BiSolidCircle } from "react-icons/bi";
 
-const variants = {
-  enter: (direction: number) => {
-    return {
-      y: direction > 0 ? 1000 : -1000,
-      opacity: 0,
-    };
-  },
-  center: {
-    zIndex: 1,
-    y: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => {
-    return {
-      zIndex: 100,
-      y: direction < 0 ? 1000 : -1000,
-      opacity: 0,
-    };
-  },
+const isStringBlank = (str: string) => {
+  return !str.trim();
 };
 
-export default function CreateThread() {
-  const [modalIsOpen, setModalisOpen] = useState(false);
-  const [[currentStep, direction], setCurrentStep] = useState([0, 0]);
-  const maxSteps = 10; // Maximum number of steps/tweets
-
-  const paginate = (newDirection: number) => {
-    const nextStep = currentStep + newDirection;
-    if (nextStep < 0) {
-      setCurrentStep([0, 0]);
-    } else if (nextStep >= maxSteps) {
-      setCurrentStep([maxSteps - 2, 0]);
-    } else {
-      setCurrentStep([nextStep, newDirection]);
-    }
-  };
-
-  const steps = Array.from({ length: maxSteps }).map((_, index) => {
-    return {
-      component: <Tweet key={index} />,
-    };
-  });
-
-  return (
-    <div>
-      <button className="btn" onClick={() => setModalisOpen(true)}>
-        thread
-      </button>
-      <Modal isModalOpen={modalIsOpen} onClose={() => setModalisOpen(false)}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            variants={variants}
-            custom={direction}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              y: { type: "tween", ease: "easeOut", duration: 0.3 },
-              opacity: { duration: 0.3 },
-            }}
-            className="flex flex-col w-full h-[650px] gap-4"
-          >
-            {currentStep > 0 && (
-              <div
-                className="w-full h-[80px] bg-base-100 hover:bg-base-200 cursor-pointer"
-                onClick={() => paginate(-1)}
-              />
-            )}
-            <div className="w-full h-full bg-base-100 p-4">
-              <p className="float-right">{currentStep}</p>
-
-              {steps[currentStep].component}
-            </div>
-            {currentStep < maxSteps - 1 && (
-              <div
-                className="w-full h-[80px] bg-base-100 hover:bg-base-200 cursor-pointer"
-                onClick={() => paginate(1)}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </Modal>
-    </div>
-  );
-}
-
-const Tweet = () => {
-  const { data: session, status } = useSession();
-
-  const [tweetText, setTweetText] = useState("");
-
-  const handleChange = (e: any) => {
-    const text = e.target.value;
-    if (text.length <= 280) {
-      setTweetText(text);
-    }
-  };
-
-  const handleTextareaResize = (e: any) => {
-    e.target.style.height = "auto";
-    e.target.style.height = `${e.target.scrollHeight}px`;
-  };
-
-  const handleImageUpload = (e: any) => {
-    const files = Array.from(e.target.files).slice(0, 4);
-    const images = files.map((file: Blob | MediaSource) =>
-      URL.createObjectURL(file)
-    );
-    setUploadedImages(images);
-  };
-  const [uploadedImages, setUploadedImages] = useState([]);
-
-  return (
-    <div className="bg-base-100 rounded-lg h-full">
-      <div className="flex gap-4 justify-center w-full h-fit">
-        {/* User Avatar */}
-        {session?.user?.twitter?.profile_image_url && (
-          <Image
-            className="rounded-full"
-            width={50}
-            height={50}
-            src={session?.user?.twitter?.profile_image_url}
-            alt="User Avatar"
-          />
-        )}
-
-        <div className="flex flex-col gap-4 items-start w-full h-fit">
-          {/* User Info */}
-          <div className="flex items-center space-x-2 w-full h-fit">
-            <span className="font-semibold text-gray-800">
-              {session?.user?.twitter?.name}
-            </span>
-            <span className="text-gray-500">
-              {session?.user?.twitter?.username}
-            </span>
-            <span className="text-gray-500">•</span>
-            <span className="text-gray-500">2h</span>
-          </div>
-
-          {/* Tweet Textarea */}
-          <textarea
-            rows={1}
-            placeholder="What's happening?"
-            className="mt-1 p-2 textarea textarea-lg resize-none w-full overflow-y-hidden"
-            style={{ height: "auto" }}
-            value={tweetText}
-            onChange={handleChange}
-            onInput={handleTextareaResize}
-          />
-          <div className="text-gray-500 text-right">
-            {280 - tweetText.length} characters remaining
-          </div>
-
-          {/* Uploaded Images */}
-          {uploadedImages.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 h-1/3">
-              {uploadedImages.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Uploaded Image ${index + 1}`}
-                  className={
-                    uploadedImages.length === 1
-                      ? "w-full h-24"
-                      : uploadedImages.length === 2
-                      ? "w-1/2 h-1/4"
-                      : "w-1/2 sm:w-1/3 lg:w-1/4 h-1/4"
-                  }
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Button Section */}
-          <div className="flex space-x-2 mt-2 w-full justify-between">
-            <label
-              htmlFor="image-upload"
-              className="flex items-center btn btn-square btn-sm btn-ghost"
-            >
-              <PhotoIcon className="w-6 h-6" />
-              <input
-                type="file"
-                id="image-upload"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </label>
-            <button className="bg-twitter hover:bg-opacity-60 text-white font-bold py-2 px-4 rounded focus:outline-none">
-              Tweet
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Modal = ({
+const TweetModal = ({
   isModalOpen,
   children,
-  onClose,
-  title,
 }: {
   isModalOpen: boolean;
   children: React.ReactNode;
-  onClose: () => void;
-  title?: string;
 }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [modalRef]);
-
   if (isModalOpen) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50 w-full">
-        <div className="modal modal-open bg-transparent ">
-          <div
-            ref={modalRef}
-            className="modal-box max-w-2xl overflow-hidden bg-transparent p-0"
-          >
-            {children}
-          </div>
+      <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-[#00000080] transition-colors duration-300 ease-in-out">
+        <div className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-2xl animate-springUp">
+          {children}
         </div>
-        <div className="fixed inset-0 bg-black opacity-50"></div>
       </div>
     );
   }
   return null;
 };
+
+const RenderAccount = ({ isBarVisible }: { isBarVisible: boolean }) => {
+  const { data: session, status } = useSession();
+  if (session?.user?.twitter) {
+    return (
+      <div className="flex flex-col items-center">
+        <Image
+          src={session.user.twitter.profile_image_url_large}
+          alt="User Avatar"
+          width={50}
+          height={50}
+          className="rounded-full"
+        />
+        {isBarVisible && <div className="bg-border w-1 h-full" />}
+      </div>
+    );
+  }
+  return null;
+};
+
+const RenderMedia = ({
+  threadItem,
+  isFocused,
+  removeTweetMedia,
+}: {
+  threadItem: ThreadItem;
+  isFocused: boolean;
+  removeTweetMedia: any;
+}) => {
+  if (threadItem.isVideo) {
+    return (
+      <div className="relative w-full">
+        {isFocused && (
+          <button
+            className="absolute top-[-10px] right-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg"
+            onClick={() => removeTweetMedia(threadItem.id)}
+          >
+            <HiOutlineTrash className="w-5 h-5" />
+          </button>
+        )}
+        <MediaController className="rounded-xl">
+          <video
+            slot="media"
+            src={threadItem.primaryAssetBlob}
+            poster={
+              threadItem.videoThumbnailBlobIndex !== null
+                ? threadItem.videoThumbnailOptions[
+                    threadItem.videoThumbnailBlobIndex
+                  ]
+                : ""
+            }
+            preload="auto"
+            muted
+            crossOrigin=""
+            className="rounded-t-xl h-64 w-full object-contain"
+          />
+          <MediaControlBar>
+            <MediaPlayButton></MediaPlayButton>
+            <MediaTimeRange></MediaTimeRange>
+            <MediaTimeDisplay showDuration></MediaTimeDisplay>
+            <MediaMuteButton></MediaMuteButton>
+          </MediaControlBar>
+        </MediaController>
+      </div>
+    );
+  } else if (threadItem.primaryAssetBlob) {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="relative">
+          {isFocused && (
+            <button
+              className="absolute top-0 right-0 mt-[-10px] mr-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg"
+              onClick={() => removeTweetMedia(threadItem.id)}
+            >
+              <HiOutlineTrash className="w-5 h-5" />
+            </button>
+          )}
+          <Image
+            src={threadItem.primaryAssetBlob}
+            alt="Tweet Media"
+            width={200}
+            height={200}
+            className="rounded-lg object-contain"
+          />
+        </div>
+      </div>
+    );
+  } else return null;
+};
+
+const Tweet = ({
+  threadItem,
+  setTweetText,
+  removeTweetMedia,
+  isFocused,
+}: {
+  threadItem: ThreadItem;
+  setTweetText: any;
+  removeTweetMedia: any;
+  isFocused: boolean;
+}) => {
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  useAutosizeTextArea({ textAreaRef, value: threadItem.text });
+  return (
+    <div className="flex flex-col w-11/12 m-auto ">
+      <textarea
+        ref={textAreaRef}
+        placeholder="whats happening?"
+        //focused={focusedTweet === id}
+        value={threadItem.text}
+        rows={1}
+        onChange={(e) => setTweetText(threadItem.id, e.target.value)}
+        className="rounded-sm p-2.5 w-full outline-none resize-none leading-normal bg-transparent"
+      />
+      <RenderMedia
+        threadItem={threadItem}
+        isFocused={isFocused}
+        removeTweetMedia={removeTweetMedia}
+      />
+    </div>
+  );
+};
+
+const TweetFooter = ({
+  tweet,
+  setTweetVideoThumbnailBlobIndex,
+  addTweet,
+  handleFileChange,
+  visible,
+  handleSave,
+  confirmLabel,
+  isSaveDisabled,
+  isMediaUploading,
+}: {
+  tweet: ThreadItem;
+  setTweetVideoThumbnailBlobIndex: (id: string, index: number | null) => void;
+  addTweet: () => void;
+  handleFileChange: (data: any) => void;
+  visible: boolean;
+  handleSave: () => void;
+  confirmLabel: string;
+  isSaveDisabled: boolean;
+  isMediaUploading: boolean;
+}) => {
+  const imageUploader = useRef<HTMLInputElement>(null);
+  const thumbnailUploader = useRef<HTMLInputElement>(null);
+
+  const Input = ({
+    id,
+    isVideo,
+    mode,
+    disabled,
+    children,
+  }: {
+    id: string;
+    isVideo: boolean;
+    mode: "primary" | "thumbnail";
+    disabled?: boolean;
+    children: React.ReactNode;
+  }) => (
+    <div>
+      <input
+        placeholder="asset"
+        type="file"
+        disabled={disabled}
+        accept={mode === "primary" ? "image/*, video/mp4" : "image/*"}
+        className="hidden"
+        onChange={(event) => {
+          console.log(imageUploader);
+          handleFileChange({ id, event, isVideo, mode });
+        }}
+        ref={mode === "primary" ? imageUploader : thumbnailUploader}
+      />
+      <div className={`${disabled ? "opacity-50 pointer-events-none" : ""}`}>
+        {children}
+      </div>
+    </div>
+  );
+
+  if (visible)
+    return (
+      <div className="flex flex-col gap-5">
+        <span className="loading loading-spinner text-primary"></span>
+
+        {tweet.isVideo && tweet?.videoThumbnailOptions?.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-2 items-center justify-center bg-base-100 border border-border p-2 w-fit m-auto rounded">
+            <p className="self-center text-xs">Thumbnail</p>
+            <div className="grid grid-rows-2 sm:grid-rows-1 grid-cols-3 sm:grid-cols-5 gap-4 ">
+              {tweet.videoThumbnailOptions.map((thumbOp, thumbIdx) => {
+                return (
+                  <div
+                    key={thumbIdx}
+                    className="relative cursor-pointer"
+                    onClick={() =>
+                      setTweetVideoThumbnailBlobIndex(tweet.id, thumbIdx)
+                    }
+                  >
+                    <Image
+                      src={thumbOp}
+                      alt="Tweet Media"
+                      width={64}
+                      height={64}
+                      className={`hover:opacity-50 rounded aspect-video object-contain ${
+                        tweet.videoThumbnailBlobIndex === thumbIdx
+                          ? "opacity-50"
+                          : ""
+                      }`}
+                    />
+
+                    {tweet.videoThumbnailBlobIndex === thumbIdx && (
+                      <BiSolidCircle className="absolute text-primary w-5 h-5 top-[-10px] right-[-10px]" />
+                    )}
+                  </div>
+                );
+              })}
+              <Input id={tweet.id} isVideo={false} mode="thumbnail">
+                <div
+                  className="w-16 h-9"
+                  onClick={() => thumbnailUploader.current?.click()}
+                >
+                  <div className="w-full h-full bg-base-100 border border-border rounded opacity-50 hover:opacity-90 flex flex-col p-2 items-center justify-center cursor-pointer text-gray-500">
+                    <BiPlusCircle className="w-4 h-4" />
+                  </div>
+                </div>
+              </Input>
+            </div>
+          </div>
+        )}
+        <div className="w-full h-0.5 bg-border"></div>
+        <div className="flex items-center justify-start w-full ml-auto">
+          <Input
+            id={tweet.id}
+            isVideo={tweet.isVideo}
+            mode="primary"
+            disabled={tweet.primaryAssetBlob ? true : false}
+          >
+            <div
+              className="hover:opacity-50 cursor-pointer"
+              onClick={() => imageUploader.current?.click()}
+            >
+              <HiPhoto className="w-7 h-7" />
+            </div>
+          </Input>
+          <div className="flex flex-row gap-2 ml-auto items-center justify-center">
+            {tweet.text.length > 220 && tweet.text.length <= 280 && (
+              <>
+                <p className="text-xs text-warning">
+                  {280 - tweet.text.length}
+                </p>
+                <div className="w-0.5 h-5 bg-border" />
+              </>
+            )}
+            {tweet.text.length > 280 && (
+              <>
+                <p className="text-sm text-error">{280 - tweet.text.length}</p>
+                <div className="w-0.5 h-5 bg-border" />
+              </>
+            )}
+
+            <div className="hover:opacity-50 cursor-pointer" onClick={addTweet}>
+              <BiPlusCircle className="w-7 h-7" />
+            </div>
+            <button
+              onClick={handleSave}
+              className="btn btn-sm btn-primary lowercase"
+              disabled={isSaveDisabled || isMediaUploading}
+            >
+              {confirmLabel}
+            </button>
+          </div>
+        </div>
+        {isMediaUploading && (
+          <div className="flex flex-row w-full items-center justify-end gap-2 text-gray-500">
+            <p className="text-xs">uploading media</p>
+            <div
+              className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+              role="status"
+            >
+              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                Loading...
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+};
+
+const CreateThread = ({
+  isModalOpen,
+  setIsModalOpen,
+  initialThread,
+  confirmLabel,
+  onConfirm,
+  customDecorators,
+}: {
+  isModalOpen: boolean;
+  setIsModalOpen: (value: boolean) => void;
+  initialThread: ThreadItem[];
+  confirmLabel: string;
+  onConfirm: (thread: ThreadItem[]) => void;
+  customDecorators?: {
+    type: "text";
+    data: string;
+    title: string;
+    icon: React.ReactNode;
+  }[];
+}) => {
+  const {
+    thread,
+    addTweet,
+    removeTweet,
+    removeTweetMedia,
+    setTweetText,
+    setTweetVideoThumbnailBlobIndex,
+    handleFileChange,
+    validateThread,
+  } = useThreadCreator(initialThread);
+
+  console.log(thread)
+
+
+  const [focusedTweet, setFocusedTweet] = useState(initialThread[0]?.id);
+  const [title, setTitle] = useState("");
+  const { data: session, status } = useSession();
+  const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+  useEffect(() => {
+    setFocusedTweet(thread.at(-1)?.id);
+  }, [thread.length]);
+
+  useEffect(() => {
+    thread.map((tweet) => {
+      const isBlank = isStringBlank(tweet.text);
+      if (isBlank && !tweet.primaryAssetBlob) {
+        setIsSaveDisabled(true);
+        return;
+      } else if (!isBlank) {
+        if (tweet.text.length > 280) {
+          setIsSaveDisabled(true);
+          return;
+        }
+      }
+      setIsSaveDisabled(false);
+    });
+  }, [thread]);
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSave = async () => {
+    const { isError } = await validateThread();
+    if (isError) return;
+    onConfirm(thread);
+    handleClose();
+  };
+
+  const handleDecoratorSelect = (decorator: any, threadIndex: string) => {
+    const { type, data } = decorator;
+    const currentTweet = thread.find((tweet) => {
+      return tweet.id === threadIndex;
+    });
+    if (type === "text") {
+      setTweetText(threadIndex, currentTweet?.text + data);
+    }
+  };
+
+  return (
+    <TweetModal isModalOpen={isModalOpen}>
+      <button
+        className="absolute top-2 left-2 bg-base-100 rounded-full p-1 z-10 hover:opacity-50"
+        onClick={handleClose}
+      >
+        <HiXMark className="w-5 h-5" />
+      </button>
+
+      <div className="flex flex-col w-full px-1 gap-4 mt-8">
+        {!session?.user?.twitter && (
+          <div className="flex flex-col items-center justify-center w-full gap-4">
+            <h1>Please link your twitter account to get started</h1>
+            <div className="w-fit m-auto">
+              <TwitterConnectButton />
+            </div>
+          </div>
+        )}
+        {session?.user?.twitter && (
+          <>
+            {customDecorators && (
+              <ul className="absolute top-0 left-1/2 transform -translate-x-1/2  menu menu-horizontal bg-base-100 rounded-box">
+                {customDecorators.map((decorator, index) => (
+                  <li
+                    key={index}
+                    onClick={() =>
+                      handleDecoratorSelect(decorator, focusedTweet)
+                    }
+                  >
+                    <div className="menu-content flex flex-row gap-2">
+                      {decorator.icon}
+                      {decorator.title}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {thread.map((tweet, index) => (
+              <div
+                key={index}
+                className={`grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] w-full ml-auto mr-auto overflow-hidden relative ${
+                  focusedTweet !== tweet.id ? "opacity-50" : ""
+                }`}
+                onClick={() => setFocusedTweet(tweet.id)}
+              >
+                {focusedTweet === tweet.id && thread.length > 1 && (
+                  <HiXMark
+                    className="absolute top-0 right-0 w-6 h-6 ml-auto cursor-pointer hover:opacity-50"
+                    onClick={() => {
+                      removeTweet(tweet.id);
+                      setFocusedTweet(thread.at(-1)?.id);
+                    }}
+                  />
+                )}
+
+                <RenderAccount
+                  isBarVisible={thread.length > 0 && index < thread.length - 1}
+                />
+                <div className="w-11/12 flex flex-col gap-2">
+                  <Tweet
+                    threadItem={tweet}
+                    setTweetText={setTweetText}
+                    removeTweetMedia={removeTweetMedia}
+                    isFocused={focusedTweet === tweet.id}
+                  />
+                  <TweetFooter
+                    {...{
+                      tweet,
+                      setTweetVideoThumbnailBlobIndex,
+                      addTweet,
+                      handleFileChange,
+                      visible: focusedTweet === tweet.id,
+                      handleSave,
+                      confirmLabel,
+                      isSaveDisabled,
+                      isMediaUploading: thread.some(
+                        (tweet) => tweet.isUploading
+                      ),
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+    </TweetModal>
+  );
+};
+
+export default CreateThread;

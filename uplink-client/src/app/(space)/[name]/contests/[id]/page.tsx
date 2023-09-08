@@ -1,51 +1,50 @@
-import Prompt from "@/ui/Contests/ContestPrompt";
 import SubmissionDisplay from "@/ui/Contests/SubmissionDisplay";
-import { getContestById } from "@/lib/fetch/contest";
-import { Suspense } from "react";
-import { SubmissionDisplaySkeleton } from "@/ui/Contests/SubmissionDisplay";
 import ContestSidebar from "@/ui/Contests/ContestSidebar";
-import { SWRConfig } from "swr";
-import SwrProvider from "@/providers/SwrProvider";
-
-const fetchSubmission = async (url: string) => {
-  console.log("fetching submission from", url);
-  return fetch(url, { cache: "no-store" }).then((res) => res.json());
-};
-
+import { getContestById } from "./fetchContest";
+import MobileActions from "@/ui/Contests/MobileActions";
+import ContestHeading from "@/ui/Contests/ContestHeading";
 
 export default async function Page({
   params,
 }: {
   params: { id: string; name: string };
 }) {
-  const contest = await getContestById(parseInt(params.id));
-  const { contestId, metadata, deadlines, promptUrl, submissions } =contest.data.contest;
+  const {
+    metadata,
+    deadlines,
+    promptUrl,
+    space,
+    submitterRewards,
+    voterRewards,
+    votingPolicy,
+    tweetId,
+  } = await getContestById(params.id);
 
-  
-  const resolvedSubmissions = await Promise.all(submissions.map(async (submission, idx) => {
-    const data = await fetchSubmission(submission.url)
-    return { ...submission, data: data }
-  }))
-
-  const fallback = {
-    [`/ipfs/submissions/${params.id}`]: resolvedSubmissions
-  }
+  const promptData = await fetch(promptUrl).then((res) => res.json());
 
   return (
     <>
-      <div className="flex flex-col w-full lg:w-3/4 gap-4">
-        {/*@ts-expect-error*/}
-        <Prompt
-          contestId={contestId}
+      <div className="flex flex-col w-full gap-4">
+        <ContestHeading
+          space={space}
           metadata={metadata}
           deadlines={deadlines}
-          promptUrl={promptUrl}
+          prompt={promptData}
+          tweetId={tweetId}
         />
-        <SwrProvider fallback={fallback}>
-          <SubmissionDisplay contestId={parseInt(params.id)}/>
-        </SwrProvider>
+        <MobileActions contestId={params.id} spaceName={params.name} />
+        <SubmissionDisplay contestId={params.id} spaceName={params.name} />
       </div>
-      <ContestSidebar contestId={parseInt(params.id)} spaceName={params.name} />
+      <ContestSidebar
+        contestId={params.id}
+        spaceName={params.name}
+        spaceId={space.id}
+        startTime={deadlines.startTime}
+        prompt={promptData}
+        submitterRewards={submitterRewards}
+        voterRewards={voterRewards}
+        votingPolicy={votingPolicy}
+      />
     </>
   );
 }

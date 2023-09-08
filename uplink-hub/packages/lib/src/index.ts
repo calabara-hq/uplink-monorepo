@@ -10,5 +10,7 @@ export * from './graphql-scalars/EditorData.js';
 export * from './graphql-scalars/IpfsUrl.js'
 export * from './graphql-scalars/Decimal.js'
 export * from './graphql-scalars/SubmissionAssetUrl.js'
+export * from './revalidate-client-cache/index.js'
+export * from './cipher/index.js'
 export { OutputData as EditorOutputData } from '@editorjs/editorjs';
 export { Decimal } from 'decimal.js';

@@ -38,6 +38,7 @@ export const reducer = (state: SpaceBuilderProps, action: any) => {
         logoBlob: action.payload,
       };
     case "setLogoUrl":
+      console.log(action.payload)
       return {
         ...state,
         logoUrl: action.payload,
@@ -144,7 +145,7 @@ export const validateSpaceName = (name: SpaceBuilderProps['name']): { error: str
 export const validateSpaceLogo = (logoUrl: SpaceBuilderProps['logoUrl']): { error: string | null, value: SpaceBuilderProps['logoUrl'] } => {
 
   if (!logoUrl) return { value: logoUrl, error: "Logo is required" };
-  const pattern = /^(https:\/\/(?:[a-z0-9]+\.(?:ipfs|ipns)\.[a-z]+|cloudflare-ipfs\.com\/ipfs\/[a-zA-Z0-9]+|cloud\.ipfs\.io\/ipfs\/[a-zA-Z0-9]+|ipfs\.infura\.io\/ipfs\/[a-zA-Z0-9]+|dweb\.link\/ipfs\/[a-zA-Z0-9]+|ipfs\.fsi\.cloud\/ipfs\/[a-zA-Z0-9]+|ipfs\.runfission\.com\/ipfs\/[a-zA-Z0-9]+|calabara\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+)|ipfs:\/\/[a-zA-Z0-9]+)/;
+  const pattern = /^https:\/\/uplink\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+/;
   if (!pattern.test(logoUrl)) return { value: logoUrl, error: "Logo is not valid" };
 
   return {

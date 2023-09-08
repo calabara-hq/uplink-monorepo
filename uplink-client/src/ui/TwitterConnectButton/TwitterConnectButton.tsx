@@ -1,9 +1,10 @@
 "use client";
 import { twitterSignIn, useSession } from "@/providers/SessionProvider";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
+import WalletConnectButton from "../ConnectButton/ConnectButton";
 
 const TwitterConnectButton = ({}) => {
-  const { data: session, status } = useSession();
   const handleClick = async () => {
     const res = await twitterSignIn("write");
     if (res) {
@@ -12,24 +13,14 @@ const TwitterConnectButton = ({}) => {
   };
 
   return (
-    <div>
-      <button className="btn bg-twitter" onClick={handleClick}>
-        Twitter
+    <WalletConnectButton>
+      <button
+        className="btn btn-primary lowercase  w-full"
+        onClick={handleClick}
+      >
+        Connect Twitter
       </button>
-      <div>
-        <p>Twitter</p>
-        {session?.user?.twitter?.name}
-        {session?.user?.twitter?.profile_image_url && (
-          <Image
-            className="rounded-full"
-            width={50}
-            height={50}
-            src={session?.user?.twitter?.profile_image_url}
-            alt={"weekly sub"}
-          />
-        )}
-      </div>
-    </div>
+    </WalletConnectButton>
   );
 };
 

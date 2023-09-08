@@ -1,190 +1,293 @@
+import {
+  CategoryLabel,
+  ContestCategory,
+  RemainingTimeLabel,
+  StatusLabel,
+} from "@/ui/ContestLabels/ContestLabels";
+import CardSubmission from "@/ui/Submission/CardSubmission";
+import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
-import weeklySub from "../../public/9999-winner.jpeg";
-import TabGroup from "@/ui/TabGroup/TabGroup";
-export default async function Page() {
+import Link from "next/link";
+import { BiPlusCircle } from "react-icons/bi";
+import { HiOutlineTrash, HiPhoto } from "react-icons/hi2";
+
+const getActiveContests = async () => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+      query ActiveContests {
+        activeContests {
+          id
+          tweetId
+          promptUrl
+          deadlines {
+            startTime
+            voteTime
+            endTime
+          }
+          metadata {
+            type
+            category
+          }
+          space {
+            logoUrl
+            displayName
+            name
+          }
+        }
+      }`,
+    }),
+    next: { revalidate: 60 },
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.activeContests);
+  return data;
+};
+
+const getPopularSubmissions = async () => {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+      query PopularSubmissions {
+        popularSubmissions {
+          author
+          contestCategory
+          spaceDisplayName
+          spaceName
+          contestId
+          created
+          id
+          type
+          url
+          version
+        }
+      }`,
+    }),
+    next: { revalidate: 60 },
+  })
+    .then((res) => res.json())
+    .then((res) => res.data.popularSubmissions)
+    .then(async (submissions) => {
+      return await Promise.all(
+        submissions.map(async (submission, idx) => {
+          const data = await fetch(submission.url).then((res) => res.json());
+          return { ...submission, data: data };
+        })
+      );
+    });
+  return data;
+};
+
+const BannerSection = () => {
   return (
-    <>
-      <div className="relative">
-        <div className="flex flex-col lg:flex-row justify-center items-center ml-auto mr-auto z-10 top-6 left-0 right-0 gap-20 px-10  w-8/12 ">
-          <div className="w-1/2">
-            <h1 className="text-5xl font-bold text-white">Uplink</h1>
-            <p className="py-6 text-white">
-              Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-              excepturi exercitationem quasi. In deleniti eaque aut repudiandae
-              et a id nisi.
-            </p>
-            <button className="btn">Get Started</button>
-          </div>
-          {/*}
-          <div className="card card-compact w-64 bg-neutral text-white shadow-xl z-10">
-            <figure>
-              <Image src={weeklySub} alt="Shoes" />
-            </figure>
-            <div className="card-body grid grid-rows-2 grid-flow-col gap-2 text-white">
-              <p>Artist:</p>
-              <p>Contest:</p>
-              <p className="text-end font-bold">Messhup</p>
-              <p className="text-end font-bold">The Noun Square - 9999 PFP</p>
-            </div>{" "}
-          </div>
-          */}
-          <div className="bg-neutral flex-col z-10 rounded-lg font-virgil shadow-lg ">
-            <Image
-              src={weeklySub}
-              alt="Shoes"
-              width={300}
-              className="rounded-t-lg"
-            />
-            <div className="p-6">
-              <p className="text-end font-bold">The Noun Square 9999 PFP</p>
-              <p className="text-end font-bold">- Messhup</p>
+    <div className="grid grid-rows-[80%_20%] h-screen">
+      <div className="from-[#1c1f26] to-[#1c1f26] text-white grid place-items-center items-center bg-gradient-to-br pt-5">
+        <div className="relative hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row lg:gap-0 xl:gap-20 ">
+          <div className="lg:pl-10 ">
+            <div className="mb-2 py-4 text-left ">
+              <h1 className="mb-2 text-5xl font-[700] text-t1">
+                Crafted for creators
+              </h1>
+              <h2 className="text-lg max-w-md text-t1">
+                Uplink is where creativity finds its canvas. Dive into a vibrant
+                community where your knack earns more than just applause.
+              </h2>
             </div>
           </div>
-        </div>
-        <div className="relative z-0 pointer-events-none">
-          <svg
-            className="w-full h-auto -mt-[34vw]"
-            id="visual"
-            viewBox="0 0 1920 1080"
-            width="1920"
-            height="1080"
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.1"
-          >
-            <path
-              d="M0 733L45.7 733.8C91.3 734.7 182.7 736.3 274.2 739.7C365.7 743 457.3 748 548.8 729.3C640.3 710.7 731.7 668.3 823 645.7C914.3 623 1005.7 620 1097 635.8C1188.3 651.7 1279.7 686.3 1371.2 678.5C1462.7 670.7 1554.3 620.3 1645.8 597C1737.3 573.7 1828.7 577.3 1874.3 579.2L1920 581L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#fa7268"
-            ></path>
-            <path
-              d="M0 737L45.7 731.5C91.3 726 182.7 715 274.2 729.2C365.7 743.3 457.3 782.7 548.8 800.3C640.3 818 731.7 814 823 813.2C914.3 812.3 1005.7 814.7 1097 811C1188.3 807.3 1279.7 797.7 1371.2 776.8C1462.7 756 1554.3 724 1645.8 712.7C1737.3 701.3 1828.7 710.7 1874.3 715.3L1920 720L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#ef5f67"
-            ></path>
-            <path
-              d="M0 734L45.7 752.3C91.3 770.7 182.7 807.3 274.2 819.5C365.7 831.7 457.3 819.3 548.8 809.2C640.3 799 731.7 791 823 796.5C914.3 802 1005.7 821 1097 822.5C1188.3 824 1279.7 808 1371.2 814.8C1462.7 821.7 1554.3 851.3 1645.8 862C1737.3 872.7 1828.7 864.3 1874.3 860.2L1920 856L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#e34c67"
-            ></path>
-            <path
-              d="M0 949L45.7 933.5C91.3 918 182.7 887 274.2 888.3C365.7 889.7 457.3 923.3 548.8 929.8C640.3 936.3 731.7 915.7 823 896.2C914.3 876.7 1005.7 858.3 1097 859.5C1188.3 860.7 1279.7 881.3 1371.2 885.5C1462.7 889.7 1554.3 877.3 1645.8 869.3C1737.3 861.3 1828.7 857.7 1874.3 855.8L1920 854L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#d53867"
-            ></path>
-            <path
-              d="M0 991L45.7 981.2C91.3 971.3 182.7 951.7 274.2 953.8C365.7 956 457.3 980 548.8 992.3C640.3 1004.7 731.7 1005.3 823 1004C914.3 1002.7 1005.7 999.3 1097 999.5C1188.3 999.7 1279.7 1003.3 1371.2 995.3C1462.7 987.3 1554.3 967.7 1645.8 954.5C1737.3 941.3 1828.7 934.7 1874.3 931.3L1920 928L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#c62368"
-            ></path>
-          </svg>
-          {/*<div className="h-16 bg-[#c62368]">test</div>*/}
-        </div>
-        <div className="relative flex flex-col w-7/12 mr-auto ml-auto -mt-48 backdrop-blur-md bg-white/30 text-white px-2 py-2 rounded-lg">
-          <div className="p-5">
-            <h1 className="text-2xl font-bold">Active Contests</h1>
-          </div>
-
-          <div className="flex flex-col p-4 gap-2">
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-            <div className="bg-base-100 rounded-md p-4">contest1</div>
-          </div>
-        </div>
-      </div>
-
-      {/*}
-      <div className="hero top-0 bg-cover bg-blue-300">
-        <div className="hero-content flex-col justify-evenly lg:flex-row-reverse ">
-          <div className="card card-compact w-96 align-center rounded-2xl bg-neutral">
-            <figure>
-              <Image
-                className="rounded-t-2xl"
-                src={weeklySub}
-                alt={"weekly sub"}
-              />
-            </figure>
-            <div className="card-body grid grid-rows-2 grid-flow-col gap-2 text-white">
-              <p>Artist:</p>
-              <p>Contest:</p>
-              <p className="text-end font-bold">Messhup</p>
-              <p className="text-end font-bold">The Noun Square - 9999 PFP</p>
-            </div>{" "}
-          </div>
-          <div className="w-1/2">
-            <h1 className="text-5xl font-bold text-white">Creator Contests!</h1>
-            <p className="py-6 text-white">
-              Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-              excepturi exercitationem quasi. In deleniti eaque aut repudiandae
-              et a id nisi.
-            </p>
-            <button className="btn btn-primary">Get Started</button>
-          </div>
-        </div>
-        <div className="w-full overflow-x-hidden">
-          <svg
-            className="z-0"
-            id="visual"
-            viewBox="0 300 1920 1080"
-            width="1920"
-            height="1080"
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.1"
-          >
-            <path
-              d="M0 733L45.7 733.8C91.3 734.7 182.7 736.3 274.2 739.7C365.7 743 457.3 748 548.8 729.3C640.3 710.7 731.7 668.3 823 645.7C914.3 623 1005.7 620 1097 635.8C1188.3 651.7 1279.7 686.3 1371.2 678.5C1462.7 670.7 1554.3 620.3 1645.8 597C1737.3 573.7 1828.7 577.3 1874.3 579.2L1920 581L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#fa7268"
-            ></path>
-            <path
-              d="M0 737L45.7 731.5C91.3 726 182.7 715 274.2 729.2C365.7 743.3 457.3 782.7 548.8 800.3C640.3 818 731.7 814 823 813.2C914.3 812.3 1005.7 814.7 1097 811C1188.3 807.3 1279.7 797.7 1371.2 776.8C1462.7 756 1554.3 724 1645.8 712.7C1737.3 701.3 1828.7 710.7 1874.3 715.3L1920 720L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#ef5f67"
-            ></path>
-            <path
-              d="M0 734L45.7 752.3C91.3 770.7 182.7 807.3 274.2 819.5C365.7 831.7 457.3 819.3 548.8 809.2C640.3 799 731.7 791 823 796.5C914.3 802 1005.7 821 1097 822.5C1188.3 824 1279.7 808 1371.2 814.8C1462.7 821.7 1554.3 851.3 1645.8 862C1737.3 872.7 1828.7 864.3 1874.3 860.2L1920 856L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#e34c67"
-            ></path>
-            <path
-              d="M0 949L45.7 933.5C91.3 918 182.7 887 274.2 888.3C365.7 889.7 457.3 923.3 548.8 929.8C640.3 936.3 731.7 915.7 823 896.2C914.3 876.7 1005.7 858.3 1097 859.5C1188.3 860.7 1279.7 881.3 1371.2 885.5C1462.7 889.7 1554.3 877.3 1645.8 869.3C1737.3 861.3 1828.7 857.7 1874.3 855.8L1920 854L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#d53867"
-            ></path>
-            <path
-              d="M0 991L45.7 981.2C91.3 971.3 182.7 951.7 274.2 953.8C365.7 956 457.3 980 548.8 992.3C640.3 1004.7 731.7 1005.3 823 1004C914.3 1002.7 1005.7 999.3 1097 999.5C1188.3 999.7 1279.7 1003.3 1371.2 995.3C1462.7 987.3 1554.3 967.7 1645.8 954.5C1737.3 941.3 1828.7 934.7 1874.3 931.3L1920 928L1920 1081L1874.3 1081C1828.7 1081 1737.3 1081 1645.8 1081C1554.3 1081 1462.7 1081 1371.2 1081C1279.7 1081 1188.3 1081 1097 1081C1005.7 1081 914.3 1081 823 1081C731.7 1081 640.3 1081 548.8 1081C457.3 1081 365.7 1081 274.2 1081C182.7 1081 91.3 1081 45.7 1081L0 1081Z"
-              fill="#c62368"
-            ></path>
-          </svg>
-        </div>
-      </div>
-  */}
-      {/*
-      <div className="flex flex-row w-full p-6 text-white">
-        <div className="flex-1">
-          <p className="text-2xl">Active Contests</p>
-        </div>
-        <TabGroup />
-      </div>
-
-      <div className="h-96 w-full p-6 bg-purple-300">
-        <div className="flex flex-col h-full w-full bg-pink-400">
-          <div tabIndex={0} className="collapse group p-6">
-            <div className="collapse-title flex flex-row items-center bg-primary rounded-2xl text-primary-content group-focus:bg-secondary group-focus:text-secondary-content">
-              <div className="avatar">
-                <div className="w-24 rounded-full">
-                  <Image
-                    src={"/noun-47.png"}
-                    alt={"org avatar"}
-                    height={500}
-                    width={500}
-                  />
+          <div className="m-auto w-full max-w-sm">
+            <div className="mockup-window bg-base-100 border border-border">
+              <div className="grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
+                <Image
+                  src={"/swim-shady.png"}
+                  alt="swim shady"
+                  width={50}
+                  height={50}
+                  className="rounded-full"
+                />
+                <div className="flex-grow flex flex-col gap-2 ml-4">
+                  <p className="text-t1">Noun 9999 in 3333D!</p>
+                  <div className="flex-grow flex flex-col items-center">
+                    <div className="relative w-full">
+                      {/* <span className="absolute top-0 right-0 mt-[-10px] mr-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg">
+                      <HiOutlineTrash className="w-5 h-5" />
+                    </span> */}
+                      <Image
+                        src={"/9999-winner.jpeg"}
+                        alt="twitter submission"
+                        width={200}
+                        height={200}
+                        className="rounded-lg object-contain"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-full h-0.5 bg-border"></div>
+                  <div className="flex items-center justify-start w-full">
+                    <HiPhoto className="w-5 h-5 opacity-50" />
+                    <BiPlusCircle className="w-5 h-5 opacity-50 ml-auto mr-2" />
+                    <button
+                      className="btn btn-xs btn-primary normal-case"
+                      disabled
+                    >
+                      Submitting
+                      <div
+                        className="text-xs ml-1 inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
-              <p>Focus me to see content</p>
-            </div>
-            <div className="collapse-content bg-primary rounded-b-2xl text-primary-content group-focus:bg-secondary group-focus:text-secondary-content">
-              <p>
-                tabIndex={0} attribute is necessary to make the div focusable
-              </p>
             </div>
           </div>
         </div>
+        <svg
+          className="fill-[#FF638D] col-start-1 row-start-1 h-auto w-full self-end"
+          width="1600"
+          height="410"
+          viewBox="0 0 1600 410"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M0 338L53.3 349.2C106.7 360.3 213.3 382.7 320 393.8C426.7 405 533.3 405 640 359.3C746.7 313.7 853.3 222.3 960 189.2C1066.7 156 1173.3 181 1280 159.2C1386.7 137.3 1493.3 68.7 1546.7 34.3L1600 0V595H1546.7C1493.3 595 1386.7 595 1280 595C1173.3 595 1066.7 595 960 595C853.3 595 746.7 595 640 595C533.3 595 426.7 595 320 595C213.3 595 106.7 595 53.3 595H0V338Z"></path>
+        </svg>
       </div>
-  */}
-    </>
+      <div className="flex items-center justify-center bg-[#FF638D]" />
+    </div>
+  );
+};
+
+const ContentSection = async () => {
+  const activeContests = await getActiveContests();
+  const popularSubmissions = await getPopularSubmissions();
+
+  return (
+    <div className="relative flex flex-col">
+      <div className="flex flex-col gap-2 w-10/12 m-auto p-2">
+        <h1 className="font-bold text-3xl text-t1">Weekly Wave</h1>
+        <h2 className="text-lg text-t2">
+          Popular submissions. Updated weekly.
+        </h2>
+        <div className="w-9/12 sm:w-full m-auto grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+          {popularSubmissions.map((submission, idx) => {
+            return (
+              <CardSubmission
+                key={idx}
+                basePath={`${submission.spaceName}/contests/${submission.contestId}`}
+                submission={submission}
+              />
+            );
+          })}
+        </div>
+
+        <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {activeContests.map((contest, idx) => {
+            return (
+              <ContestCard
+                key={idx}
+                contestId={contest.id}
+                promptUrl={contest.promptUrl}
+                spaceName={contest.space.name}
+                spaceDisplayName={contest.space.displayName}
+                spaceLogo={contest.space.logoUrl}
+                linkTo={`${contest.space.name}/contests/${contest.id}`}
+                metadata={contest.metadata}
+                deadlines={contest.deadlines}
+                tweetId={contest.tweetId}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ContestCard = ({
+  contestId,
+  promptUrl,
+  linkTo,
+  metadata,
+  deadlines,
+  spaceName,
+  spaceDisplayName,
+  spaceLogo,
+  tweetId,
+}: {
+  contestId: string;
+  promptUrl: string;
+  linkTo: string;
+  metadata: { category: ContestCategory; type: "twitter" | "standard" };
+  deadlines: { startTime: string; voteTime: string; endTime: string };
+  spaceName: string;
+  spaceDisplayName: string;
+  spaceLogo: string;
+  tweetId: string | null;
+}) => {
+  const showSpace = spaceName && spaceDisplayName && spaceLogo;
+  const { contestState, stateRemainingTime } = calculateContestStatus(
+    deadlines,
+    metadata.type,
+    tweetId
+  );
+  return (
+    <Link
+      className="card bg-base-100 
+    cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full transform 
+    transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
+      href={linkTo}
+    >
+      <div className="card-body items-center p-0">
+        <div className="flex flex-col gap-2 items-center">
+          <div className="avatar online">
+            <Image
+              src={spaceLogo}
+              width={82}
+              height={82}
+              alt="spaceLogo"
+              className="mask mask-squircle"
+            />
+          </div>
+          <h1 className="font-bold text-2xl">{spaceDisplayName}</h1>
+        </div>
+        {/*@ts-expect-error*/}
+        <PromptSummary promptUrl={promptUrl} />
+        <div className="flex flex-row gap-2">
+          <CategoryLabel category={metadata.category} />
+          <StatusLabel status={contestState} />
+        </div>
+        <RemainingTimeLabel remainingTime={stateRemainingTime} />
+      </div>
+    </Link>
+  );
+};
+
+const PromptSummary = async ({ promptUrl }: { promptUrl: string }) => {
+  const { title } = await fetch(promptUrl).then((res) => res.json());
+
+  return (
+    <div className="flex-grow overflow-hidden">
+      <h2 className="card-title mb-0 normal-case whitespace-nowrap overflow-ellipsis overflow-hidden">
+        {title}
+      </h2>
+    </div>
+  );
+};
+
+export default async function Page() {
+  return (
+    <div className="flex flex-col w-full ">
+      <BannerSection />
+      {/*@ts-expect-error*/}
+      <ContentSection />
+    </div>
   );
 }

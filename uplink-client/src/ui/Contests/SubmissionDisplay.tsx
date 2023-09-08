@@ -1,98 +1,44 @@
 "use client";
-import { getContestById } from "@/lib/fetch/contest";
 import { VideoProvider } from "@/providers/VideoProvider";
 import VideoPreview from "../VideoPlayer/VideoPlayer";
 import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { useVoteProposalContext } from "@/providers/VoteProposalProvider";
+import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import SubmissionVoteButton from "./SubmissionVoteButton";
 import useTrackSubmissions from "@/hooks/useTrackSubmissions";
+import { Decimal } from "decimal.js";
+import Output from "editorjs-react-renderer";
 import {
-  CheckBadgeIcon,
-  MinusCircleIcon,
-  PlusCircleIcon,
-  DocumentChartBarIcon,
-  PlusIcon,
-} from "@heroicons/react/24/solid";
+  MediaController,
+  MediaControlBar,
+  MediaTimeRange,
+  MediaTimeDisplay,
+  MediaPlayButton,
+  MediaMuteButton,
+} from "media-chrome/dist/react";
+import CardSubmission from "../Submission/CardSubmission";
+import { HiCheckBadge, HiPlus } from "react-icons/hi2";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import SubmissionViewer from "../SubmissionViewer/SubmissionViewer2";
+import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
+import { Submission } from "@/providers/ContestInteractionProvider";
+import { useContestState } from "@/providers/ContestStateProvider";
+import { BiBadge } from "react-icons/bi";
+import { FaBurst } from "react-icons/fa6";
 
-/*
-const VideoPreview = dynamic(() => import("../VideoPlayer/VideoPlayer"), {
-  loading: () => <SubmissionSkeleton />,
-});
-*/
-/*
-const fetchSubmission = async (url: string) => {
-  console.log("fetching submission from", url);
-  return fetch(url, { cache: "no-store" }).then((res) => res.json());
-};
-*/
-
-const SubmissionDisplay = ({ contestId }: { contestId: number }) => {
-  // init useSWR here
-
-  const { liveSubmissions, isLoading, error } = useTrackSubmissions(contestId);
-  return (
-    <div className="flex flex-col gap-4 w-full">
-      <h1 className="text-xl lg:text-3xl text-center font-bold">Submissions</h1>
-      <div className="flex w-full justify-evenly items-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-full w-full">
-          {liveSubmissions.map((submission, idx) => {
-            return <SubmissionCard submission={submission} key={idx} />;
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const SubmissionCard = ({ submission }: { submission: any }) => {
-  return (
-    <div className="card card-compact cursor-pointer border border-border rounded-xl bg-base-100">
-      {submission.data.type === "video" && (
-        <RenderVideoSubmission submission={submission} />
-      )}
-      {submission.data.type === "image" && (
-        <RenderImageSubmission submission={submission} />
-      )}
-      {submission.data.type === "text" && (
-        <RenderTextSubmission submission={submission} />
-      )}
-      <SubmissionFooter submission={submission} />
-    </div>
-  );
-};
-
-const SubmissionTypeBadge = ({
-  type,
-}: {
-  type: "video" | "image" | "text";
-}) => {
-  const badgeType = {
-    video: "primary",
-    image: "secondary",
-    text: "warning",
-  }[type];
-
-  return (
-    <div className={`badge rounded badge-outline badge-${badgeType}`}>
-      {type}
-    </div>
-  );
-};
-
-const SubmissionFooter = ({ submission }) => {
-  const { addProposedVote, userVotingState } = useVoteProposalContext();
+const AddToCartButton = ({ submission, voteActions }) => {
+  const { addProposedVote, currentVotes, proposedVotes } = voteActions;
   const [isSelected, setIsSelected] = useState(false);
 
   useEffect(() => {
     setIsSelected(
-      [
-        ...userVotingState.currentVotes,
-        ...userVotingState.proposedUserVotes,
-      ].some((vote) => vote.submissionId === submission.id)
+      [...currentVotes, ...proposedVotes].some(
+        (vote) => vote.submissionId === submission.id
+      )
     );
-  }, [userVotingState, submission.id]);
+  }, [currentVotes, proposedVotes, submission.id]);
 
   const handleSelect = () => {
     if (!isSelected) {
@@ -101,78 +47,62 @@ const SubmissionFooter = ({ submission }) => {
     setIsSelected(!isSelected);
   };
 
-  const buttonVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  };
+  if (isSelected) {
+    return (
+      <button className=" btn btn-ghost btn-sm cursor-default no-animation ml-auto">
+        <HiCheckBadge className="h-6 w-6 text-black" />
+      </button>
+    );
+  } else
+    return (
+      <button className=" btn btn-ghost btn-sm ml-auto" onClick={handleSelect}>
+        <HiPlus className="h-6 w-6 text-black" />
+      </button>
+    );
+};
+
+const SubmissionFooter = ({ submission }) => {
+  const { contestState } = useContestState();
+  const voteActions = useVoteActionContext();
+  if (voteActions && contestState === "voting")
+    return (
+      <div className="animate-springUp flex absolute bottom-0 left-0 items-end w-full h-8 rounded-b-lg bg-secondary">
+        <AddToCartButton submission={submission} voteActions={voteActions} />
+      </div>
+    );
+  return null;
+};
+
+const SubmissionDisplay = ({
+  contestId,
+  spaceName,
+}: {
+  contestId: string;
+  spaceName: string;
+}) => {
+  const { submissions } = useContestInteractionState();
 
   return (
-    <div className="card-body h-36 rounded-b-xl w-full">
-      <h2 className="card-title">{submission.data.title}</h2>
-      <h3>author</h3>
-      <div className="absolute bottom-0 left-0 grid grid-cols-3 w-full gap-6">
-        <div className="flex items-center justify-center">
-          <SubmissionTypeBadge type={submission.data.type} />
-        </div>
-        <div className="flex items-center justify-center">
-          <div className="badge rounded badge-outline badge-warning">
-            {submission.votes} votes
-          </div>
-        </div>
-
-        <div
-          className="flex items-center justify-center lg:tooltip"
-          data-tip={isSelected ? "item is in your cart" : "add to cart"}
-        >
-          {isSelected && (
-            <button className="btn btn-ghost w-full">
-              <CheckBadgeIcon className="h-6 w-6 text-border" />
-            </button>
-          )}
-          {!isSelected && (
-            <button className="btn btn-ghost w-full" onClick={handleSelect}>
-              <PlusIcon className="h-6 w-6" />
-            </button>
-          )}
+    <div className="flex flex-col gap-4 w-full">
+      <SubmissionViewer />
+      <h1 className="text-xl lg:text-3xl text-center font-bold text-t1">
+        Submissions
+      </h1>
+      <div className="flex w-full justify-evenly items-center">
+        <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 sm:auto-rows-fr">
+          {submissions.map((submission, idx) => {
+            return (
+              <CardSubmission
+                key={idx}
+                basePath={`${spaceName}/contests/${contestId}`}
+                submission={submission}
+                footerChildren={<SubmissionFooter submission={submission} />}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
-  );
-};
-
-const RenderTextSubmission = ({ submission }) => {
-  return (
-    <div className="card-body h-32 bg-base-100 rounded-xl">
-      <h2 className="card-title">{submission.data.title}</h2>
-      <p>is simply dummy text of the printing and typesetting industry.</p>
-    </div>
-  );
-};
-
-const RenderImageSubmission = ({ submission }) => {
-  return (
-    <figure className="relative h-64 w-full">
-      <Image
-        src={submission.data.previewAsset}
-        alt="submission image"
-        fill
-        className="rounded-t-xl object-cover w-full"
-      />
-    </figure>
-  );
-};
-
-const RenderVideoSubmission = ({ submission }) => {
-  return (
-    <VideoProvider>
-      <figure className="relative bg-base-100 h-64 w-full">
-        <VideoPreview
-          url={submission.data.videoAsset}
-          thubmnailUrl={submission.data.previewAsset}
-          id={submission.data.id}
-        />
-      </figure>
-    </VideoProvider>
   );
 };
 

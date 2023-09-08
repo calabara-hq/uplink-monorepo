@@ -14,11 +14,20 @@ export const CreateContestDocument = gql`
                 voterRewards
                 submitterRestrictions
                 votingPolicy
-                twitter
             }
         }
     }
 `;
+
+
+export const CreateContestTweetDocument = gql`
+    mutation CreateContestTweet($contestId: ID!, $spaceId: ID!, $tweetThread: [ThreadItem!]!){
+        createContestTweet(contestId: $contestId, spaceId: $spaceId, tweetThread: $tweetThread){
+            success
+        }
+    }
+`;
+
 
 
 export const ContestByIdDocument = gql`

@@ -38,7 +38,7 @@ const UserVotingParamsDocument = gql`
 // this will only be called when the user is authenticated and has a wallet address
 // because of this, we will return a default value if the query fails
 
-const getUserVotingParams = async (contestId: number) => {
+const getUserVotingParams = async (contestId: string) => {
   const response = await graphqlClient
     .query(UserVotingParamsDocument, { contestId })
     .toPromise()
@@ -56,7 +56,7 @@ const getUserVotingParams = async (contestId: number) => {
 };
 
 
-const useVotingParams = (contestId: number) => {
+const useVotingParams = (contestId: string) => {
   const { data: session, status } = useSession();
   const { contestState } = useContestState();
 
