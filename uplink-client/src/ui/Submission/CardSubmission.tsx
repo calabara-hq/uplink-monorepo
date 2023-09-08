@@ -36,18 +36,20 @@ const SubmissionBody = ({
 }) => {
   if (submission.data.type !== "text")
     return (
-      <div className="relative flex flex-col gap-4 rounded-b-lg w-full p-2 pb-10 ">
+      <div className="relative flex flex-col gap-2 rounded-b-lg w-full p-2 pb-10 ">
         <h2 className="text-lg font-semibold">{submission.data.title}</h2>
         <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
           <UserAvatar address={submission.author} size={28} />
-          <AddressOrEns address={submission.author} />
-          {new Decimal(submission.totalVotes ?? "0").greaterThan(0) ? (
+          <h3 className="break-all italic text-sm">
+            <AddressOrEns address={submission.author} />
+          </h3>
+          {/* {new Decimal(submission.totalVotes ?? "0").greaterThan(0) ? (
             <div className="badge rounded badge-warning font-semibold ml-auto">
               {submission.totalVotes} votes
             </div>
           ) : (
             <span /> // placeholder
-          )}
+          )} */}
         </div>
         {footerChildren}
       </div>
@@ -65,27 +67,27 @@ const RenderTextSubmission = ({
 }) => {
   console.log(submission);
   return (
-    <div className="relative h-full w-full border border-border rounded-xl text-white/80 gap-1 p-2">
+    <div className="relative h-full w-full rounded-xl text-white/80 gap-1 p-2">
       <div
         className={`p-2 w-full h-full flex flex-col gap-1 transition-transform duration-300 ease-in-out will-change-transform ${
           isActive ? "zoomIn" : ""
         }`}
       >
-        <h2 className="break-word font-bold text-2xl">
+        <h2 className="break-word font-bold text-xl">
           {submission.data.title}
         </h2>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="w-full flex items-center gap-2 flex-wrap font-semibold text-sm text-t2">
           <UserAvatar address={submission.author} size={28} />
-          <h3 className="break-all italic text-sm">
+          <h3 className="break-all italic text-sm ">
             <AddressOrEns address={submission.author} />
           </h3>
-          {new Decimal(submission.totalVotes ?? "0").greaterThan(-1) ? ( //TODO: change this back to 0
+          {/* {new Decimal(submission.totalVotes ?? "0").greaterThan(-1) ? ( //TODO: change this back to 0
             <div className="badge rounded badge-warning font-semibold">
               {submission.totalVotes} votes
             </div>
           ) : (
             <span /> // placeholder
-          )}
+          )} */}
         </div>
         <section className="break-word">
           {submission.type === "twitter" ? (
@@ -252,7 +254,7 @@ const CardSubmission = ({
 
   return (
     <Link
-      className="flex flex-col rounded-lg bg-base-100"
+      className="flex flex-col rounded-xl bg-base-100 border border-border"
       ref={ref}
       href={`${basePath}/submission/${submission.id}`}
       onMouseEnter={() => !isMobileDevice && setIsActive(true)}

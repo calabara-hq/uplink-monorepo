@@ -1,7 +1,7 @@
+import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
-import { SubmissionCard } from "../../ui/Contests/SubmissionDisplay";
-import  CardSubmission  from "../Submission/CardSubmission"
-
+//import { SubmissionCard } from "../../ui/Contests/SubmissionDisplay";
+import CardSubmission from "../Submission/CardSubmission";
 
 export default {
   title: "ui/CardSubmission",
@@ -11,9 +11,40 @@ export default {
 
 const Template = (args: any) => (
   <div className=" bg-pink-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-full w-full">
-    <CardSubmission {...args} />
+    <CardSubmission {...args} footerChildren={<SubmissionFooter />} />
   </div>
 );
+
+const AddToCartButton = ({ submission }) => {
+  const isSelected = false;
+
+  const setIsSelected = (x) => {};
+
+  const handleSelect = () => {
+    setIsSelected(!isSelected);
+  };
+
+  if (isSelected) {
+    return (
+      <button className=" btn btn-ghost btn-sm cursor-default no-animation ml-auto">
+        <HiCheckBadge className="h-6 w-6 text-black" />
+      </button>
+    );
+  } else
+    return (
+      <button className=" btn btn-ghost btn-sm ml-auto" onClick={handleSelect}>
+        <HiPlus className="h-6 w-6 text-black" />
+      </button>
+    );
+};
+
+const SubmissionFooter = ({ submission }) => {
+  return (
+    <div className="animate-springUp flex absolute bottom-0 left-0 items-end w-full h-8 rounded-b-lg bg-secondary">
+      <AddToCartButton submission={submission} />
+    </div>
+  );
+};
 
 export const Default = Template.bind({});
 Default.args = {
@@ -29,7 +60,7 @@ Default.args = {
     rank: 1,
     data: {
       type: "video",
-      title: "X ".repeat(25),
+      title: "X ".repeat(50),
       thread: [
         {
           assetType: "video/mp4",
@@ -43,11 +74,7 @@ Default.args = {
       ],
     },
   },
-  addProposedVote: () => {},
-
-  currentVotes: [],
-
-  proposedVotes: [],
+  basePath: "",
 };
 
 export const Image = Template.bind({});
@@ -65,7 +92,7 @@ Image.args = {
     rank: null,
     data: {
       type: "image",
-      title: "X ".repeat(25),
+      title: "X ".repeat(50),
       thread: [
         {
           assetType: "image/jpeg",
@@ -94,10 +121,10 @@ Text.args = {
     rank: null,
     data: {
       type: "text",
-      title: "X ".repeat(25),
+      title: "X ".repeat(50),
       thread: [
         {
-          text: "Another brand new submission!!!!!!".repeat(30),
+          text: "Another brand new submission!!!!!! ",
         },
       ],
     },
