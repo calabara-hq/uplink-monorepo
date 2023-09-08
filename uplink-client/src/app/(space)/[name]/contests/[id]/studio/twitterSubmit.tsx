@@ -720,7 +720,7 @@ const ExplainerSection = () => {
             <h2 className="font-title text-lg font-extrabold sm:text-xl lg:text-2xl text-t1">
               Create a submission in 3 easy steps.
               <br />
-              When you're done, we'll tweet it
+              {`When you're done, we'll tweet it`}
               <br />
               for you!
             </h2>

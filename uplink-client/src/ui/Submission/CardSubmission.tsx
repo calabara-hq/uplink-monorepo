@@ -14,7 +14,6 @@ import {
   MediaMuteButton,
   MediaTextDisplay,
 } from "media-chrome/dist/react";
-import Output from "editorjs-react-renderer";
 import { useEffect, useRef, useState } from "react";
 import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 import { Decimal } from "decimal.js";
@@ -44,13 +43,7 @@ const SubmissionBody = ({
           <h3 className="break-all italic text-sm">
             <AddressOrEns address={submission.author} />
           </h3>
-          {/* {new Decimal(submission.totalVotes ?? "0").greaterThan(0) ? (
-            <div className="badge rounded badge-warning font-semibold ml-auto">
-              {submission.totalVotes} votes
-            </div>
-          ) : (
-            <span /> // placeholder
-          )} */}
+
         </div>
         {footerChildren}
       </div>
@@ -100,6 +93,7 @@ const RenderTextSubmission = ({
             <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
               {ParseBlocks({ data: submission.data.body, omitImages: false })}
             </div>
+
           )}
         </section>
       </div>
