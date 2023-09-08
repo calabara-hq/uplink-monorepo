@@ -1,4 +1,5 @@
 import { validateEthAddress } from "@/lib/ethAddress";
+import { handleMutationError } from "@/lib/handleMutationError";
 
 export type FormField = {
   value: string;
@@ -38,7 +39,6 @@ export const reducer = (state: SpaceBuilderProps, action: any) => {
         logoBlob: action.payload,
       };
     case "setLogoUrl":
-      console.log(action.payload)
       return {
         ...state,
         logoUrl: action.payload,
@@ -276,3 +276,83 @@ export const validateSpaceBuilderProps = async (props: SpaceBuilderProps) => {
   }
 
 }
+
+
+export const createSpace = async (
+  url,
+  {
+    arg,
+  }: {
+    arg: any;
+  }
+) => {
+  return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      query: `
+            mutation CreateSpace($spaceData: SpaceBuilderInput!){
+              createSpace(spaceData: $spaceData){
+                spaceName
+                success
+                errors{
+                  name
+                  logoUrl
+                  twitter
+                  website
+                  admins
+                }
+              }
+            }`,
+      variables: {
+        spaceData: arg.spaceData,
+      },
+    }),
+  })
+    .then((res) => res.json())
+    .then(handleMutationError)
+    .then((res) => res.data.createSpace);
+};
+
+export const editSpace = async (
+  url,
+  {
+    arg,
+  }: {
+    arg: any;
+  }
+) => {
+  return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      query: `
+            mutation EditSpace($spaceId: ID!, $spaceData: SpaceBuilderInput!){
+              editSpace(spaceId: $spaceId, spaceData: $spaceData){
+                spaceName
+                success
+                errors{
+                  name
+                  logoUrl
+                  twitter
+                  website
+                  admins
+                }
+              }
+            }`,
+      variables: {
+        spaceId: arg.spaceId,
+        spaceData: arg.spaceData,
+      },
+    }),
+  })
+    .then((res) => res.json())
+    .then(handleMutationError)
+    .then((res) => res.data.editSpace);
+};

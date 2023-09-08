@@ -128,7 +128,7 @@ export const updateDbSpace = async (
                 await revalidateClientCache({
                     host: process.env.FRONTEND_HOST,
                     secret: process.env.FRONTEND_API_SECRET,
-                    tags: ['spaces']
+                    tags: ['spaces', `space/${spaceId}`]
                 })
 
                 return result[0].name

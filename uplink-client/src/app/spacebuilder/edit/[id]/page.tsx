@@ -1,4 +1,4 @@
-import SpaceForm from "@/ui/SpaceForm/SpaceForm";
+import SpaceForm from "@/app/spacebuilder/SpaceForm";
 
 const getSpace = async (id: string) => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -25,8 +25,7 @@ const getSpace = async (id: string) => {
         id,
       },
     }),
-    cache: "no-store",
-    next: { tags: [`space/${id}`] /*revalidate: 60 */ },
+    next: { tags: [`space/${id}`] },
   })
     .then((res) => res.json())
     .then((res) => res.data.space);

@@ -27,7 +27,7 @@ const getSpaces = async () => {
 
 const AllSpaces = ({ spaces }: any) => {
   return (
-    <div className="grid gap-4 md:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 w-full ">
+    <div className="grid gap-4 md:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 w-full ">
       {spaces.map((space: any, index: number) => {
         return (
           <Link
@@ -71,6 +71,7 @@ export default async function Page() {
         <Link
           className="btn btn-primary btn-outline normal-case"
           href="/spacebuilder/create"
+          draggable={false}
         >
           <HiPlus className="w-6 h-6" />
           <p className="pl-2">New Space</p>

@@ -357,9 +357,6 @@ const CreateThread = ({
     validateThread,
   } = useThreadCreator(initialThread);
 
-  console.log(thread)
-
-
   const [focusedTweet, setFocusedTweet] = useState(initialThread[0]?.id);
   const [title, setTitle] = useState("");
   const { data: session, status } = useSession();
