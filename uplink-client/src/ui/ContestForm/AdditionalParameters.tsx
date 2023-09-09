@@ -39,7 +39,7 @@ const Extras = ({
       </div>
       <button
         onClick={onSubmit}
-        className="btn btn-primary lowercase mt-4 self-end"
+        className="btn btn-primary normal-case mt-4 self-end"
       >
         Confirm
       </button>
@@ -202,7 +202,7 @@ const SubmissionLimit = ({
               subLimit: 0,
             }));
           }}
-          className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
+          className={`btn btn-ghost normal-case border-2 border-border h-full card rounded-box place-items-center ${
             subLimit === 0
               ? "border-success border-2 hover:border-success hover:bg-transparent"
               : ""

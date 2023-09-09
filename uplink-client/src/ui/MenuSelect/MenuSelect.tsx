@@ -37,11 +37,11 @@ const MenuSelect = ({
   return (
     <div className="relative" ref={dropdownRef}>
       <div
-        className="flex justify-between bg-base-100 rounded-lg p-3 cursor-pointer hover:bg-base-200"
+        className="flex items-center justify-between bg-base-100 rounded-lg p-3 cursor-pointer hover:bg-base-200"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <p>{selected.label}</p>
-        <HiChevronDown className="w-5 ml-2" />
+        <p className="text-sm">{selected.label}</p>
+        <HiChevronDown className="w-5 h-5 ml-2" />
       </div>
 
       {isOpen && (
@@ -55,11 +55,11 @@ const MenuSelect = ({
               }}
               className={`rounded-lg w-full ${
                 selected.value === option.value
-                  ? "bg-primary disabled:pointer-events-none"
+                  ? "bg-primary disabled:pointer-events-none text-black"
                   : ""
               }`}
             >
-              <a className="">{option.label}</a>
+              <p className="">{option.label}</p>
             </li>
           ))}
           {/*

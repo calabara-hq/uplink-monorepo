@@ -164,7 +164,7 @@ const QuickAddToken = ({
           return (
             <li key={index}>
               <a
-                className={`flex flex-row justify-between hover:bg-base-200 transition-all  ${
+                className={`flex flex-row justify-between border-border border hover:bg-base-200 transition-all  ${
                   JSON.stringify(state.quickAddToken) === JSON.stringify(el)
                     ? "bg-base-200"
                     : "bg-base-100"
@@ -186,7 +186,7 @@ const QuickAddToken = ({
 
       <div className="w-full text-center">
         <button
-          className="btn btn-sm btn-ghost underline "
+          className="btn btn-sm btn-ghost underline normal-case"
           onClick={() => setProgress(1)}
         >
           Manual Add

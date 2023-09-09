@@ -2,6 +2,7 @@ import { EditorOutputData, IToken, DatabaseController, schema, isERCToken } from
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
 import { nanoid } from 'nanoid';
+import { isIpfsUrl } from "lib";
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
@@ -281,7 +282,8 @@ export const queueTweet = async (contestId: number, user: any, startTime: string
         retries: 0,
         status: 0
     }
-    return await db.insert(schema.tweetQueue).values(tweetJob)
+    await db.insert(schema.tweetQueue).values(tweetJob)
+        .then(() => { return { success: true } })
         .catch((err) => {
             throw new Error("database error: " + err.message)
         })
@@ -407,8 +409,5 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         throw new Error("database error: " + err.message)
     }
 };
-
-
-
 
 

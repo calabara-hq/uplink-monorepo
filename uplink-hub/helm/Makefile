@@ -12,7 +12,7 @@ staging-secret:
 
 .PHONY: production-secret
 production-secret:
-	kubectl create secret generic production-sealed-secret --from-env-file=../.env.staging --namespace=production --dry-run=client -o yaml | yq e '.metadata.annotations += {"sealedsecrets.bitnami.com/managed": "true"}' > production-sealed-secret.yaml
+	kubectl create secret generic production-sealed-secret --from-env-file=../.env.prod --namespace=production --dry-run=client -o yaml | yq e '.metadata.annotations += {"sealedsecrets.bitnami.com/managed": "true"}' > production-sealed-secret.yaml
 	kubeseal --fetch-cert > cert.pem
 	kubeseal --format=yaml --cert=cert.pem < production-sealed-secret.yaml > sealed-secrets/production-sealed-secret.yaml
 	rm cert.pem production-sealed-secret.yaml 

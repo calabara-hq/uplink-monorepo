@@ -4,12 +4,13 @@ import {
   RemainingTimeLabel,
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
+import Noggles from "@/ui/Noggles/Noggles";
 import CardSubmission from "@/ui/Submission/CardSubmission";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
 import { BiPlusCircle } from "react-icons/bi";
-import { HiOutlineTrash, HiPhoto } from "react-icons/hi2";
+import { HiOutlineTrash, HiPhoto, HiSparkles } from "react-icons/hi2";
 
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -93,16 +94,19 @@ const BannerSection = () => {
         <div className="relative hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row lg:gap-0 xl:gap-20 ">
           <div className="lg:pl-10 ">
             <div className="mb-2 py-4 text-left ">
-              <h1 className="mb-2 text-5xl font-[700] text-t1">
-                Crafted for creators
-              </h1>
+              <div className="flex gap-2">
+                <h1 className="mb-2 text-5xl font-[700] text-t1 w-fit">
+                  Crafted for creators
+                </h1>
+                <HiSparkles className="w-10 h-10 mr-auto " />
+              </div>
               <h2 className="text-lg max-w-md text-t1">
                 Uplink is where creativity finds its canvas. Dive into a vibrant
                 community where your knack earns more than just applause.
               </h2>
             </div>
           </div>
-          <div className="m-auto w-full max-w-sm">
+          <div className="m-auto w-full max-w-[321px] md:max-w-sm">
             <div className="mockup-window bg-base-100 border border-border">
               <div className="grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
                 <Image
@@ -150,7 +154,7 @@ const BannerSection = () => {
         </div>
         <svg
           className="fill-[#FF638D] col-start-1 row-start-1 h-auto w-full self-end"
-          width="1600"
+          width="1300"
           height="410"
           viewBox="0 0 1600 410"
           fill="none"
@@ -169,39 +173,42 @@ const ContentSection = async () => {
   const popularSubmissions = await getPopularSubmissions();
 
   return (
-    <div className="relative flex flex-col">
-      <div className="flex flex-col gap-2 w-10/12 m-auto p-2">
+    <div className="relative flex flex-col w-10/12 gap-6 m-auto">
+      {activeContests.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {activeContests.map((contest, idx) => {
+              return (
+                <ContestCard
+                  key={idx}
+                  contestId={contest.id}
+                  promptUrl={contest.promptUrl}
+                  spaceName={contest.space.name}
+                  spaceDisplayName={contest.space.displayName}
+                  spaceLogo={contest.space.logoUrl}
+                  linkTo={`${contest.space.name}/contest/${contest.id}`}
+                  metadata={contest.metadata}
+                  deadlines={contest.deadlines}
+                  tweetId={contest.tweetId}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+      <div className="flex flex-col gap-2">
         <h1 className="font-bold text-3xl text-t1">Weekly Wave</h1>
         <h2 className="text-lg text-t2">
           Popular submissions. Updated weekly.
         </h2>
-        <div className="w-9/12 sm:w-full m-auto grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+        <div className="w-8/12 sm:w-full m-auto grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 auto-rows-fr">
           {popularSubmissions.map((submission, idx) => {
             return (
               <CardSubmission
                 key={idx}
-                basePath={`${submission.spaceName}/contests/${submission.contestId}`}
+                basePath={`${submission.spaceName}/contest/${submission.contestId}`}
                 submission={submission}
-              />
-            );
-          })}
-        </div>
-
-        <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {activeContests.map((contest, idx) => {
-            return (
-              <ContestCard
-                key={idx}
-                contestId={contest.id}
-                promptUrl={contest.promptUrl}
-                spaceName={contest.space.name}
-                spaceDisplayName={contest.space.displayName}
-                spaceLogo={contest.space.logoUrl}
-                linkTo={`${contest.space.name}/contests/${contest.id}`}
-                metadata={contest.metadata}
-                deadlines={contest.deadlines}
-                tweetId={contest.tweetId}
               />
             );
           })}
@@ -284,7 +291,7 @@ const PromptSummary = async ({ promptUrl }: { promptUrl: string }) => {
 
 export default async function Page() {
   return (
-    <div className="flex flex-col w-full ">
+    <div className="flex flex-col w-full gap-6 pb-16">
       <BannerSection />
       {/*@ts-expect-error*/}
       <ContentSection />

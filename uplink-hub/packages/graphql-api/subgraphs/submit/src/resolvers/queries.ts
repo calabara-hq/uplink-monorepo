@@ -51,7 +51,7 @@ const getPopularSubmissions = async () => {
         submissionId: schema.votes.submissionId,
     }).from(schema.votes)
         .groupBy(schema.votes.submissionId)
-        .having(sqlOps.gt(sqlOps.sql<number>`count(*)`, 0))
+        .having(sqlOps.gt(sqlOps.sql<number>`count(*)`, 2))
         .then(res => res.map(el => el.submissionId))
 
 
@@ -76,7 +76,8 @@ const getPopularSubmissions = async () => {
                 sqlOps.inArray(schema.submissions.id, submissionIds),
                 sqlOps.lt(schema.contests.endTime, new Date().toISOString())
             ))
-            .limit(20)
+            .orderBy(schema.submissions.created, 'desc')
+            .limit(10)
 
         return submissions;
     } else {
@@ -185,9 +186,12 @@ const queries = {
                     return await Promise.all(submissions.map((submission) => postProcessSubmission(submission, withAuthor, withVotes)))
                 });
 
+
             const promise_rewards = isContestOver ? getRewards.execute({ contestId: contest.id }).then(postProcessRewards) : { submitterRewards: [], voterRewards: [] }
 
             const [submissions, { submitterRewards }] = await Promise.all([promise_submissions, promise_rewards])
+
+            if(submissions.length === 0) return submissions;
 
             // at this point, submissions are ranked by total votes and we know the reward ranks.
             // we'll add a field to the submissions called "rank" which is the reward rank.

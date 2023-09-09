@@ -387,8 +387,6 @@ const PreviewModal = ({
   contestId: string;
   spaceName: string;
 }) => {
-  const handleMutation = useHandleMutation(CreateTwitterSubmissionDocument);
-  const router = useRouter();
   const { data: session, status } = useSession();
   const { trigger, data, error, isMutating, reset } = useSWRMutation(
     [`/api/userSubmitParams/${contestId}`, session?.user?.address],
@@ -410,7 +408,7 @@ const PreviewModal = ({
     reset();
   };
 
-  const handleSubmit2 = async () => {
+  const handleSubmit = async () => {
     const submission: {
       title: string;
       thread: ApiThreadItem[];
@@ -439,52 +437,6 @@ const PreviewModal = ({
     }
   };
 
-  const handleSubmit = async () => {
-    const submission: {
-      title: string;
-      thread: ApiThreadItem[];
-    } = {
-      title: title,
-      thread: thread.map((el) => {
-        const serverThreadItem: ApiThreadItem = {
-          text: el.text,
-          ...(el.assetSize ? { assetSize: el.assetSize.toString() } : {}),
-          ...(el.assetType ? { assetType: el.assetType } : {}),
-        };
-        if (el.isVideo) {
-          serverThreadItem.previewAsset = el.videoThumbnailUrl;
-          serverThreadItem.videoAsset = el.primaryAssetUrl;
-        } else if (el.primaryAssetUrl) {
-          serverThreadItem.previewAsset = el.primaryAssetUrl;
-        }
-        return serverThreadItem;
-      }),
-    };
-    await handleMutation({
-      contestId,
-      submission,
-    })
-      .then((res) => {
-        if (!res) return;
-        if (res.error) return; // known error handled by the mutation hook (didn't throw)
-        const { success } = res.data?.createTwitterSubmission;
-        if (!success) {
-          return toast.error(
-            "Oops, something went wrong. Please check your inputs and try again."
-          );
-        } else if (success) {
-          toast.success("Submission created successfully", {
-            icon: "🎉",
-          });
-          router.refresh();
-          router.push(`${spaceName}/contests/${contestId}`);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        return toast.error("unknown error");
-      });
-  };
 
   if (isModalOpen && !data) {
     return (
@@ -550,7 +502,7 @@ const PreviewModal = ({
             cancelLabel="edit tweet"
             confirmDisabled={!title || isMutating}
             isLoading={isMutating}
-            onConfirm={handleSubmit2}
+            onConfirm={handleSubmit}
             onCancel={() => {
               handleRevert();
               onClose();
@@ -568,7 +520,7 @@ const PreviewModal = ({
             <HiBadgeCheck className="w-32 h-32 text-success" />
             <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
             <Link
-              href={`/${spaceName}/contests/${contestId}`}
+              href={`/${spaceName}/contest/${contestId}`}
               className="btn btn-ghost text-t2 normal-case"
             >
               Go to contest

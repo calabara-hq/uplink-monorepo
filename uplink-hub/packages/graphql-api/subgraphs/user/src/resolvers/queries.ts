@@ -1,5 +1,5 @@
 import { sqlOps, db } from "../utils/database.js";
-import { AuthorizationController } from "lib";
+import { AuthorizationController, schema } from "lib";
 
 const authController = new AuthorizationController(process.env.REDIS_URL);
 
@@ -10,6 +10,13 @@ const userById = db.query.users.findFirst({
 const userByAddress = db.query.users.findFirst({
     where: ((users) => sqlOps.eq(users.address, sqlOps.placeholder('address'))),
 }).prepare();
+
+
+///
+
+const getSubmisssion = db.query.submissions.findFirst({
+    where: ((submissions) => sqlOps.eq(submissions.created, sqlOps.placeholder('created'))),
+}).prepare()
 
 
 

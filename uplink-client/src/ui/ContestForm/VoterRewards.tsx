@@ -101,9 +101,9 @@ const VoterRewards = ({
           className="card btn bg-base-200 h-24"
           onClick={() => setIsModalOpen(true)}
         >
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row gap-2 items-center normal-case">
             <AiOutlinePlus className="w-6 h-6" />
-            <p>add reward</p>
+            <p>Add Reward</p>
           </div>
         </div>
         {rewardsObjectToArray(rewards).map((token, index) => {
@@ -138,7 +138,7 @@ const VoterRewards = ({
       />
       <button
         onClick={onSubmit}
-        className="btn btn-primary lowercase mt-4 self-end"
+        className="btn btn-primary normal-case mt-4 self-end"
       >
         Confirm
       </button>

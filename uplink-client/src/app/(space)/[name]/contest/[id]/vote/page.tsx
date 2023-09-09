@@ -26,7 +26,7 @@ export default async function Page({
     <div className="w-full flex flex-col items-center justify-center gap-4 ">
       <Link
         className="btn btn-ghost mr-auto"
-        href={`/${params.name}/contests/${params.id}`}
+        href={`/${params.name}/contest/${params.id}`}
       >
         <HiArrowNarrowLeft className="h-6 w-6 mr-1" />
         Back to Contest

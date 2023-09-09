@@ -1,4 +1,4 @@
-import SpaceForm from "@/ui/SpaceForm/SpaceForm";
+import SpaceForm from "@/app/spacebuilder/SpaceForm";
 
 export default function Page() {
   const initialState = {

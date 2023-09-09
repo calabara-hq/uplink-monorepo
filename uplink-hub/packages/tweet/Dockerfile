@@ -9,15 +9,13 @@ COPY ./yarn.lock ./
 
 # Copy the source code of the workspaces
 COPY ./packages/lib ./packages/lib
-COPY ./packages/tweet ./packages/tweet
 
-# Install all dependencies
+# Copy tweet service
+COPY ./packages/graphql-api/subgraphs/tweet ./packages/tweet
 RUN yarn install
-
-# Build the workspaces
 RUN yarn workspace lib build
 RUN yarn workspace tweet build
 
-workdir /app/packages/tweet
+WORKDIR /app/packages/tweet
 
 CMD ["yarn", "start"]

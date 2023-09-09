@@ -16,7 +16,10 @@ export default function WalletConnectButton2({}: {}) {
           switch (status) {
             case "unauthenticated":
               return (
-                <button className={`btn btn-ghost btn-active normal-case rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear`} onClick={openConnectModal}>
+                <button
+                  className={`btn btn-ghost btn-active normal-case rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear`}
+                  onClick={openConnectModal}
+                >
                   sign in
                 </button>
               );
@@ -26,19 +29,14 @@ export default function WalletConnectButton2({}: {}) {
                   className="flex items-center join overflow-hidden cursor-pointer lg:gap-2"
                   onClick={openAccountModal}
                 >
-                   <div className="hidden md:flex items-center justify-center text-sm font-bold px-2 btn btn-ghost rounded-xl hover:bg-base-200 transition-all duration-200 ease-linear ">
+                  <div className="hidden md:flex gap-2 items-center justify-start text-sm font-bold pl-0 btn btn-ghost normal-case rounded-xl hover:bg-base-200 transition-all duration-200 ease-linear h-fit min-h-fit text-t2 hover:text-t1 ">
+                    <CustomAvatar
+                      address={session?.user?.address}
+                      size={40}
+                      context={"button"}
+                    />
                     <p>{formatAddress(session?.user?.address)}</p>
-                  </div> 
-                  {/* <div className="divider divider-horizontal mr-1 ml-0"></div> */}
-                  {/* <div className="flex flex-col ml-auto bg-primary rounded-r-xl justify-center items-center text-black p-3">
-                      <BiLink className="w-6 h-6" />
-                    </div> */}
-                  <CustomAvatar
-                    address={session?.user?.address}
-                    size={40}
-                    context={"button"}
-                  />
-
+                  </div>
                 </div>
               );
           }

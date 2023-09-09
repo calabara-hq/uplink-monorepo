@@ -56,12 +56,12 @@ const VotingPolicy = ({
         {errors && <p className="text-error self-start">{errors}</p>}
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5 sm gap-4">
           <div
-            className="card btn bg-base-200 h-28"
+            className="card btn normal-case bg-base-200 h-28"
             onClick={() => setIsTokenModalOpen(true)}
           >
             <div className="flex flex-row gap-2 items-center">
               <AiOutlinePlus className="w-6 h-6" />
-              <p>add reward</p>
+              <p>Add Reward</p>
             </div>
           </div>
           {votingPolicy.map((policy, index) => {

@@ -49,7 +49,7 @@ const MobileActions = ({
         <StickyContainer>
           <div className="flex flex-row w-full p-2">
             <Link
-              href={`${spaceName}/contests/${contestId}/studio`}
+              href={`${spaceName}/contest/${contestId}/studio`}
               className="btn btn-primary flex flex-1 normal-case rounded-r-none"
             >
               Submit
@@ -68,7 +68,7 @@ const MobileActions = ({
         <StickyContainer>
           <div className="flex flex-row w-full p-2">
             <Link
-              href={`${spaceName}/contests/${contestId}/vote`}
+              href={`${spaceName}/contest/${contestId}/vote`}
               className="btn btn-primary flex flex-1 normal-case rounded-r-none indicator"
             >
               Vote
