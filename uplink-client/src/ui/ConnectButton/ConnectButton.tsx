@@ -1,9 +1,9 @@
 "use client";
-import { formatAddress } from "@/utils/formatAddress";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useSession } from "@/providers/SessionProvider";
 import React from "react";
 import { BiLink } from "react-icons/bi";
+import { AddressOrEns } from "../AddressDisplay/AddressDisplay";
 
 export default function WalletConnectButton({
   children,
@@ -40,7 +40,7 @@ export default function WalletConnectButton({
                     onClick={openAccountModal}
                   >
                     <div className="join rounded-xl items-center justify-center p-2 text-xs font-bold">
-                      <p>{formatAddress(session?.user?.address)}</p>
+                      <AddressOrEns address={session?.user?.address} />
                     </div>
                     <div className="flex flex-col ml-auto bg-primary rounded-r-xl justify-center items-center text-black p-3">
                       <BiLink className="w-6 h-6" />

@@ -35,10 +35,10 @@ import {
   useStandardSubmissionCreator,
   SubmissionBuilderProps,
 } from "@/hooks/useStandardSubmissionCreator";
-import { formatAddress } from "@/utils/formatAddress";
 import { handleMutationError } from "@/lib/handleMutationError";
 import { HiArrowNarrowLeft, HiBadgeCheck } from "react-icons/hi";
 import Link from "next/link";
+import { AddressOrEns } from "@/ui/AddressDisplay/AddressDisplay";
 
 async function postSubmission(
   url,
@@ -582,7 +582,9 @@ const SubmissionCardBody = ({ title, author, subType }) => {
       <h2 className={`card-title text-md ${title ? "" : "text-gray-500"}`}>
         {title || "My awesome new submission"}
       </h2>
-      <p className="text-sm">{formatAddress(author)}</p>
+      <p className="text-sm">
+        <AddressOrEns address={author} />
+      </p>
     </div>
   );
 };
@@ -615,7 +617,9 @@ const RenderTextPreview = ({
       <h2 className="break-word font-bold text-2xl">
         {title || "My awesome new submission"}
       </h2>
-      <h3 className="break-all italic">{formatAddress(author)}</h3>
+      <h3 className="break-all italic">
+        <AddressOrEns address={author} />
+      </h3>
       <section className="break-all">
         <Output data={editorData} />
       </section>

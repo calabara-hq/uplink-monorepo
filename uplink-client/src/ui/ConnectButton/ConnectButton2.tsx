@@ -5,6 +5,7 @@ import { useSession } from "@/providers/SessionProvider";
 import React, { useContext } from "react";
 import { BiLink } from "react-icons/bi";
 import { CustomAvatar } from "@/providers/WalletProvider";
+import { AddressOrEns } from "../AddressDisplay/AddressDisplay";
 export default function WalletConnectButton2({}: {}) {
   const { data: session, status } = useSession();
   if (!status || status === "loading")
@@ -35,7 +36,7 @@ export default function WalletConnectButton2({}: {}) {
                       size={40}
                       context={"button"}
                     />
-                    <p>{formatAddress(session?.user?.address)}</p>
+                    <AddressOrEns address={session?.user?.address} />
                   </div>
                 </div>
               );
