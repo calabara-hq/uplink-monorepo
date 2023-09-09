@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user
+  name: tweet
 spec:
   replicas: {{ .Values.tweet.replicaCount }}
   selector:

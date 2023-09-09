@@ -57,7 +57,7 @@ services:
     image: nickdodson/user-service:${GITHUB_VERSION_TAG}
 
   tweet:
-    container_name: vote
+    container_name: tweet
     build:
       context: .
       dockerfile: ./packages/tweet/Dockerfile
