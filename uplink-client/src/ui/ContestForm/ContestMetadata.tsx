@@ -1,5 +1,5 @@
 import { BlockWrapper } from "./Entrypoint";
-import { HiCheckBadge } from "react-icons/hi2";
+import { HiCheckBadge, HiInformationCircle } from "react-icons/hi2";
 import { ContestCategory } from "@/ui/ContestLabels/ContestLabels";
 import { useState } from "react";
 import { validateMetadata, Metadata, MetadataError } from "./contestHandler";
@@ -13,7 +13,6 @@ const categories: ContestCategory[] = [
   "design",
   "other",
 ];
-
 
 const ContestMetadata = ({
   initialMetadata,
@@ -45,78 +44,104 @@ const ContestMetadata = ({
   };
 
   return (
-    <BlockWrapper title="Contest type & category">
-      {errors.type && <p className="text-error self-start">{errors.type}</p>}
+    <BlockWrapper title="">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold text-t1">Contest Type</h1>
+          {errors.type && (
+            <p className="text-error self-start">{errors.type}</p>
+          )}
 
-      <div className="flex flex-col w-full lg:flex-row mt-2">
-        <div className="indicator grid flex-grow w-full h-32">
-          <span
-            className={`indicator-item badge bg-transparent border-none ${
-              type === "standard" ? "visible" : "hidden"
-            }`}
-          >
-            <HiCheckBadge className="w-8 h-8 text-success" />
-          </span>
-          <button
-            onClick={() => {
-              handleTypeChange("standard");
-            }}
-            className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
+          <div className="flex flex-col w-full lg:flex-row mt-2">
+            <div className="indicator grid flex-grow w-full h-32">
+              <span
+                className={`indicator-item badge bg-transparent border-none ${
+                  type === "standard" ? "visible" : "hidden"
+                }`}
+              >
+                <HiCheckBadge className="w-8 h-8 text-success bg-base" />
+              </span>
+              <div
+                className={`flex flex-col items-center justify-center gap-2 border-2 border-border h-full rounded-box cursor-pointer transform 
+            transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform p-2 ${
               type === "standard"
                 ? "border-success border-2 hover:border-success hover:bg-transparent"
                 : ""
             }`}
-          >
-            <p>standard contest</p>
-          </button>
-        </div>
-        <div className="divider lg:divider-horizontal">OR</div>
-        <div className="indicator grid flex-grow w-full h-32">
-          <span
-            className={`indicator-item badge bg-transparent border-none ${
-              type === "twitter" ? "visible" : "hidden"
-            }`}
-          >
-            <HiCheckBadge className="w-8 h-8 text-primary" />
-          </span>
-          <button
-            onClick={() => {
-              handleTypeChange("twitter");
-            }}
-            className={`btn btn-ghost border-2 border-border h-full card rounded-box place-items-center ${
+                onClick={() => {
+                  handleTypeChange("standard");
+                }}
+              >
+                <h1 className="text-lg font-semibold text-center text-t1">
+                  Standard Contest
+                </h1>
+
+                <p className="text-sm text-t2 text-center">
+                  {`Create a prompt, set participation requirements, & configure rewards.
+              Submitters respond to your prompt through Uplink.`}
+                </p>
+              </div>
+            </div>
+            <div className="divider lg:divider-horizontal">OR</div>
+            <div className="indicator grid flex-grow w-full h-32">
+              <span
+                className={`indicator-item badge bg-transparent border-none ${
+                  type === "twitter" ? "visible" : "hidden"
+                }`}
+              >
+                <HiCheckBadge className="w-8 h-8 text-primary bg-base" />
+              </span>
+              <div
+                className={`flex flex-col items-center justify-center gap-2 border-2 border-border h-full rounded-box cursor-pointer transform 
+            transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform p-2 ${
               type === "twitter"
                 ? "border-primary border-2 hover:border-primary hover:bg-transparent"
                 : ""
             }`}
-          >
-            twitter contest
-          </button>
-        </div>
-      </div>
-      {errors.category && (
-        <p className="text-error self-start">{errors.category}</p>
-      )}
+                onClick={() => {
+                  handleTypeChange("twitter");
+                }}
+              >
+                <h1 className="text-lg font-semibold text-center text-t1">
+                  Twitter Contest
+                </h1>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 w-full gap-4">
-        {categories.map((el, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              handleCategoryChange(el);
-            }}
-            className={`btn btn-ghost border-2 border-border h-full card place-items-center ${
-              el === category
-                ? "border-success border-2 hover:border-success hover:bg-transparent"
-                : ""
-            }`}
-          >
-            {el}
-          </button>
-        ))}
+                <p className="text-sm text-t2 text-center">
+                  {`Same as standard + user submissions will be auto-posted as
+              quote-replies to a contest announcement tweet.`}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold text-t1">Category</h1>
+          {errors.category && (
+            <p className="text-error self-start">{errors.category}</p>
+          )}
+          <div className="grid grid-cols-2 lg:grid-cols-5 w-full gap-4">
+            {categories.map((el, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  handleCategoryChange(el);
+                }}
+                className={`btn btn-ghost normal-case border-2 border-border h-full card place-items-center ${
+                  el === category
+                    ? "border-purple-500 border-2 hover:border-purple-500 hover:bg-transparent"
+                    : ""
+                }`}
+              >
+                {el}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
       <button
         onClick={onSubmit}
-        className="btn btn-primary lowercase mt-4 self-end"
+        className="btn btn-primary normal-case mt-4 self-end"
       >
         Confirm
       </button>

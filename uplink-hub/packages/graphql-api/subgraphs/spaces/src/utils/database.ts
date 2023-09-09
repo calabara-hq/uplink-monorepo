@@ -124,6 +124,13 @@ export const updateDbSpace = async (
                 const result = await tx2.select({ name: schema.spaces.name })
                     .from(schema.spaces)
                     .where(sqlOps.eq(schema.spaces.id, spaceId));
+
+                await revalidateClientCache({
+                    host: process.env.FRONTEND_HOST,
+                    secret: process.env.FRONTEND_API_SECRET,
+                    tags: ['spaces', `space/${spaceId}`]
+                })
+
                 return result[0].name
             })
         });

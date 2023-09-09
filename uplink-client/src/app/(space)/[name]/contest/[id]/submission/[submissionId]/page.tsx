@@ -40,7 +40,7 @@ export default async function SubmissionPage({
   submission.data = await fetch(submission.url).then((res) => res.json());
   return (
     <div className="grid grid-cols-1 w-full gap-2 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full">
-      <Link href={`/${name}/contests/${id}`} className="mr-auto">
+      <Link href={`/${name}/contest/${id}`} className="mr-auto">
         <HiArrowNarrowLeft className="w-6 h-6" />
       </Link>
       <ExpandedSubmission submission={submission} />

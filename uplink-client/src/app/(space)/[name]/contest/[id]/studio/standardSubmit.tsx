@@ -566,7 +566,7 @@ const SubmissionPreviewModal = ({
           <HiBadgeCheck className="w-32 h-32 text-success" />
           <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
           <Link
-            href={`/${spaceName}/contests/${contestId}`}
+            href={`/${spaceName}/contest/${contestId}`}
             className="btn btn-ghost text-t2 normal-case"
           >
             Go to contest
@@ -769,7 +769,7 @@ const StandardSubmit = ({
     return (
       <div className="flex flex-col w-full xl:w-3/4 gap-4">
         <Link
-          href={`/${params.name}/contests/${params.id}`}
+          href={`/${params.name}/contest/${params.id}`}
           className="btn btn-ghost self-start btn-active"
         >
           <HiArrowNarrowLeft className="w-8 h-8" />

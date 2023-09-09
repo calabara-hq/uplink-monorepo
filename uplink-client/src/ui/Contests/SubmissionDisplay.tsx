@@ -1,32 +1,13 @@
 "use client";
-import { VideoProvider } from "@/providers/VideoProvider";
-import VideoPreview from "../VideoPlayer/VideoPlayer";
-import { Suspense, useEffect, useState } from "react";
-import Image from "next/image";
-import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { useVoteActionContext } from "@/providers/VoteActionProvider";
-import SubmissionVoteButton from "./SubmissionVoteButton";
-import useTrackSubmissions from "@/hooks/useTrackSubmissions";
-import { Decimal } from "decimal.js";
-import Output from "editorjs-react-renderer";
-import {
-  MediaController,
-  MediaControlBar,
-  MediaTimeRange,
-  MediaTimeDisplay,
-  MediaPlayButton,
-  MediaMuteButton,
-} from "media-chrome/dist/react";
+
 import CardSubmission from "../Submission/CardSubmission";
 import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import SubmissionViewer from "../SubmissionViewer/SubmissionViewer2";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
-import { Submission } from "@/providers/ContestInteractionProvider";
 import { useContestState } from "@/providers/ContestStateProvider";
-import { BiBadge } from "react-icons/bi";
-import { FaBurst } from "react-icons/fa6";
+
 
 const AddToCartButton = ({ submission, voteActions }) => {
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
@@ -111,7 +92,6 @@ const SubmissionDisplay = ({
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      <SubmissionViewer />
       <h1 className="text-xl lg:text-3xl text-center font-bold text-t1">
         Submissions
       </h1>
@@ -121,7 +101,7 @@ const SubmissionDisplay = ({
             return (
               <CardSubmission
                 key={idx}
-                basePath={`${spaceName}/contests/${contestId}`}
+                basePath={`${spaceName}/contest/${contestId}`}
                 submission={submission}
                 footerChildren={<SubmissionFooter submission={submission} />}
               />

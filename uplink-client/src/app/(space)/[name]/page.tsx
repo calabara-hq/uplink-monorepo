@@ -195,7 +195,7 @@ const ContestDisplay = ({
           >
             All Contests
           </Link>
-          <Link href={`${spaceName}/contests/create`} className="tab">
+          <Link href={`${spaceName}/contest/create`} className="tab">
             <span>New</span>
             <HiSparkles className="h-5 w-5 text-secondary pl-0.5" />
           </Link>
@@ -265,7 +265,7 @@ const ContestCard = ({
   remainingTime: string | null;
 }) => {
   return (
-    <Link href={`${spaceName}/contests/${contestId}`} prefetch={false}>
+    <Link href={`${spaceName}/contest/${contestId}`}>
       <div
         key={contestId}
         className="card bg-base-100 

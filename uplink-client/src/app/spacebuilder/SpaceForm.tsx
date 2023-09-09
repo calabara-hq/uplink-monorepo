@@ -3,22 +3,19 @@ import { useRef, useState } from "react";
 import { HiTrash, HiUser } from "react-icons/hi2";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
-import {
-  CreateSpaceDocument,
-  EditSpaceDocument,
-} from "@/lib/graphql/spaces.gql";
-import graphqlClient, { stripTypenames } from "@/lib/graphql/initUrql";
 import handleMediaUpload from "@/lib/mediaUpload";
 import {
   reducer,
   SpaceBuilderProps,
   validateSpaceBuilderProps,
+  createSpace,
+  editSpace,
 } from "@/app/spacebuilder/spaceHandler";
 import { useRouter } from "next/navigation";
-import useHandleMutation from "@/hooks/useHandleMutation";
 import toast from "react-hot-toast";
-import WalletConnectButton from "../ConnectButton/ConnectButton";
-
+import WalletConnectButton from "../../ui/ConnectButton/ConnectButton";
+import Image from "next/image";
+import useSWRMutation from "swr/mutation";
 export default function SpaceForm({
   initialState,
   isNewSpace,
@@ -31,8 +28,20 @@ export default function SpaceForm({
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
 
-  const handleMutation = useHandleMutation(
-    isNewSpace ? CreateSpaceDocument : EditSpaceDocument
+  const { trigger, error, isMutating, reset } = useSWRMutation(
+    isNewSpace
+      ? `/api/createContest/${spaceId}`
+      : `/api/editContest/${spaceId}`,
+    isNewSpace ? createSpace : editSpace,
+    {
+      onError: (err) => {
+        console.log(err);
+        toast.error(
+          "Oops, something went wrong. Please check the fields and try again."
+        );
+        reset();
+      },
+    }
   );
 
   const validate = async () => {
@@ -48,49 +57,44 @@ export default function SpaceForm({
     return result;
   };
 
-  const onFormSubmit = async (state: SpaceBuilderProps) => {
+  const onFormSubmit = async () => {
     const { isValid, values } = await validate();
     if (!isValid) return;
 
-    const result = await handleMutation({
-      spaceData: values,
-      spaceId,
-    });
-
-    if (!result) return;
-
-    const { errors, success, spaceName } = isNewSpace
-      ? result.data.createSpace
-      : result.data.editSpace;
-
-    if (!success) {
-      toast.error(
-        "Oops, something went wrong. Please check the fields and try again."
-      );
-      // set any errors that came from the server
-
-      dispatch({
-        type: "setErrors",
-        payload: {
-          ...(errors?.name && { name: errors.name }),
-          ...(errors?.website && { website: errors.website }),
-          ...(errors?.twitter && { twitter: errors.twitter }),
-          ...(errors?.logoUrl && { logoUrl: errors.logoUrl }),
-        },
-      });
-    }
-
-    if (success) {
-      toast.success(
-        isNewSpace
-          ? "Space created successfully!"
-          : "Successfully saved your changes",
-        {
-          icon: "🚀",
+    try {
+      await trigger({
+        ...(!isNewSpace && { spaceId: spaceId }),
+        spaceData: values,
+      }).then(({ success, spaceName, errors }) => {
+        if (success) {
+          toast.success(
+            isNewSpace
+              ? "Space created successfully!"
+              : "Successfully saved your changes",
+            {
+              icon: "🚀",
+            }
+          );
+          router.refresh();
+          router.push(`/${spaceName}`);
+        } else {
+          // set the errors
+          dispatch({
+            type: "setErrors",
+            payload: {
+              ...(errors?.name && { name: errors.name }),
+              ...(errors?.website && { website: errors.website }),
+              ...(errors?.twitter && { twitter: errors.twitter }),
+              ...(errors?.logoUrl && { logoUrl: errors.logoUrl }),
+            },
+          });
+          toast.error(
+            "Oops, something went wrong. Please check the fields and try again."
+          );
         }
-      );
-      router.refresh();
-      router.push(`/${spaceName}`);
+      });
+    } catch (e) {
+      reset();
     }
   };
 
@@ -102,14 +106,27 @@ export default function SpaceForm({
         <SpaceName state={state} dispatch={dispatch} />
         <SpaceWebsite state={state} dispatch={dispatch} />
         <SpaceTwitter state={state} dispatch={dispatch} />
-        <SpaceAdmins state={state} dispatch={dispatch} />
+        <SpaceAdmins
+          state={state}
+          dispatch={dispatch}
+          isNewSpace={isNewSpace}
+        />
         <div className="p-2" />
         <WalletConnectButton>
           <button
-            className="btn btn-primary"
-            onClick={() => onFormSubmit(state)}
+            className="btn btn-primary normal-case"
+            onClick={onFormSubmit}
+            disabled={isMutating}
           >
-            submit
+            <div className="flex w-full items-center justify-center">
+              Save
+              {isMutating && (
+                <div
+                  className="inline-block h-4 w-4 animate-spin rounded-full border-2 ml-auto border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                  role="status"
+                />
+              )}
+            </div>
           </button>
         </WalletConnectButton>
       </div>
@@ -197,10 +214,12 @@ const SpaceLogo = ({
       />
       <div className="avatar">
         <div
-          className="w-28 h-28 rounded-full cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all"
+          className="relative w-28 h-28 rounded-full cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all"
           onClick={() => imageUploader.current?.click()}
         >
-          {state.logoBlob && <img src={state.logoBlob} />}
+          {state.logoBlob && (
+            <Image src={state.logoBlob} alt="space avatar" fill />
+          )}
           {!state.logoBlob && (
             <div className="flex justify-center items-center w-full h-full">
               <HiUser className="w-8 h-8" />
@@ -300,32 +319,12 @@ const SpaceTwitter = ({
 const SpaceAdmins = ({
   state,
   dispatch,
+  isNewSpace,
 }: {
   state: SpaceBuilderProps;
   dispatch: any;
+  isNewSpace: boolean;
 }) => {
-  const { data: session, status } = useSession();
-  const userAddress = session?.user?.address || "you";
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      return dispatch({
-        type: "setAdmin",
-        payload: {
-          index: 0,
-          value: userAddress,
-        },
-      });
-    }
-
-    return dispatch({
-      type: "setAdmin",
-      payload: {
-        index: 0,
-        value: "you",
-      },
-    });
-  }, [status]);
   return (
     <div className="">
       <label className="label">
@@ -333,57 +332,105 @@ const SpaceAdmins = ({
       </label>
       <div className="flex flex-col gap-4">
         {state.admins.map((admin: string, index: number) => {
-          const isError = state.errors?.admins?.[index];
           return (
-            <div key={index}>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="vitalik.eth"
-                  spellCheck="false"
-                  className={`input w-full
-                ${isError ? "input-error" : "input"}`}
-                  disabled={index < 1}
-                  value={admin}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "setAdmin",
-                      payload: { index: index, value: e.target.value },
-                    })
-                  }
-                />
-                {index > 0 && (
-                  <button
-                    onClick={() => {
-                      dispatch({ type: "removeAdmin", payload: index });
-                    }}
-                    className="btn btn-square btn-ghost"
-                  >
-                    <HiTrash className="w-6" />
-                  </button>
-                )}
-              </div>
-              {isError && (
-                <label className="label">
-                  <span className="label-text-alt text-error">
-                    invalid address
-                  </span>
-                </label>
-              )}
-            </div>
+            <AdminRow
+              key={index}
+              isNewSpace={isNewSpace}
+              error={state?.errors?.admins?.[index]}
+              {...{ admin, index, dispatch }}
+            />
           );
         })}
         <button
-          className="btn btn-ghost underline w-fit"
+          className="btn btn-ghost underline w-fit normal-case"
           onClick={() => {
             dispatch({
               type: "addAdmin",
             });
           }}
         >
-          add
+          Add
         </button>
       </div>
+    </div>
+  );
+};
+
+const AdminRow = ({
+  error,
+  dispatch,
+  admin,
+  index,
+  isNewSpace,
+}: {
+  error: string;
+  dispatch: any;
+  admin: string;
+  index: number;
+  isNewSpace: boolean;
+}) => {
+  const { data: session, status } = useSession();
+
+  // the user can never remove themself as an admin (if they are one)
+  // on session change, check if the user is an admin. if they are, lock the row and set the address
+  // if they aren't, unlock the row for editing
+
+  const isLocked = isNewSpace
+    ? index === 0
+    : status === "authenticated"
+    ? session?.user?.address === admin
+    : true;
+
+  // set the
+  useEffect(() => {
+    if (isNewSpace) {
+      // set the session / address if the user is signed in and is an admin
+      if (status === "authenticated" && admin === "you") {
+        dispatch({
+          type: "setAdmin",
+          payload: {
+            index: index,
+            value: session?.user?.address,
+          },
+        });
+      }
+    }
+  }, [status, session?.user?.address]);
+
+  return (
+    <div>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="vitalik.eth"
+          spellCheck="false"
+          className={`input w-full
+        ${error ? "input-error" : "input"}`}
+          disabled={isLocked}
+          value={admin}
+          onChange={(e) =>
+            dispatch({
+              type: "setAdmin",
+              payload: { index: index, value: e.target.value },
+            })
+          }
+        />
+        {!isLocked && (
+          <button
+            onClick={() => {
+              dispatch({ type: "removeAdmin", payload: index });
+            }}
+            className="btn btn-square btn-ghost"
+          >
+            <HiTrash className="w-6" />
+          </button>
+        )}
+      </div>
+      {error && (
+        <label className="label">
+          <span className="label-text-alt text-error">invalid address</span>
+        </label>
+      )}
     </div>
   );
 };

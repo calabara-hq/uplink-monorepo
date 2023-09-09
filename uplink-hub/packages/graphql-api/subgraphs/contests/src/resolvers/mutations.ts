@@ -15,26 +15,27 @@ dotenv.config();
 const authController = new AuthorizationController(process.env.REDIS_URL);
 
 
-const verifyUserIsAdmin = async (user: any, spaceId: string) => {
-    const isAdmin = await db.select({ id: schema.admins.id })
-        .from(schema.admins)
-        .where(
-            sqlOps.and(
-                sqlOps.eq(schema.admins.spaceId, parseInt(spaceId)),
-                sqlOps.eq(schema.admins.address, user.address)
-            )
-        )
+const userSpaceAdminObject = db.query.admins.findFirst({
+    where: (admin) => sqlOps.and(
+        sqlOps.eq(admin.address, sqlOps.placeholder('address')),
+        sqlOps.eq(admin.spaceId, sqlOps.placeholder('spaceId'))
+    )
 
-    return isAdmin.length > 0
+}).prepare();
 
+
+const isUserSpaceAdmin = async (user: any, spaceId: string) => {
+    const isAdmin = await userSpaceAdminObject.execute({ address: user.address, spaceId: spaceId })
+    return isAdmin
 }
+
 
 const mutations = {
     Mutation: {
         createContest: async (_: any, args: any, context: any) => {
             const user = await authController.getUser(context);
             if (!user) throw new Error('Unauthorized');
-            const isSpaceAdmin = await verifyUserIsAdmin(user, args.contestData.spaceId)
+            const isSpaceAdmin = await isUserSpaceAdmin(user, args.contestData.spaceId)
             if (!isSpaceAdmin) throw new Error('Unauthorized');
 
             const { contestData } = args;
@@ -66,6 +67,7 @@ const mutations = {
         },
         createContestTweet: async (_: any, args: any, context: any) => {
             const user = await authController.getUser(context);
+
             const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.accessSecret ?? null);
 
             if (!user || !isTwitterAuth) throw new GraphQLError('Unauthorized', {
@@ -73,7 +75,8 @@ const mutations = {
                     code: 'UNAUTHORIZED'
                 }
             })
-            const isSpaceAdmin = await verifyUserIsAdmin(user, args.spaceId)
+
+            const isSpaceAdmin = await isUserSpaceAdmin(user, args.spaceId)
 
             if (!isSpaceAdmin) throw new GraphQLError('Unauthorized', {
                 extensions: {
@@ -106,14 +109,18 @@ const mutations = {
                 }
             })
 
-
             const { cleanPayload, errors, success } = validateTweetThread(args.tweetThread);
 
             if (success) {
-                await queueTweet(contest.id, user, contest.startTime, cleanPayload);
-                return { success: true }
-            }
+                try {
+                    await queueTweet(contest.id, user, contest.startTime, cleanPayload)
+                    return { success: true }
 
+                } catch (e) {
+                    console.log(e)
+                    return { success: false }
+                }
+            }
             else if (!success) {
                 return {
                     success,

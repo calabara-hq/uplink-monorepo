@@ -281,7 +281,8 @@ export const queueTweet = async (contestId: number, user: any, startTime: string
         retries: 0,
         status: 0
     }
-    return await db.insert(schema.tweetQueue).values(tweetJob)
+    await db.insert(schema.tweetQueue).values(tweetJob)
+        .then(() => { return { success: true } })
         .catch((err) => {
             throw new Error("database error: " + err.message)
         })
