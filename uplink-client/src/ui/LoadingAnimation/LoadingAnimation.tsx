@@ -18,15 +18,15 @@ const LoadingAnimation = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowAnimation(false);
-    }, 1000);
+      setShowAnimation(true);
+    }, 500);
     return () => clearTimeout(timer);
   }, []);
 
   if (!showAnimation) return null;
 
   return (
-    <div className="flex flex-col gap-8 w-full h-screen items-center justify-center mr-16">
+    <div>
       <motion.svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 100 100"

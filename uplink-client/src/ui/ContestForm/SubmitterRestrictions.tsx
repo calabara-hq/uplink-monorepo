@@ -37,7 +37,6 @@ const SubmitterRestrictions = ({
   };
 
   const onSubmit = () => {
-    console.log(restrictions);
     handleConfirm(restrictions);
   };
 
@@ -48,12 +47,12 @@ const SubmitterRestrictions = ({
     >
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5 sm gap-4">
         <div
-          className="card btn bg-base-200 h-28"
+          className="card btn bg-base-200 h-28 normal-case"
           onClick={() => setIsTokenModalOpen(true)}
         >
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row gap-2 items-center ">
             <AiOutlinePlus className="w-6 h-6" />
-            <p>add restriction</p>
+            <p>Add Restriction</p>
           </div>
         </div>
         {restrictions.map((restriction, index) => {
@@ -88,7 +87,7 @@ const SubmitterRestrictions = ({
       </Modal>
       <button
         onClick={onSubmit}
-        className="btn btn-primary lowercase mt-4 self-end"
+        className="btn btn-primary normal-case mt-4 self-end"
       >
         Confirm
       </button>

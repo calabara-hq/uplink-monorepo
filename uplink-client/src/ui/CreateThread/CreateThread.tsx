@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import Image from "next/image";
 import { ThreadItem, useThreadCreator } from "@/hooks/useThreadCreator";
-import { HiOutlineTrash, HiPhoto, HiXMark } from "react-icons/hi2";
+import { HiOutlineTrash, HiPhoto, HiSparkles, HiXMark } from "react-icons/hi2";
 import TwitterConnectButton from "../TwitterConnectButton/TwitterConnectButton";
 import {
   MediaController,
@@ -15,6 +15,8 @@ import {
 } from "media-chrome/dist/react";
 import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import { BiPlusCircle, BiSolidCircle } from "react-icons/bi";
+import { FaTwitterSquare } from "react-icons/fa";
+import MenuSelect from "../MenuSelect/MenuSelect";
 
 const isStringBlank = (str: string) => {
   return !str.trim();
@@ -164,6 +166,7 @@ const Tweet = ({
 const TweetFooter = ({
   tweet,
   setTweetVideoThumbnailBlobIndex,
+  setTweetText,
   addTweet,
   handleFileChange,
   visible,
@@ -171,9 +174,11 @@ const TweetFooter = ({
   confirmLabel,
   isSaveDisabled,
   isMediaUploading,
+  customDecorators,
 }: {
   tweet: ThreadItem;
   setTweetVideoThumbnailBlobIndex: (id: string, index: number | null) => void;
+  setTweetText: any;
   addTweet: () => void;
   handleFileChange: (data: any) => void;
   visible: boolean;
@@ -181,9 +186,22 @@ const TweetFooter = ({
   confirmLabel: string;
   isSaveDisabled: boolean;
   isMediaUploading: boolean;
+  customDecorators?: {
+    type: "text";
+    data: string;
+    title: string;
+    icon: React.ReactNode;
+  }[];
 }) => {
   const imageUploader = useRef<HTMLInputElement>(null);
   const thumbnailUploader = useRef<HTMLInputElement>(null);
+
+  const handleDecoratorSelect = (decorator: any) => {
+    const { type, data } = decorator;
+    if (type === "text") {
+      setTweetText(tweet.id, tweet.text + data);
+    }
+  };
 
   const Input = ({
     id,
@@ -281,6 +299,21 @@ const TweetFooter = ({
               <HiPhoto className="w-7 h-7" />
             </div>
           </Input>
+          {customDecorators && (
+            <ul className="menu menu-horizontal bg-base-200 rounded-box ml-4">
+              {customDecorators.map((decorator, index) => (
+                <li
+                  key={index}
+                  onClick={() => handleDecoratorSelect(decorator)}
+                >
+                  <div className="menu-content flex flex-row text-sm">
+                    {/* {decorator.icon} */}
+                    {decorator.title}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
           <div className="flex flex-row gap-2 ml-auto items-center justify-center">
             {tweet.text.length > 220 && tweet.text.length <= 280 && (
               <>
@@ -392,16 +425,6 @@ const CreateThread = ({
     handleClose();
   };
 
-  const handleDecoratorSelect = (decorator: any, threadIndex: string) => {
-    const { type, data } = decorator;
-    const currentTweet = thread.find((tweet) => {
-      return tweet.id === threadIndex;
-    });
-    if (type === "text") {
-      setTweetText(threadIndex, currentTweet?.text + data);
-    }
-  };
-
   return (
     <TweetModal isModalOpen={isModalOpen}>
       <button
@@ -411,10 +434,13 @@ const CreateThread = ({
         <HiXMark className="w-5 h-5" />
       </button>
 
-      <div className="flex flex-col w-full px-1 gap-4 mt-8">
+      <div className="relative flex flex-col w-full px-1 gap-4">
         {!session?.user?.twitter && (
           <div className="flex flex-col items-center justify-center w-full gap-4">
-            <h1>Please link your twitter account to get started</h1>
+            <FaTwitterSquare className="w-16 h-16 text-t2" />
+            <h1 className="text-lg text-t1">
+              Please link your twitter account to get started
+            </h1>
             <div className="w-fit m-auto">
               <TwitterConnectButton />
             </div>
@@ -422,24 +448,6 @@ const CreateThread = ({
         )}
         {session?.user?.twitter && (
           <>
-            {customDecorators && (
-              <ul className="absolute top-0 left-1/2 transform -translate-x-1/2  menu menu-horizontal bg-base-100 rounded-box">
-                {customDecorators.map((decorator, index) => (
-                  <li
-                    key={index}
-                    onClick={() =>
-                      handleDecoratorSelect(decorator, focusedTweet)
-                    }
-                  >
-                    <div className="menu-content flex flex-row gap-2">
-                      {decorator.icon}
-                      {decorator.title}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
             {thread.map((tweet, index) => (
               <div
                 key={index}
@@ -472,12 +480,14 @@ const CreateThread = ({
                     {...{
                       tweet,
                       setTweetVideoThumbnailBlobIndex,
+                      setTweetText,
                       addTweet,
                       handleFileChange,
                       visible: focusedTweet === tweet.id,
                       handleSave,
                       confirmLabel,
                       isSaveDisabled,
+                      customDecorators,
                       isMediaUploading: thread.some(
                         (tweet) => tweet.isUploading
                       ),

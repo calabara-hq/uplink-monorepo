@@ -101,13 +101,13 @@ const SubmitterRewards = ({
     >
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5 sm gap-4">
         <div
-      className="card btn bg-base-200 h-24"
+      className="card btn bg-base-200 h-24 normal-case"
           onClick={() => setIsModalOpen(true)}
         >
           <div className="flex flex-row gap-2 items-center">
             <AiOutlinePlus className="w-6 h-6" />
 
-            <p>add reward</p>
+            <p>Add Reward</p>
           </div>
         </div>
         {rewardsObjectToArray(rewards).map((token, index) => {
@@ -139,7 +139,7 @@ const SubmitterRewards = ({
       />
       <button
         onClick={onSubmit}
-        className="btn btn-primary lowercase mt-4 self-end"
+        className="btn btn-primary mt-4 self-end normal-case"
       >
         Confirm
       </button>

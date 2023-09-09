@@ -15,7 +15,7 @@ const TwitterConnectButton = ({}) => {
   return (
     <WalletConnectButton>
       <button
-        className="btn btn-primary lowercase  w-full"
+        className="btn btn-primary btn-outline  lowercase w-full"
         onClick={handleClick}
       >
         Connect Twitter

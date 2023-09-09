@@ -35,15 +35,14 @@ const getSpace = async (name: string) => {
 };
 
 export default async function Page({ params }: { params: { name: string } }) {
-  const data = await getSpace(params.name)
-    
   const { id, spaceTokens } = await getSpace(params.name);
-  console.log(JSON.stringify(data, null, 2))
   return (
-    <ContestForm
-      spaceName={params.name}
-      spaceId={id}
-      spaceTokens={spaceTokens.map((t) => t.token)}
-    />
+    <div className="w-full h-full lg:w-9/12 m-auto">
+      <ContestForm
+        spaceName={params.name}
+        spaceId={id}
+        spaceTokens={spaceTokens.map((t) => t.token)}
+      />
+    </div>
   );
 }

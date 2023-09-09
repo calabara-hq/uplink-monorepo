@@ -51,6 +51,7 @@ import { toast } from "react-hot-toast";
 import LoadingAnimation from "../LoadingAnimation/LoadingAnimation";
 import WalletConnectButton from "../ConnectButton/ConnectButton";
 import useSWRMutation from "swr/mutation";
+import CreateContestTweet from "./CreateContestTweet";
 
 const validateContestParams = (contestState: ContestBuilderProps) => {
   const {
@@ -203,7 +204,7 @@ const ContestParamSectionCards = ({ steps, onSubmit }) => {
       </div>
       <div className="ml-auto w-fit">
         <WalletConnectButton>
-          <button className="btn btn-primary" onClick={onSubmit}>
+          <button className="btn btn-primary normal-case" onClick={onSubmit}>
             Submit
           </button>
         </WalletConnectButton>
@@ -222,7 +223,6 @@ const ContestForm = ({
   spaceTokens: IToken[];
 }) => {
   const [currentStep, setCurrentStep] = useState(-1);
-  const handleMutation = useHandleMutation(CreateContestDocument);
 
   // add ETH to the spaceTokens array if it doesn't exist
   const spaceTokensWithEth: IToken[] = spaceTokens.some(
@@ -521,7 +521,12 @@ const ContestForm = ({
     },
   ];
 
-  if (isMutating) return <LoadingAnimation />;
+  if (isMutating)
+    return (
+      <div className="flex items-center justify-center w-full h-[80vh] ">
+        <LoadingAnimation />
+      </div>
+    );
   else
     return (
       <AnimatePresence mode="wait">
@@ -532,7 +537,7 @@ const ContestForm = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.1 }}
-            className="flex flex-col gap-8 m-4 w-full lg:w-9/12"
+            className="flex flex-col gap-8 m-4 w-full"
           >
             {currentStep > -1 ? (
               <div className="w-full flex flex-col gap-2 ">
@@ -569,28 +574,6 @@ const ContestForm = ({
     );
 };
 
-const composeInferredThread = (contestState) => {
-  const { prompt } = contestState;
-  const { title, coverUrl } = prompt;
-
-  const thread: ThreadItem[] = [
-    {
-      id: nanoid(),
-      text: title,
-      primaryAssetUrl: coverUrl ?? null,
-      primaryAssetBlob: null,
-      videoThumbnailUrl: null,
-      videoThumbnailBlobIndex: null,
-      videoThumbnailOptions: null,
-      assetSize: null,
-      assetType: null,
-      isVideo: false,
-      isUploading: false,
-    },
-  ];
-  return thread;
-};
-
 // sidebar for adding contest state elements
 // tweet homescreen
 // options for tweeting now vs closer to contest start
@@ -606,65 +589,52 @@ const AddTweetDialogue = ({
   spaceName: string;
   spaceId: string;
 }) => {
-  const initialThread = composeInferredThread(contestState);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasTweeted, setHasTweeted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const handleTweetMutation = useHandleMutation(CreateContestTweetDocument);
 
-  const postTweet = async (thread: ThreadItem[]) => {
-    const apiObject = {
-      contestId,
-      spaceId,
-      tweetThread: thread.map((el) => {
-        const serverThreadItem: ApiThreadItem = {
-          text: el.text,
-          ...(el.assetSize ? { assetSize: el.assetSize.toString() } : {}),
-          ...(el.assetType ? { assetType: el.assetType } : {}),
-        };
-        if (el.isVideo) {
-          serverThreadItem.previewAsset = el.videoThumbnailUrl;
-          serverThreadItem.videoAsset = el.primaryAssetUrl;
-        } else if (el.primaryAssetUrl) {
-          serverThreadItem.previewAsset = el.primaryAssetUrl;
-        }
-        return serverThreadItem;
-      }),
-    };
-    try {
-      const res = await handleTweetMutation(apiObject);
-      if (!res) {
-        toast.error("There was an error. Please try again.");
-        return {
-          success: false,
-          errors: "",
-        };
-      }
-      const { errors, success } = res.data.createContestTweet;
-      return { success, errors };
-    } catch (err) {
-      console.log(err);
-      return {
-        success: false,
-        errors: "",
-      };
-    }
+  const onSuccess = () => {
+    toast.success("Successfully scheduled your tweet");
+    setHasTweeted(true);
   };
 
-  const handleConfirm = async (thread: ThreadItem[]) => {
-    setIsLoading(true);
-    const { success, errors } = await postTweet(thread);
-    setIsLoading(false);
-    if (success) {
-      toast.success("Tweet successfully scheduled!");
-      setHasTweeted(true);
-    }
-  };
+  const customDecorators: {
+    type: "text";
+    data: string;
+    title: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      type: "text",
+      data: `\nbegins ${new Date(
+        contestState.deadlines.startTime
+      ).toLocaleString("en-US", {
+        hour12: false,
+        timeZone: "UTC",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })} UTC`,
+      title: "start time",
+      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+    },
+    {
+      type: "text",
+      data: `\n${contestState.prompt.title}`,
+      title: "prompt title",
+      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+    },
+    {
+      type: "text",
+      data: `\nhttps://uplink.wtf/${spaceName}/contest/${contestId}`,
+      title: "contest url",
+      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+    },
+  ];
 
   if (hasTweeted)
     return <RenderSuccessScreen contestId={contestId} spaceName={spaceName} />;
-  else if (isLoading) return <LoadingAnimation />;
   else
     return (
       <div className="flex flex-col items-center justify-center gap-6 p-4 w-10/12 md:w-1/3 h-1/2 bg-base-100 rounded-xl transition-colors duration-300 ease-in-out animate-springUp">
@@ -682,7 +652,7 @@ const AddTweetDialogue = ({
             className="btn btn-ghost text-t2"
             onClick={() => {
               router.refresh();
-              router.push(`${spaceName}/contests/${contestId}`);
+              router.push(`${spaceName}/contest/${contestId}`);
             }}
           >
             Go to contest
@@ -694,41 +664,14 @@ const AddTweetDialogue = ({
             add tweet
           </button>
         </div>
-        <CreateThread
-          initialThread={initialThread}
+        <CreateContestTweet
+          contestId={contestId}
+          spaceId={spaceId}
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
-          confirmLabel="Save"
-          onConfirm={handleConfirm}
-          customDecorators={[
-            {
-              type: "text",
-              data: `\nbegins ${new Date(
-                contestState.deadlines.startTime
-              ).toLocaleString("en-US", {
-                hour12: false,
-                timeZone: "UTC",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })} UTC`,
-              title: "start time",
-              icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-            },
-            {
-              type: "text",
-              data: `\n${contestState.prompt.title}`,
-              title: "prompt title",
-              icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-            },
-            {
-              type: "text",
-              data: `\nhttps://uplink.wtf/${spaceName}/contests/${contestId}`,
-              title: "contest url",
-              icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-            },
-          ]}
+          onSuccess={onSuccess}
+          onError={() => {}}
+          customDecorators={customDecorators}
         />
       </div>
     );
@@ -758,7 +701,7 @@ const RenderSuccessScreen = ({ contestId, spaceName }) => {
         className="btn btn-ghost text-t2"
         onClick={() => {
           router.refresh();
-          router.push(`${spaceName}/contests/${contestId}`);
+          router.push(`${spaceName}/contest/${contestId}`);
         }}
       >
         Go to contest

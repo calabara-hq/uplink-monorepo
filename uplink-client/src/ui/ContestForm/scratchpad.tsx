@@ -41,7 +41,7 @@ async function postContestTweet(
   })
     .then((res) => res.json())
     .then(handleMutationError)
-    .then((res) => res.data.createContestTweet);
+    .then((res) => res.data.createTwitterSubmission);
 }
 
 const CreateContestTweet = ({
@@ -66,6 +66,22 @@ const CreateContestTweet = ({
     icon: React.ReactNode;
   }[];
 }) => {
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [thread, setThread] = useState<ThreadItem[]>([
+    {
+      id: nanoid(),
+      text: "",
+      primaryAssetUrl: null,
+      primaryAssetBlob: null,
+      videoThumbnailUrl: null,
+      videoThumbnailBlobIndex: null,
+      videoThumbnailOptions: null,
+      assetSize: null,
+      assetType: null,
+      isVideo: false,
+      isUploading: false,
+    },
+  ]);
   const { trigger, data, error, isMutating, reset } = useSWRMtation(
     `/api/createContestTweet/${contestId}`,
     postContestTweet,
@@ -79,9 +95,7 @@ const CreateContestTweet = ({
   );
 
   useEffect(() => {
-    return () => {
-      reset();
-    };
+    return reset();
   }, []);
 
   const handleConfirm = async (thread: ThreadItem[]) => {
@@ -106,7 +120,6 @@ const CreateContestTweet = ({
     try {
       await trigger(payload).then(({ success, errors }) => {
         if (success) {
-          setIsModalOpen(false);
           onSuccess();
           reset();
         } else {
@@ -123,27 +136,31 @@ const CreateContestTweet = ({
   return (
     <>
       <CreateThread
-        initialThread={[
-          {
-            id: nanoid(),
-            text: "",
-            primaryAssetUrl: null,
-            primaryAssetBlob: null,
-            videoThumbnailUrl: null,
-            videoThumbnailBlobIndex: null,
-            videoThumbnailOptions: null,
-            assetSize: null,
-            assetType: null,
-            isVideo: false,
-            isUploading: false,
-          },
-        ]}
+        initialThread={[]}
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        confirmLabel="Post"
-        onConfirm={(thread: ThreadItem[]) => handleConfirm(thread)}
+        confirmLabel="Confirm"
+        onConfirm={() => {
+          setThread(thread);
+          setIsPreviewModalOpen(true);
+        }}
         customDecorators={customDecorators}
       />
+      <Modal
+        isModalOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+      >
+        <p>hey there</p>
+        <ModalActions
+          confirmLabel="Post"
+          onConfirm={() => handleConfirm(thread)}
+          cancelLabel="Cancel"
+          onCancel={() => {
+            setIsModalOpen(true);
+            setIsPreviewModalOpen(false);
+          }}
+        />
+      </Modal>
     </>
   );
 };

@@ -7,6 +7,8 @@ import { mutate } from "swr";
 import {
   HiXCircle,
   HiSparkles,
+  HiPlusCircle,
+  HiInformationCircle,
 } from "react-icons/hi2";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "../ConnectButton/ConnectButton";
@@ -17,6 +19,7 @@ import CreateContestTweet from "../ContestForm/CreateContestTweet";
 import { OutputData } from "@editorjs/editorjs";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 import SidebarVote from "./Vote";
+import { toast } from "react-hot-toast";
 
 // sidebar for the main contest view
 
@@ -24,11 +27,12 @@ const TweetQueuedDialog = () => {
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
       <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-        <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-          Tweet Queued
+        <div className="flex items-center gap-2 bg-base border border-border text-lg px-1 py-0.5 rounded-t-md w-full">
+          <HiInformationCircle className="w-6 h-6 text-primary" />
+          <p className="text-lg font-semibold">Tweet Queued</p>
         </div>
         <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-          <p className="font-bold">{`The announcement tweet is queued. It will be tweeted within 5 minutes of the contest start time.`}</p>
+          <p className="font-[500] text-t2">{`The announcement tweet is queued. It will be tweeted within 5 minutes of the contest start time.`}</p>
         </div>
       </div>
     </div>
@@ -54,34 +58,67 @@ const TweetNotQueuedDialog = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleSuccess = () => {
+    toast.success("Successfully scheduled your tweet");
     mutate(`/api/tweetQueueStatus/${contestId}`);
   };
+
+  const customDecorators: {
+    type: "text";
+    data: string;
+    title: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      type: "text",
+      data: `\nbegins ${new Date(startTime).toLocaleString("en-US", {
+        hour12: false,
+        timeZone: "UTC",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })} UTC`,
+      title: "start time",
+      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+    },
+    {
+      type: "text",
+      data: `\n${prompt.title}`,
+      title: "prompt title",
+      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+    },
+    {
+      type: "text",
+      data: `\nhttps://uplink.wtf/${spaceName}/contest/${contestId}`,
+      title: "contest url",
+      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+    },
+  ];
 
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
       <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-        <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+        <div className="bg-warning text-black text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
           Tweet Not Queued
         </div>
-        <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-          <p className="font-bold">{`This contest requires an announcement tweet before it can begin.`}</p>
+        <div className="flex flex-col items-center justify-evenly p-4 gap-4 w-full">
+          <p>{`This contest requires an announcement tweet before it can begin.`}</p>
           <button
-            className="btn lowercase"
+            className="btn btn-primary btn-outline normal-case w-full"
             onClick={() => setIsModalOpen(true)}
           >
-            add a tweet
+            Tweet
           </button>
         </div>
       </div>
       <CreateContestTweet
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        startTime={startTime}
-        prompt={prompt}
         contestId={contestId}
-        spaceName={spaceName}
         spaceId={spaceId}
+        customDecorators={customDecorators}
         onSuccess={handleSuccess}
+        onError={() => {}}
       />
     </div>
   );
@@ -110,8 +147,6 @@ const AdminsRequired = ({
     useTweetQueueStatus(contestId);
   const isAdmin = contestAdmins.includes(session?.user?.address ?? "");
 
-  console.log(isTweetQueued);
-
   if (status === "loading") return <SidebarSkeleton />;
   else if (isAdmin) {
     if (isQueueStatusLoading) return <SidebarSkeleton />;
@@ -126,15 +161,15 @@ const AdminsRequired = ({
     return (
       <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
         <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-          <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+          <div className="bg-warning text-black text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
             Admins required
           </div>
           <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-            <p className="font-bold">{`Hang tight! A space admin is needed to launch the contest.`}</p>
+            <p className="">{`Hang tight! A space admin is needed to launch the contest.`}</p>
             {!session?.user?.address && (
-              <div className="flex flex-row items-center justify-start gap-2 w-full">
+              <div className="flex flex-row items-center justify-start gap-2 ml-auto">
                 <p>Are you an admin?</p>
-                <WalletConnectButton style="btn-sm btn-ghost ml-auto" />
+                <WalletConnectButton style="btn-sm btn-ghost" />
               </div>
             )}
           </div>
@@ -245,8 +280,8 @@ const Submitting = ({
           />
           <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
             <Link
-              href={`${spaceName}/contests/${contestId}/studio`}
-              className="btn btn-accent flex flex-1"
+              href={`${spaceName}/contest/${contestId}/studio`}
+              className="btn btn-accent normal-case flex flex-1"
             >
               Submit
             </Link>

@@ -180,7 +180,7 @@ const ContentSection = async () => {
             return (
               <CardSubmission
                 key={idx}
-                basePath={`${submission.spaceName}/contests/${submission.contestId}`}
+                basePath={`${submission.spaceName}/contest/${submission.contestId}`}
                 submission={submission}
               />
             );
@@ -198,7 +198,7 @@ const ContentSection = async () => {
                 spaceName={contest.space.name}
                 spaceDisplayName={contest.space.displayName}
                 spaceLogo={contest.space.logoUrl}
-                linkTo={`${contest.space.name}/contests/${contest.id}`}
+                linkTo={`${contest.space.name}/contest/${contest.id}`}
                 metadata={contest.metadata}
                 deadlines={contest.deadlines}
                 tweetId={contest.tweetId}

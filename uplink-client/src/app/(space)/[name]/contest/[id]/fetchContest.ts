@@ -14,6 +14,7 @@ export const getContestById = async (contestId: string) => {
             promptUrl
             tweetId
             space {
+              id
               name
               displayName
               logoUrl
