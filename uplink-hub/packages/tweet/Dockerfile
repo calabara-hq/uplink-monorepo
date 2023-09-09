@@ -11,7 +11,7 @@ COPY ./yarn.lock ./
 COPY ./packages/lib ./packages/lib
 
 # Copy tweet service
-COPY ./packages/graphql-api/subgraphs/tweet ./packages/tweet
+COPY ./packages/tweet ./packages/tweet
 RUN yarn install
 RUN yarn workspace lib build
 RUN yarn workspace tweet build
