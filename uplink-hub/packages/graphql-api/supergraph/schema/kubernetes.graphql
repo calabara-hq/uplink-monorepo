@@ -232,6 +232,7 @@ enum join__Graph {
   CONTESTS @join__graph(name: "contests", url: "http://contests:8080")
   SPACES @join__graph(name: "spaces", url: "http://spaces:8080")
   SUBMIT @join__graph(name: "submit", url: "http://submit:8080")
+  USER @join__graph(name: "user", url: "http://user:8080")
   VOTE @join__graph(name: "vote", url: "http://vote:8080")
 }
 
@@ -319,6 +320,7 @@ type Query
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
   @join__type(graph: SUBMIT)
+  @join__type(graph: USER)
   @join__type(graph: VOTE)
 {
   contest(contestId: ID!): Contest @join__field(graph: CONTESTS)
@@ -330,6 +332,8 @@ type Query
   contestSubmissions(contestId: ID!): [Submission!]! @join__field(graph: SUBMIT)
   popularSubmissions: [PopularSubmission!]! @join__field(graph: SUBMIT)
   getUserSubmissionParams(contestId: ID!, walletAddress: String): UserSubmissionParams! @join__field(graph: SUBMIT)
+  me: User @join__field(graph: USER)
+  user(id: ID, address: String): User @join__field(graph: USER)
   testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTE)
   getUserVotingParams(contestId: ID!, walletAddress: String): UserVotingParams! @join__field(graph: VOTE)
 }
@@ -601,6 +605,13 @@ input TwitterSubmissionPayload
 {
   title: String!
   thread: [ThreadPayload!]!
+}
+
+type User
+  @join__type(graph: USER, key: "id")
+{
+  id: ID
+  address: String
 }
 
 type UserSubmissionParams
