@@ -29,7 +29,6 @@ import {
   MediaMuteButton,
 } from "media-chrome/dist/react";
 import { ModalActions } from "@/ui/Modal/Modal";
-import { formatAddress } from "@/utils/formatAddress";
 import useHandleMutation from "@/hooks/useHandleMutation";
 import { CreateTwitterSubmissionDocument } from "@/lib/graphql/submit.gql";
 import { toast } from "react-hot-toast";
@@ -40,6 +39,7 @@ import { IoMdCreate } from "react-icons/io";
 import { HiArrowNarrowLeft, HiBadgeCheck } from "react-icons/hi";
 import Link from "next/link";
 import { handleMutationError } from "@/lib/handleMutationError";
+import { AddressOrEns } from "@/ui/AddressDisplay/AddressDisplay";
 
 async function postTwitterSubmission(
   url,
@@ -437,7 +437,6 @@ const PreviewModal = ({
     }
   };
 
-
   if (isModalOpen && !data) {
     return (
       <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
@@ -593,7 +592,9 @@ const SubmissionBody = ({ title, author, subType }) => {
       <h2 className={`card-title text-md ${title ? "" : "text-gray-500"}`}>
         {title || "My awesome new submission"}
       </h2>
-      <p className="text-sm">{formatAddress(author)}</p>
+      <p className="text-sm">
+        <AddressOrEns address={author} />
+      </p>
     </div>
   );
 };
@@ -626,7 +627,9 @@ const RenderTextPreview = ({
       <h2 className="break-word font-bold text-2xl">
         {title || "My awesome new submission"}
       </h2>
-      <h3 className="break-all italic">{formatAddress(author)}</h3>
+      <h3 className="break-all italic">
+        <AddressOrEns address={author} />
+      </h3>
       <section className="break-all">{text}</section>
     </div>
   );
