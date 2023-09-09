@@ -9,33 +9,54 @@ import {
   HiSparkles,
   HiPlusCircle,
   HiInformationCircle,
+  HiOutlineLockClosed,
 } from "react-icons/hi2";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "../ConnectButton/ConnectButton";
 import Modal from "../Modal/Modal";
-import { BiInfoCircle } from "react-icons/bi";
+import { BiInfoCircle, BiTime } from "react-icons/bi";
 import useTweetQueueStatus from "@/hooks/useTweetQueueStatus";
 import CreateContestTweet from "../ContestForm/CreateContestTweet";
 import { OutputData } from "@editorjs/editorjs";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 import SidebarVote from "./Vote";
 import { toast } from "react-hot-toast";
+import { IoWarningOutline } from "react-icons/io5";
 
 // sidebar for the main contest view
 
-const TweetQueuedDialog = () => {
+const InfoWrapper = ({
+  bannerText,
+  icon,
+  children,
+}: {
+  bannerText: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) => {
   return (
     <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
       <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-        <div className="flex items-center gap-2 bg-base border border-border text-lg px-1 py-0.5 rounded-t-md w-full">
-          <HiInformationCircle className="w-6 h-6 text-primary" />
-          <p className="text-lg font-semibold">Tweet Queued</p>
+        <div className="flex gap-2 items-center bg-base text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
+          {icon}
+          <p>{bannerText}</p>
         </div>
-        <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-          <p className="font-[500] text-t2">{`The announcement tweet is queued. It will be tweeted within 5 minutes of the contest start time.`}</p>
-        </div>
+        {children}
       </div>
     </div>
+  );
+};
+
+const TweetQueuedDialog = () => {
+  return (
+    <InfoWrapper
+      bannerText="Tweet Queued"
+      icon={<HiInformationCircle className="w-6 h-6 text-primary" />}
+    >
+      <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+        <p className="font-[500] text-t2">{`The announcement tweet is queued. It will be tweeted within 5 minutes of the contest start time.`}</p>
+      </div>
+    </InfoWrapper>
   );
 };
 
@@ -159,39 +180,35 @@ const AdminsRequired = ({
       );
   } else
     return (
-      <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
-        <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-          <div className="bg-warning text-black text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-            Admins required
-          </div>
-          <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-            <p className="">{`Hang tight! A space admin is needed to launch the contest.`}</p>
-            {!session?.user?.address && (
-              <div className="flex flex-row items-center justify-start gap-2 ml-auto">
-                <p>Are you an admin?</p>
-                <WalletConnectButton style="btn-sm btn-ghost" />
-              </div>
-            )}
-          </div>
+      <InfoWrapper
+        bannerText="Admins Required"
+        icon={<IoWarningOutline className="w-6 h-6 text-warning" />}
+      >
+        <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full text-t2">
+          <p className="">{`Hang tight! A space admin is needed to launch the contest.`}</p>
+          {!session?.user?.address && (
+            <div className="flex flex-row items-center justify-start gap-2 ml-auto text-t1">
+              <p>Are you an admin?</p>
+              <WalletConnectButton style="btn-sm btn-ghost" />
+            </div>
+          )}
         </div>
-      </div>
+      </InfoWrapper>
     );
 };
 
 const Pending = () => {
   return (
-    <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
-      <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-        <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-          Pending
-        </div>
-        <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-          <p className="font-bold">
-            {`This contest hasn't started yet. Check back soon!`}
-          </p>
-        </div>
+    <InfoWrapper
+      bannerText="Pending"
+      icon={<BiTime className="w-16 h-16 text-purple-500" />}
+    >
+      <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+        <p className="text-t2">
+          {`This contest hasn't started yet. Check back soon!`}
+        </p>
       </div>
-    </div>
+    </InfoWrapper>
   );
 };
 
@@ -208,51 +225,50 @@ const Closed = ({
     useContestInteractionState();
   const [downloadClicked, setDownloadClicked] = useState(false);
   return (
-    <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
-      <ContestRewards
-        submitterRewards={submitterRewards}
-        voterRewards={voterRewards}
-        openRewardsModal={openRewardsModal}
-      />
-      <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
-        <div className="bg-neutral text-lg px-1 py-0.5 rounded-br-md rounded-tl-md w-fit">
-          Contest Closed
-        </div>
+    // <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4">
+    //   <ContestRewards
+    //     submitterRewards={submitterRewards}
+    //     voterRewards={voterRewards}
+    //     openRewardsModal={openRewardsModal}
+    //   />
 
-        <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-          {!downloadClicked && (
+    <InfoWrapper
+      bannerText="Contest Closed"
+      icon={<HiOutlineLockClosed className="w-6 h-6 text-orange-500" />}
+    >
+      <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
+        {!downloadClicked && (
+          <button
+            className="btn btn-primary normal-case"
+            onClick={() => setDownloadClicked(true)}
+          >
+            Download Winners
+          </button>
+        )}
+        {downloadClicked && (
+          <div className="flex gap-2 items-center">
             <button
-              className="btn btn-primary normal-case"
-              onClick={() => setDownloadClicked(true)}
+              className="btn btn-md btn-outline btn-primary normal-case"
+              onClick={downloadGnosisResults}
             >
-              Download Winners
+              Gnosis
             </button>
-          )}
-          {downloadClicked && (
-            <div className="flex gap-2 items-center">
-              <button
-                className="btn btn-md btn-outline btn-primary normal-case"
-                onClick={downloadGnosisResults}
-              >
-                Gnosis
-              </button>
-              <button
-                className="btn btn-md btn-outline btn-secondary normal-case"
-                onClick={downloadUtopiaResults}
-              >
-                Utopia
-              </button>
-              <button
-                className="btn btn-ghost btn-sm text-t2"
-                onClick={() => setDownloadClicked(false)}
-              >
-                <HiXCircle className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
+            <button
+              className="btn btn-md btn-outline btn-secondary normal-case"
+              onClick={downloadUtopiaResults}
+            >
+              Utopia
+            </button>
+            <button
+              className="btn btn-ghost btn-sm text-t2"
+              onClick={() => setDownloadClicked(false)}
+            >
+              <HiXCircle className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
-    </div>
+    </InfoWrapper>
   );
 };
 
@@ -583,7 +599,15 @@ const ContestSidebar = ({
   const openVotingPolicyModal = () => {
     setIsVotingPolicyModalOpen(true);
   };
-  console.log(contestState, type, tweetId);
+
+  return (
+    <Closed
+      submitterRewards={submitterRewards}
+      voterRewards={voterRewards}
+      openRewardsModal={openRewardsModal}
+    />
+  );
+
   return (
     <>
       {!contestState && <SidebarSkeleton />}
