@@ -1,5 +1,4 @@
 "use client";
-import { formatAddress } from "@/utils/formatAddress";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useSession } from "@/providers/SessionProvider";
 import React, { useContext } from "react";
