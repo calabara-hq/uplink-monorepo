@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "env:test": "cp .env.test .env",
-    "env:dev": "cp .env.prod .env",
+    "env:dev": "cp .env.dev .env",
     "env:prod": "cp .env.prod .env",
     "test:unit-vote": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace vote test",
     "test:unit-submit": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace submit test",

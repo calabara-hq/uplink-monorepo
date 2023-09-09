@@ -17,7 +17,8 @@ export interface IWalletProviderProps {
   refetchInterval: number;
 }
 
-const generateColorFromAddress = (address) => {
+const generateColorFromAddress = (address: string) => {
+  if (!address) return { foreground: "black", background: "white" };
   const hexColor = address.slice(2, 8);
   const firstInt = parseInt(hexColor.charAt(0));
 

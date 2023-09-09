@@ -219,7 +219,8 @@ const RenderImageSubmission = ({ submission, isActive }) => {
         }
         alt="submission image"
         fill
-        className={`object-contain w-full h-full transition-transform duration-300 ease-in-out ${
+        sizes="30vw"
+        className={`object-cover w-full h-full transition-transform duration-300 ease-in-out ${
           isActive ? "zoomIn" : ""
         }`}
       />
