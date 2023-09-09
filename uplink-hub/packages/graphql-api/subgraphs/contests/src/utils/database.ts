@@ -2,6 +2,7 @@ import { EditorOutputData, IToken, DatabaseController, schema, isERCToken } from
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
 import { nanoid } from 'nanoid';
+import { isIpfsUrl } from "lib";
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
@@ -408,8 +409,5 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         throw new Error("database error: " + err.message)
     }
 };
-
-
-
 
 

@@ -48,3 +48,17 @@ services:
       context: .
       dockerfile: ./packages/graphql-api/subgraphs/vote/Dockerfile
     image: nickdodson/vote-service:${GITHUB_VERSION_TAG}
+
+  user:
+    container_name: user
+    build:
+      context: .
+      dockerfile: ./packages/graphql-api/subgraphs/user/Dockerfile
+    image: nickdodson/user-service:${GITHUB_VERSION_TAG}
+
+  tweet:
+    container_name: vote
+    build:
+      context: .
+      dockerfile: ./packages/tweet/Dockerfile
+    image: nickdodson/tweet-service:${GITHUB_VERSION_TAG}

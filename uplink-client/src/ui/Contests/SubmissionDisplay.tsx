@@ -7,7 +7,7 @@ import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 import { usePathname, useRouter } from "next/navigation";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 import { useContestState } from "@/providers/ContestStateProvider";
-
+import { Decimal } from "decimal.js";
 
 const AddToCartButton = ({ submission, voteActions }) => {
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
@@ -22,8 +22,8 @@ const AddToCartButton = ({ submission, voteActions }) => {
   }, [currentVotes, proposedVotes, submission.id]);
 
   const handleSelect = (event) => {
-    event.stopPropagation()
-    event.preventDefault()
+    event.stopPropagation();
+    event.preventDefault();
     if (!isSelected) {
       addProposedVote({ ...submission, submissionId: submission.id });
     }
@@ -45,13 +45,16 @@ const AddToCartButton = ({ submission, voteActions }) => {
     );
   } else
     return (
-      <div onClick={(event)=>handleSelect(event)} className="animate-springUp flex absolute bottom-0 left-0 items-center w-full h-8 rounded-b-lg bg-warning px-1 hover:bg-opacity-80">
+      <div
+        onClick={(event) => handleSelect(event)}
+        className="animate-springUp flex absolute bottom-0 left-0 items-center w-full h-8 rounded-b-lg bg-warning px-1 hover:bg-opacity-80"
+      >
         <p className="text-black font-medium text-center ml-auto">
           Add to Cart
         </p>
         <div className="w-0.5 h-full bg-base ml-auto" />
 
-        <span className=" p-4" >
+        <span className=" p-4">
           <HiPlus className="h-6 w-6 text-black font-medium" />
         </span>
       </div>
@@ -62,9 +65,7 @@ const SubmissionFooter = ({ submission }) => {
   const { contestState } = useContestState();
   const voteActions = useVoteActionContext();
   if (contestState) {
-    if (
-      voteActions && contestState === "voting"
-    )
+    if (voteActions && contestState === "voting")
       return (
         <AddToCartButton submission={submission} voteActions={voteActions} />
       );
