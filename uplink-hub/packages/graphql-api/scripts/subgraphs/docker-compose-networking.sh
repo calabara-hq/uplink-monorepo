@@ -1,6 +1,6 @@
 #!/bin/bash
 
-subgraphs=("spaces" "contests" "submit" "vote", "user")
+subgraphs=("spaces" "contests" "submit" "vote" "user")
 
 url_spaces="http://spaces:4000/graphql"
 url_contests="http://contests:4000/graphql"
