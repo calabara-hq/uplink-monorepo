@@ -16,3 +16,7 @@ subgraphs:
     routing_url: http://vote:8080
     schema:
       file: ../../subgraphs/vote/schema.graphql
+  user:
+    routing_url: http://user:8080
+    schema:
+      file: ../../subgraphs/user/schema.graphql
