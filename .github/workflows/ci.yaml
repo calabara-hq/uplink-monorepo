@@ -192,7 +192,11 @@ jobs:
         run: |
           npm install --global vercel@canary
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          if ! vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}; then
+            echo "::error::Vercel build failed!, Rolling back hub version"
+            helm rollback 'uplink-hub' -n production
+            exit 1
+          fi
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
       
       - name: Create GitHub Release
