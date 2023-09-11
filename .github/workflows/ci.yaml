@@ -3,7 +3,7 @@ on:
     types:
       - closed
     branches:
-      - main
+      - staging
 
 
 env:
@@ -179,6 +179,12 @@ jobs:
           cd uplink-hub/helm
           helm upgrade -i uplink-hub ./uplink-charts-0.1.0.tgz -n production \
           -f ./uplink-charts/values.production.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
+      - name: Merge staging into main
+        run: |
+          git fetch origin
+          git checkout main
+          git merge --no-ff staging -m "Merge changes from staging"
+          git push origin main
           
       - name: Create GitHub Release
         uses: actions/create-release@v1
