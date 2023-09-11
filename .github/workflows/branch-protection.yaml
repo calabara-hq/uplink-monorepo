@@ -1,0 +1,38 @@
+name: Main Branch Protection
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  enforce-branch-rules:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Ensure we fetch all history for all branches and tags.
+
+    - name: Check direct push source
+      if: github.event_name == 'push'
+      run: |
+        git fetch origin  # Fetch the latest state of all branches.
+        # Check if the last commit is a merge commit from staging to main
+        PARENT_COMMIT=$(git rev-parse HEAD^2)
+        STAGING_COMMIT=$(git rev-parse origin/staging)
+        if [[ "$PARENT_COMMIT" != "$STAGING_COMMIT" ]]; then
+          echo "Error: Direct pushes to main are only allowed from the staging branch."
+          exit 1
+        fi
+
+    - name: Check PR source branch
+      if: github.event_name == 'pull_request'
+      run: |
+        if [[ "${{ github.head_ref }}" != "hotfix"* ]]; then
+          echo "Error: Only PRs from branches starting with hotfix are allowed to merge into main."
+          exit 1
+        fi
