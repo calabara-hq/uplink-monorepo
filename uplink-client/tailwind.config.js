@@ -77,6 +77,8 @@ module.exports = {
       },
       animation: {
         'springUp': 'springUp 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
+        'scrollInX': 'scrollInX 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
+        
       }
     },
     keyframes: ({ theme }) => ({
@@ -94,7 +96,17 @@ module.exports = {
           transform: 'translateY(0)',
           opacity: '1'
         }
-      }
+      },
+      scrollInX: {
+        '0%': {
+          transform: 'translateX(-100%)',
+          opacity: '0'
+        },
+        '100%': {
+          transform: 'translateX(0)',
+          opacity: '1'
+        }
+      },
 
     })
   },

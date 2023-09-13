@@ -59,21 +59,6 @@ const contestCategoryColor = (contestCategory: ContestCategory) => {
         text: "text-gray-300",
         bg: "bg-gray-300",
       };
-
-    // case "music":
-    //   return "text-yellow-300";
-    // case "writing":
-    //   return "text-green-300";
-    // case "video":
-    //   return "text-blue-300";
-    // case "photography":
-    //   return "text-indigo-300";
-    // case "design":
-    //   return "text-purple-300";
-    // case "development":
-    //   return "text-pink-300";
-    // case "other":
-    //   return "text-gray-300";
   }
 };
 
@@ -92,19 +77,32 @@ export type ContestState = "pending" | "submitting" | "voting" | "closed";
 const contestStatusColor = (contestState: ContestState) => {
   switch (contestState) {
     case "pending":
-      return "text-purple-500";
+      return {
+        text: "text-purple-500",
+        bg: "bg-purple-500",
+      };
     case "submitting":
-      return "text-green-300";
+      return {
+        text: "text-green-300",
+        bg: "bg-green-300",
+      };
     case "voting":
-      return "text-yellow-500";
+      return {
+        text: "text-yellow-500",
+        bg: "bg-yellow-500",
+      };
     case "closed":
-      return "text-gray-600";
+      return {
+        text: "text-gray-600",
+        bg: "bg-gray-600",
+      };
   }
 };
 
 export const StatusLabel = ({ status }: { status: ContestState }) => {
+  const { text, bg } = contestStatusColor(status);
   return (
-    <p className={`badge badge-outline badge-md ${contestStatusColor(status)}`}>
+    <p className={`badge border-none badge-md ${bg} ${text} bg-opacity-30`}>
       {status}
     </p>
   );

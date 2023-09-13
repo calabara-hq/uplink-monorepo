@@ -16,16 +16,7 @@ const container = {
   exit: { opacity: 0, scale: 0.5 },
 };
 
-const item = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-  },
-  exit: { y: 20, opacity: 0 },
-};
-
-export const DelayedGridLayout = ({
+const DelayedGridLayout = ({
   gridStyle,
   children,
 }: {
@@ -56,16 +47,4 @@ export const DelayedGridLayout = ({
   );
 };
 
-export const DelayedGridItem = ({
-  gridItemStyle,
-  children,
-}: {
-  gridItemStyle: string;
-  children: React.ReactNode;
-}) => {
-  return (
-    <motion.div className={gridItemStyle} variants={item}>
-      {children}
-    </motion.div>
-  );
-};
+export default DelayedGridLayout;

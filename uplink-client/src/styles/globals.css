@@ -23,8 +23,13 @@
 
 }
 
-
-.no-select > p, h1, h2, h3, h4, div, span {
+.no-select p,
+.no-select h1,
+.no-select h2,
+.no-select h3,
+.no-select h4,
+.no-select div,
+.no-select span {
   user-select: none;
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
