@@ -11,7 +11,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { BiPlusCircle } from "react-icons/bi";
 import { HiOutlineTrash, HiPhoto, HiSparkles } from "react-icons/hi2";
-
+import ArtistPfp from "@/../public/pumey_pfp.jpg";
+import ArtistSubmission from "@/../public/vinnie_noggles.png";
+import landingBg from "@/../public/landing-bg.svg";
+import videoEditor from "@/../public/video-editor.png";
+import { Swiper, SwiperSlide } from "@/ui/Swiper/Swiper";
+import { BiCategoryAlt, BiTime } from "react-icons/bi";
+import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
+import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
+import { motion } from "framer-motion";
+import ParallaxCards, {
+  DelayedGridItem,
+  DelayedGridLayout,
+} from "./spaces/ParallaxCards";
+import Parallax from "./spaces/ParallaxCards";
+import DelayedGrid from "./spaces/ParallaxCards";
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
@@ -89,47 +103,55 @@ const getPopularSubmissions = async () => {
 
 const BannerSection = () => {
   return (
-    <div className="grid grid-rows-[80%_20%] h-screen">
-      <div className="from-[#1c1f26] to-[#1c1f26] text-white grid place-items-center items-center bg-gradient-to-br pt-5">
-        <div className="relative hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row lg:gap-0 xl:gap-20 ">
+    <div className="w-full h-screen flex flex-col bg-base-100 relative">
+      <div className="grid place-items-center items-center bg-gradient-to-br">
+        <div className="hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-5 lg:gap-10 lg:flex-row xl:gap-20 z-[1]">
           <div className="lg:pl-10 ">
             <div className="mb-2 py-4 text-left ">
               <div className="flex gap-2">
                 <h1 className="mb-2 text-5xl font-[700] text-t1 w-fit">
-                  Crafted for creators
+                  Unleash your biggest fans
                 </h1>
-                <HiSparkles className="w-10 h-10 mr-auto " />
               </div>
               <h2 className="text-lg max-w-md text-t1">
-                Uplink is where creativity finds its canvas. Dive into a vibrant
-                community where your knack earns more than just applause.
+                Uplink lets individuals, brands, and decentralized orgs create
+                rewards systems to amplify their reach and co-create
+                masterpieces with their most passionate supporters.
               </h2>
             </div>
           </div>
-          <div className="m-auto w-full max-w-[321px] md:max-w-sm">
+          <div className="m-auto w-full max-w-xs sm:max-w-sm lg:max-w-lg animate-springUp">
             <div className="mockup-window bg-base-100 border border-border">
               <div className="grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
                 <Image
-                  src={"/swim-shady.png"}
+                  src={ArtistPfp}
                   alt="swim shady"
                   width={50}
                   height={50}
                   className="rounded-full"
                 />
                 <div className="flex-grow flex flex-col gap-2 ml-4">
-                  <p className="text-t1">Noun 9999 in 3333D!</p>
+                  <p className="text-t1">
+                    <span className="text-primary">@vinniehager</span> noggles!
+                  </p>
                   <div className="flex-grow flex flex-col items-center">
                     <div className="relative w-full">
-                      {/* <span className="absolute top-0 right-0 mt-[-10px] mr-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg">
-                      <HiOutlineTrash className="w-5 h-5" />
-                    </span> */}
                       <Image
-                        src={"/9999-winner.jpeg"}
+                        src={ArtistSubmission}
                         alt="twitter submission"
-                        width={200}
-                        height={200}
                         className="rounded-lg object-contain"
                       />
+                    </div>
+                    <div className="text-sm text-t2 italic font-[500] self-start text-left">
+                      <Link
+                        href="https://twitter.com/pumey_arts"
+                        target="_blank"
+                        className="hover:underline"
+                        prefetch={false}
+                      >
+                        @pumey_arts -
+                      </Link>{" "}
+                      Vinnie Hager x Nouns contest
                     </div>
                   </div>
                   <div className="w-full h-0.5 bg-border"></div>
@@ -152,68 +174,14 @@ const BannerSection = () => {
             </div>
           </div>
         </div>
-        <svg
-          className="fill-[#FF638D] col-start-1 row-start-1 h-auto w-full self-end"
-          width="1300"
-          height="410"
-          viewBox="0 0 1600 410"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M0 338L53.3 349.2C106.7 360.3 213.3 382.7 320 393.8C426.7 405 533.3 405 640 359.3C746.7 313.7 853.3 222.3 960 189.2C1066.7 156 1173.3 181 1280 159.2C1386.7 137.3 1493.3 68.7 1546.7 34.3L1600 0V595H1546.7C1493.3 595 1386.7 595 1280 595C1173.3 595 1066.7 595 960 595C853.3 595 746.7 595 640 595C533.3 595 426.7 595 320 595C213.3 595 106.7 595 53.3 595H0V338Z"></path>
-        </svg>
       </div>
-      <div className="flex items-center justify-center bg-[#FF638D]" />
-    </div>
-  );
-};
-
-const ContentSection = async () => {
-  const activeContests = await getActiveContests();
-  const popularSubmissions = await getPopularSubmissions();
-
-  return (
-    <div className="relative flex flex-col w-10/12 gap-6 m-auto">
-      {activeContests.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
-          <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {activeContests.map((contest, idx) => {
-              return (
-                <ContestCard
-                  key={idx}
-                  contestId={contest.id}
-                  promptUrl={contest.promptUrl}
-                  spaceName={contest.space.name}
-                  spaceDisplayName={contest.space.displayName}
-                  spaceLogo={contest.space.logoUrl}
-                  linkTo={`${contest.space.name}/contest/${contest.id}`}
-                  metadata={contest.metadata}
-                  deadlines={contest.deadlines}
-                  tweetId={contest.tweetId}
-                />
-              );
-            })}
-          </div>
-        </div>
-      )}
-      <div className="flex flex-col gap-2">
-        <h1 className="font-bold text-3xl text-t1">Weekly Wave</h1>
-        <h2 className="text-lg text-t2">
-          Popular submissions. Updated weekly.
-        </h2>
-        <div className="w-8/12 sm:w-full m-auto grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 auto-rows-fr">
-          {popularSubmissions.map((submission, idx) => {
-            return (
-              <CardSubmission
-                key={idx}
-                basePath={`${submission.spaceName}/contest/${submission.contestId}`}
-                submission={submission}
-              />
-            );
-          })}
-        </div>
-      </div>
+      <Image
+        src={landingBg}
+        alt=""
+        layout="fill"
+        objectFit="cover"
+        className="absolute !h-[80%] !bottom-0 !left-0 !top-auto"
+      />
     </div>
   );
 };
@@ -289,12 +257,194 @@ const PromptSummary = async ({ promptUrl }: { promptUrl: string }) => {
   );
 };
 
+const ActiveContests = async () => {
+  const activeContests = await getActiveContests();
+  if (activeContests.length > 0) {
+    return (
+      <div className="flex flex-col gap-2">
+        <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {activeContests.map((contest, idx) => {
+            return (
+              <ContestCard
+                key={idx}
+                contestId={contest.id}
+                promptUrl={contest.promptUrl}
+                spaceName={contest.space.name}
+                spaceDisplayName={contest.space.displayName}
+                spaceLogo={contest.space.logoUrl}
+                linkTo={`${contest.space.name}/contest/${contest.id}`}
+                metadata={contest.metadata}
+                deadlines={contest.deadlines}
+                tweetId={contest.tweetId}
+              />
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const ContestBanner = () => {
+  const steps = [
+    {
+      name: "Contest Type",
+      background: "bg-primary",
+      icon: <BiCategoryAlt className="w-24 h-24 text-primary" />,
+    },
+
+    {
+      name: "Deadlines",
+      background: "bg-error",
+      icon: <BiTime className="w-24 h-24 text-error" />,
+    },
+
+    {
+      name: "Prompt",
+      background: "bg-purple-500",
+      icon: <HiOutlineDocument className="w-24 h-24 text-purple-500" />,
+    },
+    {
+      name: "Voting Policy",
+      background: "bg-warning",
+      icon: <LuVote className="w-24 h-24 text-warning" />,
+    },
+
+    {
+      name: "Submitter Rewards",
+      background: "bg-green-400",
+      icon: <LuCoins className="w-24 h-24 text-green-400" />,
+    },
+
+    {
+      name: "Voter Rewards",
+      background: "bg-purple-500",
+      icon: <LuCoins className="w-24 h-24 text-purple-500" />,
+    },
+    {
+      name: "Submitter Restrictions",
+      background: "bg-orange-600",
+      icon: <HiOutlineLockClosed className="w-24 h-24 text-orange-600" />,
+    },
+
+    {
+      name: "Extras",
+      background: "bg-gray-500",
+      icon: <LuSettings2 className="w-24 h-24 text-t2" />,
+    },
+  ];
+
+  const categories: ContestCategory[] = [
+    "art",
+    "music",
+    "video",
+    "writing",
+    "photography",
+    "design",
+    "development",
+    "other",
+  ];
+
+  return (
+    <div className="w-full m-auto grid grid-cols-2 rounded-xl bg-base-100 h-[60vh] bg-opacity-40">
+      <div className="flex flex-col h-full items-start justify-center w-1/2 m-auto gap-6 break-words ">
+        <span className="font-bold text-3xl">
+          <h1 className="text-t1">Unlimited flexibility</h1>
+          <h1 className="text-t2">for your next big idea </h1>
+        </span>
+        {/* <div className="flex gap-2 flex-wrap">
+          {categories.map((category, idx) => {
+            return <CategoryLabel category={category} />;
+          })}
+        </div> */}
+        <Link href={"/spacebuilder/create"}>
+          <h3 className="text-lg font-semibold hover:underline transition-all duration-200">
+            Create a contest
+          </h3>
+        </Link>
+      </div>
+
+      <div className="relative w-full overflow-hidden">
+        <DelayedGridLayout gridStyle="absolute top-0 left-0 w-full h-full grid grid-cols-3 auto-rows-fr gap-2 !rotate-[-20deg]">
+          {steps.map((step, idx) => {
+            return (
+              <DelayedGridItem gridItemStyle="box border border-border p-2 rounded-xl flex flex-col gap-2 items-center justify-evenly">
+                <h2 className="font-bold text-t1 text-xl text-center">
+                  {step.name}
+                </h2>
+                {step.icon}
+              </DelayedGridItem>
+            );
+          })}
+        </DelayedGridLayout>
+      </div>
+    </div>
+  );
+};
+
+const PopularSubmissions = async () => {
+  const popularSubmissions = await getPopularSubmissions();
+
+  return (
+    <div className="w-full flex flex-col gap-2 m-auto">
+      <h1 className="font-bold text-3xl text-t1">Weekly Wave</h1>
+      <h2 className="text-lg text-t2">Popular submissions. Updated weekly.</h2>
+      <div className="w-full">
+        {/* <SubmissionCardSwiper submissions={[...popularSubmissions, ...popularSubmissions, ...popularSubmissions]}/> */}
+        <Swiper
+          spaceBetween={30}
+          slidesPerView={3}
+          slidesPerGroup={3}
+          breakpoints={{
+            320: {
+              slidesPerView: 1,
+              slidesPerGroup: 1,
+              spaceBetween: 10,
+            },
+            500: {
+              slidesPerView: 2,
+              slidesPerGroup: 2,
+              spaceBetween: 10,
+            },
+            850: {
+              slidesPerView: 3,
+              slidesPerGroup: 3,
+              spaceBetween: 20,
+            },
+            1200: {
+              slidesPerView: 4,
+              slidesPerGroup: 4,
+              spaceBetween: 20,
+            },
+          }}
+        >
+          {popularSubmissions.map((submission, index) => (
+            <SwiperSlide key={index}>
+              <CardSubmission
+                submission={submission}
+                basePath={`${submission.spaceName}/contest/${submission.contestId}`}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+    </div>
+  );
+};
+
 export default async function Page() {
   return (
-    <div className="flex flex-col w-full gap-6 pb-16">
+    <div className="flex flex-col w-full gap-6 mb-16">
       <BannerSection />
-      {/*@ts-expect-error*/}
-      <ContentSection />
+      <div className="flex flex-col w-10/12 m-auto gap-6">
+        {/*@ts-expect-error*/}
+        <ActiveContests />
+        {/*@ts-expect-error*/}
+        <PopularSubmissions />
+        <ContestBanner />
+      </div>
     </div>
   );
 }

@@ -67,4 +67,6 @@ RUN \
 RUN chmod 755 /dist/router_wrapper.sh
 
 # Default executable is the wrapper script
-ENTRYPOINT ["/dist/router_wrapper.sh", "-s", "schema/kubernetes.graphql", "--dev"]
+ENTRYPOINT ["/dist/router_wrapper.sh", "-s", "schema/kubernetes.graphql"]
+
+# dev mode -- ENTRYPOINT ["/dist/router_wrapper.sh", "-s", "schema/kubernetes.graphql", "--dev"]

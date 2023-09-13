@@ -48,7 +48,7 @@ type Admin
   spaceId: ID! @join__field(graph: SPACES)
 }
 
-type ArcadeVotingPolicyType
+type ArcadeVotingStrategyType
   @join__type(graph: CONTESTS)
 {
   token: TokenType
@@ -668,8 +668,8 @@ type VotingPolicyType
   @join__type(graph: CONTESTS)
 {
   strategyType: VotingStrategyType!
-  arcadeVotingPolicy: ArcadeVotingPolicyType
-  weightedVotingPolicy: WeightedVotingPolicyType
+  arcadeVotingStrategy: ArcadeVotingStrategyType
+  weightedVotingStrategy: WeightedVotingStrategyType
 }
 
 input VotingStrategy
@@ -686,7 +686,7 @@ enum VotingStrategyType
   weighted @join__enumValue(graph: CONTESTS)
 }
 
-type WeightedVotingPolicyType
+type WeightedVotingStrategyType
   @join__type(graph: CONTESTS)
 {
   token: TokenType

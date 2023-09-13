@@ -253,7 +253,7 @@ const CardSubmission = ({
 
   return (
     <Link
-      className="flex flex-col rounded-xl bg-base-100 border border-border"
+      className="flex flex-col rounded-xl bg-base-100 border border-border no-select"
       ref={ref}
       href={`${basePath}/submission/${submission.id}`}
       onMouseEnter={() => !isMobileDevice && setIsActive(true)}

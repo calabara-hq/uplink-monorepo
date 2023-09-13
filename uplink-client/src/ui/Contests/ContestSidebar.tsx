@@ -22,7 +22,8 @@ import { useContestInteractionState } from "@/providers/ContestInteractionProvid
 import SidebarVote from "./Vote";
 import { toast } from "react-hot-toast";
 import { IoWarningOutline } from "react-icons/io5";
-
+import formatOrdinals from "@/lib/formatOrdinals";
+import { FaRegCircleQuestion } from "react-icons/fa6";
 // sidebar for the main contest view
 
 const InfoWrapper = ({
@@ -452,6 +453,228 @@ const ExpandedSubmitterRewards = (rewards: Reward[]) => {
   return rewardSummary;
 };
 
+const SectionWrapper = ({
+  title,
+  children,
+  tooltipContent,
+}: {
+  title: string;
+  children: React.ReactNode;
+  tooltipContent?: React.ReactNode;
+}) => {
+  return (
+    <div className="flex flex-col gap-1 w-full">
+      <div className="flex gap-2 items-center">
+        <h2 className="font-semibold text-t1">{title}</h2>
+        {tooltipContent && (
+          <div className="dropdown dropdown-left dropdown-hover">
+            <label tabIndex={0} className="cursor-pointer">
+              <FaRegCircleQuestion className="w-4 h-4 text-t2" />
+            </label>
+            <div
+              tabIndex={0}
+              className="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-primary text-primary-content"
+            >
+              <div className="card-body">{tooltipContent}</div>
+            </div>
+          </div>
+        )}
+      </div>
+      {children}
+      <div className="bg-base-100 h-0.5 w-full" />
+    </div>
+  );
+};
+
+const SubmitterRewardsSection = ({
+  submitterRewards,
+  setIsModalOpen,
+}: {
+  submitterRewards: any;
+  setIsModalOpen: (val: boolean) => void;
+}) => {
+  return (
+    <SectionWrapper
+      title="Submitter Rewards"
+      tooltipContent={
+        <p className="font-semibold">
+          At the end of the voting period, these rewards are allocated to
+          submissions that finish in the pre-defined ranks.
+        </p>
+      }
+    >
+      {submitterRewards.length > 0 ? (
+        <div className="flex flex-col gap-1 p-2 text-t2">
+          <h2 className="text-sm font-semibold">Rank</h2>
+          {submitterRewards.slice(0, 3).map((reward: any, idx: number) => {
+            return (
+              <div key={idx} className="grid grid-cols-5 text-sm">
+                <p>{formatOrdinals(reward.rank)}</p>
+                <p>{`${reward.tokenReward.amount} ${reward.tokenReward.token.symbol}`}</p>
+              </div>
+            );
+          })}
+          {submitterRewards.length > 3 && (
+            <a
+              className="text-t2 underline hover:text-t1 cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+            >
+              + {submitterRewards.length - 3} more
+            </a>
+          )}
+        </div>
+      ) : (
+        <p className="text-t2 text-left">None</p>
+      )}
+    </SectionWrapper>
+  );
+};
+
+const VoterRewardsSection = ({ voterRewards }: { voterRewards: any }) => {
+  if (voterRewards.length > 0)
+    return (
+      <SectionWrapper
+        title="Voter Rewards"
+        tooltipContent={
+          <p className="font-semibold">
+            At the end of the voting period, these rewards are split amongst
+            voters that accurately choose the submissions that fall in the
+            pre-defined ranks.
+          </p>
+        }
+      >
+        <div className="flex flex-col gap-1 p-2 text-t2">
+          <h2 className="text-sm font-semibold">Rank</h2>
+          {voterRewards.slice(0, 3).map((reward: any, idx: number) => {
+            return (
+              <div key={idx} className="grid grid-cols-5 text-sm">
+                <p>{formatOrdinals(reward.rank)}</p>
+                <p>{`${reward.tokenReward.amount} ${reward.tokenReward.token.symbol}`}</p>
+              </div>
+            );
+          })}
+          {voterRewards.length > 3 && (
+            <p className="text-t2">+ {voterRewards.length - 3} more</p>
+          )}
+        </div>
+      </SectionWrapper>
+    );
+  return null;
+};
+
+const SubmitterRestrictionsSection = ({
+  submitterRestrictions,
+  contestState,
+  stateRemainingTime,
+  linkTo,
+}: {
+  submitterRestrictions: any;
+  contestState: string | null;
+  stateRemainingTime: string;
+  linkTo: string;
+}) => {
+  return (
+    <SectionWrapper
+      title="Entry Requirements"
+      tooltipContent={
+        <p className="font-semibold">
+          {`Users satisfying at least one restriction (if present) are elgible to submit.`}
+        </p>
+      }
+    >
+      {submitterRestrictions.length > 0 ? (
+        <div className="flex flex-col gap-1 p-2 text-t2">
+          {submitterRestrictions
+            .slice(0, 3)
+            .map((restriction: any, idx: number) => {
+              return (
+                <p key={idx}>
+                  {`Hold ${restriction.tokenRestriction.threshold} or more ${restriction.tokenRestriction.token.symbol} `}{" "}
+                </p>
+              );
+            })}
+          {submitterRestrictions.length > 3 && (
+            <p className="text-t2">+ {submitterRestrictions.length - 3} more</p>
+          )}
+        </div>
+      ) : (
+        <p className="text-t2 text-left">Anyone can submit!</p>
+      )}
+      {contestState === "submitting" && (
+        <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit">
+          <Link
+            href={linkTo}
+            className="btn btn-success btn-outline normal-case flex flex-1"
+          >
+            Submit
+          </Link>
+          <p className="mx-2 p-2 text-center text-t2">{stateRemainingTime}</p>
+        </div>
+      )}
+    </SectionWrapper>
+  );
+};
+
+const VotingPolicySection = ({ votingPolicy }: { votingPolicy: any }) => {
+  return (
+    <SectionWrapper
+      title="Voting Strategies"
+      tooltipContent={
+        <>
+          <p className="font-semibold">
+            {`Eligible voters must meet at least one requirement. Credits determine voting power.`}
+          </p>
+
+          <p className="font-extrabold">
+            {`Weighted: Credits = token balance.`}
+          </p>
+          <p className="font-extrabold">
+            {`Arcade: All users that hold <Token> get <Credits> credits.`}
+          </p>
+
+          <p className="font-semibold">
+            {`If a user meets multiple requirements, the highest # of credits are used.`}
+          </p>
+        </>
+      }
+    >
+      {votingPolicy.length > 0 ? (
+        <div className="flex flex-col gap-1 p-2 text-t2">
+          <div className="grid grid-cols-3">
+            <p>Token</p>
+            <p>Type</p>
+            <p>Credits</p>
+            {votingPolicy.slice(0, 3).map((strategy: any, idx: number) => {
+              if (strategy.strategyType === "arcade") {
+                return (
+                  <>
+                    <p>{strategy.arcadeVotingStrategy.token.symbol}</p>
+                    <p>Arcade</p>
+                    <p>{strategy.arcadeVotingStrategy.votingPower}</p>
+                  </>
+                );
+              } else if (strategy.strategyType === "weighted") {
+                return (
+                  <>
+                    <p>{strategy.weightedVotingStrategy.token.symbol}</p>
+                    <p>Weighted</p>
+                    <p>Weighted</p>
+                  </>
+                );
+              }
+            })}
+            {votingPolicy.length > 3 && (
+              <p className="text-t2">+ {votingPolicy.length - 3} more</p>
+            )}
+          </div>
+        </div>
+      ) : (
+        <p className="text-t2 text-center">Anyone can submit!</p>
+      )}
+    </SectionWrapper>
+  );
+};
+
 const RewardsModalContent = ({
   submitterRewards,
   voterRewards,
@@ -461,8 +684,6 @@ const RewardsModalContent = ({
 }) => {
   const [tab, setTab] = useState(0); // 0 = submitting, 1 = voting
   const subRewards = ExpandedSubmitterRewards(submitterRewards);
-
-  console.log(subRewards);
 
   return (
     <div className="tabs tabs-boxed gap-2 bg-base">
@@ -565,7 +786,180 @@ const RewardsModalContent = ({
   );
 };
 
+const SubmitterRewardsModalContent = ({
+  submitterRewards,
+}: {
+  submitterRewards: any;
+}) => {
+  return (
+    <div className="overflow-x-auto w-full flex flex-col gap-4">
+      <div className="flex items-center gap-4 p-2 rounded-xl border border-border">
+        <HiSparkles className="w-6 h-6 text-primary" />
+        <p className="">
+          Submitter rewards are allocated to submissions that finish in the
+          following ranks.
+        </p>
+      </div>
+      {submitterRewards.length === 0 && (
+        <p>There are no submitter rewards for this contest</p>
+      )}
+      {submitterRewards.length > 0 && (
+        <table className="table w-full">
+          {/* head */}
+          <thead>
+            <tr>
+              <th className="bg-base-100 text-center">rank</th>
+              <th className="bg-gray-600 text-center">ETH</th>
+              <th className="bg-gray-700 text-center">ERC20</th>
+              <th className="bg-gray-800 text-center">ERC721</th>
+              <th className="bg-gray-900 text-center">ERC1155</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* {Object.entries(submitterRewards).map(([rank, reward]) => (
+              <tr key={rank}>
+                <td className="bg-base-100 text-center">{rank}</td>
+                <td className="bg-gray-600 text-center">
+                  {reward.ETH?.amount ?? ""}
+                </td>
+
+                <td className="bg-gray-700 text-center">
+                  {reward.ERC20?.amount ?? ""} {reward.ERC20?.symbol ?? ""}
+                </td>
+
+                <td className="bg-gray-800 text-center">
+                  {" "}
+                  {reward.ERC721?.amount ?? ""} {reward.ERC721?.symbol ?? ""}
+                </td>
+
+                <td className="bg-gray-900 text-center">
+                  {" "}
+                  {reward.ERC1155?.amount ?? ""} {reward.ERC1155?.symbol ?? ""}
+                </td>
+              </tr>
+            ))} */}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+};
+
+const VoterRewardsModalContent = ({ voterRewards }: { voterRewards: any }) => {
+  return (
+    <div className="overflow-x-auto w-full flex flex-col gap-4">
+      <div className="flex items-center gap-4 p-2 rounded-xl border border-border">
+        <HiSparkles className="w-6 h-6 text-primary" />
+        <p className="">
+          Voter rewards are split amongst voters that allocate votes to
+          submissions that finish in the following ranks.
+        </p>
+      </div>
+      {voterRewards.length === 0 && (
+        <p>There are no voter rewards for this contest</p>
+      )}
+      {voterRewards.length > 0 && (
+        <table className="table w-full">
+          <tbody>
+            {voterRewards.map((reward, idx) => (
+              <tr key={reward.rank} className="w-full">
+                <td className="w-full">
+                  voters that accurately choose rank {reward.rank} will split{" "}
+                  {reward.tokenReward.amount} {reward.tokenReward.token.symbol}.
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+};
+
 const ContestSidebar = ({
+  spaceName,
+  contestId,
+  spaceId,
+  startTime,
+  prompt,
+  submitterRewards,
+  voterRewards,
+  votingPolicy,
+  submitterRestrictions,
+}: {
+  spaceName: string;
+  contestId: string;
+  spaceId: string;
+  startTime: string;
+  prompt: {
+    title: string;
+    body: OutputData | null;
+    coverUrl?: string;
+  };
+  submitterRewards: any;
+  voterRewards: any;
+  votingPolicy: any;
+  submitterRestrictions: any;
+}) => {
+  const { contestState, stateRemainingTime, type, tweetId } = useContestState();
+  const [isSubmitterRewardsModalOpen, setIsSubmitterRewardsModalOpen] =
+    useState(false);
+  const [isVoterRewardsModalOpen, setIsVoterRewardsModalOpen] = useState(false);
+  const [isVotingPolicyModalOpen, setIsVotingPolicyModalOpen] = useState(false);
+  const [
+    isSubmitterRestrictionsModalOpen,
+    setIsSubmitterRestrictionsModalOpen,
+  ] = useState(false);
+
+  // show the high priority content at the top, with the rest of the sidebar below
+  return (
+    <div className="hidden lg:flex lg:flex-col items-center lg:w-1/3 gap-4 pt-4">
+      <SubmitterRewardsSection
+        submitterRewards={submitterRewards}
+        setIsModalOpen={setIsSubmitterRewardsModalOpen}
+      />
+      <VoterRewardsSection voterRewards={voterRewards} />
+      <SubmitterRestrictionsSection
+        submitterRestrictions={submitterRestrictions}
+        contestState={contestState}
+        stateRemainingTime={stateRemainingTime}
+        linkTo={`${spaceName}/contest/${contestId}/studio`}
+      />
+      <VotingPolicySection votingPolicy={votingPolicy} />
+      <Modal
+        isModalOpen={
+          isSubmitterRewardsModalOpen ||
+          isVoterRewardsModalOpen ||
+          isSubmitterRestrictionsModalOpen ||
+          isVotingPolicyModalOpen
+        }
+        onClose={() => {
+          setIsSubmitterRewardsModalOpen(false);
+          setIsVoterRewardsModalOpen(false);
+          setIsSubmitterRestrictionsModalOpen(false);
+          setIsVotingPolicyModalOpen(false);
+        }}
+      >
+        {isSubmitterRewardsModalOpen && (
+          <SubmitterRewardsModalContent submitterRewards={submitterRewards} />
+        )}
+        {isVoterRewardsModalOpen && (
+          <VoterRewardsModalContent voterRewards={voterRewards} />
+        )}
+        {/* {isSubmitterRestrictionsModalOpen && (
+          <SubmitterRestrictionsModalContent
+            submitterRestrictions={submitterRestrictions}
+          />
+        )}
+        {isVotingPolicyModalOpen && (
+          <VotingPolicyModalContent votingPolicy={votingPolicy} />
+        )} */}
+      </Modal>
+    </div>
+  );
+};
+
+const ContestSidebar2 = ({
   spaceName,
   contestId,
   spaceId,
@@ -599,14 +993,6 @@ const ContestSidebar = ({
   const openVotingPolicyModal = () => {
     setIsVotingPolicyModalOpen(true);
   };
-
-  return (
-    <Closed
-      submitterRewards={submitterRewards}
-      voterRewards={voterRewards}
-      openRewardsModal={openRewardsModal}
-    />
-  );
 
   return (
     <>

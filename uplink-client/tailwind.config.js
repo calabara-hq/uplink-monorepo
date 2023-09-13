@@ -39,6 +39,9 @@ const colors2 = {
 
 
 module.exports = {
+  experimental: {
+    optimizeUniversalDefaults: true
+  },
   content: [
     "./src/**/*.{js,ts,jsx,tsx}",
   ],

@@ -38,7 +38,7 @@ export function AuthenticationProvider({
         createMessage: ({ address, chainId, nonce }) => {
           const defaultConfigurableOptions: ConfigurableMessageOptions = {
             statement: "sign here please!",
-            domain: "uplink.wtf",
+            domain: process.env.NEXT_PUBLIC_HUB_URL,
             uri: window.location.origin,
             version: "1",
           };

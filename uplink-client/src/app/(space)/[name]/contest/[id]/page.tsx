@@ -17,6 +17,7 @@ export default async function Page({
     submitterRewards,
     voterRewards,
     votingPolicy,
+    submitterRestrictions,
     tweetId,
   } = await getContestById(params.id);
 
@@ -44,6 +45,7 @@ export default async function Page({
         submitterRewards={submitterRewards}
         voterRewards={voterRewards}
         votingPolicy={votingPolicy}
+        submitterRestrictions={submitterRestrictions}
       />
     </>
   );

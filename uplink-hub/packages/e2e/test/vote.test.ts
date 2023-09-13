@@ -85,19 +85,19 @@ const seedContests = async ({ window, selfVote, votingPolicy, submissions }: {
         }
         const insertedVotingPolicy = await db.insert(schema.votingPolicy).values(newVotingPolicy);
         if (policy.strategyType === 'arcade') {
-            const newArcadeVotingPolicy: schema.dbNewArcadeVotingStrategyType = {
+            const newArcadeVotingStrategy: schema.dbNewArcadeVotingStrategyType = {
                 votingPolicyId: insertedVotingPolicy.insertId,
                 votingPower: policy.votingPower,
                 tokenLink: insertedToken.insertId,
             }
-            await db.insert(schema.arcadeVotingStrategy).values(newArcadeVotingPolicy);
+            await db.insert(schema.arcadeVotingStrategy).values(newArcadeVotingStrategy);
         }
         else if (policy.strategyType === 'weighted') {
-            const newWeightedVotingPolicy: schema.dbNewWeightedVotingStrategyType = {
+            const newWeightedVotingStrategy: schema.dbNewWeightedVotingStrategyType = {
                 votingPolicyId: insertedVotingPolicy.insertId,
                 tokenLink: insertedToken.insertId,
             }
-            await db.insert(schema.weightedVotingStrategy).values(newWeightedVotingPolicy);
+            await db.insert(schema.weightedVotingStrategy).values(newWeightedVotingStrategy);
         }
     }
 

@@ -100,7 +100,6 @@ export const dbContestTweetQueue = db.query.tweetQueue.findFirst({
 
 const postProcessContest = (contest, user) => {
     if (!contest) return null;
-
     const submitterRewards = [];
     const voterRewards = [];
     const submitterRestrictions = contest.submitterRestrictions.map(restriction => ({
@@ -110,27 +109,21 @@ const postProcessContest = (contest, user) => {
             threshold: new Decimal(restriction.tokenRestriction.threshold)
         }
     }));
+
     const votingPolicy = contest.votingPolicy.map(policy => {
         if (policy.strategyType === 'arcade') {
             return {
                 ...policy,
-                arcadeVotingPolicy: {
+                arcadeVotingStrategy: {
                     ...policy.arcadeVotingStrategy,
                     votingPower: new Decimal(policy.arcadeVotingStrategy.votingPower)
-                }
-            };
-        } else if (policy.strategyType === 'weighted') {
-            return {
-                ...policy,
-                weightedVotingPolicy: {
-                    ...policy.weightedVotingStrategy
                 }
             };
         }
         return policy;
     });
 
-    for (const reward of contest.rewards) {
+    contest.rewards.forEach(reward => {
         const newReward = {
             ...reward,
             tokenReward: {
@@ -143,7 +136,7 @@ const postProcessContest = (contest, user) => {
         } else if (reward.recipient === 'voter') {
             voterRewards.push(newReward);
         }
-    }
+    });
 
     return {
         ...contest,
@@ -166,7 +159,6 @@ const queries = {
             const data = await dbActiveContests.execute().then(async (contests) => {
                 return await Promise.all(contests.map(postProcessContest))
             });
-            console.log(data)
             return data;
         },
 
