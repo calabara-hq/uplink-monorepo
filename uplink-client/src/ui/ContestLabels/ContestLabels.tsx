@@ -8,34 +8,79 @@ export type ContestCategory =
   | "photography"
   | "design"
   | "development"
+  | "memes"
   | "other";
 
 // return color for contest category
 const contestCategoryColor = (contestCategory: ContestCategory) => {
   switch (contestCategory) {
     case "art":
-      return "text-orange-300";
+      return {
+        text: "text-orange-300",
+        bg: "bg-orange-300",
+      };
     case "music":
-      return "text-yellow-300";
+      return {
+        text: "text-yellow-300",
+        bg: "bg-yellow-300",
+      };
     case "writing":
-      return "text-green-300";
+      return {
+        text: "text-green-300",
+        bg: "bg-green-300",
+      };
     case "video":
-      return "text-blue-300";
+      return {
+        text: "text-blue-300",
+        bg: "bg-blue-300",
+      };
     case "photography":
-      return "text-indigo-300";
+      return {
+        text: "text-indigo-300",
+        bg: "bg-indigo-300",
+      };
     case "design":
-      return "text-purple-300";
+      return {
+        text: "text-purple-300",
+        bg: "bg-purple-300",
+      };
     case "development":
-      return "text-pink-300";
+      return {
+        text: "text-pink-300",
+        bg: "bg-pink-300",
+      };
+    case "memes":
+      return {
+        text: "text-red-300",
+        bg: "bg-red-300",
+      };
     case "other":
-      return "text-gray-300";
+      return {
+        text: "text-gray-300",
+        bg: "bg-gray-300",
+      };
+
+    // case "music":
+    //   return "text-yellow-300";
+    // case "writing":
+    //   return "text-green-300";
+    // case "video":
+    //   return "text-blue-300";
+    // case "photography":
+    //   return "text-indigo-300";
+    // case "design":
+    //   return "text-purple-300";
+    // case "development":
+    //   return "text-pink-300";
+    // case "other":
+    //   return "text-gray-300";
   }
 };
 
 export const CategoryLabel = ({ category }: { category: ContestCategory }) => {
-  const categoryColor = contestCategoryColor(category);
+  const { text, bg } = contestCategoryColor(category);
   return (
-    <p className={`badge badge-outline badge-md ${categoryColor}`}>
+    <p className={`badge border-none badge-md ${bg} ${text} bg-opacity-30`}>
       {category}
     </p>
   );

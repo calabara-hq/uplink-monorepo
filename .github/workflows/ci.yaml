@@ -79,13 +79,13 @@ jobs:
         with:
           credentials_json: ${{ secrets.GKE_SA_KEY }}
           
-      - name: init gcloud CLI
+      - name: Init gcloud CLI
         uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
-      - name: connect to GKE
+      - name: Connect to GKE
         uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
         with:
           cluster_name: ${{ env.GKE_CLUSTER }}
@@ -108,7 +108,7 @@ jobs:
            token: ${{ secrets.GITHUB_TOKEN }}
         id: install
           
-      - name: Deploy staging
+      - name: Deploy staging hub
         run: |
           cd uplink-hub/helm
           helm package --app-version=${{ steps.read_version.outputs.version }} ./uplink-charts/ \
@@ -121,12 +121,13 @@ jobs:
           name: chart
           path: uplink-hub/helm/uplink-charts-0.1.0.tgz
       
-      - name: Deploy vercel preview
+      - name: Deploy staging FE
         run: |
           npm install --global vercel@canary
           vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+          url="$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})"
+          vercel alias --token=${{ secrets.VERCEL_TOKEN }} set "$url" staging.uplink.wtf
 
   deploy-production:
     name: production
@@ -146,13 +147,13 @@ jobs:
         with:
           credentials_json: ${{ secrets.GKE_SA_KEY }}
           
-      - name: init gcloud CLI
+      - name: Init gcloud CLI
         uses: google-github-actions/setup-gcloud@1bee7de035d65ec5da40a31f8589e240eba8fde5
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
-      - name: connect to GKE
+      - name: Connect to GKE
         uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
         with:
           cluster_name: ${{ env.GKE_CLUSTER }}
@@ -181,17 +182,21 @@ jobs:
            token: ${{ secrets.GITHUB_TOKEN }}
         id: install
           
-      - name: Deploy Production
+      - name: Deploy production Hub
         run: |
           cd uplink-hub/helm
           helm upgrade -i uplink-hub ./uplink-charts-0.1.0.tgz -n production \
           -f ./uplink-charts/values.production.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
       
-      - name: Deploy vercel preview
+      - name: Deploy production FE
         run: |
           npm install --global vercel@canary
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          if ! vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}; then
+            echo "::error::Vercel build failed!, Rolling back hub version"
+            helm rollback 'uplink-hub' -n production
+            exit 1
+          fi
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
       
       - name: Create GitHub Release

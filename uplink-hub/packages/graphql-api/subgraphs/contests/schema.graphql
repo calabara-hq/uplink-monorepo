@@ -60,19 +60,19 @@ type SubmitterRestrictionType {
   tokenRestriction: TokenRestrictionType!
 }
 
-type ArcadeVotingPolicyType {
+type ArcadeVotingStrategyType {
   token: TokenType
   votingPower: Decimal
 }
 
-type WeightedVotingPolicyType {
+type WeightedVotingStrategyType {
   token: TokenType
 }
 
 type VotingPolicyType {
   strategyType: VotingStrategyType!
-  arcadeVotingPolicy: ArcadeVotingPolicyType
-  weightedVotingPolicy: WeightedVotingPolicyType
+  arcadeVotingStrategy: ArcadeVotingStrategyType
+  weightedVotingStrategy: WeightedVotingStrategyType
 }
 
 type AdditionalParamsType {

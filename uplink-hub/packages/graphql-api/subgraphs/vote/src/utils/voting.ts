@@ -111,7 +111,7 @@ export const deadlineAdjustedVotingPower = (
 export const computeArcadeVotingPowerUserValues = async (
     user: { address: string },
     snapshot: string,
-    arcadePolicy: {
+    arcadeStrategy: {
         token: {
             tokenHash: string,
             type: string,
@@ -123,7 +123,7 @@ export const computeArcadeVotingPowerUserValues = async (
         votingPower: Decimal,
     }[]
 ) => {
-    const arcadeVotingPowerUserValues = await Promise.all(arcadePolicy.map(async (policy: any) => {
+    const arcadeVotingPowerUserValues = await Promise.all(arcadeStrategy.map(async (policy: any) => {
         const { token, votingPower } = policy;
         const userBalance = await tokenController.computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
         if (userBalance > new Decimal(0)) return votingPower;
@@ -137,7 +137,7 @@ export const computeArcadeVotingPowerUserValues = async (
 export const computeWeightedVotingPowerUserValues = async (
     user: { address: string },
     snapshot: string,
-    weightedPolicy: {
+    weightedStrategy: {
         token: {
             tokenHash: string,
             type: string,
@@ -148,7 +148,7 @@ export const computeWeightedVotingPowerUserValues = async (
         }
     }[]
 ) => {
-    const weightedVotingPowerUserValues = await Promise.all(weightedPolicy.map(async (policy: any) => {
+    const weightedVotingPowerUserValues = await Promise.all(weightedStrategy.map(async (policy: any) => {
         const { token } = policy;
         const userBalance = await tokenController.computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
         if (userBalance > new Decimal(0)) return userBalance;
@@ -182,16 +182,16 @@ export const calculateTotalVotingPower = async (
 
 
     else {
-        const [arcadeVotingPolicy, weightedVotingPolicy] = await Promise.all([
+        const [arcadeVotingStrategy, weightedVotingStrategy] = await Promise.all([
             fetchVotingPolicy(contestId, 'arcade'),
             fetchVotingPolicy(contestId, 'weighted'),
         ]);
 
-        if (!arcadeVotingPolicy && !weightedVotingPolicy) return new Decimal(0);
+        if (!arcadeVotingStrategy && !weightedVotingStrategy) return new Decimal(0);
 
         const [arcadeVotingPowerUserValues, weightedVotingPowerUserValues] = await Promise.all([
-            computeArcadeVotingPowerUserValues(user, deadlines.snapshot, arcadeVotingPolicy),
-            computeWeightedVotingPowerUserValues(user, deadlines.snapshot, weightedVotingPolicy),
+            computeArcadeVotingPowerUserValues(user, deadlines.snapshot, arcadeVotingStrategy),
+            computeWeightedVotingPowerUserValues(user, deadlines.snapshot, weightedVotingStrategy),
         ]);
 
 

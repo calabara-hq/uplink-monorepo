@@ -87,7 +87,7 @@ export const getContestById = async (contestId: string) => {
             }
             votingPolicy {
               strategyType
-              arcadeVotingPolicy {
+              arcadeVotingStrategy {
                 token {
                   tokenHash
                   type
@@ -98,7 +98,7 @@ export const getContestById = async (contestId: string) => {
                 }
                 votingPower
               }
-              weightedVotingPolicy {
+              weightedVotingStrategy {
                 token {
                   tokenHash
                   type

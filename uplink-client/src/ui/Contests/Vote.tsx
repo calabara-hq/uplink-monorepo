@@ -202,8 +202,8 @@ const VotingPolicyModalContent = ({ votingPolicy }: { votingPolicy: any }) => {
           const strategyType = el.strategyType;
           const objectReference =
             strategyType === "arcade"
-              ? el.arcadeVotingPolicy
-              : el.weightedVotingPolicy;
+              ? el.arcadeVotingStrategy
+              : el.weightedVotingStrategy;
           return (
             <div
               key={index}
