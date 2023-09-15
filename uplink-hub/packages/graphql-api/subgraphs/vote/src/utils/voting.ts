@@ -110,7 +110,7 @@ export const deadlineAdjustedVotingPower = (
 
 export const computeArcadeVotingPowerUserValues = async (
     user: { address: string },
-    snapshot: string,
+    blockNum: number,
     arcadeStrategy: {
         token: {
             tokenHash: string,
@@ -123,9 +123,10 @@ export const computeArcadeVotingPowerUserValues = async (
         votingPower: Decimal,
     }[]
 ) => {
+
     const arcadeVotingPowerUserValues = await Promise.all(arcadeStrategy.map(async (policy: any) => {
         const { token, votingPower } = policy;
-        const userBalance = await tokenController.computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
+        const userBalance = await tokenController.computeUserTokenBalance({ token, blockNum, walletAddress: user.address });
         if (userBalance > new Decimal(0)) return votingPower;
         return new Decimal(0);
     }));
@@ -136,7 +137,7 @@ export const computeArcadeVotingPowerUserValues = async (
 
 export const computeWeightedVotingPowerUserValues = async (
     user: { address: string },
-    snapshot: string,
+    blockNum: number,
     weightedStrategy: {
         token: {
             tokenHash: string,
@@ -150,7 +151,7 @@ export const computeWeightedVotingPowerUserValues = async (
 ) => {
     const weightedVotingPowerUserValues = await Promise.all(weightedStrategy.map(async (policy: any) => {
         const { token } = policy;
-        const userBalance = await tokenController.computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
+        const userBalance = await tokenController.computeUserTokenBalance({ token, blockNum, walletAddress: user.address });
         if (userBalance > new Decimal(0)) return userBalance;
         return new Decimal(0);
 
@@ -176,34 +177,30 @@ export const calculateTotalVotingPower = async (
     if (!user || !user.address) return new Decimal(0);
 
 
-    const cachedVotingPower = null//await getCacheTotalVotingPower(user, contestId);
-
+    const cachedVotingPower = await getCacheTotalVotingPower(user, contestId);
     if (cachedVotingPower !== null) return deadlineAdjustedVotingPower(cachedVotingPower, deadlines);
 
 
-    else {
+
+    else { // not cached
         const [arcadeVotingStrategy, weightedVotingStrategy] = await Promise.all([
             fetchVotingPolicy(contestId, 'arcade'),
             fetchVotingPolicy(contestId, 'weighted'),
         ]);
-
         if (!arcadeVotingStrategy && !weightedVotingStrategy) return new Decimal(0);
-
+        const blockNum = await tokenController.calculateBlockFromTimestamp(deadlines.snapshot);
         const [arcadeVotingPowerUserValues, weightedVotingPowerUserValues] = await Promise.all([
-            computeArcadeVotingPowerUserValues(user, deadlines.snapshot, arcadeVotingStrategy),
-            computeWeightedVotingPowerUserValues(user, deadlines.snapshot, weightedVotingStrategy),
+            computeArcadeVotingPowerUserValues(user, blockNum, arcadeVotingStrategy),
+            computeWeightedVotingPowerUserValues(user, blockNum, weightedVotingStrategy),
         ]);
-
 
         // total vp is the max(max arcade vp, max weighted vp)
 
         const totalTheoreticalVotingPower = new Decimal(Decimal.max(...arcadeVotingPowerUserValues, ...weightedVotingPowerUserValues));
-
         // cache the total theoretical vp for the user / contest
         // return the deadline adjusted vp
 
         setCacheTotalVotingPower(user, contestId, totalTheoreticalVotingPower);
-
         return deadlineAdjustedVotingPower(totalTheoreticalVotingPower, deadlines);
 
     }
@@ -232,11 +229,6 @@ export const calculateUserVotingParams = async (
 
     const votesSpent = userVotes.reduce((acc: Decimal, vote: any) => Decimal.add(acc, vote.votes), new Decimal(0));
     const votesRemaining = new Decimal(Decimal.sub(totalVotingPower, votesSpent));
-
-    console.log('totalVotingPower', totalVotingPower.toString())
-    console.log('votesSpent', votesSpent.toString())
-    console.log('votesRemaining', votesRemaining.toString())
-    console.log('userVotes', userVotes)
 
     return {
         totalVotingPower,
@@ -307,8 +299,6 @@ export const castVotes = async (
     const votingPower = await calculateTotalVotingPower(user, contestId, contestParams.deadlines);
     const proposedVoteTotal = payload.reduce((acc: Decimal, el: { submissionId: number, votes: Decimal }) => acc.plus(el.votes), new Decimal(0));
 
-    console.log('proposed vote total', proposedVoteTotal.toString())
-    console.log('voting power', votingPower.toString())
 
     if (proposedVoteTotal.greaterThan(votingPower)) throw new GraphQLError('Insufficient voting power', {
         extensions: {
@@ -349,12 +339,6 @@ export const castVotes = async (
     await insertVotes(user, contestId, payload);
 
     const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines);
-
-    console.log('totalVotingPower', totalVotingPower.toString())
-    console.log('votesSpent', votesSpent.toString())
-    console.log('votesRemaining', votesRemaining.toString())
-    console.log('userVotes', userVotes)
-
 
     return {
         success: true,

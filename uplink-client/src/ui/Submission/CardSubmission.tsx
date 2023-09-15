@@ -28,13 +28,7 @@ import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { ParseBlocks } from "@/lib/blockParser";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
 
-const SubmissionBody = ({
-  submission,
-  footerChildren,
-}: {
-  submission: Submission;
-  footerChildren: React.ReactNode;
-}) => {
+const SubmissionBody = ({ submission }: { submission: Submission }) => {
   if (submission.data.type !== "text")
     return (
       <div className="relative flex flex-col gap-2 rounded-b-lg w-full p-2 ">
@@ -45,20 +39,11 @@ const SubmissionBody = ({
             <AddressOrEns address={submission.author} />
           </h3>
         </div>
-        {footerChildren}
       </div>
     );
 };
 
-const RenderTextSubmission = ({
-  submission,
-  isActive,
-  footerChildren,
-}: {
-  submission: Submission;
-  isActive: boolean;
-  footerChildren?: React.ReactNode;
-}) => {
+const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
   console.log(submission);
   return (
     <div className="relative h-full w-full min-h-[330px] rounded-xl text-white/80 gap-1">
@@ -86,7 +71,6 @@ const RenderTextSubmission = ({
           )}
         </section>
       </div>
-      {footerChildren}
     </div>
   );
 };
@@ -186,7 +170,7 @@ const RenderVideoSubmission = ({
   );
 };
 
-const RenderImageSubmission = ({ submission, isActive }) => {
+const RenderImageSubmission = ({ submission }) => {
   return (
     <ImageWrapper>
       <Image
@@ -198,17 +182,9 @@ const RenderImageSubmission = ({ submission, isActive }) => {
         alt="submission image"
         fill
         sizes="30vw"
-        className="object-contain w-full h-full transition-transform duration-300 ease-in-out"
+        className="object-contain w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
       />
     </ImageWrapper>
-  );
-};
-
-const Card = () => {
-  return (
-    <div className="w-full h-full bg-base-100 border-border border p-2 rounded-lg">
-      <p>hey</p>
-    </div>
   );
 };
 
@@ -230,19 +206,15 @@ export const SimplePreview = ({ submission }: { submission: Submission }) => {
       onMouseLeave={() => !isMobileDevice && setIsActive(false)}
       draggable={false}
     >
-      <SubmissionBody submission={submission} footerChildren={null} />
+      <SubmissionBody submission={submission} />
       {submission.data.type === "image" && (
-        <RenderImageSubmission submission={submission} isActive={isActive} />
+        <RenderImageSubmission submission={submission} />
       )}
       {submission.data.type === "video" && (
         <RenderVideoSubmission submission={submission} isActive={isActive} />
       )}
       {submission.data.type === "text" && (
-        <RenderTextSubmission
-          submission={submission}
-          isActive={isActive}
-          footerChildren={null}
-        />
+        <RenderTextSubmission submission={submission} />
       )}
     </div>
   );
@@ -281,23 +253,18 @@ const CardSubmission = ({
       onMouseLeave={() => !isMobileDevice && setIsActive(false)}
       draggable={false}
     >
-      <SubmissionBody
-        submission={submission}
-        footerChildren={isActive ? footerChildren : null}
-      />
+      <SubmissionBody submission={submission} />
       {submission.data.type === "image" && (
-        <RenderImageSubmission submission={submission} isActive={isActive} />
+        <RenderImageSubmission submission={submission} />
       )}
       {submission.data.type === "video" && (
         <RenderVideoSubmission submission={submission} isActive={isActive} />
       )}
       {submission.data.type === "text" && (
-        <RenderTextSubmission
-          submission={submission}
-          isActive={isActive}
-          footerChildren={isActive ? footerChildren : null}
-        />
+        <RenderTextSubmission submission={submission} />
       )}
+      <div className="p-2 w-full" />
+      {footerChildren}
     </Link>
   );
 };

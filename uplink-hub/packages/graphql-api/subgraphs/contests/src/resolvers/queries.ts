@@ -99,7 +99,6 @@ export const dbContestTweetQueue = db.query.tweetQueue.findFirst({
 }).prepare();
 
 const postProcessContest = (contest, user) => {
-    console.log(JSON.stringify(contest.rewards, null, 2))
     if (!contest) return null;
     const submitterRewards = [];
     const voterRewards = [];
@@ -177,7 +176,6 @@ const queries = {
                 .then((contests) => {
                     return Promise.all(contests.map(postProcessContest))
                 });
-            console.log(data)
             return data;
         }
     },

@@ -1,9 +1,9 @@
 import {
   CategoryLabel,
-  ContestCategory,
   RemainingTimeLabel,
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
+import { ContestCategory } from "@/types/contest";
 import CardSubmission from "@/ui/Submission/CardSubmission";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
@@ -17,15 +17,9 @@ import { Swiper, SwiperSlide } from "@/ui/Swiper/Swiper";
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
 import { LuCoins, LuSettings2, LuVote, LuArrowRight } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
-//import { DelayedGridItem, DelayedGridLayout } from "./DelayedGrid";
-// import dynamic from "next/dynamic";
 
-// const DelayedGridLayout = dynamic(() => import("./DelayedGridLayout"));
-
-// const DelayedGridItem = dynamic(() => import("./DelayedGridItem"));
 import DelayedGridLayout from "./DelayedGridLayout";
 import DelayedGridItem from "./DelayedGridItem";
-
 
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -130,7 +124,6 @@ const BannerSection = () => {
                   width={50}
                   height={50}
                   className="rounded-full"
-                  
                 />
                 <div className="flex-grow flex flex-col gap-2 ml-4">
                   <p className="text-t1">

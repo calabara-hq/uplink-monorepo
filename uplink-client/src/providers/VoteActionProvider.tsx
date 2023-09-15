@@ -133,6 +133,7 @@ export interface VoteActionProps {
   updateVoteAmount: (submissionId: number, amount: string) => void;
   submitVotes: () => void;
   areCurrentVotesDirty: boolean;
+  areUserVotingParamsLoading: boolean;
   proposedVotes: any[];
 }
 
@@ -151,6 +152,9 @@ export const VoteActionProvider = ({
   const [proposedVotes, setProposedVotes] = useState<any[]>([]);
   const [areCurrentVotesDirty, setAreCurrentVotesDirty] = useState(false);
   const { data: session, status } = useSession();
+
+  console.log("VOTE", userVoteParams);
+
 
   // handle cases where the user was signed out, added proposed votes, then signed in
   // if proposed votes already exist in current votes, remove them from proposed votes
@@ -453,6 +457,7 @@ export const VoteActionProvider = ({
     <VoteActionContext.Provider
       value={{
         // fwd the user voting params
+        areUserVotingParamsLoading,
         totalVotingPower: userVoteParams?.totalVotingPower || "0",
         votesSpent: userVoteParams?.votesSpent || "0",
         votesRemaining: userVoteParams?.votesRemaining || "0",
