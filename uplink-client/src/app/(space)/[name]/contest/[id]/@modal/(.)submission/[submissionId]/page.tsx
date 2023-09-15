@@ -36,6 +36,7 @@ export default async function SubmissionPage({
   //     ? submissions[currSubmissionIndex + 1]
   //     : null;
 
+  
   return (
     <SubmissionModal
       spaceName={name}

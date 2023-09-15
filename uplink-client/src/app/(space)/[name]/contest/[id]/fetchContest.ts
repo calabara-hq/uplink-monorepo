@@ -32,15 +32,6 @@ export const getContestById = async (contestId: string) => {
               endTime
               snapshot
             }
-            submissions {
-              id
-              contestId
-              author
-              created
-              type
-              url
-              version
-            }
             submitterRestrictions {
               restrictionType
               tokenRestriction {
@@ -87,7 +78,7 @@ export const getContestById = async (contestId: string) => {
             }
             votingPolicy {
               strategyType
-              arcadeVotingPolicy {
+              arcadeVotingStrategy {
                 token {
                   tokenHash
                   type
@@ -98,7 +89,7 @@ export const getContestById = async (contestId: string) => {
                 }
                 votingPower
               }
-              weightedVotingPolicy {
+              weightedVotingStrategy {
                 token {
                   tokenHash
                   type

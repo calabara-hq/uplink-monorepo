@@ -228,7 +228,7 @@ export const useStandardSubmissionCreator = () => {
 
 
         if (isUploading) {
-            toast.error('One of your tweets is still uploading. Please wait for it to finish before submitting.')
+            toast.error('Your media is still uploading. Please wait for it to finish before submitting.')
             return {
                 isError: true,
             }
@@ -294,7 +294,6 @@ export const useStandardSubmissionCreator = () => {
                 // convert the base64 to blob first
                 const blob = await fetch(videoThumbnailOptions[videoThumbnailBlobIndex]).then(r => r.blob())
                 await IpfsUpload(blob).then(url => {
-                    console.log(url)
                     setVideoThumbnailUrl(url)
                 }).catch(err => {
                     console.log(err)
@@ -316,7 +315,6 @@ export const useStandardSubmissionCreator = () => {
             };
         }
 
-        console.log('to the end')
         return {
             isError: false,
             payload: {

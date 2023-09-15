@@ -44,7 +44,6 @@ const queries = {
         },
         async space(parent, { id, name }, contextValue, info) {
             const data = id ? await singleSpaceById.execute({ id }) : name ? await singleSpaceByName.execute({ name }) : null;
-            console.log(JSON.stringify(data, null, 2))
             return data
         },
     },

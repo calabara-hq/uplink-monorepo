@@ -32,7 +32,7 @@ const TweetModal = ({
   if (isModalOpen) {
     return (
       <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-[#00000080] transition-colors duration-300 ease-in-out">
-        <div className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-2xl animate-springUp">
+        <div className="modal-box relative bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-2xl animate-springUp">
           {children}
         </div>
       </div>
@@ -335,7 +335,7 @@ const TweetFooter = ({
             </div>
             <button
               onClick={handleSave}
-              className="btn btn-sm btn-primary lowercase"
+              className="btn btn-sm btn-primary normal-case"
               disabled={isSaveDisabled || isMediaUploading}
             >
               {confirmLabel}

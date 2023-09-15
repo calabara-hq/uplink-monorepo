@@ -1,7 +1,6 @@
 "use client";
 import Editor from "@/ui/Editor/Editor";
 import { OutputData } from "@editorjs/editorjs";
-import Output from "editorjs-react-renderer";
 import useSWRMutation from "swr/mutation";
 import {
   HiCamera,
@@ -36,9 +35,9 @@ import {
   SubmissionBuilderProps,
 } from "@/hooks/useStandardSubmissionCreator";
 import { handleMutationError } from "@/lib/handleMutationError";
-import { HiArrowNarrowLeft, HiBadgeCheck } from "react-icons/hi";
+import { HiBadgeCheck } from "react-icons/hi";
 import Link from "next/link";
-import { AddressOrEns } from "@/ui/AddressDisplay/AddressDisplay";
+import { SimplePreview } from "@/ui/Submission/CardSubmission";
 
 async function postSubmission(
   url,
@@ -462,6 +461,7 @@ const SubmissionPreviewModal = ({
   spaceName: string;
 }) => {
   const { data: session, status } = useSession();
+  const { mutateLiveSubmissions } = useContestInteractionState();
   const { trigger, data, error, isMutating, reset } = useSWRMutation(
     [`/api/userSubmitParams/${contestId}`, session?.user?.address],
     postSubmission,
@@ -486,6 +486,7 @@ const SubmissionPreviewModal = ({
     }
     try {
       await trigger({ contestId, submission: payload });
+      mutateLiveSubmissions();
     } catch (err) {
       console.log(err);
     }
@@ -513,40 +514,34 @@ const SubmissionPreviewModal = ({
             </span>
           </div>
           <div className="flex flex-col gap-2 w-9/12 m-auto">
-            <div className="card card-compact cursor-pointer border border-border rounded-xl bg-base-100">
-              {submissionType === "video" ? (
-                <>
-                  <RenderVideoPreview
-                    video={submission.primaryAssetBlob}
-                    thumbnail={
-                      submission.videoThumbnailOptions[
-                        submission.videoThumbnailBlobIndex
-                      ]
-                    }
-                  />
-                  <SubmissionCardBody
-                    title={submission.title}
-                    author={session?.user?.address}
-                    subType={submissionType}
-                  />
-                </>
-              ) : submissionType === "image" ? (
-                <>
-                  <RenderImagePreview image={submission.primaryAssetBlob} />
-                  <SubmissionCardBody
-                    title={submission.title}
-                    author={session?.user?.address}
-                    subType={submissionType}
-                  />
-                </>
-              ) : (
-                <RenderTextPreview
-                  editorData={submission.submissionBody}
-                  title={submission.title}
-                  author={session?.user?.address}
-                />
-              )}
-            </div>
+            <SimplePreview
+              submission={{
+                id: "0",
+                contestId: "0",
+                created: "0",
+                url: "xyz",
+                version: "preview",
+                author: session?.user?.address as `0x${string}`,
+                totalVotes: null,
+                rank: null,
+                type: "standard",
+                data: {
+                  type: submissionType,
+                  title: submission.title,
+                  previewAsset:
+                    submissionType === "video"
+                      ? submission.videoThumbnailOptions[
+                          submission.videoThumbnailBlobIndex
+                        ]
+                      : submission.primaryAssetBlob,
+                  videoAsset:
+                    submissionType === "video"
+                      ? submission.primaryAssetBlob
+                      : null,
+                  body: submission.submissionBody,
+                },
+              }}
+            />
           </div>
         </div>
         <ModalActions
@@ -574,85 +569,6 @@ const SubmissionPreviewModal = ({
         </div>
       </Modal>
     );
-};
-
-const SubmissionCardBody = ({ title, author, subType }) => {
-  return (
-    <div className="card-body h-28 rounded-b-xl w-full">
-      <h2 className={`card-title text-md ${title ? "" : "text-gray-500"}`}>
-        {title || "My awesome new submission"}
-      </h2>
-      <p className="text-sm">
-        <AddressOrEns address={author} />
-      </p>
-    </div>
-  );
-};
-
-const RenderImagePreview = ({ image }: { image: string }) => {
-  return (
-    <div className="flex flex-col">
-      <Image
-        src={image}
-        alt="submission preview"
-        width={640}
-        height={360}
-        className="rounded-t-xl"
-      />
-    </div>
-  );
-};
-
-const RenderTextPreview = ({
-  editorData,
-  title,
-  author,
-}: {
-  editorData: OutputData;
-  title: string;
-  author: string;
-}) => {
-  return (
-    <div className="card-body h-64 bg-white/90 rounded-xl text-black/80 gap-1 w-full overflow-auto">
-      <h2 className="break-word font-bold text-2xl">
-        {title || "My awesome new submission"}
-      </h2>
-      <h3 className="break-all italic">
-        <AddressOrEns address={author} />
-      </h3>
-      <section className="break-all">
-        <Output data={editorData} />
-      </section>
-    </div>
-  );
-};
-
-const RenderVideoPreview = ({
-  video,
-  thumbnail,
-}: {
-  video: string;
-  thumbnail: string;
-}) => {
-  return (
-    <MediaController className="rounded-t-xl">
-      <video
-        slot="media"
-        src={video}
-        poster={thumbnail}
-        preload="auto"
-        muted
-        crossOrigin=""
-        className="rounded-t-xl h-64 w-full object-cover"
-      />
-      <MediaControlBar>
-        <MediaPlayButton></MediaPlayButton>
-        <MediaTimeRange></MediaTimeRange>
-        <MediaTimeDisplay showDuration></MediaTimeDisplay>
-        <MediaMuteButton></MediaMuteButton>
-      </MediaControlBar>
-    </MediaController>
-  );
 };
 
 const RestrictionModal = ({
@@ -729,19 +645,6 @@ const StudioSkeleton = () => {
           <div className="w-full bg-base-100 h-24 shimmer rounded-xl" />
         </div>
       </div>
-
-      {/* <div className="flex flex-col w-full lg:w-3/4 h-screen gap-4 m-8">
-        <div className="flex flex-col lg:flex-row justify-between items-end">
-          <div className="bg-base-100 w-full lg:w-[450px] h-12 shimmer rounded-xl" />
-          <div className="w-28 h-28 lg:w-36 lg:h-36 cursor-pointer flex justify-center items-center bg-base-100 shimmer rounded-xl" />
-        </div>
-        <div className="flex flex-col w-full h-64 bg-base-100 shimmer" />
-      </div>
-      <div className="hidden lg:flex lg:flex-col items-center lg:w-2/6 gap-4">
-        <div className="bg-base-100 w-full h-16 rounded-xl shimmer" />
-        <div className="bg-base-100 w-full h-16 rounded-xl shimmer" />
-        <div className="bg-base-100 w-full h-16 rounded-xl shimmer" />
-      </div> */}
     </div>
   );
 };
@@ -772,12 +675,6 @@ const StandardSubmit = ({
     // contest in submit window
     return (
       <div className="flex flex-col w-full xl:w-3/4 gap-4">
-        <Link
-          href={`/${params.name}/contest/${params.id}`}
-          className="btn btn-ghost self-start btn-active"
-        >
-          <HiArrowNarrowLeft className="w-8 h-8" />
-        </Link>
         <div className="grid grid-cols-1 md:grid-cols-[auto_33%] gap-4">
           <div className="flex flex-col w-full gap-4 order-last md:order-1">
             <SubmissionTitle

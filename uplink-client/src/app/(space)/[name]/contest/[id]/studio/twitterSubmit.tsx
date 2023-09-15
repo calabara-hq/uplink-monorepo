@@ -1,16 +1,14 @@
 "use client";
 import { ThreadItem, ApiThreadItem } from "@/hooks/useThreadCreator";
-import { useContestState } from "@/providers/ContestStateProvider";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
 import CreateThread from "@/ui/CreateThread/CreateThread";
 import Stack from "@/ui/Stack/Stack";
 import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton";
-import { set } from "date-fns";
 import { nanoid } from "nanoid";
 import Image from "next/image";
-import { useEffect, useReducer, useState } from "react";
-import { BiInfoCircle, BiLink, BiPlusCircle } from "react-icons/bi";
+import { useEffect, useState } from "react";
+import { BiInfoCircle, BiPlusCircle } from "react-icons/bi";
 import useSWRMutation from "swr/mutation";
 import {
   HiCheckBadge,
@@ -20,19 +18,7 @@ import {
   HiPhoto,
   HiOutlineTrash,
 } from "react-icons/hi2";
-import {
-  MediaController,
-  MediaControlBar,
-  MediaTimeRange,
-  MediaTimeDisplay,
-  MediaPlayButton,
-  MediaMuteButton,
-} from "media-chrome/dist/react";
 import { ModalActions } from "@/ui/Modal/Modal";
-import useHandleMutation from "@/hooks/useHandleMutation";
-import { CreateTwitterSubmissionDocument } from "@/lib/graphql/submit.gql";
-import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 import { Decimal } from "decimal.js";
 import { IoMdCreate } from "react-icons/io";
@@ -40,6 +26,7 @@ import { HiArrowNarrowLeft, HiBadgeCheck } from "react-icons/hi";
 import Link from "next/link";
 import { handleMutationError } from "@/lib/handleMutationError";
 import { AddressOrEns } from "@/ui/AddressDisplay/AddressDisplay";
+import { SimplePreview } from "@/ui/Submission/CardSubmission";
 
 async function postTwitterSubmission(
   url,
@@ -140,34 +127,39 @@ const Step1 = ({ contestId }: { contestId: string }) => {
             </div>
           }
           layer2={
-            <div className="flex flex-col gap-2 h-full">
+            <div className="flex flex-col gap-2 h-full w-full">
               <p className="font-bold">Eligibility</p>
-              <WalletConnectButton />
+
+              <WalletConnectButton>
+                <span className="hidden" />
+              </WalletConnectButton>
               {userSubmitParams && (
-                <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex flex-col items-end justify-center h-full">
                   {userSubmitParams.restrictionResults.length === 0 ? (
                     <div className="flex flex-row gap-2 items-center">
                       <p className="text-t2">No entry requirements</p>
                     </div>
                   ) : (
-                    userSubmitParams.restrictionResults.map((el, idx) => {
-                      return (
-                        <div
-                          key={idx}
-                          className="flex flex-row gap-2 items-center m-1"
-                        >
-                          <p>
-                            {el.restriction.tokenRestriction.threshold.toString()}{" "}
-                            {el.restriction.tokenRestriction.token.symbol}
-                          </p>
-                          {el.result === true ? (
-                            <HiCheckBadge className="text-success w-5 h-5 ml-auto" />
-                          ) : (
-                            <HiXCircle className="w-5 h-5 ml-auto" />
-                          )}
-                        </div>
-                      );
-                    })
+                    userSubmitParams.restrictionResults
+                      .slice(0, 4)
+                      .map((el, idx) => {
+                        return (
+                          <div
+                            key={idx}
+                            className="flex flex-row gap-2 items-center text-sm text-t2"
+                          >
+                            <p>
+                              {el.restriction.tokenRestriction.threshold.toString()}{" "}
+                              {el.restriction.tokenRestriction.token.symbol}
+                            </p>
+                            {el.result === true ? (
+                              <HiCheckBadge className="text-success w-4 h-4 ml-auto" />
+                            ) : (
+                              <HiXCircle className="w-4 h-4 ml-auto" />
+                            )}
+                          </div>
+                        );
+                      })
                   )}
                 </div>
               )}
@@ -388,6 +380,7 @@ const PreviewModal = ({
   spaceName: string;
 }) => {
   const { data: session, status } = useSession();
+  const { mutateLiveSubmissions } = useContestInteractionState();
   const { trigger, data, error, isMutating, reset } = useSWRMutation(
     [`/api/userSubmitParams/${contestId}`, session?.user?.address],
     postTwitterSubmission,
@@ -431,6 +424,7 @@ const PreviewModal = ({
     };
     try {
       await trigger({ contestId, submission });
+      mutateLiveSubmissions();
     } catch (err) {
       console.log(err);
       onClose();
@@ -492,7 +486,42 @@ const PreviewModal = ({
                   </div>
                 </span>
               </label>
-              <RenderPreview thread={thread} title={title} />
+              <SimplePreview
+                submission={{
+                  id: "0",
+                  contestId: "0",
+                  created: "0",
+                  url: "xyz",
+                  version: "preview",
+                  author: session?.user?.address as `0x${string}`,
+                  totalVotes: null,
+                  rank: null,
+                  type: "twitter",
+                  data: {
+                    type: thread[0].isVideo
+                      ? "video"
+                      : thread[0].primaryAssetBlob
+                      ? "image"
+                      : "text",
+                    title: title,
+                    thread: [
+                      {
+                        text: thread[0].text,
+                        previewAsset: thread[0].isVideo
+                          ? thread[0].videoThumbnailOptions[
+                              thread[0].videoThumbnailBlobIndex
+                            ]
+                          : thread[0].primaryAssetBlob,
+                        videoAsset: thread[0].isVideo
+                          ? thread[0].primaryAssetBlob
+                          : null,
+                        assetSize: 1,
+                        assetType: null,
+                      },
+                    ],
+                  },
+                }}
+              />
             </div>
           </div>
 
@@ -530,62 +559,6 @@ const PreviewModal = ({
     );
 };
 
-const RenderPreview = ({
-  thread,
-  title,
-}: {
-  thread: ThreadItem[];
-  title: string;
-}) => {
-  const { data: session, status } = useSession();
-
-  const {
-    isVideo,
-    primaryAssetBlob,
-    videoThumbnailOptions,
-    videoThumbnailBlobIndex,
-  } = thread[0];
-
-  const submissionType = isVideo
-    ? "video"
-    : primaryAssetBlob
-    ? "image"
-    : "text";
-
-  return (
-    <div className="card card-compact cursor-pointer border border-border rounded-xl bg-base-100">
-      {submissionType === "video" ? (
-        <>
-          <RenderVideoPreview
-            video={primaryAssetBlob}
-            thumbnail={videoThumbnailOptions[videoThumbnailBlobIndex]}
-          />
-          <SubmissionBody
-            title={title}
-            author={session?.user?.address}
-            subType={submissionType}
-          />
-        </>
-      ) : submissionType === "image" ? (
-        <>
-          <RenderImagePreview image={primaryAssetBlob} />
-          <SubmissionBody
-            title={title}
-            author={session?.user?.address}
-            subType={submissionType}
-          />
-        </>
-      ) : (
-        <RenderTextPreview
-          text={thread[0].text}
-          title={title}
-          author={session?.user?.address}
-        />
-      )}
-    </div>
-  );
-};
-
 const SubmissionBody = ({ title, author, subType }) => {
   return (
     <div className="card-body h-28 rounded-b-xl w-full">
@@ -599,77 +572,13 @@ const SubmissionBody = ({ title, author, subType }) => {
   );
 };
 
-const RenderImagePreview = ({ image }: { image: string }) => {
-  return (
-    <div className="flex flex-col">
-      <Image
-        src={image}
-        alt="submission preview"
-        width={640}
-        height={360}
-        className="rounded-t-xl"
-      />
-    </div>
-  );
-};
-
-const RenderTextPreview = ({
-  text,
-  title,
-  author,
-}: {
-  text: React.ReactNode;
-  title: string;
-  author: string;
-}) => {
-  return (
-    <div className="card-body h-64 bg-white/90 rounded-xl text-black/80 gap-1 w-full overflow-auto">
-      <h2 className="break-word font-bold text-2xl">
-        {title || "My awesome new submission"}
-      </h2>
-      <h3 className="break-all italic">
-        <AddressOrEns address={author} />
-      </h3>
-      <section className="break-all">{text}</section>
-    </div>
-  );
-};
-
-const RenderVideoPreview = ({
-  video,
-  thumbnail,
-}: {
-  video: string;
-  thumbnail: string;
-}) => {
-  return (
-    <MediaController className="rounded-t-xl">
-      <video
-        slot="media"
-        src={video}
-        poster={thumbnail}
-        preload="auto"
-        muted
-        crossOrigin=""
-        className="rounded-t-xl h-64 w-full object-cover"
-      />
-      <MediaControlBar>
-        <MediaPlayButton></MediaPlayButton>
-        <MediaTimeRange></MediaTimeRange>
-        <MediaTimeDisplay showDuration></MediaTimeDisplay>
-        <MediaMuteButton></MediaMuteButton>
-      </MediaControlBar>
-    </MediaController>
-  );
-};
-
 const ExplainerSection = () => {
   return (
     <div className="from-[#00223390] to-[#002233] text-white grid place-items-center items-center bg-gradient-to-br rounded-xl">
       <div className="relative hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row  lg:gap-0 xl:gap-20  ">
         <div className="lg:pl-10 ">
           <div className="mb-2 py-4 text-center lg:text-left ">
-            <h1 className="font-title mb-2 text-4xl sm:text-5xl lg:text-6xl font-virgil">
+            <h1 className="font-title mb-2 text-4xl sm:text-5xl lg:text-6xl font-extrabold">
               Twitter Contest
             </h1>
             <h2 className="font-title text-lg font-extrabold sm:text-xl lg:text-2xl text-t1">
@@ -749,7 +658,7 @@ const TwitterSubmit = ({
   return (
     <div className="flex flex-col w-full">
       <Link
-        href={`/${params.name}/contests/${params.id}`}
+        href={`/${params.name}/contest/${params.id}`}
         className="btn btn-ghost normal-case text-t2 w-fit mb-1"
       >
         <HiArrowNarrowLeft className="w-5 h-5" />

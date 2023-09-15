@@ -61,8 +61,8 @@ const getSpace = async (name: string) => {
 };
 
 const SpaceInfo = async ({ name }: { name: string }) => {
-  const space = await getSpace(name);
-  const { id, contests, displayName, logoUrl, twitter, website } = space;
+  const data  = await getSpace(name);
+  const { id, displayName, logoUrl, twitter, website } = data;
 
   return (
     <div className="flex flex-col gap-2 w-full items-center">

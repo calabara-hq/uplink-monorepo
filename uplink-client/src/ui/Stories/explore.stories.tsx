@@ -1,5 +1,5 @@
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
-import { AllSpaces } from "../../app/explore/page";
+import { AllSpaces } from "../../app/spaces/page";
 
 export default {
   title: "ui/explore",

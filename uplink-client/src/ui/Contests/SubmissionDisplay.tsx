@@ -93,16 +93,13 @@ const SubmissionDisplay = ({
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      <h1 className="text-xl lg:text-3xl text-center font-bold text-t1">
-        Submissions
-      </h1>
       <div className="flex w-full justify-evenly items-center">
-        <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 sm:auto-rows-fr">
+        <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  sm:auto-rows-fr">
           {submissions.map((submission, idx) => {
             return (
               <CardSubmission
                 key={idx}
-                basePath={`${spaceName}/contest/${contestId}`}
+                basePath={`/${spaceName}/contest/${contestId}`}
                 submission={submission}
                 footerChildren={<SubmissionFooter submission={submission} />}
               />

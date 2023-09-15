@@ -27,6 +27,13 @@ export default function WalletConnectButton2({}: {}) {
                   />
                   <AddressOrEns address={session?.user?.address} />
                 </div>
+                <div className="flex md:hidden">
+                  <CustomAvatar
+                    address={session?.user?.address}
+                    size={40}
+                    context={"button"}
+                  />
+                </div>
               </div>
             );
           }

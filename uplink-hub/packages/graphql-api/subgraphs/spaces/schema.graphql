@@ -46,7 +46,7 @@ type SpaceToken {
   symbol: String!
   decimals: Int!
   address: String
-  tokenId: String
+  tokenId: Int
 }
 
 type SpaceTokenMap {

@@ -26,6 +26,7 @@ import { MdOutlineOndemandVideo } from "react-icons/md";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { ParseBlocks } from "@/lib/blockParser";
+import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
 
 const SubmissionBody = ({
   submission,
@@ -36,14 +37,13 @@ const SubmissionBody = ({
 }) => {
   if (submission.data.type !== "text")
     return (
-      <div className="relative flex flex-col gap-2 rounded-b-lg w-full p-2 pb-10 ">
+      <div className="relative flex flex-col gap-2 rounded-b-lg w-full p-2 ">
         <h2 className="text-lg font-semibold">{submission.data.title}</h2>
         <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
           <UserAvatar address={submission.author} size={28} />
           <h3 className="break-all italic text-sm">
             <AddressOrEns address={submission.author} />
           </h3>
-
         </div>
         {footerChildren}
       </div>
@@ -61,12 +61,8 @@ const RenderTextSubmission = ({
 }) => {
   console.log(submission);
   return (
-    <div className="relative h-full w-full min-h-[330px] rounded-xl text-white/80 gap-1 p-2">
-      <div
-        className={`p-2 w-full h-full flex flex-col gap-1 transition-transform duration-300 ease-in-out will-change-transform ${
-          isActive ? "zoomIn" : ""
-        }`}
-      >
+    <div className="relative h-full w-full min-h-[330px] rounded-xl text-white/80 gap-1">
+      <div className="p-2 w-full h-full flex flex-col gap-1 transition-transform duration-300 ease-in-out will-change-transform">
         <h2 className="break-word font-bold text-xl">
           {submission.data.title}
         </h2>
@@ -75,25 +71,18 @@ const RenderTextSubmission = ({
           <h3 className="break-all italic text-sm ">
             <AddressOrEns address={submission.author} />
           </h3>
-          {/* {new Decimal(submission.totalVotes ?? "0").greaterThan(-1) ? ( //TODO: change this back to 0
-            <div className="badge rounded badge-warning font-semibold">
-              {submission.totalVotes} votes
-            </div>
-          ) : (
-            <span /> // placeholder
-          )} */}
         </div>
         <section className="break-word">
           {submission.type === "twitter" ? (
             <p className="line-clamp-[8] lg:line-clamp-[12]">
-              {submission.data.thread[0].text}
+              {submission.data.thread.map((threadItem, idx) => {
+                return threadItem.text;
+              })}
             </p>
           ) : (
-            //<Output data={submission.data.body} />
             <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
               {ParseBlocks({ data: submission.data.body, omitImages: false })}
             </div>
-
           )}
         </section>
       </div>
@@ -136,8 +125,8 @@ const RenderVideoSubmission = ({
   });
 
   return (
-    <MediaWrapper>
-      <MediaController className="w-full h-full rounded-t-lg">
+    <VideoWrapper>
+      <MediaController className="w-full h-full rounded-xl">
         <video
           ref={vidRef}
           autoPlay={isActive}
@@ -157,16 +146,14 @@ const RenderVideoSubmission = ({
           preload="auto"
           muted
           crossOrigin=""
-          className={`rounded-t-lg h-full w-full object-cover transition-transform duration-300 ease-in-out ${
-            isActive ? "zoomIn" : ""
-          }`}
+          className="rounded-xl object-cover h-full w-full transition-transform duration-300 ease-in-out "
         />
 
         <div slot="top-chrome" className="flex flex-row w-full mt-2">
           {isActive ? (
             <MediaMuteButton
               ref={muteButtonRef}
-              className="bg-[#1c1c1ca6] hover:bg-[#1c1c1ce6] ml-auto mr-2 rounded-md p-2"
+              className="bg-[#1c1c1ca6] hover:bg-[#1c1c1ce6] ml-auto mr-2 rounded-xl p-2"
             >
               <span slot="high">
                 <HiOutlineVolumeUp className="h-6 w-6 text-t1" />
@@ -176,7 +163,7 @@ const RenderVideoSubmission = ({
               </span>
             </MediaMuteButton>
           ) : (
-            <MediaPlayButton className="bg-[#1c1c1ce6] ml-auto mr-2 rounded-md p-2">
+            <MediaPlayButton className="bg-[#1c1c1ce6] ml-auto mr-2 rounded-xl p-2">
               <span slot="play">
                 <MdOutlineOndemandVideo className="h-6 w-6 text-warning" />
               </span>
@@ -184,33 +171,24 @@ const RenderVideoSubmission = ({
           )}
         </div>
 
-        <div className="flex flex-row w-full items-end bg-gradient-to-t from-[black] h-20 pb-1">
+        <div className="flex flex-row w-full items-end bg-gradient-to-t from-[black] rounded-b-xl h-20">
           <MediaTimeDisplay
             ref={timeRef}
-            className="ml-auto mr-2 rounded-md p-1 bg-transparent text-t1"
+            className="ml-auto mr-2 rounded-xl p-1 bg-transparent text-t1"
             showDuration={isActive}
+            remaining={!isActive}
           >
-            {!isActive && <slot>{duration}</slot>}
+            {/* {!isActive && <slot>{duration}</slot>} */}
           </MediaTimeDisplay>
         </div>
       </MediaController>
-    </MediaWrapper>
-  );
-};
-
-const MediaWrapper = ({ children }) => {
-  return (
-    <div className="relative media-grid-item">
-      <figure className="absolute inset-0 overflow-hidden rounded-t-xl">
-        {children}
-      </figure>
-    </div>
+    </VideoWrapper>
   );
 };
 
 const RenderImageSubmission = ({ submission, isActive }) => {
   return (
-    <MediaWrapper>
+    <ImageWrapper>
       <Image
         src={
           submission.type === "standard"
@@ -220,11 +198,53 @@ const RenderImageSubmission = ({ submission, isActive }) => {
         alt="submission image"
         fill
         sizes="30vw"
-        className={`object-cover w-full h-full transition-transform duration-300 ease-in-out ${
-          isActive ? "zoomIn" : ""
-        }`}
+        className="object-contain w-full h-full transition-transform duration-300 ease-in-out"
       />
-    </MediaWrapper>
+    </ImageWrapper>
+  );
+};
+
+const Card = () => {
+  return (
+    <div className="w-full h-full bg-base-100 border-border border p-2 rounded-lg">
+      <p>hey</p>
+    </div>
+  );
+};
+
+// used to render a preview in the submission dialog
+export const SimplePreview = ({ submission }: { submission: Submission }) => {
+  const [isActive, setIsActive] = useState(false);
+  const isMobileDevice = isMobile();
+  useEffect(() => {
+    if (isMobileDevice) {
+      setIsActive(true);
+    }
+  }, [isMobileDevice]);
+
+  return (
+    <div
+      className="w-full h-full p-2 shadow-black shadow-sm cursor-pointer flex flex-col justify-between rounded-xl bg-base-100 border border-border no-select transform 
+      transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
+      onMouseEnter={() => !isMobileDevice && setIsActive(true)}
+      onMouseLeave={() => !isMobileDevice && setIsActive(false)}
+      draggable={false}
+    >
+      <SubmissionBody submission={submission} footerChildren={null} />
+      {submission.data.type === "image" && (
+        <RenderImageSubmission submission={submission} isActive={isActive} />
+      )}
+      {submission.data.type === "video" && (
+        <RenderVideoSubmission submission={submission} isActive={isActive} />
+      )}
+      {submission.data.type === "text" && (
+        <RenderTextSubmission
+          submission={submission}
+          isActive={isActive}
+          footerChildren={null}
+        />
+      )}
+    </div>
   );
 };
 
@@ -253,13 +273,18 @@ const CardSubmission = ({
 
   return (
     <Link
-      className="flex flex-col rounded-xl bg-base-100 border border-border"
+      className="w-full h-full p-2 shadow-black shadow-sm flex flex-col justify-between rounded-xl bg-base-100 border border-border no-select transform 
+      transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
       ref={ref}
       href={`${basePath}/submission/${submission.id}`}
       onMouseEnter={() => !isMobileDevice && setIsActive(true)}
       onMouseLeave={() => !isMobileDevice && setIsActive(false)}
       draggable={false}
     >
+      <SubmissionBody
+        submission={submission}
+        footerChildren={isActive ? footerChildren : null}
+      />
       {submission.data.type === "image" && (
         <RenderImageSubmission submission={submission} isActive={isActive} />
       )}
@@ -273,10 +298,6 @@ const CardSubmission = ({
           footerChildren={isActive ? footerChildren : null}
         />
       )}
-      <SubmissionBody
-        submission={submission}
-        footerChildren={isActive ? footerChildren : null}
-      />
     </Link>
   );
 };

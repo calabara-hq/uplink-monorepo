@@ -118,6 +118,7 @@ export const TokenManager = ({
         <ModalActions
           onCancel={handleCloseAndReset}
           onConfirm={handleModalConfirm}
+          confirmDisabled={!state.customToken.address}
           confirmLabel="Confirm"
           cancelLabel="Cancel"
         />

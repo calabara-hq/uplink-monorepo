@@ -1,41 +1,56 @@
 import { BiTime } from "react-icons/bi";
-
-export type ContestCategory =
-  | "art"
-  | "music"
-  | "writing"
-  | "video"
-  | "photography"
-  | "design"
-  | "development"
-  | "other";
+import { ContestCategory } from "@/types/contest";
 
 // return color for contest category
 const contestCategoryColor = (contestCategory: ContestCategory) => {
   switch (contestCategory) {
     case "art":
-      return "text-orange-300";
+      return {
+        text: "text-orange-300",
+        bg: "bg-orange-300",
+      };
     case "music":
-      return "text-yellow-300";
+      return {
+        text: "text-yellow-300",
+        bg: "bg-yellow-300",
+      };
     case "writing":
-      return "text-green-300";
+      return {
+        text: "text-green-300",
+        bg: "bg-green-300",
+      };
     case "video":
-      return "text-blue-300";
+      return {
+        text: "text-blue-300",
+        bg: "bg-blue-300",
+      };
     case "photography":
-      return "text-indigo-300";
+      return {
+        text: "text-indigo-300",
+        bg: "bg-indigo-300",
+      };
     case "design":
-      return "text-purple-300";
-    case "development":
-      return "text-pink-300";
+      return {
+        text: "text-purple-300",
+        bg: "bg-purple-300",
+      };
+    case "memes":
+      return {
+        text: "text-red-300",
+        bg: "bg-red-300",
+      };
     case "other":
-      return "text-gray-300";
+      return {
+        text: "text-gray-300",
+        bg: "bg-gray-300",
+      };
   }
 };
 
 export const CategoryLabel = ({ category }: { category: ContestCategory }) => {
-  const categoryColor = contestCategoryColor(category);
+  const { text, bg } = contestCategoryColor(category);
   return (
-    <p className={`badge badge-outline badge-md ${categoryColor}`}>
+    <p className={`badge border-none badge-md ${bg} ${text} bg-opacity-30`}>
       {category}
     </p>
   );
@@ -47,19 +62,32 @@ export type ContestState = "pending" | "submitting" | "voting" | "closed";
 const contestStatusColor = (contestState: ContestState) => {
   switch (contestState) {
     case "pending":
-      return "text-purple-500";
+      return {
+        text: "text-purple-500",
+        bg: "bg-purple-500",
+      };
     case "submitting":
-      return "text-green-300";
+      return {
+        text: "text-green-300",
+        bg: "bg-green-300",
+      };
     case "voting":
-      return "text-yellow-500";
+      return {
+        text: "text-yellow-500",
+        bg: "bg-yellow-500",
+      };
     case "closed":
-      return "text-gray-600";
+      return {
+        text: "text-gray-600",
+        bg: "bg-gray-600",
+      };
   }
 };
 
 export const StatusLabel = ({ status }: { status: ContestState }) => {
+  const { text, bg } = contestStatusColor(status);
   return (
-    <p className={`badge badge-outline badge-md ${contestStatusColor(status)}`}>
+    <p className={`badge border-none badge-md ${bg} ${text} bg-opacity-30`}>
       {status}
     </p>
   );

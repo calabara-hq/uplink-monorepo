@@ -2,7 +2,6 @@ import { EditorOutputData, IToken, DatabaseController, schema, isERCToken } from
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
 import { nanoid } from 'nanoid';
-import { isIpfsUrl } from "lib";
 dotenv.config();
 
 const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_KEY, pinataSecretApiKey: process.env.PINATA_SECRET });
@@ -205,19 +204,19 @@ const insertVotingPolicies = async (contestId, votingPolicy, tx) => {
         const insertedVotingPolicy = await tx.insert(schema.votingPolicy).values(newVotingPolicy);
 
         if (policy.strategy.type === "arcade") {
-            const newArcadeVotingPolicy: schema.dbNewArcadeVotingStrategyType = {
+            const newArcadeVotingStrategy: schema.dbNewArcadeVotingStrategyType = {
                 votingPolicyId: parseInt(insertedVotingPolicy.insertId),
                 votingPower: policy.strategy.votingPower,
                 tokenLink: policy.tokenLink,
             }
-            await tx.insert(schema.arcadeVotingStrategy).values(newArcadeVotingPolicy);
+            await tx.insert(schema.arcadeVotingStrategy).values(newArcadeVotingStrategy);
         }
         else if (policy.strategy.type === "weighted") {
-            const newWeightedVotingPolicy: schema.dbNewWeightedVotingStrategyType = {
+            const newWeightedVotingStrategy: schema.dbNewWeightedVotingStrategyType = {
                 votingPolicyId: parseInt(insertedVotingPolicy.insertId),
                 tokenLink: policy.tokenLink,
             }
-            await tx.insert(schema.weightedVotingStrategy).values(newWeightedVotingPolicy);
+            await tx.insert(schema.weightedVotingStrategy).values(newWeightedVotingStrategy);
         }
     };
 }
@@ -299,10 +298,8 @@ export const createDbContest = async (contest: ContestData, user: any) => {
     const uniqueTokens = new Map();
 
     const insertUniqueToken = async (token) => {
-        console.log('the token is', JSON.stringify(token, null, 2))
         const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
 
-        console.log('the hash is', tokenHash)
         if (!uniqueTokens.has(tokenHash)) {
             const existingToken = await db
                 .select({ id: schema.tokens.id })
