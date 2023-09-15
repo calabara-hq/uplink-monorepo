@@ -40,6 +40,14 @@
                                   supported by Chrome and Opera */
 }
 
+.tooltip::before{
+  background-color: white;
+  color: black;
+}
+
+.tooltip::after{
+  border-color: white transparent transparent transparent;
+}
 
 .shimmer{
   @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.5s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent
@@ -80,3 +88,4 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+

@@ -1,12 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import TokenBadge from "@/ui/TokenBadge/TokenBadge";
+import { ContestCategory } from "@/types/contest";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import {
   CategoryLabel,
   StatusLabel,
   RemainingTimeLabel,
-  ContestCategory,
   ContestState,
 } from "@/ui/ContestLabels/ContestLabels";
 import { BiPencil, BiWorld } from "react-icons/bi";
