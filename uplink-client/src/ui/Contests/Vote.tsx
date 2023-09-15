@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   HiLockClosed,
   HiLockOpen,
-  HiXCircle,
   HiPhoto,
   HiPlus,
   HiSparkles,
@@ -19,7 +18,6 @@ import formatDecimal from "@/lib/formatDecimal";
 import { useContestState } from "@/providers/ContestStateProvider";
 import Image from "next/image";
 import { HiTrash, HiDocumentText } from "react-icons/hi2";
-import { VoterRewardsSection, VotingPolicySection } from "./SidebarInfo";
 
 const SubmissionVoteInput = ({
   submission,
@@ -28,7 +26,6 @@ const SubmissionVoteInput = ({
   submission: any;
   mode: "current" | "proposed";
 }) => {
-  console.log(submission);
   const { updateVoteAmount } = useVoteActionContext();
 
   return (
@@ -140,13 +137,19 @@ export const VoteButton = ({
 }: {
   setIsEditMode: (isEditMode: boolean) => void;
 }) => {
-  const { submitVotes, areCurrentVotesDirty, proposedVotes } =
-    useVoteActionContext();
+  const {
+    submitVotes,
+    areCurrentVotesDirty,
+    proposedVotes,
+    areUserVotingParamsLoading,
+  } = useVoteActionContext();
   const { stateRemainingTime } = useContestState();
 
   const { status } = useSession();
 
-  const isVoteButtonEnabled = areCurrentVotesDirty || proposedVotes.length > 0;
+  const isVoteButtonEnabled =
+    !areUserVotingParamsLoading &&
+    (areCurrentVotesDirty || proposedVotes.length > 0);
 
   const handleSubmit = () => {
     submitVotes();
@@ -199,33 +202,6 @@ const EditButton = ({
   }
 };
 
-const VoterTabBar = ({
-  activeTab,
-  handleTabClick,
-}: {
-  handleTabClick: (tab: string) => void;
-  activeTab: string;
-}) => {
-  const { proposedVotes } = useVoteActionContext();
-  return (
-    <div className="tabs w-full">
-      <a
-        className={`tab tab-md font-bold indicator indicator-secondary ${
-          activeTab === "votes" ? "tab-active" : ""
-        }`}
-        onClick={() => handleTabClick("votes")}
-      >
-        My Selections
-        {proposedVotes.length > 0 && (
-          <span className="indicator-item badge badge-warning rounded-full">
-            <p>{proposedVotes.length}</p>
-          </span>
-        )}
-      </a>
-    </div>
-  );
-};
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.5 } },
@@ -244,6 +220,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
     totalVotingPower,
     votesSpent,
     votesRemaining,
+    areUserVotingParamsLoading,
   } = useVoteActionContext();
 
   const { liveSubmissions } = useTrackSubmissions(contestId);
@@ -365,7 +342,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
             className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded text-t2"
             data-tip={displayableTotalVotingPower.long}
           >
-            <p className="text-sm">Voting Power</p>
+            <p className="text-sm">Credits</p>
             <p>{displayableTotalVotingPower.short}</p>
           </div>
           <div
@@ -389,51 +366,31 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
   );
 };
 
-const DetailsTab = ({
-  voterRewards,
-  votingPolicy,
-}: {
-  voterRewards: any;
-  votingPolicy: any;
-}) => {
-  return (
-    <motion.div
-      className="container h-[60vh]"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <div className="flex flex-col gap-2 p-4">
-        <h2 className="text-2xl font-bold">Details</h2>
-        <VoterRewardsSection voterRewards={voterRewards} />
-        <VotingPolicySection votingPolicy={votingPolicy} />
-      </div>
-    </motion.div>
-  );
-};
-
 const SidebarVote = ({ contestId }: { contestId: string }) => {
-  const [activeTab, setActiveTab] = useState("votes");
   const { contestState } = useContestState();
-  const { areUserVotingParamsLoading } = useVoteActionContext();
+  const { proposedVotes } = useVoteActionContext();
 
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
-  };
-  if (contestState === "voting" && !areUserVotingParamsLoading) {
+  if (contestState === "voting") {
     return (
       <div className="hidden w-1/4 lg:flex lg:flex-col items-center gap-4">
         <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
-          <VoterTabBar handleTabClick={handleTabClick} activeTab={activeTab} />
+          <div className="flex flex-row items-center gap-2">
+            <h2 className="text-t1 text-lg font-semibold">My Selections </h2>
+            {proposedVotes.length > 0 && (
+              <span className="badge badge-warning font-bold">
+                {proposedVotes.length}
+              </span>
+            )}
+          </div>
           <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
-            {activeTab === "votes" && <VoteTab contestId={contestId} />}
+            <VoteTab contestId={contestId} />
           </div>
         </div>
       </div>
     );
   }
   // render a placeholder so the other flex's don't grow too wide
-  return <div className="w-0 lg:w-1/12"/>;
+  return <div className="w-0 lg:w-1/12" />;
 };
 
 export default SidebarVote;

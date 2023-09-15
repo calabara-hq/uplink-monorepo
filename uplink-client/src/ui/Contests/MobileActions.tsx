@@ -44,13 +44,15 @@ const InfoDrawer = ({
   children: React.ReactNode;
 }) => {
   const drawerRef = useRef(null);
+  const [scrollY, setScrollY] = useState(0);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      console.log("click outside");
       if (
         drawerRef.current &&
         !drawerRef.current.contains(event.target as Node)
       ) {
+        document.body.style.overflow = "visible";
         handleClose();
       }
     };
@@ -60,9 +62,10 @@ const InfoDrawer = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [drawerRef]);
-  if (isDrawerOpen)
+  if (isDrawerOpen) {
+    document.body.style.overflow = "hidden";
     return (
-      <div className="drawer drawer-open absolute top-0 left-0 md:left-[62px] z-10 w-[80vw] h-screen ">
+      <div className="drawer drawer-open fixed top-0 left-0 bottom-0 md:left-[62px] z-10 w-[calc(80vw - 62px)] h-screen bg-[#00000080] overflow-hidden ">
         <div className="drawer-side">
           <ul
             ref={drawerRef}
@@ -74,6 +77,7 @@ const InfoDrawer = ({
         </div>
       </div>
     );
+  }
   return null;
 };
 
@@ -95,7 +99,9 @@ const MobileActions = ({
   const { contestState, stateRemainingTime } = useContestState();
   const { proposedVotes } = useVoteActionContext();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   if (!contestState) return null;
+
   if (contestState === "submitting") {
     return (
       <div className="flex lg:hidden">
@@ -168,6 +174,19 @@ const MobileActions = ({
             </div>
           </div>
         </StickyContainer>
+        <InfoDrawer
+          isDrawerOpen={isDrawerOpen}
+          handleClose={() => {
+            setIsDrawerOpen(false);
+          }}
+        >
+          <RenderDetails
+            submitterRewards={submitterRewards}
+            voterRewards={voterRewards}
+            votingPolicy={votingPolicy}
+            submitterRestrictions={submitterRestrictions}
+          />
+        </InfoDrawer>
       </div>
     );
   }

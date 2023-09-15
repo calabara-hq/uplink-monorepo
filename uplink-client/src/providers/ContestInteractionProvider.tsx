@@ -277,7 +277,7 @@ export function ContestInteractionProvider({
     isLoading: areSubmissionsLoading,
     error: isSubmissionError,
     mutate: mutateLiveSubmissions,
-  }: { data: any; isLoading: boolean; error: any, mutate: any } = useSWR(
+  }: { data: any; isLoading: boolean; error: any; mutate: any } = useSWR(
     `submissions/${contestId}`,
     () => fetchSubmissions(contestId),
     { refreshInterval: 10000 }

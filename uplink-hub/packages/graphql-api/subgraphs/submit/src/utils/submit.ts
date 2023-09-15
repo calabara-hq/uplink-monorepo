@@ -303,7 +303,7 @@ const uploadTwitterSubmission = async (
 // verify that the user is eligible to submit
 export const restrictionWalletCheck = async (
     user: any,
-    snapshot: string,
+    blockNum: number,
     restrictions: {
         restrictionType: string,
         tokenRestriction: {
@@ -321,7 +321,7 @@ export const restrictionWalletCheck = async (
     const restrictionResults = await Promise.all(restrictions.map(async (restriction: any) => {
         const { restrictionType, tokenRestriction } = restriction;
         const { token, threshold } = tokenRestriction;
-        const userBalance = await tokenController.computeUserTokenBalance({ token, snapshot, walletAddress: user.address });
+        const userBalance = await tokenController.computeUserTokenBalance({ token, blockNum, walletAddress: user.address });
         if (userBalance.cmp(threshold) > 0) return {
             restriction,
             result: true
@@ -357,7 +357,8 @@ export const computeMaxSubmissionPower = async (
 
         if (submitterRestrictions.length === 0) return { contestType, maxSubPower: deadlineAdjustedSubmittingPower(maxSubPower, deadlines), restrictionResults: [] };
 
-        const userRestrictionResult = await restrictionWalletCheck(user, deadlines.snapshot, submitterRestrictions);
+        const blockNum = await tokenController.calculateBlockFromTimestamp(deadlines.snapshot)
+        const userRestrictionResult = await restrictionWalletCheck(user, blockNum, submitterRestrictions);
         const restrictionAdjustedSubPower = userRestrictionResult.some((token) => token.result === true) ? maxSubPower : 0;
         await setCacheSubParams(user, contestId, restrictionAdjustedSubPower, userRestrictionResult);
         return { contestType, maxSubPower: deadlineAdjustedSubmittingPower(restrictionAdjustedSubPower, deadlines), restrictionResults: userRestrictionResult };
@@ -502,7 +503,7 @@ export const twitterSubmit = async (
             secret: process.env.FRONTEND_API_SECRET,
             tags: [`submissions/${contestId}`]
         })
-        
+
         return {
             success: true,
             userSubmissionParams: {

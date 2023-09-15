@@ -21,7 +21,7 @@ export class TokenController {
         this.dater = new EthDater(this.provider);
     }
 
-    async validateEthAddress(address: string) {
+    validateEthAddress = async (address: string) => {
 
         if (!address) return null
         address = address.trim();
@@ -43,7 +43,7 @@ export class TokenController {
         }
     }
 
-    async validateERC20(address: string) {
+    validateERC20 = async (address: string) => {
         try {
             const erc20Contract = new ethers.Contract(address, ERC20ABI, this.provider);
             await erc20Contract.totalSupply();
@@ -53,7 +53,7 @@ export class TokenController {
         }
     };
 
-    async validateInterface(address: string, interfaceId: '0x80ac58cd' | '0xd9b67a26') {
+    validateInterface = async (address: string, interfaceId: '0x80ac58cd' | '0xd9b67a26') => {
         try {
             const erc165Contract = new ethers.Contract(address, ERC165ABI, this.provider);
             return await erc165Contract.supportsInterface(interfaceId);
@@ -62,7 +62,7 @@ export class TokenController {
         }
     };
 
-    async verifyTokenStandard({ contractAddress, expectedStandard }: { contractAddress: string; expectedStandard: "ERC20" | "ERC721" | "ERC1155" }) {
+    verifyTokenStandard = async ({ contractAddress, expectedStandard }: { contractAddress: string; expectedStandard: "ERC20" | "ERC721" | "ERC1155" }) => {
         switch (expectedStandard) {
             case "ERC20":
                 try {
@@ -84,7 +84,7 @@ export class TokenController {
     };
 
 
-    async tokenGetSymbolAndDecimal({ contractAddress, tokenStandard }: { contractAddress: string, tokenStandard: "ERC20" | "ERC721" | "ERC1155" }) {
+    tokenGetSymbolAndDecimal = async ({ contractAddress, tokenStandard }: { contractAddress: string, tokenStandard: "ERC20" | "ERC721" | "ERC1155" }) => {
 
         // use the erc20 abi since we only want symbol and decimals
         const tokenContract = new ethers.Contract(contractAddress, ERC20ABI, this.provider);
@@ -111,9 +111,9 @@ export class TokenController {
     }
 
 
-    async isValidERC1155TokenId({ contractAddress, tokenId }: {
+    isValidERC1155TokenId = async ({ contractAddress, tokenId }: {
         contractAddress: string, tokenId: number
-    }) {
+    }) => {
         try {
             const tokenContract = new ethers.Contract(contractAddress, ERC1155ABI, this.provider);
             const uri = await tokenContract.uri(tokenId);
@@ -127,9 +127,9 @@ export class TokenController {
     }
 
 
-    async isERC1155TokenFungible({ contractAddress, tokenId }: {
+    isERC1155TokenFungible = async ({ contractAddress, tokenId }: {
         contractAddress: string, tokenId: number
-    }) {
+    }) => {
         try {
             const tokenContract = new ethers.Contract(contractAddress, ERC1155ABI, this.provider);
             const isFungible = await tokenContract.supportsInterface(ERC1155MetaDataURIInterface);
@@ -140,19 +140,17 @@ export class TokenController {
         }
     }
 
-    async calculateBlockFromTimestamp(timestamp: string) {
+    calculateBlockFromTimestamp = async (timestamp: string) => {
         const result = await this.dater.getDate(timestamp, true, false);
         return result.block;
     }
 
 
-    async computeUserTokenBalance({ token, snapshot, walletAddress }: {
+    computeUserTokenBalance = async ({ token, blockNum, walletAddress }: {
         token: IToken,
-        snapshot: string,
+        blockNum: number,
         walletAddress: string
-    }) {
-
-        const blockNum = this.calculateBlockFromTimestamp(snapshot);
+    }) => {
 
         try {
             if (token.type === "ETH") {
@@ -165,6 +163,7 @@ export class TokenController {
                 return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
             }
             else { // ERC20 / ERC721
+
                 const tokenContract = new ethers.Contract(token.address, ERC20ABI, this.provider);
                 const balance = await tokenContract.balanceOf(walletAddress, { blockTag: blockNum });
                 return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));

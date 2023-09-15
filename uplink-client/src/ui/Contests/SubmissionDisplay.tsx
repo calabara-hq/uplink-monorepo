@@ -8,6 +8,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { Decimal } from "decimal.js";
+import { FaShare } from "react-icons/fa6";
+import { BiLayerPlus } from "react-icons/bi";
+import formatDecimal from "@/lib/formatDecimal";
+import { toast } from "react-hot-toast";
 
 const AddToCartButton = ({ submission, voteActions }) => {
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
@@ -32,54 +36,63 @@ const AddToCartButton = ({ submission, voteActions }) => {
 
   if (isSelected) {
     return (
-      <div className="animate-springUp flex absolute bottom-0 left-0 items-center w-full h-8 rounded-b-lg bg-warning px-1 bg-opacity-80 cursor-default no-animation">
-        <p className="text-black font-medium text-center ml-auto">
-          Item in Cart
-        </p>
-        <div className="w-0.5 h-full bg-base ml-auto" />
-
-        <span className="p-4   ">
-          <HiCheckBadge className="h-6 w-6 text-black" />
-        </span>
-      </div>
+      <span
+        className="ml-auto tooltip tooltip-top pr-2.5"
+        data-tip={"Selected"}
+      >
+        <HiCheckBadge className="h-6 w-6 text-warning" />
+      </span>
     );
   } else
     return (
-      <div
-        onClick={(event) => handleSelect(event)}
-        className="animate-springUp flex absolute bottom-0 left-0 items-center w-full h-8 rounded-b-lg bg-warning px-1 hover:bg-opacity-80"
-      >
-        <p className="text-black font-medium text-center ml-auto">
-          Add to Cart
-        </p>
-        <div className="w-0.5 h-full bg-base ml-auto" />
-
-        <span className=" p-4">
-          <HiPlus className="h-6 w-6 text-black font-medium" />
-        </span>
-      </div>
+      <span className="ml-auto tooltip tooltip-top " data-tip={"Add to cart"}>
+        <button
+          className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-warning hover:bg-opacity-30 hover:text-warning"
+          onClick={handleSelect}
+        >
+          <BiLayerPlus className="h-6 w-6 " />
+        </button>
+      </span>
     );
 };
 
-const SubmissionFooter = ({ submission }) => {
-  const { contestState } = useContestState();
+const SubmissionFooter = ({ submission, sharePath }) => {
+  const totalVotes = new Decimal(submission.totalVotes ?? "0");
   const voteActions = useVoteActionContext();
-  if (contestState) {
-    if (voteActions && contestState === "voting")
-      return (
-        <AddToCartButton submission={submission} voteActions={voteActions} />
-      );
-    else if (new Decimal(submission.totalVotes ?? "0").greaterThan(0))
-      return (
-        <div className="animate-springUp flex absolute bottom-0 left-0 items-end w-full h-8 rounded-b-lg bg-warning">
-          <div className="text-black font-medium m-auto">
-            {submission.totalVotes} votes
-          </div>
-        </div>
-      );
-  }
+  const { contestState } = useContestState();
+  const [shareText, setShareText] = useState("Share");
+  const handleShare = () => {
+    setShareText("Copied Link");
+    navigator.clipboard.writeText(sharePath);
+    setTimeout(() => {
+      setShareText("Share");
+    }, 2000);
+  };
 
-  return null;
+  return (
+    <div className="flex flex-col w-full">
+      <div className="grid grid-cols-3 w-full items-center">
+        <span className="tooltip tooltip-top mr-auto" data-tip={shareText}>
+          <button
+            className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-primary hover:bg-opacity-30 hover:text-primary"
+            onClick={handleShare}
+          >
+            <FaShare className="h-6 w-6 " />
+          </button>
+        </span>
+        {totalVotes.greaterThan(0) ? (
+          <span className="text-center text-t2 text-sm font-medium">
+            {formatDecimal(totalVotes.toString()).short} votes
+          </span>
+        ) : (
+          <span />
+        )}
+        {contestState === "voting" && (
+          <AddToCartButton submission={submission} voteActions={voteActions} />
+        )}
+      </div>
+    </div>
+  );
 };
 
 const SubmissionDisplay = ({
@@ -101,7 +114,12 @@ const SubmissionDisplay = ({
                 key={idx}
                 basePath={`/${spaceName}/contest/${contestId}`}
                 submission={submission}
-                footerChildren={<SubmissionFooter submission={submission} />}
+                footerChildren={
+                  <SubmissionFooter
+                    sharePath={`https://uplink.wtf/${spaceName}/contest/${contestId}/submission/${submission.id}`}
+                    submission={submission}
+                  />
+                }
               />
             );
           })}
