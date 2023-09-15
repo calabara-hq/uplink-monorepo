@@ -99,6 +99,7 @@ export const dbContestTweetQueue = db.query.tweetQueue.findFirst({
 }).prepare();
 
 const postProcessContest = (contest, user) => {
+    console.log(JSON.stringify(contest.rewards, null, 2))
     if (!contest) return null;
     const submitterRewards = [];
     const voterRewards = [];
@@ -106,7 +107,7 @@ const postProcessContest = (contest, user) => {
         ...restriction,
         tokenRestriction: {
             ...restriction.tokenRestriction,
-            threshold: new Decimal(restriction.tokenRestriction.threshold)
+            threshold: new Decimal(restriction.tokenRestriction.threshold || 0)
         }
     }));
 
@@ -116,19 +117,20 @@ const postProcessContest = (contest, user) => {
                 ...policy,
                 arcadeVotingStrategy: {
                     ...policy.arcadeVotingStrategy,
-                    votingPower: new Decimal(policy.arcadeVotingStrategy.votingPower)
+                    votingPower: new Decimal(policy.arcadeVotingStrategy.votingPower || 0)
                 }
             };
         }
         return policy;
     });
 
+
     contest.rewards.forEach(reward => {
         const newReward = {
             ...reward,
             tokenReward: {
                 ...reward.tokenReward,
-                amount: new Decimal(reward.tokenReward.amount)
+                amount: new Decimal(reward.tokenReward.amount || 0)
             }
         };
         if (reward.recipient === 'submitter') {
@@ -172,9 +174,10 @@ const queries = {
     Space: {
         async contests(space) {
             const data = await dbMultiContestsBySpaceId.execute({ spaceId: space.id })
-                .then(async (contests) => {
-                    return await Promise.all(contests.map(postProcessContest))
+                .then((contests) => {
+                    return Promise.all(contests.map(postProcessContest))
                 });
+            console.log(data)
             return data;
         }
     },

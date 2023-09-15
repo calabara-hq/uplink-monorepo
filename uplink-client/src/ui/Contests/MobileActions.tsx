@@ -1,10 +1,12 @@
 "use client";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 import { useContestState } from "@/providers/ContestStateProvider";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import Link from "next/link";
 import { useVoteActionContext } from "@/providers/VoteActionProvider";
+import { RenderDetails } from "./ContestSidebar";
+import { HiMenu } from "react-icons/hi";
 
 // This is essentially the mobile version of the ContestSidebar
 
@@ -32,33 +34,106 @@ const StickyContainer = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+const InfoDrawer = ({
+  isDrawerOpen,
+  handleClose,
+  children,
+}: {
+  isDrawerOpen: boolean;
+  handleClose: () => void;
+  children: React.ReactNode;
+}) => {
+  const drawerRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      console.log("click outside");
+      if (
+        drawerRef.current &&
+        !drawerRef.current.contains(event.target as Node)
+      ) {
+        handleClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [drawerRef]);
+  if (isDrawerOpen)
+    return (
+      <div className="drawer drawer-open absolute top-0 left-0 md:left-[62px] z-10 w-[80vw] h-screen ">
+        <div className="drawer-side">
+          <ul
+            ref={drawerRef}
+            className="menu flex flex-col gap-4 p-4 w-80 min-h-full bg-base-100 text-base-content shadow-black shadow-sm animate-scrollInX"
+          >
+            <h1 className="text-xl font-bold">Details</h1>
+            {children}
+          </ul>
+        </div>
+      </div>
+    );
+  return null;
+};
+
 const MobileActions = ({
   contestId,
   spaceName,
+  submitterRewards,
+  voterRewards,
+  votingPolicy,
+  submitterRestrictions,
 }: {
   contestId: string;
   spaceName: string;
+  submitterRewards: any;
+  voterRewards: any;
+  votingPolicy: any;
+  submitterRestrictions: any;
 }) => {
   const { contestState, stateRemainingTime } = useContestState();
-  const { areUserVotingParamsLoading } = useContestInteractionState();
   const { proposedVotes } = useVoteActionContext();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   if (!contestState) return null;
   if (contestState === "submitting") {
     return (
       <div className="flex lg:hidden">
         <StickyContainer>
-          <div className="flex flex-row w-full p-2">
-            <Link
-              href={`${spaceName}/contest/${contestId}/studio`}
-              className="btn btn-primary flex flex-1 normal-case rounded-r-none"
+          <div className="flex flex-row items-center gap-8 w-full">
+            <button
+              className="btn btn-ghost rounded-full"
+              onClick={() => setIsDrawerOpen(true)}
             >
-              Submit
-            </Link>
-            <div className="flex items-center justify-center bg-base-100 rounded-r-xl">
-              <p className="px-4 text-t2">{stateRemainingTime}</p>
+              <HiMenu className="w-8 h-8 font-bold text-t2" />
+            </button>
+            <div className="flex p-2 w-full">
+              <Link
+                href={`/${spaceName}/contest/${contestId}/studio`}
+                className="btn btn-primary flex flex-1 normal-case rounded-r-none"
+                draggable={false}
+              >
+                Submit
+              </Link>
+              <div className="flex items-center justify-center bg-base-100 rounded-r-xl">
+                <p className="px-4 text-t2">{stateRemainingTime}</p>
+              </div>
             </div>
           </div>
         </StickyContainer>
+        <InfoDrawer
+          isDrawerOpen={isDrawerOpen}
+          handleClose={() => {
+            setIsDrawerOpen(false);
+          }}
+        >
+          <RenderDetails
+            submitterRewards={submitterRewards}
+            voterRewards={voterRewards}
+            votingPolicy={votingPolicy}
+            submitterRestrictions={submitterRestrictions}
+          />
+        </InfoDrawer>
       </div>
       // <div className="flex flex-col w-full bg-blue-200"></div>
     );
@@ -66,20 +141,30 @@ const MobileActions = ({
     return (
       <div className="flex lg:hidden">
         <StickyContainer>
-          <div className="flex flex-row w-full p-2">
-            <Link
-              href={`${spaceName}/contest/${contestId}/vote`}
-              className="btn btn-primary flex flex-1 normal-case rounded-r-none indicator"
+          <div className="flex flex-row items-center gap-8 w-full">
+            <button
+              className="btn btn-ghost rounded-full"
+              onClick={() => setIsDrawerOpen(true)}
             >
-              Vote
-              {proposedVotes.length > 0 && (
-                <span className="indicator-item badge badge-warning rounded-full">
-                  <p>{proposedVotes.length}</p>
-                </span>
-              )}
-            </Link>
-            <div className="flex items-center justify-center bg-base-100 rounded-r-xl">
-              <p className="px-4 text-t2">{stateRemainingTime}</p>
+              <HiMenu className="w-8 h-8 font-bold text-t2" />
+            </button>
+            <div className="flex p-2 w-full">
+              {" "}
+              <Link
+                href={`/${spaceName}/contest/${contestId}/vote`}
+                className="btn btn-warning flex flex-1 normal-case rounded-r-none indicator"
+                draggable={false}
+              >
+                Vote
+                {proposedVotes.length > 0 && (
+                  <span className="indicator-item badge badge-warning rounded-full">
+                    <p>{proposedVotes.length}</p>
+                  </span>
+                )}
+              </Link>
+              <div className="flex items-center justify-center bg-base-100 rounded-r-xl">
+                <p className="px-4 text-t2">{stateRemainingTime}</p>
+              </div>
             </div>
           </div>
         </StickyContainer>

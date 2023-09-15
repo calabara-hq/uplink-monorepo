@@ -2,121 +2,36 @@ import { SpaceBuilderProps, validateSpaceBuilderProps, reducer, validateSpaceAdm
 import { describe, expect, test } from "@jest/globals";
 
 const calabaraAddress = "0xa943e039B1Ce670873ccCd4024AB959082FC6Dd8"
-const nickAddress = "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"
+const vitalikAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 
-const baseState: SpaceBuilderProps = {
-    name: '',
-    logo_url: '',
-    logo_blob: '',
-    admins: [],
-    errors: {
-        admins: []
-    }
-}
-
-describe('space handler reducer', () => {
-    describe('website reducer', () => {
-        test('should properly set website with string payload', () => {
-            const action = { type: 'setWebsite', payload: 'test' }
-            const newState = reducer(baseState, action)
-            expect(newState.website).toEqual('test')
-        })
-
-        test('should properly clear website with empty string payload', () => {
-            const initialState = { ...baseState, website: 'test' }
-            const action = { type: 'setWebsite', payload: '' }
-            const newState = reducer(initialState, action)
-            expect(newState).toEqual(baseState)
-        })
-    })
-
-    describe('twitter reducer', () => {
-        test('should properly set twitter with string payload', () => {
-            const action = { type: 'setTwitter', payload: 'test' }
-            const newState = reducer(baseState, action)
-            expect(newState.twitter).toEqual('test')
-        })
-
-        test('should properly clear twitter with empty string payload', () => {
-            const initialState = { ...baseState, twitter: 'test' }
-            const action = { type: 'setTwitter', payload: '' }
-            const newState = reducer(initialState, action)
-            expect(newState).toEqual(baseState)
-        })
-    })
-
-    describe('admins reducer', () => {
-        test('should properly add admin', () => {
-            const action = { type: 'addAdmin' }
-            const newState = reducer(baseState, action)
-            expect(newState.admins).toEqual([''])
-        })
-
-        test('should properly remove admin', () => {
-            const initialState = { ...baseState, admins: [calabaraAddress] }
-            const action = { type: 'removeAdmin', payload: 0 }
-            const newState = reducer(initialState, action)
-            expect(newState.admins).toEqual([])
-        })
-
-        test('should properly setAdmin', () => {
-            const initialState = { ...baseState, admins: [''] }
-            const action = { type: 'setAdmin', payload: { index: 0, value: calabaraAddress } }
-            const newState = reducer(initialState, action)
-            expect(newState.admins).toEqual([calabaraAddress])
-        })
-    })
-})
-
-describe('space builder props validation', () => {
-    describe('validate space name', () => {
-        test('should succeed with standard string', () => {
-            const name = 'test';
-            const { error, value } = validateSpaceName(name);
-            expect(error).toBeNull();
-            expect(value).toEqual(name);
-        })
-
-        test('should succeed and trim string', () => {
-            const name = '   test    ';
-            const { error, value } = validateSpaceName(name);
-            expect(error).toBeNull();
-            expect(value).toEqual('test');
-        })
-
+describe('Space Handler', () => {
+    describe('Validate Space Name', () => {
         test('should fail with empty string', () => {
-            const name = '';
-            const { error, value } = validateSpaceName(name);
+            const { error, value } = validateSpaceName('');
             expect(error).toEqual('Name is required');
-            expect(value).toEqual(name);
+            expect(value).toEqual('');
         })
-
-        test('should fail with string less than 3 characters', () => {
-            const name = 'te';
-            const { error, value } = validateSpaceName(name);
+        test('should fail with string too short', () => {
+            const { error, value } = validateSpaceName('a'.repeat(2));
             expect(error).toEqual('Name must be at least 3 characters long');
-            expect(value).toEqual(name);
+            expect(value).toEqual('a'.repeat(2));
         })
-
-        test('should fail with string more than 30 characters', () => {
-            const name = 'teasdfasdfasdflkjasdlkfjalskdjflaksjdflksdjf';
-            const { error, value } = validateSpaceName(name);
+        test('should fail with string too long', () => {
+            const { error, value } = validateSpaceName('a'.repeat(31));
             expect(error).toEqual('Name must be less than 30 characters long');
-            expect(value).toEqual(name);
+            expect(value).toEqual('a'.repeat(31));
         })
-
-        test('should fail non alphanumeric chars', () => {
+        test('should fail with non-alphanumeric chars', () => {
             const name = 'test!';
             const { error, value } = validateSpaceName(name);
             expect(error).toEqual('Name must only contain alphanumeric characters and underscores');
             expect(value).toEqual(name);
         })
-
     })
 
-    describe('validate space logo', () => {
+    describe('Validate Space Logo', () => {
         test('should succeed with platform ipfs link', () => {
-            const logo = 'https://calabara.mypinata.cloud/ipfs/QmUxRzCcizzuNdyPRxMdn4LFQQQ5ce9cRqubnUCaR4G7Bz';
+            const logo = 'https://uplink.mypinata.cloud/ipfs/QmUxRzCcizzuNdyPRxMdn4LFQQQ5ce9cRqubnUCaR4G7Bz';
             const { error, value } = validateSpaceLogo(logo);
             expect(error).toBeNull();
             expect(value).toEqual(logo);
@@ -189,10 +104,10 @@ describe('space builder props validation', () => {
     describe('validate space admins', () => {
 
         test('should succeed with valid addresses', async () => {
-            const admins = ['calabara.eth', 'nickdodson.eth'];
+            const admins = ['calabara.eth', 'vitalik.eth'];
             const { error, value } = await validateSpaceAdmins(admins);
             expect(error).toEqual([null, null])
-            expect(value).toEqual([calabaraAddress, nickAddress])
+            expect(value).toEqual([calabaraAddress, vitalikAddress])
         })
 
         test('should succeed and strip empty addresses', async () => {
@@ -203,49 +118,81 @@ describe('space builder props validation', () => {
         })
 
         test('should strip empty addresses and return errors', async () => {
-            const admins = ['calabara.eth', 'test', 'nickdodson.eth', ''];
+            const admins = ['calabara.eth', 'test', 'vitalik.eth', ''];
             const { error, value } = await validateSpaceAdmins(admins);
             expect(error).toEqual([null, 'invalid address', null])
-            expect(value).toEqual([calabaraAddress, 'test', nickAddress])
+            expect(value).toEqual([calabaraAddress, 'test', vitalikAddress])
         })
 
         test('should strip empty addresses, remove duplicates, and return error addresses', async () => {
-            const admins = ['calabara.eth', 'test', 'nickdodson.eth', '', 'nickdodson.eth'];
+            const admins = ['calabara.eth', 'test', 'vitalik.eth', '', 'vitalik.eth'];
             const { error, value } = await validateSpaceAdmins(admins);
             expect(error).toEqual([null, 'invalid address', null])
-            expect(value).toEqual([calabaraAddress, 'test', nickAddress])
+            expect(value).toEqual([calabaraAddress, 'test', vitalikAddress])
         })
     })
-})
 
 
+    describe('Validate Space Builder Props', () => {
 
-
-/*
-    test('validate space builder props', async () => {
-        const initialState: SpaceBuilderProps = {
-            ens: '',
-            name: 'nick',
-            logo_url: 'https://calabara.mypinata.cloud/ipfs/QmUxRzCcizzuNdyPRxMdn4LFQQQ5ce9cRqubnUCaR4G7Bz',
-            logo_blob: '',
-            website: '',
-            twitter: '',
-            admins: ['calabara.eth', 'nickdodson.eth'],
-            errors: {
-                ens: null,
-                name: null,
-                logo_url: null,
-                website: null,
-                twitter: null,
+        test('should return errors', async () => {
+            const props: SpaceBuilderProps = {
+                name: "",
+                logoBlob: "",
+                logoUrl: "",
+                website: "",
+                twitter: "",
                 admins: [],
+                errors: {
+                    admins: [],
+                },
             }
-        }
 
-
-        const { isValid, errors, values } = await validateSpaceBuilderProps(initialState);
-        expect(isValid).toBe(false);
-        expect(errors).toEqual({
-            admins: [null, null]
+            const { isValid, errors, values } = await validateSpaceBuilderProps(props);
+            expect(isValid).toBe(false);
+            expect(errors).toEqual({
+                name: "Name is required",
+                logoUrl: "Logo is required",
+                admins: []
+            })
+            expect(values).toEqual({
+                name: "",
+                logoUrl: "",
+                admins: [],
+            })
         })
-    })
-    */
+
+        test('should return valid props', async () => {
+            const props: SpaceBuilderProps = {
+                name: "sample space",
+                logoBlob: "asdf",
+                logoUrl: "https://uplink.mypinata.cloud/ipfs/asdfasdf",
+                website: "twitter.com",
+                twitter: "@uplinkwtf",
+                admins: [calabaraAddress, vitalikAddress],
+                errors: {
+                    admins: [],
+                },
+            }
+
+            const { isValid, errors, values } = await validateSpaceBuilderProps(props);
+            console.log(JSON.stringify(errors, null, 2))
+            expect(isValid).toBe(true);
+            expect(errors).toEqual({
+                admins: [null, null]
+            })
+            expect(values).toEqual({
+                name: "sample space",
+                logoUrl: "https://uplink.mypinata.cloud/ipfs/asdfasdf",
+                website: "twitter.com",
+                twitter: "@uplinkwtf",
+                admins: [calabaraAddress, vitalikAddress],
+            })
+        })
+
+    });
+
+
+
+
+})

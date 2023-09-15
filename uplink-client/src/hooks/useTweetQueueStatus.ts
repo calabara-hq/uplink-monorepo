@@ -29,8 +29,8 @@ const getTweetQueueStatus = async (contestId: string) => {
 
 const useTweetQueueStatus = (contestId: string) => {
     const swrKey = `/api/tweetQueueStatus/${contestId}`
-    const { data: isTweetQueued, error, isLoading } = useSWR(swrKey, () => getTweetQueueStatus(contestId));
-    return { isTweetQueued, isLoading };
+    const { data: isTweetQueued, error, isLoading, mutate: mutateIsTweetQueued } = useSWR(swrKey, () => getTweetQueueStatus(contestId));
+    return { isTweetQueued, isLoading, mutateIsTweetQueued };
 }
 
 

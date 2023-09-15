@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   HiLockClosed,
@@ -17,11 +16,10 @@ import WalletConnectButton from "../ConnectButton/ConnectButton";
 import Modal from "../Modal/Modal";
 
 import formatDecimal from "@/lib/formatDecimal";
-import { useRouter } from "next/navigation";
-import { ContestRewards } from "./ContestSidebar";
 import { useContestState } from "@/providers/ContestStateProvider";
 import Image from "next/image";
 import { HiTrash, HiDocumentText } from "react-icons/hi2";
+import { VoterRewardsSection, VotingPolicySection } from "./SidebarInfo";
 
 const SubmissionVoteInput = ({
   submission,
@@ -46,33 +44,6 @@ const SubmissionVoteInput = ({
         updateVoteAmount(submission.submissionId, e.target.value, mode)
       }
     />
-  );
-};
-
-const SubmissionVoteTrash = ({
-  submission,
-  mode,
-}: {
-  submission: any;
-  mode: "current" | "proposed";
-}) => {
-  const { removeSingleVote } = useVoteActionContext();
-
-  return (
-    <>
-      <button
-        className="btn btn-ghost w-auto h-full rounded-xl ml-auto md:hidden lg:flex"
-        onClick={() => removeSingleVote(submission.submissionId, mode)}
-      >
-        <HiTrash className="w-5 h-5 text-t2 " />
-      </button>
-      <button
-        className="absolute top-0 right-0 btn btn-ghost rounded-full ml-auto btn-sm lg:hidden"
-        onClick={() => removeSingleVote(submission.submissionId, mode)}
-      >
-        <HiTrash className="w-4 h-4 text-t2" />
-      </button>
-    </>
   );
 };
 
@@ -117,29 +88,6 @@ const SubmissionCardVote = ({
       </div>
     </div>
   );
-
-  return (
-    <div className="relative flex flex-row w-full h-24 max-h-24 gap-1">
-      <div
-        className="flex flex-row w-full bg-base-100 rounded-xl
-                    cursor-pointer"
-      >
-        {submission.data.type === "text" && (
-          <CartTextSubmission submission={submission} />
-        )}
-        {submission.data.type !== "text" && (
-          <CartMediaSubmission submission={submission} />
-        )}
-        <div className="flex flex-col justify-between items-start gap-4 h-full p-2 w-full">
-          <h2 className="text-base overflow-hidden overflow-ellipsis whitespace-nowrap w-3/4 text-left">
-            {submission.data.title}
-          </h2>
-          <SubmissionVoteInput submission={submission} mode={mode} />
-        </div>
-      </div>
-      <SubmissionVoteTrash submission={submission} mode={mode} />
-    </div>
-  );
 };
 
 const CartMediaSubmission = ({ submission }: { submission: any }) => {
@@ -159,7 +107,6 @@ const CartTextSubmission = ({ submission }: { submission: any }) => {
   return (
     <HiDocumentText className="h-full w-full max-w-[80%] text-t2 object-contain text-center " />
   );
-  return null; //<HiDocumentText className="w-full h-full text-t2 object-contain text-center p-4" />;
 };
 
 const LockedCardVote = ({ submission }: { submission: any }) => {
@@ -183,69 +130,6 @@ const LockedCardVote = ({ submission }: { submission: any }) => {
         <div className="flex flex-col items-center justify-center ml-auto gap-1 px-2">
           <p>{displayableVotes.short}</p>
         </div>
-      </div>
-    </div>
-  );
-};
-
-const VotingPolicyModalContent = ({ votingPolicy }: { votingPolicy: any }) => {
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-1 italic text-md border border-gray-600 p-2 rounded">
-        <p>strategy types:</p>
-
-        <p>arcade = uniform voting power for all token holders</p>
-        <p>weighted = voting power corresponds to user token balance</p>
-      </div>
-      <div className="grid grid-cols-2">
-        {votingPolicy.map((el, index) => {
-          const strategyType = el.strategyType;
-          const objectReference =
-            strategyType === "arcade"
-              ? el.arcadeVotingStrategy
-              : el.weightedVotingStrategy;
-          return (
-            <div
-              key={index}
-              className="flex flex-col gap-1 bg-base-100 p-2 rounded"
-            >
-              <div className="badge badge-secondary">{index + 1}</div>
-              <p>
-                <a className="font-bold">strategy type: </a> {strategyType}
-              </p>
-              <p>
-                <a className="font-bold">symbol: </a>
-                <a
-                  className={
-                    objectReference.token.symbol === "ETH"
-                      ? ""
-                      : "underline cursor-pointer hover:text-gray-300"
-                  }
-                  onClick={
-                    objectReference.token.symbol === "ETH"
-                      ? () => {}
-                      : () => {
-                          window.open(
-                            `https://etherscan.io/token/${objectReference.token.address}`,
-                            "_blank"
-                          );
-                        }
-                  }
-                >
-                  {" "}
-                  {objectReference.token.symbol}
-                </a>
-                {strategyType === "arcade" && (
-                  <p>
-                    <a className="font-bold">Voting Power: </a>
-                    {objectReference.votingPower.toString()}
-                  </p>
-                )}
-              </p>
-              <p></p>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
@@ -316,20 +200,18 @@ const EditButton = ({
 };
 
 const VoterTabBar = ({
+  activeTab,
   handleTabClick,
-  isVotingCartVisible,
-  setIsVotingCartVisible,
 }: {
   handleTabClick: (tab: string) => void;
-  isVotingCartVisible: boolean;
-  setIsVotingCartVisible: (visible: boolean) => void;
+  activeTab: string;
 }) => {
   const { proposedVotes } = useVoteActionContext();
   return (
     <div className="tabs w-full">
       <a
         className={`tab tab-md font-bold indicator indicator-secondary ${
-          isVotingCartVisible ? "tab-active" : ""
+          activeTab === "votes" ? "tab-active" : ""
         }`}
         onClick={() => handleTabClick("votes")}
       >
@@ -340,15 +222,6 @@ const VoterTabBar = ({
           </span>
         )}
       </a>
-
-      {isVotingCartVisible && (
-        <a
-          className="tab tab-md font-bold ml-auto"
-          onClick={() => setIsVotingCartVisible(false)}
-        >
-          <HiXCircle className="w-5 h-5" />
-        </a>
-      )}
     </div>
   );
 };
@@ -363,13 +236,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-export const VoteTab = ({
-  contestId,
-  votingPolicy,
-}: {
-  contestId: string;
-  votingPolicy: any;
-}) => {
+export const VoteTab = ({ contestId }: { contestId: string }) => {
   const {
     removeAllVotes,
     proposedVotes,
@@ -381,7 +248,6 @@ export const VoteTab = ({
 
   const { liveSubmissions } = useTrackSubmissions(contestId);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isVotingPolicyModalOpen, setIsVotingPolicyModalOpen] = useState(false);
   const displayableVotesSpent = formatDecimal(votesSpent);
   const displayableVotesRemaining = formatDecimal(votesRemaining);
   const displayableTotalVotingPower = formatDecimal(totalVotingPower);
@@ -484,9 +350,9 @@ export const VoteTab = ({
             </div>
             <div className="p-4"></div>
             <h1 className="text-center text-t2">No entries selected.</h1>
-            <p className="text-center text-t2">
-              Select entries by clicking the plus sign in the bottom right
-              corner.
+            <p className="text-center text-t2 px-8">
+              Select entries by hovering a submission and clicking the plus sign
+              in the bottom right corner.
             </p>
           </div>
           <div className="p-10"></div>
@@ -517,74 +383,57 @@ export const VoteTab = ({
             <p className="mt-auto">{displayableVotesRemaining.short}</p>
           </div>
         </div>
-        <div className="flex gap-2 items-center justify-center bg-base-100 p-2 rounded text-t2">
-          <a
-            className="underline cursor-pointer hover:text-gray-400"
-            onClick={() => setIsVotingPolicyModalOpen(true)}
-          >
-            How is voting power calculated?
-          </a>
-        </div>
       </motion.div>
       <VoteButton setIsEditMode={setIsEditMode} />
-      <Modal
-        isModalOpen={isVotingPolicyModalOpen}
-        onClose={() => {
-          setIsVotingPolicyModalOpen(false);
-        }}
-      >
-        <VotingPolicyModalContent votingPolicy={votingPolicy} />
-      </Modal>
     </motion.div>
   );
 };
 
-const SidebarVote = ({
-  spaceName,
-  contestId,
+const DetailsTab = ({
   voterRewards,
   votingPolicy,
-  openRewardsModal,
-  openVotingPolicyModal,
 }: {
-  spaceName: string;
-  contestId: string;
   voterRewards: any;
   votingPolicy: any;
-  openRewardsModal: () => void;
-  openVotingPolicyModal: () => void;
 }) => {
+  return (
+    <motion.div
+      className="container h-[60vh]"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <div className="flex flex-col gap-2 p-4">
+        <h2 className="text-2xl font-bold">Details</h2>
+        <VoterRewardsSection voterRewards={voterRewards} />
+        <VotingPolicySection votingPolicy={votingPolicy} />
+      </div>
+    </motion.div>
+  );
+};
+
+const SidebarVote = ({ contestId }: { contestId: string }) => {
   const [activeTab, setActiveTab] = useState("votes");
-  const [isVotingCartVisible, setIsVotingCartVisible] = useState(true);
-  const { proposedVotes } = useVoteActionContext();
+  const { contestState } = useContestState();
+  const { areUserVotingParamsLoading } = useVoteActionContext();
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
-    if (tab === "votes" && !isVotingCartVisible) {
-      setIsVotingCartVisible(true);
-    }
   };
-
-  return (
-    <div className="hidden lg:flex lg:flex-col lg:w-5/12 xl:w-1/3 items-center gap-4">
-      <ContestRewards
-        voterRewards={voterRewards}
-        openRewardsModal={openRewardsModal}
-      />
-      <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
-        <VoterTabBar
-          handleTabClick={handleTabClick}
-          isVotingCartVisible={isVotingCartVisible}
-          setIsVotingCartVisible={setIsVotingCartVisible}
-        />
-        <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
-          {isVotingCartVisible && (
-            <VoteTab contestId={contestId} votingPolicy={votingPolicy} />
-          )}
+  if (contestState === "voting" && !areUserVotingParamsLoading) {
+    return (
+      <div className="hidden w-1/4 lg:flex lg:flex-col items-center gap-4">
+        <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
+          <VoterTabBar handleTabClick={handleTabClick} activeTab={activeTab} />
+          <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
+            {activeTab === "votes" && <VoteTab contestId={contestId} />}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+  // render a placeholder so the other flex's don't grow too wide
+  return <div className="w-0 lg:w-1/12"/>;
 };
 
 export default SidebarVote;

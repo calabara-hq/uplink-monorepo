@@ -12,7 +12,7 @@ export default async function Layout({
   modal,
 }: {
   children: React.ReactNode;
-  params: { name: string; id: string };
+  params: { id: string };
   modal: React.ReactNode;
 }) {
   const [contest, submissions] = await Promise.all([
@@ -24,26 +24,25 @@ export default async function Layout({
     [`submissions/${params.id}`]: submissions,
   };
 
+  console.log(JSON.stringify(contest, null, 2));
   const { deadlines, metadata, tweetId, space } = contest;
   return (
     <div className="w-full flex flex-col items-center p-4">
-      <div className="flex justify-center gap-6 m-auto w-full lg:w-11/12 ">
-        <ContestStateProvider
-          deadlines={deadlines}
-          metadata={metadata}
-          tweetId={tweetId}
-          contestAdmins={space.admins.map((admin) => admin.address)}
-        >
-          <SwrProvider fallback={fallback}>
-            <ContestInteractionProvider contestId={params.id}>
-              <VoteActionProvider contestId={params.id}>
-                {children}
-                {modal}
-              </VoteActionProvider>
-            </ContestInteractionProvider>
-          </SwrProvider>
-        </ContestStateProvider>
-      </div>
+      <ContestStateProvider
+        deadlines={deadlines}
+        metadata={metadata}
+        tweetId={tweetId}
+        contestAdmins={space.admins.map((admin) => admin.address)}
+      >
+        <SwrProvider fallback={fallback}>
+          <ContestInteractionProvider contestId={params.id}>
+            <VoteActionProvider contestId={params.id}>
+              {children}
+              {modal}
+            </VoteActionProvider>
+          </ContestInteractionProvider>
+        </SwrProvider>
+      </ContestStateProvider>
     </div>
   );
 }

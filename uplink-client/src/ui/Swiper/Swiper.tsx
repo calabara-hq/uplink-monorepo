@@ -10,7 +10,6 @@ export const Swiper = (props: {
   slidesPerView?: number;
   slidesPerGroup?: number;
   breakpoints?: any;
-
 }) => {
   const swiperRef = useRef(null);
   const { children, ...rest } = props;
@@ -29,10 +28,6 @@ export const Swiper = (props: {
   }, []);
 
   useEffect(() => {
-    // swiperRef.current.addEventListener("init", function () {
-    //   setIsReady(true);
-    // });
-
     // Register Swiper web component
     register();
 
@@ -42,14 +37,21 @@ export const Swiper = (props: {
       preventClicks: true,
       preventClicksPropagation: true,
       on: {
-        init: () => {
+        init: (swiper) => {
           setIsReady(true);
         },
-        slideChange: (data) => {
-          setDisablePrev(data.isBeginning);
-          setDisableNext(data.isEnd);
+        slideChange: (swiper) => {
+          setDisablePrev(swiper.isBeginning);
+          setDisableNext(swiper.isEnd);
         },
       },
+      injectStyles: [
+        `
+        .swiper {
+          overflow-y: visible;
+        }
+        `,
+      ],
     };
 
     // Assign it to swiper element
@@ -59,15 +61,11 @@ export const Swiper = (props: {
     swiperRef.current.initialize();
   }, []);
 
-  useEffect(() => {
-    console.log(swiperRef.current);
-  }, [swiperRef.current]);
-
   return (
     <div className="mx-auto w-full px-12 relative">
       {/* @ts-expect-error */}
       <swiper-container init="false" ref={swiperRef}>
-        {!isReady && <SwiperSkeleton/>}
+        {!isReady && <SwiperSkeleton />}
         {isReady && children}
         {/* @ts-expect-error */}
       </swiper-container>
@@ -104,13 +102,11 @@ export const SwiperSlide = (props) => {
 
 const SwiperSkeleton = () => {
   return (
-    <div className="mx-auto w-full px-12 relative">
-      <div className="flex flex-row gap-4">
-        <div className="w-full shimmer h-96 bg-base-100 rounded-lg" />
-        <div className="w-full shimmer h-96 bg-base-100 rounded-lg" />
-        <div className="w-full shimmer h-96 bg-base-100 rounded-lg" />
-        <div className="w-full shimmer h-96 bg-base-100 rounded-lg" />
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+      <div className="w-full shimmer h-64 bg-base-100 rounded-lg" />
+      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden md:block" />
+      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden lg:block" />
+      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden lg:block" />
     </div>
   );
 };

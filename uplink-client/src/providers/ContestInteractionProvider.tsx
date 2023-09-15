@@ -86,6 +86,7 @@ export type UserVotingParams =
 
 export interface ContestInteractionProps {
   submissions: Submission[];
+  mutateLiveSubmissions: any; //(newSubmissions: Submission[], options?: any) => void;
   areSubmissionsLoading: boolean;
   isSubmissionError: any;
   userSubmitParams: UserSubmissionParams;
@@ -275,7 +276,8 @@ export function ContestInteractionProvider({
     data: liveSubmissions,
     isLoading: areSubmissionsLoading,
     error: isSubmissionError,
-  }: { data: any; isLoading: boolean; error: any } = useSWR(
+    mutate: mutateLiveSubmissions,
+  }: { data: any; isLoading: boolean; error: any, mutate: any } = useSWR(
     `submissions/${contestId}`,
     () => fetchSubmissions(contestId),
     { refreshInterval: 10000 }
@@ -334,6 +336,7 @@ export function ContestInteractionProvider({
     <ContestInteractionContext.Provider
       value={{
         submissions: liveSubmissions,
+        mutateLiveSubmissions,
         areSubmissionsLoading,
         isSubmissionError,
         userSubmitParams,

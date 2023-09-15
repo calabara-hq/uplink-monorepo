@@ -298,10 +298,8 @@ export const createDbContest = async (contest: ContestData, user: any) => {
     const uniqueTokens = new Map();
 
     const insertUniqueToken = async (token) => {
-        console.log('the token is', JSON.stringify(token, null, 2))
         const tokenHash = djb2Hash(JSON.stringify(token)).toString(16);
 
-        console.log('the hash is', tokenHash)
         if (!uniqueTokens.has(tokenHash)) {
             const existingToken = await db
                 .select({ id: schema.tokens.id })

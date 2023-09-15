@@ -153,7 +153,7 @@ export default function SubmissionModal({
           }}
           className="flex w-full h-[500px] lg:h-[650px] gap-1 lg:gap-4 p-0"
         >
-          <div className="flex flex-col jusitfy-start w-full h-full">
+          <div className="flex flex-col jusitfy-start w-full h-full ">
             <ExpandedSubmission
               submission={submission}
               headerChildren={<AddToCartButton submission={submission} />}

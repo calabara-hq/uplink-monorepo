@@ -4,28 +4,29 @@ import {
   RemainingTimeLabel,
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
-import Noggles from "@/ui/Noggles/Noggles";
 import CardSubmission from "@/ui/Submission/CardSubmission";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
 import { BiPlusCircle } from "react-icons/bi";
-import { HiOutlineTrash, HiPhoto, HiSparkles } from "react-icons/hi2";
+import { HiPhoto } from "react-icons/hi2";
 import ArtistPfp from "@/../public/pumey_pfp.jpg";
 import ArtistSubmission from "@/../public/vinnie_noggles.png";
 import landingBg from "@/../public/landing-bg.svg";
-import videoEditor from "@/../public/video-editor.png";
 import { Swiper, SwiperSlide } from "@/ui/Swiper/Swiper";
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
-import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
+import { LuCoins, LuSettings2, LuVote, LuArrowRight } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
-import { motion } from "framer-motion";
-import ParallaxCards, {
-  DelayedGridItem,
-  DelayedGridLayout,
-} from "./spaces/ParallaxCards";
-import Parallax from "./spaces/ParallaxCards";
-import DelayedGrid from "./spaces/ParallaxCards";
+//import { DelayedGridItem, DelayedGridLayout } from "./DelayedGrid";
+// import dynamic from "next/dynamic";
+
+// const DelayedGridLayout = dynamic(() => import("./DelayedGridLayout"));
+
+// const DelayedGridItem = dynamic(() => import("./DelayedGridItem"));
+import DelayedGridLayout from "./DelayedGridLayout";
+import DelayedGridItem from "./DelayedGridItem";
+
+
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
@@ -129,6 +130,7 @@ const BannerSection = () => {
                   width={50}
                   height={50}
                   className="rounded-full"
+                  
                 />
                 <div className="flex-grow flex flex-col gap-2 ml-4">
                   <p className="text-t1">
@@ -140,6 +142,7 @@ const BannerSection = () => {
                         src={ArtistSubmission}
                         alt="twitter submission"
                         className="rounded-lg object-contain"
+                        priority
                       />
                     </div>
                     <div className="text-sm text-t2 italic font-[500] self-start text-left">
@@ -178,9 +181,8 @@ const BannerSection = () => {
       <Image
         src={landingBg}
         alt=""
-        layout="fill"
-        objectFit="cover"
-        className="absolute !h-[80%] !bottom-0 !left-0 !top-auto"
+        fill
+        className="absolute !h-[80%] !bottom-0 !left-0 !top-auto object-cover"
       />
     </div>
   );
@@ -215,9 +217,9 @@ const ContestCard = ({
   );
   return (
     <Link
-      className="card bg-base-100 
+      className="card bg-base-100 animate-scrollInX
     cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full transform 
-    transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
+    transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform no-select"
       href={linkTo}
     >
       <div className="card-body items-center p-0">
@@ -261,30 +263,117 @@ const ActiveContests = async () => {
   const activeContests = await getActiveContests();
   if (activeContests.length > 0) {
     return (
-      <div className="flex flex-col gap-2">
-        <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {activeContests.map((contest, idx) => {
-            return (
-              <ContestCard
-                key={idx}
-                contestId={contest.id}
-                promptUrl={contest.promptUrl}
-                spaceName={contest.space.name}
-                spaceDisplayName={contest.space.displayName}
-                spaceLogo={contest.space.logoUrl}
-                linkTo={`${contest.space.name}/contest/${contest.id}`}
-                metadata={contest.metadata}
-                deadlines={contest.deadlines}
-                tweetId={contest.tweetId}
-              />
-            );
-          })}
+      <div className="w-full flex flex-col gap-4">
+        <h1 className="font-bold text-3xl text-t1 px-12">Active Contests</h1>
+
+        <div className="w-full">
+          <Swiper
+            spaceBetween={30}
+            slidesPerView={3}
+            slidesPerGroup={3}
+            breakpoints={{
+              320: {
+                slidesPerView: 1,
+                slidesPerGroup: 1,
+                spaceBetween: 10,
+              },
+              500: {
+                slidesPerView: 2,
+                slidesPerGroup: 2,
+                spaceBetween: 10,
+              },
+              850: {
+                slidesPerView: 3,
+                slidesPerGroup: 3,
+                spaceBetween: 20,
+              },
+              1200: {
+                slidesPerView: 4,
+                slidesPerGroup: 4,
+                spaceBetween: 20,
+              },
+            }}
+          >
+            {[
+              ...activeContests,
+              ...activeContests,
+              ...activeContests,
+              ...activeContests,
+              ...activeContests,
+            ].map((contest, index) => (
+              <SwiperSlide key={index}>
+                <ContestCard
+                  contestId={contest.id}
+                  promptUrl={contest.promptUrl}
+                  spaceName={contest.space.name}
+                  spaceDisplayName={contest.space.displayName}
+                  spaceLogo={contest.space.logoUrl}
+                  linkTo={`${contest.space.name}/contest/${contest.id}`}
+                  metadata={contest.metadata}
+                  deadlines={contest.deadlines}
+                  tweetId={contest.tweetId}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </div>
     );
   }
   return null;
+};
+
+const PopularSubmissions = async () => {
+  const popularSubmissions = await getPopularSubmissions();
+
+  return (
+    <div className="w-full flex flex-col gap-2 m-auto">
+      <h1 className="font-bold text-3xl text-t1 px-12">Weekly Wave</h1>
+      <h2 className="text-lg text-t2 px-12">
+        Popular submissions. Updated weekly.
+      </h2>
+      <div className="w-full">
+        <Swiper
+          spaceBetween={30}
+          slidesPerView={3}
+          slidesPerGroup={3}
+          breakpoints={{
+            320: {
+              slidesPerView: 1,
+              slidesPerGroup: 1,
+              spaceBetween: 10,
+            },
+            500: {
+              slidesPerView: 2,
+              slidesPerGroup: 2,
+              spaceBetween: 10,
+            },
+            850: {
+              slidesPerView: 3,
+              slidesPerGroup: 3,
+              spaceBetween: 20,
+            },
+            1200: {
+              slidesPerView: 4,
+              slidesPerGroup: 4,
+              spaceBetween: 20,
+            },
+          }}
+        >
+          {popularSubmissions.map((submission, index) => (
+            <SwiperSlide key={index}>
+              <div className="w-full h-full animate-scrollInX">
+                <CardSubmission
+                  submission={submission}
+                  basePath={`${submission.spaceName}/contest/${submission.contestId}`}
+                />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+    </div>
+  );
 };
 
 const ContestBanner = () => {
@@ -336,41 +425,35 @@ const ContestBanner = () => {
     },
   ];
 
-  const categories: ContestCategory[] = [
-    "art",
-    "music",
-    "video",
-    "writing",
-    "photography",
-    "design",
-    "development",
-    "other",
-  ];
-
   return (
-    <div className="w-full m-auto grid grid-cols-2 rounded-xl bg-base-100 h-[60vh] bg-opacity-40">
-      <div className="flex flex-col h-full items-start justify-center w-1/2 m-auto gap-6 break-words ">
-        <span className="font-bold text-3xl">
+    <div className="w-full m-auto grid grid-cols-1 lg:grid-cols-2 rounded-xl bg-base-100 bg-opacity-40">
+      <div className="flex flex-col items-start md:items-center lg:items-start justify-end lg:justify-center w-3/4 lg:w-2/3 m-auto gap-6 break-words h-[36vh] lg:h-[60vh]">
+        <span className="flex flex-col gap-0.5 items-start font-bold text-3xl">
           <h1 className="text-t1">Unlimited flexibility</h1>
-          <h1 className="text-t2">for your next big idea </h1>
+          <h1 className="text-t2">for your next big idea. </h1>
         </span>
-        {/* <div className="flex gap-2 flex-wrap">
-          {categories.map((category, idx) => {
-            return <CategoryLabel category={category} />;
-          })}
-        </div> */}
-        <Link href={"/spacebuilder/create"}>
-          <h3 className="text-lg font-semibold hover:underline transition-all duration-200">
+        <Link
+          href={"/spacebuilder/create"}
+          className="btn btn-primary btn-md rounded-md normal-case shadow-black shadow-2xl"
+        >
+          <div className="flex items-center">
+            <p>Create a Contest</p>
+            <LuArrowRight className="w-6 h-6 ml-auto font-bold" />
+          </div>
+          {/* <h3 className="text-lg font-semibold hover:underline transition-all duration-200">
             Create a contest
-          </h3>
+          </h3> */}
         </Link>
       </div>
 
-      <div className="relative w-full overflow-hidden">
-        <DelayedGridLayout gridStyle="absolute top-0 left-0 w-full h-full grid grid-cols-3 auto-rows-fr gap-2 !rotate-[-20deg]">
+      <div className="relative w-full overflow-hidden h-[60vh]">
+        <DelayedGridLayout gridStyle="absolute top-0 left-0 md:right-0 w-[600px] h-full grid grid-cols-3 auto-rows-fr gap-2 !rotate-[-20deg]">
           {steps.map((step, idx) => {
             return (
-              <DelayedGridItem gridItemStyle="box border border-border p-2 rounded-xl flex flex-col gap-2 items-center justify-evenly">
+              <DelayedGridItem
+                key={idx}
+                gridItemStyle="box border border-border p-2 rounded-xl flex flex-col gap-2 items-center justify-evenly"
+              >
                 <h2 className="font-bold text-t1 text-xl text-center">
                   {step.name}
                 </h2>
@@ -384,66 +467,18 @@ const ContestBanner = () => {
   );
 };
 
-const PopularSubmissions = async () => {
-  const popularSubmissions = await getPopularSubmissions();
-
-  return (
-    <div className="w-full flex flex-col gap-2 m-auto">
-      <h1 className="font-bold text-3xl text-t1">Weekly Wave</h1>
-      <h2 className="text-lg text-t2">Popular submissions. Updated weekly.</h2>
-      <div className="w-full">
-        {/* <SubmissionCardSwiper submissions={[...popularSubmissions, ...popularSubmissions, ...popularSubmissions]}/> */}
-        <Swiper
-          spaceBetween={30}
-          slidesPerView={3}
-          slidesPerGroup={3}
-          breakpoints={{
-            320: {
-              slidesPerView: 1,
-              slidesPerGroup: 1,
-              spaceBetween: 10,
-            },
-            500: {
-              slidesPerView: 2,
-              slidesPerGroup: 2,
-              spaceBetween: 10,
-            },
-            850: {
-              slidesPerView: 3,
-              slidesPerGroup: 3,
-              spaceBetween: 20,
-            },
-            1200: {
-              slidesPerView: 4,
-              slidesPerGroup: 4,
-              spaceBetween: 20,
-            },
-          }}
-        >
-          {popularSubmissions.map((submission, index) => (
-            <SwiperSlide key={index}>
-              <CardSubmission
-                submission={submission}
-                basePath={`${submission.spaceName}/contest/${submission.contestId}`}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
-    </div>
-  );
-};
-
 export default async function Page() {
   return (
-    <div className="flex flex-col w-full gap-6 mb-16">
+    <div className="flex flex-col w-full gap-12 mb-16">
       <BannerSection />
-      <div className="flex flex-col w-10/12 m-auto gap-6">
+      <div className="flex flex-col w-full md:w-10/12 m-auto gap-12">
         {/*@ts-expect-error*/}
         <ActiveContests />
         {/*@ts-expect-error*/}
         <PopularSubmissions />
-        <ContestBanner />
+        <div className="w-full px-4 lg:px-12">
+          <ContestBanner />
+        </div>
       </div>
     </div>
   );

@@ -174,7 +174,7 @@ const VotingPolicyManager = ({
       <TokenManager
         setIsModalOpen={setIsModalOpen}
         saveCallback={saveTokenCallback}
-        existingTokens={votingPolicy.map((policy) => policy.token as IToken)}
+        existingTokens={votingPolicy.map(({ token, ...rest }) => token)}
         quickAddTokens={arraysSubtract(
           spaceTokens,
           votingPolicy.map((policy) => policy.token as IToken)
