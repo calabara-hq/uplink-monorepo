@@ -11,7 +11,7 @@ import WalletConnectButton2 from "../ConnectButton/ConnectButton2";
 
 export default function Sidebar() {
   return (
-    <div className="h-full w-full bg-base-100 shadow-lg hidden md:flex md:flex-col py-2">
+    <div className="h-full w-full bg-base-100 shadow-xl hidden md:flex md:flex-col py-2">
       <SideBarIcon
         icon={
           <Image src={uplinkLogo} alt="uplink logo" height={28} width={28} />

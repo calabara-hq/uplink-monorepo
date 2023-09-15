@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, Suspense, useEffect, useReducer, useState } from "react";
+import { Fragment, useEffect, useReducer, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   initialState,
@@ -22,20 +22,9 @@ import VoterRewards from "@/ui/ContestForm/VoterRewards";
 import SubmitterRestrictions from "@/ui/ContestForm//SubmitterRestrictions";
 import VotingPolicy from "@/ui/ContestForm//VotingPolicy";
 import Extras from "@/ui/ContestForm//AdditionalParameters";
-import {
-  CreateContestDocument,
-  CreateContestTweetDocument,
-} from "@/lib/graphql/contests.gql";
-import useHandleMutation from "@/hooks/useHandleMutation";
-import { ApiThreadItem, ThreadItem } from "@/hooks/useThreadCreator";
-import { nanoid } from "nanoid";
-import CreateThread from "../CreateThread/CreateThread";
 import { useRouter } from "next/navigation";
 import { HiArrowNarrowLeft, HiBadgeCheck } from "react-icons/hi";
 import {
-  HiInformationCircle,
-  HiLockClosed,
-  HiLockOpen,
   HiOutlineDocument,
   HiOutlineInformationCircle,
   HiOutlineLockClosed,
@@ -43,15 +32,13 @@ import {
   HiSparkles,
   HiXCircle,
 } from "react-icons/hi2";
-import { BiCategoryAlt, BiParty, BiTime } from "react-icons/bi";
-import { LuCoins, LuPartyPopper, LuSettings2, LuVote } from "react-icons/lu";
-import { TbMoneybag, TbPigMoney } from "react-icons/tb";
-import { GrMoney } from "react-icons/gr";
-import { toast } from "react-hot-toast";
+import { BiCategoryAlt, BiTime } from "react-icons/bi";
+import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import LoadingAnimation from "../LoadingAnimation/LoadingAnimation";
 import WalletConnectButton from "../ConnectButton/ConnectButton";
 import useSWRMutation from "swr/mutation";
 import CreateContestTweet from "./CreateContestTweet";
+import { toast } from "react-hot-toast";
 
 const validateContestParams = (contestState: ContestBuilderProps) => {
   const {
@@ -652,7 +639,7 @@ const AddTweetDialogue = ({
             className="btn btn-ghost text-t2"
             onClick={() => {
               router.refresh();
-              router.push(`${spaceName}/contest/${contestId}`);
+              router.push(`/${spaceName}/contest/${contestId}`);
             }}
           >
             Go to contest
@@ -701,7 +688,7 @@ const RenderSuccessScreen = ({ contestId, spaceName }) => {
         className="btn btn-ghost text-t2"
         onClick={() => {
           router.refresh();
-          router.push(`${spaceName}/contest/${contestId}`);
+          router.push(`/${spaceName}/contest/${contestId}`);
         }}
       >
         Go to contest

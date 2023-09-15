@@ -37,7 +37,7 @@ const getSpace = async (name: string) => {
 export default async function Page({ params }: { params: { name: string } }) {
   const { id, spaceTokens } = await getSpace(params.name);
   return (
-    <div className="w-full h-full lg:w-9/12 m-auto">
+    <div className="w-11/12 h-full lg:w-9/12 m-auto">
       <ContestForm
         spaceName={params.name}
         spaceId={id}

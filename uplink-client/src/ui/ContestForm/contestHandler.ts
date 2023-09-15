@@ -1,6 +1,7 @@
 
 import { ThreadItem } from "@/hooks/useThreadCreator";
 import { handleMutationError } from "@/lib/handleMutationError";
+import { ContestCategory, ContestType } from "@/types/contest";
 import { IToken, IERCToken, INativeToken } from "@/types/token";
 import { OutputData } from "@editorjs/editorjs";
 
@@ -41,7 +42,7 @@ export type SubmitterRestriction = {
 
 export type ArcadeStrategy = {
     type: "arcade";
-    votingPower?: string;
+    votingPower: string;
 }
 
 export type WeightedStrategy = {
@@ -51,7 +52,7 @@ export type WeightedStrategy = {
 export type VotingPolicyType = {
     token?: IToken;
     strategy?: ArcadeStrategy | WeightedStrategy;
-} & ({ strategy: ArcadeStrategy; votingPower: string } | { strategy: WeightedStrategy });
+}
 
 export interface Prompt {
     title: string;
@@ -75,8 +76,8 @@ export interface AdditionalParams {
 }
 
 export type Metadata = {
-    type: string | null;
-    category: string | null;
+    type: ContestType | string | null;
+    category: ContestCategory | null;
 }
 
 export interface ContestBuilderProps {
@@ -180,15 +181,18 @@ export const cleanSubmitterRewards = (submitterRewards: SubmitterRewards) => {
             seenERC1155 = true;
         }
 
-        return cleanedPayout;
-    })
+        // if the payout is empty, return null
+        const { rank, ...rest } = cleanedPayout;
+        return someFieldPopulated(rest) ? cleanedPayout : null;
+    }).filter((el) => el !== null) // filter null values after the map
 
     return {
         ...(seenETH ? { ETH: submitterRewards.ETH } : {}),
         ...(seenERC20 ? { ERC20: submitterRewards.ERC20 } : {}),
         ...(seenERC721 ? { ERC721: submitterRewards.ERC721 } : {}),
         ...(seenERC1155 ? { ERC1155: submitterRewards.ERC1155 } : {}),
-        ...(cleanedPayouts ? { payouts: cleanedPayouts } : {}),
+        // cleaned payouts can be undefined if empty obj is passed
+        ...(cleanedPayouts?.length ?? 0 > 0 ? { payouts: cleanedPayouts } : {}),
     }
 };
 
@@ -213,15 +217,23 @@ export const cleanVoterRewards = (voterRewards: VoterRewards) => {
             seenERC20 = true;
         }
 
-        return cleanedPayout;
-    })
+        // if the payout is empty, return null
+        const { rank, ...rest } = cleanedPayout;
+        return someFieldPopulated(rest) ? cleanedPayout : null;
+    }).filter((el) => el !== null) // filter null values after the map
 
     return {
         ...(seenETH ? { ETH: voterRewards.ETH } : {}),
         ...(seenERC20 ? { ERC20: voterRewards.ERC20 } : {}),
-        ...(cleanedPayouts ? { payouts: cleanedPayouts } : {}),
+        ...(cleanedPayouts?.length ?? 0 > 0 ? { payouts: cleanedPayouts } : {}),
     }
 };
+
+// detect if a field in an object is ! empty string
+const someFieldPopulated = (fields: any) => {
+    return Object.values(fields).some(field => field !== "")
+}
+
 
 // validation
 
@@ -241,7 +253,7 @@ export const validateMetadata = (metadata: Metadata) => {
     }
 
     return {
-        isError: errors.type || errors.category,
+        isError: someFieldPopulated(errors),
         errors,
         data: {
             type,
@@ -266,7 +278,7 @@ export const validateDeadlines = (deadlines: Deadlines, clean: boolean) => {
     if (!calculatedStartTime) errors.startTime = "start date is required";
     if (!voteTime) errors.voteTime = "vote date is required";
     if (!endTime) errors.endTime = "end date is required";
-    if (errors.snapshot || errors.startTime || errors.voteTime || errors.endTime) return { errors, data: deadlines }
+    if (errors.snapshot || errors.startTime || errors.voteTime || errors.endTime) return { isError: true, errors, data: deadlines }
 
 
     // check that dates are in the correct order
@@ -287,7 +299,7 @@ export const validateDeadlines = (deadlines: Deadlines, clean: boolean) => {
 
     return {
         errors,
-        isError: errors.snapshot || errors.startTime || errors.voteTime || errors.endTime,
+        isError: someFieldPopulated(errors),
         data: cleanedDeadlines
     }
 }
@@ -301,15 +313,15 @@ export const validatePrompt = (prompt: Prompt) => {
     };
 
     const pattern = /^https:\/\/uplink\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+/;
-    if (!title) errors.title = "Please enter a title";
-    if (!body || body?.blocks.length < 1) errors.body = "Please enter a prompt body";
+    if (!title) errors.title = "Please provide a title";
+    if (!body || body?.blocks.length < 1) errors.body = "Please provide a prompt body";
     if (coverUrl) {
         if (!pattern.test(coverUrl)) errors.coverUrl = "Invalid cover image";
     }
 
     return {
         errors,
-        isError: errors.title || errors.body || errors.coverUrl,
+        isError: someFieldPopulated(errors),
         data: {
             title,
             body,
@@ -405,7 +417,7 @@ export const validateVotingPolicy = (votingPolicy: VotingPolicyType[]) => {
     if (votingPolicy.length === 0) error = "Please add at least one voting policy";
     return {
         errors: error,
-        isError: error,
+        isError: !!error,
         data: votingPolicy
     }
 

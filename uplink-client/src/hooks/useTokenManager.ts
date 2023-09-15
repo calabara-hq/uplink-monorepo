@@ -129,7 +129,6 @@ const fetchSymbolAndDecimals = async (address: string, type: ERCOptions) => {
 };
 
 
-
 /**
  * useTokenManager handles all logic related to adding a token
  * it can also be used in continuous mode, where it will not reset after adding a token
@@ -226,6 +225,9 @@ export const useTokenManager = ({
         handleTokenConflicts();
     };
 
+
+
+
     /*
      * when existing tokens are passed in, conflicts occur in 2 forms
      * 1. the user is trying to add a token that already exists
@@ -235,22 +237,33 @@ export const useTokenManager = ({
      */
 
     const handleTokenConflicts = () => {
-        const currentToken = state.quickAddToken || state.customToken;
+        const currentToken = state.quickAddToken || state.customToken as IERCToken;
 
         if (existingTokens) {
-            const tokenAlreadyExists = existingTokens.some((el) => {
-                if (isERCToken(el)) {
-                    return JSON.stringify(el) === JSON.stringify(currentToken);
-                }
-            });
 
-            if (tokenAlreadyExists) {
-                return dispatch({
-                    type: "setCustomTokenErrors",
-                    payload: {
-                        address: "This token is already in your list",
-                    },
-                });
+            for (const existingToken of existingTokens) {
+
+                if (isERCToken(existingToken) && isERCToken(currentToken)) {
+                    if (existingToken.address === currentToken.address) {
+                        if (currentToken.type === "ERC1155") {
+                            // set tokenid error
+                            return dispatch({
+                                type: "setCustomTokenErrors",
+                                payload: {
+                                    tokenId: "This token id is already in your list",
+                                },
+                            });
+                        }
+                        else {
+                            return dispatch({
+                                type: "setCustomTokenErrors",
+                                payload: {
+                                    address: "This token is already in your list",
+                                },
+                            });
+                        }
+                    }
+                }
             }
 
             // handle case 2

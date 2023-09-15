@@ -1,6 +1,6 @@
 import { BlockWrapper } from "./Entrypoint";
 import { HiCheckBadge, HiInformationCircle } from "react-icons/hi2";
-import { ContestCategory } from "@/ui/ContestLabels/ContestLabels";
+import { ContestCategory } from "@/types/contest";
 import { useState } from "react";
 import { validateMetadata, Metadata, MetadataError } from "./contestHandler";
 
@@ -11,7 +11,8 @@ const categories: ContestCategory[] = [
   "video",
   "photography",
   "design",
-  "other",
+  "memes",
+  "other"
 ];
 
 const ContestMetadata = ({

@@ -1,15 +1,5 @@
 import { BiTime } from "react-icons/bi";
-
-export type ContestCategory =
-  | "art"
-  | "music"
-  | "writing"
-  | "video"
-  | "photography"
-  | "design"
-  | "development"
-  | "memes"
-  | "other";
+import { ContestCategory } from "@/types/contest";
 
 // return color for contest category
 const contestCategoryColor = (contestCategory: ContestCategory) => {
@@ -43,11 +33,6 @@ const contestCategoryColor = (contestCategory: ContestCategory) => {
       return {
         text: "text-purple-300",
         bg: "bg-purple-300",
-      };
-    case "development":
-      return {
-        text: "text-pink-300",
-        bg: "bg-pink-300",
       };
     case "memes":
       return {

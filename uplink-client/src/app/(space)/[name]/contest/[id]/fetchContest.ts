@@ -32,15 +32,6 @@ export const getContestById = async (contestId: string) => {
               endTime
               snapshot
             }
-            submissions {
-              id
-              contestId
-              author
-              created
-              type
-              url
-              version
-            }
             submitterRestrictions {
               restrictionType
               tokenRestriction {
