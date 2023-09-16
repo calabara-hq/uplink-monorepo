@@ -54,34 +54,55 @@ const SubmissionCardVote = ({
   const { removeSingleVote } = useVoteActionContext();
 
   return (
-    <div className="grid grid-cols-3 w-full h-24 max-h-24">
-      <div className="flex flex-col items-center justify-center rounded-l-xl bg-base-100 h-full w-full p-1">
-        {submission.data.type === "text" && (
-          <CartTextSubmission submission={submission} />
-        )}
-        {submission.data.type !== "text" && (
-          <CartMediaSubmission submission={submission} />
-        )}
-      </div>
-      <div className="flex flex-col items-start justify-center bg-base-100 h-full w-full p-1 break-all">
-        <p className="text-base line-clamp-3 text-t1">
-          {submission.data.title}
-        </p>
-      </div>
-      <div className="flex flex-col rounded-r-xl bg-base-100 h-full w-full">
-        <div className="grid grid-rows-2 gap-1 ">
-          <div className=" rounded-tr-xl">
-            <button
-              className="btn btn-ghost normal-case w-full rounded-none rounded-tr-xl text-error"
-              onClick={() => removeSingleVote(submission.submissionId, mode)}
-            >
-              <p className="text-error font-[500]">remove</p>
-            </button>
-          </div>
-          <div className="rounded-br-xl">
-            <SubmissionVoteInput submission={submission} mode={mode} />
-          </div>
+    <div className="grid grid-cols-[70%_30%] w-full h-24 max-h-24 bg-base-100 rounded-xl">
+      {submission.data.type === "text" && (
+        <div className="grid grid-cols-1 w-full p-2">
+          <p className="text-base line-clamp-4 text-t1">
+            {submission.data.title}
+          </p>
         </div>
+      )}
+      {submission.data.type !== "text" && (
+        <div className="grid grid-cols-2 w-full p-2">
+          <CartMediaSubmission submission={submission} />
+        </div>
+      )}
+      <div className="grid grid-rows-2 ">
+        <div className="flex">
+          <button
+            className="btn btn-ghost btn-sm ml-auto text-error"
+            onClick={() => removeSingleVote(submission.submissionId, mode)}
+          >
+            <HiTrash className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="rounded-br-xl">
+          <SubmissionVoteInput submission={submission} mode={mode} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LockedCardVote = ({ submission }: { submission: any }) => {
+  const displayableVotes = formatDecimal(submission.votes);
+
+  return (
+    <div className="grid grid-cols-[70%_30%] gap-2 h-20 min-h-20 bg-base-100 rounded-xl">
+      {submission.data.type === "text" && (
+        <div className="grid grid-cols-1 w-full p-2">
+          <p className="text-base line-clamp-4 text-t1">
+            {submission.data.title}
+          </p>
+        </div>
+      )}
+      {submission.data.type !== "text" && (
+        <div className="grid grid-cols-2 w-full p-2">
+          <CartMediaSubmission submission={submission} />
+        </div>
+      )}
+      <div className="flex flex-col items-center justify-center m-auto gap-1 px-2">
+        <p>{displayableVotes.short}</p>
       </div>
     </div>
   );
@@ -89,46 +110,14 @@ const SubmissionCardVote = ({
 
 const CartMediaSubmission = ({ submission }: { submission: any }) => {
   return (
-    <figure className="relative w-full h-full rounded-xl">
+    <figure className="relative w-full h-full rounded-xl p-2">
       <Image
         src={submission.data.previewAsset}
         alt="submission image"
         fill
-        className="object-contain rounded-xl"
+        className="object-cover rounded-xl"
       />
     </figure>
-  );
-};
-
-const CartTextSubmission = ({ submission }: { submission: any }) => {
-  return (
-    <HiDocumentText className="h-full w-full max-w-[80%] text-t2 object-contain text-center " />
-  );
-};
-
-const LockedCardVote = ({ submission }: { submission: any }) => {
-  const displayableVotes = formatDecimal(submission.votes);
-  return (
-    <div
-      className="flex flex-row w-full h-16 min-h-16 bg-base-100 rounded-xl
-                    cursor-pointer-none"
-    >
-      {submission.data.type === "text" && (
-        <CartTextSubmission submission={submission} />
-      )}
-      {submission.data.type !== "text" && (
-        <CartMediaSubmission submission={submission} />
-      )}
-      <div className="flex flex-row justify-center items-center gap-4 p-2 w-full">
-        <h2 className="text-base overflow-hidden overflow-ellipsis whitespace-nowrap text-center w-3/4">
-          {submission.data.title}
-        </h2>
-        {/*<SubmissionVoteInput submission={submission} mode={mode} />*/}
-        <div className="flex flex-col items-center justify-center ml-auto gap-1 px-2">
-          <p>{displayableVotes.short}</p>
-        </div>
-      </div>
-    </div>
   );
 };
 
@@ -162,7 +151,7 @@ export const VoteButton = ({
   return (
     <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-9/10 m-2">
       <button
-        className="btn btn-primary flex flex-1 normal-case"
+        className="btn btn-warning flex flex-1 normal-case"
         onClick={handleSubmit}
         disabled={!isVoteButtonEnabled}
       >
@@ -248,7 +237,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
       )}
       {currentVotes.length > 0 && (
         <motion.div
-          className="flex flex-col gap-4 p-2 m-2 max-h-80 overflow-y-auto bg-neutral rounded-lg"
+          className="flex flex-col gap-2 p-2 m-2 max-h-80 overflow-y-auto bg-base-200 rounded-lg"
           variants={itemVariants}
         >
           <div className="flex flex-row w-full justify-between items-center">
@@ -295,7 +284,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
               <p className="">+ Your proposed additions</p>
             </div>
           )}
-          <div className="flex flex-col gap-4 p-2 max-h-80 overflow-y-auto">
+          <div className="flex flex-col gap-2 p-2 max-h-80 overflow-y-auto">
             {proposedVotes.map((submission: any, idx: number) => (
               <SubmissionCardVote
                 key={idx}
@@ -372,7 +361,7 @@ const SidebarVote = ({ contestId }: { contestId: string }) => {
 
   if (contestState === "voting") {
     return (
-      <div className="hidden w-1/4 lg:flex lg:flex-col items-center gap-4">
+      <div className="hidden w-1/3 lg:flex lg:flex-col items-center gap-4">
         <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
           <div className="flex flex-row items-center gap-2">
             <h2 className="text-t1 text-lg font-semibold">My Selections </h2>

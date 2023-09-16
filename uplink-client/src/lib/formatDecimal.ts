@@ -9,6 +9,12 @@ const formatDecimal = (value: string) => {
         short: '0',
         long: '0'
     }
+    else if (toFloat < 0) {
+        return {
+            short: 0,
+            long: 0
+        }
+    }
     else if (toFloat < 0.0001) {
         return {
             short: scientific_formatter.format(toFloat),

@@ -140,17 +140,7 @@ export default function SubmissionModal({
   return (
     <Modal isModalOpen={true} onClose={() => router.back()}>
       <AnimatePresence mode="wait">
-        <motion.div
-          key={index}
-          variants={variants}
-          //custom={direction}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{
-            x: { type: "spring", stiffness: 300, damping: 30 },
-            opacity: { duration: 0.1 },
-          }}
+        <div
           className="flex w-full h-[500px] lg:h-[650px] gap-1 lg:gap-4 p-0"
         >
           <div className="flex flex-col jusitfy-start w-full h-full ">
@@ -159,7 +149,7 @@ export default function SubmissionModal({
               headerChildren={<AddToCartButton submission={submission} />}
             />
           </div>
-        </motion.div>
+        </div>
       </AnimatePresence>
     </Modal>
   );

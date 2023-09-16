@@ -182,7 +182,7 @@ const RenderImageSubmission = ({ submission }) => {
         alt="submission image"
         fill
         sizes="30vw"
-        className="object-contain w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
+        className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
       />
     </ImageWrapper>
   );
@@ -263,7 +263,6 @@ const CardSubmission = ({
       {submission.data.type === "text" && (
         <RenderTextSubmission submission={submission} />
       )}
-      <div className="p-2 w-full" />
       {footerChildren}
     </Link>
   );

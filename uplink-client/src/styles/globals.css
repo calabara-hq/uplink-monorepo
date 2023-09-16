@@ -89,3 +89,8 @@
   display: none;
 }
 
+.modal {
+  ::-webkit-scrollbar {
+    width: 0px;
+  }
+}

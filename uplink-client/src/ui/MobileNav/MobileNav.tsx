@@ -12,7 +12,7 @@ const MobileNav = () => {
         <span className="btm-nav-label">Home</span>
       </Link>
 
-      <Link href="/explore">
+      <Link href="/spaces">
         <HiMagnifyingGlass className="h-8 w-8" />
         <span className="btm-nav-label">spaces</span>
       </Link>
