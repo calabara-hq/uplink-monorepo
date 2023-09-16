@@ -8,7 +8,7 @@
 - federated by a rust api router
 
 ### Local Development
-
+   
 The Makefile in the hub root contains recipes to target various setups. In a local envioronment, the hub can be started with 
 
 ```
