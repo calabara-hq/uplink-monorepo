@@ -6,7 +6,7 @@ First, copy .env.sample to .env.local.
 set the ALCHEMY_KEY variable of your .env.local
 
 Then run the development server:
-
+ 
 ```bash
 yarn install
 yarn dev
