@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { register } from "swiper/element/bundle";
-import { Navigation } from "swiper/modules";
+import { Navigation, Grid } from "swiper/modules";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 export const Swiper = (props: {
@@ -45,6 +45,10 @@ export const Swiper = (props: {
           setDisableNext(swiper.isEnd);
         },
       },
+      // modules: [Grid],
+      // grid: { rows: 1 },
+      centeredSlides: true,
+      centeredSlidesBounds: true,
       injectStyles: [
         `
         .swiper {
@@ -71,7 +75,7 @@ export const Swiper = (props: {
       </swiper-container>
       {!disablePrev && (
         <div
-          className="absolute flex flex-col justify-center items-center hover:bg-base-100 opacity-60 h-full w-8 left-0 top-0 cursor-pointer transition-all duration-300 ease-in-out rounded-lg"
+          className="absolute hidden md:flex md:flex-col justify-center items-center hover:bg-base-100 opacity-60 h-full w-8 left-0 top-0 cursor-pointer transition-all duration-300 ease-in-out rounded-lg"
           onClick={handlePrev}
         >
           <HiChevronLeft className="h-10 w-10 text-t1" />
@@ -79,7 +83,7 @@ export const Swiper = (props: {
       )}
       {!disableNext && (
         <div
-          className="absolute flex flex-col justify-center items-center hover:bg-base-100 opacity-60 h-full w-8 right-0 top-0 cursor-pointer transition-all duration-300 ease-in-out rounded-lg"
+          className="absolute hidden md:flex md:flex-col justify-center items-center hover:bg-base-100 opacity-60 h-full w-8 right-0 top-0 cursor-pointer transition-all duration-300 ease-in-out rounded-lg"
           onClick={handleNext}
         >
           <HiChevronRight className="h-10 w-10 text-t1" />
@@ -91,11 +95,13 @@ export const Swiper = (props: {
 
 export const SwiperSlide = (props) => {
   const { children, ...rest } = props;
-
   return (
     <>
       {/* @ts-expect-error */}
-      <swiper-slide {...rest}>{children}</swiper-slide>
+      <swiper-slide {...rest} style={{ height: "auto" }}>
+        {children}
+        {/* @ts-expect-error */}
+      </swiper-slide>
     </>
   );
 };

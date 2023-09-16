@@ -98,11 +98,11 @@ const getPopularSubmissions = async () => {
 
 const BannerSection = () => {
   return (
-    <div className="w-full h-screen flex flex-col bg-base-100 relative">
+    <div className="w-full h-screen min-h-[750px] flex-grow flex flex-col bg-base-100 relative">
       <div className="grid place-items-center items-center bg-gradient-to-br">
         <div className="hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-5 lg:gap-10 lg:flex-row xl:gap-20 z-[1]">
           <div className="lg:pl-10 ">
-            <div className="mb-2 py-4 text-left ">
+            <div className="flex flex-col gap-2 mb-2 py-4 text-left ">
               <div className="flex gap-2">
                 <h1 className="mb-2 text-5xl font-[700] text-t1 w-fit">
                   Unleash your biggest fans
@@ -115,7 +115,7 @@ const BannerSection = () => {
               </h2>
             </div>
           </div>
-          <div className="m-auto w-full max-w-xs sm:max-w-sm lg:max-w-lg animate-springUp">
+          <div className="m-auto w-full max-w-[300px] sm:max-w-sm lg:max-w-lg animate-springUp">
             <div className="mockup-window bg-base-100 border border-border">
               <div className="grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
                 <Image
@@ -266,7 +266,7 @@ const ActiveContests = async () => {
             slidesPerGroup={3}
             breakpoints={{
               320: {
-                slidesPerView: 1,
+                slidesPerView: 1.4,
                 slidesPerGroup: 1,
                 spaceBetween: 10,
               },
@@ -278,12 +278,12 @@ const ActiveContests = async () => {
               850: {
                 slidesPerView: 3,
                 slidesPerGroup: 3,
-                spaceBetween: 20,
+                spaceBetween: 16,
               },
               1200: {
                 slidesPerView: 4,
                 slidesPerGroup: 4,
-                spaceBetween: 20,
+                spaceBetween: 16,
               },
             }}
           >
@@ -327,12 +327,12 @@ const PopularSubmissions = async () => {
       </h2>
       <div className="w-full">
         <Swiper
-          spaceBetween={30}
+          spaceBetween={16} 
           slidesPerView={3}
           slidesPerGroup={3}
           breakpoints={{
             320: {
-              slidesPerView: 1,
+              slidesPerView: 1.4,
               slidesPerGroup: 1,
               spaceBetween: 10,
             },
@@ -344,12 +344,12 @@ const PopularSubmissions = async () => {
             850: {
               slidesPerView: 3,
               slidesPerGroup: 3,
-              spaceBetween: 20,
+              spaceBetween: 16,
             },
             1200: {
               slidesPerView: 4,
               slidesPerGroup: 4,
-              spaceBetween: 20,
+              spaceBetween: 16,
             },
           }}
         >
