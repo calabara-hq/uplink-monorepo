@@ -61,7 +61,9 @@ const SubmissionFooter = ({ submission, sharePath }) => {
   const voteActions = useVoteActionContext();
   const { contestState } = useContestState();
   const [shareText, setShareText] = useState("Share");
-  const handleShare = () => {
+  const handleShare = (event) => {
+    event.stopPropagation();
+    event.preventDefault();
     setShareText("Copied Link");
     navigator.clipboard.writeText(sharePath);
     setTimeout(() => {
@@ -71,11 +73,12 @@ const SubmissionFooter = ({ submission, sharePath }) => {
 
   return (
     <div className="flex flex-col w-full">
+      <div className="p-2 w-full" />
       <div className="grid grid-cols-3 w-full items-center">
         <span className="tooltip tooltip-top mr-auto" data-tip={shareText}>
           <button
             className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-primary hover:bg-opacity-30 hover:text-primary"
-            onClick={handleShare}
+            onClick={(e) => handleShare(e)}
           >
             <FaShare className="h-6 w-6 " />
           </button>

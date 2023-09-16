@@ -47,7 +47,7 @@ const RenderImageSubmission = ({ submission }: { submission: Submission }) => {
         }
         alt="submission image"
         fill
-        className="object-contain w-full h-full overflow-hidden"
+        className="object-contain rounded-xl w-full h-full overflow-hidden"
       />
     </ImageWrapper>
   );
@@ -68,7 +68,7 @@ const RenderVideoSubmission = ({ submission }: { submission: Submission }) => {
           }
           preload="auto"
           crossOrigin=""
-          className="w-full aspect-video object-cover rounded-lg"
+          className="w-full aspect-video object-cover rounded-xl"
           poster={
             submission.type === "twitter"
               ? submission.data.thread[0].previewAsset
@@ -77,7 +77,7 @@ const RenderVideoSubmission = ({ submission }: { submission: Submission }) => {
         />
         <MediaLoadingIndicator slot="centered-chrome" />
 
-        <div className="flex flex-col items-end justify-end w-full m-auto bg-gradient-to-t from-black rounded-b-lg">
+        <div className="flex flex-col items-end justify-end w-full m-auto bg-gradient-to-t from-black rounded-b-xl">
           <div className="flex w-full h-8 cursor-pointer">
             <MediaTimeRange className="bg-transparent w-full"></MediaTimeRange>
           </div>
@@ -123,19 +123,19 @@ const ExpandedSubmission = ({
         </div>
       </div>
       <div className="w-full h-0.5 bg-base-200" />
-      {submission.data.type === "video" && (
-        <>
-          <RenderVideoSubmission submission={submission} />
-          <div className="w-full h-0.5 bg-base-200" />
-        </>
-      )}
-      {submission.data.type === "image" && (
-        <>
-          <RenderImageSubmission submission={submission} />
-          <div className="w-full h-0.5 bg-base-200" />
-        </>
-      )}
-      <RenderSubmissionBody submission={submission} />
+      <div className="w-9/12 m-auto">
+        {submission.data.type === "video" && (
+          <div>
+            <RenderVideoSubmission submission={submission} />
+          </div>
+        )}
+        {submission.data.type === "image" && (
+          <div>
+            <RenderImageSubmission submission={submission} />
+          </div>
+        )}
+        <RenderSubmissionBody submission={submission} />
+      </div>
     </div>
   );
 };
