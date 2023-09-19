@@ -115,6 +115,7 @@ function djb2Hash(str) {
 }
 
 
+
 export const prepareContestPromptUrl = async (contestPrompt: Prompt) => {
     const prompt = { ...contestPrompt, version: 'uplink-v1' }
 
@@ -289,7 +290,7 @@ export const queueTweet = async (contestId: number, user: any, startTime: string
 }
 
 
-export const createDbContest = async (contest: ContestData, user: any) => {
+export const createDbContest = async (contest: ContestData) => {
     const spaceId = parseInt(contest.spaceId);
     const promptUrl = await prepareContestPromptUrl(contest.prompt);
 
@@ -406,5 +407,3 @@ export const createDbContest = async (contest: ContestData, user: any) => {
         throw new Error("database error: " + err.message)
     }
 };
-
-

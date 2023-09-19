@@ -21,6 +21,7 @@ import useVideoControls from "@/hooks/useVideoControls";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import "@/styles/videoPlayer.css";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
+import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 
 const RenderSubmissionBody = ({ submission }: { submission: Submission }) => {
   return (
@@ -116,9 +117,12 @@ const ExpandedSubmission = ({
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl text-t1 font-[500]">{submission.data.title}</h2>
         <div className="flex flex-row items-center">
-          <h3 className="text-lg text-t2">
-            {submission.author ?? "anonymous"}
-          </h3>
+          <div className="flex gap-2 items-center">
+            <UserAvatar address={submission.author} size={28} />
+            <h3 className="break-all italic text-sm text-t2 font-semibold">
+              <AddressOrEns address={submission.author} />
+            </h3>
+          </div>
           {headerChildren}
         </div>
       </div>
@@ -134,8 +138,8 @@ const ExpandedSubmission = ({
             <RenderImageSubmission submission={submission} />
           </div>
         )}
-        <RenderSubmissionBody submission={submission} />
       </div>
+      <RenderSubmissionBody submission={submission} />
     </div>
   );
 };

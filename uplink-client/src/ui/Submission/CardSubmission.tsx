@@ -27,6 +27,7 @@ import { useContestState } from "@/providers/ContestStateProvider";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { ParseBlocks } from "@/lib/blockParser";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
+import { TbCrown } from "react-icons/tb";
 
 const SubmissionBody = ({ submission }: { submission: Submission }) => {
   if (submission.data.type !== "text")
@@ -245,14 +246,21 @@ const CardSubmission = ({
 
   return (
     <Link
-      className="w-full h-full p-2 shadow-black shadow-sm flex flex-col justify-between rounded-xl bg-base-100 border border-border no-select transform 
-      transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
+      className="relative w-full h-full p-2 shadow-black shadow-sm flex flex-col justify-between rounded-xl bg-base-100 border border-border no-select transform 
+      transition-transform duration-300 hoverCard will-change-transform"
       ref={ref}
       href={`${basePath}/submission/${submission.id}`}
       onMouseEnter={() => !isMobileDevice && setIsActive(true)}
       onMouseLeave={() => !isMobileDevice && setIsActive(false)}
       draggable={false}
     >
+      {submission.rank && (
+        <TbCrown
+          className="absolute -top-3 -right-3 w-8 h-8 text-yellow-600"
+          fill="#facc15"
+        />
+      )}
+
       <SubmissionBody submission={submission} />
       {submission.data.type === "image" && (
         <RenderImageSubmission submission={submission} />
