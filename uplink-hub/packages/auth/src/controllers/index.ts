@@ -84,69 +84,6 @@ export const signOut = async (req, res) => {
         return res.send(true)
     })
 }
-/*
-
-export const initiateTwitterAuth = async (req, res) => {
-    const { scope } = req.body;
-    if (!req.session.user) return res.status(401).send('You must be logged in to initiate Twitter OAuth2')
-    const { url, codeVerifier, state: stateVerifier } = twitterClient.generateOAuth2AuthLink(twitterRedirect, { scope: twitterScopes[scope] });
-    req.session.SIWT = {
-        codeVerifier,
-        stateVerifier
-    }
-
-    res.send({ url, scope })
-}
-
-
-export const twitterOauth2 = async (req, res) => {
-    const { state, code } = req.query;
-
-    console.log('twitterOauth2', req.sessionID)
-
-    const { codeVerifier, stateVerifier } = req.session.SIWT;
-
-    if (!codeVerifier || !state || !stateVerifier || !code) {
-        return res.status(400).send('You denied the app or your session expired!');
-    }
-
-    if (state !== stateVerifier) {
-        return res.status(400).send('Stored tokens didnt match!');
-    }
-
-    // Obtain access token
-
-    twitterClient.loginWithOAuth2({ code, codeVerifier, redirectUri: twitterRedirect })
-        .then(async ({ client: loggedClient, accessToken, refreshToken, expiresIn }) => {
-            // {loggedClient} is an authenticated client in behalf of some user
-            // Store {accessToken} somewhere, it will be valid until {expiresIn} is hit.
-            // If you want to refresh your token later, store {refreshToken} (it is present if 'offline.access' has been given as scope)
-
-            // Example request
-            const { data: userObject } = await loggedClient.v2.me({ "user.fields": ["profile_image_url"] });
-
-            let now = new Date();
-            // add 1 hour and 55 minutes to the current time (access token expires in 2 hours)
-            now.setMinutes(now.getMinutes() + 115);
-            let expiresAt = now.toISOString();
-
-            req.session.user.twitter = {
-                ...userObject,
-                expiresAt: expiresAt,
-                accessToken: accessToken,
-            }
-            //TODO: send html page with success message
-            return res.sendStatus(200)
-        })
-        .catch((err) => {
-            console.log(err)
-            //TODO: send html page with error message
-            res.status(403).send('Invalid verifier or access tokens!')
-        });
-
-}
-
-*/
 
 export const initiateTwitterAuth = async (req, res) => {
     const { scope } = req.body;

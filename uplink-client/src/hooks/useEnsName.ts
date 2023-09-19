@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
+import { publicClient } from '@/lib/viem';
 
-const provider = new ethers.providers.AlchemyProvider('homestead', process.env.NEXT_PUBLIC_ALCHEMY_KEY)
 
 
 const useEnsName = (address: string) => {
@@ -12,7 +11,7 @@ const useEnsName = (address: string) => {
     useEffect(() => {
         async function fetchENSName() {
             try {
-                const name = await provider.lookupAddress(address);
+                const name = await publicClient.getEnsName({ address: address as `0x${string}` })
                 setEnsName(name);
                 setLoading(false);
             } catch (err) {
