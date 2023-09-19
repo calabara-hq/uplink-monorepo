@@ -202,7 +202,6 @@ const ContestCard = ({
   spaceLogo: string;
   tweetId: string | null;
 }) => {
-  const showSpace = spaceName && spaceDisplayName && spaceLogo;
   const { contestState, stateRemainingTime } = calculateContestStatus(
     deadlines,
     metadata.type,
@@ -212,7 +211,7 @@ const ContestCard = ({
     <Link
       className="card bg-base-100 animate-scrollInX
     cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full transform 
-    transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform no-select"
+    transition-transform duration-300 hoverCard will-change-transform no-select"
       href={linkTo}
     >
       <div className="card-body items-center p-0">
@@ -327,7 +326,7 @@ const PopularSubmissions = async () => {
       </h2>
       <div className="w-full">
         <Swiper
-          spaceBetween={16} 
+          spaceBetween={16}
           slidesPerView={3}
           slidesPerGroup={3}
           breakpoints={{
@@ -429,13 +428,7 @@ const ContestBanner = () => {
           href={"/spacebuilder/create"}
           className="btn btn-primary btn-md rounded-md normal-case shadow-black shadow-2xl"
         >
-          <div className="flex items-center">
-            <p>Create a Contest</p>
-            <LuArrowRight className="w-6 h-6 ml-auto font-bold" />
-          </div>
-          {/* <h3 className="text-lg font-semibold hover:underline transition-all duration-200">
-            Create a contest
-          </h3> */}
+          Create a Contest
         </Link>
       </div>
 

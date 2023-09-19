@@ -45,7 +45,7 @@ const Modal = ({
       <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-[#00000080] transition-colors duration-300 ease-in-out">
         <div
           ref={modalRef}
-          className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-4xl animate-springUp"
+          className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-4xl h-full animate-springUp"
         >
           {children}
         </div>
@@ -53,27 +53,6 @@ const Modal = ({
     );
   }
   return null;
-};
-
-const variants = {
-  enter: (direction: number) => {
-    return {
-      x: direction > 0 ? "100%" : "-100%",
-      opacity: 0,
-    };
-  },
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => {
-    return {
-      zIndex: 0,
-      x: direction < 0 ? "100%" : "-100%",
-      opacity: 0,
-    };
-  },
 };
 
 const AddToCartButton = ({ submission }: { submission: Submission }) => {
@@ -140,9 +119,7 @@ export default function SubmissionModal({
   return (
     <Modal isModalOpen={true} onClose={() => router.back()}>
       <AnimatePresence mode="wait">
-        <div
-          className="flex w-full h-[500px] lg:h-[650px] gap-1 lg:gap-4 p-0"
-        >
+        <div className="flex w-full  gap-1 lg:gap-4 p-0">
           <div className="flex flex-col jusitfy-start w-full h-full ">
             <ExpandedSubmission
               submission={submission}
@@ -154,9 +131,3 @@ export default function SubmissionModal({
     </Modal>
   );
 }
-
-const PreviewSubmission = ({ submission }: { submission: any }) => {
-  if (submission.type === "text") {
-    return <p>{submission.title}</p>;
-  }
-};

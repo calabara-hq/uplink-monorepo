@@ -27,7 +27,7 @@ export default async function Page({
   return (
     <div className="flex gap-6 m-auto w-full lg:w-[91vw] h-full">
       <div className="flex w-full gap-6 ">
-        <div className="hidden lg:block w-[15%] flex-grow border border-border rounded-lg">
+        <div className="hidden lg:block w-[15%] flex-grow h-fit border border-border rounded-lg">
           <ContestSidebar
             contestId={params.id}
             spaceName={params.name}

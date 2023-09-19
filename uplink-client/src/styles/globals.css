@@ -40,6 +40,14 @@
                                   supported by Chrome and Opera */
 }
 
+
+@media (hover: hover){
+  .hoverCard:hover{
+    @apply -translate-y-1.5 translate-x-0
+  }
+}
+
+
 .tooltip::before{
   background-color: white;
   color: black;

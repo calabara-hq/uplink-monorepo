@@ -54,7 +54,7 @@ const mutations = {
                     submitterRestrictions: contestData.submitterRestrictions,
                     votingPolicy: contestData.votingPolicy,
                 }
-                contestId = await createDbContest(data, user)
+                contestId = await createDbContest(data)
             } else {
                 contestId = null
             }
