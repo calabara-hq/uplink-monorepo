@@ -83,7 +83,7 @@ export default function SubmissionModal({
             <ExpandedSubmission
               submission={submission}
               headerChildren={
-                <div className="p-1 ml-auto ">
+                <div className="flex p-1 ml-auto items-center justify-center">
                   <AddToCartButton
                     submission={submission}
                     voteActions={voteActions}

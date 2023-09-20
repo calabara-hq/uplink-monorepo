@@ -1,3 +1,4 @@
+import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import { OutputData } from "@editorjs/editorjs";
 import Image from "next/image";
 import React from "react";
@@ -36,19 +37,21 @@ export const ParseBlocks = ({
       );
     } else if (block.type === "image" && !omitImages) {
       return (
-        <div key={index} className="relative media-grid-item w-full h-full">
-          <figure className="absolute inset-0 overflow-hidden rounded-xl">
+        <div className="w-9/12 m-auto pt-4 pb-4" key={index}>
+          <ImageWrapper>
             <Image
               key={index}
               src={block.data.file.url}
               alt="content media"
               fill
-              className="object-contain"
+              className="object-cover rounded-xl w-full h-full overflow-hidden"
+              sizes="80vw"
             />
-          </figure>
+          </ImageWrapper>
         </div>
       );
     }
     return null;
   });
 };
+

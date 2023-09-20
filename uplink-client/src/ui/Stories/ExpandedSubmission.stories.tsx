@@ -1,17 +1,17 @@
 import { HiCheckBadge, HiPlus } from "react-icons/hi2";
 import SessionDecorator from "../../../.storybook/decorators/SessionDecorator";
 //import { SubmissionCard } from "../../ui/Contests/SubmissionDisplay";
-import CardSubmission from "../Submission/CardSubmission";
+import ExpandedSubmission from "../Submission/ExpandedSubmission";
 
 export default {
-  title: "ui/CardSubmission",
-  component: CardSubmission,
+  title: "ui/ExpandedSubmission",
+  component: ExpandedSubmission,
   decorators: [SessionDecorator],
 };
 
 const Template = (args: any) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 justify-items-evenly gap-8 lg:w-9/12 w-full m-auto">
-    <CardSubmission {...args} />
+  <div className="grid grid-cols-1 w-full gap-2 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full bg-base">
+    <ExpandedSubmission {...args} />
   </div>
 );
 
@@ -51,7 +51,7 @@ TwitterTextThread.args = {
       title: "X ".repeat(50),
       thread: [
         {
-          text: "first line",
+          text: "a twitter text submission",
         },
         {
           text: "a twitter text submission",
@@ -83,7 +83,7 @@ TwitterTextThreadWithImage.args = {
       title: "X ".repeat(50),
       thread: [
         {
-          text: "first line",
+          text: "a twitter text submission",
         },
         {
           text: "a twitter text submission",
@@ -167,7 +167,7 @@ StandardText.args = {
             id: "3f4JQkc6y9",
             type: "paragraph",
             data: {
-              text: "this is a new test prompt".repeat(10),
+              text: "this is a new test prompt ".repeat(10),
             },
           },
           {
@@ -255,27 +255,6 @@ StandardTextMultiBlockWithImage.args = {
               withBorder: false,
               withBackground: false,
               stretched: true,
-            },
-          },
-          {
-            id: "3f4JQkc6y9",
-            type: "paragraph",
-            data: {
-              text: "this is a new test prompt",
-            },
-          },
-          {
-            id: "3f4JQkc6y9",
-            type: "paragraph",
-            data: {
-              text: "this is a new test prompt",
-            },
-          },
-          {
-            id: "3f4JQkc6y9",
-            type: "paragraph",
-            data: {
-              text: "this is a new test prompt",
             },
           },
         ],

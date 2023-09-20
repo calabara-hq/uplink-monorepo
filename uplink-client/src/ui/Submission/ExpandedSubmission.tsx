@@ -13,19 +13,18 @@ import {
   MediaLoadingIndicator,
 } from "media-chrome/dist/react";
 import { ParseBlocks } from "@/lib/blockParser";
+import { ParseThread } from "@/lib/threadParser";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 
 const RenderSubmissionBody = ({ submission }: { submission: Submission }) => {
   return (
-    <div className="">
+    <div>
       <section className="break-word">
-        {submission.type === "twitter" ? (
-          <p className="">{submission.data.thread[0].text}</p>
-        ) : (
-          <section>{ParseBlocks({ data: submission.data.body })}</section>
-        )}
+        {submission.type === "twitter"
+          ? ParseThread({ thread: submission.data.thread })
+          : ParseBlocks({ data: submission.data.body })}
       </section>
     </div>
   );
@@ -100,6 +99,44 @@ const RenderVideoSubmission = ({ submission }: { submission: Submission }) => {
   );
 };
 
+/**
+ *
+ * std submission
+ * - render the image or video if present, then render the body
+ * twitter submission
+ * - render the whole thread
+ * this should be optimized in the future. we have to do this now because threads have many items whereas standard submissions are partitioned by block
+ */
+
+const SubmissionRenderer = ({ submission }: { submission: Submission }) => {
+  if (submission.type === "standard") {
+    return (
+      <div>
+        <div className="w-9/12 m-auto">
+          {submission.data.type === "video" && (
+            <div>
+              <RenderVideoSubmission submission={submission} />
+            </div>
+          )}
+          {submission.data.type === "image" && (
+            <div>
+              <RenderImageSubmission submission={submission} />
+            </div>
+          )}
+        </div>
+        <RenderSubmissionBody submission={submission} />
+      </div>
+    );
+  } else if (submission.type === "twitter") {
+    return (
+      <div>
+        <RenderSubmissionBody submission={submission} />
+      </div>
+    );
+  }
+  return null;
+};
+
 const ExpandedSubmission = ({
   submission,
   headerChildren,
@@ -111,7 +148,7 @@ const ExpandedSubmission = ({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl text-t1 font-[500]">{submission.data.title}</h2>
-        <div className="flex flex-row items-center justify-center">
+        <div className="flex flex-row items-center">
           <div className="flex gap-2 items-center">
             <UserAvatar address={submission.author} size={28} />
             <h3 className="break-all italic text-sm text-t2 font-semibold">
@@ -122,19 +159,7 @@ const ExpandedSubmission = ({
         </div>
       </div>
       <div className="w-full h-0.5 bg-base-200" />
-      <div className="w-9/12 m-auto">
-        {submission.data.type === "video" && (
-          <div>
-            <RenderVideoSubmission submission={submission} />
-          </div>
-        )}
-        {submission.data.type === "image" && (
-          <div>
-            <RenderImageSubmission submission={submission} />
-          </div>
-        )}
-      </div>
-      <RenderSubmissionBody submission={submission} />
+      <SubmissionRenderer submission={submission} />
     </div>
   );
 };
