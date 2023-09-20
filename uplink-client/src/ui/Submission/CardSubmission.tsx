@@ -28,6 +28,7 @@ import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { ParseBlocks } from "@/lib/blockParser";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
 import { TbCrown } from "react-icons/tb";
+import { ParseThread } from "@/lib/threadParser";
 
 const SubmissionBody = ({ submission }: { submission: Submission }) => {
   if (submission.data.type !== "text")
@@ -45,7 +46,6 @@ const SubmissionBody = ({ submission }: { submission: Submission }) => {
 };
 
 const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
-  console.log(submission);
   return (
     <div className="relative h-full w-full min-h-[330px] rounded-xl text-white/80 gap-1">
       <div className="p-2 w-full h-full flex flex-col gap-1 transition-transform duration-300 ease-in-out will-change-transform">
@@ -60,14 +60,12 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
         </div>
         <section className="break-word">
           {submission.type === "twitter" ? (
-            <p className="line-clamp-[8] lg:line-clamp-[12]">
-              {submission.data.thread.map((threadItem, idx) => {
-                return threadItem.text;
-              })}
-            </p>
+            <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
+              {ParseThread({ thread: submission.data.thread, omitImages: true })}
+            </div>
           ) : (
             <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
-              {ParseBlocks({ data: submission.data.body, omitImages: false })}
+              {ParseBlocks({ data: submission.data.body, omitImages: true })}
             </div>
           )}
         </section>
@@ -84,14 +82,6 @@ const RenderVideoSubmission = ({
   isActive: boolean;
 }) => {
   const vidRef = useRef<HTMLVideoElement>(null);
-  const [duration, setDuration] = useState("00:00");
-
-  useEffect(() => {
-    if (vidRef?.current?.duration)
-      setDuration(
-        new Date(vidRef.current.duration * 1000).toISOString().slice(14, 19)
-      );
-  }, [vidRef]);
 
   useEffect(() => {
     if (isActive && vidRef.current) vidRef.current.play();

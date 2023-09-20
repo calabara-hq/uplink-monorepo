@@ -21,7 +21,6 @@ const Prompt = ({
     metadata.type,
     tweetId
   );
-  console.log(JSON.stringify(prompt, null, 2));
   return (
     <div className="grid grid-cols-1 sm:grid-cols-[auto_25%] gap-6 w-full p-4">
       <div className="flex flex-col gap-2 break-word">

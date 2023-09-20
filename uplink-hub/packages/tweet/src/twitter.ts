@@ -34,6 +34,7 @@ export class TwitterController {
             const session = await this.client.currentUser();
             return session;
         } catch (e) {
+            console.log(e)
             throw new Error(`failed to establish a twitter session`)
         }
     }
@@ -53,8 +54,6 @@ export class TwitterController {
 
 
     public async uploadTweetMedia(tweet: ThreadItem) {
-
-        await this.validateSession();
         // INIT
         const mediaUrl = tweet.media.url;
 
@@ -114,7 +113,6 @@ export class TwitterController {
     async waitForUploadCompletion(mediaData: MediaStatusV1Result) {
         while (true) {
             const status = await this.client.v1.mediaInfo(mediaData.media_id_string);
-            console.log('CURRENT MEDIA DATA \n', JSON.stringify(status, null, 2))
             const { processing_info } = status;
 
             if (!processing_info || processing_info.state === 'succeeded') {

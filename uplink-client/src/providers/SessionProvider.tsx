@@ -28,6 +28,7 @@ export interface Session {
     twitter?: UserTwitterObject | null;
   };
   expires: ISODateString;
+  csrfToken: string | null;
 }
 
 interface ISessionStore {
@@ -140,10 +141,13 @@ export type GetSessionParams = CtxOrReq & {
 // fetch the current session from the server
 
 export const getSession = async (params?: GetSessionParams) => {
-  const session = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/auth/session`, {
+  const session = await fetch(
+    `${process.env.NEXT_PUBLIC_HUB_URL}/auth/session`,
+    {
       credentials: "include",
       cache: "no-store",
-  })
+    }
+  )
     .then((res) => res.json())
     .then((data) => (Object.keys(data).length > 0 ? data : null))
     .catch((err) => {
@@ -199,7 +203,7 @@ export const signIn = async (credentials: SignInParams) => {
 // sign out
 
 export const signOut = async () => {
-  const csrfToken = await getCsrfToken();
+  const csrfToken = _SessionStore._session?.csrfToken;
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_HUB_URL}/auth/sign_out`,
     {
@@ -218,6 +222,7 @@ export const signOut = async () => {
 
 export const twitterSignIn = async (scope: string) => {
   // Logic to sign in with Twitter goes here
+  const csrfToken = _SessionStore._session?.csrfToken;
   return await fetch(
     `${process.env.NEXT_PUBLIC_HUB_URL}/auth/twitter/initiate_twitter_auth`,
     {
@@ -226,7 +231,7 @@ export const twitterSignIn = async (scope: string) => {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ scope: scope }),
+      body: JSON.stringify({ scope: scope, csrfToken }),
     }
   )
     .then((res) => res.json())

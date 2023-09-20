@@ -156,6 +156,7 @@ const QuickAddToken = ({
   setProgress: (progress: number) => void;
 }) => {
   if (!quickAddTokens) return null;
+
   return (
     <div className="flex flex-col w-full px-1 gap-4">
       <h2 className="text-xl text-t1">Quick Add</h2>
@@ -166,8 +167,11 @@ const QuickAddToken = ({
             <li key={index}>
               <a
                 className={`flex flex-row justify-between border-border border hover:bg-base-200 transition-all  ${
-                  JSON.stringify(state.quickAddToken) === JSON.stringify(el)
-                    ? "bg-base-200"
+                  state.quickAddToken
+                    ? state.quickAddToken.type === el.type &&
+                      state.quickAddToken.symbol === el.symbol
+                      ? "bg-base-200"
+                      : "bg-base-100"
                     : "bg-base-100"
                 }`}
                 onClick={() => {

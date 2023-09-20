@@ -1,4 +1,3 @@
-import cron from 'node-cron';
 import { DatabaseController, schema, CipherController, revalidateClientCache } from 'lib';
 import dotenv from 'dotenv';
 import { TwitterController } from './twitter.js';
@@ -82,50 +81,12 @@ const setJobRetries = async (id: number) => {
     await db.update(schema.tweetQueue).set({ retries: sqlOps.sql`${schema.tweetQueue.retries} + 1` }).where(sqlOps.eq(schema.tweetQueue.id, id))
 }
 
-// const getJobQuoteTweetId = async (contestId: number) => {
-//     const quoteTweetId = await db.select({
-//         tweetId: schema.contests.tweetId
-//     }).from(schema.contests).where(sqlOps.eq(schema.contests.id, contestId))
-//     return quoteTweetId;
-// }
-
-
 const getJobQuoteTweetId = db.query.contests.findFirst({
     columns: {
         tweetId: true
     },
     where: (contests) => sqlOps.eq(contests.id, sqlOps.placeholder('contestId')),
 }).prepare();
-
-// const triageJobs = async () => {
-//     const jobs = await db.select({
-//         id: schema.tweetQueue.id,
-//         contestId: schema.tweetQueue.contestId,
-//         author: schema.tweetQueue.author,
-//         jobContext: schema.tweetQueue.jobContext,
-//         payload: schema.tweetQueue.payload,
-//         accessToken: schema.tweetQueue.accessToken,
-//         accessSecret: schema.tweetQueue.accessSecret,
-//         retries: schema.tweetQueue.retries,
-//         status: schema.tweetQueue.status,
-//     }).from(schema.tweetQueue)
-//         .where(
-//             sqlOps.and(
-//                 sqlOps.lt(schema.tweetQueue.status, 2),
-//                 sqlOps.or(
-//                     sqlOps.and(
-//                         sqlOps.eq(schema.tweetQueue.jobContext, 'contest'),
-//                         sqlOps.gte(schema.tweetQueue.created, sqlOps.sql`NOW() - INTERVAL '5 minutes'`)
-//                     ),
-//                     sqlOps.eq(schema.tweetQueue.jobContext, 'submission')
-//                 ))
-//         )
-//         .orderBy(sqlOps.asc(schema.tweetQueue.jobContext))  // give priority to announcement tweets
-//         .orderBy(sqlOps.asc(schema.tweetQueue.created))   // give priority to oldest jobs
-//         .limit(15);
-
-//     return jobs;
-// }
 
 const handleJob = async (job: schema.dbTweetQueueType) => {
     const payload = job.payload as ThreadItem[]
@@ -172,20 +133,12 @@ const handleJob = async (job: schema.dbTweetQueueType) => {
     }
 }
 
-const mainLoop = async () => {
-    //const jobs = await triageJobs();
-    //const adjustedTime = new Date(Date.now() - 5 * 60 * 1000);
-    // create an adjustedTime to be now - 5 minutes
+export const tweet = async () => {
     const adjustedTime = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const currentTime = new Date().toISOString();
     const jobs = await getJobs.execute({ adjustedTime, currentTime });
     await Promise.all(jobs.map(async ({ contest, ...job }) => {
         await handleJob(job as schema.dbTweetQueueType);
     }));
-}
 
-export const tweet = async (frequency) => {
-    cron.schedule(frequency, () => {
-        mainLoop();
-    })
 }

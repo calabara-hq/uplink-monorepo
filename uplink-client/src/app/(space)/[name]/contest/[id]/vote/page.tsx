@@ -14,7 +14,7 @@ export default async function Page({
   return (
     <div className="w-full flex flex-col items-center justify-center gap-4 ">
       <Link
-        className="btn btn-ghost mr-auto"
+        className="btn btn-ghost mr-auto normal-case"
         href={`/${params.name}/contest/${params.id}`}
       >
         <HiArrowNarrowLeft className="h-6 w-6 mr-1" />

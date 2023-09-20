@@ -18,5 +18,7 @@ RUN yarn workspace contests build
 
 WORKDIR /app/packages/contests
 
+env NODE_ENV production
+
 CMD ["yarn", "start"]
 

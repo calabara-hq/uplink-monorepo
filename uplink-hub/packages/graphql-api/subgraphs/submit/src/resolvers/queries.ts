@@ -123,8 +123,8 @@ const postProcessRewards = (rewards) => {
 
 const sortSubmissions = (submissions, isContestOver: boolean) => {
 
-    // randomize the order of the submissions if the contest is still ongoing
-    if (!isContestOver) return submissions.sort(() => Math.random() - 0.5);
+    // if contest is not over, return as is
+    if (!isContestOver) return submissions
 
     // contest is over, sort by total votes.
     return submissions.sort((a, b) => {
@@ -146,9 +146,9 @@ const sortSubmissions = (submissions, isContestOver: boolean) => {
 
 const queries = {
     Query: {
-        async getUserSubmissionParams(_, { walletAddress, contestId }, contextValue, info) {
+        async getUserSubmissionParams(_, { contestId }, context, info) {
 
-            const user = walletAddress ? { address: walletAddress } : await authController.getUser(contextValue);
+            const user = await authController.getUser(context);
             if (!user) throw new GraphQLError('Unknown user', {
                 extensions: {
                     code: 'UNKOWN_USER'
@@ -157,7 +157,7 @@ const queries = {
             return computeSubmissionParams(user, parseInt(contestId))
         },
 
-        async submission(_, { submissionId }, contextValue, info) {
+        async submission(_, { submissionId }, context, info) {
             // determine if we need to filter out some of the hidden fields
             const data = await singleSubmissionById.execute({ submissionId })
             const { endTime, anonSubs, visibleVotes } = data.contest;
@@ -166,7 +166,7 @@ const queries = {
             return postProcessSubmission(data, withAuthor, withVotes);
         },
 
-        async popularSubmissions(_, { submissionId }, contextValue, info) {
+        async popularSubmissions(_, { submissionId }, context, info) {
             return getPopularSubmissions();
         },
     },

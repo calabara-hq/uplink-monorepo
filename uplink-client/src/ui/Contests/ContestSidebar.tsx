@@ -12,7 +12,7 @@ import {
   HiOutlineLockClosed,
 } from "react-icons/hi2";
 import { useSession } from "@/providers/SessionProvider";
-import WalletConnectButton from "../ConnectButton/ConnectButton";
+import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import Modal from "../Modal/Modal";
 import { BiInfoCircle, BiTime } from "react-icons/bi";
 import useTweetQueueStatus from "@/hooks/useTweetQueueStatus";
@@ -28,6 +28,7 @@ import {
   SubmitterRestrictionsSection,
   VotingPolicySection,
 } from "./SidebarInfo";
+import { StatusLabel } from "../ContestLabels/ContestLabels";
 // sidebar for the main contest view
 
 const InfoWrapper = ({
@@ -188,7 +189,7 @@ const AdminsRequired = ({
           {!session?.user?.address && (
             <div className="flex flex-row items-center justify-start gap-2  xl:ml-auto text-t1">
               <p className="text-t1 text-sm">Are you an admin?</p>
-              <WalletConnectButton style="btn-sm btn-ghost" />
+              <WalletConnectButton styleOverride="btn-sm btn-ghost" />
             </div>
           )}
         </div>
@@ -273,6 +274,20 @@ const Submitting = ({ studioLink }: { studioLink: string }) => {
   );
 };
 
+const Voting = () => {
+  const { contestState, stateRemainingTime } = useContestState();
+  //const ratio = new Date() / new Date(stateRemainingTime).toISOString();
+  if (contestState === "voting") {
+    return (
+      <div className="flex gap-2 items-center">
+        <StatusLabel status={contestState} />
+        <p className="text-t2">{stateRemainingTime}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const SidebarSkeleton = () => {
   return (
     <div className="flex flex-col justify-between bg-base-100  rounded-lg w-full">
@@ -338,7 +353,7 @@ const RenderStateSpecificDialog = ({
       <Submitting studioLink={`/${spaceName}/contest/${contestId}/studio`} />
     );
   } else if (contestState === "voting") {
-    return <p>voting!!</p>;
+    return <Voting />;
   } else if (contestState === "closed") {
     return <Closed />;
   }
