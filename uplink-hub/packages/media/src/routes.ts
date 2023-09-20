@@ -6,8 +6,8 @@ import cookie from 'cookie';
 media.use(bodyParser.json())
 
 
-media.get('/test', (req, res) => {
-    res.send('media test')
+media.get('/health', (req, res) => {
+    res.send('ready')
 })
 
 
