@@ -4,6 +4,12 @@ metadata:
   name: auth
 spec:
   replicas: {{ .Values.auth.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
   selector:
     matchLabels:
       app: auth
@@ -15,6 +21,20 @@ spec:
       containers:
       - name: auth
         image: "{{ .Values.auth.image.repository }}:{{ .Values.image_version_tag }}"
+        
+        readinessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 2
+          successThreshold: 2
+          failureThreshold: 2
+          httpGet:
+            path: /health
+            port: 8080
+            httpHeaders:
+            - name: apollo-require-preflight
+              value: "true"
+
         resources:
           requests:
             cpu: "20m"

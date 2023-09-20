@@ -9,6 +9,9 @@ auth.get('/', (req, res) => {
     res.send({ auth: { version: "1.0.0" } })
 })
 
+auth.get('/health', (req, res) => {
+    res.send('ready')
+});
 
 auth.get('/session', authController.getSession)
 auth.get('/csrf', authController.getCsrfToken)
