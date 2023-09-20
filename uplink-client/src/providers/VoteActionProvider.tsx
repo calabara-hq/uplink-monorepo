@@ -155,8 +155,6 @@ export const VoteActionProvider = ({
   const [areCurrentVotesDirty, setAreCurrentVotesDirty] = useState(false);
   const { data: session, status } = useSession();
 
-  console.log("VOTE", userVoteParams);
-
 
   // handle cases where the user was signed out, added proposed votes, then signed in
   // if proposed votes already exist in current votes, remove them from proposed votes

@@ -9,7 +9,7 @@ auth:
   replicaCount: 1
   hpa:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 1
     targetCpuPercentage: 80
     
 media:
@@ -18,7 +18,7 @@ media:
   replicaCount: 1
   hpa:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 1
     targetCpuPercentage: 80
 
 router:
@@ -27,7 +27,7 @@ router:
   replicaCount: 1
   hpa:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 1
     targetCpuPercentage: 80
 
 spaces:
@@ -36,7 +36,7 @@ spaces:
   replicaCount: 1
   hpa:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 1
     targetCpuPercentage: 80
 
 contests:
@@ -45,7 +45,7 @@ contests:
   replicaCount: 1
   hpa:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 1
     targetCpuPercentage: 80
 
 submit:
@@ -54,7 +54,7 @@ submit:
   replicaCount: 1
   hpa:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 1
     targetCpuPercentage: 80
 
 vote:
@@ -63,7 +63,7 @@ vote:
   replicaCount: 1
   hpa:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 1
     targetCpuPercentage: 80
 
 user:
@@ -72,7 +72,7 @@ user:
   replicaCount: 1
   hpa:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 1
     targetCpuPercentage: 80
 
 tweet:

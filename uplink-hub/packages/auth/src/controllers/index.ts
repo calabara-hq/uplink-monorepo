@@ -128,8 +128,11 @@ export const oauthCallback = async (req, res) => {
                 accessToken: cipherController.encrypt(accessToken),
                 accessSecret: cipherController.encrypt(accessSecret),
             }
-            //TODO: send html page with success message
-            return res.sendStatus(200)
+            return res.send(`
+            <script>
+                window.close();
+            </script>
+            `)
         })
         .catch(() => res.status(403).send('Invalid verifier or access tokens!'));
 }

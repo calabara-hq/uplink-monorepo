@@ -42,7 +42,6 @@ const VotingPolicy = ({
 
   const onSubmit = () => {
     const { errors, isError, data } = validateVotingPolicy(votingPolicy);
-    console.log({ errors, isError, data });
     if (isError) return setErrors(errors);
     handleConfirm(data);
   };
@@ -61,7 +60,7 @@ const VotingPolicy = ({
           >
             <div className="flex flex-row gap-2 items-center">
               <AiOutlinePlus className="w-6 h-6" />
-              <p>Add Reward</p>
+              <p>Add Policy</p>
             </div>
           </div>
           {votingPolicy.map((policy, index) => {

@@ -18,5 +18,7 @@ RUN yarn workspace spaces build
 
 WORKDIR /app/packages/spaces
 
+env NODE_ENV production
+
 CMD ["yarn", "start"]
 

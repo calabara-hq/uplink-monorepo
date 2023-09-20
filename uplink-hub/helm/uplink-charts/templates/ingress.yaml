@@ -29,7 +29,7 @@ spec:
             port:
               number: 8080
 
-      - path: /api/media/
+      - path: /api/media/(.*)
         pathType: Prefix
         backend:
           service:

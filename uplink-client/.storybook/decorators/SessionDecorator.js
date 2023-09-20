@@ -7,7 +7,6 @@ export default function SessionDecorator(Story, context) {
     } :
         null;
 
-    console.log('SessionDecorator', context)
     return (
         <WalletProvider session={session}>
             <Story />

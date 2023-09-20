@@ -22,7 +22,6 @@ export const ParseThread = ({
   omitImages?: boolean;
 }) => {
   if (!thread || thread.length === 0) return null;
-  console.log(thread);
   return thread.map((tweet, index) => {
     return (
       <>
@@ -87,30 +86,5 @@ export const ParseThread = ({
           ))}
       </>
     );
-
-    if (tweet.text) {
-      return <p key={index}>{tweet.text}</p>;
-    }
-    if (tweet.previewAsset && !omitImages) {
-      if (tweet.videoAsset) {
-        // render video
-      } else {
-        // render plain image
-        return (
-          <div className="w-9/12 m-auto pt-4 pb-4" key={index}>
-            <ImageWrapper>
-              <Image
-                key={index}
-                src={tweet.previewAsset}
-                alt="content media"
-                fill
-                className="object-contain rounded-xl w-full h-full overflow-hidden"
-                sizes="80vw"
-              />
-            </ImageWrapper>
-          </div>
-        );
-      }
-    }
   });
 };

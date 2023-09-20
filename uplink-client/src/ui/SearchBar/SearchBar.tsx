@@ -14,7 +14,6 @@ export function SearchBar({ spaces }: any) {
     setSearchQuery(e.target.value);
   };
   const onSearch = (query: string) => {
-    console.log(query);
   };
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

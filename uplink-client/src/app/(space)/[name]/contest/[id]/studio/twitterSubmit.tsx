@@ -136,7 +136,7 @@ const Step1 = ({ contestId }: { contestId: string }) => {
                 <span className="hidden" />
               </WalletConnectButton>
               {userSubmitParams && (
-                <div className="flex flex-col items-end justify-center h-full">
+                <div className="flex flex-col items-center justify-center h-full">
                   {userSubmitParams.restrictionResults.length === 0 ? (
                     <div className="flex flex-row gap-2 items-center">
                       <p className="text-t2">No entry requirements</p>

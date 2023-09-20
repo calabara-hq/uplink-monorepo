@@ -18,4 +18,6 @@ RUN yarn workspace user build
 
 WORKDIR /app/packages/user
 
+env NODE_ENV production
+
 CMD ["yarn", "start"]

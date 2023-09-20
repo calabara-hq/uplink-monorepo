@@ -224,7 +224,6 @@ const TweetFooter = ({
         accept={mode === "primary" ? "image/*, video/mp4" : "image/*"}
         className="hidden"
         onChange={(event) => {
-          console.log(imageUploader);
           handleFileChange({ id, event, isVideo, mode });
         }}
         ref={mode === "primary" ? imageUploader : thumbnailUploader}

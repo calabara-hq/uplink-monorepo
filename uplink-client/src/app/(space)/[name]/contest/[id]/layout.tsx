@@ -24,7 +24,6 @@ export default async function Layout({
     [`submissions/${params.id}`]: submissions,
   };
 
-  console.log(JSON.stringify(contest, null, 2));
   const { deadlines, metadata, tweetId, space } = contest;
   return (
     <div className="w-full flex flex-col items-center p-4">

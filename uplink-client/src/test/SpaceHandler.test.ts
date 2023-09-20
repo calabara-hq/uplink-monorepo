@@ -176,7 +176,6 @@ describe('Space Handler', () => {
             }
 
             const { isValid, errors, values } = await validateSpaceBuilderProps(props);
-            console.log(JSON.stringify(errors, null, 2))
             expect(isValid).toBe(true);
             expect(errors).toEqual({
                 admins: [null, null]
