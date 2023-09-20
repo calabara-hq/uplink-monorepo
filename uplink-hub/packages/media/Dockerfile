@@ -20,4 +20,6 @@ RUN yarn workspace media build
 
 workdir /app/packages/media
 
+env NODE_ENV production
+
 CMD ["yarn", "start"]

@@ -18,5 +18,7 @@ RUN yarn workspace submit build
 
 WORKDIR /app/packages/submit
 
+env NODE_ENV production
+
 CMD ["yarn", "start"]
 

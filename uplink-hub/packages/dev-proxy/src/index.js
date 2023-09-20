@@ -23,8 +23,6 @@ const server = http.createServer(app);
 
 app.all('*', (req, res) => {
     if (req.url.startsWith('/api/graphql')) {
-        console.log('GOT GRAPHQL REQUEST')
-        console.log(`http://localhost:${process.env.SUPERGRAPH_SERVICE_PORT}/`)
         req.headers.host = `localhost:${process.env.SUPERGRAPH_SERVICE_PORT}`;
         req.url = req.url.replace('/api/graphql', ''); // remove the '/api/graphql' from the path.
         proxy.web(req, res, { target: `http://localhost:${process.env.SUPERGRAPH_SERVICE_PORT}/` });

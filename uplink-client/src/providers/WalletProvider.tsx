@@ -6,7 +6,7 @@ import {
   RainbowKitProvider,
   darkTheme,
 } from "@rainbow-me/rainbowkit";
-import { wagmiClient, chains } from "@/configs/wallet";
+import { wagmiConfig, chains, appInfo } from "@/lib/wallet";
 import { SessionProvider } from "./SessionProvider";
 import { AuthenticationProvider } from "./AuthenticationProvider";
 import { Session } from "./SessionProvider";
@@ -79,13 +79,14 @@ export default function WalletProvider({
   refetchInterval,
 }: any) {
   return (
-    <WagmiConfig client={wagmiClient}>
+    <WagmiConfig config={wagmiConfig}>
       <SessionProvider
         refetchInterval={refetchInterval ? refetchInterval : 0}
         session={session}
       >
         <AuthenticationProvider>
           <RainbowKitProvider
+            appInfo={appInfo}
             theme={darkTheme()}
             chains={chains}
             avatar={CustomAvatar}

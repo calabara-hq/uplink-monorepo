@@ -18,5 +18,7 @@ RUN yarn workspace vote build
 
 WORKDIR /app/packages/vote
 
+env NODE_ENV production
+
 CMD ["yarn", "start"]
 

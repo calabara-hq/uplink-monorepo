@@ -8,18 +8,19 @@ import CardSubmission from "@/ui/Submission/CardSubmission";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
-import { BiPlusCircle } from "react-icons/bi";
-import { HiPhoto } from "react-icons/hi2";
 import ArtistPfp from "@/../public/pumey_pfp.jpg";
 import ArtistSubmission from "@/../public/vinnie_noggles.png";
 import landingBg from "@/../public/landing-bg.svg";
 import { Swiper, SwiperSlide } from "@/ui/Swiper/Swiper";
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
-import { LuCoins, LuSettings2, LuVote, LuArrowRight } from "react-icons/lu";
+import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
+import { DelayedGridItem, DelayedGridLayout } from "./DelayedGrid";
+import { BiPlusCircle } from "react-icons/bi";
+import { HiPhoto } from "react-icons/hi2";
 
-import DelayedGridLayout from "./DelayedGridLayout";
-import DelayedGridItem from "./DelayedGridItem";
+
+
 
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -123,6 +124,7 @@ const BannerSection = () => {
                   alt="swim shady"
                   width={50}
                   height={50}
+                  sizes="10vw"
                   className="rounded-full"
                 />
                 <div className="flex-grow flex flex-col gap-2 ml-4">
@@ -135,6 +137,7 @@ const BannerSection = () => {
                         src={ArtistSubmission}
                         alt="twitter submission"
                         className="rounded-lg object-contain"
+                        sizes="50vw"
                         priority
                       />
                     </div>
@@ -202,7 +205,6 @@ const ContestCard = ({
   spaceLogo: string;
   tweetId: string | null;
 }) => {
-  const showSpace = spaceName && spaceDisplayName && spaceLogo;
   const { contestState, stateRemainingTime } = calculateContestStatus(
     deadlines,
     metadata.type,
@@ -212,7 +214,7 @@ const ContestCard = ({
     <Link
       className="card bg-base-100 animate-scrollInX
     cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full transform 
-    transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform no-select"
+    transition-transform duration-300 hoverCard will-change-transform no-select"
       href={linkTo}
     >
       <div className="card-body items-center p-0">
@@ -287,13 +289,7 @@ const ActiveContests = async () => {
               },
             }}
           >
-            {[
-              ...activeContests,
-              ...activeContests,
-              ...activeContests,
-              ...activeContests,
-              ...activeContests,
-            ].map((contest, index) => (
+            {activeContests.map((contest, index) => (
               <SwiperSlide key={index}>
                 <ContestCard
                   contestId={contest.id}
@@ -327,7 +323,7 @@ const PopularSubmissions = async () => {
       </h2>
       <div className="w-full">
         <Swiper
-          spaceBetween={16} 
+          spaceBetween={16}
           slidesPerView={3}
           slidesPerGroup={3}
           breakpoints={{
@@ -429,13 +425,7 @@ const ContestBanner = () => {
           href={"/spacebuilder/create"}
           className="btn btn-primary btn-md rounded-md normal-case shadow-black shadow-2xl"
         >
-          <div className="flex items-center">
-            <p>Create a Contest</p>
-            <LuArrowRight className="w-6 h-6 ml-auto font-bold" />
-          </div>
-          {/* <h3 className="text-lg font-semibold hover:underline transition-all duration-200">
-            Create a contest
-          </h3> */}
+          Create a Contest
         </Link>
       </div>
 

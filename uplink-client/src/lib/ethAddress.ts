@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
-const provider = new ethers.providers.AlchemyProvider('homestead', process.env.NEXT_PUBLIC_ALCHEMY_KEY)
-
+import { publicClient } from "./viem";
+import { getAddress } from 'viem';
+import { normalize } from "viem/ens";
 
 export const validateEthAddress = async (address: string) => {
 
@@ -11,13 +11,13 @@ export const validateEthAddress = async (address: string) => {
     let resolvedAddress: string | null = null;
 
     if (isEns) {
-        resolvedAddress = await provider.resolveName(address);
+        resolvedAddress = await publicClient.getEnsAddress({ name: normalize(address) });
         if (!resolvedAddress) return null;
         return resolvedAddress;
     }
 
     try {
-        resolvedAddress = ethers.utils.getAddress(address);
+        resolvedAddress = getAddress(address);
         return resolvedAddress as string;
     } catch (error) {
         return null;

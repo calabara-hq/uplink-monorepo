@@ -1,8 +1,6 @@
 "use client";
 import { twitterSignIn, useSession } from "@/providers/SessionProvider";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
-import Image from "next/image";
-import WalletConnectButton from "../ConnectButton/ConnectButton";
+import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 
 const TwitterConnectButton = ({}) => {
   const handleClick = async () => {
@@ -15,7 +13,7 @@ const TwitterConnectButton = ({}) => {
   return (
     <WalletConnectButton>
       <button
-        className="btn btn-primary btn-outline  lowercase w-full"
+        className="btn btn-primary btn-outline normal-case w-full"
         onClick={handleClick}
       >
         Connect Twitter

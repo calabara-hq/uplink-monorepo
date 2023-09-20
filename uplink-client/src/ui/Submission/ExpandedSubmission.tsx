@@ -13,24 +13,18 @@ import {
   MediaLoadingIndicator,
 } from "media-chrome/dist/react";
 import { ParseBlocks } from "@/lib/blockParser";
-import { isMobile } from "@/lib/isMobile";
+import { ParseThread } from "@/lib/threadParser";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
-import { useEffect, useRef, useState } from "react";
-import { useInView } from "react-intersection-observer";
-import useVideoControls from "@/hooks/useVideoControls";
-import { MdOutlineOndemandVideo } from "react-icons/md";
-import "@/styles/videoPlayer.css";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
+import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 
 const RenderSubmissionBody = ({ submission }: { submission: Submission }) => {
   return (
-    <div className="">
+    <div>
       <section className="break-word">
-        {submission.type === "twitter" ? (
-          <p className="">{submission.data.thread[0].text}</p>
-        ) : (
-          <section>{ParseBlocks({ data: submission.data.body })}</section>
-        )}
+        {submission.type === "twitter"
+          ? ParseThread({ thread: submission.data.thread })
+          : ParseBlocks({ data: submission.data.body })}
       </section>
     </div>
   );
@@ -48,6 +42,7 @@ const RenderImageSubmission = ({ submission }: { submission: Submission }) => {
         alt="submission image"
         fill
         className="object-contain rounded-xl w-full h-full overflow-hidden"
+        sizes="80vw"
       />
     </ImageWrapper>
   );
@@ -104,6 +99,44 @@ const RenderVideoSubmission = ({ submission }: { submission: Submission }) => {
   );
 };
 
+/**
+ *
+ * std submission
+ * - render the image or video if present, then render the body
+ * twitter submission
+ * - render the whole thread
+ * this should be optimized in the future. we have to do this now because threads have many items whereas standard submissions are partitioned by block
+ */
+
+const SubmissionRenderer = ({ submission }: { submission: Submission }) => {
+  if (submission.type === "standard") {
+    return (
+      <div>
+        <div className="w-9/12 m-auto">
+          {submission.data.type === "video" && (
+            <div>
+              <RenderVideoSubmission submission={submission} />
+            </div>
+          )}
+          {submission.data.type === "image" && (
+            <div>
+              <RenderImageSubmission submission={submission} />
+            </div>
+          )}
+        </div>
+        <RenderSubmissionBody submission={submission} />
+      </div>
+    );
+  } else if (submission.type === "twitter") {
+    return (
+      <div>
+        <RenderSubmissionBody submission={submission} />
+      </div>
+    );
+  }
+  return null;
+};
+
 const ExpandedSubmission = ({
   submission,
   headerChildren,
@@ -116,26 +149,17 @@ const ExpandedSubmission = ({
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl text-t1 font-[500]">{submission.data.title}</h2>
         <div className="flex flex-row items-center">
-          <h3 className="text-lg text-t2">
-            {submission.author ?? "anonymous"}
-          </h3>
+          <div className="flex gap-2 items-center">
+            <UserAvatar address={submission.author} size={28} />
+            <h3 className="break-all italic text-sm text-t2 font-semibold">
+              <AddressOrEns address={submission.author} />
+            </h3>
+          </div>
           {headerChildren}
         </div>
       </div>
       <div className="w-full h-0.5 bg-base-200" />
-      <div className="w-9/12 m-auto">
-        {submission.data.type === "video" && (
-          <div>
-            <RenderVideoSubmission submission={submission} />
-          </div>
-        )}
-        {submission.data.type === "image" && (
-          <div>
-            <RenderImageSubmission submission={submission} />
-          </div>
-        )}
-        <RenderSubmissionBody submission={submission} />
-      </div>
+      <SubmissionRenderer submission={submission} />
     </div>
   );
 };

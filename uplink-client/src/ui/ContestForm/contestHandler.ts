@@ -518,6 +518,7 @@ export const postContest = async (url,
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "X-CSRF-TOKEN": arg.csrfToken,
         },
         credentials: "include",
         body: JSON.stringify({

@@ -210,8 +210,6 @@ const VoterRewardRow = ({
   errors,
 }) => {
   const [selectedToken, setSelectedToken] = useState(menuSelectOptions[0]);
-  console.log(menuSelectOptions);
-
   useEffect(() => {
     // Check if the current selectedToken is still in the updated menuSelectOptions
     const isSelectedTokenPresent = menuSelectOptions.some(
@@ -223,10 +221,6 @@ const VoterRewardRow = ({
       setSelectedToken(menuSelectOptions[0]);
     }
   }, [menuSelectOptions]);
-
-  useEffect(() => {
-    console.log("selected token changed to", selectedToken);
-  }, [selectedToken]);
 
   const removeRank = () => {
     const newPayouts = allRewards.payouts.filter((_, i) => i !== index);
@@ -246,7 +240,6 @@ const VoterRewardRow = ({
   };
 
   const updateTokenType = (option) => {
-    console.log(option);
     if (selectedToken.value === option.value) return;
 
     const updatedPayouts = [...allRewards.payouts];

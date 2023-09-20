@@ -41,17 +41,17 @@ const getRewards = db.query.rewards.findMany({
 }).prepare();
 
 
-// take a random sample of 20 submissions that recieved more than 5 vote instances (not vote amount)
+// take a random sample of 10 submissions that recieved more than 5 vote instances (not vote amount)
 // TODO: this can be converted to a relational query
 const getPopularSubmissions = async () => {
 
 
-    // get submissions that recieved more than 5 unique vote instances (not vote amount)
+    // get submissions that recieved more than 3 unique vote instances (not vote amount)
     const submissionIds = await db.select({
         submissionId: schema.votes.submissionId,
     }).from(schema.votes)
         .groupBy(schema.votes.submissionId)
-        //.having(sqlOps.gt(sqlOps.sql<number>`count(*)`, 2))
+        .having(sqlOps.gt(sqlOps.sql<number>`count(*)`, 3))
         .then(res => res.map(el => el.submissionId))
 
 
@@ -76,7 +76,7 @@ const getPopularSubmissions = async () => {
                 sqlOps.inArray(schema.submissions.id, submissionIds),
                 sqlOps.lt(schema.contests.endTime, new Date().toISOString())
             ))
-            //.orderBy(schema.submissions.created, 'desc')
+            .orderBy(sqlOps.sql`${schema.submissions.created} desc`)
             .limit(10)
 
         return submissions;
@@ -123,8 +123,8 @@ const postProcessRewards = (rewards) => {
 
 const sortSubmissions = (submissions, isContestOver: boolean) => {
 
-    // randomize the order of the submissions if the contest is still ongoing
-    if (!isContestOver) return submissions.sort(() => Math.random() - 0.5);
+    // if contest is not over, return as is
+    if (!isContestOver) return submissions
 
     // contest is over, sort by total votes.
     return submissions.sort((a, b) => {
@@ -146,9 +146,9 @@ const sortSubmissions = (submissions, isContestOver: boolean) => {
 
 const queries = {
     Query: {
-        async getUserSubmissionParams(_, { walletAddress, contestId }, contextValue, info) {
+        async getUserSubmissionParams(_, { contestId }, context, info) {
 
-            const user = walletAddress ? { address: walletAddress } : await authController.getUser(contextValue);
+            const user = await authController.getUser(context);
             if (!user) throw new GraphQLError('Unknown user', {
                 extensions: {
                     code: 'UNKOWN_USER'
@@ -157,7 +157,7 @@ const queries = {
             return computeSubmissionParams(user, parseInt(contestId))
         },
 
-        async submission(_, { submissionId }, contextValue, info) {
+        async submission(_, { submissionId }, context, info) {
             // determine if we need to filter out some of the hidden fields
             const data = await singleSubmissionById.execute({ submissionId })
             const { endTime, anonSubs, visibleVotes } = data.contest;
@@ -166,7 +166,7 @@ const queries = {
             return postProcessSubmission(data, withAuthor, withVotes);
         },
 
-        async popularSubmissions(_, { submissionId }, contextValue, info) {
+        async popularSubmissions(_, { submissionId }, context, info) {
             return getPopularSubmissions();
         },
     },
@@ -184,14 +184,15 @@ const queries = {
             const promise_submissions = submissionsByContestId.execute({ contestId: contest.id })
                 .then(async (submissions) => {
                     return await Promise.all(submissions.map((submission) => postProcessSubmission(submission, withAuthor, withVotes)))
-                });
+                })
+                .then(submissions => sortSubmissions(submissions, isContestOver))
 
 
             const promise_rewards = isContestOver ? getRewards.execute({ contestId: contest.id }).then(postProcessRewards) : { submitterRewards: [], voterRewards: [] }
 
             const [submissions, { submitterRewards }] = await Promise.all([promise_submissions, promise_rewards])
 
-            if(submissions.length === 0) return submissions;
+            if (submissions.length === 0) return submissions;
 
             // at this point, submissions are ranked by total votes and we know the reward ranks.
             // we'll add a field to the submissions called "rank" which is the reward rank.

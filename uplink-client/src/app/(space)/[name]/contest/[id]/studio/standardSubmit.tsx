@@ -14,7 +14,7 @@ import { useSession } from "@/providers/SessionProvider";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { BiInfoCircle, BiPlusCircle, BiSolidCircle } from "react-icons/bi";
 import Modal, { ModalActions } from "@/ui/Modal/Modal";
-import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
+import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import {
   UserSubmissionParams,
   useContestInteractionState,
@@ -52,6 +52,7 @@ async function postSubmission(
         previewAsset: string | null;
         videoAsset: string | null;
       };
+      csrfToken: string | null;
     };
   }
 ) {
@@ -59,6 +60,7 @@ async function postSubmission(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": arg.csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({
@@ -400,7 +402,7 @@ const StudioSidebar = ({
               </div>
             </div>
           )}
-          <WalletConnectButton>
+          <WalletConnectButton styleOverride="w-full btn-primary">
             <div className="flex flex-row items-center justify-between bg-base-200 rounded-lg gap-2 h-fit w-full">
               <button
                 onClick={onSubmit}
@@ -485,7 +487,11 @@ const SubmissionPreviewModal = ({
       onClose();
     }
     try {
-      await trigger({ contestId, submission: payload });
+      await trigger({
+        contestId,
+        submission: payload,
+        csrfToken: session.csrfToken,
+      });
       mutateLiveSubmissions();
     } catch (err) {
       console.log(err);

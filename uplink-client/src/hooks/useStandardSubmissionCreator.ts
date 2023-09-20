@@ -280,7 +280,6 @@ export const useStandardSubmissionCreator = () => {
         }
 
         if (isVideo) {
-            console.log('in here')
             if (!videoThumbnailOptions[videoThumbnailBlobIndex]) {
                 toast.error("Please choose a thumbnail for your video")
                 setErrors({

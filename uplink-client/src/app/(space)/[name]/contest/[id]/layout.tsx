@@ -1,7 +1,7 @@
 import { ContestStateProvider } from "@/providers/ContestStateProvider";
-import { VoteProposalProvider } from "@/providers/VoteProposalProvider";
 import { getContestById } from "./fetchContest";
 import { ContestInteractionProvider } from "@/providers/ContestInteractionProvider";
+
 import SwrProvider from "@/providers/SwrProvider";
 import { VoteActionProvider } from "@/providers/VoteActionProvider";
 import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
@@ -24,7 +24,6 @@ export default async function Layout({
     [`submissions/${params.id}`]: submissions,
   };
 
-  console.log(JSON.stringify(contest, null, 2));
   const { deadlines, metadata, tweetId, space } = contest;
   return (
     <div className="w-full flex flex-col items-center p-4">

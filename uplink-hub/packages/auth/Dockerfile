@@ -20,4 +20,6 @@ RUN yarn workspace auth build
 
 workdir /app/packages/auth
 
+env NODE_ENV production
+
 CMD ["yarn", "start"]

@@ -25,36 +25,32 @@ const getSpaces = async () => {
     .then((res) => res.data.spaces);
 };
 
-const AllSpaces = ({ spaces }: any) => {
+const AllSpaces = ({ spaces }) => {
   return (
-    <div className="grid gap-4 md:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 w-full ">
+    <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
       {spaces.map((space: any, index: number) => {
         return (
           <Link
             key={index}
             href={`${space.name}`}
-            prefetch={true}
-            className="flex flex-col will-change-transform rounded-xl bg-base-100 overflow-hidden transform transition-transform duration-300 hover:-translate-y-2.5 hover:translate-x-0"
+            className="flex flex-col items-center justify-center gap-4 bg-base animate-scrollInX
+            cursor-pointer border border-border rounded-2xl p-4 full overflow-hidden w-full transform 
+            transition-transform duration-300 hoverCard will-change-transform no-select"
           >
-            <div className="relative media-grid-item">
-              <figure className="absolute inset-0 overflow-hidden rounded-b-2xl">
-                <Image
-                  src={space.logoUrl}
-                  alt="space logo"
-                  fill
-                  className="object-cover w-full"
-                  sizes="25vw"
-                />
-              </figure>
-              <div className="absolute flex items-end bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black rounded-b-lg">
-                <h2
-                  className={`card-title w-full truncate text-t1 p-2 text-lg md:text-xl ${
-                    space.displayName.length > 25 ? "text-xl" : "text-2xl"
-                  }`}
-                >
-                  {space.displayName}
-                </h2>
-              </div>
+            <div className="relative w-28 h-28">
+              <Image
+                src={space.logoUrl}
+                fill
+                alt="spaceLogo"
+                className="object-contain mask mask-circle"
+              />
+            </div>
+            <div className="flex items-center justify-center gap-1 truncate">
+              <h1 className="overflow-hidden text-xl font-semibold">
+                {space.displayName.length > 15
+                  ? space.displayName.slice(0, 15) + "..."
+                  : space.displayName}
+              </h1>
             </div>
           </Link>
         );

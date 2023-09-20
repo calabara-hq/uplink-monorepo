@@ -1,8 +1,6 @@
 import Image from "next/image";
 import uplinkLogo from "../../../public/uplink-logo.svg";
-import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
-import WalletConnectButton2 from "../ConnectButton/ConnectButton2";
-
+import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 const Nav = () => {
   return (
     <nav className="h-20 w-full bg-base-100 hidden md:flex">
@@ -21,7 +19,7 @@ const Nav = () => {
           </div>
         </div>
         <div className="flex items-center justify-center ml-auto">
-          <WalletConnectButton2 />
+          <WalletConnectButton />
         </div>
       </div>
     </nav>

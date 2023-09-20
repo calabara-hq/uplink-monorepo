@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     try {
         const requestData = await request.json();
         const { tags, secret } = requestData;
-        if (secret !== process.env.FRONTEND_API_SECRET) throw new Error('Invalid secret')
+        if (secret !== process.env.API_SECRET) throw new Error('Invalid secret')
 
         for (const tag of tags) { revalidateTag(tag) }
 

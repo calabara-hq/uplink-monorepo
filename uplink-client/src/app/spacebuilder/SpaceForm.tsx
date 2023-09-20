@@ -13,7 +13,7 @@ import {
 } from "@/app/spacebuilder/spaceHandler";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import WalletConnectButton from "../../ui/ConnectButton/ConnectButton";
+import WalletConnectButton from "../../ui/ConnectButton/WalletConnectButton";
 import Image from "next/image";
 import useSWRMutation from "swr/mutation";
 export default function SpaceForm({
@@ -27,7 +27,7 @@ export default function SpaceForm({
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
-
+  const { data: session, status } = useSession();
   const { trigger, error, isMutating, reset } = useSWRMutation(
     isNewSpace
       ? `/api/createContest/${spaceId}`
@@ -65,6 +65,7 @@ export default function SpaceForm({
       await trigger({
         ...(!isNewSpace && { spaceId: spaceId }),
         spaceData: values,
+        csrfToken: session.csrfToken,
       }).then(({ success, spaceName, errors }) => {
         if (success) {
           toast.success(
@@ -112,7 +113,7 @@ export default function SpaceForm({
           isNewSpace={isNewSpace}
         />
         <div className="p-2" />
-        <WalletConnectButton>
+        <WalletConnectButton styleOverride="w-full btn-primary">
           <button
             className="btn btn-primary normal-case"
             onClick={onFormSubmit}

@@ -290,6 +290,7 @@ export const createSpace = async (
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": arg.csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({
@@ -329,6 +330,7 @@ export const editSpace = async (
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": arg.csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({

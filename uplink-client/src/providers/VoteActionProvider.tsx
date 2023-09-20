@@ -12,12 +12,12 @@ import { useSession } from "./SessionProvider";
 // inherit voting params from contest interaction provider
 // provide an API for managing user votes
 
-const apiCastVotes = async (contestId: string, castVotePayload: any) => {
+const apiCastVotes = async (contestId: string, castVotePayload: any, csrfToken: string | null) => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // "Authorization": "Bearer YOUR_TOKEN" // Uncomment if authentication is required
+      "X-CSRF-Token": csrfToken
     },
     credentials: "include",
     body: JSON.stringify({
@@ -50,11 +50,12 @@ const apiCastVotes = async (contestId: string, castVotePayload: any) => {
     .then((res) => res.data.castVotes);
 };
 
-const apiRemoveSingleVote = async (contestId: string, submissionId: string) => {
+const apiRemoveSingleVote = async (contestId: string, submissionId: string, csrfToken: string | null) => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken
     },
     credentials: "include",
     body: JSON.stringify({
@@ -87,11 +88,12 @@ const apiRemoveSingleVote = async (contestId: string, submissionId: string) => {
     .then((res) => res.data.removeSingleVote);
 };
 
-const apiRemoveAllVotes = async (contestId: string) => {
+const apiRemoveAllVotes = async (contestId: string, csrfToken: string | null) => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken
     },
     credentials: "include",
     body: JSON.stringify({
@@ -152,8 +154,6 @@ export const VoteActionProvider = ({
   const [proposedVotes, setProposedVotes] = useState<any[]>([]);
   const [areCurrentVotesDirty, setAreCurrentVotesDirty] = useState(false);
   const { data: session, status } = useSession();
-
-  console.log("VOTE", userVoteParams);
 
 
   // handle cases where the user was signed out, added proposed votes, then signed in
@@ -230,7 +230,7 @@ export const VoteActionProvider = ({
       };
       try {
         await mutateUserVotingParams(
-          apiRemoveSingleVote(contestId, submissionId),
+          apiRemoveSingleVote(contestId, submissionId, session.csrfToken),
           options
         );
         toast.success("Your vote has been removed");
@@ -273,7 +273,7 @@ export const VoteActionProvider = ({
       revalidate: false,
     };
     try {
-      await mutateUserVotingParams(apiRemoveAllVotes(contestId), options);
+      await mutateUserVotingParams(apiRemoveAllVotes(contestId, session.csrfToken), options);
       toast.success("Your votes have been removed");
     } catch (err) {
       console.log(err);
@@ -441,7 +441,7 @@ export const VoteActionProvider = ({
 
     try {
       await mutateUserVotingParams(
-        apiCastVotes(contestId, castVotePayload),
+        apiCastVotes(contestId, castVotePayload, session.csrfToken),
         options
       );
       toast.success("Your votes have been submitted");

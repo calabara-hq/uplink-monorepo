@@ -379,8 +379,6 @@ export const computeSubmissionParams = async (
 
     const userSubCount = userSubmissions.length;
     const remainingSubPower = maxSubPower === 0 ? 0 : maxSubPower - userSubCount;
-    //console.log(JSON.stringify(restrictionResults, null, 2))
-
     return {
         contestType,
         userSubmissions,

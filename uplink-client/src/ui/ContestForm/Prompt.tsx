@@ -80,9 +80,7 @@ const Prompt = ({
                     handleMediaUpload(
                       event,
                       ["image"],
-                      (mimeType) => {
-                        console.log(mimeType);
-                      },
+                      (mimeType) => {},
                       (base64) => {
                         setPromptData((prevPromptData) => ({
                           ...prevPromptData,

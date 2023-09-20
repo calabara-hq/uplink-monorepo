@@ -18,4 +18,6 @@ RUN yarn workspace tweet build
 
 WORKDIR /app/packages/tweet
 
+env NODE_ENV production
+
 CMD ["yarn", "start"]

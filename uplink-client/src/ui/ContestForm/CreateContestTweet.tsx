@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Modal, { ModalActions } from "../Modal/Modal";
 import { nanoid } from "nanoid";
 import { handleMutationError } from "@/lib/handleMutationError";
+import { useSession } from "@/providers/SessionProvider";
 
 async function postContestTweet(
   url,
@@ -16,6 +17,7 @@ async function postContestTweet(
       contestId: string;
       spaceId: string;
       tweetThread: ApiThreadItem[];
+      csrfToken: string | null;
     };
   }
 ) {
@@ -23,6 +25,7 @@ async function postContestTweet(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": arg.csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({
@@ -66,6 +69,7 @@ const CreateContestTweet = ({
     icon: React.ReactNode;
   }[];
 }) => {
+  const { data: session, status } = useSession();
   const { trigger, data, error, isMutating, reset } = useSWRMtation(
     `/api/createContestTweet/${contestId}`,
     postContestTweet,
@@ -102,6 +106,7 @@ const CreateContestTweet = ({
         }
         return serverThreadItem;
       }),
+      csrfToken: session?.csrfToken,
     };
     try {
       await trigger(payload).then(({ success, errors }) => {

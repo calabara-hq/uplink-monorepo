@@ -118,14 +118,6 @@ const handleMediaUpload = async (
         throw new MediaUploadError({ code: 4, message: 'Error reading file' })
     };
 
-    /*
-    const preUploadResponse = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/media/preupload?filesize=${fileSize}`, {
-        method: 'GET',
-        credentials: 'include'
-    });
-
-    console.log(preUploadResponse);
-    */
     const response = await IpfsUpload(file);
     if (!response) throw new MediaUploadError({ code: 5, message: 'Error uploading to IPFS' })
 
