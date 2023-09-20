@@ -12,7 +12,7 @@ import {
   HiOutlineLockClosed,
 } from "react-icons/hi2";
 import { useSession } from "@/providers/SessionProvider";
-import WalletConnectButton from "../ConnectButton/ConnectButton";
+import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import Modal from "../Modal/Modal";
 import { BiInfoCircle, BiTime } from "react-icons/bi";
 import useTweetQueueStatus from "@/hooks/useTweetQueueStatus";
@@ -189,7 +189,7 @@ const AdminsRequired = ({
           {!session?.user?.address && (
             <div className="flex flex-row items-center justify-start gap-2  xl:ml-auto text-t1">
               <p className="text-t1 text-sm">Are you an admin?</p>
-              <WalletConnectButton style="btn-sm btn-ghost" />
+              <WalletConnectButton styleOverride="btn-sm btn-ghost" />
             </div>
           )}
         </div>

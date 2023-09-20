@@ -1,7 +1,7 @@
 "use client";
 import { ThreadItem, ApiThreadItem } from "@/hooks/useThreadCreator";
 import { useSession } from "@/providers/SessionProvider";
-import WalletConnectButton from "@/ui/ConnectButton/ConnectButton";
+import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import CreateThread from "@/ui/CreateThread/CreateThread";
 import Stack from "@/ui/Stack/Stack";
 import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton";
@@ -39,6 +39,7 @@ async function postTwitterSubmission(
         title: string;
         thread: ApiThreadItem[];
       };
+      csrfToken: string | null;
     };
   }
 ) {
@@ -46,6 +47,7 @@ async function postTwitterSubmission(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": arg.csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({
@@ -130,7 +132,7 @@ const Step1 = ({ contestId }: { contestId: string }) => {
             <div className="flex flex-col gap-2 h-full w-full">
               <p className="font-bold">Eligibility</p>
 
-              <WalletConnectButton>
+              <WalletConnectButton styleOverride="w-full btn-primary">
                 <span className="hidden" />
               </WalletConnectButton>
               {userSubmitParams && (
@@ -423,7 +425,7 @@ const PreviewModal = ({
       }),
     };
     try {
-      await trigger({ contestId, submission });
+      await trigger({ contestId, submission, csrfToken: session.csrfToken });
       mutateLiveSubmissions();
     } catch (err) {
       console.log(err);

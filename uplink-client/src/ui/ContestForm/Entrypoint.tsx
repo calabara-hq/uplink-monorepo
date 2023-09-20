@@ -35,10 +35,11 @@ import {
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
 import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import LoadingAnimation from "../LoadingAnimation/LoadingAnimation";
-import WalletConnectButton from "../ConnectButton/ConnectButton";
+import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import useSWRMutation from "swr/mutation";
 import CreateContestTweet from "./CreateContestTweet";
 import { toast } from "react-hot-toast";
+import { useSession } from "@/providers/SessionProvider";
 
 const validateContestParams = (contestState: ContestBuilderProps) => {
   const {
@@ -190,8 +191,8 @@ const ContestParamSectionCards = ({ steps, onSubmit }) => {
         })}
       </div>
       <div className="ml-auto w-fit">
-        <WalletConnectButton>
-          <button className="btn btn-primary normal-case" onClick={onSubmit}>
+        <WalletConnectButton styleOverride="w-full btn-primary">
+          <button className="btn btn-success normal-case" onClick={onSubmit}>
             Submit
           </button>
         </WalletConnectButton>
@@ -210,7 +211,7 @@ const ContestForm = ({
   spaceTokens: IToken[];
 }) => {
   const [currentStep, setCurrentStep] = useState(-1);
-
+  const { data: session, status } = useSession();
   // add ETH to the spaceTokens array if it doesn't exist
   const spaceTokensWithEth: IToken[] = spaceTokens.some(
     (token) => token.type === "ETH" && token.symbol === "ETH"
@@ -267,6 +268,7 @@ const ContestForm = ({
     if (isError) return;
     try {
       await trigger({
+        csrfToken: session.csrfToken,
         contestData: {
           ...data,
           prompt: {

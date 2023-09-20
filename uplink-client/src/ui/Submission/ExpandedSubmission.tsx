@@ -13,13 +13,7 @@ import {
   MediaLoadingIndicator,
 } from "media-chrome/dist/react";
 import { ParseBlocks } from "@/lib/blockParser";
-import { isMobile } from "@/lib/isMobile";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
-import { useEffect, useRef, useState } from "react";
-import { useInView } from "react-intersection-observer";
-import useVideoControls from "@/hooks/useVideoControls";
-import { MdOutlineOndemandVideo } from "react-icons/md";
-import "@/styles/videoPlayer.css";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 

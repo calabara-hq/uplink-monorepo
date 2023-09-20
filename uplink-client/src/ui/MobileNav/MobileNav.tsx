@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HiMagnifyingGlass } from "react-icons/hi2";
-import WalletConnectButton2 from "../ConnectButton/ConnectButton2";
+import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import uplinkLogo from "../../../public/uplink-logo.svg";
 
 const MobileNav = () => {
@@ -17,7 +17,7 @@ const MobileNav = () => {
         <span className="btm-nav-label">spaces</span>
       </Link>
       <div>
-        <WalletConnectButton2 />
+        <WalletConnectButton />
       </div>
     </>
   );

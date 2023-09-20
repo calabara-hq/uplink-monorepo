@@ -259,7 +259,6 @@ export function ContestInteractionProvider({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
-  console.log("session", session)
   const { contestState } = useContestState();
   const isAuthed = status === "authenticated";
   const isSubmitPeriod = contestState === "submitting";

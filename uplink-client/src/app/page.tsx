@@ -8,18 +8,19 @@ import CardSubmission from "@/ui/Submission/CardSubmission";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
-import { BiPlusCircle } from "react-icons/bi";
-import { HiPhoto } from "react-icons/hi2";
 import ArtistPfp from "@/../public/pumey_pfp.jpg";
 import ArtistSubmission from "@/../public/vinnie_noggles.png";
 import landingBg from "@/../public/landing-bg.svg";
 import { Swiper, SwiperSlide } from "@/ui/Swiper/Swiper";
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
-import { LuCoins, LuSettings2, LuVote, LuArrowRight } from "react-icons/lu";
+import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
+import { DelayedGridItem, DelayedGridLayout } from "./DelayedGrid";
+import { BiPlusCircle } from "react-icons/bi";
+import { HiPhoto } from "react-icons/hi2";
 
-import DelayedGridLayout from "./DelayedGridLayout";
-import DelayedGridItem from "./DelayedGridItem";
+
+
 
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -123,6 +124,7 @@ const BannerSection = () => {
                   alt="swim shady"
                   width={50}
                   height={50}
+                  sizes="10vw"
                   className="rounded-full"
                 />
                 <div className="flex-grow flex flex-col gap-2 ml-4">
@@ -135,6 +137,7 @@ const BannerSection = () => {
                         src={ArtistSubmission}
                         alt="twitter submission"
                         className="rounded-lg object-contain"
+                        sizes="50vw"
                         priority
                       />
                     </div>

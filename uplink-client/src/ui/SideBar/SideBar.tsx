@@ -7,7 +7,6 @@ import {
   HiPlus,
 } from "react-icons/hi2";
 import uplinkLogo from "../../../public/uplink-logo.svg";
-import WalletConnectButton2 from "../ConnectButton/ConnectButton2";
 
 export default function Sidebar() {
   return (

@@ -33,10 +33,16 @@ const nextConfig = {
   },
   webpack: config => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
+    config.resolve.extensions = [ '.mjs', '.js', '.jsx', '.json' ];
     return config;
   },
 }
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
 
 
-module.exports = nextConfig
+
+
+module.exports = withBundleAnalyzer({ nextConfig });

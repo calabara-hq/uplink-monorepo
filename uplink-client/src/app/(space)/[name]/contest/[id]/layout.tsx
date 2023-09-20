@@ -1,7 +1,7 @@
 import { ContestStateProvider } from "@/providers/ContestStateProvider";
-import { VoteProposalProvider } from "@/providers/VoteProposalProvider";
 import { getContestById } from "./fetchContest";
 import { ContestInteractionProvider } from "@/providers/ContestInteractionProvider";
+
 import SwrProvider from "@/providers/SwrProvider";
 import { VoteActionProvider } from "@/providers/VoteActionProvider";
 import fetchSubmissions from "@/lib/fetch/fetchSubmissions";

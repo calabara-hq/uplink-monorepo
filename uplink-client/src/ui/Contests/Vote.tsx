@@ -9,15 +9,13 @@ import {
   HiSparkles,
 } from "react-icons/hi2";
 import { useVoteActionContext } from "@/providers/VoteActionProvider";
-import useTrackSubmissions from "@/hooks/useTrackSubmissions";
 import { useSession } from "@/providers/SessionProvider";
-import WalletConnectButton from "../ConnectButton/ConnectButton";
-import Modal from "../Modal/Modal";
-
+import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import formatDecimal from "@/lib/formatDecimal";
 import { useContestState } from "@/providers/ContestStateProvider";
 import Image from "next/image";
 import { HiTrash, HiDocumentText } from "react-icons/hi2";
+import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
 
 const SubmissionVoteInput = ({
   submission,
@@ -56,7 +54,7 @@ const SubmissionCardVote = ({
   return (
     <div className="grid grid-cols-[70%_30%] w-full h-24 max-h-24 bg-base-100 rounded-xl">
       {submission.data.type === "text" && (
-        <div className="grid grid-cols-1 w-full p-2">
+        <div className="flex flex-col justify-center w-full p-2">
           <p className="text-base line-clamp-4 text-t1">
             {submission.data.title}
           </p>
@@ -90,7 +88,7 @@ const LockedCardVote = ({ submission }: { submission: any }) => {
   return (
     <div className="grid grid-cols-[70%_30%] gap-2 h-20 min-h-20 bg-base-100 rounded-xl">
       {submission.data.type === "text" && (
-        <div className="grid grid-cols-1 w-full p-2">
+        <div className="flex flex-col justify-center w-full p-2">
           <p className="text-base line-clamp-4 text-t1">
             {submission.data.title}
           </p>
@@ -146,8 +144,25 @@ export const VoteButton = ({
     setIsEditMode(false);
   };
 
+  return (
+    <div className="w-full p-2">
+      <WalletConnectButton styleOverride="w-full rounded-lg btn btn-primary">
+        <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-9/10 m-2">
+          <button
+            className="btn btn-warning flex flex-1 normal-case"
+            onClick={handleSubmit}
+            disabled={!isVoteButtonEnabled}
+          >
+            Cast Votes
+          </button>
+          <p className="mx-2 p-2 text-center text-t2">{stateRemainingTime}</p>
+        </div>
+      </WalletConnectButton>
+    </div>
+  );
+
   if (status !== "authenticated") {
-    return <WalletConnectButton style="w-full" />;
+    return <WalletConnectButton styleOverride="w-full rounded-lg" />;
   }
   return (
     <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-9/10 m-2">
@@ -213,7 +228,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
     areUserVotingParamsLoading,
   } = useVoteActionContext();
 
-  const { liveSubmissions } = useTrackSubmissions(contestId);
+  const { submissions } = useContestInteractionState();
   const [isEditMode, setIsEditMode] = useState(false);
   const displayableVotesSpent = formatDecimal(votesSpent);
   const displayableVotesRemaining = formatDecimal(votesRemaining);
@@ -254,7 +269,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
                     mode={"current"}
                     submission={{
                       ...submission,
-                      data: liveSubmissions.find(
+                      data: submissions.find(
                         (el) => el.id === submission.submissionId
                       ).data,
                     }}
@@ -266,7 +281,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
                     key={idx}
                     submission={{
                       ...submission,
-                      data: liveSubmissions.find(
+                      data: submissions.find(
                         (el) => el.id === submission.submissionId
                       ).data,
                     }}
