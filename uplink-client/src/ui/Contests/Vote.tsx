@@ -116,6 +116,7 @@ const CartMediaSubmission = ({ submission }: { submission: any }) => {
         alt="submission image"
         fill
         className="object-cover rounded-xl"
+        sizes="10wv"
       />
     </figure>
   );
@@ -181,7 +182,7 @@ const EditButton = ({
   } else {
     return (
       <button
-        className="btn btn-sm btn-ghost"
+        className="btn btn-sm btn-ghost normal-case"
         onClick={() => setIsEditMode(true)}
       >
         <HiLockClosed className="w-4 h-4 mr-2" />

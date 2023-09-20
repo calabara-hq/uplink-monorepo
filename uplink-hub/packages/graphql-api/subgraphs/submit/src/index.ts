@@ -19,11 +19,11 @@ const server = new ApolloServer({
 const { url } = await startStandaloneServer(server, {
   listen: { port },
   context: async ({ req }) => {
-    // get the user token from the headers
-    // get the 'session-cookie' header from the request
+    // get the 'session-cookie' + csrfToken header from the request
     const token = cookie.parse(req.headers['session-cookie'] || '');
-    // add the user to the context
-    return { token };
+    const csrfToken = req.headers['x-csrf-token'] || ''
+    // add the user + csrf to the context
+    return { token, csrfToken };
   }
 });
 

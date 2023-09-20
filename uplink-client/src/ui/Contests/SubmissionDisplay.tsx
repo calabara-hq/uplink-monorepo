@@ -13,7 +13,7 @@ import { BiLayerPlus } from "react-icons/bi";
 import formatDecimal from "@/lib/formatDecimal";
 import { toast } from "react-hot-toast";
 
-const AddToCartButton = ({ submission, voteActions }) => {
+export const AddToCartButton = ({ submission, voteActions }) => {
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
   const [isSelected, setIsSelected] = useState(false);
 
@@ -40,7 +40,7 @@ const AddToCartButton = ({ submission, voteActions }) => {
         className="ml-auto tooltip tooltip-top pr-2.5"
         data-tip={"Selected"}
       >
-        <HiCheckBadge className="h-6 w-6 text-warning" />
+        <HiCheckBadge className="h-7 w-7 text-warning" />
       </span>
     );
   } else

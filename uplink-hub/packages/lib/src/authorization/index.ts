@@ -2,20 +2,20 @@ import Redis, { Redis as RedisType } from 'ioredis';
 
 export class AuthorizationController {
     private redisClient: RedisType;
-    
+
     constructor(redisUrl: string) {
         this.redisClient = new Redis(redisUrl);
     }
-    
+
     async getUser(context: any) {
-        if (!context || !context.token) {
+        if (!context || !context.token || !context.csrfToken) {
             return null;
         }
 
-        const { token } = context;
+        const { token, csrfToken } = context;
         const { 'uplink-hub': uplinkHub } = token;
 
-        if (!uplinkHub) return null;
+        if (!uplinkHub || !csrfToken) return null;
 
         const sid = uplinkHub.split('.')[0]?.split(':')[1];
 
@@ -24,8 +24,9 @@ export class AuthorizationController {
             const data = await this.redisClient.get(`uplink-session:${sid}`);
 
             if (data) {
-                const parsedData = JSON.parse(data);
-                return parsedData.user || null;
+                const { user, csrfToken: sessionCsrf } = JSON.parse(data);
+                if (sessionCsrf !== csrfToken) return null; // check for csrf token match
+                return user || null;
             }
 
             return null;

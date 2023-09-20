@@ -28,6 +28,7 @@ import {
   SubmitterRestrictionsSection,
   VotingPolicySection,
 } from "./SidebarInfo";
+import { StatusLabel } from "../ContestLabels/ContestLabels";
 // sidebar for the main contest view
 
 const InfoWrapper = ({
@@ -273,6 +274,20 @@ const Submitting = ({ studioLink }: { studioLink: string }) => {
   );
 };
 
+const Voting = () => {
+  const { contestState, stateRemainingTime } = useContestState();
+  //const ratio = new Date() / new Date(stateRemainingTime).toISOString();
+  if (contestState === "voting") {
+    return (
+      <div className="flex gap-2 items-center">
+        <StatusLabel status={contestState} />
+        <p className="text-t2">{stateRemainingTime}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const SidebarSkeleton = () => {
   return (
     <div className="flex flex-col justify-between bg-base-100  rounded-lg w-full">
@@ -338,7 +353,7 @@ const RenderStateSpecificDialog = ({
       <Submitting studioLink={`/${spaceName}/contest/${contestId}/studio`} />
     );
   } else if (contestState === "voting") {
-    return <p>voting!!</p>;
+    return <Voting />;
   } else if (contestState === "closed") {
     return <Closed />;
   }

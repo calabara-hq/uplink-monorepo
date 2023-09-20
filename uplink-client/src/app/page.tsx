@@ -286,13 +286,7 @@ const ActiveContests = async () => {
               },
             }}
           >
-            {[
-              ...activeContests,
-              ...activeContests,
-              ...activeContests,
-              ...activeContests,
-              ...activeContests,
-            ].map((contest, index) => (
+            {activeContests.map((contest, index) => (
               <SwiperSlide key={index}>
                 <ContestCard
                   contestId={contest.id}

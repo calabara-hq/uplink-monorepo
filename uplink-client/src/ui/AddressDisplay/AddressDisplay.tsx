@@ -37,6 +37,6 @@ export const UserAvatar = ({
   size: number;
 }) => {
   if (!address)
-    return <CustomAvatar address="0x123456" size={size} context="true" />;
+    return <CustomAvatar address="0xe31f92" size={size} context="true" />;
   return <CustomAvatar address={address} size={size} context="true" />;
 };

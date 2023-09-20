@@ -39,9 +39,7 @@ const addUser = async (user: Session['user']) => {
 
 export const getCsrfToken = function (req, res) {
     let csrf = randomUUID().replace(/-/g, '')
-    console.log('session1', req.session, '\n')
     req.session.csrfToken = csrf
-    console.log('session2', req.session, '\n')
     res.send({ csrfToken: csrf })
 }
 
@@ -51,7 +49,7 @@ export const getSession = function (req, res) {
     res.send(
         session.user
             ?
-            { user: session.user, expires: session.cookie.expires }
+            { user: session.user, expires: session.cookie.expires, csrfToken: session.csrfToken }
             : {}
     )
 }
@@ -65,7 +63,7 @@ export const verifySignature = async (req, res) => {
         req.session.user = { address: result.data.address }
         const user = { address: result.data.address }
         await addUser(user);
-        res.send({ user: user, expires: req.session.cookie.expires })
+        res.send({ user: user, expires: req.session.cookie.expires, csrfToken: session.csrfToken })
     } catch (err) {
         console.error(err)
         res.sendStatus(401)
@@ -86,8 +84,9 @@ export const signOut = async (req, res) => {
 }
 
 export const initiateTwitterAuth = async (req, res) => {
-    const { scope } = req.body;
-    if (!req.session.user) return res.status(401).send('You must be logged in to initiate Twitter OAuth')
+    const { scope, csrfToken } = req.body;
+    if (!req.session.user) return res.status(401).send('You must be logged in to initiate Twitter OAuth');
+    if (csrfToken !== req.session.csrfToken) return res.status(401).send('Invalid CSRF Token');
     const data = await twitterClient.generateAuthLink(twitterRedirect, { linkMode: 'authorize' });
 
     const { url, oauth_token, oauth_token_secret } = data;

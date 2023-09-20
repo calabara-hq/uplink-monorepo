@@ -10,3 +10,6 @@ headers:
           named: "cookie"
           default: "null"
           rename: "session-cookie"
+      - propagate:
+          named: 'X-CSRF-TOKEN'
+          default: 'null'

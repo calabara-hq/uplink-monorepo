@@ -20,7 +20,6 @@ const mutations = {
         },
 
         createTwitterSubmission: async (_: any, args: any, context: any) => {
-            console.log('CREATING TWITTER SUBMISSION')
             const user = await authController.getUser(context);
             if (!user || !user.twitter) throw new GraphQLError('Unauthorized', {
                 extensions: {
@@ -28,7 +27,6 @@ const mutations = {
                 }
             })
             let result = await twitterSubmit(user, args.contestId, args.submission);
-            console.log(result);
             return result;
         }
     },

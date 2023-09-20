@@ -91,7 +91,6 @@ type Query {
   popularSubmissions: [PopularSubmission!]!
   getUserSubmissionParams(
     contestId: ID!
-    walletAddress: String
   ): UserSubmissionParams!
 }
 

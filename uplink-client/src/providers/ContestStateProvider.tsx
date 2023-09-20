@@ -77,7 +77,6 @@ export function ContestStateProvider({
       const minutes = differenceInMinutes(nextDeadline, now);
       const hours = differenceInHours(nextDeadline, now);
       const days = differenceInDays(nextDeadline, now);
-      console.log(days, hours, minutes, seconds)
       if (days > 0) {
         setStateRemainingTime(`${days} days`);
       } else if (hours > 0) {

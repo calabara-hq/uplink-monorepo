@@ -5,6 +5,7 @@ import {
   VoteActionProps,
   useVoteActionContext,
 } from "@/providers/VoteActionProvider";
+import { AddToCartButton } from "@/ui/Contests/SubmissionDisplay";
 import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
 import { sub } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
@@ -55,49 +56,6 @@ const Modal = ({
   return null;
 };
 
-const AddToCartButton = ({ submission }: { submission: Submission }) => {
-  const { addProposedVote, currentVotes, proposedVotes } =
-    useVoteActionContext();
-  const { contestState } = useContestState();
-  const [isSelected, setIsSelected] = useState(false);
-
-  useEffect(() => {
-    if (currentVotes && proposedVotes) {
-      setIsSelected(
-        [...currentVotes, ...proposedVotes].some(
-          (vote) => vote.submissionId === submission.id
-        )
-      );
-    }
-  }, [currentVotes, proposedVotes, submission.id]);
-
-  const handleSelect = () => {
-    if (!isSelected) {
-      addProposedVote({ ...submission, submissionId: submission.id });
-    }
-    setIsSelected(!isSelected);
-  };
-
-  if (contestState === "voting") {
-    if (isSelected) {
-      return (
-        <button className=" btn btn-ghost btn-sm cursor-default no-animation ml-auto">
-          <HiCheckBadge className="h-6 w-6 text-black" />
-        </button>
-      );
-    } else
-      return (
-        <button
-          className=" btn btn-ghost btn-sm ml-auto"
-          onClick={handleSelect}
-        >
-          <HiPlus className="h-6 w-6 text-black" />
-        </button>
-      );
-  }
-  return null;
-};
-
 export default function SubmissionModal({
   spaceName,
   contestId,
@@ -116,14 +74,22 @@ export default function SubmissionModal({
   index: number;
 }) {
   const router = useRouter();
+  const voteActions = useVoteActionContext();
   return (
     <Modal isModalOpen={true} onClose={() => router.back()}>
       <AnimatePresence mode="wait">
-        <div className="flex w-full  gap-1 lg:gap-4 p-0">
+        <div className="flex w-full gap-1 lg:gap-4 p-0">
           <div className="flex flex-col jusitfy-start w-full h-full ">
             <ExpandedSubmission
               submission={submission}
-              headerChildren={<AddToCartButton submission={submission} />}
+              headerChildren={
+                <div className="p-1 ml-auto ">
+                  <AddToCartButton
+                    submission={submission}
+                    voteActions={voteActions}
+                  />
+                </div>
+              }
             />
           </div>
         </div>

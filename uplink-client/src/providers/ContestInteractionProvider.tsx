@@ -104,17 +104,19 @@ export interface ContestInteractionProps {
 
 const getUserSubmissionParams = async (
   contestId: string,
-  walletAddress: string
+  csrfToken: string | null
 ) => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": csrfToken,
     },
     body: JSON.stringify({
       query: `
-              query GetUserSubmissionParams($contestId: ID!, $walletAddress: String) {
-                  getUserSubmissionParams(contestId: $contestId, walletAddress: $walletAddress) {
+              query GetUserSubmissionParams($contestId: ID!) {
+                  getUserSubmissionParams(contestId: $contestId) {
                     maxSubPower
                     remainingSubPower
                     userSubmissions {
@@ -140,7 +142,6 @@ const getUserSubmissionParams = async (
                 }`,
       variables: {
         contestId,
-        walletAddress,
       },
     }),
   })
@@ -157,17 +158,19 @@ const getUserSubmissionParams = async (
 
 const getUserVotingParams = async (
   contestId: string,
-  walletAddress: string
+  csrfToken: string | null
 ) => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": csrfToken,
     },
     body: JSON.stringify({
       query: `
-        query getUserVotingParams($contestId: ID!, $walletAddress: String) {
-            getUserVotingParams(contestId: $contestId, walletAddress: $walletAddress) {
+        query getUserVotingParams($contestId: ID!) {
+            getUserVotingParams(contestId: $contestId) {
                 totalVotingPower
                 votesRemaining
                 votesSpent
@@ -180,7 +183,6 @@ const getUserVotingParams = async (
             }`,
       variables: {
         contestId,
-        walletAddress,
       },
     }),
   })
@@ -257,6 +259,7 @@ export function ContestInteractionProvider({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
+  console.log("session", session)
   const { contestState } = useContestState();
   const isAuthed = status === "authenticated";
   const isSubmitPeriod = contestState === "submitting";
@@ -292,7 +295,7 @@ export function ContestInteractionProvider({
     error: isUserSubmitParamsError,
   }: { data: any; isLoading: boolean; error: any } = useSWR(
     submitParamsSwrKey,
-    () => getUserSubmissionParams(contestId, session.user.address)
+    () => getUserSubmissionParams(contestId, session.csrfToken)
   );
 
   // user voting params
@@ -308,7 +311,7 @@ export function ContestInteractionProvider({
     error: any;
     mutate: any;
   } = useSWR(voteParamsSwrKey, () =>
-    getUserVotingParams(contestId, session.user.address)
+    getUserVotingParams(contestId, session.csrfToken)
   );
 
   const postProcessCsvResults = (results: string, type: string) => {

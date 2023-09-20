@@ -331,11 +331,11 @@ type Query
   submission(submissionId: ID!): Submission @join__field(graph: SUBMIT)
   contestSubmissions(contestId: ID!): [Submission!]! @join__field(graph: SUBMIT)
   popularSubmissions: [PopularSubmission!]! @join__field(graph: SUBMIT)
-  getUserSubmissionParams(contestId: ID!, walletAddress: String): UserSubmissionParams! @join__field(graph: SUBMIT)
+  getUserSubmissionParams(contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
   me: User @join__field(graph: USER)
   user(id: ID, address: String): User @join__field(graph: USER)
   testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTE)
-  getUserVotingParams(contestId: ID!, walletAddress: String): UserVotingParams! @join__field(graph: VOTE)
+  getUserVotingParams(contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
 }
 
 type RemoveAllVotesResponse
