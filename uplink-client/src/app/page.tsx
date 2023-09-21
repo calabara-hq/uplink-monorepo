@@ -14,15 +14,11 @@ import landingBg from "@/../public/landing-bg.svg";
 import { Swiper, SwiperSlide } from "@/ui/Swiper/Swiper";
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
 
-
 import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
 import { DelayedGridItem, DelayedGridLayout } from "./DelayedGrid";
 import { BiPlusCircle } from "react-icons/bi";
 import { HiPhoto } from "react-icons/hi2";
-
-
-
 
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -316,7 +312,7 @@ const ActiveContests = async () => {
 
 const PopularSubmissions = async () => {
   const popularSubmissions = await getPopularSubmissions();
-
+  if (popularSubmissions.length === 0) return null;
   return (
     <div className="w-full flex flex-col gap-2 m-auto">
       <h1 className="font-bold text-3xl text-t1 px-12">Weekly Wave</h1>

@@ -12,6 +12,8 @@ import { BiPencil, BiWorld } from "react-icons/bi";
 import { FaTwitter } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi2";
 
+import { Metadata, ResolvingMetadata } from "next";
+
 const getSpace = async (name: string) => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
@@ -291,6 +293,36 @@ const ContestCard = ({
     </Link>
   );
 };
+
+export async function generateMetadata({
+  params,
+  parent,
+}: {
+  params: { name: string };
+  parent: ResolvingMetadata;
+}): Promise<Metadata> {
+  const name = params.name;
+  const space = await getSpace(name);
+
+  return {
+    title: `${space.displayName}`,
+    description: `${space.displayName} on Uplink`,
+    openGraph: {
+      title: `${space.displayName}`,
+      description: `Create with ${space.displayName} on Uplink`,
+      images: [
+        {
+          url: `${space.logoUrl}`,
+          width: 600,
+          height: 600,
+          alt: `${space.displayName} logo`,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+  };
+}
 
 export default async function Page({
   params,

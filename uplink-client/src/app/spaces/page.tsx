@@ -1,6 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { HiPlus } from "react-icons/hi2";
+import { Metadata } from "next";
+import { baseMetadata } from "../base-metadata";
+
+export const metadata: Metadata = {
+  ...baseMetadata,
+  description: "Spaces",
+  openGraph: {
+    ...baseMetadata.openGraph,
+    title: "Spaces",
+    description: "Explore spaces on Uplink",
+  },
+};
 
 const getSpaces = async () => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
