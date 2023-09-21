@@ -60,7 +60,7 @@ const getSpace = async (name: string) => {
 };
 
 const SpaceInfo = async ({ name }: { name: string }) => {
-  const data  = await getSpace(name);
+  const data = await getSpace(name);
   const { id, displayName, logoUrl, twitter, website } = data;
 
   return (
@@ -234,8 +234,7 @@ const ContestDisplay = ({
                 key={contest.id}
                 spaceName={spaceName}
                 contestId={contest.id}
-                // Update prompt url fetch
-                contestTitle="test prompt"
+                contestTitle={contest.promptData.title}
                 category={contest.metadata.category}
                 contestState={contestState}
                 remainingTime={stateRemainingTime}
@@ -303,7 +302,29 @@ export default async function Page({
   try {
     const { allContests: isAllContests } = searchParams;
     const space = await getSpace(params.name);
-    const { id, contests, displayName, logoUrl, twitter, website } = space;
+
+    const contests = await Promise.all(
+      space.contests.map(async (contest: any) => {
+        // fetch prompt url
+        const promptData = await fetch(contest.promptUrl, {
+          cache: "no-store",
+        }).then((res) => res.json());
+        return {
+          ...contest,
+          promptData,
+        };
+      })
+    );
+
+    const resolvedPrompts = await Promise.all(
+      contests.map(async (contest: any) => {
+        const prompt = await fetch(contest.promptUrl, {
+          cache: "no-store",
+        }).then((res) => res.json());
+        return prompt;
+      })
+    );
+
     return (
       <div className="flex flex-col md:flex-row m-auto py-6 w-11/12 gap-4">
         <div className="flex flex-col w-full md:w-56 gap-4">
