@@ -59,7 +59,6 @@ module.exports = {
         'repeat': 'repeat',
       },
       fontFamily: {
-        'virgil': ['Virgil', 'sans-serif'],
       },
       colors: {
         'twitter': '#00acee',

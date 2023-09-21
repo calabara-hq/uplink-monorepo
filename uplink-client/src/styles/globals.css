@@ -3,11 +3,6 @@
 @tailwind utilities;
 
 
-@font-face {
-  font-family: 'Virgil';
-  src: local('Virgil'), url(./fonts/Virgil.woff2) format('woff');
-}
-
 @layer site {
   /* Chrome, Safari, Edge, Opera */
   input::-webkit-outer-spin-button,
