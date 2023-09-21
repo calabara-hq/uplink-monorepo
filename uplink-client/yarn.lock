@@ -2188,10 +2188,10 @@
   dependencies:
     glob "7.1.7"
 
-"@next/font@13.1.6":
-  version "13.1.6"
-  resolved "https://registry.yarnpkg.com/@next/font/-/font-13.1.6.tgz#2bf99e3321ec9b4d65781c0d0ebff072e8752e1a"
-  integrity sha512-AITjmeb1RgX1HKMCiA39ztx2mxeAyxl4ljv2UoSBUGAbFFMg8MO7YAvjHCgFhD39hL7YTbFjol04e/BPBH5RzQ==
+"@next/font@^13.5.2":
+  version "13.5.2"
+  resolved "https://registry.yarnpkg.com/@next/font/-/font-13.5.2.tgz#f078f7efa3802d25f44c0592515b5225c585cf33"
+  integrity sha512-c9EXqdXMEErMLrC71wZvpcOnNVkEEufZOO3EjgQJcKQUwPISvnkgIj9GKFIop0rX2dLNdzL3OC/4nrcAqWqUsg==
 
 "@next/swc-darwin-arm64@13.4.5":
   version "13.4.5"
@@ -2369,6 +2369,11 @@
   integrity sha512-RnTbCmzCHbjcjPNKhr9FaehItHgAZyd47Lq+iIGynFqWSsrwGy46LgOXSvb50DYbwDyT0GtxaXBIk6aiFki1Dg==
   dependencies:
     "@react-editor-js/core" "2.1.0"
+
+"@react-icons/all-files@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@react-icons/all-files/-/all-files-4.1.0.tgz#477284873a0821928224b6fc84c62d2534d6650b"
+  integrity sha512-hxBI2UOuVaI3O/BhQfhtb4kcGn9ft12RWAFVMUeNjqqhLsHvFtzIkFaptBJpFDANTKoDfdVoHTKZDlwKCACbMQ==
 
 "@rushstack/eslint-patch@^1.1.3":
   version "1.2.0"
