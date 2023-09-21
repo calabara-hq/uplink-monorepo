@@ -2,7 +2,6 @@ import {
   createAuthenticationAdapter,
   RainbowKitAuthenticationProvider,
 } from "@rainbow-me/rainbowkit";
-import { SiweMessage } from "siwe";
 import { useMemo } from "react";
 import { useSession, signIn, signOut, getCsrfToken } from "./SessionProvider";
 
@@ -11,6 +10,17 @@ type UnconfigurableMessageOptions = {
   chainId: number;
   nonce: string;
 };
+
+interface SiweMessage {
+  nonce: string;
+  address: string;
+  domain: string;
+  version: string;
+  chainId: number;
+  uri: string;
+  issuedAt: string;
+  statement: string;
+}
 
 type ConfigurableMessageOptions = Partial<
   Omit<SiweMessage, keyof UnconfigurableMessageOptions>
@@ -25,6 +35,21 @@ interface RainbowKitSiweNextAuthProviderProps {
   getSiweMessageOptions?: GetSiweMessageOptions;
   children: React.ReactNode;
 }
+
+const prepareMessage = (message: SiweMessage) => {
+  const header = `${message.domain} wants you to sign in with your Ethereum account:`;
+  const uriField = `URI: ${message.uri}`;
+  let prefix = [header, message.address].join("\n");
+  const versionField = `Version: ${message.version}`;
+  const chainField = `Chain ID: ` + message.chainId || "1";
+  const nonceField = `Nonce: ${message.nonce}`;
+  const suffixArray = [uriField, versionField, chainField, nonceField];
+  suffixArray.push(`Issued At: ${message.issuedAt}`);
+  const statement = message.statement;
+  const suffix = suffixArray.join("\n");
+  prefix = [prefix, statement].join("\n\n");
+  return [(prefix += "\n"), suffix].join("\n");
+};
 
 export function AuthenticationProvider({
   children,
@@ -49,16 +74,17 @@ export function AuthenticationProvider({
             nonce,
           };
 
-          const msg = new SiweMessage({
+          return {
             ...defaultConfigurableOptions,
             ...getSiweMessageOptions?.(),
             ...unconfigurableOptions,
-          });
-
-          return msg;
+            issuedAt: new Date().toISOString(),
+          };
         },
 
-        getMessageBody: ({ message }) => message.prepareMessage(),
+        getMessageBody: ({ message }: { message: SiweMessage }) => {
+          return prepareMessage(message);
+        },
 
         getNonce: async () => {
           const csrf = await getCsrfToken();

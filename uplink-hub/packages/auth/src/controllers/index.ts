@@ -1,8 +1,9 @@
 import { randomBytes, randomUUID } from 'crypto';
-import { generateNonce, SiweMessage } from 'siwe';
 import { TwitterApi } from 'twitter-api-v2';
 import dotenv from 'dotenv';
 import { CipherController, schema } from 'lib'
+import { createPublicClient, http, verifyMessage } from 'viem';
+import { mainnet } from 'viem/chains';
 dotenv.config();
 
 import { sqlOps, db } from "../utils/database.js";
@@ -10,12 +11,30 @@ import { sqlOps, db } from "../utils/database.js";
 const cipherController = new CipherController(process.env.APP_SECRET)
 const twitterClient = new TwitterApi({ appKey: process.env.TWITTER_CONSUMER_KEY, appSecret: process.env.TWITTER_CONSUMER_SECRET, accessToken: process.env.TWITTER_ACCESS_TOKEN, accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET })
 
+export const publicClient = createPublicClient({
+    chain: mainnet,
+    transport: http(`https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`),
+})
+
+
 const twitterRedirect = "http://localhost:8080/api/auth/twitter/oauth"
+
 const twitterScopes = {
     write: ['tweet.read', 'users.read', 'tweet.write'],
     read: ['tweet.read', 'users.read']
 }
 
+
+interface SiweMessage {
+    nonce: string;
+    address: string;
+    domain: string;
+    version: string;
+    chainId: number;
+    uri: string;
+    statement: string;
+    issuedAt: ISODateString;
+}
 
 export type ISODateString = string;
 
@@ -25,6 +44,27 @@ type Session = {
     };
     expires: ISODateString;
 }
+
+
+
+
+const prepareMessage = (message: SiweMessage) => {
+    const header = `${message.domain} wants you to sign in with your Ethereum account:`;
+    const uriField = `URI: ${message.uri}`;
+    let prefix = [header, message.address].join("\n");
+    const versionField = `Version: ${message.version}`;
+    const chainField = `Chain ID: ` + message.chainId || "1";
+    const nonceField = `Nonce: ${message.nonce}`;
+    const suffixArray = [uriField, versionField, chainField, nonceField];
+    suffixArray.push(`Issued At: ${message.issuedAt}`);
+    const statement = message.statement;
+    const suffix = suffixArray.join("\n");
+    prefix = [prefix, statement].join("\n\n");
+    return [(prefix += "\n"), suffix].join("\n");
+};
+
+
+
 
 const addUser = async (user: Session['user']) => {
     try {
@@ -57,12 +97,21 @@ export const getSession = function (req, res) {
 export const verifySignature = async (req, res) => {
     try {
         const { message, signature } = req.body;
-        const siweMessage = new SiweMessage(JSON.parse(message));
+        const parsedMessage = JSON.parse(message)
+        const siweMessage = prepareMessage(parsedMessage)
+        const isValid = await verifyMessage({
+            address: parsedMessage.address,
+            message: siweMessage,
+            signature
+        })
+
+        if (!isValid) return res.sendStatus(401);
+
         const session = req.session;
-        const result = await siweMessage.verify({ signature, nonce: session.csrfToken })
-        req.session.user = { address: result.data.address }
-        const user = { address: result.data.address }
+        const user = { address: parsedMessage.address }
+        req.session.user = user
         await addUser(user);
+
         res.send({ user: user, expires: req.session.cookie.expires, csrfToken: session.csrfToken })
     } catch (err) {
         console.error(err)

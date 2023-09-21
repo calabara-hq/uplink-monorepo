@@ -35,16 +35,12 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/ui/Editor/Editor.tsx",
-    "src/app/(space)/[name]/contest/[id]/@dynamicSidebar/studio/default.js",
-    "src/app/(space)/[name]/contest/[id]/@dynamicSidebar/default.tsx",
-    "src/app/(space)/[name]/contest/[id]/default.js"
-  ],
+    ".next/types/**/*.ts"
+, "src/lib/editorTools.js"  ],
   "exclude": [
     "node_modules",
     "**/*.stories.tsx",
     "**/*.stories.ts",
-    ".storybook",
+    ".storybook"
   ]
 }
