@@ -17,7 +17,7 @@ export const publicClient = createPublicClient({
 })
 
 
-const twitterRedirect = "http://localhost:8080/api/auth/twitter/oauth"
+const twitterRedirect = process.env.TWITTER_CALLBACK_URL
 
 const twitterScopes = {
     write: ['tweet.read', 'users.read', 'tweet.write'],
