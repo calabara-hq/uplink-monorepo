@@ -43,6 +43,7 @@ const AllSpaces = ({ spaces }) => {
                 fill
                 alt="spaceLogo"
                 className="object-contain mask mask-circle"
+                sizes={"10vw"}
               />
             </div>
             <div className="flex items-center justify-center gap-1 truncate">

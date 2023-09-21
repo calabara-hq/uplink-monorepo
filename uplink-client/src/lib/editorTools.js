@@ -1,8 +1,7 @@
 import "@/styles/editor.css";
-import Paragraph from "@editorjs/paragraph";
+
 import List from "@editorjs/list";
 import Image from "@editorjs/image";
-import SimpleImage from "@editorjs/simple-image";
 import { IpfsUpload } from "@/lib/mediaUpload";
 
 const EDITOR_JS_TOOLS = {
