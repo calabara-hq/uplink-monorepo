@@ -13,8 +13,6 @@ import ArtistSubmission from "@/../public/vinnie_noggles.png";
 import landingBg from "@/../public/landing-bg.svg";
 import { Swiper, SwiperSlide } from "@/ui/Swiper/Swiper";
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
-
-
 import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
 import { DelayedGridItem, DelayedGridLayout } from "./DelayedGrid";

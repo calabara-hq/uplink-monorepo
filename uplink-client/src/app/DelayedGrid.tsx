@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode } from "react";
+import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 
@@ -21,7 +21,7 @@ export const DelayedGridLayout = ({
   children,
 }: {
   gridStyle: string;
-  children: ReactNode;
+  children: React.ReactNode;
 }) => {
   const [inViewRef, inView] = useInView({
     threshold: 0.3,
@@ -61,7 +61,7 @@ export const DelayedGridItem = ({
   children,
 }: {
   gridItemStyle: string;
-  children: ReactNode;
+  children: React.ReactNode;
 }) => {
   return (
     <motion.div className={gridItemStyle} variants={item}>

@@ -21,9 +21,8 @@ let redisStore = new RedisStore({
 app.use(bodyParser.json())
 
 app.use(session({
-  proxy: process.env.NODE_ENV === "production",
   name: "uplink-hub",
-  secret: process.env.NODE_ENV === "production" ? process.env.SESSION_SECRET : "dev-secret",
+  secret: "SESS_SECRET",
   store: redisStore,
   saveUninitialized: false,
   resave: false,
