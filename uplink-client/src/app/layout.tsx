@@ -5,6 +5,10 @@ import WalletProvider from "@/providers/WalletProvider";
 import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
 import MobileNav from "@/ui/MobileNav/MobileNav";
+import type { Metadata } from "next";
+import { baseMetadata } from "./base-metadata";
+
+export const metadata: Metadata = baseMetadata;
 
 export default function RootLayout({
   children,
