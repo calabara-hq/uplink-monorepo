@@ -1,5 +1,6 @@
 "use client";
-import Editor from "@/ui/Editor/Editor";
+import dynamic from "next/dynamic";
+const Editor = dynamic(() => import("@/ui/Editor/Editor"), { ssr: false });
 import { OutputData } from "@editorjs/editorjs";
 import useSWRMutation from "swr/mutation";
 import {

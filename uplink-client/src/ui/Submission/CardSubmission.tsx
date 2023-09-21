@@ -7,23 +7,16 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   MediaController,
-  MediaControlBar,
-  MediaTimeRange,
+
   MediaTimeDisplay,
   MediaPlayButton,
   MediaMuteButton,
-  MediaTextDisplay,
 } from "media-chrome/dist/react";
 import { useEffect, useRef, useState } from "react";
-import { HiCheckBadge, HiPlus } from "react-icons/hi2";
-import { Decimal } from "decimal.js";
 import { isMobile } from "@/lib/isMobile";
 import useVideoControls from "@/hooks/useVideoControls";
-import { FaVolumeHigh } from "react-icons/fa6";
-import { FaVolumeMute } from "react-icons/fa";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import { MdOutlineOndemandVideo } from "react-icons/md";
-import { useContestState } from "@/providers/ContestStateProvider";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { ParseBlocks } from "@/lib/blockParser";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
@@ -61,7 +54,10 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
         <section className="break-word">
           {submission.type === "twitter" ? (
             <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
-              {ParseThread({ thread: submission.data.thread, omitImages: true })}
+              {ParseThread({
+                thread: submission.data.thread,
+                omitImages: true,
+              })}
             </div>
           ) : (
             <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
