@@ -4,12 +4,17 @@ import dotenv from 'dotenv';
 import { CipherController, schema } from 'lib'
 import { createPublicClient, http, verifyMessage } from 'viem';
 import { mainnet } from 'viem/chains';
+import Redis, { Redis as RedisType } from 'ioredis';
+
 dotenv.config();
 
 import { sqlOps, db } from "../utils/database.js";
 
 const cipherController = new CipherController(process.env.APP_SECRET)
 const twitterClient = new TwitterApi({ appKey: process.env.TWITTER_CONSUMER_KEY, appSecret: process.env.TWITTER_CONSUMER_SECRET, accessToken: process.env.TWITTER_ACCESS_TOKEN, accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET })
+const redisClient = new Redis(process.env.REDIS_URL);
+
+
 
 export const publicClient = createPublicClient({
     chain: mainnet,
@@ -62,6 +67,25 @@ const prepareMessage = (message: SiweMessage) => {
     prefix = [prefix, statement].join("\n\n");
     return [(prefix += "\n"), suffix].join("\n");
 };
+
+
+
+const getCacheValue = async (key: string) => {
+    const data = await redisClient.get(key);
+    if (data) return JSON.parse(data);
+    return null;
+}
+
+const setCacheValue = async (key: string, value: string) => {
+    try {
+        const data = await redisClient.set(key, value);
+        return true;
+    } catch (error) {
+        console.error(`Failed to set cache value: ${error}`);
+        return false;
+    }
+
+}
 
 
 
@@ -140,10 +164,7 @@ export const initiateTwitterAuth = async (req, res) => {
 
     const { url, oauth_token, oauth_token_secret } = data;
 
-    req.session.SIWT = {
-        oauth_token,
-        oauth_token_secret
-    }
+    await setCacheValue(`SIWT-${oauth_token}`, JSON.stringify(oauth_token_secret));
 
     res.send({ url, scope })
 }
@@ -151,7 +172,8 @@ export const initiateTwitterAuth = async (req, res) => {
 
 export const oauthCallback = async (req, res) => {
     const { oauth_token, oauth_verifier } = req.query;
-    const { oauth_token_secret } = req.session.SIWT;
+
+    const oauth_token_secret = await getCacheValue(`SIWT-${oauth_token}`)
 
     if (!oauth_token || !oauth_verifier || !oauth_token_secret) {
         return res.status(400).send('You denied the app or your session expired!');
@@ -168,8 +190,6 @@ export const oauthCallback = async (req, res) => {
 
     client.login(oauth_verifier)
         .then(async ({ client: loggedClient, accessToken, accessSecret }) => {
-            console.log(JSON.stringify(loggedClient, null, 2))
-
             const { data: userObject } = await loggedClient.v2.me({ "user.fields": ["profile_image_url"] });
             req.session.user.twitter = {
                 ...userObject,
@@ -178,10 +198,13 @@ export const oauthCallback = async (req, res) => {
                 accessSecret: cipherController.encrypt(accessSecret),
             }
             return res.send(`
+
             <script>
                 window.close();
             </script>
+
             `)
         })
         .catch(() => res.status(403).send('Invalid verifier or access tokens!'));
 }
+
