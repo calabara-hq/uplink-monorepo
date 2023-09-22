@@ -123,7 +123,7 @@ jobs:
       
       - name: Deploy staging FE
         run: |
-          npm install --global vercel@canary
+          yarn global add vercel@canary
           vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --token=${{ secrets.VERCEL_TOKEN }}
           url="$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})"
@@ -190,7 +190,7 @@ jobs:
       
       - name: Deploy production FE
         run: |
-          npm install --global vercel@canary
+          yarn global add vercel@canary
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           if ! vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}; then
             echo "::error::Vercel build failed!, Rolling back hub version"
