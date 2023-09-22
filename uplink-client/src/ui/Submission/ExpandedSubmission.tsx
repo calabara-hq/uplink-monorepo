@@ -1,4 +1,5 @@
 // Render the submission in a large format. This is used for modals and the submission page.
+"use client";
 import { Submission } from "@/providers/ContestInteractionProvider";
 import Image from "next/image";
 import {
@@ -17,6 +18,8 @@ import { ParseThread } from "@/lib/threadParser";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
+
+// nextjs 13.5.2 complains about the video component in ssr
 
 const RenderSubmissionBody = ({ submission }: { submission: Submission }) => {
   return (

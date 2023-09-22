@@ -119,7 +119,7 @@ const SubmissionDisplay = ({
                 submission={submission}
                 footerChildren={
                   <SubmissionFooter
-                    sharePath={`${window.location.host}/${spaceName}/contest/${contestId}/submission/${submission.id}`}
+                    sharePath={`https://uplink.wtf/${spaceName}/contest/${contestId}/submission/${submission.id}`} // TODO: change this to window.host
                     submission={submission}
                   />
                 }

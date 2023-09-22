@@ -1,5 +1,4 @@
-import { DatabaseController, schema, revalidateClientCache } from "lib";
-import { GraphQLError } from "graphql";
+import { DatabaseController } from "lib";
 import dotenv from 'dotenv';
 
 dotenv.config();
