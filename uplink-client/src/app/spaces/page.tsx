@@ -2,18 +2,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { HiPlus } from "react-icons/hi2";
 import { Metadata } from "next";
-import { baseMetadata } from "../base-metadata";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import SwrProvider from "@/providers/SwrProvider";
 import ListSpaces from "./ListSpaces";
 
 export const metadata: Metadata = {
-  ...baseMetadata,
-  description: "Spaces",
   openGraph: {
-    ...baseMetadata.openGraph,
-    title: "Spaces",
-    description: "Explore spaces on Uplink",
+    title: "Uplink",
+    description: "Discover spaces on Uplink.",
+    url: "/",
+    siteName: "Uplink",
+    images: [
+      {
+        url: "/opengraph.png",
+        width: 400,
+        height: 600,
+        alt: "Uplink",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
   },
 };
 

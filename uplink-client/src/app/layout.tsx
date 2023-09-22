@@ -6,9 +6,32 @@ import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
 import MobileNav from "@/ui/MobileNav/MobileNav";
 import type { Metadata } from "next";
-import { baseMetadata } from "./base-metadata";
+//import metadataBase from "./base-metadata";
 
-export const metadata: Metadata = baseMetadata;
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL),
+  title: "Uplink",
+  description: "Crafted for creators.",
+  icons: {
+    icon: "/uplink-logo.svg",
+  },
+  openGraph: {
+    title: "Uplink",
+    description: "Crafted for creators.",
+    url: "/",
+    siteName: "Uplink",
+    images: [
+      {
+        url: "/opengraph.png",
+        width: 400,
+        height: 600,
+        alt: "Uplink",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+};
 
 export default function RootLayout({
   children,
