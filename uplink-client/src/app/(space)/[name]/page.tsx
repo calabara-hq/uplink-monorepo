@@ -1,68 +1,43 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ContestCategory } from "@/types/contest";
-import { calculateContestStatus } from "@/utils/staticContestState";
-import {
-  CategoryLabel,
-  StatusLabel,
-  RemainingTimeLabel,
-  ContestState,
-} from "@/ui/ContestLabels/ContestLabels";
 import { BiPencil, BiWorld } from "react-icons/bi";
 import { FaTwitter } from "react-icons/fa";
-import { HiSparkles } from "react-icons/hi2";
+import { Metadata } from "next";
+import ListContests from "./ListContests";
+import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
+import fetchSpaces from "@/lib/fetch/fetchSpaces";
+import fetchSpaceContests from "@/lib/fetch/fetchSpaceContests";
+import SwrProvider from "@/providers/SwrProvider";
 
-import { Metadata, ResolvingMetadata } from "next";
-
-const getSpace = async (name: string) => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+export async function generateMetadata({
+  params,
+}: {
+  params: { name: string };
+}): Promise<Metadata> {
+  const name = params.name;
+  const space = await fetchSingleSpace(name);
+  return {
+    title: `${space.displayName}`,
+    description: `${space.displayName} on Uplink`,
+    openGraph: {
+      title: `${space.displayName}`,
+      description: `Create with ${space.displayName} on Uplink`,
+      images: [
+        {
+          url: `${space.logoUrl}`,
+          width: 600,
+          height: 600,
+          alt: `${space.displayName} logo`,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
     },
-    body: JSON.stringify({
-      query: `
-        query space($name: String!){
-          space(name: $name) {
-            id
-            name
-            displayName
-            logoUrl
-            twitter
-            website
-            admins{
-                address
-            }
-            contests {
-                deadlines {
-                  endTime
-                  snapshot
-                  startTime
-                  voteTime
-                }
-                id
-                tweetId
-                metadata {
-                  category
-                  type
-                }
-                promptUrl
-            }
-          }
-      }`,
-      variables: {
-        name,
-      },
-    }),
-    next: { tags: [`space/${name}`], revalidate: 60 },
-  })
-    .then((res) => res.json())
-    .then((res) => res.data.space);
-  return data;
-};
+  };
+}
 
 const SpaceInfo = async ({ name }: { name: string }) => {
-  const data = await getSpace(name);
+  const data = await fetchSingleSpace(name);
   const { id, displayName, logoUrl, twitter, website } = data;
 
   return (
@@ -103,7 +78,10 @@ const SpaceInfo = async ({ name }: { name: string }) => {
               <BiWorld className="w-6 h-6" />
             </Link>
           )}
-          <Link href={`/spacebuilder/edit/${id}`} className="link link-neutral">
+          <Link
+            href={`/spacebuilder/edit/${name}`}
+            className="link link-neutral"
+          >
             <BiPencil className="w-6 h-6" />
           </Link>
         </div>
@@ -112,264 +90,26 @@ const SpaceInfo = async ({ name }: { name: string }) => {
   );
 };
 
-const Stats = () => {
-  return (
-    <div className="stats stats-horizontal md:stats-vertical w-full bg-transparent border-2 border-border shadow-box">
-      <div className="stat">
-        <div className="stat-figure text-primary">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            className="inline-block w-8 h-8 stroke-current"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            ></path>
-          </svg>
-        </div>
-        <div className="stat-title">ETH rewards</div>
-        <div className="stat-value text-primary">25.6K</div>
-        <div className="stat-desc"></div>
-      </div>
+export default async function Page({ params }: { params: { name: string } }) {
+  const { name } = params;
 
-      <div className="stat">
-        <div className="stat-figure text-secondary">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            className="inline-block w-8 h-8 stroke-current"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            ></path>
-          </svg>
-        </div>
-        <div className="stat-title">ERC rewards</div>
-        <div className="stat-value text-secondary">2.6M</div>
-        <div className="stat-desc">tokens + nfts</div>
-      </div>
-    </div>
-  );
-};
-
-const ContestDisplay = ({
-  contests,
-  spaceName,
-  isAllContests,
-}: {
-  contests: any;
-  spaceName: string;
-  isAllContests: boolean;
-}) => {
-  const now = new Date().toISOString();
-
-  const filteredContests = isAllContests
-    ? contests
-    : contests.filter((contest) => {
-        return contest.deadlines.endTime > now;
-      });
-  return (
-    <div className="flex flex-col w-full lg:w-3/4 ml-auto mr-auto items-center gap-4 border-2 border-border p-6 rounded-xl shadow-box min-h-[500px]">
-      <div className="flex flex-col lg:flex-row w-full lg:justify-between items-center">
-        <h1 className="text-3xl font-bold">Contests</h1>
-        <div
-          tabIndex={0}
-          className="tabs tabs-boxed content-center p-1 bg-transparent text-white font-bold"
-        >
-          <Link
-            href={`${spaceName}`}
-            className={`tab ${!isAllContests && "tab-active"}`}
-          >
-            Active
-          </Link>
-          <Link
-            href={`${spaceName}?allContests=true`}
-            className={`tab ${isAllContests && "tab-active"}`}
-          >
-            All Contests
-          </Link>
-          <Link href={`${spaceName}/contest/create`} className="tab">
-            <span>New</span>
-            <HiSparkles className="h-5 w-5 text-secondary pl-0.5" />
-          </Link>
-        </div>
-      </div>
-
-      {filteredContests.length === 0 && isAllContests && (
-        <div className="card bg-base-100 m-auto border-2 border-border">
-          <div className="card-body">
-            <p>This space has not yet hosted any contests. Check back later!</p>
-          </div>
-        </div>
-      )}
-      {filteredContests.length === 0 && !isAllContests && (
-        <div className="card bg-base-100 m-auto border-2 border-border">
-          <div className="card-body">
-            <p>No active contests</p>
-            <Link
-              href={`${spaceName}?allContests=true`}
-              className="btn btn-sm btn-primary lowercase"
-            >
-              view previous
-            </Link>
-          </div>
-        </div>
-      )}
-      {filteredContests.length > 0 && (
-        <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full auto-rows-fr">
-          {filteredContests.map((contest) => {
-            const { contestState, stateRemainingTime } = calculateContestStatus(
-              contest.deadlines,
-              contest.metadata.type,
-              contest.tweetId
-            );
-            return (
-              <ContestCard
-                key={contest.id}
-                spaceName={spaceName}
-                contestId={contest.id}
-                contestTitle={contest.promptData.title}
-                category={contest.metadata.category}
-                contestState={contestState}
-                remainingTime={stateRemainingTime}
-              />
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ContestCard = ({
-  spaceName,
-  contestId,
-  contestTitle,
-  category,
-  contestState,
-  remainingTime,
-}: {
-  spaceName: string;
-  contestId: string;
-  contestTitle: string;
-  category: ContestCategory;
-  contestState: ContestState;
-  remainingTime: string | null;
-}) => {
-  return (
-    <Link href={`${spaceName}/contest/${contestId}`}>
-      <div
-        key={contestId}
-        className="card bg-base-100 
-        cursor-pointer border border-border rounded-2xl p-4 h-full max-h-36 overflow-hidden w-full transform transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform"
-      >
-        <div className="card-body items-start p-0">
-          <div className="flex w-full">
-            <div className="flex-grow ">
-              <h2
-                className={`card-title mb-0 normal-case break-all line-clamp-2`}
-              >
-                {contestTitle}
-              </h2>
-            </div>
-            <div className="ml-2">
-              <CategoryLabel category={category} />
-            </div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <StatusLabel status={contestState} />
-            <RemainingTimeLabel remainingTime={remainingTime} />
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-};
-
-export async function generateMetadata({
-  params,
-  parent,
-}: {
-  params: { name: string };
-  parent: ResolvingMetadata;
-}): Promise<Metadata> {
-  const name = params.name;
-  const space = await getSpace(name);
-
-  return {
-    title: `${space.displayName}`,
-    description: `${space.displayName} on Uplink`,
-    openGraph: {
-      title: `${space.displayName}`,
-      description: `Create with ${space.displayName} on Uplink`,
-      images: [
-        {
-          url: `${space.logoUrl}`,
-          width: 600,
-          height: 600,
-          alt: `${space.displayName} logo`,
-        },
-      ],
-      locale: "en_US",
-      type: "website",
-    },
-  };
-}
-
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { name: string };
-  searchParams: any;
-}) {
   try {
-    const { allContests: isAllContests } = searchParams;
-    const space = await getSpace(params.name);
-
-    const contests = await Promise.all(
-      space.contests.map(async (contest: any) => {
-        // fetch prompt url
-        const promptData = await fetch(contest.promptUrl, {
-          cache: "no-store",
-        }).then((res) => res.json());
-        return {
-          ...contest,
-          promptData,
-        };
-      })
-    );
-
-    const resolvedPrompts = await Promise.all(
-      contests.map(async (contest: any) => {
-        const prompt = await fetch(contest.promptUrl, {
-          cache: "no-store",
-        }).then((res) => res.json());
-        return prompt;
-      })
-    );
+    const contests = await fetchSpaceContests(params.name);
+    const fallback = {
+      [`space/${params.name}/contests`]: contests,
+    };
 
     return (
       <div className="flex flex-col md:flex-row m-auto py-6 w-11/12 gap-4">
         <div className="flex flex-col w-full md:w-56 gap-4">
           {/*@ts-expect-error */}
-          <SpaceInfo name={params.name} />
+          <SpaceInfo name={name} />
           {/* <Stats /> */}
         </div>
         <div className="flex flex-col flex-grow">
-          <ContestDisplay
-            contests={contests}
-            spaceName={params.name}
-            isAllContests={isAllContests}
-          />
+          <SwrProvider fallback={fallback}>
+            <ListContests spaceName={name} />
+          </SwrProvider>
         </div>
       </div>
     );
@@ -378,3 +118,51 @@ export default async function Page({
     return <h1 className="text-white">oops, we couldnt find that space!</h1>;
   }
 }
+
+// const Stats = () => {
+//   return (
+//     <div className="stats stats-horizontal md:stats-vertical w-full bg-transparent border-2 border-border shadow-box">
+//       <div className="stat">
+//         <div className="stat-figure text-primary">
+//           <svg
+//             xmlns="http://www.w3.org/2000/svg"
+//             fill="none"
+//             viewBox="0 0 24 24"
+//             className="inline-block w-8 h-8 stroke-current"
+//           >
+//             <path
+//               strokeLinecap="round"
+//               strokeLinejoin="round"
+//               strokeWidth="2"
+//               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+//             ></path>
+//           </svg>
+//         </div>
+//         <div className="stat-title">ETH rewards</div>
+//         <div className="stat-value text-primary">25.6K</div>
+//         <div className="stat-desc"></div>
+//       </div>
+
+//       <div className="stat">
+//         <div className="stat-figure text-secondary">
+//           <svg
+//             xmlns="http://www.w3.org/2000/svg"
+//             fill="none"
+//             viewBox="0 0 24 24"
+//             className="inline-block w-8 h-8 stroke-current"
+//           >
+//             <path
+//               strokeLinecap="round"
+//               strokeLinejoin="round"
+//               strokeWidth="2"
+//               d="M13 10V3L4 14h7v7l9-11h-7z"
+//             ></path>
+//           </svg>
+//         </div>
+//         <div className="stat-title">ERC rewards</div>
+//         <div className="stat-value text-secondary">2.6M</div>
+//         <div className="stat-desc">tokens + nfts</div>
+//       </div>
+//     </div>
+//   );
+// };

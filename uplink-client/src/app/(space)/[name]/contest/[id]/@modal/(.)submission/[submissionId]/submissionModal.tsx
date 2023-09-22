@@ -25,6 +25,7 @@ const Modal = ({
   onClose: () => void;
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -75,6 +76,8 @@ export default function SubmissionModal({
 }) {
   const router = useRouter();
   const voteActions = useVoteActionContext();
+  const { contestState } = useContestState();
+
   return (
     <Modal isModalOpen={true} onClose={() => router.back()}>
       <AnimatePresence mode="wait">
@@ -84,10 +87,12 @@ export default function SubmissionModal({
               submission={submission}
               headerChildren={
                 <div className="flex p-1 ml-auto items-center justify-center">
-                  <AddToCartButton
-                    submission={submission}
-                    voteActions={voteActions}
-                  />
+                  {contestState === "voting" && (
+                    <AddToCartButton
+                      submission={submission}
+                      voteActions={voteActions}
+                    />
+                  )}
                 </div>
               }
             />

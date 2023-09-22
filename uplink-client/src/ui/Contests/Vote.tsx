@@ -16,6 +16,7 @@ import { useContestState } from "@/providers/ContestStateProvider";
 import Image from "next/image";
 import { HiTrash, HiDocumentText } from "react-icons/hi2";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
+import LoadingAnimation from "../LoadingAnimation/LoadingAnimation";
 
 const SubmissionVoteInput = ({
   submission,
@@ -374,6 +375,14 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
 const SidebarVote = ({ contestId }: { contestId: string }) => {
   const { contestState } = useContestState();
   const { proposedVotes } = useVoteActionContext();
+
+  if (!contestState) { // return placeholder to prevent layout shift
+    return (
+      <div className="hidden w-1/3 lg:flex lg:flex-col items-center gap-4">
+        <div className="sticky top-3 right-0 flex flex-col justify-center items-center gap-4 w-full h-[60vh] rounded-xl mt-2"></div>
+      </div>
+    );
+  }
 
   if (contestState === "voting") {
     return (
