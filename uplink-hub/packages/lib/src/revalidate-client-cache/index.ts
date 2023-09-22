@@ -10,13 +10,15 @@ export const revalidateClientCache = async ({ host, secret, tags }: {
     tags: string[]
 }) => {
     try {
+        console.log('revalidating with tags:')
+        console.log(tags)
         const revalResult = await axios.post(`${host}/api/revalidate`, {
-            tags: tags
+            tags: tags,
+            secret
         },
             {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + secret
                 }
             })
         return revalResult

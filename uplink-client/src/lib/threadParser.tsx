@@ -24,14 +24,14 @@ export const ParseThread = ({
   if (!thread || thread.length === 0) return null;
   return thread.map((tweet, index) => {
     return (
-      <>
+      <div key={index}>
         {tweet.text && <p key={index}>{tweet.text}</p>}
         {tweet.previewAsset &&
           !omitImages &&
           (tweet.videoAsset ? (
             // render video
-            <div className="w-9/12 m-auto pt-4 pb-4" key={index}>
-              <VideoWrapper key={index}>
+            <div className="w-9/12 m-auto pt-4 pb-4">
+              <VideoWrapper>
                 <MediaController className="w-full h-fit aspect-video bg-transparent">
                   <video
                     autoPlay={false}
@@ -71,7 +71,7 @@ export const ParseThread = ({
               </VideoWrapper>
             </div>
           ) : (
-            <div className="w-9/12 m-auto pt-4 pb-4" key={index}>
+            <div className="w-9/12 m-auto pt-4 pb-4">
               <ImageWrapper>
                 <Image
                   key={index}
@@ -84,7 +84,7 @@ export const ParseThread = ({
               </ImageWrapper>
             </div>
           ))}
-      </>
+      </div>
     );
   });
 };

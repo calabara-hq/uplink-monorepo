@@ -30,7 +30,7 @@ const LoadingAnimation = () => {
       <motion.svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 100 100"
-        className="stroke-[#57BAD7] stroke-w-2 stroke-linejoin-round stroke-linecap-round w-32 h-32"
+        className="stroke-[#57BAD7] stroke-w-2 stroke-linejoin-round stroke-linecap-round w-32 h-32 text-center"
       >
         <motion.path
           d="M0.902244 14.6903C2.21382 13.7092 4.46223 13.7715 5.56562 14.8928C8.35533 17.7272 10 21.2156 10 25C10 28.7844 8.35533 32.2728 5.56562 35.1072C4.46223 36.2285 2.23464 36.2908 0.902244 35.3097C-0.221964 34.4843 -0.28442 33.1761 0.65242 32.2261C2.67535 30.1209 3.76068 27.5926 3.7544 25C3.7544 22.3058 2.60937 19.814 0.65242 17.7739C-0.263601 16.8239 -0.201145 15.5157 0.902244 14.6903Z"

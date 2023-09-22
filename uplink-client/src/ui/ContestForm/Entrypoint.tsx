@@ -40,6 +40,7 @@ import useSWRMutation from "swr/mutation";
 import CreateContestTweet from "./CreateContestTweet";
 import { toast } from "react-hot-toast";
 import { useSession } from "@/providers/SessionProvider";
+import { useListContests } from "@/app/(space)/[name]/ListContests";
 
 const validateContestParams = (contestState: ContestBuilderProps) => {
   const {
@@ -212,6 +213,7 @@ const ContestForm = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(-1);
   const { data: session, status } = useSession();
+  const { mutateContests } = useListContests(spaceName);
   // add ETH to the spaceTokens array if it doesn't exist
   const spaceTokensWithEth: IToken[] = spaceTokens.some(
     (token) => token.type === "ETH" && token.symbol === "ETH"
@@ -279,6 +281,7 @@ const ContestForm = ({
           spaceId,
         },
       });
+      mutateContests(spaceName);
     } catch (e) {
       reset();
     }

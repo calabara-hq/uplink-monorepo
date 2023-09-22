@@ -16,6 +16,8 @@ import toast from "react-hot-toast";
 import WalletConnectButton from "../../ui/ConnectButton/WalletConnectButton";
 import Image from "next/image";
 import useSWRMutation from "swr/mutation";
+import { useSWRConfig } from "swr";
+import { useListSpaces } from "../spaces/ListSpaces";
 export default function SpaceForm({
   initialState,
   isNewSpace,
@@ -26,8 +28,10 @@ export default function SpaceForm({
   spaceId?: string;
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { mutateSpaces } = useListSpaces();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { mutate } = useSWRConfig();
   const { trigger, error, isMutating, reset } = useSWRMutation(
     isNewSpace
       ? `/api/createContest/${spaceId}`
@@ -68,6 +72,7 @@ export default function SpaceForm({
         csrfToken: session.csrfToken,
       }).then(({ success, spaceName, errors }) => {
         if (success) {
+          mutateSpaces();
           toast.success(
             isNewSpace
               ? "Space created successfully!"
@@ -193,7 +198,7 @@ const SpaceLogo = ({
         onChange={async (event) => {
           handleMediaUpload(
             event,
-            ["image"],
+            ["image", "svg"],
             (mimeType) => {},
             (base64) => {
               dispatch({
