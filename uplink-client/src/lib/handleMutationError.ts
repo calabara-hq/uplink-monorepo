@@ -27,6 +27,7 @@ const knownErrors = {
     'NOT_TWITTER_CONTEST': 'This is not a twitter contest',
     'CONTEST_TWEET_EXISTS': 'You have already tweeted for this contest',
     'CONTEST_TWEET_QUEUED': 'A tweet is already queued for this contest',
+
 }
 
 // we should still throw errors in any case of an error, but here we'll display a toast message to the user when we know what the error is
