@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
+import { Submission } from "@/providers/ContestInteractionProvider";
 
 const getSubmission = async (submissionId: string) => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -31,13 +32,14 @@ const getSubmission = async (submissionId: string) => {
   return data;
 };
 
-export default async function SubmissionPage({
+export default async function Page({
   params: { name, id, submissionId },
 }: {
   params: { name: string; id: string; submissionId: string };
 }) {
-  const submission = await getSubmission(submissionId);
+  const submission = await getSubmission(submissionId).then((res) => res);
   submission.data = await fetch(submission.url).then((res) => res.json());
+
   return (
     <div className="grid grid-cols-1 w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full">
       <Link
@@ -50,4 +52,6 @@ export default async function SubmissionPage({
       <ExpandedSubmission submission={submission} />
     </div>
   );
+
+  return <p>hey</p>;
 }

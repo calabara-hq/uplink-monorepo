@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 export const baseMetadata: Metadata = {
+    metadataBase: new URL(process.env.VERCEL_URL || "https://uplink.wtf"),
     title: "Uplink",
     description: "Crafted for creators.",
     icons: {
@@ -8,11 +9,11 @@ export const baseMetadata: Metadata = {
     openGraph: {
         title: "Uplink",
         description: "Crafted for creators.",
-        url: "https://uplink.wtf",
+        url: "/",
         siteName: "Uplink",
         images: [
             {
-                url: "/uplink-logo.png",
+                url: "",
                 width: 400,
                 height: 600,
                 alt: "Uplink",
