@@ -1,5 +1,11 @@
 "use client";
-import { Fragment, useEffect, useReducer, useState } from "react";
+import {
+  Fragment,
+  startTransition,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   initialState,
@@ -40,7 +46,7 @@ import useSWRMutation from "swr/mutation";
 import CreateContestTweet from "./CreateContestTweet";
 import { toast } from "react-hot-toast";
 import { useSession } from "@/providers/SessionProvider";
-import { useListContests } from "@/app/(space)/[name]/ListContests";
+import { mutateSpaceContests } from "@/app/mutate";
 
 const validateContestParams = (contestState: ContestBuilderProps) => {
   const {
@@ -193,7 +199,7 @@ const ContestParamSectionCards = ({ steps, onSubmit }) => {
       </div>
       <div className="ml-auto w-fit">
         <WalletConnectButton styleOverride="w-full btn-primary">
-          <button className="btn btn-success normal-case" onClick={onSubmit}>
+          <button className="btn btn-primary normal-case" onClick={onSubmit}>
             Submit
           </button>
         </WalletConnectButton>
@@ -213,7 +219,6 @@ const ContestForm = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(-1);
   const { data: session, status } = useSession();
-  const { mutateContests } = useListContests(spaceName);
   // add ETH to the spaceTokens array if it doesn't exist
   const spaceTokensWithEth: IToken[] = spaceTokens.some(
     (token) => token.type === "ETH" && token.symbol === "ETH"
@@ -281,7 +286,7 @@ const ContestForm = ({
           spaceId,
         },
       });
-      mutateContests(spaceName);
+      mutateSpaceContests(spaceName);
     } catch (e) {
       reset();
     }

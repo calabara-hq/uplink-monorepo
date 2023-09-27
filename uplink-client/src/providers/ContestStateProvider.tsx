@@ -71,6 +71,7 @@ export function ContestStateProvider({
         setContestState("voting");
       } else {
         setContestState("closed");
+        clearInterval(interval);
       }
 
       const seconds = differenceInSeconds(nextDeadline, now);
@@ -81,12 +82,11 @@ export function ContestStateProvider({
         setStateRemainingTime(`${days} days`);
       } else if (hours > 0) {
         setStateRemainingTime(`${hours} hrs`);
-      } else if (minutes > 1) {
+      } else if (minutes > 0) {
         setStateRemainingTime(`${minutes} mins`);
-      } else if (seconds > 0){
+      } else if (seconds < 59) {
         setStateRemainingTime(`${seconds} s`);
       }
-      else clearInterval(interval);
     }, 1000);
 
     return () => {

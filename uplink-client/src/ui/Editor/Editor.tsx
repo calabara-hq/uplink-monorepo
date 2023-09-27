@@ -1,6 +1,6 @@
 import "@/styles/editor.css";
 import { createReactEditorJS } from "react-editor-js";
-import { API, OutputData } from "@editorjs/editorjs";
+import type { API, OutputData } from "@editorjs/editorjs";
 import EDITOR_JS_TOOLS from "@/lib/editorTools";
 import React from "react";
 

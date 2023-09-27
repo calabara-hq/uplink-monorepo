@@ -4,21 +4,46 @@ import {
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
 import { ContestCategory } from "@/types/contest";
-import CardSubmission from "@/ui/Submission/CardSubmission";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
 import ArtistPfp from "@/../public/pumey_pfp.jpg";
 import ArtistSubmission from "@/../public/vinnie_noggles.png";
 import landingBg from "@/../public/landing-bg.svg";
-import { Swiper, SwiperSlide } from "@/ui/Swiper/Swiper";
+import dynamic from "next/dynamic";
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
-
 import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
-import { DelayedGridItem, DelayedGridLayout } from "./DelayedGrid";
 import { BiPlusCircle } from "react-icons/bi";
 import { HiPhoto } from "react-icons/hi2";
+
+const Swiper = dynamic(() => import("@/ui/Swiper/Swiper"), {
+  ssr: false,
+  loading: () => {
+    return <SwiperSkeleton />;
+  },
+});
+const SwiperSlide = dynamic(() => import("@/ui/Swiper/SwiperSlide"), {
+  ssr: false,
+});
+
+const DelayedGridLayout = dynamic(
+  () => import("@/ui/DelayedGrid/DelayedGridLayout"),
+  {
+    ssr: false,
+  }
+);
+
+const DelayedGridItem = dynamic(
+  () => import("@/ui/DelayedGrid/DelayedGridItem"),
+  {
+    ssr: false,
+  }
+);
+
+const CardSubmission = dynamic(() => import("@/ui/Submission/CardSubmission"), {
+  ssr: false,
+});
 
 const getActiveContests = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -95,6 +120,17 @@ const getPopularSubmissions = async () => {
   return data;
 };
 
+const SwiperSkeleton = () => {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+      <div className="w-full shimmer h-64 bg-base-100 rounded-lg" />
+      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden md:block" />
+      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden lg:block" />
+      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden lg:block" />
+    </div>
+  );
+};
+
 const BannerSection = () => {
   return (
     <div className="w-full h-screen min-h-[750px] flex-grow flex flex-col bg-base-100 relative">
@@ -145,6 +181,7 @@ const BannerSection = () => {
                         target="_blank"
                         className="hover:underline"
                         prefetch={false}
+                        draggable={false}
                       >
                         @pumey_arts -
                       </Link>{" "}
@@ -214,6 +251,7 @@ const ContestCard = ({
     cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full transform 
     transition-transform duration-300 hoverCard will-change-transform no-select"
       href={linkTo}
+      draggable={false}
     >
       <div className="card-body items-center p-0">
         <div className="flex flex-col gap-2 items-center">
@@ -422,6 +460,7 @@ const ContestBanner = () => {
         <Link
           href={"/spacebuilder/create"}
           className="btn btn-primary btn-md rounded-md normal-case shadow-black shadow-2xl"
+          draggable={false}
         >
           Create a Contest
         </Link>

@@ -1,27 +1,19 @@
 // Render the submission in a card format. This is used in the contest page + the homepage.
 "use client";
 import { Submission } from "@/providers/ContestInteractionProvider";
-import { VoteActionProps } from "@/providers/VoteActionProvider";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  MediaController,
-
-  MediaTimeDisplay,
-  MediaPlayButton,
-  MediaMuteButton,
-} from "media-chrome/dist/react";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, lazy, useState } from "react";
 import { isMobile } from "@/lib/isMobile";
-import useVideoControls from "@/hooks/useVideoControls";
-import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
-import { MdOutlineOndemandVideo } from "react-icons/md";
+import dynamic from "next/dynamic";
+
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
-import { ParseBlocks } from "@/lib/blockParser";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
 import { TbCrown } from "react-icons/tb";
 import { ParseThread } from "@/lib/threadParser";
+import { ParseBlocks } from "@/lib/blockParser";
+import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
 
 const SubmissionBody = ({ submission }: { submission: Submission }) => {
   if (submission.data.type !== "text")
@@ -54,14 +46,11 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
         <section className="break-word">
           {submission.type === "twitter" ? (
             <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
-              {ParseThread({
-                thread: submission.data.thread,
-                omitImages: true,
-              })}
+              <ParseThread thread={submission.data.thread} omitImages={true} />
             </div>
           ) : (
             <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
-              {ParseBlocks({ data: submission.data.body, omitImages: true })}
+              <ParseBlocks data={submission.data.body} omitImages={true} />
             </div>
           )}
         </section>
@@ -77,83 +66,17 @@ const RenderVideoSubmission = ({
   submission: Submission;
   isActive: boolean;
 }) => {
-  const vidRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    if (isActive && vidRef.current) vidRef.current.play();
-    else if (!isActive && vidRef.current) vidRef.current.pause();
-  }, [isActive]);
-
-  const { muteButtonRef, timeRef } = useVideoControls({
-    onMute: (event: Event) => {
-      event.stopPropagation();
-      event.preventDefault();
-    },
-    onTimeToggle: (event: Event) => {
-      event.stopPropagation();
-      event.preventDefault();
-    },
-  });
+  const videoUrl =
+    submission.type === "twitter"
+      ? submission.data.thread[0].videoAsset
+      : submission.data.videoAsset;
+  const posterUrl =
+    submission.type === "twitter"
+      ? submission.data.thread[0].previewAsset
+      : submission.data.previewAsset;
 
   return (
-    <VideoWrapper>
-      <MediaController className="w-full h-full rounded-xl">
-        <video
-          ref={vidRef}
-          autoPlay={isActive}
-          playsInline
-          slot="media"
-          loop={true}
-          src={
-            submission.type === "twitter"
-              ? submission.data.thread[0].videoAsset
-              : submission.data.videoAsset
-          }
-          poster={
-            submission.type === "twitter"
-              ? submission.data.thread[0].previewAsset
-              : submission.data.previewAsset
-          }
-          preload="auto"
-          muted
-          crossOrigin=""
-          className="rounded-xl object-cover h-full w-full transition-transform duration-300 ease-in-out "
-        />
-
-        <div slot="top-chrome" className="flex flex-row w-full mt-2">
-          {isActive ? (
-            <MediaMuteButton
-              ref={muteButtonRef}
-              className="bg-[#1c1c1ca6] hover:bg-[#1c1c1ce6] ml-auto mr-2 rounded-xl p-2"
-            >
-              <span slot="high">
-                <HiOutlineVolumeUp className="h-6 w-6 text-t1" />
-              </span>
-              <span slot="off">
-                <HiOutlineVolumeOff className="h-6 w-6 text-t1" />
-              </span>
-            </MediaMuteButton>
-          ) : (
-            <MediaPlayButton className="bg-[#1c1c1ce6] ml-auto mr-2 rounded-xl p-2">
-              <span slot="play">
-                <MdOutlineOndemandVideo className="h-6 w-6 text-warning" />
-              </span>
-            </MediaPlayButton>
-          )}
-        </div>
-
-        <div className="flex flex-row w-full items-end bg-gradient-to-t from-[black] rounded-b-xl h-20">
-          <MediaTimeDisplay
-            ref={timeRef}
-            className="ml-auto mr-2 rounded-xl p-1 bg-transparent text-t1"
-            showDuration={isActive}
-            remaining={!isActive}
-          >
-            {/* {!isActive && <slot>{duration}</slot>} */}
-          </MediaTimeDisplay>
-        </div>
-      </MediaController>
-    </VideoWrapper>
+    <RenderInteractiveVideoWithLoader {...{ videoUrl, posterUrl, isActive }} />
   );
 };
 
@@ -239,6 +162,7 @@ const CardSubmission = ({
       onMouseEnter={() => !isMobileDevice && setIsActive(true)}
       onMouseLeave={() => !isMobileDevice && setIsActive(false)}
       draggable={false}
+      scroll={false}
     >
       {submission.rank && (
         <TbCrown

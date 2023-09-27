@@ -1,19 +1,10 @@
 "use client";
 import { Submission } from "@/providers/ContestInteractionProvider";
 import { useContestState } from "@/providers/ContestStateProvider";
-import {
-  VoteActionProps,
-  useVoteActionContext,
-} from "@/providers/VoteActionProvider";
-import { AddToCartButton } from "@/ui/Contests/SubmissionDisplay";
-import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
-import { sub } from "date-fns";
-import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { BiLeftArrowAlt, BiRightArrowAlt } from "react-icons/bi";
-import { HiCheckBadge, HiPlus } from "react-icons/hi2";
+import { useVoteActionContext } from "@/providers/VoteActionProvider";
+import { AddToCartButton } from "@/ui/Submission/SubmissionDisplay";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 const Modal = ({
   isModalOpen,
@@ -44,7 +35,7 @@ const Modal = ({
 
   if (isModalOpen) {
     return (
-      <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-[#00000080] transition-colors duration-300 ease-in-out">
+      <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-black bg-opacity-80 transition-colors duration-300 ease-in-out">
         <div
           ref={modalRef}
           className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-4xl h-full animate-springUp"
@@ -57,48 +48,28 @@ const Modal = ({
   return null;
 };
 
-export default function SubmissionModal({
-  spaceName,
-  contestId,
-  submission,
-  submissions,
-  prevSubmission,
-  nextSubmission,
-  index,
-}: {
-  spaceName: string;
-  contestId: string;
-  submission: any;
-  submissions: any;
-  prevSubmission: any;
-  nextSubmission: any;
-  index: number;
-}) {
-  const router = useRouter();
+export const ModalAddToCart = ({ submission }: { submission: Submission }) => {
   const voteActions = useVoteActionContext();
   const { contestState } = useContestState();
 
+  if (contestState === "voting") {
+    return (
+      <AddToCartButton submission={submission} voteActions={voteActions} />
+    );
+  }
+  return null;
+};
+
+export default function SubmissionModal({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+
   return (
     <Modal isModalOpen={true} onClose={() => router.back()}>
-      <AnimatePresence mode="wait">
-        <div className="flex w-full gap-1 lg:gap-4 p-0">
-          <div className="flex flex-col jusitfy-start w-full h-full ">
-            <ExpandedSubmission
-              submission={submission}
-              headerChildren={
-                <div className="flex p-1 ml-auto items-center justify-center">
-                  {contestState === "voting" && (
-                    <AddToCartButton
-                      submission={submission}
-                      voteActions={voteActions}
-                    />
-                  )}
-                </div>
-              }
-            />
-          </div>
-        </div>
-      </AnimatePresence>
+      {children}
     </Modal>
   );
 }

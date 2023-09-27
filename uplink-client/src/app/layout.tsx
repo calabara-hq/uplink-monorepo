@@ -6,7 +6,6 @@ import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
 import MobileNav from "@/ui/MobileNav/MobileNav";
 import type { Metadata } from "next";
-//import metadataBase from "./base-metadata";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL),

@@ -88,5 +88,19 @@ describe('token utils test suite', () => {
             expect(result.toString()).toEqual("1");
         });
 
+        test('nouns delegate balance check', async () => {
+            const token: IToken = {
+                type: 'ERC721',
+                symbol: 'NOUNS',
+                decimals: 0,
+                address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03"
+            };
+            const snapshot = '2023-05-20T12:30:00.000Z';
+            const walletAddress = '0xcC2688350d29623E2A0844Cc8885F9050F0f6Ed5'; // nouncil
+            const blockNum = await calculateBlockFromTimestamp(snapshot);
+            const result = await computeUserTokenBalance({ token, blockNum, walletAddress });
+            expect(result.toString()).toEqual("7");
+        });
+
     })
 });

@@ -37,7 +37,7 @@ export const handleMutationError = (result: ResultObject) => {
         if (result?.errors.length > 0) {
             for (const err of result.errors) {
                 const errorCode = err.extensions.code as string;
-
+                console.log('error code is', errorCode)
                 // check for known errors
                 if (errorCode in knownErrors) {
                     toast.error(knownErrors[errorCode as keyof typeof knownErrors])

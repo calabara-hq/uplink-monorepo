@@ -2,7 +2,6 @@ import { useEffect, useReducer, useState } from "react";
 import { nanoid } from 'nanoid';
 import handleMediaUpload, { IpfsUpload, MediaUploadError } from "@/lib/mediaUpload";
 import { toast } from "react-hot-toast";
-import { set } from "date-fns";
 
 
 // client context thread item

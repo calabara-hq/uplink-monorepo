@@ -1,5 +1,5 @@
 import { db, sqlOps } from "../utils/database.js";
-import { schema, Decimal, EditorOutputData, revalidateClientCache } from "lib";
+import { schema, Decimal, EditorOutputData } from "lib";
 import { getCacheValue, setCacheValue } from "./cache.js";
 import { GraphQLError, validate } from "graphql";
 import pinataSDK from '@pinata/sdk';
@@ -436,13 +436,6 @@ export const submit = async (
         // get the users updated submissions
         const updatedUserSubmissions = await fetchUserSubmissions(user, contestId);
 
-        await revalidateClientCache({
-            host: process.env.FRONTEND_HOST,
-            secret: process.env.FRONTEND_API_SECRET,
-            tags: [`submissions/${contestId}`]
-        })
-
-
         return {
             success: true,
             userSubmissionParams: {
@@ -495,12 +488,6 @@ export const twitterSubmit = async (
         const submissionId = await uploadTwitterSubmission(user, contestId, cleanPayload);
 
         const updatedUserSubmissions = await fetchUserSubmissions(user, contestId);
-
-        await revalidateClientCache({
-            host: process.env.FRONTEND_HOST,
-            secret: process.env.FRONTEND_API_SECRET,
-            tags: [`submissions/${contestId}`]
-        })
 
         return {
             success: true,

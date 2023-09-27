@@ -1,11 +1,10 @@
 "use client";
-import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
+import fetchContest from "@/lib/fetch/fetchContest";
 import { useContestState } from "@/providers/ContestStateProvider";
-import { useEffect, useRef, useState } from "react";
+import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import Link from "next/link";
-import { useVoteActionContext } from "@/providers/VoteActionProvider";
-import { RenderDetails } from "./ContestSidebar";
+import { useEffect, useRef, useState } from "react";
 import { HiMenu } from "react-icons/hi";
 
 // This is essentially the mobile version of the ContestSidebar
@@ -81,24 +80,53 @@ const InfoDrawer = ({
   return null;
 };
 
-const MobileActions = ({
+export const DetailsMenuDrawer = ({
+  detailChildren,
+  ui,
+}: {
+  detailChildren: React.ReactNode;
+  ui?: { classNames: string; label: React.ReactNode };
+}) => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  return (
+    <div>
+      {ui ? (
+        <button className={ui.classNames} onClick={() => setIsDrawerOpen(true)}>
+          {ui.label}
+        </button>
+      ) : (
+        <button
+          className="btn btn-ghost rounded-full"
+          onClick={() => setIsDrawerOpen(true)}
+        >
+          <HiMenu className="w-8 h-8 font-bold text-t2" />
+        </button>
+      )}
+      <InfoDrawer
+        isDrawerOpen={isDrawerOpen}
+        handleClose={() => {
+          setIsDrawerOpen(false);
+        }}
+      >
+        {detailChildren}
+      </InfoDrawer>
+    </div>
+  );
+};
+
+const MobileContestActions = ({
   contestId,
   spaceName,
-  submitterRewards,
-  voterRewards,
-  votingPolicy,
-  submitterRestrictions,
+  detailChildren,
 }: {
   contestId: string;
   spaceName: string;
-  submitterRewards: any;
-  voterRewards: any;
-  votingPolicy: any;
-  submitterRestrictions: any;
+  detailChildren: React.ReactNode;
 }) => {
   const { contestState, stateRemainingTime } = useContestState();
-  const { proposedVotes } = useVoteActionContext();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { proposedVotes } = useVoteActionContext();
 
   if (!contestState) return null;
 
@@ -107,12 +135,7 @@ const MobileActions = ({
       <div className="flex lg:hidden">
         <StickyContainer>
           <div className="flex flex-row items-center gap-8 w-full">
-            <button
-              className="btn btn-ghost rounded-full"
-              onClick={() => setIsDrawerOpen(true)}
-            >
-              <HiMenu className="w-8 h-8 font-bold text-t2" />
-            </button>
+            <DetailsMenuDrawer detailChildren={detailChildren} />
             <div className="flex p-2 w-full">
               <Link
                 href={`/${spaceName}/contest/${contestId}/studio`}
@@ -127,19 +150,6 @@ const MobileActions = ({
             </div>
           </div>
         </StickyContainer>
-        <InfoDrawer
-          isDrawerOpen={isDrawerOpen}
-          handleClose={() => {
-            setIsDrawerOpen(false);
-          }}
-        >
-          <RenderDetails
-            submitterRewards={submitterRewards}
-            voterRewards={voterRewards}
-            votingPolicy={votingPolicy}
-            submitterRestrictions={submitterRestrictions}
-          />
-        </InfoDrawer>
       </div>
       // <div className="flex flex-col w-full bg-blue-200"></div>
     );
@@ -148,12 +158,8 @@ const MobileActions = ({
       <div className="flex lg:hidden">
         <StickyContainer>
           <div className="flex flex-row items-center gap-8 w-full">
-            <button
-              className="btn btn-ghost rounded-full"
-              onClick={() => setIsDrawerOpen(true)}
-            >
-              <HiMenu className="w-8 h-8 font-bold text-t2" />
-            </button>
+            <DetailsMenuDrawer detailChildren={detailChildren} />
+
             <div className="flex p-2 w-full">
               {" "}
               <Link
@@ -174,22 +180,9 @@ const MobileActions = ({
             </div>
           </div>
         </StickyContainer>
-        <InfoDrawer
-          isDrawerOpen={isDrawerOpen}
-          handleClose={() => {
-            setIsDrawerOpen(false);
-          }}
-        >
-          <RenderDetails
-            submitterRewards={submitterRewards}
-            voterRewards={voterRewards}
-            votingPolicy={votingPolicy}
-            submitterRestrictions={submitterRestrictions}
-          />
-        </InfoDrawer>
       </div>
     );
   }
 };
 
-export default MobileActions;
+export default MobileContestActions;
