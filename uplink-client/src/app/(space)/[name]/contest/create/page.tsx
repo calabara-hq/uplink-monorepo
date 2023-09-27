@@ -1,3 +1,4 @@
+import handleNotFound from "@/lib/handleNotFound";
 import ContestForm from "@/ui/ContestForm/Entrypoint";
 
 const getSpace = async (name: string) => {
@@ -26,10 +27,10 @@ const getSpace = async (name: string) => {
         name,
       },
     }),
-    cache: "no-store",
-    next: { tags: [`space/${name}`] /*revalidate: 60 */ },
+    next: { tags: [`space/${name}`], revalidate: 60 },
   })
     .then((res) => res.json())
+    .then(handleNotFound)
     .then((res) => res.data.space);
   return data;
 };

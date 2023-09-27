@@ -34,9 +34,19 @@ const mutations = {
     Mutation: {
         createContest: async (_: any, args: any, context: any) => {
             const user = await authController.getUser(context);
-            if (!user) throw new Error('Unauthorized');
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
             const isSpaceAdmin = await isUserSpaceAdmin(user, args.contestData.spaceId)
-            if (!isSpaceAdmin) throw new Error('Unauthorized');
+            if (!isSpaceAdmin) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
 
             const { contestData } = args;
             const result = await validateContestParams(contestData);

@@ -4,7 +4,7 @@ import { register } from "swiper/element/bundle";
 import { Navigation, Grid } from "swiper/modules";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
-export const Swiper = (props: {
+const Swiper = (props: {
   children: React.ReactNode;
   spaceBetween?: number;
   slidesPerView?: number;
@@ -69,7 +69,6 @@ export const Swiper = (props: {
     <div className="mx-auto w-full px-12 relative">
       {/* @ts-expect-error */}
       <swiper-container init="false" ref={swiperRef}>
-        {!isReady && <SwiperSkeleton />}
         {isReady && children}
         {/* @ts-expect-error */}
       </swiper-container>
@@ -93,26 +92,4 @@ export const Swiper = (props: {
   );
 };
 
-export const SwiperSlide = (props) => {
-  const { children, ...rest } = props;
-  return (
-    <>
-      {/* @ts-expect-error */}
-      <swiper-slide {...rest} style={{ height: "auto" }}>
-        {children}
-        {/* @ts-expect-error */}
-      </swiper-slide>
-    </>
-  );
-};
-
-const SwiperSkeleton = () => {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-      <div className="w-full shimmer h-64 bg-base-100 rounded-lg" />
-      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden md:block" />
-      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden lg:block" />
-      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden lg:block" />
-    </div>
-  );
-};
+export default Swiper;

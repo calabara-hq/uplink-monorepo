@@ -45,6 +45,7 @@ const SideBarIcon = ({
 }) => (
   <Link
     href={path}
+    draggable={false}
     className="relative flex items-center justify-center h-12 w-12 mt-2 mb-2 mx-auto
   hover:bg-accent bg-gray-800 text-accent hover:text-black 
   hover:rounded-xl rounded-3xl transition-all duration-300 ease-linear cursor-pointer shadow-lg group"

@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
+  UserVote,
   UserVotingParams,
   useContestInteractionState,
 } from "./ContestInteractionProvider";
@@ -12,12 +13,16 @@ import { useSession } from "./SessionProvider";
 // inherit voting params from contest interaction provider
 // provide an API for managing user votes
 
-const apiCastVotes = async (contestId: string, castVotePayload: any, csrfToken: string | null) => {
+const apiCastVotes = async (
+  contestId: string,
+  castVotePayload: any,
+  csrfToken: string | null
+) => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRF-Token": csrfToken
+      "X-CSRF-Token": csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({
@@ -50,12 +55,16 @@ const apiCastVotes = async (contestId: string, castVotePayload: any, csrfToken: 
     .then((res) => res.data.castVotes);
 };
 
-const apiRemoveSingleVote = async (contestId: string, submissionId: string, csrfToken: string | null) => {
+const apiRemoveSingleVote = async (
+  contestId: string,
+  submissionId: string,
+  csrfToken: string | null
+) => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRF-Token": csrfToken
+      "X-CSRF-Token": csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({
@@ -88,12 +97,15 @@ const apiRemoveSingleVote = async (contestId: string, submissionId: string, csrf
     .then((res) => res.data.removeSingleVote);
 };
 
-const apiRemoveAllVotes = async (contestId: string, csrfToken: string | null) => {
+const apiRemoveAllVotes = async (
+  contestId: string,
+  csrfToken: string | null
+) => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRF-Token": csrfToken
+      "X-CSRF-Token": csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({
@@ -155,7 +167,6 @@ export const VoteActionProvider = ({
   const [areCurrentVotesDirty, setAreCurrentVotesDirty] = useState(false);
   const { data: session, status } = useSession();
 
-
   // handle cases where the user was signed out, added proposed votes, then signed in
   // if proposed votes already exist in current votes, remove them from proposed votes
 
@@ -164,7 +175,7 @@ export const VoteActionProvider = ({
       const newProposedVotes = proposedVotes.filter(
         (el) =>
           !userVoteParams?.userVotes.find(
-            (vote) => vote?.submissionId === el.submissionId
+            (vote: UserVote) => vote?.submissionId === el.submissionId
           )
       );
       setProposedVotes(newProposedVotes);
@@ -198,7 +209,7 @@ export const VoteActionProvider = ({
 
     if (mode === "current") {
       const toRemoveIdx = userVoteParams?.userVotes.findIndex(
-        (el) => el.submissionId === submissionId
+        (el: UserVote) => el.submissionId === submissionId
       );
 
       // send the mutation request and optimistically update the cache
@@ -273,7 +284,10 @@ export const VoteActionProvider = ({
       revalidate: false,
     };
     try {
-      await mutateUserVotingParams(apiRemoveAllVotes(contestId, session.csrfToken), options);
+      await mutateUserVotingParams(
+        apiRemoveAllVotes(contestId, session.csrfToken),
+        options
+      );
       toast.success("Your votes have been removed");
     } catch (err) {
       console.log(err);
@@ -352,7 +366,7 @@ export const VoteActionProvider = ({
     } else if (mode === "current") {
       // update the user voting params swr state to reflect the new differential
       const voteIndex = userVoteParams.userVotes.findIndex(
-        (vote) => vote.submissionId === id
+        (vote: UserVote) => vote.submissionId === id
       );
       const newUserVotes =
         voteIndex < 0

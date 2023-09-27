@@ -5,18 +5,11 @@ import Image from "next/image";
 import { ThreadItem, useThreadCreator } from "@/hooks/useThreadCreator";
 import { HiOutlineTrash, HiPhoto, HiSparkles, HiXMark } from "react-icons/hi2";
 import TwitterConnectButton from "../TwitterConnectButton/TwitterConnectButton";
-import {
-  MediaController,
-  MediaControlBar,
-  MediaTimeRange,
-  MediaTimeDisplay,
-  MediaPlayButton,
-  MediaMuteButton,
-} from "media-chrome/dist/react";
+
 import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import { BiPlusCircle, BiSolidCircle } from "react-icons/bi";
 import { FaTwitterSquare } from "react-icons/fa";
-import MenuSelect from "../MenuSelect/MenuSelect";
+import { RenderStandardVideoWithLoader } from "../VideoPlayer";
 
 const isStringBlank = (str: string) => {
   return !str.trim();
@@ -80,7 +73,17 @@ const RenderMedia = ({
             <HiOutlineTrash className="w-5 h-5" />
           </button>
         )}
-        <MediaController className="rounded-xl">
+        <RenderStandardVideoWithLoader
+          videoUrl={threadItem.primaryAssetBlob}
+          posterUrl={
+            threadItem.videoThumbnailBlobIndex !== null
+              ? threadItem.videoThumbnailOptions[
+                  threadItem.videoThumbnailBlobIndex
+                ]
+              : ""
+          }
+        />
+        {/* <MediaController className="rounded-xl">
           <video
             slot="media"
             src={threadItem.primaryAssetBlob}
@@ -102,7 +105,7 @@ const RenderMedia = ({
             <MediaTimeDisplay showDuration></MediaTimeDisplay>
             <MediaMuteButton></MediaMuteButton>
           </MediaControlBar>
-        </MediaController>
+        </MediaController> */}
       </div>
     );
   } else if (threadItem.primaryAssetBlob) {

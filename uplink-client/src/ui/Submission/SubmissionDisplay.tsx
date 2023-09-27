@@ -1,17 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useVoteActionContext } from "@/providers/VoteActionProvider";
-
-import CardSubmission from "../Submission/CardSubmission";
-import { HiCheckBadge, HiPlus } from "react-icons/hi2";
-import { usePathname, useRouter } from "next/navigation";
-import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
+import CardSubmission from "./CardSubmission";
+import { HiCheckBadge } from "react-icons/hi2";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { Decimal } from "decimal.js";
 import { FaShare } from "react-icons/fa6";
 import { BiLayerPlus } from "react-icons/bi";
 import formatDecimal from "@/lib/formatDecimal";
-import { toast } from "react-hot-toast";
+import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 
 export const AddToCartButton = ({ submission, voteActions }) => {
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
@@ -98,40 +95,6 @@ const SubmissionFooter = ({ submission, sharePath }) => {
   );
 };
 
-const SubmissionDisplay = ({
-  contestId,
-  spaceName,
-}: {
-  contestId: string;
-  spaceName: string;
-}) => {
-  const { submissions } = useContestInteractionState();
-
-  return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="flex w-full justify-evenly items-center">
-        <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  sm:auto-rows-fr">
-          {submissions.map((submission, idx) => {
-            return (
-              <CardSubmission
-                key={idx}
-                basePath={`/${spaceName}/contest/${contestId}`}
-                submission={submission}
-                footerChildren={
-                  <SubmissionFooter
-                    sharePath={`https://uplink.wtf/${spaceName}/contest/${contestId}/submission/${submission.id}`} // TODO: change this to window.host
-                    submission={submission}
-                  />
-                }
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const SubmissionSkeleton = () => {
   return (
     <div className="col-span-4 space-y-4 lg:col-span-1">
@@ -158,6 +121,40 @@ export const SubmissionDisplaySkeleton = () => {
         <SubmissionSkeleton />
         <SubmissionSkeleton />
         <SubmissionSkeleton />
+      </div>
+    </div>
+  );
+};
+
+const SubmissionDisplay = ({
+  contestId,
+  spaceName,
+}: {
+  contestId: string;
+  spaceName: string;
+}) => {
+  const { liveSubmissions: submissions } = useLiveSubmissions(contestId);
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <div className="flex w-full justify-evenly items-center">
+        <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  sm:auto-rows-fr">
+          {submissions.map((submission, idx) => {
+            return (
+              <CardSubmission
+                key={idx}
+                basePath={`/${spaceName}/contest/${contestId}`}
+                submission={submission}
+                footerChildren={
+                  <SubmissionFooter
+                    sharePath={`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/contest/${contestId}/submission/${submission.id}`} // TODO: change this to window.host
+                    submission={submission}
+                  />
+                }
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );

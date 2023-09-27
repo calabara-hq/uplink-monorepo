@@ -3,7 +3,7 @@ import { ThreadItem } from "@/hooks/useThreadCreator";
 import { handleMutationError } from "@/lib/handleMutationError";
 import { ContestCategory, ContestType } from "@/types/contest";
 import { IToken, IERCToken, INativeToken } from "@/types/token";
-import { OutputData } from "@editorjs/editorjs";
+import type { OutputData } from "@editorjs/editorjs";
 
 type FungiblePayout = {
     amount: string;

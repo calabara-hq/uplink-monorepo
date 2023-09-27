@@ -1,7 +1,12 @@
 "use client";
 import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("@/ui/Editor/Editor"), { ssr: false });
-import { OutputData } from "@editorjs/editorjs";
+const Editor = dynamic(() => import("@/ui/Editor/Editor"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full bg-base-100 h-[264px] shimmer rounded-xl" />
+  ),
+});
+import type { OutputData } from "@editorjs/editorjs";
 import useSWRMutation from "swr/mutation";
 import {
   HiCamera,
@@ -23,15 +28,6 @@ import {
 import { Decimal } from "decimal.js";
 
 import {
-  MediaController,
-  MediaControlBar,
-  MediaTimeRange,
-  MediaTimeDisplay,
-  MediaPlayButton,
-  MediaMuteButton,
-} from "media-chrome/dist/react";
-
-import {
   useStandardSubmissionCreator,
   SubmissionBuilderProps,
 } from "@/hooks/useStandardSubmissionCreator";
@@ -39,6 +35,9 @@ import { handleMutationError } from "@/lib/handleMutationError";
 import { HiBadgeCheck } from "react-icons/hi";
 import Link from "next/link";
 import { SimplePreview } from "@/ui/Submission/CardSubmission";
+import useLiveSubmissions from "@/hooks/useLiveSubmissions";
+import StandardVideoPlayer from "@/ui/VideoPlayer/StandardVideoPlayer";
+import LoadingDialog from "./loadingDialog";
 
 async function postSubmission(
   url,
@@ -194,7 +193,7 @@ const MediaUpload = ({
         >
           <HiOutlineTrash className="w-5 h-5" />
         </button>
-        <MediaController className="rounded-xl">
+        {/* <MediaController className="rounded-xl">
           <video
             slot="media"
             src={submission.primaryAssetBlob}
@@ -216,7 +215,17 @@ const MediaUpload = ({
             <MediaTimeDisplay showDuration></MediaTimeDisplay>
             <MediaMuteButton></MediaMuteButton>
           </MediaControlBar>
-        </MediaController>
+        </MediaController> */}
+        <StandardVideoPlayer
+          videoUrl={submission.primaryAssetBlob}
+          posterUrl={
+            submission.videoThumbnailBlobIndex !== null
+              ? submission.videoThumbnailOptions[
+                  submission.videoThumbnailBlobIndex
+                ]
+              : ""
+          }
+        />
         {submission.videoThumbnailOptions?.length > 0 && (
           <div className="flex flex-col sm:flex-row gap-2 items-center justify-center bg-base-100 border border-border p-2 w-fit m-auto rounded">
             <p className="self-center text-xs">Thumbnail</p>
@@ -407,7 +416,7 @@ const StudioSidebar = ({
             <div className="flex flex-row items-center justify-between bg-base-200 rounded-lg gap-2 h-fit w-full">
               <button
                 onClick={onSubmit}
-                className="btn btn-accent flex flex-1 normal-case text-lg"
+                className="btn btn-primary flex flex-1 normal-case text-lg"
                 disabled={
                   !userSubmitParams ||
                   parseInt(userSubmitParams.remainingSubPower) <= 0 ||
@@ -423,7 +432,7 @@ const StudioSidebar = ({
                     />
                   </div>
                 ) : (
-                  "Submit"
+                  "Preview"
                 )}
               </button>
               <p className="mx-2 p-2 text-center">{stateRemainingTime}</p>
@@ -464,7 +473,7 @@ const SubmissionPreviewModal = ({
   spaceName: string;
 }) => {
   const { data: session, status } = useSession();
-  const { mutateLiveSubmissions } = useContestInteractionState();
+  const { mutateLiveSubmissions } = useLiveSubmissions(contestId);
   const { trigger, data, error, isMutating, reset } = useSWRMutation(
     [`/api/userSubmitParams/${contestId}`, session?.user?.address],
     postSubmission,
@@ -569,6 +578,7 @@ const SubmissionPreviewModal = ({
           <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
           <Link
             href={`/${spaceName}/contest/${contestId}`}
+            draggable={false}
             className="btn btn-ghost text-t2 normal-case"
           >
             Go to contest
@@ -675,7 +685,7 @@ const StandardSubmit = ({
   const { title, submissionBody, errors, isUploading } = submission;
 
   if (!contestState) {
-    return <StudioSkeleton />;
+    return <LoadingDialog />;
   } else if (contestState !== "submitting") {
     return <p>not in submit window</p>;
   } else {

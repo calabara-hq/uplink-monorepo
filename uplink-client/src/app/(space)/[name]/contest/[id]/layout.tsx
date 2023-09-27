@@ -1,5 +1,5 @@
 import { ContestStateProvider } from "@/providers/ContestStateProvider";
-import { getContestById } from "./fetchContest";
+import fetchContest from "@/lib/fetch/fetchContest";
 import { ContestInteractionProvider } from "@/providers/ContestInteractionProvider";
 
 import SwrProvider from "@/providers/SwrProvider";
@@ -7,24 +7,25 @@ import { VoteActionProvider } from "@/providers/VoteActionProvider";
 import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
 
 export default async function Layout({
-  children,
   params,
+  children,
   modal,
 }: {
+  params: { id: string; name: string };
   children: React.ReactNode;
-  params: { id: string };
   modal: React.ReactNode;
 }) {
+  const contestId = params.id;
   const [contest, submissions] = await Promise.all([
-    getContestById(params.id),
-    fetchSubmissions(params.id),
+    fetchContest(contestId),
+    fetchSubmissions(contestId),
   ]);
 
   const fallback = {
-    [`submissions/${params.id}`]: submissions,
+    [`submissions/${contestId}`]: submissions,
   };
 
-  const { deadlines, metadata, tweetId, space } = contest;
+  const { metadata, deadlines, space, tweetId } = contest;
   return (
     <div className="w-full flex flex-col items-center p-4">
       <ContestStateProvider
@@ -34,8 +35,8 @@ export default async function Layout({
         contestAdmins={space.admins.map((admin) => admin.address)}
       >
         <SwrProvider fallback={fallback}>
-          <ContestInteractionProvider contestId={params.id}>
-            <VoteActionProvider contestId={params.id}>
+          <ContestInteractionProvider contestId={contestId}>
+            <VoteActionProvider contestId={contestId}>
               {children}
               {modal}
             </VoteActionProvider>

@@ -1,23 +1,12 @@
 // Render the submission in a large format. This is used for modals and the submission page.
-"use client";
 import { Submission } from "@/providers/ContestInteractionProvider";
 import Image from "next/image";
-import {
-  MediaController,
-  MediaControlBar,
-  MediaTimeRange,
-  MediaTimeDisplay,
-  MediaPlayButton,
-  MediaMuteButton,
-  MediaFullscreenButton,
-  MediaPosterImage,
-  MediaLoadingIndicator,
-} from "media-chrome/dist/react";
 import { ParseBlocks } from "@/lib/blockParser";
 import { ParseThread } from "@/lib/threadParser";
-import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
+import dynamic from "next/dynamic";
+import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 
 // nextjs 13.5.2 complains about the video component in ssr
 
@@ -25,9 +14,11 @@ const RenderSubmissionBody = ({ submission }: { submission: Submission }) => {
   return (
     <div>
       <section className="break-word">
-        {submission.type === "twitter"
-          ? ParseThread({ thread: submission.data.thread })
-          : ParseBlocks({ data: submission.data.body })}
+        {submission.type === "twitter" ? (
+          <ParseThread thread={submission.data.thread} />
+        ) : (
+          <ParseBlocks data={submission.data.body} />
+        )}
       </section>
     </div>
   );
@@ -52,54 +43,16 @@ const RenderImageSubmission = ({ submission }: { submission: Submission }) => {
 };
 
 const RenderVideoSubmission = ({ submission }: { submission: Submission }) => {
-  return (
-    <VideoWrapper>
-      <MediaController className="w-full h-fit aspect-video bg-transparent">
-        <video
-          autoPlay={false}
-          playsInline
-          slot="media"
-          src={
-            submission.type === "twitter"
-              ? submission.data.thread[0].videoAsset
-              : submission.data.videoAsset
-          }
-          preload="auto"
-          crossOrigin=""
-          className="w-full aspect-video object-cover rounded-xl"
-          poster={
-            submission.type === "twitter"
-              ? submission.data.thread[0].previewAsset
-              : submission.data.previewAsset
-          }
-        />
-        <MediaLoadingIndicator slot="centered-chrome" />
+  const videoUrl =
+    submission.type === "twitter"
+      ? submission.data.thread[0].videoAsset
+      : submission.data.videoAsset;
+  const posterUrl =
+    submission.type === "twitter"
+      ? submission.data.thread[0].previewAsset
+      : submission.data.previewAsset;
 
-        <div className="flex flex-col items-end justify-end w-full m-auto bg-gradient-to-t from-black rounded-b-xl">
-          <div className="flex w-full h-8 cursor-pointer">
-            <MediaTimeRange className="bg-transparent w-full"></MediaTimeRange>
-          </div>
-          <div className="flex w-full">
-            <MediaPlayButton className="bg-transparent"></MediaPlayButton>
-            <MediaMuteButton className="bg-transparent">
-              <span slot="high">
-                <HiOutlineVolumeUp className="h-6 w-6 text-t1" />
-              </span>
-              <span slot="off">
-                <HiOutlineVolumeOff className="h-6 w-6 text-t1" />
-              </span>
-            </MediaMuteButton>
-            <MediaTimeDisplay
-              showDuration
-              noToggle
-              className="bg-transparent"
-            />
-            <MediaFullscreenButton className="bg-transparent ml-auto" />
-          </div>
-        </div>
-      </MediaController>
-    </VideoWrapper>
-  );
+  return <RenderStandardVideoWithLoader {...{ videoUrl, posterUrl }} />;
 };
 
 /**
@@ -115,12 +68,14 @@ const SubmissionRenderer = ({ submission }: { submission: Submission }) => {
   if (submission.type === "standard") {
     return (
       <div>
-        <div className="w-9/12 m-auto">
+        <div className="w-full m-auto">
           {submission.data.type === "video" && (
             <div>
               <RenderVideoSubmission submission={submission} />
             </div>
           )}
+        </div>
+        <div className="w-9/12 m-auto">
           {submission.data.type === "image" && (
             <div>
               <RenderImageSubmission submission={submission} />
