@@ -27,6 +27,7 @@ import Link from "next/link";
 import { handleMutationError } from "@/lib/handleMutationError";
 import { AddressOrEns } from "@/ui/AddressDisplay/AddressDisplay";
 import { SimplePreview } from "@/ui/Submission/CardSubmission";
+import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 
 async function postTwitterSubmission(
   url,
@@ -382,7 +383,7 @@ const PreviewModal = ({
   spaceName: string;
 }) => {
   const { data: session, status } = useSession();
-  const { mutateLiveSubmissions } = useContestInteractionState();
+  const { mutateLiveSubmissions } = useLiveSubmissions(contestId);
   const { trigger, data, error, isMutating, reset } = useSWRMutation(
     [`/api/userSubmitParams/${contestId}`, session?.user?.address],
     postTwitterSubmission,
@@ -551,6 +552,7 @@ const PreviewModal = ({
             <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
             <Link
               href={`/${spaceName}/contest/${contestId}`}
+              draggable={false}
               className="btn btn-ghost text-t2 normal-case"
             >
               Go to contest
@@ -575,6 +577,17 @@ const SubmissionBody = ({ title, author, subType }) => {
 };
 
 const ExplainerSection = () => {
+  const handleClickScroll = () => {
+    const element = document.getElementById("scrollTo");
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+
+      });
+    }
+  };
+
   return (
     <div className="from-[#00223390] to-[#002233] text-white grid place-items-center items-center bg-gradient-to-br rounded-xl">
       <div className="relative hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-10 pb-10 lg:pb-0 lg:flex-row  lg:gap-0 xl:gap-20  ">
@@ -590,11 +603,14 @@ const ExplainerSection = () => {
               <br />
               for you!
             </h2>
+            <button className="btn btn-ghost btn-active hover:bg-base-200 normal-case mt-2 ml-auto" onClick={handleClickScroll}>
+              Lets go
+            </button>
           </div>
         </div>
-        <div className="w-full max-w-sm">
-          <div className="mockup-window bg-base-100">
-            <div className="grid grid-rows grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
+        <div className="m-auto w-full max-w-[300px] sm:max-w-sm  animate-springUp">
+          <div className="mockup-window bg-base-100 border border-border">
+            <div className="grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
               <Image
                 src={"/swim-shady.png"}
                 alt="swim shady"
@@ -602,13 +618,10 @@ const ExplainerSection = () => {
                 height={50}
                 className="rounded-full"
               />
-              <div className="w-10/12 flex flex-col gap-2">
+              <div className="flex-grow flex flex-col gap-2 ml-4">
                 <p className="text-t1">Noun 9999 in 3333D!</p>
                 <div className="flex flex-col w-10/12 m-auto">
                   <div className="relative">
-                    <span className="absolute top-0 right-0 mt-[-10px] mr-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg">
-                      <HiOutlineTrash className="w-5 h-5" />
-                    </span>
                     <Image
                       src={"/9999-winner.jpeg"}
                       alt="twitter submission"
@@ -648,6 +661,7 @@ const ExplainerSection = () => {
       >
         <path d="M0 338L53.3 349.2C106.7 360.3 213.3 382.7 320 393.8C426.7 405 533.3 405 640 359.3C746.7 313.7 853.3 222.3 960 189.2C1066.7 156 1173.3 181 1280 159.2C1386.7 137.3 1493.3 68.7 1546.7 34.3L1600 0V595H1546.7C1493.3 595 1386.7 595 1280 595C1173.3 595 1066.7 595 960 595C853.3 595 746.7 595 640 595C533.3 595 426.7 595 320 595C213.3 595 106.7 595 53.3 595H0V338Z"></path>
       </svg>
+      <div id="scrollTo" />
     </div>
   );
 };
@@ -661,6 +675,7 @@ const TwitterSubmit = ({
     <div className="flex flex-col w-full">
       <Link
         href={`/${params.name}/contest/${params.id}`}
+        draggable={false}
         className="btn btn-ghost normal-case text-t2 w-fit mb-1"
       >
         <HiArrowNarrowLeft className="w-5 h-5" />

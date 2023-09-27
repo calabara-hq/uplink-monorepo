@@ -9,8 +9,7 @@ import useSWR from "swr";
 import { useSession } from "./SessionProvider";
 import { useContestState } from "./ContestStateProvider";
 import { IToken } from "@/types/token";
-import { OutputData } from "@editorjs/editorjs";
-import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
+import type { OutputData } from "@editorjs/editorjs";
 
 type SubmissionFormat = "video" | "image" | "text";
 
@@ -69,7 +68,7 @@ export type UserSubmissionParams = {
   }[];
 };
 
-type UserVote = {
+export type UserVote = {
   votes: string;
   submissionId: string;
   submissionUrl: string;
@@ -85,10 +84,6 @@ export type UserVotingParams =
   | undefined;
 
 export interface ContestInteractionProps {
-  submissions: Submission[];
-  mutateLiveSubmissions: any; //(newSubmissions: Submission[], options?: any) => void;
-  areSubmissionsLoading: boolean;
-  isSubmissionError: any;
   userSubmitParams: UserSubmissionParams;
   areUserSubmitParamsLoading: boolean;
   isUserSubmitParamsError: any;
@@ -273,18 +268,6 @@ export function ContestInteractionProvider({
       ? [`/api/userVotingParams/${contestId}`, session.user.address]
       : null;
 
-  // dynamic submissions. only active when contest is in submitting or voting stage
-  const {
-    data: liveSubmissions,
-    isLoading: areSubmissionsLoading,
-    error: isSubmissionError,
-    mutate: mutateLiveSubmissions,
-  }: { data: any; isLoading: boolean; error: any; mutate: any } = useSWR(
-    `submissions/${contestId}`,
-    () => fetchSubmissions(contestId),
-    { refreshInterval: 10000 }
-  );
-
   // user submission params
   // The key will be undefined until the user is authenticated and the contest is in the submitting stage
 
@@ -337,10 +320,6 @@ export function ContestInteractionProvider({
   return (
     <ContestInteractionContext.Provider
       value={{
-        submissions: liveSubmissions,
-        mutateLiveSubmissions,
-        areSubmissionsLoading,
-        isSubmissionError,
         userSubmitParams,
         areUserSubmitParamsLoading,
         isUserSubmitParamsError,

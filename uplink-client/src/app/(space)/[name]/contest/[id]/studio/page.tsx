@@ -1,17 +1,29 @@
-"use client";
-import { useContestState } from "@/providers/ContestStateProvider";
-import StandardSubmit from "./standardSubmit";
-import TwitterSubmit from "./twitterSubmit";
+import fetchContest from "@/lib/fetch/fetchContest";
+import LoadingDialog from "./loadingDialog";
+import dynamic from "next/dynamic";
 
-export default function Page({
+const StandardSubmit = dynamic(() => import("./standardSubmit"), {
+  ssr: false,
+  loading: () => <LoadingDialog springUp />,
+});
+
+const TwitterSubmit = dynamic(() => import("./twitterSubmit"), {
+  ssr: false,
+  loading: () => <LoadingDialog springUp />,
+});
+
+export default async function Page({
   params,
 }: {
   params: { name: string; id: string };
 }) {
-  const { type } = useContestState();
+  const constest = await fetchContest(params.id);
+  //await new Promise((resolve) => setTimeout(resolve, 4000));
+  const { metadata } = constest;
 
   // contest in submit window
-  if (type === "standard") return <StandardSubmit params={params} />;
-  else if (type === "twitter") return <TwitterSubmit params={params} />;
+  if (metadata.type === "standard") return <StandardSubmit params={params} />;
+  else if (metadata.type === "twitter")
+    return <TwitterSubmit params={params} />;
   else return null;
 }

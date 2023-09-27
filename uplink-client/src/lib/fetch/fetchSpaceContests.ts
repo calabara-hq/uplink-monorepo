@@ -1,5 +1,7 @@
 // iterate a list of contests and return the prompts for each
 
+import handleNotFound from "../handleNotFound";
+
 const fetchSpaceContests = async (spaceName: string) => {
 
     const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -12,19 +14,19 @@ const fetchSpaceContests = async (spaceName: string) => {
                 query space($name: String!){
                   space(name: $name) {
                     contests {
+                        id
+                        tweetId
+                        promptUrl
                         deadlines {
                           endTime
                           snapshot
                           startTime
                           voteTime
                         }
-                        id
-                        tweetId
                         metadata {
                           category
                           type
                         }
-                        promptUrl
                     }
                   }
               }`,
@@ -35,7 +37,9 @@ const fetchSpaceContests = async (spaceName: string) => {
         next: { tags: [`space/${spaceName}/contests`], revalidate: 60 },
     })
         .then((res) => res.json())
-        .then((res) => res.data.space.contests)
+        .then(res => res.data.space)
+        .then(handleNotFound)
+        .then((res) => res.contests)
         .then(async contests => {
             return await Promise.all(
                 contests.map(async (contest) => {

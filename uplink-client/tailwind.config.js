@@ -2,9 +2,9 @@
 const colors = {
 
   // Base Colors
-  base1: '#353F5B',
-  base2: '#535D79',
-  base3: '#717B97',
+  base1: '#1c1f26',
+  base2: '#2b303b',
+  base3: '#202020',
 
   // Neutral Colors
   neutral1: '#5D6783',
@@ -12,10 +12,9 @@ const colors = {
   neurtral3: '#99A3BF',
 
   // Accent Colors
-  primary: '#5d9cec',
+  primary: '#57BAD7',
   secondary: '#CC0595',
-  accent1: '#57A89C',
-  accent2: '#57BAD7',
+  accent: '#57BAD7',
 
   // Text Colors
   text1: '#FFFFFF',
@@ -27,13 +26,6 @@ const colors = {
   warning: '#FFB84D',
   error: '#f87272',
   info: '#5D9CEC',
-}
-
-
-const colors2 = {
-  base1: '#1c1f26',
-  base2: '#2b303b',
-  base3: '#202020'
 }
 
 
@@ -76,8 +68,8 @@ module.exports = {
       },
       animation: {
         'springUp': 'springUp 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
-        'scrollInX': 'scrollInX 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
-        
+        'scrollInX': 'scrollInX 350ms ',
+        'fadeIn': 'fadeIn 150ms ease-in-out',
       }
     },
     keyframes: ({ theme }) => ({
@@ -106,6 +98,14 @@ module.exports = {
           opacity: '1'
         }
       },
+      fadeIn: {
+        '0%': {
+          opacity: '0'
+        },
+        '100%': {
+          opacity: '1'
+        }
+      },
 
     })
   },
@@ -114,32 +114,13 @@ module.exports = {
     themes: [
 
       {
-        mytheme: {
-
+        uplinkDark: {
           primary: colors.primary,
           secondary: colors.secondary,
-          accent: colors.accent2,
-          'primary-content': colors.text1,
-          'secondary-content': colors.text1,
-          'accent-content': colors.text2,
+          accent: colors.accent,
           'base-100': colors.base1,
           'base-200': colors.base2,
           'base-300': colors.base3,
-          neutral: colors.neutral1,
-          info: colors.info,
-          success: colors.success,
-          warning: colors.warning,
-          error: colors.error,
-
-
-        },
-        uplinkDark: {
-          primary: colors.accent2,
-          secondary: colors.secondary,
-          accent: colors.accent2,
-          'base-100': colors2.base1,
-          'base-200': colors2.base2,
-          'base-300': colors2.base3,
           neutral: colors.neutral1,
           info: colors.info,
           success: colors.success,
@@ -149,37 +130,6 @@ module.exports = {
       }
     ]
   },
-
-  /*daisyui: {
-    themes: ["dark",
-    {
-      
-  
-      mytheme: {
-  
-        "primary": "#b2c3ff",
-  
-        "secondary": "#3e2596",
-  
-        "accent": "#6f76d6",
-  
-        "neutral": "#1D2734",
-  
-        "base-100": "#393239",
-  
-        "info": "#759CF0",
-  
-        "success": "#17C488",
-  
-        "warning": "#FAC36B",
-  
-        "error": "#DD2622",
-      },
-    },
-    
-  ],
-  
-  },*/
 
   plugins: [
     require("daisyui"),

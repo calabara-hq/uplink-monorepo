@@ -1,3 +1,5 @@
+import handleNotFound from "../handleNotFound";
+
 const fetchSubmissions = async (contestId: string) => {
     const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
         method: "POST",
@@ -28,7 +30,9 @@ const fetchSubmissions = async (contestId: string) => {
         next: { tags: [`submissions/${contestId}`], revalidate: 60 }, // cache submissions for 60 seconds
     })
         .then((res) => res.json())
-        .then((res) => res.data.contest.submissions)
+        .then((res) => res.data.contest)
+        .then(handleNotFound)
+        .then(res => res.submissions)
         .then(async (submissions) => {
             return await Promise.all(
                 submissions.map(async (submission, idx) => {

@@ -1,9 +1,9 @@
 import handleMediaUpload from "@/lib/mediaUpload";
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { OutputData } from "@editorjs/editorjs";
+import type { OutputData } from "@editorjs/editorjs";
 import { BlockWrapper } from "./Entrypoint";
-let Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
+const Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
 import { HiPhoto } from "react-icons/hi2";
 import { toast } from "react-hot-toast";
 import {

@@ -36,7 +36,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "src/lib/editorTools.js"  ],
+, "src/lib/editorTools.js",
+  ],
   "exclude": [
     "node_modules",
     "**/*.stories.tsx",

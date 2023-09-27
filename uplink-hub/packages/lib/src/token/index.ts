@@ -164,6 +164,13 @@ export class TokenController {
             }
             else { // ERC20 / ERC721
 
+                // if nouns token, check if user is delegated any votes
+                if (token.address === "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03") {
+                    const nounsContract = new ethers.Contract(token.address, ERC721ABI, this.provider);
+                    const balance = await nounsContract.getPriorVotes(walletAddress, blockNum);
+                    return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
+                }
+
                 const tokenContract = new ethers.Contract(token.address, ERC20ABI, this.provider);
                 const balance = await tokenContract.balanceOf(walletAddress, { blockTag: blockNum });
                 return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));

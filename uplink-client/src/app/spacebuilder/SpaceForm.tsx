@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { startTransition, useRef, useState } from "react";
 import { HiTrash, HiUser } from "react-icons/hi2";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
@@ -17,7 +17,8 @@ import WalletConnectButton from "../../ui/ConnectButton/WalletConnectButton";
 import Image from "next/image";
 import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
-import { useListSpaces } from "../spaces/ListSpaces";
+import { revalidateDataCache } from "../actions";
+import { mutateSpaces } from "../mutate";
 export default function SpaceForm({
   initialState,
   isNewSpace,
@@ -28,7 +29,6 @@ export default function SpaceForm({
   spaceId?: string;
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { mutateSpaces } = useListSpaces();
   const router = useRouter();
   const { data: session, status } = useSession();
   const { mutate } = useSWRConfig();

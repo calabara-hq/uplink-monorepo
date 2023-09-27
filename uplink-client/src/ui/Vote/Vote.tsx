@@ -15,8 +15,7 @@ import formatDecimal from "@/lib/formatDecimal";
 import { useContestState } from "@/providers/ContestStateProvider";
 import Image from "next/image";
 import { HiTrash, HiDocumentText } from "react-icons/hi2";
-import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
-import LoadingAnimation from "../LoadingAnimation/LoadingAnimation";
+import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 
 const SubmissionVoteInput = ({
   submission,
@@ -161,22 +160,6 @@ export const VoteButton = ({
       </WalletConnectButton>
     </div>
   );
-
-  if (status !== "authenticated") {
-    return <WalletConnectButton styleOverride="w-full rounded-lg" />;
-  }
-  return (
-    <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-9/10 m-2">
-      <button
-        className="btn btn-warning flex flex-1 normal-case"
-        onClick={handleSubmit}
-        disabled={!isVoteButtonEnabled}
-      >
-        Cast Votes
-      </button>
-      <p className="mx-2 p-2 text-center text-t2">{stateRemainingTime}</p>
-    </div>
-  );
 };
 
 const EditButton = ({
@@ -229,7 +212,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
     areUserVotingParamsLoading,
   } = useVoteActionContext();
 
-  const { submissions } = useContestInteractionState();
+  const { liveSubmissions: submissions } = useLiveSubmissions(contestId);
   const [isEditMode, setIsEditMode] = useState(false);
   const displayableVotesSpent = formatDecimal(votesSpent);
   const displayableVotesRemaining = formatDecimal(votesRemaining);
@@ -376,17 +359,19 @@ const SidebarVote = ({ contestId }: { contestId: string }) => {
   const { contestState } = useContestState();
   const { proposedVotes } = useVoteActionContext();
 
-  if (!contestState) { // return placeholder to prevent layout shift
-    return (
-      <div className="hidden w-1/3 lg:flex lg:flex-col items-center gap-4">
-        <div className="sticky top-3 right-0 flex flex-col justify-center items-center gap-4 w-full h-[60vh] rounded-xl mt-2"></div>
-      </div>
-    );
-  }
+  //if (!contestState || contestState !== "voting") {
+  // if (!contestState) {
+  //   // return placeholder
+  //   return (
+  //     <div className="hidden w-1/3 lg:flex lg:flex-col items-center gap-4">
+  //       <div className="sticky top-3 right-0 flex flex-col justify-center items-center gap-4 w-full h-[60vh] rounded-xl mt-2"></div>
+  //     </div>
+  //   );
+  // }
 
   if (contestState === "voting") {
     return (
-      <div className="hidden w-1/3 lg:flex lg:flex-col items-center gap-4">
+      <div className="hidden w-1/3 xl:w-1/4 flex-shrink-0 lg:flex lg:flex-col items-center gap-4">
         <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
           <div className="flex flex-row items-center gap-2">
             <h2 className="text-t1 text-lg font-semibold">My Selections </h2>

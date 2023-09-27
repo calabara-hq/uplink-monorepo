@@ -1,4 +1,6 @@
-export const getContestById = async (contestId: string) => {
+import handleNotFound from "../handleNotFound";
+
+const fetchContest = async (contestId: string) => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
@@ -109,7 +111,9 @@ export const getContestById = async (contestId: string) => {
     next: { tags: [`contest/${contestId}`], revalidate: 60 },
   })
     .then((res) => res.json())
-    .then((res) => res.data.contest);
+    .then((res) => res.data.contest)
+    .then(handleNotFound)
   return data;
 };
 
+export default fetchContest;

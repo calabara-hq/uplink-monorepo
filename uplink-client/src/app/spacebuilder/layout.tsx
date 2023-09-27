@@ -1,13 +1,20 @@
 import { Metadata } from "next";
-import { baseMetadata } from "../base-metadata";
-
 export const metadata: Metadata = {
-  ...baseMetadata,
-  description: "Space Builder",
   openGraph: {
-    ...baseMetadata.openGraph,
-    title: "Space Builder",
-    description: "Create a space on Uplink",
+    title: "Uplink",
+    description: "Create a space on Uplink.",
+    url: "/",
+    siteName: "Uplink",
+    images: [
+      {
+        url: "/opengraph.png",
+        width: 400,
+        height: 600,
+        alt: "Uplink",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
   },
 };
 
