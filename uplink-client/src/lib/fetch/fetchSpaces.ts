@@ -1,8 +1,11 @@
+import "server-only"
+
 const fetchSpaces = async () => {
     return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "X-API-TOKEN": process.env.API_SECRET,
         },
         body: JSON.stringify({
             query: `

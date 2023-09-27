@@ -11,6 +11,7 @@ interface ResultObject {
 
 const knownErrors = {
     'UNAUTHORIZED': 'You are not authorized to perform this action',
+    'RATE_LIMIT_EXCEEDED': 'You are being rate limited',
     'INTERNAL_SERVER_ERROR': 'Something went wrong', // catch all for database errors
     // submitting
     'IPFS_UPLOAD_ERROR': 'Error uploading submission to IPFS',

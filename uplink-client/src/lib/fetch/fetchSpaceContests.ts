@@ -1,5 +1,5 @@
 // iterate a list of contests and return the prompts for each
-
+import "server-only"
 import handleNotFound from "../handleNotFound";
 
 const fetchSpaceContests = async (spaceName: string) => {

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import "server-only"
 import handleNotFound from "../handleNotFound";
 
 const fetchSingleSpace = async (name: string) => {
