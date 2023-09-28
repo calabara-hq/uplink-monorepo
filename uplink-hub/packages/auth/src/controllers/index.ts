@@ -88,8 +88,6 @@ const setCacheValue = async (key: string, value: string) => {
 }
 
 
-
-
 const addUser = async (user: Session['user']) => {
     try {
         await db.insert(schema.users).values({
@@ -172,14 +170,12 @@ export const initiateTwitterAuth = async (req, res) => {
 
 export const oauthCallback = async (req, res) => {
     const { oauth_token, oauth_verifier } = req.query;
-    console.log('oauth_token', oauth_token)
-    console.log('oauth_verifier', oauth_verifier)
     const oauth_token_secret = await getCacheValue(`SIWT-${oauth_token}`)
-    console.log('oauth_token_secret', oauth_token_secret)
+
     if (!oauth_token || !oauth_verifier || !oauth_token_secret) {
         return res.status(400).send('You denied the app or your session expired!');
     }
-    console.log('passed checks')
+
     // Obtain the persistent tokens
     // Create a client from temporary tokens
     const client = new TwitterApi({
@@ -188,9 +184,6 @@ export const oauthCallback = async (req, res) => {
         accessToken: oauth_token,
         accessSecret: oauth_token_secret,
     });
-
-
-    console.log('created client')
 
     client.login(oauth_verifier)
         .then(async ({ client: loggedClient, accessToken, accessSecret }) => {
@@ -203,8 +196,7 @@ export const oauthCallback = async (req, res) => {
                 accessToken: cipherController.encrypt(accessToken),
                 accessSecret: cipherController.encrypt(accessSecret),
             }
-            console.log('set session')
-            return res.send(`ok`)
+            return res.send(`<script>window.close()</script>`)
         })
         .catch(() => res.status(403).send('Invalid verifier or access tokens!'));
 }
