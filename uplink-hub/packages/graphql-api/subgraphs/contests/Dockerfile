@@ -1,44 +1,36 @@
 # Build Stage for lib
-FROM node:18-alpine AS lib-builder
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy necessary files for yarn and lib
+# Copy all the necessary files for install
 COPY ./package.json ./
-COPY ./.yarnrc.yml ./
+COPY ./.yarnrc.yml ./.yarnrc.yml
 COPY ./.yarn ./.yarn
 COPY ./yarn.lock ./
 
+# Copy the source code of the workspaces
 COPY ./packages/lib ./packages/lib
-RUN yarn install && yarn workspace lib build
-
-# Build Stage for contests
-FROM node:18-alpine AS contests-builder
-WORKDIR /app
-
-# Copy necessary files for yarn and contests, including the built lib
-COPY --from=lib-builder /app/package.json ./
-COPY --from=lib-builder /app/.yarnrc.yml ./
-COPY --from=lib-builder /app/.yarn ./.yarn
-COPY --from=lib-builder /app/yarn.lock ./
-
-COPY --from=lib-builder /app/packages/lib ./packages/lib
 COPY ./packages/graphql-api/subgraphs/contests ./packages/graphql-api/subgraphs/contests
 
-RUN yarn install && yarn workspace contests build
+# Install all dependencies
+RUN yarn install
+
+# Build the workspaces
+RUN yarn workspace lib build
+RUN yarn workspace contests build
+
+##################################
 
 # Production Stage
 FROM node:18-alpine
-WORKDIR /app/packages/graphql-api/subgraphs/contests
+WORKDIR /app
 
 # Copy the necessary runtime files from the builders
-COPY --from=contests-builder /app/package.json /app/
-COPY --from=contests-builder /app/.yarnrc.yml /app/
-COPY --from=contests-builder /app/.yarn /app/.yarn
-COPY --from=contests-builder /app/yarn.lock /app/
+COPY --from=builder /app/packages/graphql-api/subgraphs/contests /app/packages/graphql-api/subgraphs/contests
+COPY --from=builder /app/packages/lib /app/packages/lib
+RUN ls /app/packages/graphql-api/subgraphs/contests
 
-# Only copy the built dist directories of lib and contests (assuming your build output goes to a dist folder)
-COPY --from=lib-builder /app/packages/lib/dist /app/packages/lib/dist
-COPY --from=contests-builder /app/packages/graphql-api/subgraphs/contests /app/packages/graphql-api/subgraphs/contests
+WORKDIR /app/packages/graphql-api/subgraphs/contests
 
 # Set NODE_ENV to production for optimization
 ENV NODE_ENV=production
