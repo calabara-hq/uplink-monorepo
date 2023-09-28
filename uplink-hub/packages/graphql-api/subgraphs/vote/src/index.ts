@@ -1,30 +1,64 @@
 import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from '@apollo/server/standalone'
+import { startStandaloneServer } from '@apollo/server/standalone';
 import { buildSubgraphSchema } from "@apollo/subgraph";
 import gql from 'graphql-tag';
 import { readFileSync } from "fs";
-import resolvers from "./resolvers/index.js";
-const typeDefs = gql(readFileSync("./schema.graphql").toString('utf-8'));
 import cookie from 'cookie';
 import dotenv from 'dotenv';
+import resolvers from "./resolvers/index.js";
+
+import { xor_compare } from 'lib';
+import { shield } from "graphql-shield";
+import { GraphQLError } from "graphql";
+import Redis from 'ioredis';
+import { createRateLimitRule, RedisStore } from "graphql-rate-limit";
+import { applyMiddleware } from "graphql-middleware";
+// Initial configurations
 dotenv.config();
 
-const port = parseInt(process.env.VOTE_SERVICE_PORT)
+export const redisClient = new Redis(process.env.REDIS_URL);
 
+const typeDefs = gql(readFileSync("./schema.graphql").toString('utf-8'));
 
-// initialize the apollo server with buildSubgraphSchema and context
-const server = new ApolloServer({
-  schema: buildSubgraphSchema({ typeDefs, resolvers }),
+// Helper function to parse headers
+const parseHeader = (headerArray: string[] | string) => {
+  return Array.isArray(headerArray) ? headerArray[0] : headerArray || '';
+};
+
+// Rate limiting rule configuration
+const rateLimitRule = createRateLimitRule({
+  identifyContext: ctx => ctx.hasApiToken ? Math.random().toString(36).slice(2) : ctx.ip,
+  createError: (message: string) => new GraphQLError(message, { extensions: { code: 'RATE_LIMIT_EXCEEDED' } }),
+  store: new RedisStore(redisClient)
+})
+
+// Setting up GraphQL permissions
+const permissions = shield({
+  Query: {
+    getUserVotingParams: rateLimitRule({ window: '1m', max: 15 }),
+  },
+  Mutation: {
+    castVotes: rateLimitRule({ window: '1m', max: 8 }),
+    removeSingleVote: rateLimitRule({ window: '1m', max: 8 }),
+    removeAllVotes: rateLimitRule({ window: '1m', max: 8 }),
+  }
 });
 
+// Create Apollo server with applied middleware
+const server = new ApolloServer({
+  schema: applyMiddleware(buildSubgraphSchema([{ typeDefs, resolvers }]), permissions)
+});
+
+// Start the server
 const { url } = await startStandaloneServer(server, {
-  listen: { port: port },
+  listen: { port: parseInt(process.env.VOTE_SERVICE_PORT) },
   context: async ({ req }) => {
-    // get the 'session-cookie' + csrfToken header from the request
-    const token = cookie.parse(req.headers['session-cookie'] || '');
-    const csrfToken = req.headers['x-csrf-token'] || ''
-    // add the user + csrf to the context
-    return { token, csrfToken };
+    return {
+      token: cookie.parse(parseHeader(req.headers['session-cookie'])),
+      csrfToken: parseHeader(req.headers['x-csrf-token']),
+      ip: parseHeader(req.headers['x-forwarded-for']) || req.socket.remoteAddress,
+      hasApiToken: xor_compare(parseHeader(req.headers['x-api-token']), process.env.FRONTEND_API_SECRET)
+    };
   }
 });
 

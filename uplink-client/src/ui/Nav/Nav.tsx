@@ -13,9 +13,13 @@ const Nav = () => {
             width={28}
             className="flex md:hidden"
           />
-          <h1 className="text-lg text-white font-bold">Uplink</h1>
-          <div className="badge badge-xs bg-gray-700 border-0 p-2 text-gray-400">
-            1.0.1
+          <div className="flex gap-2 items-center justify-center">
+            <p className="text-2xl text-white font-bold">Uplink</p>
+            <p
+              className={`badge border-none badge-md bg-base-200 text-t2 font-semibold`}
+            >
+              1.0.1
+            </p>
           </div>
         </div>
         <div className="flex items-center justify-center ml-auto">

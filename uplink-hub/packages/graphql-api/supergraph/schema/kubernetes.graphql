@@ -329,12 +329,10 @@ type Query
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
   submission(submissionId: ID!): Submission @join__field(graph: SUBMIT)
-  contestSubmissions(contestId: ID!): [Submission!]! @join__field(graph: SUBMIT)
   popularSubmissions: [PopularSubmission!]! @join__field(graph: SUBMIT)
   getUserSubmissionParams(contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
   me: User @join__field(graph: USER)
   user(id: ID, address: String): User @join__field(graph: USER)
-  testEndpoint(id: ID!): SampleResponse! @join__field(graph: VOTE)
   getUserVotingParams(contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
 }
 
@@ -390,12 +388,6 @@ type RewardType
 {
   rank: Int!
   tokenReward: tokenRewardType!
-}
-
-type SampleResponse
-  @join__type(graph: VOTE)
-{
-  success: Boolean!
 }
 
 type Space

@@ -1,4 +1,4 @@
-import { DatabaseController, schema, CipherController, revalidateClientCache } from 'lib';
+import { DatabaseController, schema, CipherController } from 'lib';
 import dotenv from 'dotenv';
 import { TwitterController } from './twitter.js';
 import { SendTweetV2Params, TwitterApiError } from 'twitter-api-v2';
@@ -65,11 +65,6 @@ const setJobStatus = async (id: number, status: 'ready' | 'failed' | 'pending' |
 
 const setContestTweetId = async (contestId: number, tweetId: string) => {
     await db.update(schema.contests).set({ tweetId }).where(sqlOps.eq(schema.contests.id, contestId));
-    await revalidateClientCache({
-        host: process.env.FRONTEND_HOST,
-        secret: process.env.FRONTEND_API_SECRET,
-        tags: [`contest/${contestId}`]
-    })
 }
 
 

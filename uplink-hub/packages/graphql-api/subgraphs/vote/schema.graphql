@@ -7,10 +7,6 @@ type Vote @key(fields: "id") {
   votes: Decimal!
 }
 
-type SampleResponse {
-  success: Boolean!
-}
-
 type VoteObject {
   id: ID!
   votes: Decimal!
@@ -26,7 +22,6 @@ type UserVotingParams {
 }
 
 type Query {
-  testEndpoint(id: ID!): SampleResponse!
   getUserVotingParams(contestId: ID!): UserVotingParams!
 }
 

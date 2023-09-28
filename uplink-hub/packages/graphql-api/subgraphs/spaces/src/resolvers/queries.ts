@@ -36,9 +36,24 @@ const singleSpaceByName = db.query.spaces.findFirst({
     }
 }).prepare();
 
+
+
+// const constructQuery = (info) => {
+//     let dbWith = {};
+//     info.fieldNodes[0].selectionSet.selections.map(selection => {
+//         const field = selection.name.value;
+//         if(field === 'admins')
+//     });
+// }
+
+
+
+
 const queries = {
     Query: {
-        async spaces() {
+        async spaces(_, __, ___, info) {
+            //const fields = constructQuery(info);
+            //console.log(fields)
             const data = await manySpaces.execute();
             return data;
         },
@@ -61,7 +76,6 @@ const queries = {
             return data;
         },
     },
-
 };
 
 export default queries

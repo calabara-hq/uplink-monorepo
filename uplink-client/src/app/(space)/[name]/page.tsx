@@ -15,33 +15,6 @@ import {
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { name: string };
-}): Promise<Metadata> {
-  const name = params.name;
-  const space = await fetchSingleSpace(name);
-  return {
-    title: `${space.displayName}`,
-    description: `${space.displayName} on Uplink`,
-    openGraph: {
-      title: `${space.displayName}`,
-      description: `Create with ${space.displayName} on Uplink`,
-      images: [
-        {
-          url: `${space.logoUrl}`,
-          width: 600,
-          height: 600,
-          alt: `${space.displayName} logo`,
-        },
-      ],
-      locale: "en_US",
-      type: "website",
-    },
-  };
-}
-
 const SpaceInfoSekelton = () => {
   return (
     <div className="flex flex-col gap-4 w-full">
