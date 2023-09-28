@@ -1,3 +1,4 @@
+import "server-only"
 import handleNotFound from "../handleNotFound";
 
 const fetchSingleSubmission = async (submissionId: string) => {
@@ -5,20 +6,21 @@ const fetchSingleSubmission = async (submissionId: string) => {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "X-API-TOKEN": process.env.API_SECRET,
         },
         body: JSON.stringify({
             query: `
-          query submission($submissionId: ID!){
-            submission(submissionId: $submissionId) {
-              author
-              created
-              rank
-              totalVotes
-              type
-              url
-              version
-            }
-        }`,
+                query submission($submissionId: ID!){
+                    submission(submissionId: $submissionId) {
+                    author
+                    created
+                    rank
+                    totalVotes
+                    type
+                    url
+                    version
+                    }
+                }`,
             variables: {
                 submissionId,
             },

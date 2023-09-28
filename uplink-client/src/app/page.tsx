@@ -16,6 +16,8 @@ import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
 import { BiPlusCircle } from "react-icons/bi";
 import { HiPhoto } from "react-icons/hi2";
+import fetchActiveContests from "@/lib/fetch/fetchActiveContests";
+import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 
 const Swiper = dynamic(() => import("@/ui/Swiper/Swiper"), {
   ssr: false,
@@ -45,81 +47,6 @@ const CardSubmission = dynamic(() => import("@/ui/Submission/CardSubmission"), {
   ssr: false,
 });
 
-const getActiveContests = async () => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `
-      query ActiveContests {
-        activeContests {
-          id
-          tweetId
-          promptUrl
-          deadlines {
-            startTime
-            voteTime
-            endTime
-          }
-          metadata {
-            type
-            category
-          }
-          space {
-            logoUrl
-            displayName
-            name
-          }
-        }
-      }`,
-    }),
-    next: { revalidate: 60 },
-  })
-    .then((res) => res.json())
-    .then((res) => res.data.activeContests);
-  return data;
-};
-
-const getPopularSubmissions = async () => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `
-      query PopularSubmissions {
-        popularSubmissions {
-          author
-          contestCategory
-          spaceDisplayName
-          spaceName
-          contestId
-          created
-          id
-          type
-          url
-          version
-        }
-      }`,
-    }),
-    next: { revalidate: 60 },
-  })
-    .then((res) => res.json())
-    .then((res) => res.data.popularSubmissions)
-    .then(async (submissions) => {
-      return await Promise.all(
-        submissions.map(async (submission, idx) => {
-          const data = await fetch(submission.url).then((res) => res.json());
-          return { ...submission, data: data };
-        })
-      );
-    });
-  return data;
-};
-
 const SwiperSkeleton = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
@@ -137,7 +64,7 @@ const BannerSection = () => {
       <div className="grid place-items-center items-center bg-gradient-to-br">
         <div className="hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-5 lg:gap-10 lg:flex-row xl:gap-20 z-[1]">
           <div className="lg:pl-10 ">
-            <div className="flex flex-col gap-2 mb-2 py-4 text-left ">
+            <div className="flex flex-col gap-2 py-4 text-left ">
               <div className="flex gap-2">
                 <h1 className="mb-2 text-5xl font-[700] text-t1 w-fit">
                   Unleash your biggest fans
@@ -213,7 +140,7 @@ const BannerSection = () => {
         src={landingBg}
         alt=""
         fill
-        className="absolute !h-[80%] !bottom-0 !left-0 !top-auto object-cover"
+        className="absolute !h-[70%] !bottom-0 !left-0 !top-auto object-cover"
       />
     </div>
   );
@@ -291,7 +218,7 @@ const PromptSummary = async ({ promptUrl }: { promptUrl: string }) => {
 };
 
 const ActiveContests = async () => {
-  const activeContests = await getActiveContests();
+  const activeContests = await fetchActiveContests();
   if (activeContests.length > 0) {
     return (
       <div className="w-full flex flex-col gap-4">
@@ -349,7 +276,7 @@ const ActiveContests = async () => {
 };
 
 const PopularSubmissions = async () => {
-  const popularSubmissions = await getPopularSubmissions();
+  const popularSubmissions = await fetchPopularSubmissions();
   if (popularSubmissions.length === 0) return null;
   return (
     <div className="w-full flex flex-col gap-2 m-auto">
