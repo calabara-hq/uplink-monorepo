@@ -9,14 +9,14 @@ const fetchSpaces = async () => {
         },
         body: JSON.stringify({
             query: `
-        query Spaces{
-          spaces{
-              name
-              displayName
-              members
-              logoUrl
-          }
-      }`,
+                query Spaces{
+                spaces{
+                    name
+                    displayName
+                    members
+                    logoUrl
+                }
+            }`,
         }),
         next: { tags: ["spaces"], revalidate: 60 },
     })

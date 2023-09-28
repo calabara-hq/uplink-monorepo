@@ -16,7 +16,6 @@ import { applyMiddleware } from "graphql-middleware";
 // Initial configurations
 dotenv.config();
 
-
 export const redisClient = new Redis(process.env.REDIS_URL);
 
 const typeDefs = gql(readFileSync("./schema.graphql").toString('utf-8'));

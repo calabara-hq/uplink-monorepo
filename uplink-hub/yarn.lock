@@ -5026,7 +5026,11 @@ __metadata:
     chai: ^4.3.7
     dotenv: ^16.0.3
     graphql: ^16.6.0
+    graphql-middleware: ^6.1.35
+    graphql-rate-limit: ^3.3.0
+    graphql-shield: ^7.6.5
     graphql-tag: ^2.12.6
+    ioredis: ^5.3.2
     jest: ^29.5.0
     lib: "workspace:*"
     mocha: ^10.2.0
@@ -10408,6 +10412,9 @@ __metadata:
     dotenv: ^16.0.3
     ethers: 5.7.2
     graphql: ^16.6.0
+    graphql-middleware: ^6.1.35
+    graphql-rate-limit: ^3.3.0
+    graphql-shield: ^7.6.5
     graphql-tag: ^2.12.6
     ioredis: ^5.3.2
     jest: ^29.5.0
@@ -11066,7 +11073,11 @@ __metadata:
     "@types/jest": ^29.4.0
     "@types/node": ^18.11.19
     graphql: ^16.6.0
+    graphql-middleware: ^6.1.35
+    graphql-rate-limit: ^3.3.0
+    graphql-shield: ^7.6.5
     graphql-tag: ^2.12.6
+    ioredis: ^5.3.2
     jest: ^29.4.2
     lib: "workspace:*"
     nodemon: ^2.0.20
@@ -11254,6 +11265,9 @@ __metadata:
     dotenv: ^16.0.3
     ethers: 5.7.2
     graphql: ^16.6.0
+    graphql-middleware: ^6.1.35
+    graphql-rate-limit: ^3.3.0
+    graphql-shield: ^7.6.5
     graphql-tag: ^2.12.6
     ioredis: ^5.3.2
     jest: ^29.5.0

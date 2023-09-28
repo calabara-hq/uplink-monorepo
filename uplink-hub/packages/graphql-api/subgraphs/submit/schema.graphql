@@ -87,7 +87,6 @@ type UserSubmissionParams {
 
 type Query {
   submission(submissionId: ID!): Submission
-  contestSubmissions(contestId: ID!): [Submission!]!
   popularSubmissions: [PopularSubmission!]!
   getUserSubmissionParams(
     contestId: ID!

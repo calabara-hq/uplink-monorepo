@@ -6,6 +6,7 @@ const fetchContest = async (contestId: string) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-API-TOKEN": process.env.API_SECRET,
     },
     body: JSON.stringify({
       query: `

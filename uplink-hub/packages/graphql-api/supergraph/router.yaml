@@ -1,6 +1,13 @@
 supergraph:
   listen: 0.0.0.0:${env.SUPERGRAPH_SERVICE_PORT}
 
+traffic_shaping:
+  router:
+    timeout: 30s # router request timeout period
+  all:
+    timeout: 30s  # subgraph request timeout period
+    deduplicate_query: true # deduplicate queries to the same subgraph
+
 headers:
   # Header rules for all subgraphs
   all:
@@ -17,10 +24,4 @@ headers:
           named: 'X-API-TOKEN'
           default: 'null'
 
-traffic_shaping:
-  router:
-    timeout: 30s
-  all:
-    timeout: 30s
-    deduplicate_query: true
   

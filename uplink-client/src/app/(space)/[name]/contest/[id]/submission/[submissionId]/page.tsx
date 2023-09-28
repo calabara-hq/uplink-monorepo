@@ -4,6 +4,34 @@ import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
 import { Submission } from "@/providers/ContestInteractionProvider";
 import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { submissionId: string };
+}): Promise<Metadata> {
+  const submissionId = params.submissionId;
+  const submission = await fetchSingleSubmission(submissionId);
+  return {
+    title: `${submission.data.title}`,
+    description: `${submission.data.title} on Uplink`,
+    openGraph: {
+      title: `${submission.data.title}`,
+      description: `${submission.data.title} on Uplink`,
+      images: [
+        {
+          url: `api/submission/${submissionId}/submission_metadata`,
+          width: 600,
+          height: 600,
+          alt: `my submission`,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+  };
+}
 
 const ExpandedSubmissionSkeleton = () => {
   return (
@@ -12,8 +40,8 @@ const ExpandedSubmissionSkeleton = () => {
         <div className="w-64 h-8 bg-base-100 shimmer rounded-lg" />
         <div className="flex flex-row items-center h-8">
           <div className="flex gap-2 items-center">
-          <div className="w-6 h-6 bg-base-100 shimmer rounded-xl" />
-          <div className="w-16 h-4 bg-base-100 shimmer rounded-lg" />
+            <div className="w-6 h-6 bg-base-100 shimmer rounded-xl" />
+            <div className="w-16 h-4 bg-base-100 shimmer rounded-lg" />
           </div>
         </div>
       </div>
