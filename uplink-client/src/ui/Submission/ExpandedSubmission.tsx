@@ -67,7 +67,7 @@ const RenderVideoSubmission = ({ submission }: { submission: Submission }) => {
 const SubmissionRenderer = ({ submission }: { submission: Submission }) => {
   if (submission.type === "standard") {
     return (
-      <div>
+      <div className="space-y-4">
         <div className="w-full m-auto">
           {submission.data.type === "video" && (
             <div>

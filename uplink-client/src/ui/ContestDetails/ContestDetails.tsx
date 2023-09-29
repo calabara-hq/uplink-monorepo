@@ -87,7 +87,7 @@ export const DialogWrapper = ({
 }) => {
   return (
     <div className="flex flex-col gap-2 justify-center items-center bg-base-100 rounded-lg w-full p-4">
-      <div className="flex self-start items-center gap-2 ">
+      <div className="flex items-center gap-2 ">
         {icon}
         <p className="text-center text-t1 text-lg font-semibold">
           {bannerText}
