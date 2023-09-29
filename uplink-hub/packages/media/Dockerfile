@@ -28,7 +28,6 @@ WORKDIR /app
 # Copy the necessary runtime files from the builders
 COPY --from=builder /app/packages/media /app/packages/media
 COPY --from=builder /app/packages/lib /app/packages/lib
-RUN ls /app/packages/media
 
 WORKDIR /app/packages/media
 

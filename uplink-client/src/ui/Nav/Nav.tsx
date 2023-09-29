@@ -14,9 +14,9 @@ const Nav = () => {
             className="flex md:hidden"
           />
           <div className="flex gap-2 items-center justify-center">
-            <p className="text-2xl text-white font-bold">Uplink</p>
+            <p className="text-xl text-white font-bold">Uplink</p>
             <p
-              className={`badge border-none badge-md bg-base-200 text-t2 font-semibold`}
+              className={`badge border-none badge-md bg-base-200 text-t2`}
             >
               1.0.1
             </p>

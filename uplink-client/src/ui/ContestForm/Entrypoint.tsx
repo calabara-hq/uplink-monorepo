@@ -534,7 +534,7 @@ const ContestForm = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.1 }}
-            className="flex flex-col gap-8 m-4 w-full"
+            className="flex flex-col gap-8 mt-4 m-auto w-full"
           >
             {currentStep > -1 ? (
               <div className="w-full flex flex-col gap-2 ">
