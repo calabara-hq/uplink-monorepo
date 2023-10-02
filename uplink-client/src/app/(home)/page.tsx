@@ -286,31 +286,31 @@ const PopularSubmissions = async () => {
       </h2>
       <div className="w-full">
         <Swiper
-           spaceBetween={16}
-           slidesPerView={3.2} // adjusted for peek
-           slidesPerGroup={3}
-           breakpoints={{
-             320: {
-               slidesPerView: 1.2, // adjusted for peek
-               slidesPerGroup: 1,
-               spaceBetween: 10,
-             },
-             500: {
-               slidesPerView: 2.2, // adjusted for peek
-               slidesPerGroup: 2,
-               spaceBetween: 10,
-             },
-             850: {
-               slidesPerView: 3.2, // adjusted for peek
-               slidesPerGroup: 3,
-               spaceBetween: 16,
-             },
-             1200: {
-               slidesPerView: 4.2, // adjusted for peek
-               slidesPerGroup: 4,
-               spaceBetween: 16,
-             },
-           }}
+          spaceBetween={16}
+          slidesPerView={3.2} // adjusted for peek
+          slidesPerGroup={3}
+          breakpoints={{
+            320: {
+              slidesPerView: 1.2, // adjusted for peek
+              slidesPerGroup: 1,
+              spaceBetween: 10,
+            },
+            500: {
+              slidesPerView: 2.2, // adjusted for peek
+              slidesPerGroup: 2,
+              spaceBetween: 10,
+            },
+            850: {
+              slidesPerView: 3.2, // adjusted for peek
+              slidesPerGroup: 3,
+              spaceBetween: 16,
+            },
+            1200: {
+              slidesPerView: 4.2, // adjusted for peek
+              slidesPerGroup: 4,
+              spaceBetween: 16,
+            },
+          }}
         >
           {popularSubmissions.map((submission, index) => (
             <SwiperSlide key={index}>
