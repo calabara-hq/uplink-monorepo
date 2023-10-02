@@ -32,6 +32,7 @@
     "@types/react-dom": "18.0.10",
     "@urql/core": "^3.1.1",
     "@urql/exchange-multipart-fetch": "^1.0.1",
+    "@vercel/analytics": "^1.0.2",
     "@vidstack/react": "^0.6.13",
     "daisyui": "^2.50.1",
     "date-fns": "^2.29.3",
