@@ -5,6 +5,9 @@ import { Metadata } from "next";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
 
+
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   openGraph: {
     title: "Uplink",

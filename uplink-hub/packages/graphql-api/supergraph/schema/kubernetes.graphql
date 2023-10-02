@@ -303,9 +303,6 @@ type PopularSubmission
   version: String!
   author: String!
   url: String!
-  contestCategory: String!
-  spaceName: String!
-  spaceDisplayName: String!
 }
 
 input Prompt

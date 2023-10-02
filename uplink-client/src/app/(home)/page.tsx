@@ -49,11 +49,11 @@ const CardSubmission = dynamic(() => import("@/ui/Submission/CardSubmission"), {
 
 const SwiperSkeleton = () => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-      <div className="w-full shimmer h-64 bg-base-100 rounded-lg" />
-      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden md:block" />
-      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden lg:block" />
-      <div className="w-full shimmer h-64 bg-base-100 rounded-lg hidden lg:block" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 px-12 m-auto">
+      <div className="w-full shimmer h-72 bg-base-100 rounded-lg" />
+      <div className="w-full shimmer h-72 bg-base-100 rounded-lg hidden md:block" />
+      <div className="w-full shimmer h-72 bg-base-100 rounded-lg hidden lg:block" />
+      <div className="w-full shimmer h-72 bg-base-100 rounded-lg hidden lg:block" />
     </div>
   );
 };
@@ -227,26 +227,26 @@ const ActiveContests = async () => {
         <div className="w-full">
           <Swiper
             spaceBetween={30}
-            slidesPerView={3}
+            slidesPerView={3.2}
             slidesPerGroup={3}
             breakpoints={{
               320: {
-                slidesPerView: 1.4,
+                slidesPerView: 1.2,
                 slidesPerGroup: 1,
                 spaceBetween: 10,
               },
               500: {
-                slidesPerView: 2,
+                slidesPerView: 2.2,
                 slidesPerGroup: 2,
                 spaceBetween: 10,
               },
               850: {
-                slidesPerView: 3,
+                slidesPerView: 3.2,
                 slidesPerGroup: 3,
                 spaceBetween: 16,
               },
               1200: {
-                slidesPerView: 4,
+                slidesPerView: 4.2,
                 slidesPerGroup: 4,
                 spaceBetween: 16,
               },
@@ -286,39 +286,36 @@ const PopularSubmissions = async () => {
       </h2>
       <div className="w-full">
         <Swiper
-          spaceBetween={16}
-          slidesPerView={3}
-          slidesPerGroup={3}
-          breakpoints={{
-            320: {
-              slidesPerView: 1.4,
-              slidesPerGroup: 1,
-              spaceBetween: 10,
-            },
-            500: {
-              slidesPerView: 2,
-              slidesPerGroup: 2,
-              spaceBetween: 10,
-            },
-            850: {
-              slidesPerView: 3,
-              slidesPerGroup: 3,
-              spaceBetween: 16,
-            },
-            1200: {
-              slidesPerView: 4,
-              slidesPerGroup: 4,
-              spaceBetween: 16,
-            },
-          }}
+           spaceBetween={16}
+           slidesPerView={3.2} // adjusted for peek
+           slidesPerGroup={3}
+           breakpoints={{
+             320: {
+               slidesPerView: 1.2, // adjusted for peek
+               slidesPerGroup: 1,
+               spaceBetween: 10,
+             },
+             500: {
+               slidesPerView: 2.2, // adjusted for peek
+               slidesPerGroup: 2,
+               spaceBetween: 10,
+             },
+             850: {
+               slidesPerView: 3.2, // adjusted for peek
+               slidesPerGroup: 3,
+               spaceBetween: 16,
+             },
+             1200: {
+               slidesPerView: 4.2, // adjusted for peek
+               slidesPerGroup: 4,
+               spaceBetween: 16,
+             },
+           }}
         >
           {popularSubmissions.map((submission, index) => (
             <SwiperSlide key={index}>
               <div className="w-full h-full animate-scrollInX">
-                <CardSubmission
-                  submission={submission}
-                  basePath={`${submission.spaceName}/contest/${submission.contestId}`}
-                />
+                <CardSubmission submission={submission} basePath="" />
               </div>
             </SwiperSlide>
           ))}
