@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { HiMagnifyingGlass } from "react-icons/hi2";
+import { HiOutlineRectangleGroup } from "react-icons/hi2";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import uplinkLogo from "../../../public/uplink-logo.svg";
 
@@ -13,7 +13,7 @@ const MobileNav = () => {
       </Link>
 
       <Link href="/spaces" draggable={false}>
-        <HiMagnifyingGlass className="h-8 w-8" />
+        <HiOutlineRectangleGroup className="h-8 w-8" />
         <span className="btm-nav-label">spaces</span>
       </Link>
       <div>

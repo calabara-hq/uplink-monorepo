@@ -41,48 +41,33 @@ const getRewards = db.query.rewards.findMany({
 }).prepare();
 
 
-// take a random sample of 10 submissions that recieved more than 5 vote instances (not vote amount)
-// TODO: this can be converted to a relational query
-const getPopularSubmissions = async () => {
-
-
-    // get submissions that recieved more than 3 unique vote instances (not vote amount)
-    const submissionIds = await db.select({
-        submissionId: schema.votes.submissionId,
-    }).from(schema.votes)
-        .groupBy(schema.votes.submissionId)
-        .having(sqlOps.gt(sqlOps.sql<number>`count(*)`, 3))
-        .then(res => res.map(el => el.submissionId))
 
 
 
-    if (submissionIds.length > 0) {
-        // extract the details only for submissions in which the contest has ended, and take a random sample of 20
-        const submissions = await db.select({
-            id: schema.submissions.id,
-            created: schema.submissions.created,
-            type: schema.submissions.type,
-            contestId: schema.submissions.contestId,
-            author: schema.submissions.author,
-            url: schema.submissions.url,
-            version: schema.submissions.version,
-            contestCategory: schema.contests.category,
-            spaceName: schema.spaces.name,
-            spaceDisplayName: schema.spaces.displayName,
-        }).from(schema.submissions)
-            .leftJoin(schema.contests, sqlOps.eq(schema.submissions.contestId, schema.contests.id))
-            .leftJoin(schema.spaces, sqlOps.eq(schema.contests.spaceId, schema.spaces.id))
-            .where(sqlOps.and(
-                sqlOps.inArray(schema.submissions.id, submissionIds),
-                sqlOps.lt(schema.contests.endTime, new Date().toISOString())
-            ))
-            .orderBy(sqlOps.sql`${schema.submissions.created} desc`)
-            .limit(10)
 
-        return submissions;
-    } else {
-        return [];
-    }
+// get the last 3 contests that have ended, get submissions with more than 3 unique votes, and take a random sample of 20
+
+const getPopSubs = async () => {
+    const data = await db.execute(sqlOps.sql`
+        SELECT s.*
+        FROM submissions s
+        JOIN (
+            SELECT id, created
+            FROM contests
+            ORDER BY created DESC
+            LIMIT 3
+        ) AS latest_contests ON s.contestId = latest_contests.id
+        WHERE EXISTS (
+            SELECT 1
+            FROM votes v
+            WHERE v.submissionId = s.id
+            GROUP BY v.submissionId
+            HAVING COUNT(DISTINCT v.id) > 3
+        )
+        ORDER BY RAND()
+        LIMIT 20;
+    `)
+    return data.rows
 }
 
 
@@ -167,7 +152,8 @@ const queries = {
         },
 
         async popularSubmissions(_, { submissionId }, context, info) {
-            return getPopularSubmissions();
+            const data = await getPopSubs();
+            return data
         },
     },
 
