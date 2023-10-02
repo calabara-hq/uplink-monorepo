@@ -1,12 +1,11 @@
 import Nav from "@/ui/Nav/Nav";
 import "@/styles/globals.css";
 import WalletProvider from "@/providers/WalletProvider";
-
 import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
 import MobileNav from "@/ui/MobileNav/MobileNav";
 import type { Metadata } from "next";
-
+import { Analytics } from "@vercel/analytics/react";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL),
   title: "Uplink",
@@ -54,6 +53,7 @@ export default function RootLayout({
                 {/*@ts-expect-error*/}
                 <Nav />
                 {children}
+                <Analytics />
               </main>
             </div>
           </ToastProvider>
