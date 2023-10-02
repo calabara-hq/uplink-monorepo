@@ -47,8 +47,8 @@ const Swiper = (props: {
       },
       // modules: [Grid],
       // grid: { rows: 1 },
-      centeredSlides: true,
-      centeredSlidesBounds: true,
+      // centeredSlides: true,
+      // centeredSlidesBounds: true,
       injectStyles: [
         `
         .swiper {

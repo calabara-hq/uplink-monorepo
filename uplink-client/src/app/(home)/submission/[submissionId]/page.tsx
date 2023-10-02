@@ -59,19 +59,19 @@ const PageContent = async ({ submissionId }: { submissionId: string }) => {
 };
 
 export default async function Page({
-  params: { name, id, submissionId },
+  params: { submissionId },
 }: {
-  params: { name: string; id: string; submissionId: string };
+  params: { submissionId: string };
 }) {
   return (
-    <div className="grid grid-cols-1 w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full">
+    <div className="grid grid-cols-1 w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full p-4">
       <Link
-        href={`/${name}/contest/${id}`}
+        href={`/`}
         draggable={false}
         className="mr-auto flex gap-2 text-t2 hover:text-t1"
       >
         <HiArrowNarrowLeft className="w-6 h-6" />
-        <p>To contest</p>
+        <p>Home</p>
       </Link>
       <Suspense fallback={<ExpandedSubmissionSkeleton />}>
         {/*@ts-expect-error*/}

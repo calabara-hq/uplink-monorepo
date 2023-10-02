@@ -50,9 +50,6 @@ type PopularSubmission @key(fields: "id") {
   version: String!
   author: String!
   url: String!
-  contestCategory: String!
-  spaceName: String!
-  spaceDisplayName: String!
 }
 
 type Token {

@@ -17,7 +17,6 @@ import WalletConnectButton from "../../ui/ConnectButton/WalletConnectButton";
 import Image from "next/image";
 import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
-import { revalidateDataCache } from "../actions";
 import { mutateSpaces } from "../mutate";
 export default function SpaceForm({
   initialState,
