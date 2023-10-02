@@ -8,35 +8,6 @@ import MobileContestActions, {
 
 // TODO: dynamic metadata
 
-// export async function generateMetadata({
-//   params,
-//   parent,
-// }: {
-//   params: { id: string; name: string };
-//   parent: ResolvingMetadata;
-// }): Promise<Metadata> {
-//   const space = await getContestById(params.id);
-
-//   return {
-//     title: `${space.displayName}`,
-//     description: `${space.displayName} on Uplink`,
-//     openGraph: {
-//       title: `${space.displayName}`,
-//       description: `Create with ${space.displayName} on Uplink`,
-//       images: [
-//         {
-//           url: `${space.logoUrl}`,
-//           width: 600,
-//           height: 600,
-//           alt: `${space.displayName} logo`,
-//         },
-//       ],
-//       locale: "en_US",
-//       type: "website",
-//     },
-//   };
-// }
-
 export default async function Page({
   params,
 }: {
