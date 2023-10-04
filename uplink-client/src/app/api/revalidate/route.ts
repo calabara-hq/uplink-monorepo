@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
 
-export const runtime = 'edge';
-
-
 const xor_compare = (a: string, b: string) => {
     if (a.length !== b.length) return false;
     let result = 0;

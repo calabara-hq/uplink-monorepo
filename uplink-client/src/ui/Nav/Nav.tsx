@@ -1,8 +1,9 @@
 import Image from "next/image";
 import uplinkLogo from "../../../public/uplink-logo.svg";
-import WalletConnectButton from "../ConnectButton/WalletConnectButton";
+import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 
 const fetchVersion = async () => {
+  if(process.env.NEXT_PUBLIC_CLIENT_URL === "http://localhost:3000") return "dev"
   const res = await fetch(
     "https://api.github.com/repos/calabara-hq/uplink-monorepo/tags"
   ).then((res) => res.json());

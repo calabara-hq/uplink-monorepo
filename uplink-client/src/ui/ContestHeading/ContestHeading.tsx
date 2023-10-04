@@ -33,7 +33,7 @@ const PromptDisplay = async ({ contestId }: { contestId: string }) => {
               src={space.logoUrl}
               alt="Org Avatar"
               fill
-              className="rounded-full object-contain"
+              className="rounded-full object-cover"
             />
           </Link>
           <Link

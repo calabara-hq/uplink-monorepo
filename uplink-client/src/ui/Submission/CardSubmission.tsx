@@ -4,12 +4,11 @@ import { Submission } from "@/providers/ContestInteractionProvider";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useEffect, lazy, useState } from "react";
+import { useEffect, useState } from "react";
 import { isMobile } from "@/lib/isMobile";
-import dynamic from "next/dynamic";
 
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
-import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
+import { ImageWrapper } from "./MediaWrapper";
 import { TbCrown } from "react-icons/tb";
 import { ParseThread } from "@/lib/threadParser";
 import { ParseBlocks } from "@/lib/blockParser";

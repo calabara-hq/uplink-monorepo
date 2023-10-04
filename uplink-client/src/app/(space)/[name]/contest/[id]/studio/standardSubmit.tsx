@@ -14,7 +14,7 @@ import {
   HiXCircle,
   HiOutlineTrash,
 } from "react-icons/hi2";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSession } from "@/providers/SessionProvider";
 import { useContestState } from "@/providers/ContestStateProvider";
@@ -36,8 +36,8 @@ import { HiBadgeCheck } from "react-icons/hi";
 import Link from "next/link";
 import { SimplePreview } from "@/ui/Submission/CardSubmission";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
-import StandardVideoPlayer from "@/ui/VideoPlayer/StandardVideoPlayer";
 import LoadingDialog from "./loadingDialog";
+import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 
 async function postSubmission(
   url,
@@ -193,30 +193,7 @@ const MediaUpload = ({
         >
           <HiOutlineTrash className="w-5 h-5" />
         </button>
-        {/* <MediaController className="rounded-xl">
-          <video
-            slot="media"
-            src={submission.primaryAssetBlob}
-            poster={
-              submission.videoThumbnailBlobIndex !== null
-                ? submission.videoThumbnailOptions[
-                    submission.videoThumbnailBlobIndex
-                  ]
-                : ""
-            }
-            preload="auto"
-            muted
-            crossOrigin=""
-            className="rounded-xl h-64 w-full object-contain"
-          />
-          <MediaControlBar>
-            <MediaPlayButton></MediaPlayButton>
-            <MediaTimeRange></MediaTimeRange>
-            <MediaTimeDisplay showDuration></MediaTimeDisplay>
-            <MediaMuteButton></MediaMuteButton>
-          </MediaControlBar>
-        </MediaController> */}
-        <StandardVideoPlayer
+        <RenderStandardVideoWithLoader
           videoUrl={submission.primaryAssetBlob}
           posterUrl={
             submission.videoThumbnailBlobIndex !== null

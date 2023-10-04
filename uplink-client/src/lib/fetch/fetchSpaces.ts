@@ -1,5 +1,4 @@
-import "server-only"
-
+"use server";
 const fetchSpaces = async () => {
     return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
         method: "POST",

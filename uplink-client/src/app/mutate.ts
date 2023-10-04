@@ -3,7 +3,7 @@ import { revalidateDataCache } from "./actions";
 
 export const mutateSpaceContests = (spaceName: string) => {
     startTransition(() => {
-        revalidateDataCache([`space/${spaceName}/contests`]); // reval server cache
+        revalidateDataCache([`space/${spaceName}/contests`, "activeContests"]); // reval server cache
     });
 }
 

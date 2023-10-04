@@ -1,8 +1,7 @@
 "use client";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
-import { VideoWrapper } from "@/ui/Submission/MediaWrapper";
 import useVideoControls from "@/hooks/useVideoControls";
-import { useEffect, useRef, lazy, Suspense } from "react";
+import { useEffect, useRef } from "react";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import {
   MediaController,
@@ -11,7 +10,6 @@ import {
   MediaMuteButton,
   MediaLoadingIndicator,
 } from "media-chrome/dist/react";
-import dynamic from "next/dynamic";
 
 const InteractiveVideoPlayer = ({ videoUrl, posterUrl, isActive }) => {
   const vidRef = useRef<HTMLVideoElement>(null);
