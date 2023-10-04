@@ -2,9 +2,7 @@ import SubmissionDisplay from "@/ui/Submission/SubmissionDisplay";
 import ContestHeading from "@/ui/ContestHeading/ContestHeading";
 import ContestDetails from "@/ui/ContestDetails/ContestDetails";
 import SidebarVote from "@/ui/Vote/Vote";
-import MobileContestActions, {
-  DetailsMenuDrawer,
-} from "@/ui/MobileContestActions/MobileContestActions";
+import MobileContestActions from "@/ui/MobileContestActions/MobileContestActions";
 
 // TODO: dynamic metadata
 

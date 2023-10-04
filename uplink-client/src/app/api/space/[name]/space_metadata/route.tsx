@@ -1,6 +1,5 @@
 import { ImageResponse, NextRequest } from "next/server";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   const name = req.nextUrl.pathname.split("/")[3];

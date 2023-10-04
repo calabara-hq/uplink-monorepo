@@ -1,8 +1,10 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { register } from "swiper/element/bundle";
+import { register } from "swiper/element";
 import { Navigation, Grid } from "swiper/modules";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+
+register();
 
 const Swiper = (props: {
   children: React.ReactNode;
@@ -29,7 +31,6 @@ const Swiper = (props: {
 
   useEffect(() => {
     // Register Swiper web component
-    register();
 
     // pass component props to parameters
     const params = {

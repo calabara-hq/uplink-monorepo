@@ -1,6 +1,5 @@
 import { ImageResponse, NextRequest } from "next/server";
 import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
-export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   const submissionId = req.nextUrl.pathname.split("/")[3];

@@ -1,4 +1,4 @@
-import "server-only"
+"use server";
 import handleNotFound from "../handleNotFound";
 
 const fetchSubmissions = async (contestId: string) => {
