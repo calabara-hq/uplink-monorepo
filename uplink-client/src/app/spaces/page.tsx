@@ -36,7 +36,7 @@ const ListSpaces = async () => {
             href={`${space.name}`}
             className="flex flex-col items-center justify-center gap-4 bg-base 
               cursor-pointer border border-border rounded-2xl p-4 full overflow-hidden w-full transform 
-              transition-transform duration-300 hoverCard will-change-transform no-select"
+              transition-transform duration-300 hoverCard will-change-transform no-select animate-fadeIn"
           >
             <div className="relative w-28 h-28">
               <Image
