@@ -23,7 +23,7 @@ const colors = {
 
   // Additional Colors
   success: '#36d399',
-  warning: '#FFB84D',
+  warning: '#f5a623',
   error: '#f87272',
   info: '#5D9CEC',
 }
