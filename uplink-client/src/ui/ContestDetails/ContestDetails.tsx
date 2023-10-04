@@ -1,4 +1,4 @@
-import "server-only";
+"use server";
 import fetchContest from "@/lib/fetch/fetchContest";
 import { FaRegCircleQuestion } from "react-icons/fa6";
 import formatDecimal from "@/lib/formatDecimal";
