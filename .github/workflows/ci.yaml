@@ -17,7 +17,7 @@ jobs:
   build:
       name: build
       if: github.event.pull_request.merged
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-latest-m
       steps:
         - name: Checkout code
           uses: actions/checkout@v3
@@ -61,7 +61,7 @@ jobs:
   deploy-staging:
     name: staging
     if: github.event.pull_request.merged
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
     environment: staging
     permissions:
       id-token: write
@@ -132,7 +132,7 @@ jobs:
   deploy-production:
     name: production
     if: github.event.pull_request.merged
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
     environment: production
     needs: [build, deploy-staging]
     steps:
