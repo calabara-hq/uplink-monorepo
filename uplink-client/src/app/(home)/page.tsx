@@ -182,13 +182,12 @@ const ContestCard = ({
     >
       <div className="card-body items-center p-0">
         <div className="flex flex-col gap-2 items-center">
-          <div className="avatar online">
+          <div className="relative w-20 h-20 avatar online">
             <Image
               src={spaceLogo}
-              width={82}
-              height={82}
               alt="spaceLogo"
-              className="mask mask-squircle"
+              fill
+              className="mask mask-squircle object-cover"
             />
           </div>
           <h1 className="font-bold text-2xl">{spaceDisplayName}</h1>
@@ -224,7 +223,7 @@ const ActiveContests = async () => {
       <div className="w-full flex flex-col gap-4">
         <h1 className="font-bold text-3xl text-t1 px-12">Active Contests</h1>
 
-        <div className="w-full">
+        <div className="w-full min-h-[296px]">
           <Swiper
             spaceBetween={30}
             slidesPerView={3.2}
@@ -397,6 +396,7 @@ const ContestBanner = () => {
               <DelayedGridItem
                 key={idx}
                 gridItemStyle="box border border-border p-2 rounded-xl flex flex-col gap-2 items-center justify-evenly"
+                delay={idx * 0.2}
               >
                 <h2 className="font-bold text-t1 text-xl text-center">
                   {step.name}

@@ -1,6 +1,5 @@
 "use client";
-import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 const item = {
   hidden: { y: 20, opacity: 0 },
   visible: {
@@ -13,14 +12,34 @@ const item = {
 const DelayedGridItem = ({
   gridItemStyle,
   children,
+  delay,
 }: {
   gridItemStyle: string;
   children: ReactNode;
+  delay: number;
 }) => {
+  const [style, setStyle] = useState({
+    opacity: 0,
+    transform: "translateY(20px)",
+    transition: "opacity 0.5s, transform 0.5s",
+  });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setStyle({
+        opacity: 1,
+        transform: "translateY(0)",
+        transition: "opacity 0.5s, transform 0.5s",
+      });
+    }, delay * 1000); // converting to ms
+
+    return () => clearTimeout(timeout);
+  }, [delay]);
+
   return (
-    <motion.div className={gridItemStyle} variants={item}>
+    <div className={gridItemStyle} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 };
 

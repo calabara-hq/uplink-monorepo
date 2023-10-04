@@ -5,9 +5,6 @@ import { Metadata } from "next";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
 
-
-export const dynamic = 'force-dynamic'
-
 export const metadata: Metadata = {
   openGraph: {
     title: "Uplink",
@@ -29,7 +26,6 @@ export const metadata: Metadata = {
 
 const ListSpaces = async () => {
   const spaces = await fetchSpaces();
-  await new Promise((resolve) => setTimeout(resolve, 1000));
   return (
     <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
       {spaces.map((space: any, index: number) => {

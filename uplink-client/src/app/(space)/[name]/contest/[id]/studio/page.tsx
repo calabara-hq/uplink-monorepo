@@ -18,7 +18,6 @@ export default async function Page({
   params: { name: string; id: string };
 }) {
   const constest = await fetchContest(params.id);
-  //await new Promise((resolve) => setTimeout(resolve, 4000));
   const { metadata } = constest;
 
   // contest in submit window

@@ -2,7 +2,11 @@ import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import type { OutputData } from "@editorjs/editorjs";
 import Image from "next/image";
 import React from "react";
-import parse from "html-react-parser";
+
+const parse = (data: string) => {
+  // replace &nbsp; with space
+  return data.replace(/&nbsp;/g, " ");
+};
 
 function createTextLinks_(text: string) {
   return (text || "").replace(
@@ -29,7 +33,7 @@ const ParagraphRenderer = ({ data }) => {
     typeof data.text === "string"
   )
     content = data.text;
-  return content ? <p>{parse(content)}</p> : <></>;
+  return content ? <p className="text-t1">{parse(content)}</p> : <></>;
 };
 
 const ImageRenderer = ({ data }: { data: any }) => {
@@ -51,9 +55,14 @@ const ImageRenderer = ({ data }: { data: any }) => {
 const ListOutput = ({ data }) => {
   if (!data || !data.items || !Array.isArray(data.items)) return <></>;
 
-  const content = data.items.map((item, index) => (
-    <li key={index}>{parse(item)}</li>
-  ));
+  const content = data.items.map((item, idx) => {
+    return (
+      <li key={idx} className="text-t1">
+        {parse(item)}
+      </li>
+    );
+  });
+
   return <ul>{content}</ul>;
 };
 

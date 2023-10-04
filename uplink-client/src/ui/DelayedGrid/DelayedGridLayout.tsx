@@ -1,6 +1,5 @@
 "use client";
-import { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 
 const container = {
@@ -16,31 +15,22 @@ const container = {
   exit: { opacity: 0, scale: 0.5 },
 };
 
-const DelayedGridLayout = ({
-  gridStyle,
-  children,
-}: {
-  gridStyle: string;
-  children: ReactNode;
-}) => {
+const DelayedGridLayout = ({ gridStyle, children }) => {
   const [inViewRef, inView] = useInView({
     threshold: 0.3,
     triggerOnce: false,
   });
 
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (inView) setIsVisible(true);
+    else setIsVisible(false);
+  }, [inView]);
+
   return (
-    <div className="w-full h-full" ref={inViewRef}>
-      {inView && (
-        <motion.div
-          className={gridStyle}
-          variants={container}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-        >
-          {children}
-        </motion.div>
-      )}
+    <div ref={inViewRef} className="w-full h-full">
+      {isVisible && <div className={gridStyle}>{children}</div>}
     </div>
   );
 };

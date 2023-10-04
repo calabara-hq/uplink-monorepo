@@ -2,8 +2,7 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useSession } from "@/providers/SessionProvider";
 import React from "react";
-import { CustomAvatar } from "@/providers/WalletProvider";
-import { AddressOrEns } from "../AddressDisplay/AddressDisplay";
+import { AddressOrEns, CustomAvatar } from "@/ui/AddressDisplay/AddressDisplay";
 
 export default function WalletConnectButton({
   children,
@@ -14,7 +13,7 @@ export default function WalletConnectButton({
 }) {
   const { data: session, status } = useSession();
   if (!status || status === "loading")
-    return <div className="h-12 w-20 rounded-lg shimmer"></div>;
+    return <div className="h-12 w-20 rounded-full shimmer"></div>;
   else
     return (
       <ConnectButton.Custom>

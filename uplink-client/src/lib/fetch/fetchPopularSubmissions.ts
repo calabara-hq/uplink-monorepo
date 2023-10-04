@@ -1,3 +1,4 @@
+"use server";
 const fetchPopularSubmissions = async () => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
