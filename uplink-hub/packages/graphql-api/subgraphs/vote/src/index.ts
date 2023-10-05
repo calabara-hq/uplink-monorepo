@@ -42,7 +42,9 @@ const permissions = shield({
     removeSingleVote: rateLimitRule({ window: '1m', max: 8 }),
     removeAllVotes: rateLimitRule({ window: '1m', max: 8 }),
   }
-});
+},
+  { allowExternalErrors: true }
+);
 
 // Create Apollo server with applied middleware
 const server = new ApolloServer({

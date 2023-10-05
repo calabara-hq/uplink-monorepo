@@ -66,7 +66,10 @@ const SpaceListSkeleton = () => {
     <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
       {[...Array(20)].map((_, index) => {
         return (
-          <div key={index} className="h-[190px] shimmer bg-base-100 rounded-xl"></div>
+          <div
+            key={index}
+            className="h-[190px] shimmer bg-base-100 rounded-xl"
+          ></div>
         );
       })}
     </div>

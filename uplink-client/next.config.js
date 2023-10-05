@@ -1,4 +1,10 @@
 /** @type {import('next').NextConfig} */
+
+const edgeCacheHeader = {
+  key: "Vercel-CDN-Cache-Control",
+  value: "s-maxage=86400"
+}
+
 const nextConfig = {
   reactStrictMode: false,
   experimental: {
@@ -36,6 +42,22 @@ const nextConfig = {
     config.resolve.fallback = { fs: false, net: false, tls: false };
     return config;
   },
+  async headers() {
+    return [
+      {
+        source: "/",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/spaces",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/:name",
+        headers: [edgeCacheHeader]
+      }
+    ]
+  }
 }
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
