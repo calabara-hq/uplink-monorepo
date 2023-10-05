@@ -14,7 +14,7 @@ const colors = {
   // Accent Colors
   primary: '#57BAD7',
   secondary: '#CC0595',
-  accent: '#57BAD7',
+  accent: '#FF0080',
 
   // Text Colors
   text1: '#FFFFFF',

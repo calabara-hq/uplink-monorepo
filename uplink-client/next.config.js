@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 
+// https://vercel.com/docs/edge-network/caching#how-to-cache-responses
 const edgeCacheHeader = {
   key: "Vercel-CDN-Cache-Control",
   value: "s-maxage=86400"
@@ -49,13 +50,45 @@ const nextConfig = {
         headers: [edgeCacheHeader]
       },
       {
-        source: "/spaces",
+        source: "/submission/:submissionId",
         headers: [edgeCacheHeader]
       },
       {
         source: "/:name",
         headers: [edgeCacheHeader]
-      }
+      },
+      {
+        source: "/:name/contest/:id",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/:name/contest/:id/submission/:submissionId",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/:name/contest/:id/studio",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/:name/contest/:id/vote",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/:name/contest/create",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/spacebuilder/create",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/spacebuilder/edit/[name]",
+        headers: [edgeCacheHeader]
+      },
+      {
+        source: "/spaces",
+        headers: [edgeCacheHeader]
+      },
     ]
   }
 }
