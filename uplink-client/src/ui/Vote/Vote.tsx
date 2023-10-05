@@ -301,7 +301,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
           <div className="p-10"></div>
           <div className="relative flex flex-col items-center justify-center w-full">
             <div className="w-1/4 ml-auto">
-              <HiSparkles className="w-6 h-6 text-accent" />
+              <HiSparkles className="w-6 h-6 text-primary" />
             </div>
             <div className="relative flex flex-col items-center justify-center w-36 h-36 bg-base-100 rounded-xl">
               <HiPhoto className="w-24 h-24" />
@@ -309,10 +309,10 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
                 <div className="h-3 w-1/3 rounded-lg bg-gray-500 shimmer ml-2" />
                 <div className="h-2 w-1/2 rounded-lg bg-gray-500 shimmer ml-2" />
               </div>
-              <HiPlus className="absolute bottom-0 right-0 w-6 h-6 ml-auto m-2 text-accent" />
+              <HiPlus className="absolute bottom-0 right-0 w-6 h-6 ml-auto m-2 text-primary" />
             </div>
             <div className="w-1/4 mr-auto flex justify-end">
-              <HiSparkles className="w-6 h-6 text-accent" />
+              <HiSparkles className="w-6 h-6 text-primary" />
             </div>
             <div className="p-4"></div>
             <h1 className="text-center text-t2">No entries selected.</h1>

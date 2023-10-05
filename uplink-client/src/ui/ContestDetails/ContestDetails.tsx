@@ -455,7 +455,7 @@ const Submit = ({ studioLink }: { studioLink: string }) => {
       <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-full">
         <Link
           href={studioLink}
-          className="btn btn-accent normal-case flex flex-1"
+          className="btn btn-primary normal-case flex flex-1"
           draggable={false}
         >
           Submit
