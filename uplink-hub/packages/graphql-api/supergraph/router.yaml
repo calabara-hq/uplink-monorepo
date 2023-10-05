@@ -1,6 +1,9 @@
 supergraph:
   listen: 0.0.0.0:${env.SUPERGRAPH_SERVICE_PORT}
 
+include_subgraph_errors:
+  all: true
+  
 traffic_shaping:
   router:
     timeout: 30s # router request timeout period

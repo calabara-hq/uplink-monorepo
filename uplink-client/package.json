@@ -37,6 +37,8 @@
     "eslint-config-next": "^13.4.4",
     "framer-motion": "^10.12.4",
     "graphql": "^16.8.1",
+    "he": "^1.2.0",
+    "html-react-parser": "^4.2.2",
     "lokijs": "^1.5.12",
     "media-chrome": "^1.4.2",
     "nanoid": "^4.0.1",

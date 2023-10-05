@@ -44,7 +44,8 @@ const permissions = shield({
     createSubmission: rateLimitRule({ window: '1m', max: 3 }),
     createTwitterSubmission: rateLimitRule({ window: '1m', max: 3 }),
   }
-});
+}, { allowExternalErrors: true }
+);
 
 // Create Apollo server with applied middleware
 const server = new ApolloServer({

@@ -38,13 +38,14 @@ const permissions = shield({
     contest: rateLimitRule({ window: '1m', max: 15 }),
     activeContests: rateLimitRule({ window: '1m', max: 15 }),
     isContestTweetQueued: rateLimitRule({ window: '1m', max: 15 }),
-    
+
   },
   Mutation: {
     createContest: rateLimitRule({ window: '1m', max: 3 }),
     createContestTweet: rateLimitRule({ window: '1m', max: 3 }),
-  }
-});
+  },
+}, { allowExternalErrors: true }
+);
 
 // Create Apollo server with applied middleware
 const server = new ApolloServer({
