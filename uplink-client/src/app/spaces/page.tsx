@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { HiPlus } from "react-icons/hi2";
 import { Metadata } from "next";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
@@ -66,7 +65,10 @@ const SpaceListSkeleton = () => {
     <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
       {[...Array(20)].map((_, index) => {
         return (
-          <div key={index} className="h-[190px] shimmer bg-base-100 rounded-xl"></div>
+          <div
+            key={index}
+            className="h-[190px] shimmer bg-base-100 rounded-xl"
+          ></div>
         );
       })}
     </div>
@@ -78,12 +80,11 @@ export default async function Page() {
     <div className="flex flex-col w-11/12 lg:w-9/12 m-auto justify-center py-12 gap-4">
       <div className="flex items-center gap-4 justify-end font-bold">
         <Link
-          className="btn btn-primary btn-outline normal-case"
+          className="btn btn-primary rounded-xl  normal-case"
           href="/spacebuilder/create"
           draggable={false}
         >
-          <HiPlus className="w-6 h-6" />
-          <p className="pl-2">New Space</p>
+          New Space
         </Link>
       </div>
       <Suspense fallback={<SpaceListSkeleton />}>

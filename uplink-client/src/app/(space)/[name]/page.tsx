@@ -174,7 +174,7 @@ const SpaceContests = async ({
       isActiveContests={activeContests.length > 0}
       isContests={allContests.length > 0}
       newContestChild={
-        <Link href={`${name}/contest/create`} className="tab">
+        <Link href={`${name}/contest/create`} className="btn btn-ghost btn-sm text-t2 normal-case ml-2">
           <span>New</span>
           <HiSparkles className="h-5 w-5 text-secondary pl-0.5" />
         </Link>

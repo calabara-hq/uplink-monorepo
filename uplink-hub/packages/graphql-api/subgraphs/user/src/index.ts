@@ -38,7 +38,8 @@ const permissions = shield({
     me: rateLimitRule({ window: '1m', max: 15 }),
     user: rateLimitRule({ window: '1m', max: 15 }),
   },
-});
+}, { allowExternalErrors: true }
+);
 
 // Create Apollo server with applied middleware
 const server = new ApolloServer({

@@ -50,11 +50,19 @@ jobs:
           with:
             name: version
             path: version.txt
-          
-        - name: Build and push docker images
+        
+        - name: Expose GitHub Runtime
+          uses: crazy-max/ghaction-github-runtime@v2
+
+        - name: Build docker images
           run: |
             export GITHUB_VERSION_TAG=${{ steps.bump_tag.outputs.new_tag }}
-            docker-compose -f uplink-hub/docker-compose.yaml build
+            docker buildx create --use --driver=docker-container
+            docker buildx bake -f  uplink-hub/docker-compose.yaml --set *.cache-to="type=gha,mode=max" --set *.cache-from="type=gha" --load            
+
+        - name: Push docker images
+          run: |
+            export GITHUB_VERSION_TAG=${{ steps.bump_tag.outputs.new_tag }}
             docker-compose -f uplink-hub/docker-compose.yaml push
 
 
