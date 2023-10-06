@@ -144,7 +144,7 @@ const ContestCard = ({ contest, spaceName }) => {
 
 const CardMap = ({ contests, spaceName }) => {
   return (
-    <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full animate-fadeIn">
+    <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full animate-fadeIn p-6">
       {contests.map((contest, idx) => {
         return <ContestCard key={idx} {...{ contest, spaceName }} />;
       })}
