@@ -17,9 +17,13 @@ import {
 
 const SpaceInfoSekelton = () => {
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="w-full h-48 bg-base-100 rounded-xl" />
-      <div className="w-full h-8 bg-base-100 rounded-lg" />
+    <div className="flex flex-row lg:flex-col gap-2 w-full">
+      <div className="w-28 h-28 lg:w-48 lg:h-48 bg-neutral rounded-xl shimmer" />
+      <div className="flex flex-col gap-2">
+        <div className="w-28 h-4 bg-neutral rounded-lg shimmer" />
+        <div className="w-12 h-4 bg-neutral rounded-lg shimmer" />
+        <div className="w-12 h-4 bg-neutral rounded-lg shimmer" />
+      </div>
     </div>
   );
 };
@@ -28,19 +32,19 @@ const SpaceContestsSkeleton = () => {
   return (
     <div className="flex flex-col w-full lg:w-3/4 ml-auto mr-auto gap-10 border-2 border-border p-6 rounded-xl min-h-[500px]">
       <div className="flex w-full items-center">
-        <div className="w-48 h-8 bg-base-100 rounded-lg" />
+        <div className="w-48 h-8 bg-neutral rounded-lg" />
         <div className="grid grid-cols-3 gap-4 w-64 ml-auto">
           <div className="bg-base-200 h-8 rounded-lg" />
-          <div className="bg-base-100 h-8 rounded-lg" />
-          <div className="bg-base-100 h-8 rounded-lg" />
+          <div className="bg-neutral h-8 rounded-lg" />
+          <div className="bg-neutral h-8 rounded-lg" />
         </div>
       </div>
       <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full">
-        <div className="bg-base-100 h-24 rounded-xl" />
-        <div className="bg-base-100 h-24 rounded-xl" />
-        <div className="bg-base-100 h-24 rounded-xl" />
-        <div className="bg-base-100 h-24 rounded-xl" />
-        <div className="bg-base-100 h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
       </div>
     </div>
   );
@@ -50,8 +54,6 @@ const SpaceInfo = async ({ name }: { name: string }) => {
   const { displayName, logoUrl, twitter, website } = await fetchSingleSpace(
     name
   );
-
-    await new Promise((resolve) => setTimeout(resolve, 5000))
 
   return (
     <div className="flex flex-row lg:flex-col gap-2 w-full lg:w-56  items-start">
@@ -68,7 +70,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
       <div className="flex flex-col items-start gap-1">
         <div className="flex flex-row gap-2 items-center">
           <h2 className="text-t1 font-semibold text-2xl break-words">
-          {displayName}
+            {displayName}
           </h2>
         </div>
 
