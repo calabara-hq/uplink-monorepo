@@ -389,7 +389,7 @@ const SidebarVote = ({ contestId }: { contestId: string }) => {
     );
   }
   // render a placeholder so the other flex's don't grow too wide
-  return <div className="w-0 lg:w-1/12" />;
+  return <div className="w-0 xl:w-1/12" />;
 };
 
 export default SidebarVote;

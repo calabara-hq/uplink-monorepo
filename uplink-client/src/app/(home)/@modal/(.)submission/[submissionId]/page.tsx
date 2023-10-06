@@ -1,13 +1,17 @@
 import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
 import SubmissionModal from "./submissionModal";
 import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
+import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 
 export default async function SubmissionPage({
   params: { submissionId },
 }: {
   params: { submissionId: string };
 }) {
-  const submission = await fetchSingleSubmission(submissionId);
+  const submissions = await fetchPopularSubmissions();
+  const submission = submissions.find(
+    (submission) => submission.id === submissionId
+  );
 
   return (
     <SubmissionModal>

@@ -23,12 +23,13 @@ import {
 import { BiTime } from "react-icons/bi";
 import type { OutputData } from "@editorjs/editorjs";
 import { IoWarningOutline } from "react-icons/io5";
+import dynamic from "next/dynamic";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 /*
  * note- if this code looks a bit strange, it's because
  * nextjs allows us to pass server components as children to the client
  * to reduce bundle size and improve performance.
- * we'll try it out here, with plans to use it elsewhere in the future
+ * we'll try it out here, with plans to use it elsewhere in the future (if it is not a hellish experience)
  */
 
 const normalizeSubmitterRewards = (rewards) => {
@@ -414,28 +415,6 @@ const VotingPolicySection = ({ votingPolicy }) => {
   );
 };
 
-const RenderDetails = async ({ contestId }: { contestId: string }) => {
-  // move the fetch down the tree so we can suspend it.
-  // react will auto-dedup the fetches
-
-  const contest = await fetchContest(contestId);
-  const {
-    submitterRewards,
-    voterRewards,
-    votingPolicy,
-    submitterRestrictions,
-  } = contest;
-
-  return (
-    <div className="flex flex-col gap-4">
-      <SubmitterRestrictionsSection {...{ submitterRestrictions }} />
-      <SubmitterRewardsSection {...{ submitterRewards }} />
-      <VoterRewardsSection {...{ voterRewards }} />
-      <VotingPolicySection {...{ votingPolicy }} />
-    </div>
-  );
-};
-
 const Pending = () => {
   return (
     <DialogWrapper
@@ -622,8 +601,27 @@ const AdminsRequired = ({
   );
 };
 
-const ContestDetails = async ({ contestId }: { contestId: string }) => {
-  const contest = await fetchContest(contestId);
+export const DetailsSkeleton = () => {
+  return (
+    <div className="w-full flex flex-col gap-4 p-4">
+      <SectionSkeleton />
+      <SectionSkeleton />
+      <SectionSkeleton />
+    </div>
+  );
+};
+
+const ContestDetails = async ({
+  contestId,
+  contest,
+}: {
+  contestId: string;
+  contest: Promise<any>;
+}) => {
+  const contestData = await contest.then(async (res) => {
+    const promptData = await fetch(res.promptUrl).then((res) => res.json());
+    return { ...res, promptData };
+  });
   const {
     deadlines,
     space,
@@ -631,25 +629,17 @@ const ContestDetails = async ({ contestId }: { contestId: string }) => {
     voterRewards,
     votingPolicy,
     submitterRestrictions,
-    promptUrl,
-  } = contest;
-
-  const promptData = await fetch(promptUrl).then((res) => res.json());
+    promptData,
+  } = contestData;
 
   return (
     <div className="w-full flex flex-col gap-4 p-4">
-      <Suspense
-        fallback={new Array(3).fill(null).map((_, idx) => (
-          <SectionSkeleton key={idx} />
-        ))}
-      >
-        {/*@ts-expect-error*/}
-        <RenderDetails
-          {...{
-            contestId,
-          }}
-        />
-      </Suspense>
+      <div className="flex flex-col gap-4">
+        <SubmitterRestrictionsSection {...{ submitterRestrictions }} />
+        <SubmitterRewardsSection {...{ submitterRewards }} />
+        <VoterRewardsSection {...{ voterRewards }} />
+        <VotingPolicySection {...{ votingPolicy }} />
+      </div>
       <RenderStateSpecificDialog
         adminsChild={
           <AdminsRequired

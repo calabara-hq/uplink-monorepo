@@ -190,7 +190,7 @@ const ContestCard = ({
               className="mask mask-squircle object-cover"
             />
           </div>
-          <h1 className="font-bold text-2xl">{spaceDisplayName}</h1>
+          <h1 className="font-semibold text-xl line-clamp-1 overflow-ellipsis">{spaceDisplayName}</h1>
         </div>
         {/*@ts-expect-error*/}
         <PromptSummary promptUrl={promptUrl} />
@@ -209,7 +209,7 @@ const PromptSummary = async ({ promptUrl }: { promptUrl: string }) => {
 
   return (
     <div className="flex-grow overflow-hidden">
-      <h2 className="card-title mb-0 normal-case whitespace-nowrap overflow-ellipsis overflow-hidden">
+      <h2 className=" whitespace-nowrap overflow-ellipsis line-clamp-1 overflow-hidden">
         {title}
       </h2>
     </div>

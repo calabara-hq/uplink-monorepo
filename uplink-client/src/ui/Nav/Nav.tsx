@@ -3,9 +3,11 @@ import uplinkLogo from "../../../public/uplink-logo.svg";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 
 const fetchVersion = async () => {
-  if(process.env.NEXT_PUBLIC_CLIENT_URL === "http://localhost:3000") return "dev"
+  if (process.env.NEXT_PUBLIC_CLIENT_URL === "http://localhost:3000")
+    return "dev";
   const res = await fetch(
-    "https://api.github.com/repos/calabara-hq/uplink-monorepo/tags"
+    "https://api.github.com/repos/calabara-hq/uplink-monorepo/tags",
+    { next: { revalidate: 1440 } }
   ).then((res) => res.json());
   const tag = res[0].name.split("v")[1];
 

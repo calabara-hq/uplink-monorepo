@@ -11,9 +11,9 @@ const ListContests = ({
   const [isAllContests, setIsAllContests] = useState(false);
 
   return (
-    <div className="flex flex-col w-full lg:w-3/4 ml-auto mr-auto items-center gap-4 border border-border p-6 rounded-xl shadow-box min-h-[500px] animate-fadeIn">
-      <div className="flex flex-col lg:flex-row w-full lg:justify-between items-center">
-        <h1 className="text-3xl font-bold">Contests</h1>
+    <div className="flex flex-col w-full lg:w-3/4 m-auto items-center gap-4 border border-border  rounded-xl shadow-box min-h-[500px] animate-fadeIn">
+      <div className="flex flex-col lg:flex-row w-full lg:justify-between items-center bg-base-100 bg-opacity-50 border-b-border border-b-2 rounded-t-xl p-4">
+        <h1 className="text-2xl text-t1 font-semibold">Contests</h1>
         <div
           tabIndex={0}
           className="tabs tabs-boxed content-center p-1 bg-transparent text-white font-bold"
