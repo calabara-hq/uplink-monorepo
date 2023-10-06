@@ -31,7 +31,7 @@ const SubmissionBody = ({ submission }: { submission: Submission }) => {
 
 const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
   return (
-    <div className="relative h-full w-full min-h-[330px] rounded-xl text-white/80 gap-1">
+    <div className="relative h-full w-full min-h-[330px] rounded-xl text-t1 gap-1">
       <div className="p-2 w-full h-full flex flex-col gap-1 transition-transform duration-300 ease-in-out will-change-transform">
         <h2 className="break-word font-bold text-xl">
           {submission.data.title}
@@ -42,13 +42,13 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
             <AddressOrEns address={submission.author} />
           </h3>
         </div>
-        <section className="break-word">
+        <section className="break-word max-h-[18em] overflow-hidden">
           {submission.type === "twitter" ? (
-            <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
+            <div className="grid grid-cols-1">
               <ParseThread thread={submission.data.thread} omitImages={true} />
             </div>
           ) : (
-            <div className="grid grid-cols-1 line-clamp-[8] lg:line-clamp-[12]">
+            <div className="grid grid-cols-1">
               <ParseBlocks data={submission.data.body} omitImages={true} />
             </div>
           )}

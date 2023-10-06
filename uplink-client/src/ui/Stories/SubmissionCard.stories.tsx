@@ -227,6 +227,73 @@ StandardTextMultiBlock.args = {
   },
 };
 
+export const StandardTextMultiBlockUneven = Template.bind({});
+StandardTextMultiBlockUneven.args = {
+  submission: {
+    ...baseSubmission,
+    type: "standard",
+    data: {
+      type: "text",
+      title: "test",
+      body: {
+        blocks: [
+          {
+            id: "uJfLDubMuX",
+            type: "paragraph",
+            data: { text: "Using the format create 1 Nounish comic strip." },
+          },
+          {
+            id: "-P09HreMO3",
+            type: "paragraph",
+            data: { text: "&lt;b&gt;The Format&lt;/b&gt;" },
+          },
+          {
+            id: "Itop2v8C30",
+            type: "paragraph",
+            data: { text: "All comics should have the following:" },
+          },
+          {
+            id: "0kSvsyiJpC",
+            type: "paragraph",
+            data: { text: "1. Comic Title" },
+          },
+          {
+            id: "8bod9gbEIP",
+            type: "paragraph",
+            data: { text: "2. The Creative Team" },
+          },
+          {
+            id: "Iw7EjfwXC7",
+            type: "paragraph",
+            data: { text: "3. The Date" },
+          },
+          {
+            id: "vqwXg1neB-",
+            type: "paragraph",
+            data: {
+              text: "The Strip format should fit within the following dimensions: &lt;br&gt;3000x850 at 72 dpi (Horizontal Format)",
+            },
+          },
+          {
+            id: "QbKiCM_jg1",
+            type: "paragraph",
+            data: {
+              text: "The Strip may have anywhere between 1 or more panels but should fit with the specified dimensions.",
+            },
+          },
+          {
+            id: "9xHe1gtHrA",
+            type: "paragraph",
+            data: {
+              text: "&lt;b&gt;The Strip should be submitted on Submission Posts.&lt;/b&gt; &lt;br&gt;&lt;br&gt;1. Quote tweet our announcement tweet (first tweet in thread) with your submission, then come back to Calabara and link your wallet and twitter account.",
+            },
+          },
+        ],
+      },
+    },
+  },
+};
+
 export const StandardTextMultiBlockWithImage = Template.bind({});
 StandardTextMultiBlockWithImage.args = {
   submission: {
@@ -361,107 +428,3 @@ StandardVideo.args = {
     },
   },
 };
-
-// export const Default = Template.bind({});
-// Default.args = {
-//   submission: {
-//     id: "25",
-//     contestId: "57",
-//     author: "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C",
-//     created: "2023-08-16T18:19:47.263Z",
-//     type: "twitter",
-//     url: "https://uplink.mypinata.cloud/ipfs/QmdA92HiW612rMKTw1QwdhUqgZDHUdjhHqFEDzy4NQv8gQ",
-//     version: "uplink-v1",
-//     totalVotes: "3",
-//     rank: 1,
-//     data: {
-//       type: "video",
-//       title: "X ".repeat(50),
-//       thread: [
-//         {
-//           assetType: "video/mp4",
-//           assetSize: "5284030",
-//           videoAsset:
-//             "https://uplink.mypinata.cloud/ipfs/QmaVTkmaaDkbEBN9o5BoALAqHar9jkk29sLChnxs7nqTPc",
-//           previewAsset:
-//             "https://uplink.mypinata.cloud/ipfs/QmbukYsUaF18NipjU1XBqqWdSeNHGobVMTZyVmgjRmc96C",
-//           text: "This is my awesome new twitter submission, I hope you like it!!!! it's pretty cool how this works, it's based on different things like blah blahblah\n\n",
-//         },
-//       ],
-//     },
-//   },
-//   basePath: "",
-// };
-
-// export const Image = Template.bind({});
-// Image.args = {
-//   ...Default.args,
-//   submission: {
-//     id: "26",
-//     contestId: "57",
-//     author: "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C",
-//     created: "2023-08-16T20:14:45.650Z",
-//     type: "twitter",
-//     url: "https://uplink.mypinata.cloud/ipfs/QmeKMS3K452zbZ6fxPWyrPLBJL8gdgwTapXe8qdnNFTRm3",
-//     version: "uplink-v1",
-//     totalVotes: "1",
-//     rank: null,
-//     data: {
-//       type: "image",
-//       title: "X ".repeat(50),
-//       thread: [
-//         {
-//           assetType: "image/jpeg",
-//           assetSize: "8875",
-//           previewAsset:
-//             "https://uplink.mypinata.cloud/ipfs/QmYGhf48svGRiys3uDtr1bD7EDUk74vyzp14RcgTWyu1tR",
-//           text: "a standard image submission",
-//         },
-//       ],
-//     },
-//   },
-// };
-
-// export const Text = Template.bind({});
-// Text.args = {
-//   ...Default.args,
-//   submission: {
-//     id: "28",
-//     contestId: "57",
-//     author: "0xe9ad38d6E38E0A9970D6ebEc84C73DEA3e025da1",
-//     created: "2023-08-17T14:02:07.591Z",
-//     type: "standard",
-//     url: "https://uplink.mypinata.cloud/ipfs/QmNVe2QcPiBhQFE9RGoaYE63oh7PUC7bvK1M2Gbqpr5i7w",
-//     version: "uplink-v1",
-//     totalVotes: "1",
-//     rank: null,
-//     data: {
-//       type: "text",
-//       title: "X ".repeat(50),
-//       body: {
-//         blocks: [
-//           {
-//             id: "3f4JQkc6y9",
-//             type: "paragraph",
-//             data: {
-//               text: "this is a new test prompt".repeat(10),
-//             },
-//           },
-//           {
-//             id: "2f4JQkc6y9",
-//             type: "image",
-//             data: {
-//               file: {
-//                 url: "https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/roadster_and_semi/roadster/hero.jpg",
-//               },
-//               caption: "Roadster // tesla.com",
-//               withBorder: false,
-//               withBackground: false,
-//               stretched: true,
-//             },
-//           },
-//         ],
-//       },
-//     },
-//   },
-// };

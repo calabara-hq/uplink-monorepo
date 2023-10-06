@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BiPencil, BiWorld } from "react-icons/bi";
+import { BiCog, BiLink, BiPencil, BiWorld } from "react-icons/bi";
 import { FaTwitter } from "react-icons/fa";
 import { Metadata } from "next";
 import ListContests from "./ListContests";
@@ -17,9 +17,13 @@ import {
 
 const SpaceInfoSekelton = () => {
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="w-full h-48 bg-base-100 rounded-xl" />
-      <div className="w-full h-8 bg-base-100 rounded-lg" />
+    <div className="flex flex-row lg:flex-col gap-2 w-full">
+      <div className="w-28 h-28 lg:w-48 lg:h-48 bg-neutral rounded-xl shimmer" />
+      <div className="flex flex-col gap-2">
+        <div className="w-28 h-4 bg-neutral rounded-lg shimmer" />
+        <div className="w-12 h-4 bg-neutral rounded-lg shimmer" />
+        <div className="w-12 h-4 bg-neutral rounded-lg shimmer" />
+      </div>
     </div>
   );
 };
@@ -28,73 +32,85 @@ const SpaceContestsSkeleton = () => {
   return (
     <div className="flex flex-col w-full lg:w-3/4 ml-auto mr-auto gap-10 border-2 border-border p-6 rounded-xl min-h-[500px]">
       <div className="flex w-full items-center">
-        <div className="w-48 h-8 bg-base-100 rounded-lg" />
+        <div className="w-48 h-8 bg-neutral rounded-lg" />
         <div className="grid grid-cols-3 gap-4 w-64 ml-auto">
           <div className="bg-base-200 h-8 rounded-lg" />
-          <div className="bg-base-100 h-8 rounded-lg" />
-          <div className="bg-base-100 h-8 rounded-lg" />
+          <div className="bg-neutral h-8 rounded-lg" />
+          <div className="bg-neutral h-8 rounded-lg" />
         </div>
       </div>
       <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full">
-        <div className="bg-base-100 h-24 rounded-xl" />
-        <div className="bg-base-100 h-24 rounded-xl" />
-        <div className="bg-base-100 h-24 rounded-xl" />
-        <div className="bg-base-100 h-24 rounded-xl" />
-        <div className="bg-base-100 h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
+        <div className="bg-neutral h-24 rounded-xl" />
       </div>
     </div>
   );
 };
 
 const SpaceInfo = async ({ name }: { name: string }) => {
-  const { displayName, logoUrl, twitter, website } = await fetchSingleSpace(name);
+  const { displayName, logoUrl, twitter, website } = await fetchSingleSpace(
+    name
+  );
+
   return (
-    <div className="flex flex-col gap-2 w-full items-center">
+    <div className="flex flex-row lg:flex-col gap-2 w-full lg:w-56  items-start">
       <div className="avatar">
-        <div className="w-48 rounded-xl bg-base-100">
+        <div className="w-28 lg:w-48 rounded-full lg:rounded-xl">
           <Image
             src={logoUrl}
             alt={"org avatar"}
-            width={192}
-            height={192}
-            className="rounded-xl"
+            fill
+            className="rounded-xl object-contain"
           />
         </div>
       </div>
-      <div className="flex flex-col items-center gap-2">
-        <div className="flex flex-row gap-2">
-          <h2 className="card-title text-3xl text-center">{displayName}</h2>
+      <div className="flex flex-col items-start gap-1">
+        <div className="flex flex-row gap-2 items-center">
+          <h2 className="text-t1 font-semibold text-2xl break-words">
+            {displayName}
+          </h2>
         </div>
-        <div className="flex flex-row gap-2">
-          {twitter && (
-            <Link
-              href={`https://twitter.com/${twitter}`}
-              draggable={false}
-              target="_blank"
-              className="link link-neutral "
-              prefetch={false}
-            >
-              <FaTwitter className="w-6 h-6" />
+
+        <div className="flex flex-col gap-0.5 text-t2">
+          <div className="flex flex-col md:flex-row lg:flex-col gap-0.5 md:gap-2lg:gap-0.5">
+            {website && (
+              <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
+                <BiLink className="w-5 h-5" />
+                <Link
+                  href={`${website}`}
+                  draggable={false}
+                  target="_blank"
+                  className="text-blue-500 hover:underline"
+                  prefetch={false}
+                >
+                  {website.includes("http") ? website.split("//")[1] : website}
+                </Link>
+              </div>
+            )}
+            {twitter && (
+              <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
+                <FaTwitter className="w-4 h-4" />
+                <Link
+                  href={`https://twitter.com/${twitter}`}
+                  draggable={false}
+                  target="_blank"
+                  className="text-blue-500 hover:underline"
+                  prefetch={false}
+                >
+                  {twitter}
+                </Link>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-row gap-2 items-center hover:text-t1 w-fit">
+            <BiPencil className="w-5 h-5" />
+            <Link href={`/spacebuilder/edit/${name}`} draggable={false}>
+              edit
             </Link>
-          )}
-          {website && (
-            <Link
-              href={`${website}`}
-              draggable={false}
-              target="_blank"
-              className="link link-neutral"
-              prefetch={false}
-            >
-              <BiWorld className="w-6 h-6" />
-            </Link>
-          )}
-          <Link
-            href={`/spacebuilder/edit/${name}`}
-            draggable={false}
-            className="link link-neutral"
-          >
-            <BiPencil className="w-6 h-6" />
-          </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -152,13 +168,7 @@ const CardMap = ({ contests, spaceName }) => {
   );
 };
 
-const SpaceContests = async ({
-  name,
-  isAllContests,
-}: {
-  name: string;
-  isAllContests: boolean;
-}) => {
+const SpaceContests = async ({ name }: { name: string }) => {
   const allContests = await fetchSpaceContests(name);
   const now = new Date().toISOString();
   const activeContests = allContests.filter((contest) => {
@@ -174,7 +184,10 @@ const SpaceContests = async ({
       isActiveContests={activeContests.length > 0}
       isContests={allContests.length > 0}
       newContestChild={
-        <Link href={`${name}/contest/create`} className="btn btn-ghost btn-sm text-t2 normal-case ml-2">
+        <Link
+          href={`${name}/contest/create`}
+          className="btn btn-ghost btn-sm text-t2 normal-case ml-2"
+        >
           <span>New</span>
           <HiSparkles className="h-5 w-5 text-secondary pl-0.5" />
         </Link>
@@ -183,15 +196,26 @@ const SpaceContests = async ({
   );
 };
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { name: string };
-  searchParams: { isAllContests: string };
-}) {
+export default async function Page({ params }: { params: { name: string } }) {
   const { name } = params;
-  const isAllContests = searchParams.isAllContests === "true";
+
+  return (
+    <div className="w-full lg:w-11/12 m-auto py-6 px-2 flex flex-col-reverse lg:flex-row gap-8">
+      <div className="w-full md:w-[70%] flex-grow m-auto">
+        <Suspense fallback={<SpaceContestsSkeleton />}>
+          {/*@ts-expect-error*/}
+          <SpaceContests name={name} />
+        </Suspense>
+      </div>
+      <div className="w-full md:w-[70%] lg:w-[20%] ml-auto mr-auto">
+        <Suspense fallback={<SpaceInfoSekelton />}>
+          {/*@ts-expect-error*/}
+          <SpaceInfo name={name} />
+        </Suspense>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col md:flex-row m-auto py-6 w-11/12 gap-4">
       <div className="flex flex-col w-full md:w-56 gap-4">
@@ -204,7 +228,7 @@ export default async function Page({
       <div className="flex flex-col flex-grow">
         <Suspense fallback={<SpaceContestsSkeleton />}>
           {/*@ts-expect-error*/}
-          <SpaceContests name={name} isAllContests={isAllContests} />
+          <SpaceContests name={name} />
         </Suspense>
       </div>
     </div>
