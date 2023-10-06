@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { mutateSubmissions } from "@/app/mutate";
+import { useEffect } from "react";
 
 // local client side fetch, don't use the server-only fetch
 const fetchSubmissions = async (contestId: string) => {

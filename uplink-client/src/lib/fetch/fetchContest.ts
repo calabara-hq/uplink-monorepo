@@ -1,6 +1,7 @@
 "use server";
 import handleNotFound from "../handleNotFound";
 
+
 const fetchContest = async (contestId: string) => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",

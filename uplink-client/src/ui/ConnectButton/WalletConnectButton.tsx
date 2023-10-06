@@ -4,6 +4,7 @@ import { useSession } from "@/providers/SessionProvider";
 import React from "react";
 import { AddressOrEns, CustomAvatar } from "@/ui/AddressDisplay/AddressDisplay";
 
+
 export default function WalletConnectButton({
   children,
   styleOverride,
