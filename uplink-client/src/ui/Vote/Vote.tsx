@@ -376,7 +376,7 @@ const SidebarVote = ({ contestId }: { contestId: string }) => {
           <div className="flex flex-row items-center gap-2">
             <h2 className="text-t1 text-lg font-semibold">My Selections </h2>
             {proposedVotes.length > 0 && (
-              <span className="badge badge-warning font-bold">
+              <span className="badge badge-sm text-sm badge-warning font-bold">
                 {proposedVotes.length}
               </span>
             )}
@@ -389,7 +389,7 @@ const SidebarVote = ({ contestId }: { contestId: string }) => {
     );
   }
   // render a placeholder so the other flex's don't grow too wide
-  return <div className="w-0 xl:w-1/12" />;
+  // return <div className="w-0 lg:w-1/12" />;
 };
 
 export default SidebarVote;

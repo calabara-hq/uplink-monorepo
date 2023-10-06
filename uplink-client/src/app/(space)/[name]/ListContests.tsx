@@ -12,7 +12,7 @@ const ListContests = ({
 
   return (
     <div className="flex flex-col w-full lg:w-3/4 m-auto items-center gap-4 border border-border  rounded-xl shadow-box min-h-[500px] animate-fadeIn">
-      <div className="flex flex-col lg:flex-row w-full lg:justify-between items-center bg-base-100 bg-opacity-50 border-b-border border-b-2 rounded-t-xl p-4">
+      <div className="flex flex-col md:flex-row w-full md:justify-between items-center bg-base-100 bg-opacity-50 border-b-border border-b-2 rounded-t-xl p-4">
         <h1 className="text-2xl text-t1 font-semibold">Contests</h1>
         <div
           tabIndex={0}
