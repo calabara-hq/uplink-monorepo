@@ -139,7 +139,7 @@ const SubmissionDisplay = ({
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex w-full justify-evenly items-center">
-        <div className="w-8/12 m-auto sm:w-full grid gap-4 submission-columns">
+        <div className="w-10/12 sm:w-full m-auto grid gap-4 submission-columns auto-rows-fr">
           {submissions.map((submission, idx) => {
             return (
               <CardSubmission
