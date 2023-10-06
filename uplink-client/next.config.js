@@ -2,8 +2,10 @@
 
 // https://vercel.com/docs/edge-network/caching#how-to-cache-responses
 const edgeCacheHeader = {
-  key: "Vercel-CDN-Cache-Control",
-  value: "s-maxage=86400"
+  // key: "Vercel-CDN-Cache-Control",
+  // value: "s-maxage=86400"
+  key: 'dummy',
+  value: 'dummy'
 }
 
 const nextConfig = {

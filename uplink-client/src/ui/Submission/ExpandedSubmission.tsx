@@ -36,7 +36,7 @@ const RenderImageSubmission = ({ submission }: { submission: Submission }) => {
         alt="submission image"
         fill
         className="object-contain rounded-xl w-full h-full overflow-hidden"
-        sizes="80vw"
+        sizes="30vw"
       />
     </ImageWrapper>
   );

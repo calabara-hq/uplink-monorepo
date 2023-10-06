@@ -33,7 +33,7 @@ const ListSpaces = async () => {
             key={index}
             draggable={false}
             href={`${space.name}`}
-            className="flex flex-col items-center justify-center gap-4 bg-base 
+            className="flex flex-col items-center justify-center gap-4 bg-base-100 
               cursor-pointer border border-border rounded-2xl p-4 full overflow-hidden w-full transform 
               transition-transform duration-300 hoverCard will-change-transform no-select animate-fadeIn"
           >
@@ -80,7 +80,7 @@ export default async function Page() {
     <div className="flex flex-col w-11/12 lg:w-9/12 m-auto justify-center py-12 gap-4">
       <div className="flex items-center gap-4 justify-end font-bold">
         <Link
-          className="btn btn-primary rounded-xl  normal-case"
+          className="btn btn-primary rounded-lg  normal-case"
           href="/spacebuilder/create"
           draggable={false}
         >
