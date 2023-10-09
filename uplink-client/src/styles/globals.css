@@ -65,7 +65,6 @@
 
 .submission-columns {
   grid-template-columns: repeat(auto-fill, minmax(275px, 2fr));
-  background-color: blue;
 }
 
 .glass,.glass:hover,.glass.btn-active {
