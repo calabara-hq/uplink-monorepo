@@ -140,9 +140,17 @@ export class TokenController {
         }
     }
 
+
     calculateBlockFromTimestamp = async (timestamp: string) => {
-        const result = await this.dater.getDate(timestamp, true, false);
-        return result.block;
+        const [daterBlock, latestFinalizedBlock] = await Promise.all([
+            this.dater.getDate(timestamp, true, false),
+            this.provider.getBlock('finalized')
+        ]);
+
+        // if provided timestamp produces a non-finalized block, use the latest finalized block
+        const finalBlock = Math.min(daterBlock.block, latestFinalizedBlock.number);
+
+        return finalBlock;
     }
 
 
