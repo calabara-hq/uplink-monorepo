@@ -71,7 +71,7 @@ const DetailSectionWrapper = ({
           </div>
         )}
       </div>
-      {children}
+      <div className="flex flex-col gap-1 w-full text-t2 text-sm">{children}</div>
       <div className="bg-base-100 h-0.5 w-full" />
     </div>
   );

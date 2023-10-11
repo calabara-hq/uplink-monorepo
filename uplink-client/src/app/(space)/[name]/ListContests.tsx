@@ -37,7 +37,7 @@ const ListContests = ({
       {isAllContests &&
         (!isContests ? (
           <div className="flex flex-col gap-2 items-center justify-center m-auto font-bold text-t1 text-lg">
-            <p className="text-t1">
+            <p className="text-t1 text-center">
               This space has not yet hosted any contests.
             </p>
             <p className="text-t2">Check back later!</p>
