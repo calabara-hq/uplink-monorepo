@@ -30,7 +30,7 @@ export const ExpandSection = ({
           className="hover:underline text-blue-500 cursor-pointer"
           onClick={() => setIsModalOpen(true)}
         >
-          + {data.length - 3} requirements
+          {label}
         </a>
       )}
       <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
