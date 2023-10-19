@@ -3,7 +3,7 @@ import {
   RemainingTimeLabel,
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
-import { ContestCategory } from "@/types/contest";
+import { ContestCategory, ContestDeadlines, ContestMetadata } from "@/types/contest";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
@@ -160,12 +160,12 @@ const ContestCard = ({
   contestId: string;
   promptUrl: string;
   linkTo: string;
-  metadata: { category: ContestCategory; type: "twitter" | "standard" };
-  deadlines: { startTime: string; voteTime: string; endTime: string };
+  metadata: ContestMetadata;
+  deadlines: ContestDeadlines;
   spaceName: string;
   spaceDisplayName: string;
   spaceLogo: string;
-  tweetId: string | null;
+  tweetId?: string;
 }) => {
   const { contestState, stateRemainingTime } = calculateContestStatus(
     deadlines,

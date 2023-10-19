@@ -1,11 +1,28 @@
-"use server";
+import { ApiContestSchema } from "@/types/contest";
+import { z } from "zod";
 
-const fetchActiveContests = async () => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+export const ActiveContestsSchema = z.array(z.intersection(ApiContestSchema.pick({
+  id: true,
+  tweetId: true,
+  promptUrl: true,
+  deadlines: true,
+  metadata: true,
+}), z.object({
+  space: z.object({
+    logoUrl: z.string(),
+    displayName: z.string(),
+    name: z.string(),
+  })
+})))
+
+export type ActiveContests = z.infer<typeof ActiveContestsSchema>;
+
+const fetchActiveContests = async (): Promise<ActiveContests[]> => {
+  return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-API-TOKEN": process.env.API_SECRET,
+      "X-API-TOKEN": process.env.API_SECRET!,
     },
     body: JSON.stringify({
       query: `
@@ -34,8 +51,15 @@ const fetchActiveContests = async () => {
     next: { revalidate: 60, tags: ["activeContests"] },
   })
     .then((res) => res.json())
-    .then((res) => res.data.activeContests);
-  return data;
+    .then((res) => res.data.activeContests)
+    .then(data => {
+      const { success } = ActiveContestsSchema.safeParse(data);
+      if (!success) {
+        console.error("invalid data", data);
+        return []; // bail out with empty array if data is invalid
+      }
+      return data;
+    })
 };
 
 export default fetchActiveContests;

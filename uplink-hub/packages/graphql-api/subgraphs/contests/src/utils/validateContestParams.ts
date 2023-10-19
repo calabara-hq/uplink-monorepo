@@ -514,6 +514,8 @@ export const validateContestParams = async (contestData: ContestBuilderProps) =>
     const votingPolicyResult = await validateVotingPolicy(votingPolicy);
     const additionalParamsResult = validateAdditionalParams(additionalParams);
 
+    console.log("PROMPT RESULT IS", JSON.stringify(promptResult, null, 2))
+
     const errors = {
         ...(metadataResult.error ? { metadata: metadataResult.error } : {}),
         ...(deadlinesResult.error ? { deadlines: deadlinesResult.error } : {}),

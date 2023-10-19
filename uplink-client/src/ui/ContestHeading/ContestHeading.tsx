@@ -1,21 +1,27 @@
 import Image from "next/image";
 import { ParseBlocks } from "@/lib/blockParser";
-import { CategoryLabel, StatusLabel } from "../ContestLabels/ContestLabels";
+import { CategoryLabel } from "../ContestLabels/ContestLabels";
 import Link from "next/link";
-import fetchContest from "@/lib/fetch/fetchContest";
-import { Suspense } from "react";
+import {
+  ContestWithPromptData,
+  FetchContestResponse,
+  resolvePromptData,
+} from "@/lib/fetch/fetchContest";
 import LiveContestState from "../ContestLabels/LiveContestState";
 import { ImageWrapper } from "../Submission/MediaWrapper";
 import { DetailsMenuDrawer } from "../MobileContestActions/MobileContestActions";
 import ContestDetails from "../ContestDetails/ContestDetails";
 
-const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
-  const contestData = await contest.then(async (res) => {
-    const promptData = await fetch(res.promptUrl).then((res) => res.json());
-    return { ...res, prompt: promptData };
-  });
+const ContestHeading = async ({
+  contest,
+}: {
+  contest: Promise<FetchContestResponse>;
+}) => {
+  const contestData: ContestWithPromptData = await contest.then(
+    resolvePromptData
+  );
 
-  const { prompt, space, metadata } = contestData;
+  const { promptData, space, metadata } = contestData;
 
   return (
     <div className="grid grid-cols-1 w-full gap-2">
@@ -23,7 +29,7 @@ const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
         <div className="grid grid-cols-1 sm:grid-cols-[auto_25%] gap-6 w-full p-4">
           <div className="flex flex-col gap-2 break-word">
             <h2 className="lg:text-3xl text-xl font-[600] text-t1">
-              {prompt.title}
+              {promptData.title}
             </h2>
             <div className="flex flex-row gap-2 items-center">
               <Link
@@ -50,27 +56,27 @@ const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
               {/* render a details button when the screen gets smaller */}
               <div className="hidden lg:block xl:hidden">
                 <DetailsMenuDrawer
-              detailChildren={
-                // @ts-expect-error
-                <ContestDetails contest={contest} />
-              }
-              ui={{
-                classNames:
-                  "text-sm font-[600] text-t2 hover:underline hover:text-t1 ",
-                label: <p>details</p>,
-              }}
-            />
+                  detailChildren={
+                    // @ts-expect-error
+                    <ContestDetails contest={contest} />
+                  }
+                  ui={{
+                    classNames:
+                      "text-sm font-[600] text-t2 hover:underline hover:text-t1 ",
+                    label: <p>details</p>,
+                  }}
+                />
               </div>
             </div>
             <div className="grid grid-cols-1">
-              <ParseBlocks data={prompt.body} omitImages={false} />
+              <ParseBlocks data={promptData.body} omitImages={false} />
             </div>
           </div>
           <div className="grid grid-cols-1 w-full gap-2">
-            {prompt.coverUrl && (
+            {promptData?.coverUrl && (
               <ImageWrapper>
                 <Image
-                  src={prompt.coverUrl}
+                  src={promptData.coverUrl}
                   alt="contest image"
                   fill
                   className="object-contain rounded-xl"
@@ -101,7 +107,6 @@ export const ContestHeadingSkeleton = () => {
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
-
           </div>
         </div>
       </div>
@@ -109,6 +114,5 @@ export const ContestHeadingSkeleton = () => {
     </div>
   );
 };
-
 
 export default ContestHeading;

@@ -1,14 +1,28 @@
-// iterate a list of contests and return the prompts for each
-"use server";
+import { ApiContestSchema } from "@/types/contest";
 import handleNotFound from "../handleNotFound";
+import fetchPromptData from "./fetchContestPromptData";
+import { z } from "zod";
 
-const fetchSpaceContests = async (spaceName: string) => {
+export const SingleSpaceContestResponseSchema = ApiContestSchema.pick({
+    id: true,
+    tweetId: true,
+    promptUrl: true,
+    deadlines: true,
+    metadata: true,
+    //promptData: true
+})
 
-    const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+export const FetchSpaceContestsResponseSchema = z.array(SingleSpaceContestResponseSchema)
+
+export type FetchSpaceContestsResponse = z.infer<typeof FetchSpaceContestsResponseSchema>;
+export type SingleSpaceContestResponse = z.infer<typeof SingleSpaceContestResponseSchema>;
+const fetchSpaceContests = async (spaceName: string): Promise<FetchSpaceContestsResponse | never> => {
+    
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-API-TOKEN": process.env.API_SECRET,
+            "X-API-TOKEN": process.env.API_SECRET!,
         },
         body: JSON.stringify({
             query: `
@@ -41,13 +55,21 @@ const fetchSpaceContests = async (spaceName: string) => {
         .then(res => res.data.space)
         .then(handleNotFound)
         .then((res) => res.contests)
+        .then(data => {
+            const result = FetchSpaceContestsResponseSchema.safeParse(data);
+            if (!result.success) {
+                console.error("invalid data", result.error);
+                return [];
+            }
+            else {
+                return data;
+            }
+        })
         .then(async contests => {
             return await Promise.all(
-                contests.map(async (contest) => {
+                contests.map(async (contest: SingleSpaceContestResponse) => {
                     // fetch prompt url
-                    const promptData = await fetch(contest.promptUrl).then((res) =>
-                        res.json()
-                    );
+                    const promptData = await fetchPromptData(contest.promptUrl);
                     return {
                         ...contest,
                         promptData,
@@ -55,7 +77,6 @@ const fetchSpaceContests = async (spaceName: string) => {
                 })
             );
         })
-    return data;
 }
 
 export default fetchSpaceContests;

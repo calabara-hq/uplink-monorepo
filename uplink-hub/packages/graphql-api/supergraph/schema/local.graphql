@@ -94,7 +94,6 @@ type Contest
 input ContestBuilderProps
   @join__type(graph: CONTESTS)
 {
-  spaceId: ID!
   metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
@@ -123,7 +122,6 @@ type ContestMutationResponse
 {
   success: Boolean!
   contestId: ID
-  errors: ContestErrorData
 }
 
 type ContestTweetResponse
@@ -270,7 +268,7 @@ type Mutation
   @join__type(graph: SUBMIT)
   @join__type(graph: VOTE)
 {
-  createContest(contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
+  createContest(spaceId: ID!, contestData: ContestBuilderProps!): ContestMutationResponse! @join__field(graph: CONTESTS)
   createContestTweet(contestId: ID!, spaceId: ID!, tweetThread: [ThreadItem!]!): ContestTweetResponse! @join__field(graph: CONTESTS)
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
@@ -384,7 +382,7 @@ type RewardType
   @join__type(graph: CONTESTS)
 {
   rank: Int!
-  tokenReward: tokenRewardType!
+  tokenReward: TokenRewardType!
 }
 
 type Space
@@ -561,11 +559,10 @@ type TokenRestrictionType
   threshold: Decimal!
 }
 
-type tokenRewardType
+type TokenRewardType
   @join__type(graph: CONTESTS)
 {
   amount: Decimal
-  tokenId: Int
   token: TokenType!
 }
 

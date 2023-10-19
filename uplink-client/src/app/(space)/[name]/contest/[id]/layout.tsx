@@ -1,5 +1,5 @@
 import { ContestStateProvider } from "@/providers/ContestStateProvider";
-import fetchContest from "@/lib/fetch/fetchContest";
+import fetchContest, { FetchContestResponse } from "@/lib/fetch/fetchContest";
 import { ContestInteractionProvider } from "@/providers/ContestInteractionProvider";
 import { VoteActionProvider } from "@/providers/VoteActionProvider";
 
@@ -13,7 +13,7 @@ export default async function Layout({
   modal: React.ReactNode;
 }) {
   const contestId = params.id;
-  const contestPromise = fetchContest(contestId);
+  const contestPromise: Promise<FetchContestResponse> = fetchContest(contestId);
 
   return (
     <div className="w-full flex flex-col items-center p-4">

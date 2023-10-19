@@ -1,4 +1,4 @@
-import fetchContest from "@/lib/fetch/fetchContest";
+import fetchContest, { FetchContestResponse } from "@/lib/fetch/fetchContest";
 import LoadingDialog from "./loadingDialog";
 import dynamic from "next/dynamic";
 
@@ -17,8 +17,8 @@ export default async function Page({
 }: {
   params: { name: string; id: string };
 }) {
-  const constest = await fetchContest(params.id);
-  const { metadata } = constest;
+  const contest = await fetchContest(params.id);
+  const { metadata } = contest;
 
   // contest in submit window
   if (metadata.type === "standard") return <StandardSubmit params={params} />;

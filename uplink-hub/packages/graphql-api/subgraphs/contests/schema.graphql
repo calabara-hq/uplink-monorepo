@@ -39,15 +39,14 @@ type TokenType {
   tokenId: Int
 }
 
-type tokenRewardType {
+type TokenRewardType {
   amount: Decimal
-  tokenId: Int
   token: TokenType!
 }
 
 type RewardType {
   rank: Int!
-  tokenReward: tokenRewardType!
+  tokenReward: TokenRewardType!
 }
 
 type TokenRestrictionType {
@@ -232,7 +231,6 @@ input ThreadItem {
 }
 
 input ContestBuilderProps {
-  spaceId: ID!
   metadata: Metadata!
   deadlines: Deadlines!
   prompt: Prompt!
@@ -257,7 +255,7 @@ type ContestErrorData {
 type ContestMutationResponse {
   success: Boolean!
   contestId: ID
-  errors: ContestErrorData
+  #errors: ContestErrorData
 }
 
 type ContestTweetResponse {
@@ -266,7 +264,10 @@ type ContestTweetResponse {
 }
 
 type Mutation {
-  createContest(contestData: ContestBuilderProps!): ContestMutationResponse!
+  createContest(
+    spaceId: ID!
+    contestData: ContestBuilderProps!
+  ): ContestMutationResponse!
   createContestTweet(
     contestId: ID!
     spaceId: ID!

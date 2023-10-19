@@ -10,11 +10,9 @@ import ContestDetails, {
 import SidebarVote from "@/ui/Vote/Vote";
 import MobileContestActions from "@/ui/MobileContestActions/MobileContestActions";
 import { Suspense } from "react";
-import fetchContest from "@/lib/fetch/fetchContest";
+import fetchContest, { FetchContestResponse } from "@/lib/fetch/fetchContest";
 import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
 import SwrProvider from "@/providers/SwrProvider";
-
-// TODO: dynamic metadata
 
 const SubmissionDisplayWrapper = async ({
   submissionPromise,
@@ -62,7 +60,10 @@ export default async function Page({
               spaceName={spaceName}
               detailChildren={
                 // @ts-expect-error
-                <ContestDetails contest={contestPromise} />
+                <ContestDetails
+                  contestId={contestId}
+                  contest={contestPromise}
+                />
               }
             />
             <Suspense fallback={<SubmissionDisplaySkeleton />}>

@@ -1,6 +1,5 @@
-import { useState, useRef, useEffect, useReducer } from "react";
 import MenuSelect from "../MenuSelect/MenuSelect";
-import { IERCToken, isERCToken, IToken } from "@/types/token";
+import { IToken } from "@/types/token";
 import { HiArrowPath, HiExclamationTriangle } from "react-icons/hi2";
 import { useTokenManager } from "@/hooks/useTokenManager";
 import Modal, { ModalActions } from "../Modal/Modal";

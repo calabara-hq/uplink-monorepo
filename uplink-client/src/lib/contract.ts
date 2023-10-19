@@ -7,6 +7,7 @@ import ERC165ABI from '@/lib/abi/erc165ABI.json';
 
 const ERC721Interface = '0x80ac58cd';
 const ERC1155Interface = '0xd9b67a26';
+const ERC1155MetaDataURIInterface = '0xd9b67a26';
 
 const validateERC20 = async (address: string) => {
     try {
@@ -110,6 +111,23 @@ export const isValidERC1155TokenId = async ({ contractAddress, tokenId }: {
         // Check if the URI is valid
         const uriRegex = new RegExp('^(https?|ipfs):\\/\\/[^\\s/$.?#].[^\\s]*$', 'i');
         return uriRegex.test(uri);
+    } catch (err) {
+        return false;
+    }
+}
+
+export const isERC1155TokenFungible = async ({ contractAddress, tokenId }: {
+    contractAddress: string, tokenId: number
+}) => {
+    try {
+        const isFungible = await publicClient.readContract({
+            address: contractAddress as `0x${string}`,
+            abi: ERC1155ABI,
+            functionName: 'supportsInterface',
+            args: [ERC1155MetaDataURIInterface],
+        }) as boolean;
+
+        return isFungible;
     } catch (err) {
         return false;
     }

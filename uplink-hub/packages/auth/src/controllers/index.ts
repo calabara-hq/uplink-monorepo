@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from 'crypto';
-import { TwitterApi } from 'twitter-api-v2';
+import { TwitterApi, UserV2 } from 'twitter-api-v2';
 import dotenv from 'dotenv';
 import { CipherController, schema } from 'lib'
 import { createPublicClient, http, verifyMessage } from 'viem';
@@ -188,8 +188,6 @@ export const oauthCallback = async (req, res) => {
     client.login(oauth_verifier)
         .then(async ({ client: loggedClient, accessToken, accessSecret }) => {
             const { data: userObject } = await loggedClient.v2.me({ "user.fields": ["profile_image_url"] });
-            console.log('got user object:')
-            console.log(JSON.stringify(userObject, null, 2))
             req.session.user.twitter = {
                 ...userObject,
                 profile_image_url_large: userObject.profile_image_url.replace('_normal', '_400x400'),

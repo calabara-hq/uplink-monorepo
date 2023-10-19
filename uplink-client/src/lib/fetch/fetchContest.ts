@@ -1,13 +1,34 @@
-"use server";
+import { ApiContestSchema } from "@/types/contest";
 import handleNotFound from "../handleNotFound";
+import { z } from "zod";
+import { EditorOutputSchema } from "@/types/editor";
 
+// schemas
 
-const fetchContest = async (contestId: string) => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+export const FetchContestResponseSchema = z.intersection(ApiContestSchema, z.object({
+  spaceId: z.string(),
+  created: z.string(),
+  space: z.object({
+    id: z.string(),
+    name: z.string(),
+    displayName: z.string(),
+    logoUrl: z.string(),
+    admins: z.array(z.object({
+      address: z.string(),
+    }))
+  })
+}))
+
+// types 
+
+export type FetchContestResponse = z.infer<typeof FetchContestResponseSchema>;
+
+const fetchContest = async (contestId: string): Promise<FetchContestResponse | never> => {
+  return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-API-TOKEN": process.env.API_SECRET,
+      "X-API-TOKEN": process.env.API_SECRET!,
     },
     body: JSON.stringify({
       query: `
@@ -63,14 +84,12 @@ const fetchContest = async (contestId: string) => {
                   tokenId
                   type
                 }
-                tokenId
               }
             }
             voterRewards {
               rank
               tokenReward {
                 amount
-                tokenId
                 token {
                   tokenHash
                   type
@@ -115,8 +134,15 @@ const fetchContest = async (contestId: string) => {
   })
     .then((res) => res.json())
     .then((res) => res.data.contest)
+    .then(data => {
+      const { success } = FetchContestResponseSchema.safeParse(data);
+      if (!success) {
+        console.error("invalid data", data);
+        return null; // pass response to the notFound handler
+      }
+      return data;
+    })
     .then(handleNotFound)
-  return data;
 };
 
 export default fetchContest;

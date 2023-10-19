@@ -1,23 +1,30 @@
-export interface IERCToken {
-    type: "ERC20" | "ERC721" | "ERC1155";
-    address: string;
-    decimals: number;
-    symbol: string;
-    tokenId?: number;
-}
+import { z } from "zod";
 
-export interface INativeToken {
-    type: "ETH";
-    symbol: "ETH";
-    decimals: 18;
-}
+export const ERCTokenSchema = z.object({
+    type: z.enum(["ERC20", "ERC721", "ERC1155"]),
+    address: z.string().length(42),
+    decimals: z.number(),
+    symbol: z.string(),
+    tokenId: z.number().nullable(),
+})
 
-export type IToken = IERCToken | INativeToken;
+export const NativeTokenSchema = z.object({
+    type: z.literal("ETH"),
+    symbol: z.literal("ETH"),
+    decimals: z.literal(18),
+});
+
+
+export const TokenSchema = z.union([ERCTokenSchema, NativeTokenSchema])
+
+export type IERCToken = z.infer<typeof ERCTokenSchema>;
+export type INativeToken = z.infer<typeof NativeTokenSchema>;
+export type IToken = z.infer<typeof TokenSchema>;
 
 export const isNativeToken = (token: any): token is INativeToken => {
-    return (token.type === "ETH" && token.symbol === "ETH" && token.decimals === 18);
+    return NativeTokenSchema.safeParse(token).success;
 }
 
 export const isERCToken = (token: any): token is IERCToken => {
-    return token.type === "ERC20" || token.type === "ERC721" || token.type === "ERC1155";
+    return ERCTokenSchema.safeParse(token).success;
 }

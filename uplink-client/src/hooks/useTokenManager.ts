@@ -155,9 +155,6 @@ export const useTokenManager = ({
 
     const [state, dispatch] = useReducer(tokenReducer, initialTokenState);
 
-
-
-
     useEffect(() => {
         const isValidAddress =
             state.customToken.address.length === 42 &&
@@ -245,7 +242,7 @@ export const useTokenManager = ({
 
                 if (isERCToken(existingToken) && isERCToken(currentToken)) {
                     if (existingToken.address === currentToken.address) {
-                        if (currentToken.type === "ERC1155") {
+                        if (currentToken.type === "ERC1155" && existingToken.tokenId === currentToken.tokenId) {
                             // set tokenid error
                             return dispatch({
                                 type: "setCustomTokenErrors",

@@ -1,5 +1,9 @@
 "use server";
-import fetchContest from "@/lib/fetch/fetchContest";
+import {
+  ContestWithPromptData,
+  FetchContestResponse,
+  resolvePromptData,
+} from "@/lib/fetch/fetchContest";
 import { FaRegCircleQuestion } from "react-icons/fa6";
 import formatDecimal from "@/lib/formatDecimal";
 import {
@@ -25,6 +29,11 @@ import type { OutputData } from "@editorjs/editorjs";
 import { IoWarningOutline } from "react-icons/io5";
 import dynamic from "next/dynamic";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
+import {
+  ContestReward,
+  ContestSubmitterRestriction,
+  ContestVotingPolicy,
+} from "@/types/contest";
 /*
  * note- if this code looks a bit strange, it's because
  * nextjs allows us to pass server components as children to the client
@@ -71,7 +80,9 @@ const DetailSectionWrapper = ({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1 w-full text-t2 text-sm">{children}</div>
+      <div className="flex flex-col gap-1 w-full text-t2 text-sm">
+        {children}
+      </div>
       <div className="bg-base-100 h-0.5 w-full" />
     </div>
   );
@@ -111,7 +122,11 @@ const SectionSkeleton = () => {
   );
 };
 
-const SubmitterRestrictionsSection = ({ submitterRestrictions }) => {
+const SubmitterRestrictionsSection = ({
+  submitterRestrictions,
+}: {
+  submitterRestrictions: ContestSubmitterRestriction[];
+}) => {
   return (
     <DetailSectionWrapper
       title="Entry Requirements"
@@ -172,7 +187,7 @@ const SubmitterRestrictionsSection = ({ submitterRestrictions }) => {
 const SubmitterRewardsSection = ({
   submitterRewards,
 }: {
-  submitterRewards: any;
+  submitterRewards: ContestReward[];
 }) => {
   const normalizedRewards: {
     [rank: number]: { token: IToken; amount: string }[];
@@ -258,7 +273,11 @@ const SubmitterRewardsSection = ({
   );
 };
 
-const VoterRewardsSection = ({ voterRewards }) => {
+const VoterRewardsSection = ({
+  voterRewards,
+}: {
+  voterRewards: ContestReward[];
+}) => {
   if (voterRewards.length > 0) {
     return (
       <DetailSectionWrapper
@@ -315,7 +334,11 @@ const VoterRewardsSection = ({ voterRewards }) => {
   return null;
 };
 
-const VotingPolicySection = ({ votingPolicy }) => {
+const VotingPolicySection = ({
+  votingPolicy,
+}: {
+  votingPolicy: ContestVotingPolicy[];
+}) => {
   return (
     <DetailSectionWrapper
       title="Voting Strategies"
@@ -616,12 +639,12 @@ const ContestDetails = async ({
   contest,
 }: {
   contestId: string;
-  contest: Promise<any>;
+  contest: Promise<FetchContestResponse>;
 }) => {
-  const contestData = await contest.then(async (res) => {
-    const promptData = await fetch(res.promptUrl).then((res) => res.json());
-    return { ...res, promptData };
-  });
+  const contestData: ContestWithPromptData = await contest.then(
+    resolvePromptData
+  );
+
   const {
     deadlines,
     space,

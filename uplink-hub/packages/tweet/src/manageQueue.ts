@@ -16,7 +16,7 @@ type ThreadItem = {
     text: string;
     media?: {
         type: string;
-        size: string;
+        size: number;
         url: string;
     }
 }

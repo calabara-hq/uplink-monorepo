@@ -1,4 +1,5 @@
 
+import { ContestDeadlines, ContestType, ContestState, ContestStateSchema } from "@/types/contest";
 import {
     differenceInSeconds,
     differenceInMinutes,
@@ -14,7 +15,10 @@ import {
  *
  */
 
-export const calculateContestStatus = (deadlines: any, contestType: "standard" | "twitter", tweetId: string) => {
+export const calculateContestStatus = (deadlines: ContestDeadlines, contestType: ContestType, tweetId?: string): {
+    contestState: ContestState;
+    stateRemainingTime: string | null;
+} => {
 
     if (contestType === "twitter" && !tweetId) {
         return {
@@ -35,15 +39,15 @@ export const calculateContestStatus = (deadlines: any, contestType: "standard" |
     let nextDeadline = end;
 
     if (now < start) {
-        contestState = "pending";
+        contestState = ContestStateSchema.enum.pending;
         nextDeadline = start;
     } else if (now < vote) {
-        contestState = "submitting";
+        contestState = ContestStateSchema.enum.submitting;
         nextDeadline = vote;
     } else if (now < end) {
-        contestState = "voting";
+        contestState = ContestStateSchema.enum.voting;
     } else {
-        contestState = "closed";
+        contestState = ContestStateSchema.enum.closed;
     }
 
     const seconds = differenceInSeconds(nextDeadline, now);

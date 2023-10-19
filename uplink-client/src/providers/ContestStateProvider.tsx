@@ -7,13 +7,15 @@ import {
   differenceInDays,
   parseISO,
 } from "date-fns";
+import { ContestCategory, ContestType } from "@/types/contest";
+import type { FetchContestResponse } from "@/lib/fetch/fetchContest";
 
 export interface ContestStateProps {
   contestAdmins: string[];
   contestState: string | null;
   stateRemainingTime: string | null;
-  category: string;
-  type: string;
+  category: ContestCategory;
+  type: ContestType;
   tweetId: string | null;
 }
 
@@ -21,25 +23,23 @@ const ContestStateContext = createContext<ContestStateProps | undefined>(
   undefined
 );
 
-
 // this is a bit of an anti pattern but it is done to make navigation instant
 // the alternative would awaiting the promise in the layout component, but that would block the navigation
 // we'll make the ugliness-tradeoff for now with plans to redesign later
-
 
 export function ContestStateProvider({
   children,
   contestPromise,
 }: {
   children: React.ReactNode;
-  contestPromise: Promise<any>;
+  contestPromise: Promise<FetchContestResponse>;
 }) {
   const [contestState, setContestState] = useState<string | null>(null);
   const [stateRemainingTime, setStateRemainingTime] = useState<string>("");
-  const [contestData, setContestData] = useState<any>(null);
+  const [contestData, setContestData] = useState<FetchContestResponse>(null);
 
   useEffect(() => {
-    const processContest = async (contest: Promise<any>) => {
+    const processContest = async (contest: Promise<FetchContestResponse>) => {
       // await the preloaded promise;
       const data = await contest;
       // extract the data from the promise
@@ -109,7 +109,8 @@ export function ContestStateProvider({
         category: contestData?.metadata.category,
         type: contestData?.metadata.type,
         tweetId: contestData?.tweetId,
-        contestAdmins: contestData?.space.admins ?? [].map((admin: any) => admin.address),
+        contestAdmins:
+          contestData?.space.admins ?? [].map((admin: any) => admin.address),
       }}
     >
       {children}

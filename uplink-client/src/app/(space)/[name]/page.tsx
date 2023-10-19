@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BiCog, BiLink, BiPencil, BiWorld } from "react-icons/bi";
+import { BiLink, BiPencil } from "react-icons/bi";
 import { FaTwitter } from "react-icons/fa";
-import { Metadata } from "next";
 import ListContests from "./ListContests";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import fetchSpaceContests from "@/lib/fetch/fetchSpaceContests";
