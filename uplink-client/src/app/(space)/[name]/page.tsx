@@ -79,15 +79,15 @@ const SpaceInfo = async ({ name }: { name: string }) => {
             {website && (
               <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
                 <BiLink className="w-5 h-5" />
-                <Link
-                  href={`${website}`}
+                <a
+                  href={/^(http:\/\/|https:\/\/)/.test(website) ? website : `//${website}`}
+                  rel="noopener noreferrer"
                   draggable={false}
                   target="_blank"
                   className="text-blue-500 hover:underline"
-                  prefetch={false}
                 >
                   {website.includes("http") ? website.split("//")[1] : website}
-                </Link>
+                </a>
               </div>
             )}
             {twitter && (
@@ -95,6 +95,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
                 <FaTwitter className="w-4 h-4" />
                 <Link
                   href={`https://twitter.com/${twitter}`}
+                  rel="noopener noreferrer"
                   draggable={false}
                   target="_blank"
                   className="text-blue-500 hover:underline"

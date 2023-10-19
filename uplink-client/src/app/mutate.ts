@@ -7,9 +7,9 @@ export const mutateSpaceContests = (spaceName: string) => {
     });
 }
 
-export const mutateSpaces = () => {
+export const mutateSpaces = (name: string) => {
     startTransition(() => {
-        revalidateDataCache(["spaces"]); // reval server cache
+        revalidateDataCache(["spaces", `space/${name}`]); // reval server cache
     });
 }
 
