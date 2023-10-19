@@ -71,7 +71,7 @@ export default function SpaceForm({
         csrfToken: session.csrfToken,
       }).then(({ success, spaceName, errors }) => {
         if (success) {
-          mutateSpaces();
+          mutateSpaces(spaceName);
           toast.success(
             isNewSpace
               ? "Space created successfully!"

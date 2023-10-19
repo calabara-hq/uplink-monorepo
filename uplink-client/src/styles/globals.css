@@ -42,6 +42,11 @@
 }
 
 
+
+.hyperlinks > a {
+  @apply text-blue-500 hover:text-blue-600;
+}
+
 .tooltip::before{
   background-color: white;
   color: black;

@@ -1,6 +1,5 @@
 import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
 import SubmissionModal from "./submissionModal";
-import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
 import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 
 export default async function SubmissionPage({

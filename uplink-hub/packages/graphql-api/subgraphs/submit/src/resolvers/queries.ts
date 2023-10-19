@@ -2,6 +2,7 @@ import { sqlOps, db } from "../utils/database.js";
 import { GraphQLError } from "graphql";
 import { computeSubmissionParams } from "../utils/submit.js";
 import { AuthorizationController, schema, Decimal } from "lib";
+
 import dotenv from 'dotenv'
 dotenv.config();
 
@@ -185,10 +186,12 @@ const queries = {
             // if a submission did not recieve a reward, it will not have a rank.
             // then, we'll sort the submissions by rank.
 
+            console.log(JSON.stringify(submissions, null, 2))
 
             // assign reward ranks to submissions
             submitterRewards.forEach((reward, idx) => {
-                submissions[reward.rank - 1].rank = idx + 1;
+                submissions[reward.rank - 1] ? submissions[reward.rank - 1].rank = idx + 1 : null; // TODO: handle cases where there are more rewards than submissions
+
             });
 
             // sort submissions by reward rank

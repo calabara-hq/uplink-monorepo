@@ -11,6 +11,7 @@ import formatDecimal from "@/lib/formatDecimal";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 
 export const AddToCartButton = ({ submission, voteActions }) => {
+  
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
   const [isSelected, setIsSelected] = useState(false);
 

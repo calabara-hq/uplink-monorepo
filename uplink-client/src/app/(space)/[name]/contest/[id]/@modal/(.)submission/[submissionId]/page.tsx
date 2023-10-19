@@ -1,11 +1,9 @@
 "use client";
 import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
 import SubmissionModal, { ModalAddToCart } from "./submissionModal";
-import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
-import { Suspense } from "react";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 
-export default async function SubmissionPage({
+export default function SubmissionPage({
   params: { name, id, submissionId },
 }: {
   params: { name: string; id: string; submissionId: string };
