@@ -1,9 +1,10 @@
 import Image from "next/image";
-import { ParseBlocks } from "@/lib/blockParser";
+import dynamic from "next/dynamic";
+const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
+  ssr: true,
+});
 import { CategoryLabel, StatusLabel } from "../ContestLabels/ContestLabels";
 import Link from "next/link";
-import fetchContest from "@/lib/fetch/fetchContest";
-import { Suspense } from "react";
 import LiveContestState from "../ContestLabels/LiveContestState";
 import { ImageWrapper } from "../Submission/MediaWrapper";
 import { DetailsMenuDrawer } from "../MobileContestActions/MobileContestActions";
@@ -50,16 +51,16 @@ const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
               {/* render a details button when the screen gets smaller */}
               <div className="hidden lg:block xl:hidden">
                 <DetailsMenuDrawer
-              detailChildren={
-                // @ts-expect-error
-                <ContestDetails contest={contest} />
-              }
-              ui={{
-                classNames:
-                  "text-sm font-[600] text-t2 hover:underline hover:text-t1 ",
-                label: <p>details</p>,
-              }}
-            />
+                  detailChildren={
+                    // @ts-expect-error
+                    <ContestDetails contest={contest} />
+                  }
+                  ui={{
+                    classNames:
+                      "text-sm font-[600] text-t2 hover:underline hover:text-t1 ",
+                    label: <p>details</p>,
+                  }}
+                />
               </div>
             </div>
             <div className="grid grid-cols-1">
@@ -101,7 +102,6 @@ export const ContestHeadingSkeleton = () => {
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
-
           </div>
         </div>
       </div>
@@ -109,6 +109,5 @@ export const ContestHeadingSkeleton = () => {
     </div>
   );
 };
-
 
 export default ContestHeading;

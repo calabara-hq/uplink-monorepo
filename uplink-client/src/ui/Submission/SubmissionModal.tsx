@@ -5,7 +5,7 @@ import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import { AddToCartButton } from "@/ui/Submission/SubmissionDisplay";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-
+import ReactDOM from "react-dom";
 const Modal = ({
   isModalOpen,
   children,
@@ -34,7 +34,7 @@ const Modal = ({
   }, [modalRef]);
 
   if (isModalOpen) {
-    return (
+    return ReactDOM.createPortal(
       <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-black bg-opacity-80 transition-colors duration-300 ease-in-out">
         <div
           ref={modalRef}
@@ -42,7 +42,8 @@ const Modal = ({
         >
           {children}
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
   return null;
@@ -61,14 +62,16 @@ export const ModalAddToCart = ({ submission }: { submission: Submission }) => {
 };
 
 export default function SubmissionModal({
+  isModalOpen,
+  handleClose,
   children,
 }: {
+  isModalOpen: boolean;
+  handleClose: () => void;
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
   return (
-    <Modal isModalOpen={true} onClose={() => router.back()}>
+    <Modal isModalOpen={isModalOpen} onClose={handleClose}>
       {children}
     </Modal>
   );

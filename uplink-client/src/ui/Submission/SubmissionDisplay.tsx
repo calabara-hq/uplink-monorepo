@@ -11,7 +11,6 @@ import formatDecimal from "@/lib/formatDecimal";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 
 export const AddToCartButton = ({ submission, voteActions }) => {
-  
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
   const [isSelected, setIsSelected] = useState(false);
 
@@ -96,35 +95,34 @@ const SubmissionFooter = ({ submission, sharePath }) => {
   );
 };
 
-
 export const SubmissionDisplaySkeleton = () => {
   return (
     <div className="flex flex-col gap-4 w-full">
-    <div className="flex w-full justify-evenly items-center">
-      <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  sm:auto-rows-fr ">
-        <div className="col-span-4 space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px]">
-          <div className="h-5 w-2/3 rounded-lg bg-base-100" />
-          <div className="h-3 w-1/3 rounded-lg bg-base-100" />
-          <div className="h-4 w-3/4 rounded-lg bg-base-100" />
-        </div>
-        <div className="col-span-4 space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px]">
-          <div className="h-5 w-2/3 rounded-lg bg-base-100" />
-          <div className="h-3 w-1/3 rounded-lg bg-base-100" />
-          <div className="h-4 w-3/4 rounded-lg bg-base-100" />
-        </div>
-        <div className="col-span-4 space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px]">
-          <div className="h-5 w-2/3 rounded-lg bg-base-100" />
-          <div className="h-3 w-1/3 rounded-lg bg-base-100" />
-          <div className="h-4 w-3/4 rounded-lg bg-base-100" />
-        </div>
-        <div className="col-span-4 space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px]">
-          <div className="h-5 w-2/3 rounded-lg bg-base-100" />
-          <div className="h-3 w-1/3 rounded-lg bg-base-100" />
-          <div className="h-4 w-3/4 rounded-lg bg-base-100" />
+      <div className="flex w-full justify-evenly items-center">
+        <div className="w-8/12 m-auto sm:w-full grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  sm:auto-rows-fr ">
+          <div className="col-span-4 space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px]">
+            <div className="h-5 w-2/3 rounded-lg bg-base-100" />
+            <div className="h-3 w-1/3 rounded-lg bg-base-100" />
+            <div className="h-4 w-3/4 rounded-lg bg-base-100" />
+          </div>
+          <div className="col-span-4 space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px]">
+            <div className="h-5 w-2/3 rounded-lg bg-base-100" />
+            <div className="h-3 w-1/3 rounded-lg bg-base-100" />
+            <div className="h-4 w-3/4 rounded-lg bg-base-100" />
+          </div>
+          <div className="col-span-4 space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px]">
+            <div className="h-5 w-2/3 rounded-lg bg-base-100" />
+            <div className="h-3 w-1/3 rounded-lg bg-base-100" />
+            <div className="h-4 w-3/4 rounded-lg bg-base-100" />
+          </div>
+          <div className="col-span-4 space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px]">
+            <div className="h-5 w-2/3 rounded-lg bg-base-100" />
+            <div className="h-3 w-1/3 rounded-lg bg-base-100" />
+            <div className="h-4 w-3/4 rounded-lg bg-base-100" />
+          </div>
         </div>
       </div>
     </div>
-  </div>
   );
 };
 
@@ -136,29 +134,30 @@ const SubmissionDisplay = ({
   spaceName: string;
 }) => {
   const { liveSubmissions: submissions } = useLiveSubmissions(contestId);
-
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="flex w-full justify-evenly items-center">
-        <div className="w-10/12 sm:w-full m-auto grid gap-4 submission-columns auto-rows-fr">
-          {submissions.map((submission, idx) => {
-            return (
-              <CardSubmission
-                key={idx}
-                basePath={`/${spaceName}/contest/${contestId}`}
-                submission={submission}
-                footerChildren={
-                  <SubmissionFooter
-                    sharePath={`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/contest/${contestId}/submission/${submission.id}`}
-                    submission={submission}
-                  />
-                }
-              />
-            );
-          })}
+    <>
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex w-full justify-evenly items-center">
+          <div className="w-10/12 sm:w-full m-auto grid gap-4 submission-columns auto-rows-fr">
+            {submissions.map((submission, idx) => {
+              return (
+                <CardSubmission
+                  key={idx}
+                  interactive={true}
+                  submission={submission}
+                  footerChildren={
+                    <SubmissionFooter
+                      sharePath={`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/contest/${contestId}/submission/${submission.id}`}
+                      submission={submission}
+                    />
+                  }
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

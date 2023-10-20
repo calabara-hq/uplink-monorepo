@@ -4,40 +4,17 @@ import Image from "next/image";
 import React from "react";
 import sanitizeHtml from "sanitize-html";
 
-const parse = (data: string) => {
-  // replace &nbsp; with space
-  //return data.replace(/&nbsp;/g, " ");
-  return;
-};
-
 const createLinks = (text: string): string => {
-  // First, process URLs
-  text = (text || "").replace(
-    /([^\S]|^)(((https?\:\/\/)|(www\.))(\S+))/gi,
-    function (match, space, url) {
-      let hyperlink = url;
-      if (!hyperlink.match("^https?://")) {
-        hyperlink = "http://" + hyperlink;
-      }
-      return (
-        space + '<a target="_blank" href="' + hyperlink + '">' + url + "</a>"
-      );
-    }
-  );
-
-  // Then, process Twitter handles
-  text = text.replace(/([^\S]|^)@(\w+)/gi, function (match, space, handle) {
-    return (
-      space +
-      '<a  target="_blank" href="https://twitter.com/' +
-      handle +
-      '">@' +
-      handle +
-      "</a>"
-    );
-  });
-
-  return text;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const twitterRegex = /([^\S]|^)@(\w+)/gi;
+  return text
+    .replace(urlRegex, (url) => {
+      url = url.replace(/(^\w+:|^)\/\//, ""); // drop protocol from url
+      return `<a target="_blank" href="${url}">${url}</a>`;
+    })
+    .replace(twitterRegex, (handle) => {
+      return `<a target="_blank" href="https://twitter.com/${handle}">${handle}</a>`;
+    });
 };
 
 const ParagraphRenderer = ({ data }) => {
@@ -94,7 +71,7 @@ const ListOutput = ({ data }) => {
   return <ul>{content}</ul>;
 };
 
-export const ParseBlocks = ({
+const ParseBlocks = ({
   data,
   omitImages = false,
 }: {
@@ -104,7 +81,7 @@ export const ParseBlocks = ({
   const renderers = {
     image: omitImages ? null : ImageRenderer,
     paragraph: ParagraphRenderer,
-    //list: ListOutput,
+    list: ListOutput,
   };
 
   if (!data || !data.blocks || !Array.isArray(data.blocks)) return null;
@@ -120,3 +97,5 @@ export const ParseBlocks = ({
     </>
   );
 };
+
+export default ParseBlocks;

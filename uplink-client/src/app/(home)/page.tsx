@@ -314,7 +314,7 @@ const PopularSubmissions = async () => {
           {popularSubmissions.map((submission, index) => (
             <SwiperSlide key={index}>
               <div className="w-full h-full animate-scrollInX">
-                <CardSubmission submission={submission} basePath="" />
+                <CardSubmission submission={submission} />
               </div>
             </SwiperSlide>
           ))}
