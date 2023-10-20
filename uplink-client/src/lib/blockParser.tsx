@@ -9,11 +9,12 @@ const createLinks = (text: string): string => {
   const twitterRegex = /([^\S]|^)@(\w+)/gi;
   return text
     .replace(urlRegex, (url) => {
-      url = url.replace(/(^\w+:|^)\/\//, ""); // drop protocol from url
-      return `<a target="_blank" href="${url}">${url}</a>`;
+      const dispUrl = url.replace(/(^\w+:|^)\/\//, ""); // drop protocol from url
+      return `<a target="_blank" href="${url}">${dispUrl}</a>`;
     })
     .replace(twitterRegex, (handle) => {
-      return `<a target="_blank" href="https://twitter.com/${handle}">${handle}</a>`;
+      const linkUrl = `https://twitter.com/${handle.replace(" ", "")}`;
+      return `<a target="_blank" href="${linkUrl}">${handle}</a>`;
     });
 };
 
@@ -47,7 +48,7 @@ const ImageRenderer = ({ data }: { data: any }) => {
           src={data.file.url}
           alt="content media"
           fill
-          className="object-cover rounded-xl w-full h-full overflow-hidden"
+          className="object-contain rounded-xl w-full h-full overflow-hidden"
           sizes="80vw"
         />
       </ImageWrapper>
@@ -68,7 +69,9 @@ const ListOutput = ({ data }) => {
     );
   });
 
-  return <ul>{content}</ul>;
+  return <ul className="list-disc list-inside pl-2">{content}</ul>;
+
+
 };
 
 const ParseBlocks = ({

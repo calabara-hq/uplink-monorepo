@@ -20,7 +20,7 @@ const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
 
   return (
     <div className="grid grid-cols-1 w-full gap-2">
-      <div className="w-full ml-auto">
+      <div className="w-full ml-auto ">
         <div className="grid grid-cols-1 sm:grid-cols-[auto_25%] gap-6 w-full p-4">
           <div className="flex flex-col gap-2 break-word">
             <h2 className="lg:text-3xl text-xl font-[600] text-t1">
@@ -67,12 +67,13 @@ const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
               <ParseBlocks data={prompt.body} omitImages={false} />
             </div>
           </div>
-          <div className="grid grid-cols-1 w-full gap-2">
+          <div className="grid grid-cols-1 items-start  w-full gap-2">
             {prompt.coverUrl && (
               <ImageWrapper>
                 <Image
                   src={prompt.coverUrl}
                   alt="contest image"
+                  sizes="20vw"
                   fill
                   className="object-contain rounded-xl"
                 />
