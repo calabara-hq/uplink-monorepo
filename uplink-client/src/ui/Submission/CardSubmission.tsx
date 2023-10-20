@@ -6,13 +6,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { isMobile } from "@/lib/isMobile";
-
+import dynamic from "next/dynamic";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { ImageWrapper } from "./MediaWrapper";
 import { TbCrown } from "react-icons/tb";
 import { ParseThread } from "@/lib/threadParser";
-import { ParseBlocks } from "@/lib/blockParser";
 import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
+import { ModalAddToCart } from "./SubmissionModal";
+import ExpandedSubmission from "./ExpandedSubmission";
+const SubmissionModal = dynamic(() => import("./SubmissionModal"), {
+  ssr: false,
+});
+const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
+  ssr: true,
+});
 
 const SubmissionBody = ({ submission }: { submission: Submission }) => {
   if (submission.data.type !== "text")
@@ -88,6 +95,7 @@ const RenderImageSubmission = ({ submission }) => {
             ? submission.data.previewAsset
             : submission.data.thread[0].previewAsset
         }
+        draggable={false}
         alt="submission image"
         fill
         sizes="30vw"
@@ -131,12 +139,12 @@ export const SimplePreview = ({ submission }: { submission: Submission }) => {
 
 const CardSubmission = ({
   submission,
-  basePath,
   footerChildren,
+  interactive = false,
 }: {
   submission: Submission;
-  basePath: string;
   footerChildren?: React.ReactNode;
+  interactive?: boolean;
 }) => {
   const isMobileDevice = isMobile();
 
@@ -145,6 +153,7 @@ const CardSubmission = ({
   });
 
   const [isActive, setIsActive] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (inView && isMobileDevice) {
@@ -153,15 +162,13 @@ const CardSubmission = ({
   }, [inView, isMobileDevice]);
 
   return (
-    <Link
-      className="relative w-full h-full p-2 shadow-black shadow-sm flex flex-col justify-between rounded-xl bg-base-100 border border-border no-select transform 
+    <div
+      className="relative w-full h-full cursor-pointer p-2 shadow-black shadow-sm flex flex-col justify-between rounded-xl bg-base-100 border border-border no-select transform
       transition-transform duration-300 hoverCard will-change-transform"
       ref={ref}
-      href={`${basePath}/submission/${submission.id}`}
       onMouseEnter={() => !isMobileDevice && setIsActive(true)}
       onMouseLeave={() => !isMobileDevice && setIsActive(false)}
-      draggable={false}
-      scroll={false}
+      onClick={() => setIsModalOpen(true)}
     >
       {submission.rank && (
         <TbCrown
@@ -181,7 +188,24 @@ const CardSubmission = ({
         <RenderTextSubmission submission={submission} />
       )}
       {footerChildren}
-    </Link>
+      <SubmissionModal
+        isModalOpen={isModalOpen}
+        handleClose={() => setIsModalOpen(false)}
+      >
+        <div className="flex w-full gap-1 lg:gap-4 p-0">
+          <div className="flex flex-col jusitfy-start w-full h-full ">
+            <ExpandedSubmission
+              submission={submission}
+              headerChildren={
+                <div className="flex p-1 ml-auto items-center justify-center">
+                  {interactive && <ModalAddToCart submission={submission} />}
+                </div>
+              }
+            />
+          </div>
+        </div>
+      </SubmissionModal>
+    </div>
   );
 };
 

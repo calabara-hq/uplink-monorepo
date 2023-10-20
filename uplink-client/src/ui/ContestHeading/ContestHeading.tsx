@@ -1,9 +1,10 @@
 import Image from "next/image";
-import { ParseBlocks } from "@/lib/blockParser";
+import dynamic from "next/dynamic";
+const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
+  ssr: true,
+});
 import { CategoryLabel, StatusLabel } from "../ContestLabels/ContestLabels";
 import Link from "next/link";
-import fetchContest from "@/lib/fetch/fetchContest";
-import { Suspense } from "react";
 import LiveContestState from "../ContestLabels/LiveContestState";
 import { ImageWrapper } from "../Submission/MediaWrapper";
 import { DetailsMenuDrawer } from "../MobileContestActions/MobileContestActions";
@@ -19,7 +20,7 @@ const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
 
   return (
     <div className="grid grid-cols-1 w-full gap-2">
-      <div className="w-full ml-auto">
+      <div className="w-full ml-auto ">
         <div className="grid grid-cols-1 sm:grid-cols-[auto_25%] gap-6 w-full p-4">
           <div className="flex flex-col gap-2 break-word">
             <h2 className="lg:text-3xl text-xl font-[600] text-t1">
@@ -50,28 +51,29 @@ const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
               {/* render a details button when the screen gets smaller */}
               <div className="hidden lg:block xl:hidden">
                 <DetailsMenuDrawer
-              detailChildren={
-                // @ts-expect-error
-                <ContestDetails contest={contest} />
-              }
-              ui={{
-                classNames:
-                  "text-sm font-[600] text-t2 hover:underline hover:text-t1 ",
-                label: <p>details</p>,
-              }}
-            />
+                  detailChildren={
+                    // @ts-expect-error
+                    <ContestDetails contest={contest} />
+                  }
+                  ui={{
+                    classNames:
+                      "text-sm font-[600] text-t2 hover:underline hover:text-t1 ",
+                    label: <p>details</p>,
+                  }}
+                />
               </div>
             </div>
             <div className="grid grid-cols-1">
               <ParseBlocks data={prompt.body} omitImages={false} />
             </div>
           </div>
-          <div className="grid grid-cols-1 w-full gap-2">
+          <div className="grid grid-cols-1 items-start  w-full gap-2">
             {prompt.coverUrl && (
               <ImageWrapper>
                 <Image
                   src={prompt.coverUrl}
                   alt="contest image"
+                  sizes="20vw"
                   fill
                   className="object-contain rounded-xl"
                 />
@@ -101,7 +103,6 @@ export const ContestHeadingSkeleton = () => {
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
             <div className="shimmer h-4 w-80 bg-neutral rounded-lg" />
-
           </div>
         </div>
       </div>
@@ -109,6 +110,5 @@ export const ContestHeadingSkeleton = () => {
     </div>
   );
 };
-
 
 export default ContestHeading;
