@@ -21,11 +21,9 @@ const ContestStateContext = createContext<ContestStateProps | undefined>(
   undefined
 );
 
-
 // this is a bit of an anti pattern but it is done to make navigation instant
 // the alternative would awaiting the promise in the layout component, but that would block the navigation
 // we'll make the ugliness-tradeoff for now with plans to redesign later
-
 
 export function ContestStateProvider({
   children,
@@ -109,7 +107,10 @@ export function ContestStateProvider({
         category: contestData?.metadata.category,
         type: contestData?.metadata.type,
         tweetId: contestData?.tweetId,
-        contestAdmins: contestData?.space.admins ?? [].map((admin: any) => admin.address),
+        contestAdmins:
+        contestData?.space.admins?.map((admin: any) => {
+          return admin.address;
+        }) ?? [],
       }}
     >
       {children}

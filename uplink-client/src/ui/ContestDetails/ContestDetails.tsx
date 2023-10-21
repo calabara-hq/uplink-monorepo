@@ -4,6 +4,7 @@ import { FaRegCircleQuestion } from "react-icons/fa6";
 import formatDecimal from "@/lib/formatDecimal";
 import {
   ExpandSection,
+  InteractiveAdminSignIn,
   InteractiveAdminsRequired,
   InteractiveContestClosed,
   InteractiveCreateTweet,
@@ -71,7 +72,9 @@ const DetailSectionWrapper = ({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1 w-full text-t2 text-sm">{children}</div>
+      <div className="flex flex-col gap-1 w-full text-t2 text-sm">
+        {children}
+      </div>
       <div className="bg-base-100 h-0.5 w-full" />
     </div>
   );
@@ -477,10 +480,7 @@ const AdminRequiredDialog = () => {
     >
       <div className="flex flex-col items-center justify-evenly gap-2 w-full text-t2">
         <p className="text-center ">{`Hang tight! A space admin is needed to launch the contest.`}</p>
-        <div className="flex flex-row items-center justify-start gap-2  xl:ml-auto text-t1">
-          <p className="text-t1 text-sm">Are you an admin?</p>
-          <WalletConnectButton styleOverride="btn-sm btn-ghost" />
-        </div>
+        <InteractiveAdminSignIn />
       </div>
     </DialogWrapper>
   );
