@@ -10,7 +10,7 @@ import { ImageWrapper } from "../Submission/MediaWrapper";
 import { DetailsMenuDrawer } from "../MobileContestActions/MobileContestActions";
 import ContestDetails from "../ContestDetails/ContestDetails";
 
-const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
+const ContestHeading = async ({ contest, contestId }: { contest: Promise<any>, contestId: string }) => {
   const contestData = await contest.then(async (res) => {
     const promptData = await fetch(res.promptUrl).then((res) => res.json());
     return { ...res, prompt: promptData };
@@ -53,7 +53,7 @@ const ContestHeading = async ({ contest }: { contest: Promise<any> }) => {
                 <DetailsMenuDrawer
                   detailChildren={
                     // @ts-expect-error
-                    <ContestDetails contest={contest} />
+                    <ContestDetails contestId={contestId} contest={contest} />
                   }
                   ui={{
                     classNames:

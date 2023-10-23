@@ -125,7 +125,6 @@ const MobileContestActions = ({
   detailChildren: React.ReactNode;
 }) => {
   const { contestState, stateRemainingTime } = useContestState();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { proposedVotes } = useVoteActionContext();
 
   if (!contestState) return null;

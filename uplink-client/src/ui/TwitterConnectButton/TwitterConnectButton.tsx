@@ -1,13 +1,20 @@
 "use client";
 import { twitterSignIn, useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
+import { useEffect, useState } from "react";
 
-const TwitterConnectButton = ({}) => {
-  const handleClick = async () => {
-    const res = await twitterSignIn("write");
-    if (res) {
-      window.open(res.url, "_blank");
+const TwitterConnectButton = () => {
+  const [url, setUrl] = useState(null);
+  const { data: session, status } = useSession();
+  useEffect(() => {
+    if (status === "authenticated") {
+      twitterSignIn("write").then((data) => {
+        if (data.url) setUrl(data.url);
+      });
     }
+  }, [status]);
+  const handleClick = async () => {
+    if (url) window.open(url, "_blank");
   };
 
   return (

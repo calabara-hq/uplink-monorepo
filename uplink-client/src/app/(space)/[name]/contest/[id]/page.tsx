@@ -55,14 +55,14 @@ export default async function Page({
           <div className="flex flex-col w-full gap-4 transition-all duration-200 ease-in-out">
             <Suspense fallback={<ContestHeadingSkeleton />}>
               {/*@ts-expect-error*/}
-              <ContestHeading contest={contestPromise} />
+              <ContestHeading contest={contestPromise} contestId={contestId}/>
             </Suspense>
             <MobileContestActions
               contestId={contestId}
               spaceName={spaceName}
               detailChildren={
                 // @ts-expect-error
-                <ContestDetails contest={contestPromise} />
+                <ContestDetails contestId={contestId} contest={contestPromise} />
               }
             />
             <Suspense fallback={<SubmissionDisplaySkeleton />}>
