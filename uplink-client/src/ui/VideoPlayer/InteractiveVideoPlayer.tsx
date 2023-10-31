@@ -31,7 +31,7 @@ const InteractiveVideoPlayer = ({ videoUrl, posterUrl, isActive }) => {
   });
 
   return (
-    <MediaController className="w-full h-fit aspect-video bg-transparent animate-fadeIn">
+    <MediaController className="w-full h-fit bg-transparent animate-fadeIn">
     <video
         ref={vidRef}
         autoPlay={isActive}
@@ -43,7 +43,7 @@ const InteractiveVideoPlayer = ({ videoUrl, posterUrl, isActive }) => {
         preload="auto"
         muted
         crossOrigin=""
-        className="w-full aspect-video object-cover rounded-2xl"
+        className="w-full aspect-square object-cover rounded-2xl"
         />
       <MediaLoadingIndicator slot="centered-chrome" />
       <div slot="top-chrome" className="flex flex-row w-full mt-2">
