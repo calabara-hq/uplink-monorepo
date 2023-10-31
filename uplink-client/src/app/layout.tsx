@@ -11,7 +11,7 @@ export const runtime = "edge";
 export const preferredRegion = "iad1";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL!),
   title: "Uplink",
   description: "Crafted for creators.",
   icons: {

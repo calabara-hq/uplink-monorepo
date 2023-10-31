@@ -1,4 +1,15 @@
 import Redis, { Redis as RedisType } from 'ioredis';
+import { z } from 'zod';
+
+
+const ContextSchema = z.object({
+    token: z.record(z.string()),
+    csrfToken: z.string(),
+    ip: z.string(),
+    hasApiToken: z.boolean()
+})
+
+export type Context = z.infer<typeof ContextSchema>;
 
 export class AuthorizationController {
     private redisClient: RedisType;
@@ -7,7 +18,7 @@ export class AuthorizationController {
         this.redisClient = new Redis(redisUrl);
     }
 
-    async getUser(context: any) {
+    async getUser(context: Context) {
         if (!context || !context.token || !context.csrfToken) {
             return null;
         }

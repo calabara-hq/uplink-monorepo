@@ -67,7 +67,6 @@ async function postSubmission(
       query: `
       mutation Mutation($contestId: ID!, $submission: SubmissionPayload!) {
         createSubmission(contestId: $contestId, submission: $submission) {
-          errors
           success
           userSubmissionParams {
               maxSubPower

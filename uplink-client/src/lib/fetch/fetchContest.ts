@@ -1,13 +1,26 @@
-"use server";
+import { ReadableContest } from "@/types/contest";
 import handleNotFound from "../handleNotFound";
 
 
-const fetchContest = async (contestId: string) => {
+export type FetchSingleContestResponse = ReadableContest & {
+  space: {
+    id: string;
+    name: string;
+    displayName: string;
+    logoUrl: string;
+    admins: Array<{
+      address: string;
+    }>;
+  };
+}
+
+
+const fetchContest = async (contestId: string): Promise<FetchSingleContestResponse> => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-API-TOKEN": process.env.API_SECRET,
+      "X-API-TOKEN": process.env.API_SECRET!,
     },
     body: JSON.stringify({
       query: `
@@ -37,71 +50,99 @@ const fetchContest = async (contestId: string) => {
               endTime
               snapshot
             }
-            submitterRestrictions {
-              restrictionType
-              tokenRestriction {
-                threshold
-                token {
-                  address
-                  decimals
-                  symbol
-                  tokenHash
-                  tokenId
-                  type
+            votingPolicy {
+              ... on ArcadeVotingStrategyOption {
+                strategyType
+                arcadeVotingStrategy {
+                  token {
+                    tokenHash
+                    type
+                    symbol
+                    decimals
+                    address
+                    tokenId
+                  }
+                  votingPower
+                }
+              }
+              ... on WeightedVotingStrategyOption {
+                strategyType
+                weightedVotingStrategy {
+                  token {
+                    tokenHash
+                    type
+                    symbol
+                    decimals
+                    address
+                    tokenId
+                  }
                 }
               }
             }
             submitterRewards {
               rank
-              tokenReward {
-                amount
-                token {
-                  tokenHash
-                  symbol
-                  decimals
-                  address
-                  tokenId
-                  type
+              reward {
+                ... on SubmitterTokenReward {
+                  tokenReward {
+                    ... on FungibleReward {
+                      token {
+                        tokenHash
+                        type
+                        symbol
+                        decimals
+                        address
+                        tokenId
+                      }
+                      amount
+                    }
+                    ... on NonFungibleReward {
+                      token {
+                        tokenHash
+                        type
+                        symbol
+                        decimals
+                        address
+                        tokenId
+                      }
+                      tokenId
+                    }
+                  }
                 }
-                tokenId
               }
             }
             voterRewards {
               rank
-              tokenReward {
-                amount
-                tokenId
-                token {
-                  tokenHash
-                  type
-                  address
-                  symbol
-                  decimals
-                  tokenId
+              reward {
+                ... on VoterTokenReward {
+                  tokenReward {
+                    ... on FungibleReward {
+                      amount
+                      token {
+                        tokenHash
+                        type
+                        symbol
+                        decimals
+                        address
+                        tokenId
+                      }
+                    }
+                  }
                 }
               }
             }
-            votingPolicy {
-              strategyType
-              arcadeVotingStrategy {
-                token {
-                  tokenHash
-                  type
-                  address
-                  symbol
-                  decimals
-                  tokenId
-                }
-                votingPower
-              }
-              weightedVotingStrategy {
-                token {
-                  tokenHash
-                  type
-                  address
-                  symbol
-                  decimals
-                  tokenId
+            submitterRestrictions {
+              ... on TokenRestrictionOption {
+                restrictionType
+                tokenRestriction {
+                  threshold
+                  token {
+                    tokenHash
+                    type
+                    symbol
+                    decimals
+                    address
+                    tokenId
+                  }
                 }
               }
             }

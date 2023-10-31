@@ -8,7 +8,7 @@ import {
   HiPlus,
   HiSparkles,
 } from "react-icons/hi2";
-import { useVoteActionContext } from "@/providers/VoteActionProvider";
+import { VotableSubmission, useVoteActionContext } from "@/providers/VoteActionProvider";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import formatDecimal from "@/lib/formatDecimal";
@@ -16,6 +16,8 @@ import { useContestState } from "@/providers/ContestStateProvider";
 import Image from "next/image";
 import { HiTrash, HiDocumentText } from "react-icons/hi2";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
+import { Submission, isStandardSubmission, isTwitterSubmission } from "@/types/submission";
+import { ImageWrapper } from "../Submission/MediaWrapper";
 
 const SubmissionVoteInput = ({
   submission,
@@ -52,7 +54,35 @@ const SubmissionCardVote = ({
   const { removeSingleVote } = useVoteActionContext();
 
   return (
-    <div className="grid grid-cols-[70%_30%] w-full h-24 max-h-24 bg-base-100 rounded-xl">
+    // <div className="grid grid-cols-[70%_30%] w-full h-24 max-h-24 bg-base-100 rounded-xl">
+    // {submission.data.type === "text" && (
+    //   <div className="flex flex-col justify-center w-full p-2">
+    //     <p className="text-base line-clamp-4 text-t1">
+    //       {submission.data.title}
+    //     </p>
+    //   </div>
+    // )}
+    // {submission.data.type !== "text" && (
+    //   <div className="grid grid-cols-2 w-full p-2 bg-green-200">
+    //     <CartMediaSubmission submission={submission} />
+    //   </div>
+    // )}
+    // <div className="grid grid-rows-2 ">
+    //   <div className="flex">
+    //     <button
+    //       className="btn btn-ghost btn-sm ml-auto text-error"
+    //       onClick={() => removeSingleVote(submission.submissionId, mode)}
+    //     >
+    //       <HiTrash className="w-4 h-4" />
+    //     </button>
+    //   </div>
+    //   <div className="rounded-br-xl">
+    //     <SubmissionVoteInput submission={submission} mode={mode} />
+    //   </div>
+    // </div>
+    // </div>
+
+    <div className="grid grid-cols-2 w-full h-24 max-h-24 bg-base-100 rounded-xl overflow-hidden items-center">
       {submission.data.type === "text" && (
         <div className="flex flex-col justify-center w-full p-2">
           <p className="text-base line-clamp-4 text-t1">
@@ -61,11 +91,13 @@ const SubmissionCardVote = ({
         </div>
       )}
       {submission.data.type !== "text" && (
-        <div className="grid grid-cols-2 w-full p-2">
+        <div className="w-full h-full">
           <CartMediaSubmission submission={submission} />
         </div>
       )}
-      <div className="grid grid-rows-2 ">
+
+
+      <div className="flex flex-col gap-2 w-1/2 ml-auto mr-1">
         <div className="flex">
           <button
             className="btn btn-ghost btn-sm ml-auto text-error"
@@ -86,7 +118,25 @@ const LockedCardVote = ({ submission }: { submission: any }) => {
   const displayableVotes = formatDecimal(submission.votes);
 
   return (
-    <div className="grid grid-cols-[70%_30%] gap-2 h-20 min-h-20 bg-base-100 rounded-xl">
+    // <div className="grid grid-cols-[70%_30%] gap-2 h-20 min-h-20 bg-base-100 rounded-xl">
+    //   {submission.data.type === "text" && (
+    //     <div className="flex flex-col justify-center w-full p-2">
+    //       <p className="text-base line-clamp-4 text-t1">
+    //         {submission.data.title}
+    //       </p>
+    //     </div>
+    //   )}
+    //   {submission.data.type !== "text" && (
+    //     <div className="grid grid-cols-2 w-full">
+    //       <CartMediaSubmission submission={submission} />
+    //     </div>
+    //   )}
+    //   <div className="flex flex-col items-center justify-center m-auto gap-1 px-2">
+    //     <p>{displayableVotes.short}</p>
+    //   </div>
+    // </div>
+
+    <div className="grid grid-cols-2 w-full h-24 max-h-24 bg-base-100 rounded-xl overflow-hidden items-center">
       {submission.data.type === "text" && (
         <div className="flex flex-col justify-center w-full p-2">
           <p className="text-base line-clamp-4 text-t1">
@@ -95,28 +145,36 @@ const LockedCardVote = ({ submission }: { submission: any }) => {
         </div>
       )}
       {submission.data.type !== "text" && (
-        <div className="grid grid-cols-2 w-full p-2">
+        <div className="w-full h-full">
           <CartMediaSubmission submission={submission} />
         </div>
       )}
-      <div className="flex flex-col items-center justify-center m-auto gap-1 px-2">
-        <p>{displayableVotes.short}</p>
+      <div className="flex flex-col w-1/2 ml-auto mr-1 items-center justify-center m-auto gap-1 px-2">
+        <p className="text-t2">{displayableVotes.short} votes</p>
       </div>
     </div>
   );
 };
 
-const CartMediaSubmission = ({ submission }: { submission: any }) => {
+
+
+
+
+const CartMediaSubmission = ({ submission }: { submission: VotableSubmission }) => {
+  const src = submission.type === "standard" ? submission.data.previewAsset : submission.data.thread[0].previewAsset
   return (
-    <figure className="relative w-full h-full rounded-xl p-2">
-      <Image
-        src={submission.data.previewAsset}
-        alt="submission image"
-        fill
-        className="object-cover rounded-xl"
-        sizes="10wv"
-      />
-    </figure>
+    <div className="relative w-full h-full">
+      <figure className="absolute inset-0 overflow-hidden">
+        <Image
+          src={src}
+          alt="submission image"
+          width={100}
+          height={100}
+          className="object-cover rounded-xl"
+          sizes="5wv"
+        />
+      </figure>
+    </div>
   );
 };
 

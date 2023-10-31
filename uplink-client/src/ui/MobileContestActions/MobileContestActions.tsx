@@ -1,5 +1,4 @@
 "use client";
-import fetchContest from "@/lib/fetch/fetchContest";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";

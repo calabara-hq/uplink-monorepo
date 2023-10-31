@@ -1,12 +1,14 @@
-"use server";
+import { Space } from "@/types/space";
 import handleNotFound from "../handleNotFound";
 
-const fetchSingleSpace = async (name: string) => {
+
+
+const fetchSingleSpace = async (name: string): Promise<Space> => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-API-TOKEN": process.env.API_SECRET,
+      "X-API-TOKEN": process.env.API_SECRET!,
     },
     body: JSON.stringify({
       query: `

@@ -1,33 +1,37 @@
-import { db, sqlOps } from "../utils/database.js";
 import { GraphQLError } from "graphql";
-import { schema, AuthorizationController } from "lib";
-import { submit, twitterSubmit } from "../utils/submit.js";
+import { AuthorizationController } from "lib";
 import dotenv from "dotenv";
+import { SubmissionPayload, TwitterSubmissionPayload } from "../__generated__/resolvers-types.js";
+import { validateStandardSubmissionPayload, validateTwitterSubmissionPayload } from "../utils/validate.js";
+import { createStandardSubmission, createTwitterSubmission } from "../utils/insert.js";
 dotenv.config();
 
-const authController = new AuthorizationController(process.env.REDIS_URL);
+const authController = new AuthorizationController(process.env.REDIS_URL!);
 
 const mutations = {
     Mutation: {
-        createSubmission: async (_: any, args: any, context: any) => {
+        createSubmission: async (_: any, { contestId, submission }: { contestId: string, submission: SubmissionPayload }, context: any) => {
             const user = await authController.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'
                 }
             })
-            return submit(user, args.contestId, args.submission);
+
+            const validPayload = await validateStandardSubmissionPayload(submission);
+            return createStandardSubmission(user, parseInt(contestId), validPayload);
         },
 
-        createTwitterSubmission: async (_: any, args: any, context: any) => {
+        createTwitterSubmission: async (_: any, { contestId, submission }: { contestId: string, submission: TwitterSubmissionPayload }, context: any) => {
             const user = await authController.getUser(context);
             if (!user || !user.twitter) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'
                 }
             })
-            let result = await twitterSubmit(user, args.contestId, args.submission);
-            return result;
+
+            let validPayload = await validateTwitterSubmissionPayload(submission);
+            return createTwitterSubmission(user, parseInt(contestId), validPayload);
         }
     },
 };

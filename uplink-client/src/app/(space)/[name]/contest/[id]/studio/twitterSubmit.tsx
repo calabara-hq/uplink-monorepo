@@ -53,7 +53,6 @@ async function postTwitterSubmission(
       query: `
       mutation Mutation($contestId: ID!, $submission: TwitterSubmissionPayload!) {
         createTwitterSubmission(contestId: $contestId, submission: $submission) {
-          errors
           success
           userSubmissionParams {
               maxSubPower
@@ -411,7 +410,7 @@ const PreviewModal = ({
       thread: thread.map((el) => {
         const serverThreadItem: ApiThreadItem = {
           text: el.text,
-          ...(el.assetSize ? { assetSize: el.assetSize.toString() } : {}),
+          ...(el.assetSize ? { assetSize: el.assetSize } : {}),
           ...(el.assetType ? { assetType: el.assetType } : {}),
         };
         if (el.isVideo) {

@@ -13,7 +13,7 @@ export type ThreadItem = {
     videoThumbnailUrl: string | null;
     videoThumbnailBlobIndex: number | null;
     videoThumbnailOptions: string[] | null;
-    assetSize: string | null;
+    assetSize: number | null;
     assetType: string | null;
     isVideo: boolean;
     isUploading: boolean;
@@ -25,7 +25,7 @@ export type ApiThreadItem = {
     text: string;
     previewAsset?: string;
     videoAsset?: string;
-    assetSize?: string;
+    assetSize?: number;
     assetType?: string;
 };
 
@@ -169,7 +169,7 @@ export const useThreadCreator = (initialThread?: ThreadItem[]) => {
         });
     }
 
-    const setTweetAssetSize = (id: string, size: string) => {
+    const setTweetAssetSize = (id: string, size: number) => {
         dispatch({
             type: "SET_FIELD",
             payload: { id, field: 'assetSize', value: size }

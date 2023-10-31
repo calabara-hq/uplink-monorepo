@@ -9,48 +9,6 @@ import useSWR from "swr";
 import { useSession } from "./SessionProvider";
 import { useContestState } from "./ContestStateProvider";
 import { IToken } from "@/types/token";
-import type { OutputData } from "@editorjs/editorjs";
-
-type SubmissionFormat = "video" | "image" | "text";
-
-type BaseSubmission = {
-  id: string;
-  contestId: string;
-  created: string;
-  url: string;
-  version: string;
-  author?: `0x${string}`;
-  totalVotes: string | null;
-  rank: number | null;
-};
-
-export type TwitterSubmission = BaseSubmission & {
-  type: "twitter";
-  data: {
-    type: SubmissionFormat;
-    title: string;
-    thread: {
-      text?: string;
-      previewAsset?: string;
-      videoAsset?: string;
-      assetSize?: number;
-      assetType?: string;
-    }[];
-  };
-};
-
-export type StandardSubmission = BaseSubmission & {
-  type: "standard";
-  data: {
-    type: SubmissionFormat;
-    title: string;
-    previewAsset?: string;
-    videoAsset?: string;
-    body?: OutputData;
-  };
-};
-
-export type Submission = TwitterSubmission | StandardSubmission;
 
 export type UserSubmissionParams = {
   maxSubPower: string;

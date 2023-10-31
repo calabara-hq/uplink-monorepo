@@ -511,7 +511,12 @@ export const postContest = async (url,
     {
         arg,
     }: {
-        arg: any
+        url: string;
+        arg: {
+            csrfToken: string;
+            contestData: any;
+            spaceId: string;
+        }
     }
 ) => {
     return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
@@ -523,23 +528,16 @@ export const postContest = async (url,
         credentials: "include",
         body: JSON.stringify({
             query: `
-                mutation CreateContest($contestData: ContestBuilderProps!){
-                    createContest(contestData: $contestData){
+                mutation CreateContest($spaceId: ID!, $contestData: CreateContestData!){
+                    createContest(spaceId: $spaceId, contestData: $contestData){
                         success
                         contestId
-                        errors{
-                            metadata
-                            deadlines
-                            prompt
-                            submitterRewards
-                            voterRewards
-                            submitterRestrictions
-                            votingPolicy
-                        }
+
                     }
                 }`,
             variables: {
                 contestData: arg.contestData,
+                spaceId: arg.spaceId,
             },
         }),
     })

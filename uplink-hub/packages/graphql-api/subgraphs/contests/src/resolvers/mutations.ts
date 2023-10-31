@@ -1,143 +1,92 @@
 
-import { AuthorizationController, schema } from "lib";
-import { createDbContest, queueTweet } from "../utils/database.js";
-import {
-    validateContestParams, validateTweetThread
-} from "../utils/validateContestParams.js";
-
+import { AuthorizationController, schema, Context } from "lib";
 import { GraphQLError } from "graphql";
-import { sqlOps, db } from '../utils/database.js';
-
+import { sqlOps, db, dbSingleContestById, dbIsContestTweetQueued, dbIsUserSpaceAdmin } from '../utils/database.js';
 import dotenv from 'dotenv';
-import { dbContestTweetQueue, dbSingleContestById } from "./queries.js";
+import { validateContestData, validateTweetThread } from "../utils/validate.js";
+import { insertContest, queueTweet } from "../utils/insert.js";
+import { CreateContestData, ThreadItemInput } from "../__generated__/resolvers-types.js";
+
 dotenv.config();
 
-const authController = new AuthorizationController(process.env.REDIS_URL);
+const authController = new AuthorizationController(process.env.REDIS_URL!);
 
+const throwMutationError = (code: string) => {
 
-const userSpaceAdminObject = db.query.admins.findFirst({
-    where: (admin) => sqlOps.and(
-        sqlOps.eq(admin.address, sqlOps.placeholder('address')),
-        sqlOps.eq(admin.spaceId, sqlOps.placeholder('spaceId'))
-    )
+    const codeTable: { [key: string]: string } = {
+        "UNAUTHORIZED": "Unauthorized",
+        "CONTEST_DOES_NOT_EXIST": "Contest does not exist",
+        "NOT_TWITTER_CONTEST": "Contest is not a twitter contest",
+        "CONTEST_TWEET_EXISTS": "Contest already has a tweet",
+        "CONTEST_TWEET_QUEUED": "Contest tweet already queued"
+    }
 
-}).prepare();
+    if (codeTable[code]) throw new GraphQLError(codeTable[code], {
+        extensions: {
+            code
+        }
+    })
 
-
-const isUserSpaceAdmin = async (user: any, spaceId: string) => {
-    const isAdmin = await userSpaceAdminObject.execute({ address: user.address, spaceId: spaceId })
-    return isAdmin
+    else {
+        throw new GraphQLError("Unknown error", {
+            extensions: {
+                code: "UNKNOWN"
+            }
+        })
+    }
 }
+
 
 
 const mutations = {
     Mutation: {
-        createContest: async (_: any, args: any, context: any) => {
+        createContest: async (_: any, args: { spaceId: string, contestData: CreateContestData }, context: Context) => {
+
+            const { spaceId, contestData } = args;
+
             const user = await authController.getUser(context);
-            if (!user) throw new GraphQLError('Unauthorized', {
-                extensions: {
-                    code: 'UNAUTHORIZED'
-                }
-            })
+            if (!user) throwMutationError('UNAUTHORIZED')
 
-            const isSpaceAdmin = await isUserSpaceAdmin(user, args.contestData.spaceId)
-            if (!isSpaceAdmin) throw new GraphQLError('Unauthorized', {
-                extensions: {
-                    code: 'UNAUTHORIZED'
-                }
-            })
+            const isSpaceAdmin = await dbIsUserSpaceAdmin(user, parseInt(args.spaceId))
+            if (!isSpaceAdmin) throwMutationError('UNAUTHORIZED')
 
-
-            const { contestData } = args;
-            const result = await validateContestParams(contestData);
-            let contestId
-
-            if (result.success) {
-                const data = {
-                    spaceId: contestData.spaceId,
-                    metadata: contestData.metadata,
-                    deadlines: contestData.deadlines,
-                    prompt: contestData.prompt,
-                    additionalParams: contestData.additionalParams,
-                    submitterRewards: contestData.submitterRewards,
-                    voterRewards: contestData.voterRewards,
-                    submitterRestrictions: contestData.submitterRestrictions,
-                    votingPolicy: contestData.votingPolicy,
-                }
-                contestId = await createDbContest(data)
-            } else {
-                contestId = null
-            }
-
-            return {
-                success: result.success,
-                errors: result.errors,
-                contestId: contestId,
+            const validContestData = await validateContestData(contestData);
+            try {
+                const contestId = await insertContest(parseInt(spaceId), validContestData)
+                return { success: true, contestId }
+            } catch (e) {
+                console.log(e)
+                return { success: false, contestId: null }
             }
         },
-        createContestTweet: async (_: any, args: any, context: any) => {
+
+        createContestTweet: async (_: any, args: { contestId: string, spaceId: string, tweetThread: ThreadItemInput[] }, context: Context) => {
+
             const user = await authController.getUser(context);
-
             const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.accessSecret ?? null);
+            if (!user || !isTwitterAuth) throwMutationError('UNAUTHORIZED')
 
-            if (!user || !isTwitterAuth) throw new GraphQLError('Unauthorized', {
-                extensions: {
-                    code: 'UNAUTHORIZED'
-                }
-            })
+            const isSpaceAdmin = await dbIsUserSpaceAdmin(user, parseInt(args.spaceId))
+            if (!isSpaceAdmin) throwMutationError('UNAUTHORIZED')
 
-            const isSpaceAdmin = await isUserSpaceAdmin(user, args.spaceId)
+            const contest = await dbSingleContestById(parseInt(args.contestId))
+            if (!contest) throwMutationError('CONTEST_DOES_NOT_EXIST')
+            if (contest.metadata.type !== 'twitter') throwMutationError('NOT_TWITTER_CONTEST')
+            if (contest.tweetId) throwMutationError('CONTEST_TWEET_EXISTS')
 
-            if (!isSpaceAdmin) throw new GraphQLError('Unauthorized', {
-                extensions: {
-                    code: 'UNAUTHORIZED'
-                }
-            })
+            const tweetQueuedResult = await dbIsContestTweetQueued(parseInt(args.contestId))
+            if (tweetQueuedResult) throwMutationError('CONTEST_TWEET_QUEUED')
 
-            const contest = await dbSingleContestById.execute({ contestId: args.contestId })
+            console.log(JSON.stringify(args.tweetThread))
+            const validThread = validateTweetThread(args.tweetThread);
 
-            if (!contest) throw new GraphQLError('Contest not found', {
-                extensions: {
-                    code: 'CONTEST_DOES_NOT_EXIST'
-                }
-            })
-            if (contest.metadata.type !== 'twitter') throw new GraphQLError('Contest is not a twitter contest', {
-                extensions: {
-                    code: 'NOT_TWITTER_CONTEST'
-                }
-            })
-            if (contest.tweetId) throw new GraphQLError('Contest already has a tweet', {
-                extensions: {
-                    code: 'CONTEST_TWEET_EXISTS'
-                }
-            })
-
-            const tweetQueuedResult = await dbContestTweetQueue.execute({ contestId: args.contestId })
-            if (tweetQueuedResult) throw new GraphQLError('Contest tweet already queued', {
-                extensions: {
-                    code: 'CONTEST_TWEET_QUEUED'
-                }
-            })
-
-            const { cleanPayload, errors, success } = validateTweetThread(args.tweetThread);
-
-            if (success) {
-                try {
-                    await queueTweet(contest.id, user, contest.startTime, cleanPayload)
-                    return { success: true }
-
-                } catch (e) {
-                    console.log(e)
-                    return { success: false }
-                }
+            try {
+                await queueTweet(contest.id, user, contest.startTime, validThread)
+                return { success: true }
+            } catch (e) {
+                console.log(e)
+                return { success: false }
             }
-            else if (!success) {
-                return {
-                    success,
-                    errors
-                }
-            }
-
         },
     },
 

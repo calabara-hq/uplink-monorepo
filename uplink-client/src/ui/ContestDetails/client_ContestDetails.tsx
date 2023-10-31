@@ -155,6 +155,15 @@ export const InteractiveCreateTweet = ({
   contestId,
   spaceId,
   customDecorators,
+}: {
+  contestId: string;
+  spaceId: string;
+  customDecorators: {
+    type: "text";
+    data: string;
+    title: string;
+    icon: React.ReactNode;
+  }[];
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleSuccess = () => {

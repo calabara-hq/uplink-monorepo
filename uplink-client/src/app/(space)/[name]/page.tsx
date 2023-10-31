@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BiCog, BiLink, BiPencil, BiWorld } from "react-icons/bi";
+import { BiLink, BiPencil, BiWorld } from "react-icons/bi";
 import { FaTwitter } from "react-icons/fa";
-import { Metadata } from "next";
 import ListContests from "./ListContests";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import fetchSpaceContests from "@/lib/fetch/fetchSpaceContests";
@@ -14,6 +13,7 @@ import {
   RemainingTimeLabel,
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
+import { ActiveContest } from "@/lib/fetch/fetchActiveContests";
 
 const SpaceInfoSekelton = () => {
   return (
@@ -80,7 +80,11 @@ const SpaceInfo = async ({ name }: { name: string }) => {
               <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
                 <BiLink className="w-5 h-5" />
                 <a
-                  href={/^(http:\/\/|https:\/\/)/.test(website) ? website : `//${website}`}
+                  href={
+                    /^(http:\/\/|https:\/\/)/.test(website)
+                      ? website
+                      : `//${website}`
+                  }
                   rel="noopener noreferrer"
                   draggable={false}
                   target="_blank"
@@ -118,7 +122,13 @@ const SpaceInfo = async ({ name }: { name: string }) => {
   );
 };
 
-const ContestCard = ({ contest, spaceName }) => {
+const ContestCard = ({
+  contest,
+  spaceName,
+}: {
+  contest: ActiveContest;
+  spaceName: string;
+}) => {
   const { id, metadata, promptData, deadlines, tweetId } = contest;
   const contestId = id;
   const contestTitle = promptData.title;
@@ -159,7 +169,13 @@ const ContestCard = ({ contest, spaceName }) => {
   );
 };
 
-const CardMap = ({ contests, spaceName }) => {
+const CardMap = ({
+  contests,
+  spaceName,
+}: {
+  contests: Array<ActiveContest>;
+  spaceName: string;
+}) => {
   return (
     <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full animate-fadeIn p-6">
       {contests.map((contest, idx) => {

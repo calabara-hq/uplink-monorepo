@@ -1,8 +1,9 @@
 import handleNotFound from "@/lib/handleNotFound";
+import { Space } from "@/types/space";
 import ContestForm from "@/ui/ContestForm/Entrypoint";
 
 const getSpace = async (name: string) => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+  const data: Space = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

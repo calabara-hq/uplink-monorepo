@@ -13,15 +13,14 @@ import { Suspense } from "react";
 import fetchContest from "@/lib/fetch/fetchContest";
 import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
 import SwrProvider from "@/providers/SwrProvider";
-
-// TODO: dynamic metadata
+import { Submission } from "@/types/submission";
 
 const SubmissionDisplayWrapper = async ({
   submissionPromise,
   contestId,
   children,
 }: {
-  submissionPromise: Promise<any>;
+  submissionPromise: Promise<Array<Submission>>;
   contestId: string;
   children: string;
 }) => {

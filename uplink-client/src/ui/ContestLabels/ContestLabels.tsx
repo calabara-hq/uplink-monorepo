@@ -1,5 +1,5 @@
 import { BiTime } from "react-icons/bi";
-import { ContestCategory } from "@/types/contest";
+import { ContestCategory, ContestState } from "@/types/contest";
 
 // return color for contest category
 const contestCategoryColor = (contestCategory: ContestCategory) => {
@@ -56,8 +56,6 @@ export const CategoryLabel = ({ category }: { category: ContestCategory }) => {
   );
 };
 
-export type ContestState = "pending" | "submitting" | "voting" | "closed";
-
 // return color for contest state
 const contestStatusColor = (contestState: ContestState) => {
   switch (contestState) {
@@ -96,7 +94,7 @@ export const StatusLabel = ({ status }: { status: ContestState }) => {
 export const RemainingTimeLabel = ({
   remainingTime,
 }: {
-  remainingTime: string;
+  remainingTime: string | null;
 }) => {
   if (remainingTime)
     return (

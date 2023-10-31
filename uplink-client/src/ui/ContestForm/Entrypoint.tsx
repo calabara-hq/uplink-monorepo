@@ -275,6 +275,7 @@ const ContestForm = ({
     if (isError) return;
     try {
       await trigger({
+        spaceId: spaceId,
         csrfToken: session.csrfToken,
         contestData: {
           ...data,
@@ -283,10 +284,15 @@ const ContestForm = ({
             body: data.prompt.body,
             coverUrl: data.prompt.coverUrl,
           },
-          spaceId,
         },
+      }).then((response) => {
+        if (!response.success) {
+          toast.error("something went wrong, please try again");
+          return reset();
+        } else {
+          mutateSpaceContests(spaceName);
+        }
       });
-      mutateSpaceContests(spaceName);
     } catch (e) {
       reset();
     }

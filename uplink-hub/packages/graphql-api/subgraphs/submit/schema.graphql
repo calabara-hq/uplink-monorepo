@@ -1,11 +1,11 @@
 scalar Decimal
 scalar EditorData
 scalar SubmissionAssetUrl
-
+scalar ISODateString
 extend type Contest @key(fields: "id") {
   id: ID!
-  deadlines: DeadlinesType! @external
-  additionalParams: AdditionalParamsType! @external
+  deadlines: Deadlines! @external
+  additionalParams: AdditionalParams! @external
   submissions: [Submission!]!
     @requires(
       fields: "deadlines {startTime, voteTime, endTime, snapshot}, additionalParams {anonSubs, visibleVotes}"
@@ -14,14 +14,14 @@ extend type Contest @key(fields: "id") {
   utopiaResults: String @requires(fields: "deadlines {endTime}")
 }
 
-type DeadlinesType {
-  startTime: String! @external
-  voteTime: String! @external
-  endTime: String! @external
-  snapshot: String! @external
+type Deadlines {
+  startTime: ISODateString! @external
+  voteTime: ISODateString! @external
+  endTime: ISODateString! @external
+  snapshot: ISODateString! @external
 }
 
-type AdditionalParamsType {
+type AdditionalParams {
   anonSubs: Boolean! @external
   visibleVotes: Boolean! @external
 }
@@ -52,7 +52,7 @@ type PopularSubmission @key(fields: "id") {
   url: String!
 }
 
-type Token {
+type Submit_Token {
   type: String!
   decimals: Int!
   symbol: String!
@@ -60,18 +60,18 @@ type Token {
   tokenId: String
 }
 
-type TokenRestriction {
-  token: Token!
+type Submit_TokenRestriction {
+  token: Submit_Token!
   threshold: Decimal!
 }
 
-type Restriction {
+type Submit_Restriction {
   restrictionType: String!
-  tokenRestriction: TokenRestriction
+  tokenRestriction: Submit_TokenRestriction
 }
 
 type RestrictionResult {
-  restriction: Restriction!
+  restriction: Submit_Restriction!
   result: Boolean!
 }
 
@@ -92,7 +92,6 @@ type Query {
 
 type createSubmissionResponse {
   success: Boolean!
-  errors: String
   userSubmissionParams: UserSubmissionParams!
 }
 
@@ -107,7 +106,7 @@ input ThreadPayload {
   text: String
   previewAsset: SubmissionAssetUrl
   videoAsset: SubmissionAssetUrl
-  assetSize: String
+  assetSize: Int
   assetType: String
 }
 

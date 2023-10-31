@@ -1,5 +1,4 @@
 "use server";
-import fetchContest from "@/lib/fetch/fetchContest";
 import { FaRegCircleQuestion } from "react-icons/fa6";
 import formatDecimal from "@/lib/formatDecimal";
 import {
@@ -11,9 +10,8 @@ import {
   RenderRemainingTime,
   RenderStateSpecificDialog,
 } from "./client_ContestDetails";
-import { Fragment, Suspense } from "react";
+import { Fragment } from "react";
 import formatOrdinals from "@/lib/formatOrdinals";
-import { IToken } from "@/types/token";
 import Link from "next/link";
 import { StatusLabel } from "../ContestLabels/ContestLabels";
 import {
@@ -24,8 +22,17 @@ import {
 import { BiTime } from "react-icons/bi";
 import type { OutputData } from "@editorjs/editorjs";
 import { IoWarningOutline } from "react-icons/io5";
-import dynamic from "next/dynamic";
-import WalletConnectButton from "../ConnectButton/WalletConnectButton";
+import {
+  FungibleReward,
+  NonFungibleReward,
+  SubmitterTokenRewardOption,
+  isArcadeVotingStrategy,
+  isFungibleReward,
+  isSubmitterTokenReward,
+  isVoterTokenReward,
+  isWeightedVotingStrategy,
+} from "@/types/contest";
+import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
 /*
  * note- if this code looks a bit strange, it's because
  * nextjs allows us to pass server components as children to the client
@@ -33,13 +40,28 @@ import WalletConnectButton from "../ConnectButton/WalletConnectButton";
  * we'll try it out here, with plans to use it elsewhere in the future (if it is not a hellish experience)
  */
 
-const normalizeSubmitterRewards = (rewards) => {
-  if (rewards.length === 0) return [];
-  let rewardsObj = {};
-  rewards.forEach((reward, idx) => {
-    const { rank, tokenReward } = reward;
-    if (rewardsObj[rank]) rewardsObj[rank].push(tokenReward);
-    else rewardsObj[rank] = [tokenReward];
+const normalizeSubmitterRewards = (
+  subRewards: FetchSingleContestResponse["submitterRewards"]
+) => {
+  if (subRewards.length === 0) return [];
+  let rewardsObj: {
+    [rank: number]: SubmitterTokenRewardOption[];
+  } = {};
+
+  const pushOrAssign = (
+    rank: number,
+    reward: FungibleReward | NonFungibleReward
+  ) => {
+    if (rewardsObj[rank]) rewardsObj[rank].push(reward);
+    else rewardsObj[rank] = [reward];
+  };
+
+  subRewards.forEach((el, idx: number) => {
+    const { rank, reward } = el;
+    if (isSubmitterTokenReward(reward)) {
+      if (rewardsObj[rank]) rewardsObj[rank].push(reward.tokenReward);
+      else rewardsObj[rank] = [reward.tokenReward];
+    }
   });
 
   return rewardsObj;
@@ -114,7 +136,11 @@ const SectionSkeleton = () => {
   );
 };
 
-const SubmitterRestrictionsSection = ({ submitterRestrictions }) => {
+const SubmitterRestrictionsSection = ({
+  submitterRestrictions,
+}: {
+  submitterRestrictions: FetchSingleContestResponse["submitterRestrictions"];
+}) => {
   return (
     <DetailSectionWrapper
       title="Entry Requirements"
@@ -175,10 +201,10 @@ const SubmitterRestrictionsSection = ({ submitterRestrictions }) => {
 const SubmitterRewardsSection = ({
   submitterRewards,
 }: {
-  submitterRewards: any;
+  submitterRewards: FetchSingleContestResponse["submitterRewards"];
 }) => {
   const normalizedRewards: {
-    [rank: number]: { token: IToken; amount: string }[];
+    [rank: number]: SubmitterTokenRewardOption[];
   } = normalizeSubmitterRewards(submitterRewards);
 
   return (
@@ -207,8 +233,10 @@ const SubmitterRewardsSection = ({
                     {rewards.map((reward, idx) => {
                       return (
                         <p key={idx}>
-                          {formatDecimal(reward.amount).short}{" "}
-                          {reward.token.symbol}{" "}
+                          {isFungibleReward(reward)
+                            ? formatDecimal(reward.amount).short
+                            : "0"}
+                          {reward.token.symbol}
                           {idx !== rewards.length - 1 && ","}
                         </p>
                       );
@@ -219,7 +247,7 @@ const SubmitterRewardsSection = ({
             })}
           {/* modal content */}
           <ExpandSection
-            data={submitterRewards}
+            data={Object.keys(normalizedRewards)}
             label={`+ ${Object.keys(normalizedRewards).length - 3} rewards`}
           >
             <div className="w-full flex flex-col gap-4 text-t1">
@@ -238,7 +266,10 @@ const SubmitterRewardsSection = ({
                             {rewards.map((reward, idx) => {
                               return (
                                 <p key={idx}>
-                                  {formatDecimal(reward.amount).short}{" "}
+                                  {isFungibleReward(reward)
+                                    ? formatDecimal(reward.amount).short
+                                    : 1}{" "}
+                                  {/* just show token count (1) for NF reward for now */}
                                   {reward.token.symbol}
                                 </p>
                               );
@@ -261,7 +292,11 @@ const SubmitterRewardsSection = ({
   );
 };
 
-const VoterRewardsSection = ({ voterRewards }) => {
+const VoterRewardsSection = ({
+  voterRewards,
+}: {
+  voterRewards: FetchSingleContestResponse["voterRewards"];
+}) => {
   if (voterRewards.length > 0) {
     return (
       <DetailSectionWrapper
@@ -276,10 +311,12 @@ const VoterRewardsSection = ({ voterRewards }) => {
       >
         <div className="flex flex-col gap-1 p-2 text-t2">
           <h2 className="text-sm font-semibold">Rank</h2>
-          {voterRewards.slice(0, 3).map((reward: any, idx: number) => {
+          {voterRewards.slice(0, 3).map((el, idx: number) => {
+            const { rank, reward } = el;
+            if (!isVoterTokenReward(reward)) return null;
             return (
               <div key={idx} className="grid grid-cols-5 text-sm">
-                <p>{formatOrdinals(reward.rank)}:</p>
+                <p>{formatOrdinals(rank)}:</p>
                 <p>{`${formatDecimal(reward.tokenReward.amount).short} ${
                   reward.tokenReward.token.symbol
                 }`}</p>
@@ -295,11 +332,13 @@ const VoterRewardsSection = ({ voterRewards }) => {
               <h1 className="text-lg font-bold">Voter Rewards</h1>
 
               <div className="flex flex-col gap-1 p-2 ">
-                {voterRewards.map((reward: any, idx: number) => {
+                {voterRewards.map((el, idx: number) => {
+                  const { rank, reward } = el;
+                  if (!isVoterTokenReward(reward)) return null;
                   return (
                     <Fragment key={idx}>
                       <div className="flex flex-row items-center gap-2">
-                        <p>{formatOrdinals(reward.rank)} place:</p>
+                        <p>{formatOrdinals(rank)} place:</p>
                         <p className="ml-4">{`${
                           formatDecimal(reward.tokenReward.amount).short
                         } ${reward.tokenReward.token.symbol}`}</p>
@@ -318,7 +357,11 @@ const VoterRewardsSection = ({ voterRewards }) => {
   return null;
 };
 
-const VotingPolicySection = ({ votingPolicy }) => {
+const VotingPolicySection = ({
+  votingPolicy,
+}: {
+  votingPolicy: FetchSingleContestResponse["votingPolicy"];
+}) => {
   return (
     <DetailSectionWrapper
       title="Voting Strategies"
@@ -344,8 +387,8 @@ const VotingPolicySection = ({ votingPolicy }) => {
       {votingPolicy.length > 0 ? (
         <div className="flex flex-col gap-1 p-2 text-t2 text-sm">
           <div className="flex flex-col gap-1">
-            {votingPolicy.slice(0, 3).map((strategy: any, idx: number) => {
-              if (strategy.strategyType === "arcade") {
+            {votingPolicy.slice(0, 3).map((strategy, idx: number) => {
+              if (isArcadeVotingStrategy(strategy)) {
                 return (
                   <p key={idx}>
                     {`Arcade ${strategy.arcadeVotingStrategy.token.symbol} (${
@@ -354,7 +397,7 @@ const VotingPolicySection = ({ votingPolicy }) => {
                     } credits) `}
                   </p>
                 );
-              } else if (strategy.strategyType === "weighted") {
+              } else if (isWeightedVotingStrategy(strategy)) {
                 return (
                   <p key={idx}>
                     {" "}
@@ -616,7 +659,7 @@ const ContestDetails = async ({
   contest,
 }: {
   contestId: string;
-  contest: Promise<any>;
+  contest: Promise<FetchSingleContestResponse>;
 }) => {
   const contestData = await contest.then(async (res) => {
     const promptData = await fetch(res.promptUrl).then((res) => res.json());

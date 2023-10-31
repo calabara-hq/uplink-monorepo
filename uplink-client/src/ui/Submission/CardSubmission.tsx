@@ -1,6 +1,6 @@
 // Render the submission in a card format. This is used in the contest page + the homepage.
 "use client";
-import { Submission } from "@/providers/ContestInteractionProvider";
+import type { Submission } from "@/types/submission";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
 import Link from "next/link";

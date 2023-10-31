@@ -7,6 +7,8 @@ import {
   differenceInDays,
   parseISO,
 } from "date-fns";
+import { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
+import { ContestState } from "@/types/contest";
 
 export interface ContestStateProps {
   contestAdmins: string[];
@@ -30,10 +32,12 @@ export function ContestStateProvider({
   contestPromise,
 }: {
   children: React.ReactNode;
-  contestPromise: Promise<any>;
+  contestPromise: Promise<FetchSingleContestResponse>;
 }) {
-  const [contestState, setContestState] = useState<string | null>(null);
-  const [stateRemainingTime, setStateRemainingTime] = useState<string>("");
+  const [contestState, setContestState] = useState<ContestState | null>(null);
+  const [stateRemainingTime, setStateRemainingTime] = useState<string | null>(
+    null
+  );
   const [contestData, setContestData] = useState<any>(null);
 
   useEffect(() => {
@@ -108,9 +112,9 @@ export function ContestStateProvider({
         type: contestData?.metadata.type,
         tweetId: contestData?.tweetId,
         contestAdmins:
-        contestData?.space.admins?.map((admin: any) => {
-          return admin.address;
-        }) ?? [],
+          contestData?.space.admins?.map((admin: any) => {
+            return admin.address;
+          }) ?? [],
       }}
     >
       {children}

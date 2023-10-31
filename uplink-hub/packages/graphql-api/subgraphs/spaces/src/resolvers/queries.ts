@@ -54,7 +54,6 @@ const queries = {
         async spaces(_, __, ___, info) {
             //const fields = constructQuery(info);
             //console.log(fields)
-            console.log('FETCHING SPACES AT', Date.now())
             const data = await manySpaces.execute();
             return data;
         },

@@ -2,10 +2,6 @@
 
 const nextConfig = {
   reactStrictMode: false,
-  experimental: {
-    serverActions: true,
-  },
-
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

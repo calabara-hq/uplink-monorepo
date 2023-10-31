@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
-import { Submission } from "@/providers/ContestInteractionProvider";
+
 import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
 import { Suspense } from "react";
 import { Metadata } from "next";

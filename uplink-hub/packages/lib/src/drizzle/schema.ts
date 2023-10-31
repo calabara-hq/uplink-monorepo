@@ -335,52 +335,99 @@ export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
 }));
 
 
-export type dbSpaceType = InferModel<typeof spaces>
+export type dbSpaceType = InferModel<typeof spaces> & {
+    admins: dbAdminType[],
+    spaceTokens: dbSpaceToTokenType[],
+}
 export type dbNewSpaceType = InferModel<typeof spaces, 'insert'>
 
-export type dbAdminType = InferModel<typeof admins>
+export type dbAdminType = InferModel<typeof admins> & {
+    space: dbSpaceType,
+}
 export type dbNewAdminType = InferModel<typeof admins, 'insert'>
 
-export type dbContestType = InferModel<typeof contests>
-export type dbNewContestType = InferModel<typeof contests, 'insert'>
+export type dbContestType = InferModel<typeof contests> & {
+    rewards: dbRewardType[],
+    submitterRestrictions: dbSubmitterRestrictionType[],
+    votingPolicy: dbVotingPolicyType[],
+    submissions: dbSubmissionType[],
+    votes: dbVoteType[],
+    scheduledTweets: dbTweetQueueType[],
+}
 
-export type dbRewardType = InferModel<typeof rewards>
-export type dbNewRewardType = InferModel<typeof rewards, 'insert'>
+export type dbRewardType = InferModel<typeof rewards> & {
+    contest: dbContestType,
+    tokenReward: dbTokenRewardType,
+}
 
-export type dbSubmitterRestrictionType = InferModel<typeof submitterRestrictions>
-export type dbNewSubmitterRestrictionType = InferModel<typeof submitterRestrictions, 'insert'>
+export type dbSubmitterRestrictionType = InferModel<typeof submitterRestrictions> & {
+    contest: dbContestType,
+    tokenRestriction: dbTokenRestrictionType,
+}
 
-export type dbTokenType = InferModel<typeof tokens>
-export type dbNewTokenType = InferModel<typeof tokens, 'insert'>
+export type dbTokenType = InferModel<typeof tokens> & {
+    spaceTokens: dbSpaceToTokenType[],
+}
 
-export type dbSpaceToTokenType = InferModel<typeof spaceTokens>
-export type dbNewSpaceToTokenType = InferModel<typeof spaceTokens, 'insert'>
+export type dbSpaceToTokenType = InferModel<typeof spaceTokens> & {
+    space: dbSpaceType,
+    token: dbTokenType,
+}
 
-export type dbTokenRestrictionType = InferModel<typeof tokenRestrictions>
-export type dbNewTokenRestrictionType = InferModel<typeof tokenRestrictions, 'insert'>
+export type dbTokenRestrictionType = InferModel<typeof tokenRestrictions> & {
+    submitterRestriction: dbSubmitterRestrictionType,
+    token: dbTokenType,
+}
 
-export type dbTokenRewardType = InferModel<typeof tokenRewards>
-export type dbNewTokenRewardType = InferModel<typeof tokenRewards, 'insert'>
+export type dbTokenRewardType = InferModel<typeof tokenRewards> & {
+    reward: dbRewardType,
+    token: dbTokenType,
+}
 
-export type dbVotingPolicyType = InferModel<typeof votingPolicy>
-export type dbNewVotingPolicyType = InferModel<typeof votingPolicy, 'insert'>
+export type dbVotingPolicyType = InferModel<typeof votingPolicy> & {
+    contest: dbContestType,
+    weightedVotingStrategy: dbWeightedVotingStrategyType,
+    arcadeVotingStrategy: dbArcadeVotingStrategyType,
+}
 
-export type dbWeightedVotingStrategyType = InferModel<typeof weightedVotingStrategy>
-export type dbNewWeightedVotingStrategyType = InferModel<typeof weightedVotingStrategy, 'insert'>
+export type dbWeightedVotingStrategyType = InferModel<typeof weightedVotingStrategy> & {
+    votingPolicy: dbVotingPolicyType,
+    token: dbTokenType,
+}
 
-export type dbArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy>
-export type dbNewArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy, 'insert'>
+export type dbArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy> & {
+    votingPolicy: dbVotingPolicyType,
+    token: dbTokenType,
+}
 
-export type dbSubmissionType = InferModel<typeof submissions>
-export type dbNewSubmissionType = InferModel<typeof submissions, 'insert'>
+export type dbSubmissionType = InferModel<typeof submissions> & {
+    contest: dbContestType,
+    votes: dbVoteType[],
+}
 
-export type dbVoteType = InferModel<typeof votes>
-export type dbNewVoteType = InferModel<typeof votes, 'insert'>
+export type dbVoteType = InferModel<typeof votes> & {
+    contest: dbContestType,
+    submission: dbSubmissionType,
+}
 
-export type dbTweetQueueType = InferModel<typeof tweetQueue>
-export type dbNewTweetQueueType = InferModel<typeof tweetQueue, 'insert'>
+export type dbTweetQueueType = InferModel<typeof tweetQueue> & {
+    contest: dbContestType,
+}
 
 export type dbUserType = InferModel<typeof users>
+
+
+export type dbNewContestType = InferModel<typeof contests, 'insert'>
+export type dbNewRewardType = InferModel<typeof rewards, 'insert'>
+export type dbNewSubmitterRestrictionType = InferModel<typeof submitterRestrictions, 'insert'>
+export type dbNewTokenType = InferModel<typeof tokens, 'insert'>
+export type dbNewSpaceToTokenType = InferModel<typeof spaceTokens, 'insert'>
+export type dbNewTokenRestrictionType = InferModel<typeof tokenRestrictions, 'insert'>
+export type dbNewTokenRewardType = InferModel<typeof tokenRewards, 'insert'>
+export type dbNewVotingPolicyType = InferModel<typeof votingPolicy, 'insert'>
+export type dbNewWeightedVotingStrategyType = InferModel<typeof weightedVotingStrategy, 'insert'>
+export type dbNewArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy, 'insert'>
+export type dbNewSubmissionType = InferModel<typeof submissions, 'insert'>
+export type dbNewVoteType = InferModel<typeof votes, 'insert'>
+export type dbNewTweetQueueType = InferModel<typeof tweetQueue, 'insert'>
 export type dbNewUserType = InferModel<typeof users, 'insert'>
-
-
