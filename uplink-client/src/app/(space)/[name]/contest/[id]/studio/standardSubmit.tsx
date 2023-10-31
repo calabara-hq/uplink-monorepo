@@ -37,7 +37,7 @@ import Link from "next/link";
 import { SimplePreview } from "@/ui/Submission/CardSubmission";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import LoadingDialog from "./loadingDialog";
-import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
+import { RenderInteractiveVideoWithLoader, RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 
 async function postSubmission(
   url,
@@ -130,9 +130,8 @@ const SubmissionTitle = ({
       <textarea
         rows={1}
         placeholder="What's happening?"
-        className={`p-2 textarea textarea-lg resize-none w-full overflow-y-hidden ${
-          errors?.title ? "textarea-error" : "textarea textarea-lg"
-        }`}
+        className={`p-2 textarea textarea-lg resize-none w-full overflow-y-hidden ${errors?.title ? "textarea-error" : "textarea textarea-lg"
+          }`}
         style={{ height: "auto" }}
         value={title}
         onChange={handleTitleChange}
@@ -186,19 +185,19 @@ const MediaUpload = ({
         <label className="label">
           <span className="label-text text-t2">Media</span>
         </label>
-        <button
+        {/* <button
           className="absolute top-5 -right-3 btn btn-error btn-sm btn-circle z-10 shadow-lg"
           onClick={removeMedia}
         >
           <HiOutlineTrash className="w-5 h-5" />
-        </button>
+        </button> */}
         <RenderStandardVideoWithLoader
           videoUrl={submission.primaryAssetBlob}
           posterUrl={
             submission.videoThumbnailBlobIndex !== null
               ? submission.videoThumbnailOptions[
-                  submission.videoThumbnailBlobIndex
-                ]
+              submission.videoThumbnailBlobIndex
+              ]
               : ""
           }
         />
@@ -218,11 +217,10 @@ const MediaUpload = ({
                       alt="Tweet Media"
                       width={64}
                       height={64}
-                      className={`hover:opacity-50 rounded aspect-video object-contain ${
-                        submission.videoThumbnailBlobIndex === thumbIdx
-                          ? "opacity-50"
-                          : ""
-                      }`}
+                      className={`hover:opacity-50 rounded aspect-video object-contain ${submission.videoThumbnailBlobIndex === thumbIdx
+                        ? "opacity-50"
+                        : ""
+                        }`}
                     />
 
                     {submission.videoThumbnailBlobIndex === thumbIdx && (
@@ -261,9 +259,9 @@ const MediaUpload = ({
           </button>
           <Image
             src={submission.primaryAssetBlob}
-            alt="Tweet Media"
-            width={200}
-            height={200}
+            alt="Media"
+            width={300}
+            height={300}
             className="rounded-lg object-contain"
           />
         </div>
@@ -380,7 +378,7 @@ const StudioSidebar = ({
               <div className="flex flex-row gap-2 w-full">
                 <p>status</p>
                 {parseInt(userSubmitParams.remainingSubPower) > 0 &&
-                new Decimal(userSubmitParams.maxSubPower).greaterThan(0) ? (
+                  new Decimal(userSubmitParams.maxSubPower).greaterThan(0) ? (
                   <p className="ml-auto">eligible</p>
                 ) : (
                   <p className="ml-auto"> not eligible</p>
@@ -464,8 +462,8 @@ const SubmissionPreviewModal = ({
   const submissionType = submission.isVideo
     ? "video"
     : submission.primaryAssetBlob
-    ? "image"
-    : "text";
+      ? "image"
+      : "text";
 
   const handleSubmit = async () => {
     const { isError, payload } = await validateSubmission(submission);
@@ -523,8 +521,8 @@ const SubmissionPreviewModal = ({
                   previewAsset:
                     submissionType === "video"
                       ? submission.videoThumbnailOptions[
-                          submission.videoThumbnailBlobIndex
-                        ]
+                      submission.videoThumbnailBlobIndex
+                      ]
                       : submission.primaryAssetBlob,
                   videoAsset:
                     submissionType === "video"

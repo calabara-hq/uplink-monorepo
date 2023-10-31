@@ -151,12 +151,12 @@ export interface VoteActionProps {
     submissionId: number,
     mode: "current" | "proposed"
   ) => void;
-  addProposedVote: (el: any) => void;
+  addProposedVote: (el: VotableSubmission) => void;
   updateVoteAmount: (submissionId: number, amount: string) => void;
   submitVotes: () => void;
   areCurrentVotesDirty: boolean;
   areUserVotingParamsLoading: boolean;
-  proposedVotes: any[];
+  proposedVotes: Array<VotableSubmission>;
 }
 
 const VoteActionContext = createContext<any | undefined>(undefined);
@@ -192,8 +192,12 @@ export const VoteActionProvider = ({
 
   // add submission to proposed votes
   const addProposedVote = (el: Submission) => {
+    console.log('proposedVotes', proposedVotes)
+    console.log('userVoteParams?.userVotes', userVoteParams?.userVotes)
     if (proposedVotes.find(vote => vote.id === el.id)) return toast.error("This selection is already in your cart.");
-    if (userVoteParams?.userVotes ?? [].find(vote => vote.submissionId === el.id)) return toast.error("This selection is already in your cart.");
+    if (userVoteParams) {
+      if (userVoteParams?.userVotes.find((vote: UserVote) => vote.submissionId === el.id)) return toast.error("This selection is already in your cart.");
+    }
     setProposedVotes([...proposedVotes, { ...el, votes: "" }]);
   };
 
