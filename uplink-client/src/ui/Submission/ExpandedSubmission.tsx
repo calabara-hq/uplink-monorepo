@@ -5,7 +5,7 @@ const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: true,
 });
 import { ParseThread } from "@/lib/threadParser";
-import { ImageWrapper, VideoWrapper } from "./MediaWrapper";
+import { ImageWrapper } from "./MediaWrapper";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import dynamic from "next/dynamic";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";

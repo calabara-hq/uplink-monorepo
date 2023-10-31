@@ -56,7 +56,8 @@ const sortSubmissions = (submissions: Array<ProcessedSubmission>, isContestOver:
 
     // contest is over, sort by total votes.
     return submissions.sort((a, b) => {
-        const diff = b.totalVotes ?? new Decimal(0).minus(a.totalVotes ?? new Decimal(0))
+        if (!a.totalVotes || !b.totalVotes) return 0;
+        const diff = b.totalVotes.minus(a.totalVotes)
         // if there is a tie, give the submission with more unique voters the higher rank.
         if (diff.equals(new Decimal(0))) {
             const voteCountDiff = b.votes.length - a.votes.length;
@@ -142,6 +143,7 @@ const queries = {
 
             const [submissions, { submitterRewards }] = await Promise.all([promise_submissions, promise_rewards])
 
+
             if (submissions.length === 0) return submissions;
 
             // at this point, submissions are ranked by total votes and we know the reward ranks.
@@ -153,7 +155,8 @@ const queries = {
 
             // sort submissions by reward rank
             const sortedSubmissions = isContestOver ? rankedSubmissions.sort((a, b) => {
-                return (b.rank || 0) - (a.rank || 0);
+                if (!a.rank || !b.rank) return 0;
+                return a.rank - b.rank;
             }) : submissions;
 
             return sortedSubmissions;

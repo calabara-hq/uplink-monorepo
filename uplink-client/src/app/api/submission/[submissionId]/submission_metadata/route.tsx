@@ -1,4 +1,5 @@
-import { NextRequest, ImageResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { ImageResponse } from "next/og"
 import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
 
 export async function GET(req: NextRequest) {
@@ -76,7 +77,7 @@ export async function GET(req: NextRequest) {
             height="100"
             style={{ filter: "grayscale(100%)" }}
           />
-          <h2 style={{maxWidth: "80%", fontFamily: "Ubuntu", color: "#6b7280"}}>{submission.data.title}</h2>
+          <h2 style={{ maxWidth: "80%", fontFamily: "Ubuntu", color: "#6b7280" }}>{submission.data.title}</h2>
         </div>
       </div>
     ),

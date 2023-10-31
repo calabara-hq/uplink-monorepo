@@ -9,7 +9,6 @@ import {
   MediaLoadingIndicator,
 } from "media-chrome/dist/react";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
-import { VideoWrapper } from "../Submission/MediaWrapper";
 
 const StandardVideoPlayer = ({ videoUrl, posterUrl }) => {
   return (

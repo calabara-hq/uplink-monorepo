@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { VideoWrapper } from "../Submission/MediaWrapper";
+import { RectVideoWrapper, SquareVideoWrapper } from "../Submission/MediaWrapper";
 
 const InteractivePlayer = dynamic(() => import("./InteractiveVideoPlayer"), {
   ssr: false,
@@ -41,9 +41,9 @@ export const RenderStandardVideoWithLoader = ({
   posterUrl: string;
 }) => {
   return (
-    <VideoWrapper>
+    <RectVideoWrapper>
       <StandardPlayer {...{ videoUrl, posterUrl }} />
-    </VideoWrapper>
+    </RectVideoWrapper>
   );
 };
 
@@ -57,8 +57,8 @@ export const RenderInteractiveVideoWithLoader = ({
   isActive: boolean;
 }) => {
   return (
-    <VideoWrapper>
+    <SquareVideoWrapper>
       <InteractivePlayer {...{ videoUrl, posterUrl, isActive }} />
-    </VideoWrapper>
+    </SquareVideoWrapper>
   );
 };
