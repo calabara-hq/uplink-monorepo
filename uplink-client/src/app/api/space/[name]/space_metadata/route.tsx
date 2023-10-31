@@ -1,5 +1,4 @@
-import { NextRequest } from "next/server";
-import { ImageResponse } from "next/og";
+import { NextRequest, ImageResponse } from "next/server";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 
 export async function GET(req: NextRequest) {

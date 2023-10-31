@@ -2,6 +2,21 @@ import type { TwitterSubmission } from "@/types/submission";
 import { ImageWrapper, VideoWrapper } from "@/ui/Submission/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import Image from "next/image";
+import sanitizeHtml from "sanitize-html";
+
+const createLinks = (text: string): string => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const twitterRegex = /([^\S]|^)@(\w+)/gi;
+  return text
+    .replace(urlRegex, (url) => {
+      const dispUrl = url.replace(/(^\w+:|^)\/\//, ""); // drop protocol from url
+      return `<a target="_blank" href="${url}">${dispUrl}</a>`;
+    })
+    .replace(twitterRegex, (handle) => {
+      const linkUrl = `https://twitter.com/${handle.replace(" ", "")}`;
+      return `<a target="_blank" href="${linkUrl}">${handle}</a>`;
+    });
+};
 
 export const ParseThread = ({
   thread,
@@ -16,7 +31,7 @@ export const ParseThread = ({
       {thread.map((tweet, index) => {
         return (
           <div key={index}>
-            {tweet.text && <p key={index}>{tweet.text}</p>}
+            {tweet.text && <p className="text-t1 hyperlinks" key={index} dangerouslySetInnerHTML={{ __html: sanitizeHtml(createLinks(tweet.text)) }}></p>}
             {tweet.previewAsset &&
               !omitImages &&
               (tweet.videoAsset ? (
