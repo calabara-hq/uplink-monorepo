@@ -13,7 +13,7 @@ import { VideoWrapper } from "../Submission/MediaWrapper";
 
 const StandardVideoPlayer = ({ videoUrl, posterUrl }) => {
   return (
-      <MediaController className="animate-fadeIn rounded-2xl">
+      <MediaController className="w-full h-fit animate-fadeIn rounded-2xl">
         <video
           autoPlay={false}
           playsInline
