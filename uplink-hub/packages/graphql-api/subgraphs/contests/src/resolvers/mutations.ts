@@ -77,7 +77,6 @@ const mutations = {
             const tweetQueuedResult = await dbIsContestTweetQueued(parseInt(args.contestId))
             if (tweetQueuedResult) throwMutationError('CONTEST_TWEET_QUEUED')
 
-            console.log(JSON.stringify(args.tweetThread))
             const validThread = validateTweetThread(args.tweetThread);
 
             try {
