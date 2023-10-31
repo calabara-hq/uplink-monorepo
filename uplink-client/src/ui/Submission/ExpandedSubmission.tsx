@@ -1,5 +1,5 @@
 // Render the submission in a large format. This is used for modals and the submission page.
-import { Submission } from "@/providers/ContestInteractionProvider";
+import type { Submission } from "@/types/submission";
 import Image from "next/image";
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: true,
@@ -71,16 +71,14 @@ const SubmissionRenderer = ({ submission }: { submission: Submission }) => {
     return (
       <div className="space-y-4">
         <div className="w-full m-auto">
-          {submission.data.type === "video" && (
-            <div>
-              <RenderVideoSubmission submission={submission} />
-            </div>
-          )}
-        </div>
-        <div className="w-9/12 m-auto">
           {submission.data.type === "image" && (
             <div>
               <RenderImageSubmission submission={submission} />
+            </div>
+          )}
+          {submission.data.type === "video" && (
+            <div>
+              <RenderVideoSubmission submission={submission} />
             </div>
           )}
         </div>

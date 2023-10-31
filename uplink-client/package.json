@@ -23,7 +23,7 @@
     "@hookform/resolvers": "^3.3.1",
     "@n8tb1t/use-scroll-position": "^2.0.3",
     "@popmotion/popcorn": "^0.4.4",
-    "@rainbow-me/rainbowkit": "^1.0.11",
+    "@rainbow-me/rainbowkit": "^1.1.2",
     "@rajesh896/video-thumbnails-generator": "^2.3.9",
     "@react-icons/all-files": "^4.1.0",
     "@types/node": "18.11.18",
@@ -42,7 +42,7 @@
     "lokijs": "^1.5.12",
     "media-chrome": "^1.4.2",
     "nanoid": "^4.0.1",
-    "next": "13.5.6",
+    "next": "14.0.0",
     "popmotion": "^11.0.5",
     "react": "^18.2.0",
     "react-day-picker": "^8.6.0",
@@ -56,8 +56,8 @@
     "swiper": "^10.2.0",
     "swr": "^2.1.5",
     "typescript": "5.0.4",
-    "viem": "^1.10.7",
-    "wagmi": "^1.4.1"
+    "viem": "1.16.3",
+    "wagmi": "1.4.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",

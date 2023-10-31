@@ -1,5 +1,3 @@
-// iterate a list of contests and return the prompts for each
-"use server";
 import handleNotFound from "../handleNotFound";
 
 const fetchSpaceContests = async (spaceName: string) => {
@@ -8,7 +6,7 @@ const fetchSpaceContests = async (spaceName: string) => {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-API-TOKEN": process.env.API_SECRET,
+            "X-API-TOKEN": process.env.API_SECRET!,
         },
         body: JSON.stringify({
             query: `

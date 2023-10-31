@@ -9,6 +9,7 @@ import useTweetQueueStatus from "@/hooks/useTweetQueueStatus";
 import { toast } from "react-hot-toast";
 import { mutate } from "swr";
 import CreateContestTweet from "../ContestForm/CreateContestTweet";
+import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 
 // expand a section from the contest details page.
 // we extract this interactivity out to reduce bundle size and improve performance
@@ -139,6 +140,7 @@ export const InteractiveAdminsRequired = ({
   const { contestAdmins } = useContestState();
   const { isTweetQueued, isLoading: isQueueStatusLoading } =
     useTweetQueueStatus(contestId);
+
   const isAdmin = contestAdmins.includes(session?.user?.address ?? "");
 
   if (status === "loading") return <>{skeletonChild}</>;
@@ -153,6 +155,15 @@ export const InteractiveCreateTweet = ({
   contestId,
   spaceId,
   customDecorators,
+}: {
+  contestId: string;
+  spaceId: string;
+  customDecorators: {
+    type: "text";
+    data: string;
+    title: string;
+    icon: React.ReactNode;
+  }[];
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleSuccess = () => {
@@ -180,5 +191,20 @@ export const InteractiveCreateTweet = ({
         onError={() => {}}
       />
     </>
+  );
+};
+
+export const InteractiveAdminSignIn = () => {
+  const { status } = useSession();
+
+  return (
+    <div className="flex flex-row items-center justify-start gap-2  xl:ml-auto text-t1">
+      {status !== "authenticated" ? (
+        <>
+          <p className="text-t1 text-sm">Are you an admin?</p>
+          <WalletConnectButton styleOverride="btn-sm btn-ghost" />
+        </>
+      ) : null}
+    </div>
   );
 };

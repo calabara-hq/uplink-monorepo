@@ -68,7 +68,7 @@ const handleMediaUpload = async (
     readerCallback: (data: any) => void,
     ipfsCallback: (uri: string) => void,
     videoThumbnailCallback?: (thumbnails: string[]) => void,
-    fileSizeCallback?: (size: string) => void,
+    fileSizeCallback?: (size: number) => void,
 ) => {
 
     const acceptedMimeTypes = acceptedFormats.reduce((acc: string[], format: string) => {

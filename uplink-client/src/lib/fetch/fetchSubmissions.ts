@@ -1,7 +1,8 @@
 "use server";
+import { BaseSubmission, Submission } from "@/types/submission";
 import handleNotFound from "../handleNotFound";
 
-const fetchSubmissions = async (contestId: string) => {
+const fetchSubmissions = async (contestId: string): Promise<Array<Submission>> => {
     const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
         method: "POST",
         headers: {
@@ -37,8 +38,8 @@ const fetchSubmissions = async (contestId: string) => {
         .then(res => res.submissions)
         .then(async (submissions) => {
             return await Promise.all(
-                submissions.map(async (submission, idx) => {
-                    const data = await fetch(submission.url).then((res) => res.json());
+                submissions.map(async (submission: BaseSubmission) => {
+                    const data: Submission = await fetch(submission.url).then((res) => res.json());
                     return { ...submission, data: data };
                 })
             );

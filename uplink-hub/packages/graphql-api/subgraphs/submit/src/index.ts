@@ -16,7 +16,7 @@ import { applyMiddleware } from "graphql-middleware";
 // Initial configurations
 dotenv.config();
 
-export const redisClient = new Redis(process.env.REDIS_URL);
+export const redisClient = new Redis(process.env.REDIS_URL!);
 
 const typeDefs = gql(readFileSync("./schema.graphql").toString('utf-8'));
 
@@ -54,13 +54,13 @@ const server = new ApolloServer({
 
 // Start the server
 const { url } = await startStandaloneServer(server, {
-  listen: { port: parseInt(process.env.SUBMIT_SERVICE_PORT) },
+  listen: { port: parseInt(process.env.SUBMIT_SERVICE_PORT!) },
   context: async ({ req }) => {
     return {
-      token: cookie.parse(parseHeader(req.headers['session-cookie'])),
-      csrfToken: parseHeader(req.headers['x-csrf-token']),
-      ip: parseHeader(req.headers['x-forwarded-for']) || req.socket.remoteAddress,
-      hasApiToken: xor_compare(parseHeader(req.headers['x-api-token']), process.env.FRONTEND_API_SECRET)
+      token: cookie.parse(parseHeader(req.headers['session-cookie'] || '')),
+      csrfToken: parseHeader(req.headers['x-csrf-token'] || ''),
+      ip: parseHeader(req.headers['x-forwarded-for'] || '') || (req?.socket?.remoteAddress ?? "localhost"),
+      hasApiToken: xor_compare(parseHeader(req.headers['x-api-token'] || ''), process.env.FRONTEND_API_SECRET!)
     };
   }
 });

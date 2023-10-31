@@ -1,4 +1,5 @@
 
+import { ContestState, ContestType, Deadlines } from "@/types/contest";
 import {
     differenceInSeconds,
     differenceInMinutes,
@@ -14,7 +15,11 @@ import {
  *
  */
 
-export const calculateContestStatus = (deadlines: any, contestType: "standard" | "twitter", tweetId: string) => {
+export const calculateContestStatus = (deadlines: Deadlines, contestType: ContestType, tweetId: string | null): {
+    contestState: ContestState;
+    stateRemainingTime: string | null;
+
+} => {
 
     if (contestType === "twitter" && !tweetId) {
         return {
@@ -35,15 +40,15 @@ export const calculateContestStatus = (deadlines: any, contestType: "standard" |
     let nextDeadline = end;
 
     if (now < start) {
-        contestState = "pending";
+        contestState = "pending" as ContestState;
         nextDeadline = start;
     } else if (now < vote) {
-        contestState = "submitting";
+        contestState = "submitting" as ContestState;
         nextDeadline = vote;
     } else if (now < end) {
-        contestState = "voting";
+        contestState = "voting" as ContestState;
     } else {
-        contestState = "closed";
+        contestState = "closed" as ContestState;
     }
 
     const seconds = differenceInSeconds(nextDeadline, now);

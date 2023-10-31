@@ -9,9 +9,17 @@ import { toast } from "react-hot-toast";
 import { handleMutationError } from "@/lib/handleMutationError";
 import { Decimal } from "decimal.js";
 import { useSession } from "./SessionProvider";
+import { Submission, TwitterSubmission } from "@/types/submission";
 
 // inherit voting params from contest interaction provider
 // provide an API for managing user votes
+
+
+
+export type VotableSubmission = Submission & {
+  votes: string;
+}
+
 
 const apiCastVotes = async (
   contestId: string,
@@ -163,7 +171,7 @@ export const VoteActionProvider = ({
   // userVoteParams will be undefined if not in the voting window TODO: verify this
   const { userVoteParams, areUserVotingParamsLoading, mutateUserVotingParams } =
     useContestInteractionState();
-  const [proposedVotes, setProposedVotes] = useState<any[]>([]);
+  const [proposedVotes, setProposedVotes] = useState<Array<VotableSubmission>>([]);
   const [areCurrentVotesDirty, setAreCurrentVotesDirty] = useState(false);
   const { data: session, status } = useSession();
 
@@ -175,7 +183,7 @@ export const VoteActionProvider = ({
       const newProposedVotes = proposedVotes.filter(
         (el) =>
           !userVoteParams?.userVotes.find(
-            (vote: UserVote) => vote?.submissionId === el.submissionId
+            (vote: UserVote) => vote?.submissionId === el.id
           )
       );
       setProposedVotes(newProposedVotes);
@@ -183,14 +191,9 @@ export const VoteActionProvider = ({
   }, [status, userVoteParams?.userVotes]);
 
   // add submission to proposed votes
-  const addProposedVote = (el: any) => {
-    // check if already existing in current votes or proposed votes
-    if (
-      [...proposedVotes, ...(userVoteParams?.userVotes ?? [])].find(
-        (vote) => vote.submissionId === el.submissionId
-      )
-    )
-      return toast.error("This selection is already in your cart.");
+  const addProposedVote = (el: Submission) => {
+    if (proposedVotes.find(vote => vote.id === el.id)) return toast.error("This selection is already in your cart.");
+    if (userVoteParams?.userVotes.find(vote => vote.submissionId === el.id)) return toast.error("This selection is already in your cart.");
     setProposedVotes([...proposedVotes, { ...el, votes: "" }]);
   };
 
@@ -203,7 +206,7 @@ export const VoteActionProvider = ({
     if (mode === "proposed") {
       //TODO: need to update the vote differentials here
       setProposedVotes(
-        proposedVotes.filter((el) => el.submissionId !== submissionId)
+        proposedVotes.filter((el) => el.id !== submissionId)
       );
     }
 
@@ -310,9 +313,9 @@ export const VoteActionProvider = ({
       const voteToUpdate =
         mode === "current"
           ? (userVoteParams?.userVotes || []).find(
-              (vote) => vote.submissionId === id
-            )
-          : proposedVotes.find((vote) => vote.submissionId === id);
+            (vote) => vote.submissionId === id
+          )
+          : proposedVotes.find((vote) => vote.id === id);
 
       if (!voteToUpdate) return { votesSpent, votesRemaining };
 
@@ -343,7 +346,7 @@ export const VoteActionProvider = ({
       // update the proposed votes to match new value
       setProposedVotes((prevVotes) => {
         const voteIndex = prevVotes.findIndex(
-          (vote) => vote.submissionId === id
+          (vote) => vote.id === id
         );
         if (voteIndex < 0) return prevVotes;
         return [
@@ -372,10 +375,10 @@ export const VoteActionProvider = ({
         voteIndex < 0
           ? [...userVoteParams.userVotes]
           : [
-              ...userVoteParams.userVotes.slice(0, voteIndex),
-              { ...userVoteParams.userVotes[voteIndex], votes: newAmount },
-              ...userVoteParams.userVotes.slice(voteIndex + 1),
-            ];
+            ...userVoteParams.userVotes.slice(0, voteIndex),
+            { ...userVoteParams.userVotes[voteIndex], votes: newAmount },
+            ...userVoteParams.userVotes.slice(voteIndex + 1),
+          ];
       setAreCurrentVotesDirty(true);
       mutateUserVotingParams(
         {
@@ -396,7 +399,7 @@ export const VoteActionProvider = ({
     let castVotePayload = [];
     let optimisticVotes = [];
 
-    for (const el of [...userVoteParams.userVotes, ...proposedVotes]) {
+    for (const el of userVoteParams.userVotes) {
       const decimalAmount = new Decimal(el.votes || "0");
       if (decimalAmount.greaterThan(0)) {
         runningSum = runningSum.plus(decimalAmount);
@@ -407,6 +410,21 @@ export const VoteActionProvider = ({
         optimisticVotes.push(el);
       }
     }
+
+    for (const el of proposedVotes) {
+      const decimalAmount = new Decimal(el.votes || "0");
+      if (decimalAmount.greaterThan(0)) {
+        runningSum = runningSum.plus(decimalAmount);
+        castVotePayload.push({
+          submissionId: el.id,
+          votes: el.votes,
+        });
+        optimisticVotes.push(el);
+      }
+    }
+
+
+
 
     return {
       runningSum,

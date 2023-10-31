@@ -1,4 +1,4 @@
-import { TwitterSubmission } from "@/providers/ContestInteractionProvider";
+import type { TwitterSubmission } from "@/types/submission";
 import { ImageWrapper, VideoWrapper } from "@/ui/Submission/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import Image from "next/image";

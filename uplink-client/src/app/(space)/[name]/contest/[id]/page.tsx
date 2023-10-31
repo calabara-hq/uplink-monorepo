@@ -13,15 +13,14 @@ import { Suspense } from "react";
 import fetchContest from "@/lib/fetch/fetchContest";
 import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
 import SwrProvider from "@/providers/SwrProvider";
-
-// TODO: dynamic metadata
+import { Submission } from "@/types/submission";
 
 const SubmissionDisplayWrapper = async ({
   submissionPromise,
   contestId,
   children,
 }: {
-  submissionPromise: Promise<any>;
+  submissionPromise: Promise<Array<Submission>>;
   contestId: string;
   children: string;
 }) => {
@@ -55,14 +54,14 @@ export default async function Page({
           <div className="flex flex-col w-full gap-4 transition-all duration-200 ease-in-out">
             <Suspense fallback={<ContestHeadingSkeleton />}>
               {/*@ts-expect-error*/}
-              <ContestHeading contest={contestPromise} />
+              <ContestHeading contest={contestPromise} contestId={contestId}/>
             </Suspense>
             <MobileContestActions
               contestId={contestId}
               spaceName={spaceName}
               detailChildren={
                 // @ts-expect-error
-                <ContestDetails contest={contestPromise} />
+                <ContestDetails contestId={contestId} contest={contestPromise} />
               }
             />
             <Suspense fallback={<SubmissionDisplaySkeleton />}>

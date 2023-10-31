@@ -1,6 +1,7 @@
 "use client";
 import { useContestState } from "@/providers/ContestStateProvider";
-import { ContestState, StatusLabel } from "./ContestLabels";
+import { StatusLabel } from "./ContestLabels";
+import type { ContestState } from "@/types/contest";
 
 const LiveContestState = () => {
   const { contestState } = useContestState();

@@ -30,7 +30,7 @@ async function postContestTweet(
     credentials: "include",
     body: JSON.stringify({
       query: `
-      mutation CreateContestTweet($contestId: ID!, $spaceId: ID!, $tweetThread: [ThreadItem!]!){
+      mutation CreateContestTweet($contestId: ID!, $spaceId: ID!, $tweetThread: [ThreadItemInput!]!){
         createContestTweet(contestId: $contestId, spaceId: $spaceId, tweetThread: $tweetThread){
             success
         }
@@ -95,7 +95,7 @@ const CreateContestTweet = ({
       tweetThread: thread.map((el) => {
         const serverThreadItem: ApiThreadItem = {
           text: el.text,
-          ...(el.assetSize ? { assetSize: el.assetSize.toString() } : {}),
+          ...(el.assetSize ? { assetSize: el.assetSize } : {}),
           ...(el.assetType ? { assetType: el.assetType } : {}),
         };
         if (el.isVideo) {

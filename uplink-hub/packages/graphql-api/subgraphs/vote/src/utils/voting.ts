@@ -127,7 +127,8 @@ export const computeArcadeVotingPowerUserValues = async (
     const arcadeVotingPowerUserValues = await Promise.all(arcadeStrategy.map(async (policy: any) => {
         const { token, votingPower } = policy;
         const userBalance = await tokenController.computeUserTokenBalance({ token, blockNum, walletAddress: user.address });
-        if (userBalance > new Decimal(0)) return votingPower;
+        //if (userBalance > new Decimal(0)) return votingPower;
+        if (userBalance.greaterThan(new Decimal(0))) return votingPower;
         return new Decimal(0);
     }));
 
@@ -152,7 +153,8 @@ export const computeWeightedVotingPowerUserValues = async (
     const weightedVotingPowerUserValues = await Promise.all(weightedStrategy.map(async (policy: any) => {
         const { token } = policy;
         const userBalance = await tokenController.computeUserTokenBalance({ token, blockNum, walletAddress: user.address });
-        if (userBalance > new Decimal(0)) return userBalance;
+        // if (userBalance > new Decimal(0)) return userBalance;
+        if (userBalance.greaterThan(new Decimal(0))) return userBalance;
         return new Decimal(0);
 
     }));
@@ -175,7 +177,6 @@ export const calculateTotalVotingPower = async (
     }
 ) => {
     if (!user || !user.address) return new Decimal(0);
-
 
     const cachedVotingPower = await getCacheTotalVotingPower(user, contestId);
     if (cachedVotingPower !== null) return deadlineAdjustedVotingPower(cachedVotingPower, deadlines);

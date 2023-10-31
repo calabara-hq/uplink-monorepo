@@ -13,7 +13,7 @@ import { VideoWrapper } from "../Submission/MediaWrapper";
 
 const StandardVideoPlayer = ({ videoUrl, posterUrl }) => {
   return (
-      <MediaController className="w-full h-fit aspect-video bg-transparent animate-fadeIn">
+      <MediaController className="animate-fadeIn rounded-2xl">
         <video
           autoPlay={false}
           playsInline
@@ -21,7 +21,7 @@ const StandardVideoPlayer = ({ videoUrl, posterUrl }) => {
           src={videoUrl}
           preload="auto"
           crossOrigin=""
-          className="w-full aspect-video object-cover rounded-2xl"
+          className="rounded-2xl aspect-video"
           poster={posterUrl}
         />
         <MediaLoadingIndicator slot="centered-chrome" />

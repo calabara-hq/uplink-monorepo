@@ -1,5 +1,6 @@
 import queries from './queries.js';
 import mutations from './mutations.js';
+import unions from './unions.js';
 import { ISODateStringScalar, EditorDataScalar, IpfsUrlScalar, DecimalScalar } from 'lib';
 
 // Note this "Resolvers" type isn't strictly necessary because we are already
@@ -12,7 +13,8 @@ const resolvers = {
     IpfsUrl: IpfsUrlScalar,
     Decimal: DecimalScalar,
     ...queries,
-    ...mutations
+    ...mutations,
+    ...unions
 };
 
 export default resolvers;

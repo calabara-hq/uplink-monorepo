@@ -1,5 +1,4 @@
 "use client";
-import fetchContest from "@/lib/fetch/fetchContest";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
@@ -125,7 +124,6 @@ const MobileContestActions = ({
   detailChildren: React.ReactNode;
 }) => {
   const { contestState, stateRemainingTime } = useContestState();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { proposedVotes } = useVoteActionContext();
 
   if (!contestState) return null;

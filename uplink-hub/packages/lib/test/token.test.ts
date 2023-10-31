@@ -1,8 +1,9 @@
 import { describe, expect, test, jest, afterEach, afterAll, beforeAll } from '@jest/globals';
 import { TokenController } from '../src/token/index.js';
-import { IToken } from '../dist';
+import { IToken } from '../dist/index.js';
+import { Decimal } from 'decimal.js'
 
-const { computeUserTokenBalance, calculateBlockFromTimestamp } = new TokenController("EfYshASeuYUUeaL7K6EecREUaAJyU9Cz")//process.env.ALCHEMY_KEY);
+const { computeUserTokenBalance, calculateBlockFromTimestamp } = new TokenController(process.env.ALCHEMY_KEY!);
 
 describe('token utils test suite', () => {
 
@@ -24,6 +25,7 @@ describe('token utils test suite', () => {
                 symbol: 'USDC',
                 decimals: 6,
                 address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+                tokenId: null
             };
             const snapshot = '2022-09-28T12:30:00.000Z';
             const walletAddress = '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C';
@@ -38,6 +40,7 @@ describe('token utils test suite', () => {
                 symbol: 'USDC',
                 decimals: 6,
                 address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+                tokenId: null
             };
             const snapshot = '2022-09-29T12:30:00.000Z';
             const walletAddress = '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C';
@@ -74,12 +77,26 @@ describe('token utils test suite', () => {
             expect(result.toString()).toEqual("1.997173691515419231");
         });
 
+        test('small balance eth check', async () => {
+            const token: IToken = {
+                type: 'ETH',
+                symbol: 'ETH',
+                decimals: 18,
+            };
+            const snapshot = '2023-10-20T12:30:00.000Z';
+            const walletAddress = '0x6CBb301352F850E2E1af4466bF28c7d10C3c48BB';
+            const blockNum = await calculateBlockFromTimestamp(snapshot);
+            const result = await computeUserTokenBalance({ token, blockNum, walletAddress });
+            expect(result.greaterThan(new Decimal(0)))
+        });
+
         test('erc721 balance check', async () => {
             const token: IToken = {
                 type: 'ERC721',
                 symbol: 'ERC721',
                 decimals: 0,
-                address: "0xDb6fd84921272E288998a4B321B6C187BBd2BA4C"
+                address: "0xDb6fd84921272E288998a4B321B6C187BBd2BA4C",
+                tokenId: null
             };
             const snapshot = '2023-05-20T12:30:00.000Z';
             const walletAddress = '0xe9ad38d6E38E0A9970D6ebEc84C73DEA3e025da1';
@@ -93,7 +110,8 @@ describe('token utils test suite', () => {
                 type: 'ERC721',
                 symbol: 'NOUNS',
                 decimals: 0,
-                address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03"
+                address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+                tokenId: null
             };
             const snapshot = '2023-05-20T12:30:00.000Z';
             const walletAddress = '0xcC2688350d29623E2A0844Cc8885F9050F0f6Ed5'; // nouncil
@@ -107,7 +125,8 @@ describe('token utils test suite', () => {
                 type: 'ERC721',
                 symbol: 'NOUNS',
                 decimals: 0,
-                address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03"
+                address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+                tokenId: null
             };
             const snapshot = new Date().toISOString();
             const walletAddress = '0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C';

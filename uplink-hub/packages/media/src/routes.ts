@@ -23,7 +23,7 @@ const sessionMiddleware = async (req, res, next) => {
 
 
 
-media.get('/preupload', sessionMiddleware, mediaController.preUpload)
+//media.get('/preupload', sessionMiddleware, mediaController.preUpload)
 
 media.post('/upload', mediaController.upload)
 

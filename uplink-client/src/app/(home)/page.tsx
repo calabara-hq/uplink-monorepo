@@ -3,7 +3,6 @@ import {
   RemainingTimeLabel,
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
-import { ContestCategory } from "@/types/contest";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,7 +15,9 @@ import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
 import { BiPlusCircle } from "react-icons/bi";
 import { HiPhoto } from "react-icons/hi2";
-import fetchActiveContests from "@/lib/fetch/fetchActiveContests";
+import fetchActiveContests, {
+  ActiveContest,
+} from "@/lib/fetch/fetchActiveContests";
 import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 
 const Swiper = dynamic(() => import("@/ui/Swiper/Swiper"), {
@@ -147,30 +148,16 @@ const BannerSection = () => {
 };
 
 const ContestCard = ({
-  contestId,
-  promptUrl,
   linkTo,
-  metadata,
-  deadlines,
-  spaceName,
-  spaceDisplayName,
-  spaceLogo,
-  tweetId,
+  contest,
 }: {
-  contestId: string;
-  promptUrl: string;
+  contest: ActiveContest;
   linkTo: string;
-  metadata: { category: ContestCategory; type: "twitter" | "standard" };
-  deadlines: { startTime: string; voteTime: string; endTime: string };
-  spaceName: string;
-  spaceDisplayName: string;
-  spaceLogo: string;
-  tweetId: string | null;
 }) => {
   const { contestState, stateRemainingTime } = calculateContestStatus(
-    deadlines,
-    metadata.type,
-    tweetId
+    contest.deadlines,
+    contest.metadata.type,
+    contest.tweetId
   );
   return (
     <Link
@@ -184,18 +171,20 @@ const ContestCard = ({
         <div className="flex flex-col gap-2 items-center">
           <div className="relative w-20 h-20 avatar online">
             <Image
-              src={spaceLogo}
+              src={contest.space.logoUrl}
               alt="spaceLogo"
               fill
               className="mask mask-squircle object-cover"
             />
           </div>
-          <h1 className="font-semibold text-xl line-clamp-1 overflow-ellipsis">{spaceDisplayName}</h1>
+          <h1 className="font-semibold text-xl line-clamp-1 overflow-ellipsis">
+            {contest.space.displayName}
+          </h1>
         </div>
         {/*@ts-expect-error*/}
-        <PromptSummary promptUrl={promptUrl} />
+        <PromptSummary contest={contest} />
         <div className="flex flex-row gap-2">
-          <CategoryLabel category={metadata.category} />
+          <CategoryLabel category={contest.metadata.category} />
           <StatusLabel status={contestState} />
         </div>
         <RemainingTimeLabel remainingTime={stateRemainingTime} />
@@ -204,15 +193,11 @@ const ContestCard = ({
   );
 };
 
-const PromptSummary = async ({ promptUrl }: { promptUrl: string }) => {
-  const { title } = await fetch(promptUrl).then((res) => res.json());
-
+const PromptSummary = async ({ contest }: { contest: ActiveContest }) => {
   return (
-    <div className="flex-grow overflow-hidden">
-      <h2 className=" whitespace-nowrap overflow-ellipsis line-clamp-1 overflow-hidden">
-        {title}
-      </h2>
-    </div>
+    <h2 className="line-clamp-1 text-center">
+      {contest.promptData.title}
+    </h2>
   );
 };
 
@@ -254,15 +239,8 @@ const ActiveContests = async () => {
             {activeContests.map((contest, index) => (
               <SwiperSlide key={index}>
                 <ContestCard
-                  contestId={contest.id}
-                  promptUrl={contest.promptUrl}
-                  spaceName={contest.space.name}
-                  spaceDisplayName={contest.space.displayName}
-                  spaceLogo={contest.space.logoUrl}
+                  contest={contest}
                   linkTo={`${contest.space.name}/contest/${contest.id}`}
-                  metadata={contest.metadata}
-                  deadlines={contest.deadlines}
-                  tweetId={contest.tweetId}
                 />
               </SwiperSlide>
             ))}

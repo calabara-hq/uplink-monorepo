@@ -1,9 +1,8 @@
 "use client";
-import { Submission } from "@/providers/ContestInteractionProvider";
+import type { Submission } from "@/types/submission";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import { AddToCartButton } from "@/ui/Submission/SubmissionDisplay";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 const Modal = ({

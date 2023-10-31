@@ -5,8 +5,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS='--no-warnings --loader ts-node/esm' nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/index.ts",
-    "build": "rm -rf ./dist && tsc",
+    "codegen": "graphql-codegen --config codegen.yaml",
+    "dev": "yarn run codegen && NODE_OPTIONS='--no-warnings --loader ts-node/esm' nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/index.ts",
+    "build": "rm -rf ./dist && yarn run codegen && tsc",
     "start": "node ./dist/index.js",
     "test": "node --loader tsx --test ./test/**/*.test.ts"
   },
@@ -23,10 +24,15 @@
     "graphql-tag": "^2.12.6",
     "ioredis": "^5.3.2",
     "lib": "workspace:*",
-    "remove": "^0.1.5"
+    "remove": "^0.1.5",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-resolvers": "^4.0.1",
     "@types/chai": "^4.3.5",
+    "@types/cookie": "^0.5.3",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.11.19",
     "chai": "^4.3.7",
