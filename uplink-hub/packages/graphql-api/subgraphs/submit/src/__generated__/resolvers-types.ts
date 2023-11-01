@@ -33,7 +33,6 @@ export type Contest = {
   gnosisResults?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   submissions: Array<Submission>;
-  utopiaResults?: Maybe<Scalars['String']['output']>;
 };
 
 export type Deadlines = {
@@ -309,7 +308,6 @@ export type ContestResolvers<ContextType = any, ParentType extends ResolversPare
   gnosisResults?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   submissions?: Resolver<Array<ResolversTypes['Submission']>, ParentType, ContextType>;
-  utopiaResults?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

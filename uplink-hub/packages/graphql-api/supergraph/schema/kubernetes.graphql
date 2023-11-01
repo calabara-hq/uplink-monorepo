@@ -95,7 +95,6 @@ type Contest
   votingPolicy: [VotingStrategy!]! @join__field(graph: CONTESTS)
   submissions: [Submission!]! @join__field(graph: SUBMIT, requires: "deadlines {startTime, voteTime, endTime, snapshot}, additionalParams {anonSubs, visibleVotes}")
   gnosisResults: String @join__field(graph: SUBMIT, requires: "deadlines {endTime}")
-  utopiaResults: String @join__field(graph: SUBMIT, requires: "deadlines {endTime}")
 }
 
 enum ContestCategoryEnum
