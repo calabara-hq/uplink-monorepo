@@ -55,31 +55,31 @@ const SubmissionCardVote = ({
 
   return (
     <div className="grid grid-cols-[70%_30%] w-full h-24 max-h-24 bg-base-100 rounded-xl">
-    {submission.data.type === "text" && (
-      <div className="flex flex-col justify-center w-full p-2">
-        <p className="text-base line-clamp-4 text-t1">
-          {submission.data.title}
-        </p>
+      {submission.data.type === "text" && (
+        <div className="flex flex-col justify-center w-full p-2">
+          <p className="text-base line-clamp-4 text-t1">
+            {submission.data.title}
+          </p>
+        </div>
+      )}
+      {submission.data.type !== "text" && (
+        <div className="grid grid-cols-2 w-full p-2">
+          <CartMediaSubmission submission={submission} />
+        </div>
+      )}
+      <div className="grid grid-rows-2 ">
+        <div className="flex">
+          <button
+            className="btn btn-ghost btn-sm ml-auto text-error"
+            onClick={() => removeSingleVote(submission.submissionId, mode)}
+          >
+            <HiTrash className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="rounded-br-xl">
+          <SubmissionVoteInput submission={submission} mode={mode} />
+        </div>
       </div>
-    )}
-    {submission.data.type !== "text" && (
-      <div className="grid grid-cols-2 w-full p-2">
-        <CartMediaSubmission submission={submission} />
-      </div>
-    )}
-    <div className="grid grid-rows-2 ">
-      <div className="flex">
-        <button
-          className="btn btn-ghost btn-sm ml-auto text-error"
-          onClick={() => removeSingleVote(submission.submissionId, mode)}
-        >
-          <HiTrash className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="rounded-br-xl">
-        <SubmissionVoteInput submission={submission} mode={mode} />
-      </div>
-    </div>
     </div>
 
     // <div className="grid grid-cols-2 w-full h-24 max-h-24 bg-base-100 rounded-xl overflow-hidden items-center">
@@ -270,7 +270,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
     areUserVotingParamsLoading,
   } = useVoteActionContext();
 
-  const { liveSubmissions: submissions } = useLiveSubmissions(contestId);
+  const { liveSubmissions, areSubmissionsLoading } = useLiveSubmissions(contestId);
   const [isEditMode, setIsEditMode] = useState(false);
   const displayableVotesSpent = formatDecimal(votesSpent);
   const displayableVotesRemaining = formatDecimal(votesRemaining);
@@ -304,6 +304,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
           </div>
           <div className="flex flex-col gap-2 transition-opacity">
             {currentVotes.map((submission: any, idx: number) => {
+              if (areSubmissionsLoading || !liveSubmissions) return null;
               if (isEditMode) {
                 return (
                   <SubmissionCardVote
@@ -311,7 +312,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
                     mode={"current"}
                     submission={{
                       ...submission,
-                      data: submissions.find(
+                      data: liveSubmissions.find(
                         (el) => el.id === submission.submissionId
                       ).data,
                     }}
@@ -323,7 +324,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
                     key={idx}
                     submission={{
                       ...submission,
-                      data: submissions.find(
+                      data: liveSubmissions.find(
                         (el) => el.id === submission.submissionId
                       ).data,
                     }}
