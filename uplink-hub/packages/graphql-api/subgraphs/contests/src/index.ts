@@ -36,7 +36,7 @@ const rateLimitRule = createRateLimitRule({
 // Setting up GraphQL permissions
 const permissions = shield({
   Query: {
-    contest: rateLimitRule({ window: '1m', max: 15 }),
+    contest: rateLimitRule({ window: '1m', max: 45 }),
     activeContests: rateLimitRule({ window: '1m', max: 15 }),
     isContestTweetQueued: rateLimitRule({ window: '1m', max: 15 }),
 
