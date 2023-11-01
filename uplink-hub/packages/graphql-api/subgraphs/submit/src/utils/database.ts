@@ -56,24 +56,83 @@ export const dbGetRewards = async (contestId: number): Promise<Array<schema.dbRe
 // get the last 3 contests that have ended, get submissions with more than 3 unique votes, and take a random sample of 20
 
 export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissionType>> => {
+    // const data = await db.execute(sqlOps.sql`
+    //     SELECT s.*
+    //     FROM submissions s
+    //     JOIN (
+    //         SELECT id, created, endTime
+    //         FROM contests
+    //         WHERE endTime < NOW()
+    //         ORDER BY created DESC
+    //         LIMIT 3
+    //     ) AS latest_contests ON s.contestId = latest_contests.id
+    //     WHERE EXISTS (
+    //         SELECT 1
+    //         FROM votes v
+    //         WHERE v.submissionId = s.id
+    //         GROUP BY v.submissionId
+    //         HAVING COUNT(DISTINCT v.id) > 3
+    //     )
+    //     ORDER BY RAND()
+    //     LIMIT 20;
+    // `)
+
+
+
+
     const data = await db.execute(sqlOps.sql`
-        SELECT s.*
+        SELECT s.*, COALESCE(vote_counts.uniqueVotes, 0) AS uniqueVotes
         FROM submissions s
         JOIN (
-            SELECT id, created
+            SELECT id, created, endTime
             FROM contests
+            WHERE endTime < NOW()
             ORDER BY created DESC
             LIMIT 3
         ) AS latest_contests ON s.contestId = latest_contests.id
-        WHERE EXISTS (
-            SELECT 1
+        LEFT JOIN (
+            SELECT v.submissionId, COUNT(DISTINCT v.id) AS uniqueVotes
             FROM votes v
-            WHERE v.submissionId = s.id
             GROUP BY v.submissionId
-            HAVING COUNT(DISTINCT v.id) > 3
-        )
+            HAVING uniqueVotes > 1
+        ) AS vote_counts ON s.id = vote_counts.submissionId
         ORDER BY RAND()
-        LIMIT 20;
     `)
+
+    // sample the subs that have more than 3 unique votes
+    // if length of 3vote array is < 10, sample the subs that have 2 unique votes
+    // if length of 2vote array is < 10, just return the original array
+
+    const subsWith3PlusVotes = data.rows.filter((sub: Submission & { uniqueVotes: number }) => sub.uniqueVotes >= 3)
+    // if > 20, return a random sample of 20
+    if (subsWith3PlusVotes.length > 20) {
+        return subsWith3PlusVotes.sort(() => Math.random() - Math.random()).slice(0, 20)
+    }
+    // if > 10, return the array as is
+    if (subsWith3PlusVotes.length >= 10) {
+        return subsWith3PlusVotes
+    }
+
+    // if < 10, keep going
+
+    const subsWith2PlusVotes = data.rows.filter((sub: Submission & { uniqueVotes: number }) => sub.uniqueVotes >= 2)
+
+    // if > 20, return a random sample of 20
+    if (subsWith2PlusVotes.length > 20) {
+        return subsWith2PlusVotes.sort(() => Math.random() - Math.random()).slice(0, 20)
+    }
+    // if > 10, return the array as is
+    if (subsWith2PlusVotes.length >= 10) {
+        return subsWith2PlusVotes
+    }
+
+    // if < 10, work with the original array
+
+    // if > 20, return a random sample of 20
+    if (data.rows.length > 20) {
+        return data.rows.sort(() => Math.random() - Math.random()).slice(0, 20)
+    }
+
+    // otherwise return the original array
     return data.rows
 }

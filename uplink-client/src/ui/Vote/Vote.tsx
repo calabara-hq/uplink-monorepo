@@ -171,7 +171,7 @@ const CartMediaSubmission = ({ submission }: { submission: VotableSubmission }) 
           alt="submission image"
           fill
           className="object-cover rounded-xl"
-          sizes="5wv"
+          sizes="30vw" // same as SubmissionCard to hit cache
         />
       </figure>
     </div>
@@ -295,43 +295,45 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
       )}
       {currentVotes.length > 0 && (
         <motion.div
-          className="flex flex-col gap-2 p-2 m-2 max-h-80 overflow-y-auto bg-base-200 rounded-lg"
+          className="max-h-[30vh] overflow-y-auto"
           variants={itemVariants}
         >
-          <div className="flex flex-row w-full justify-between items-center">
-            <p className="">Your current selections</p>
-            <EditButton isEditMode={isEditMode} setIsEditMode={setIsEditMode} />
-          </div>
-          <div className="flex flex-col gap-2 transition-opacity">
-            {currentVotes.map((submission: any, idx: number) => {
-              if (areSubmissionsLoading || !liveSubmissions) return null;
-              if (isEditMode) {
-                return (
-                  <SubmissionCardVote
-                    key={idx}
-                    mode={"current"}
-                    submission={{
-                      ...submission,
-                      data: liveSubmissions.find(
-                        (el) => el.id === submission.submissionId
-                      ).data,
-                    }}
-                  />
-                );
-              } else {
-                return (
-                  <LockedCardVote
-                    key={idx}
-                    submission={{
-                      ...submission,
-                      data: liveSubmissions.find(
-                        (el) => el.id === submission.submissionId
-                      ).data,
-                    }}
-                  />
-                );
-              }
-            })}
+          <div className="flex flex-col gap-2 p-2 m-2 bg-base-200 rounded-lg">
+            <div className="flex flex-row w-full justify-between items-center">
+              <p className="">Your current selections</p>
+              <EditButton isEditMode={isEditMode} setIsEditMode={setIsEditMode} />
+            </div>
+            <div className="flex flex-col gap-2 transition-opacity">
+              {currentVotes.map((submission: any, idx: number) => {
+                if (areSubmissionsLoading || !liveSubmissions) return null;
+                if (isEditMode) {
+                  return (
+                    <SubmissionCardVote
+                      key={idx}
+                      mode={"current"}
+                      submission={{
+                        ...submission,
+                        data: liveSubmissions.find(
+                          (el) => el.id === submission.submissionId
+                        ).data,
+                      }}
+                    />
+                  );
+                } else {
+                  return (
+                    <LockedCardVote
+                      key={idx}
+                      submission={{
+                        ...submission,
+                        data: liveSubmissions.find(
+                          (el) => el.id === submission.submissionId
+                        ).data,
+                      }}
+                    />
+                  );
+                }
+              })}
+            </div>
           </div>
         </motion.div>
       )}
@@ -343,7 +345,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
               <p className="">+ Your proposed additions</p>
             </div>
           )}
-          <div className="flex flex-col gap-2 p-2 max-h-80 overflow-y-auto">
+          <div className="flex flex-col gap-2 p-2 max-h-[30vh] overflow-y-auto">
             {proposedVotes.map((submission: any, idx: number) => (
               <SubmissionCardVote
                 key={idx}

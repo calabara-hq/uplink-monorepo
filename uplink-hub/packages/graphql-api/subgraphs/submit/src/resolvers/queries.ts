@@ -4,7 +4,6 @@ import { AuthorizationController, schema, Decimal, Context } from "lib";
 import type { Contest, Submission } from "../__generated__/resolvers-types.js";
 import dotenv from 'dotenv'
 import { computeSubmissionParams } from "../utils/insert.js";
-import { dbVoteType } from "lib/dist/drizzle/schema.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL!);
@@ -169,10 +168,10 @@ const queries = {
             const isContestOver = endTime < new Date().toISOString();
             if (!isContestOver) return null;
 
-            const promise_submissions = isContestOver ? dbSubmissionsByContestId(parseInt(contest.id))
+            const promise_submissions: Promise<Array<ProcessedSubmission>> | [] = !isContestOver ? [] : dbSubmissionsByContestId(parseInt(contest.id))
                 .then(async (submissions: Array<schema.dbSubmissionType>) => {
                     return await Promise.all(submissions.map((submission) => postProcessSubmission(submission, true, true)))
-                }) : [];
+                }).then((submissions: Array<ProcessedSubmission>) => sortSubmissions(submissions, true))
 
             const promise_rewards = dbGetRewards(parseInt(contest.id)).then(postProcessRewards)
 
@@ -181,7 +180,7 @@ const queries = {
             let csvContent = "data:text/csv;charset=utf-8,token_type,token_address,receiver,amount,id\r\n"
 
             try {
-                submitterRewards.forEach((reward, idx) => {
+                submitterRewards.forEach((reward) => {
                     const winner = submissions[reward.rank - 1];
                     if (winner) { // in case rewards.length > winners.length
                         switch (reward.tokenReward.token.type) {
@@ -192,7 +191,7 @@ const queries = {
                                 csvContent += `erc20,${reward.tokenReward.token.address},${winner.author},${reward.tokenReward.amount},\r\n`;
                                 break;
                             case 'ERC721':
-                                csvContent += `nft,${reward.tokenReward.token.address},${winner.author},,${reward.tokenReward.token.tokenId},\r\n`;
+                                csvContent += `nft,${reward.tokenReward.token.address},${winner.author},,${reward.tokenReward.tokenId},\r\n`;
                                 break;
                             case 'ERC1155':
                                 csvContent += `nft,${reward.tokenReward.token.address},${winner.author},${reward.tokenReward.amount},${reward.tokenReward.token.tokenId},\r\n`;
@@ -200,7 +199,7 @@ const queries = {
                         }
                     }
 
-                    voterRewards.forEach((reward, idx) => {
+                    voterRewards.forEach((reward) => {
                         const winner = submissions[reward.rank - 1];
                         if (winner) { // in case rewards.length > winners.length
                             winner.votes.forEach((vote: schema.dbVoteType) => {
@@ -227,65 +226,6 @@ const queries = {
 
             return csvContent;
         },
-        async utopiaResults(contest: Contest) {
-            if (!contest) return null;
-            const { deadlines } = contest;
-            const { endTime } = deadlines;
-            const isContestOver = endTime < new Date().toISOString();
-            if (!isContestOver) return null;
-
-            const promise_submissions = isContestOver ? dbSubmissionsByContestId(parseInt(contest.id))
-                .then(async (submissions: Array<schema.dbSubmissionType>) => {
-                    return await Promise.all(submissions.map((submission) => postProcessSubmission(submission, true, true)))
-                }) : [];
-
-            const promise_rewards = dbGetRewards(parseInt(contest.id)).then(postProcessRewards)
-
-            const [submissions, { submitterRewards, voterRewards }] = await Promise.all([promise_submissions, promise_rewards])
-
-            let csvContent = "data:text/csv;charset=utf-8,name,wallet,amount,Pay-out token\r\n";
-
-            try {
-                submitterRewards.forEach((reward, idx) => {
-                    const winner = submissions[reward.rank - 1];
-                    if (winner) { // in case rewards.length > winners.length
-                        switch (reward.tokenReward.token.type) {
-                            case 'ETH':
-                                csvContent += `submitter reward,${winner.author},${reward.tokenReward.amount},ETH\r\n`;
-                                break;
-                            case 'ERC20':
-                                csvContent += `submitter reward,${winner.author},${reward.tokenReward.amount},${reward.tokenReward.token.symbol}\r\n`;
-                                break;
-                        }
-                    }
-
-                    voterRewards.forEach((reward, idx) => {
-                        const winner = submissions[reward.rank - 1];
-                        if (winner) { // in case rewards.length > winners.length
-                            winner.votes.forEach((vote: schema.dbVoteType) => {
-                                const decRewardAmount = new Decimal(reward.tokenReward.amount ?? 0);
-                                const decVoteAmount = new Decimal(vote.amount);
-                                const decTotalVotes = new Decimal(winner.totalVotes ?? 1);
-                                const voterShare = decRewardAmount.mul(decVoteAmount.div(decTotalVotes)).toString();
-                                switch (reward.tokenReward.token.type) {
-                                    case 'ETH':
-                                        csvContent += `voter reward,${vote.voter},${voterShare},ETH,\r\n`;
-                                        break;
-                                    case 'ERC20':
-                                        csvContent += `voter reward,${vote.voter}, ${voterShare},${reward.tokenReward.token.symbol}\r\n`;
-                                        break;
-                                }
-                            })
-                        }
-                    })
-                })
-
-            } catch (e) {
-                return "";
-            }
-
-            return csvContent;
-        }
     }
 
 };

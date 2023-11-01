@@ -50,7 +50,6 @@ export interface ContestInteractionProps {
   isUserVotingParamsError: any;
   mutateUserVotingParams: any; //(newParams: UserVotingParams, options?: any) => void;
   downloadGnosisResults: () => void;
-  downloadUtopiaResults: () => void;
 }
 
 // fetcher functions
@@ -176,30 +175,6 @@ const getGnosisResults = async (contestId: string) => {
   return data;
 };
 
-const getUtopiaResults = async (contestId: string) => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `
-        query Query($contestId: ID!){
-          contest(contestId: $contestId){
-            utopiaResults
-          }
-      }`,
-      variables: {
-        contestId,
-      },
-    }),
-  })
-    .then((res) => res.json())
-    .then((res) => res.data.contest.utopiaResults);
-
-  return data;
-};
-
 const ContestInteractionContext = createContext<
   ContestInteractionProps | undefined
 >(undefined);
@@ -269,12 +244,6 @@ export function ContestInteractionProvider({
     );
   };
 
-  const downloadUtopiaResults = () => {
-    getUtopiaResults(contestId).then((res: string) =>
-      postProcessCsvResults(res, "utopia")
-    );
-  };
-
   return (
     <ContestInteractionContext.Provider
       value={{
@@ -286,7 +255,6 @@ export function ContestInteractionProvider({
         isUserVotingParamsError,
         mutateUserVotingParams,
         downloadGnosisResults,
-        downloadUtopiaResults,
       }}
     >
       {children}

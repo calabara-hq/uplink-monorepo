@@ -77,47 +77,22 @@ export const RenderStateSpecificDialog = ({
   return null;
 };
 
-export const RenderRemainingTime = ({}) => {
+export const RenderRemainingTime = ({ }) => {
   const { stateRemainingTime } = useContestState();
   return <>{stateRemainingTime}</>;
 };
 
 export const InteractiveContestClosed = () => {
-  const { downloadGnosisResults, downloadUtopiaResults } =
+  const { downloadGnosisResults } =
     useContestInteractionState();
-  const [downloadClicked, setDownloadClicked] = useState(false);
   return (
     <div className="flex flex-col items-center justify-evenly p-4 gap-2 w-full">
-      {!downloadClicked && (
-        <button
-          className="btn btn-primary normal-case"
-          onClick={() => setDownloadClicked(true)}
-        >
-          Download Winners
-        </button>
-      )}
-      {downloadClicked && (
-        <div className="flex gap-2 items-center">
-          <button
-            className="btn bg-[#12ff80] normal-case text-black border-none hover:bg-[#12ff8099]"
-            onClick={downloadGnosisResults}
-          >
-            Gnosis
-          </button>
-          <button
-            className="btn bg-[#4c7064] normal-case text-white border-none hover:bg-[#4c706499]"
-            onClick={downloadUtopiaResults}
-          >
-            Utopia
-          </button>
-          <button
-            className="btn btn-ghost btn-sm text-t2"
-            onClick={() => setDownloadClicked(false)}
-          >
-            <HiXCircle className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      <button
+        className="btn btn-primary normal-case"
+        onClick={downloadGnosisResults}
+      >
+        Download Winners
+      </button>
     </div>
   );
 };
@@ -188,7 +163,7 @@ export const InteractiveCreateTweet = ({
         spaceId={spaceId}
         customDecorators={customDecorators}
         onSuccess={handleSuccess}
-        onError={() => {}}
+        onError={() => { }}
       />
     </>
   );

@@ -21,7 +21,7 @@ const fetchPopularSubmissions = async (): Promise<Array<Submission>> => {
           }
         }`,
     }),
-    next: { revalidate: 60 * 60 * 24 * 7 }, // 1 week
+    next: { revalidate: 60 }
   })
     .then((res) => res.json())
     .then((res) => res.data.popularSubmissions)
