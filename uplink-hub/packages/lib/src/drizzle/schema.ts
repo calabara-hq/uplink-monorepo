@@ -175,7 +175,7 @@ export const tweetQueue = mysqlTable('tweetQueue', {
     jobContext: varchar('jobContext', { length: 255 }).notNull(),   // 'submission' or 'contest'
     payload: json('payload').notNull().default('[]'),
     accessToken: varchar('accessToken', { length: 255 }).notNull(),
-    accessSecret: varchar('accessSecret', { length: 255 }).notNull(),
+    expiresAt: varchar('expiresAt', { length: 255 }).notNull(),
     retries: int('retries').notNull(),
     status: tinyint('status').notNull(),                        // 0 = pending, 1 = failed, 2 = success
     error: json('error'),
@@ -185,6 +185,9 @@ export const tweetQueue = mysqlTable('tweetQueue', {
 export const users = mysqlTable('users', {
     id: serial('id').primaryKey(),
     address: varchar('address', { length: 255 }).notNull(),
+    twitterId: varchar('twitterId', { length: 255 }),
+    twitterHandle: varchar('twitterHandle', { length: 255 }),
+    twitterAvatarUrl: varchar('twitterAvatar', { length: 255 }),
 }, (user) => ({
     userAddressIndex: uniqueIndex("user_address_idx").on(user.address)
 }));
@@ -332,6 +335,10 @@ export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
         fields: [tweetQueue.contestId],
         references: [contests.id],
     }),
+    user: one(users, {
+        fields: [tweetQueue.author],
+        references: [users.id],
+    })
 }));
 
 
@@ -412,6 +419,7 @@ export type dbVoteType = InferModel<typeof votes> & {
 
 export type dbTweetQueueType = InferModel<typeof tweetQueue> & {
     contest: dbContestType,
+    user: dbUserType,
 }
 
 export type dbUserType = InferModel<typeof users>

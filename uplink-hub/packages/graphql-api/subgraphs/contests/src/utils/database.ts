@@ -64,7 +64,6 @@ const dbExtras = {
 
 
 const postProcessContest = (contest: schema.dbContestType) => {
-    if (!contest) return null;
     const submitterRewards = [];
     const voterRewards = [];
 

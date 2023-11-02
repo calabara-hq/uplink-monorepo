@@ -37,7 +37,6 @@ const unions = {
 
     VotingStrategy: {
         __resolveType: (obj: any) => {
-            console.log(obj)
             if (obj.strategyType === "arcade") return 'ArcadeVotingStrategyOption'
             if (obj.strategyType === "weighted") return 'WeightedVotingStrategyOption'
             return null

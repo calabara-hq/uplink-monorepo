@@ -63,7 +63,7 @@ const mutations = {
         createContestTweet: async (_: any, args: { contestId: string, spaceId: string, tweetThread: ThreadItemInput[] }, context: Context) => {
 
             const user = await authController.getUser(context);
-            const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (user?.twitter?.accessSecret ?? null);
+            const isTwitterAuth = (user?.twitter?.accessToken ?? null) && (new Date(user?.twitter?.expiresAt ?? false) > new Date(Date.now()));
             if (!user || !isTwitterAuth) throwMutationError('UNAUTHORIZED')
 
             const isSpaceAdmin = await dbIsUserSpaceAdmin(user, parseInt(args.spaceId))

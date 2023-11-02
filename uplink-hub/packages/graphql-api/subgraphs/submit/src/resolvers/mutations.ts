@@ -18,11 +18,12 @@ const mutations = {
                 }
             })
 
-            const validPayload = await validateStandardSubmissionPayload(submission);
+            const validPayload = validateStandardSubmissionPayload(submission);
             return createStandardSubmission(user, parseInt(contestId), validPayload);
         },
 
         createTwitterSubmission: async (_: any, { contestId, submission }: { contestId: string, submission: TwitterSubmissionPayload }, context: any) => {
+
             const user = await authController.getUser(context);
             if (!user || !user.twitter) throw new GraphQLError('Unauthorized', {
                 extensions: {
@@ -30,7 +31,7 @@ const mutations = {
                 }
             })
 
-            let validPayload = await validateTwitterSubmissionPayload(submission);
+            let validPayload = validateTwitterSubmissionPayload(submission);
             return createTwitterSubmission(user, parseInt(contestId), validPayload);
         }
     },

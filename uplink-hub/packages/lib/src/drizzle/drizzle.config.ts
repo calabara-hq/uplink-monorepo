@@ -1,5 +1,4 @@
 import { Config } from "drizzle-kit"
-import * as schema from './schema'
 import dotenv from "dotenv"
 
 dotenv.config();
