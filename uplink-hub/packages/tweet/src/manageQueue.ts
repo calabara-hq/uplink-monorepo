@@ -1,6 +1,6 @@
 import { DatabaseController, schema, CipherController } from 'lib';
 import dotenv from 'dotenv';
-import { TwitterController } from './twitter.js';
+import { V1TwitterController, V2TwitterController } from './twitter.js';
 import { SendTweetV2Params, TwitterApiError } from 'twitter-api-v2';
 dotenv.config();
 
@@ -9,6 +9,13 @@ const cipherController = new CipherController(process.env.APP_SECRET);
 const databaseController = new DatabaseController(process.env.DATABASE_HOST, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
 export const db = databaseController.db;
 export const sqlOps = databaseController.sqlOps;
+
+const token = {
+    key: process.env.UPLINK_TWITTER_ACCESS_TOKEN,
+    secret: process.env.UPLINK_TWITTER_ACCESS_SECRET
+}
+
+const appTwitterController = new V1TwitterController(token.key, token.secret);
 
 
 type ThreadItem = {
@@ -31,7 +38,7 @@ const statusMap = {
 
 
 const getJobs = db.query.tweetQueue.findMany({
-    with: { contest: true },
+    with: { contest: true, user: true },
     where: (tweetQueue) =>
         sqlOps.and(
             sqlOps.lt(schema.tweetQueue.status, 2),
@@ -50,6 +57,7 @@ const getJobs = db.query.tweetQueue.findMany({
                 sqlOps.eq(schema.tweetQueue.jobContext, 'submission')
             )),
     orderBy: (jobs => [
+        sqlOps.asc(jobs.expiresAt), // give priority to jobs that are about to expire
         sqlOps.asc(jobs.jobContext), // give priority to announcement tweets
         sqlOps.asc(jobs.created)   // give priority to oldest jobs
     ]),
@@ -85,22 +93,19 @@ const getJobQuoteTweetId = db.query.contests.findFirst({
 
 const handleJob = async (job: schema.dbTweetQueueType) => {
     const payload = job.payload as ThreadItem[]
-    const { accessToken, accessSecret } = job;
+    const { accessToken } = job;
     const quoteTweetId = job.jobContext === 'submission' ? await getJobQuoteTweetId.execute({ contestId: job.contestId }).then(data => data.tweetId) : undefined;
     if (job.jobContext === 'submission' && !quoteTweetId) return; // need to wait for contest to be announced
     await setJobStatus(job.id, 'pending');
 
     try {
-        const token = {
-            key: cipherController.decrypt(accessToken),
-            secret: cipherController.decrypt(accessSecret)
-        }
 
-        const twitterController = new TwitterController(token.key, token.secret);
         await Promise.all(payload.map(async (item) => {
             const { media, ...rest } = item;
             if (media) {
-                const media_id: string = await twitterController.uploadTweetMedia(item);
+                const media_id: string = await appTwitterController.uploadTweetMedia(item, job.user.twitterId);
+                console.info('rate limit V1', appTwitterController.getRateLimit())
+
                 return {
                     ...rest,
                     media: { media_ids: [media_id] }
@@ -110,7 +115,8 @@ const handleJob = async (job: schema.dbTweetQueueType) => {
             }
         }))
             .then(async (res) => {
-                await twitterController.sendTweet(res as SendTweetV2Params[], quoteTweetId)
+                const userTwitterController = new V2TwitterController(cipherController.decrypt(accessToken));
+                await userTwitterController.sendTweet(res as SendTweetV2Params[], quoteTweetId)
                     .then(async (tweetId) => {
                         console.log(res)
                         await setJobStatus(job.id, 'success');

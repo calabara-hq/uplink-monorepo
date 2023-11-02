@@ -46,11 +46,11 @@ interface CtxOrReq {
 
 type SessionContextValue<R extends boolean = false> = R extends true
   ?
-      | { data: Session; status: "authenticated" }
-      | { data: null; status: "loading" }
+  | { data: Session; status: "authenticated" }
+  | { data: null; status: "loading" }
   :
-      | { data: Session; status: "authenticated" }
-      | { data: null; status: "unauthenticated" | "loading" };
+  | { data: Session; status: "authenticated" }
+  | { data: null; status: "unauthenticated" | "loading" };
 
 export const SessionContext = createContext?.<SessionContextValue | undefined>(
   undefined
@@ -61,7 +61,7 @@ export const SessionContext = createContext?.<SessionContextValue | undefined>(
 const _SessionStore: ISessionStore = {
   _lastSync: 0,
   _session: undefined,
-  _getSession: () => {},
+  _getSession: () => { },
 };
 
 // tab / window broadcast channel
@@ -114,12 +114,11 @@ export function useSession<R extends boolean>(options?: UseSessionOptions<R>) {
 
   useEffect(() => {
     if (requiredAndNotLoading) {
-      const url = `${
-        process.env.NEXT_PUBLIC_HUB_URL
-      }/auth/signin?${new URLSearchParams({
-        error: "SessionRequired",
-        callbackUrl: window.location.href,
-      })}`;
+      const url = `${process.env.NEXT_PUBLIC_HUB_URL
+        }/auth/signin?${new URLSearchParams({
+          error: "SessionRequired",
+          callbackUrl: window.location.href,
+        })}`;
       if (onUnauthenticated) onUnauthenticated();
       else window.location.href = url;
     }
@@ -220,7 +219,7 @@ export const signOut = async () => {
   return data;
 };
 
-export const twitterSignIn = async (scope: string) => {
+export const twitterSignIn = async (scopeType: string) => {
   // Logic to sign in with Twitter goes here
   const csrfToken = _SessionStore._session?.csrfToken;
   return await fetch(
@@ -231,7 +230,7 @@ export const twitterSignIn = async (scope: string) => {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ scope: scope, csrfToken }),
+      body: JSON.stringify({ scopeType, csrfToken }),
     }
   )
     .then((res) => res.json())
@@ -315,7 +314,7 @@ export function SessionProvider(props: SessionProviderProps) {
     return () => {
       _SessionStore._lastSync = 0;
       _SessionStore._session = undefined;
-      _SessionStore._getSession = () => {};
+      _SessionStore._getSession = () => { };
     };
   }, []);
 
@@ -377,8 +376,8 @@ export function SessionProvider(props: SessionProviderProps) {
       status: loading
         ? "loading"
         : session
-        ? "authenticated"
-        : "unauthenticated",
+          ? "authenticated"
+          : "unauthenticated",
     }),
     [session, loading]
   );

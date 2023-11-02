@@ -12033,6 +12033,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"raffle@workspace:packages/graphql-api/subgraphs/raffle":
+  version: 0.0.0-use.local
+  resolution: "raffle@workspace:packages/graphql-api/subgraphs/raffle"
+  dependencies:
+    "@apollo/federation": ^0.38.1
+    "@apollo/server": ^4.3.3
+    "@apollo/subgraph": ^2.3.1
+    "@graphql-codegen/cli": ^5.0.0
+    "@graphql-codegen/typescript": ^4.0.1
+    "@graphql-codegen/typescript-resolvers": ^4.0.1
+    "@types/cookie": ^0.5.3
+    "@types/node": ^18.11.19
+    dotenv: ^16.0.3
+    graphql: ^16.6.0
+    graphql-middleware: ^6.1.35
+    graphql-rate-limit: ^3.3.0
+    graphql-shield: ^7.6.5
+    graphql-tag: ^2.12.6
+    ioredis: ^5.3.2
+    lib: "workspace:*"
+    nodemon: ^2.0.20
+    ts-node: ^10.9.1
+    tsx: ^3.12.7
+    twitter-api-v2: ^1.15.2
+    typescript: ^5.1.6
+    zod: ^3.22.4
+  languageName: unknown
+  linkType: soft
+
 "random-bytes@npm:~1.0.0":
   version: 1.0.0
   resolution: "random-bytes@npm:1.0.0"
@@ -13566,6 +13595,13 @@ __metadata:
   version: 1.15.0
   resolution: "twitter-api-v2@npm:1.15.0"
   checksum: 00f0ece54fdb078f7f83330316500749ae1bbc1690b506e243c1e34e244e6ba70c9d512b6c489e5a4c57815b40f010948a0e6f8ad90b077ec652011e54b95669
+  languageName: node
+  linkType: hard
+
+"twitter-api-v2@npm:^1.15.2":
+  version: 1.15.2
+  resolution: "twitter-api-v2@npm:1.15.2"
+  checksum: 8dac701732ddf5ac310158fdcc556e92aec04e451c898150b51e791b391d8b2050cce29e8df0b613da96610d0ba1400dbc5ecd844a6d7e237fa2a186153f0872
   languageName: node
   linkType: hard
 

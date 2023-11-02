@@ -192,8 +192,6 @@ export const VoteActionProvider = ({
 
   // add submission to proposed votes
   const addProposedVote = (el: Submission) => {
-    console.log('proposedVotes', proposedVotes)
-    console.log('userVoteParams?.userVotes', userVoteParams?.userVotes)
     if (proposedVotes.find(vote => vote.id === el.id)) return toast.error("This selection is already in your cart.");
     if (userVoteParams) {
       if (userVoteParams?.userVotes?.find((vote: UserVote) => vote.submissionId === el.id)) return toast.error("This selection is already in your cart.");

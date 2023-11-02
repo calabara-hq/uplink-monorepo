@@ -228,12 +228,12 @@ export const queueTweet = async (contestId: number, user: any, startTime: string
 
     const tweetJob: schema.dbNewTweetQueueType = {
         contestId: contestId,
-        author: user.address,
+        author: user.id,
         created: startTime, // set created to startTime so that the job will be picked up by the scheduler close to the start time
         jobContext: 'contest',
         payload: tweetQueueThread,
         accessToken: user.twitter.accessToken,
-        accessSecret: user.twitter.accessSecret,
+        expiresAt: user.twitter.expiresAt,
         retries: 0,
         status: 0
     }

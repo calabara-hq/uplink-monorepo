@@ -156,7 +156,6 @@ export const computeMaxSubmissionPower = async (
     }[]
 }> => {
 
-
     const [cacheResult, contestParameters] = await Promise.all([
         getCacheSubParams(user, contestId),
         fetchContestParameters(contestId),
@@ -193,10 +192,12 @@ export const computeSubmissionParams = async (
     contestId: number
 ) => {
 
+
     const [{ maxSubPower, restrictionResults }, userSubmissions] = await Promise.all([
         computeMaxSubmissionPower(user, contestId),
         fetchUserSubmissions(user, contestId)
     ]);
+
 
     const userSubCount = userSubmissions.length;
     const remainingSubPower = maxSubPower === 0 ? 0 : maxSubPower - userSubCount;
@@ -258,7 +259,8 @@ const insertStandardSubmission = async (submission: WritableStandardSubmission, 
 
 
 const insertTwitterSubmission = async (submission: WritableTwitterSubmission, ipfsUrl: string, contestId: number, user: any) => {
-    
+
+
     const newSubmission: schema.dbNewSubmissionType = {
         contestId: contestId,
         author: user.address,
@@ -295,14 +297,15 @@ const insertTwitterSubmission = async (submission: WritableTwitterSubmission, ip
         }
     });
 
+
     const tweetJob: schema.dbNewTweetQueueType = {
         contestId: contestId,
-        author: user.address,
+        author: user.id,
         created: new Date().toISOString(),
         jobContext: 'submission',
         payload: tweetQueueThread,
         accessToken: user.twitter.accessToken,
-        accessSecret: user.twitter.accessSecret,
+        expiresAt: user.twitter.expiresAt,
         retries: 0,
         status: 0
     }
@@ -383,6 +386,8 @@ export const createTwitterSubmission = async (user: any, contestId: number, subm
     });
 
     try {
+
+
         // upload the submission
         const submissionUrl = await pinSubmission(submissionPayload);
         const submissionId = await insertTwitterSubmission(submissionPayload, submissionUrl, contestId, user);

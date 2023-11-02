@@ -20,3 +20,7 @@ subgraphs:
     routing_url: http://localhost:5007
     schema:
       file: ../../subgraphs/user/schema.graphql
+  raffle:
+    routing_url: http://localhost:5008
+    schema:
+      file: ../../subgraphs/raffle/schema.graphql

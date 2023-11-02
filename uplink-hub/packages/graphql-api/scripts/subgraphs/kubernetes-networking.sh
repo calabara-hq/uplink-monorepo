@@ -8,6 +8,7 @@ url_submit="http://submit:8080"
 url_vote="http://vote:8080"
 url_user="http://user:8080"
 
+
 schema_spaces="subgraphs/spaces/schema.graphql"
 schema_contests="subgraphs/contests/schema.graphql"
 schema_submit="subgraphs/submit/schema.graphql"
