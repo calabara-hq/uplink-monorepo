@@ -1,6 +1,8 @@
-import { publicClient } from "./viem";
+import { createWeb3Client } from "./viem";
 import { getAddress } from 'viem';
 import { normalize } from "viem/ens";
+
+const web3 = createWeb3Client(1);
 
 export const validateEthAddress = async (address: string) => {
 
@@ -11,7 +13,7 @@ export const validateEthAddress = async (address: string) => {
     let resolvedAddress: string | null = null;
 
     if (isEns) {
-        resolvedAddress = await publicClient.getEnsAddress({ name: normalize(address) });
+        resolvedAddress = await web3.getEnsAddress({ name: normalize(address) });
         if (!resolvedAddress) return null;
         return resolvedAddress;
     }

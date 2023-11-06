@@ -2,7 +2,7 @@ import { db, sqlOps } from "./database.js";
 import { GraphQLError } from "graphql";
 import { schema, Decimal } from "lib";
 import { getCacheValue, setCacheValue } from "./cache.js";
-import { tokenController } from "./tokenController.js";
+import { TokenController } from 'lib';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -29,6 +29,7 @@ export const fetchVotingPolicy = async (contestId: number, strategyType: string)
 export const fetchContestParams = async (contestId: number) => {
     const result = await db.select({
         selfVote: schema.contests.selfVote,
+        chainId: schema.contests.chainId,
         deadlines: {
             startTime: schema.contests.startTime,
             voteTime: schema.contests.voteTime,
@@ -121,7 +122,8 @@ export const computeArcadeVotingPowerUserValues = async (
             tokenId?: string,
         }
         votingPower: Decimal,
-    }[]
+    }[],
+    tokenController: TokenController
 ) => {
 
     const arcadeVotingPowerUserValues = await Promise.all(arcadeStrategy.map(async (policy: any) => {
@@ -148,7 +150,8 @@ export const computeWeightedVotingPowerUserValues = async (
             address?: string,
             tokenId?: string,
         }
-    }[]
+    }[],
+    tokenController: TokenController
 ) => {
     const weightedVotingPowerUserValues = await Promise.all(weightedStrategy.map(async (policy: any) => {
         const { token } = policy;
@@ -174,7 +177,8 @@ export const calculateTotalVotingPower = async (
         voteTime: string,
         endTime: string,
         snapshot: string
-    }
+    },
+    chainId: number
 ) => {
     if (!user || !user.address) return new Decimal(0);
 
@@ -184,6 +188,7 @@ export const calculateTotalVotingPower = async (
 
 
     else { // not cached
+        const tokenController = new TokenController(process.env.ALCHEMY_KEY!, chainId);
         const [arcadeVotingStrategy, weightedVotingStrategy] = await Promise.all([
             fetchVotingPolicy(contestId, 'arcade'),
             fetchVotingPolicy(contestId, 'weighted'),
@@ -191,8 +196,8 @@ export const calculateTotalVotingPower = async (
         if (!arcadeVotingStrategy && !weightedVotingStrategy) return new Decimal(0);
         const blockNum = await tokenController.calculateBlockFromTimestamp(deadlines.snapshot);
         const [arcadeVotingPowerUserValues, weightedVotingPowerUserValues] = await Promise.all([
-            computeArcadeVotingPowerUserValues(user, blockNum, arcadeVotingStrategy),
-            computeWeightedVotingPowerUserValues(user, blockNum, weightedVotingStrategy),
+            computeArcadeVotingPowerUserValues(user, blockNum, arcadeVotingStrategy, tokenController),
+            computeWeightedVotingPowerUserValues(user, blockNum, weightedVotingStrategy, tokenController),
         ]);
 
         // total vp is the max(max arcade vp, max weighted vp)
@@ -221,10 +226,12 @@ export const calculateUserVotingParams = async (
         voteTime: string,
         endTime: string,
         snapshot: string
-    }
+    },
+    chainId: number
 ) => {
+
     const [totalVotingPower, userVotes] = await Promise.all([
-        calculateTotalVotingPower(user, contestId, deadlines),
+        calculateTotalVotingPower(user, contestId, deadlines, chainId),
         fetchUserVotes(user, contestId),
     ]);
 
@@ -286,8 +293,9 @@ export const castVotes = async (
     payload: {
         submissionId: number,
         votes: Decimal,
-    }[]
+    }[],
 ) => {
+
     const contestParams = await fetchContestParams(contestId);
     if (!contestParams) {
         throw new GraphQLError('Contest does not exist', {
@@ -297,7 +305,7 @@ export const castVotes = async (
         })
     }
 
-    const votingPower = await calculateTotalVotingPower(user, contestId, contestParams.deadlines);
+    const votingPower = await calculateTotalVotingPower(user, contestId, contestParams.deadlines, contestParams.chainId);
     const proposedVoteTotal = payload.reduce((acc: Decimal, el: { submissionId: number, votes: Decimal }) => acc.plus(el.votes), new Decimal(0));
 
 
@@ -339,7 +347,7 @@ export const castVotes = async (
 
     await insertVotes(user, contestId, payload);
 
-    const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines);
+    const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines, contestParams.chainId);
 
     return {
         success: true,
@@ -357,7 +365,8 @@ export const retractAllVotes = async (user: any, contestId: any) => {
     try {
 
         const contestParams = await fetchContestParams(contestId);
-        const totalVotingPower = await calculateTotalVotingPower(user, contestId, contestParams.deadlines);
+
+        const totalVotingPower = await calculateTotalVotingPower(user, contestId, contestParams.deadlines, contestParams.chainId);
 
         await db.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
         // reset the voting params state
@@ -392,7 +401,7 @@ export const retractSingleVote = async (user: any, contestId: any, submissionId:
 
     try {
         await db.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.submissionId, submissionId), sqlOps.eq(schema.votes.voter, user.address)));
-        const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines);
+        const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines, contestParams.chainId);
 
         return {
             success: true,

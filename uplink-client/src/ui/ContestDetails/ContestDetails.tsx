@@ -13,7 +13,7 @@ import {
 import { Fragment } from "react";
 import formatOrdinals from "@/lib/formatOrdinals";
 import Link from "next/link";
-import { StatusLabel } from "../ContestLabels/ContestLabels";
+import { ChainLabel, StatusLabel } from "../ContestLabels/ContestLabels";
 import {
   HiInformationCircle,
   HiOutlineLockClosed,
@@ -33,6 +33,7 @@ import {
   isWeightedVotingStrategy,
 } from "@/types/contest";
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
+import { getChainName } from "@/lib/chains/supportedChains";
 /*
  * note- if this code looks a bit strange, it's because
  * nextjs allows us to pass server components as children to the client
@@ -157,9 +158,8 @@ const SubmitterRestrictionsSection = ({
             .map((restriction: any, idx: number) => {
               return (
                 <p key={idx}>
-                  {`Hold ${
-                    formatDecimal(restriction.tokenRestriction.threshold).short
-                  } or more ${restriction.tokenRestriction.token.symbol} `}{" "}
+                  {`Hold ${formatDecimal(restriction.tokenRestriction.threshold).short
+                    } or more ${restriction.tokenRestriction.token.symbol} `}{" "}
                 </p>
               );
             })}
@@ -176,12 +176,10 @@ const SubmitterRestrictionsSection = ({
                   return (
                     <Fragment key={idx}>
                       <p>
-                        {`Hold ${
-                          formatDecimal(restriction.tokenRestriction.threshold)
-                            .short
-                        } or more ${
-                          restriction.tokenRestriction.token.symbol
-                        } `}{" "}
+                        {`Hold ${formatDecimal(restriction.tokenRestriction.threshold)
+                          .short
+                          } or more ${restriction.tokenRestriction.token.symbol
+                          } `}{" "}
                       </p>
                       <div className="w-full h-0.5 bg-base-200" />
                     </Fragment>
@@ -317,9 +315,8 @@ const VoterRewardsSection = ({
             return (
               <div key={idx} className="grid grid-cols-5 text-sm">
                 <p>{formatOrdinals(rank)}:</p>
-                <p>{`${formatDecimal(reward.tokenReward.amount).short} ${
-                  reward.tokenReward.token.symbol
-                }`}</p>
+                <p>{`${formatDecimal(reward.tokenReward.amount).short} ${reward.tokenReward.token.symbol
+                  }`}</p>
               </div>
             );
           })}
@@ -339,9 +336,8 @@ const VoterRewardsSection = ({
                     <Fragment key={idx}>
                       <div className="flex flex-row items-center gap-2">
                         <p>{formatOrdinals(rank)} place:</p>
-                        <p className="ml-4">{`${
-                          formatDecimal(reward.tokenReward.amount).short
-                        } ${reward.tokenReward.token.symbol}`}</p>
+                        <p className="ml-4">{`${formatDecimal(reward.tokenReward.amount).short
+                          } ${reward.tokenReward.token.symbol}`}</p>
                       </div>
                       <div className="w-full h-0.5 bg-base-200" />
                     </Fragment>
@@ -361,6 +357,7 @@ const VotingPolicySection = ({
   votingPolicy,
 }: {
   votingPolicy: FetchSingleContestResponse["votingPolicy"];
+  chainId: FetchSingleContestResponse["chainId"];
 }) => {
   return (
     <DetailSectionWrapper
@@ -391,10 +388,9 @@ const VotingPolicySection = ({
               if (isArcadeVotingStrategy(strategy)) {
                 return (
                   <p key={idx}>
-                    {`Arcade ${strategy.arcadeVotingStrategy.token.symbol} (${
-                      formatDecimal(strategy.arcadeVotingStrategy.votingPower)
-                        .short
-                    } credits) `}
+                    {`Arcade ${strategy.arcadeVotingStrategy.token.symbol} (${formatDecimal(strategy.arcadeVotingStrategy.votingPower)
+                      .short
+                      } credits) `}
                   </p>
                 );
               } else if (isWeightedVotingStrategy(strategy)) {
@@ -565,32 +561,32 @@ const TweetNotQueuedDialog = ({
     title: string;
     icon: React.ReactNode;
   }[] = [
-    {
-      type: "text",
-      data: `\nbegins ${new Date(startTime).toLocaleString("en-US", {
-        hour12: false,
-        timeZone: "UTC",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })} UTC`,
-      title: "start time",
-      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-    },
-    {
-      type: "text",
-      data: `\n${prompt.title}`,
-      title: "prompt title",
-      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-    },
-    {
-      type: "text",
-      data: `\nhttps://uplink.wtf/${spaceName}/contest/${contestId}`,
-      title: "contest url",
-      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-    },
-  ];
+      {
+        type: "text",
+        data: `\nbegins ${new Date(startTime).toLocaleString("en-US", {
+          hour12: false,
+          timeZone: "UTC",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })} UTC`,
+        title: "start time",
+        icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+      },
+      {
+        type: "text",
+        data: `\n${prompt.title}`,
+        title: "prompt title",
+        icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+      },
+      {
+        type: "text",
+        data: `\nhttps://uplink.wtf/${spaceName}/contest/${contestId}`,
+        title: "contest url",
+        icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+      },
+    ];
 
   return (
     <DialogWrapper
@@ -666,6 +662,7 @@ const ContestDetails = async ({
     return { ...res, promptData };
   });
   const {
+    chainId,
     deadlines,
     space,
     submitterRewards,
@@ -678,10 +675,18 @@ const ContestDetails = async ({
   return (
     <div className="w-full flex flex-col gap-4 p-4">
       <div className="flex flex-col gap-4">
+        {chainId !== 1 && (
+          <DetailSectionWrapper title={"Network"}>
+            <div className="flex gap-2 items-center pl-2">
+              <p>{getChainName(chainId)}</p>
+              <ChainLabel chainId={chainId} px={16} />
+            </div>
+          </DetailSectionWrapper>
+        )}
         <SubmitterRestrictionsSection {...{ submitterRestrictions }} />
         <SubmitterRewardsSection {...{ submitterRewards }} />
         <VoterRewardsSection {...{ voterRewards }} />
-        <VotingPolicySection {...{ votingPolicy }} />
+        <VotingPolicySection votingPolicy={votingPolicy} chainId={chainId} />
       </div>
       <RenderStateSpecificDialog
         adminsChild={

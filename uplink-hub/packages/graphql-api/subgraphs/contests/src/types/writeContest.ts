@@ -7,6 +7,8 @@ import { VerifiedTokenSchema } from './writeToken.js';
 export const ContestTypeSchema = z.enum(["standard", "twitter"]);
 export const EditorOutputSchema: z.ZodType<EditorOutputData> = z.any();
 
+export const ContestChainSchema = z.number().refine(val => { return val === 1 || val === 8453 }, { message: "Invalid chain id" })
+
 export const ContestCategorySchema = z.enum([
     "art",
     "music",
@@ -201,6 +203,7 @@ export const ContestVotingPolicySchema = z.array(z.object({
 // meta type
 
 export const writableContestSchema = z.object({
+    chainId: ContestChainSchema,
     metadata: ContestMetadataSchema,
     deadlines: ContestDeadlinesSchema,
     prompt: ContestPromptDataSchema,
@@ -209,7 +212,7 @@ export const writableContestSchema = z.object({
     submitterRestrictions: ContestSubmitterRestrictionsSchema,
     votingPolicy: ContestVotingPolicySchema,
     additionalParams: ContestAdditionalParamsSchema,
-});
+})
 
 // guards
 

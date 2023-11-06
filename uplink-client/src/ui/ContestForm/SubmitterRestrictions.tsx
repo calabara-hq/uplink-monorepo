@@ -10,10 +10,12 @@ import TokenCard from "../TokenCard/TokenCard";
 import { AiOutlinePlus } from "react-icons/ai";
 
 const SubmitterRestrictions = ({
+  chainId,
   initialSubmitterRestrictions,
   handleConfirm,
   spaceTokens,
 }: {
+  chainId: number;
   initialSubmitterRestrictions: SubmitterRestriction[];
   handleConfirm: (submitterRestrictions: SubmitterRestriction[]) => void;
   spaceTokens: IToken[];
@@ -78,6 +80,7 @@ const SubmitterRestrictions = ({
         }}
       >
         <SubmitterRestrictionManager
+          chainId={chainId}
           setIsModalOpen={setIsTokenModalOpen}
           restrictions={restrictions}
           setRestrictions={setRestrictions}
@@ -96,12 +99,14 @@ const SubmitterRestrictions = ({
 };
 
 const SubmitterRestrictionManager = ({
+  chainId,
   setIsModalOpen,
   restrictions,
   setRestrictions,
   editIndex,
   spaceTokens,
 }: {
+  chainId: number;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   restrictions: SubmitterRestriction[];
   setRestrictions: React.Dispatch<React.SetStateAction<SubmitterRestriction[]>>;
@@ -137,6 +142,7 @@ const SubmitterRestrictionManager = ({
   if (progress === 0) {
     return (
       <TokenManager
+        chainId={chainId}
         setIsModalOpen={setIsModalOpen}
         saveCallback={saveTokenCallback}
         existingTokens={restrictions.map(

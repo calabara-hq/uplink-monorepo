@@ -12,12 +12,26 @@ const ERC1155Interface = '0xd9b67a26';
 const ERC1155MetaDataURIInterface = '0xd9b67a26';
 
 
+
+const formRpcUrl = (chainId: number, providerKey: string) => {
+    switch (chainId) {
+        case 1:
+            return `https://eth-mainnet.alchemyapi.io/v2/${providerKey}`;
+        case 8453:
+            return 'https://mainnet.base.org/'
+        default: return `https://eth-mainnet.alchemyapi.io/v2/${providerKey}`;
+    }
+
+}
+
 export class TokenController {
-    private provider: ethers.providers.AlchemyProvider;
+    private provider: ethers.providers.JsonRpcProvider;
+
     private dater: EthDater;
 
-    constructor(providerKey: string) {
-        this.provider = new ethers.providers.AlchemyProvider('homestead', providerKey);
+    constructor(providerKey: string, chainId: number) {
+        const rpc = formRpcUrl(chainId, providerKey);
+        this.provider = new ethers.providers.JsonRpcProvider(rpc);
         this.dater = new EthDater(this.provider);
     }
 

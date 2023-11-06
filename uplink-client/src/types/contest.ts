@@ -165,6 +165,7 @@ export type ContestPromptData = {
 
 export type ReadableContest = {
   id: string;
+  chainId: number;
   spaceId: string;
   created: string;
   promptUrl: string;

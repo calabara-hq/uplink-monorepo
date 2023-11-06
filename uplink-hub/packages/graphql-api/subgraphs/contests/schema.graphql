@@ -51,6 +51,7 @@ type Token {
   type: String!
   symbol: String!
   decimals: Int!
+  chainId: Int!
   address: String
   tokenId: Int
 }
@@ -160,6 +161,7 @@ type Contest @key(fields: "id") {
   voterRewards: [VoterReward!]!
   submitterRestrictions: [SubmitterRestriction!]!
   votingPolicy: [VotingStrategy!]!
+  chainId: Int!
 }
 
 extend type Query {
@@ -206,6 +208,7 @@ input ERCTokenInput {
   address: String!
   symbol: String!
   decimals: Int!
+  chainId: Int!
   tokenId: Int
 }
 
@@ -217,6 +220,7 @@ input NativeTokenInput {
   type: NativeTokenTypeEnum!
   symbol: NativeTokenTypeEnum!
   decimals: Int!
+  chainId: Int!
 }
 
 input FungiblePayoutInput {
@@ -261,6 +265,7 @@ input RestrictionTokenInput {
   address: String
   symbol: String!
   decimals: Int!
+  chainId: Int!
   tokenId: Int
 }
 
@@ -288,6 +293,7 @@ input ThreadItemInput {
 }
 
 input CreateContestData {
+  chainId: Int!
   metadata: MetadataInput!
   deadlines: DeadlinesInput!
   prompt: PromptInput!

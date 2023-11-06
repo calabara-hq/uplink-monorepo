@@ -16,12 +16,14 @@ import TokenCard from "../TokenCard/TokenCard";
 import { AiOutlinePlus } from "react-icons/ai";
 
 const VotingPolicy = ({
+  chainId,
   initialVotingPolicy,
   handleConfirm,
   spaceTokens,
   errors,
   setErrors,
 }: {
+  chainId: number;
   initialVotingPolicy: ContestBuilderProps["votingPolicy"];
   handleConfirm: (votingPolicy: ContestBuilderProps["votingPolicy"]) => void;
   spaceTokens: IToken[];
@@ -88,6 +90,7 @@ const VotingPolicy = ({
           }}
         >
           <VotingPolicyManager
+            chainId={chainId}
             isModalOpen={isTokenModalOpen}
             setIsModalOpen={setIsTokenModalOpen}
             editIndex={editIndex}
@@ -111,6 +114,7 @@ const VotingPolicy = ({
 // extend the token manager with policy specific options
 
 const VotingPolicyManager = ({
+  chainId,
   isModalOpen,
   setIsModalOpen,
   votingPolicy,
@@ -119,6 +123,7 @@ const VotingPolicyManager = ({
   spaceTokens,
   setErrors,
 }: {
+  chainId: number;
   isModalOpen: boolean;
   setIsModalOpen: (isModalOpen: boolean) => void;
   votingPolicy: ContestBuilderProps["votingPolicy"];
@@ -161,8 +166,8 @@ const VotingPolicyManager = ({
 
     isEdit
       ? setVotingPolicy(
-          votingPolicy.map((p, i) => (i === editIndex ? policy : p))
-        )
+        votingPolicy.map((p, i) => (i === editIndex ? policy : p))
+      )
       : setVotingPolicy([...votingPolicy, policy]);
     setErrors("");
     setIsModalOpen(false);
@@ -171,6 +176,7 @@ const VotingPolicyManager = ({
   if (progress === 0)
     return (
       <TokenManager
+        chainId={chainId}
         setIsModalOpen={setIsModalOpen}
         saveCallback={saveTokenCallback}
         existingTokens={votingPolicy.map(({ token, ...rest }) => token)}
@@ -231,11 +237,10 @@ const StrategyManager = ({
         <div className="flex justify-around items-center">
           <div className="flex flex-col gap-4 w-1/2">
             <button
-              className={`${
-                selectedStrategy === "arcade"
+              className={`${selectedStrategy === "arcade"
                   ? "btn btn-sm md:btn-md lg:btn-lg btn-active btn-success"
                   : "btn btn-sm md:btn-md lg:btn-lg btn-outline"
-              } px-4 py-2 rounded-md`}
+                } px-4 py-2 rounded-md`}
               onClick={() => handleStrategyChange("arcade")}
             >
               Arcade
@@ -249,11 +254,10 @@ const StrategyManager = ({
           </div>
           <div className="flex flex-col gap-4 w-1/2">
             <button
-              className={`${
-                selectedStrategy === "weighted"
+              className={`${selectedStrategy === "weighted"
                   ? "btn btn-sm md:btn-md lg:btn-lg btn-active btn-success"
                   : "btn btn-sm sm:btn-sm md:btn-md lg:btn-lg btn-outline"
-              } px-4 py-2 rounded-md`}
+                } px-4 py-2 rounded-md`}
               onClick={() => handleStrategyChange("weighted")}
             >
               Weighted

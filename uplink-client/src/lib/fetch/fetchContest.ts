@@ -28,6 +28,7 @@ const fetchContest = async (contestId: string): Promise<FetchSingleContestRespon
           contest(contestId: $contestId) {
             id
             spaceId
+            chainId
             created
             promptUrl
             tweetId

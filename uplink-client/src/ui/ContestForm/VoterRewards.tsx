@@ -17,12 +17,14 @@ import { validateVoterRewards } from "./contestHandler";
 import { AiOutlinePlus } from "react-icons/ai";
 
 const VoterRewards = ({
+  chainId,
   initialVoterRewards,
   spaceTokens,
   handleConfirm,
   errors,
   setErrors
 }: {
+  chainId: number;
   initialVoterRewards: VoterRewards;
   spaceTokens: IToken[];
   handleConfirm: (voterRewards: VoterRewards) => void;
@@ -123,6 +125,7 @@ const VoterRewards = ({
       />
 
       <TokenModal
+        chainId={chainId}
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         saveCallback={handleAddToken}
@@ -255,12 +258,12 @@ const VoterRewardRow = ({
     const updatedPayouts = allRewards.payouts.map((payout, i) =>
       i === index
         ? {
-            ...payout,
-            [tokenType]: {
-              ...payout[tokenType],
-              amount: amount,
-            },
-          }
+          ...payout,
+          [tokenType]: {
+            ...payout[tokenType],
+            amount: amount,
+          },
+        }
         : payout
     );
     setRewards((prevRewards) => ({ ...prevRewards, payouts: updatedPayouts }));
@@ -269,11 +272,10 @@ const VoterRewardRow = ({
     <div className="flex flex-col lg:flex-row items-center w-full justify-between gap-2 bg-base-100 p-4 rounded-xl">
       <p className="text-center">Voters that accurately choose rank </p>
       <input
-        className={`input w-16 text-center ${
-          errors?.duplicateRanks?.includes(index)
-            ? "input-error"
-            : "input-bordered"
-        }`}
+        className={`input w-16 text-center ${errors?.duplicateRanks?.includes(index)
+          ? "input-error"
+          : "input-bordered"
+          }`}
         type="number"
         value={reward.rank || ""}
         onChange={(e) => updateRank(Number(e.target.value))}

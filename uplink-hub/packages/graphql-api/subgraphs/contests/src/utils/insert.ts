@@ -157,6 +157,7 @@ export const insertContest = async (spaceId: number, contestData: WritableContes
         const newContest: schema.dbNewContestType = {
             spaceId: spaceId,
             type: contestData.metadata.type,
+            chainId: contestData.chainId,
             category: contestData.metadata.category,
             anonSubs: contestData.additionalParams.anonSubs ? 1 : 0,
             visibleVotes: contestData.additionalParams.visibleVotes ? 1 : 0,

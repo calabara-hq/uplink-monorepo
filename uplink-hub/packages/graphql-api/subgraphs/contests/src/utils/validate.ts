@@ -3,6 +3,7 @@ import { TwitterThread, TwitterThreadSchema } from "../types/writeTweet.js";
 import {
     ContestAdditionalParams,
     ContestAdditionalParamsSchema,
+    ContestChainSchema,
     ContestDeadlines,
     ContestDeadlinesSchema,
     ContestMetadata,
@@ -21,8 +22,7 @@ import {
     writableContestSchema
 } from "../types/writeContest.js";
 
-
-
+export type IncomingChainId = CreateContestData["chainId"];
 export type IncomingMetadata = CreateContestData["metadata"];
 export type IncomingDeadlines = CreateContestData["deadlines"];
 export type IncomingPrompt = CreateContestData["prompt"];
@@ -32,6 +32,9 @@ export type IncomingSubmitterRestrictions = CreateContestData["submitterRestrict
 export type IncomingVotingPolicy = CreateContestData["votingPolicy"];
 export type IncomingAdditionalParams = CreateContestData["additionalParams"];
 
+export const validateChainId = (chainId: number): number => {
+    return ContestChainSchema.parse(chainId);
+}
 
 export const validateMetadata = (metadata: IncomingMetadata): ContestMetadata => {
     return ContestMetadataSchema.parse(metadata);

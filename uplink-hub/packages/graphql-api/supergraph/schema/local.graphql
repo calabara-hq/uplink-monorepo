@@ -93,6 +93,7 @@ type Contest
   voterRewards: [VoterReward!]! @join__field(graph: CONTESTS)
   submitterRestrictions: [SubmitterRestriction!]! @join__field(graph: CONTESTS)
   votingPolicy: [VotingStrategy!]! @join__field(graph: CONTESTS)
+  chainId: Int! @join__field(graph: CONTESTS)
   submissions: [Submission!]! @join__field(graph: SUBMIT, requires: "deadlines {startTime, voteTime, endTime, snapshot}, additionalParams {anonSubs, visibleVotes}")
   gnosisResults: String @join__field(graph: SUBMIT, requires: "deadlines {endTime}")
 }
@@ -134,6 +135,7 @@ enum ContestTypeEnum
 input CreateContestData
   @join__type(graph: CONTESTS)
 {
+  chainId: Int!
   metadata: MetadataInput!
   deadlines: DeadlinesInput!
   prompt: PromptInput!
@@ -188,6 +190,7 @@ input ERCTokenInput
   address: String!
   symbol: String!
   decimals: Int!
+  chainId: Int!
   tokenId: Int
 }
 
@@ -285,6 +288,7 @@ input NativeTokenInput
   type: NativeTokenTypeEnum!
   symbol: NativeTokenTypeEnum!
   decimals: Int!
+  chainId: Int!
 }
 
 enum NativeTokenTypeEnum
@@ -386,6 +390,7 @@ input RestrictionTokenInput
   address: String
   symbol: String!
   decimals: Int!
+  chainId: Int!
   tokenId: Int
 }
 
@@ -607,6 +612,7 @@ type Token
   type: String!
   symbol: String!
   decimals: Int!
+  chainId: Int!
   address: String
   tokenId: Int
 }

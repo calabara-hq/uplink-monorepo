@@ -22,12 +22,14 @@ import {
  */
 
 const SubmitterRewards = ({
+  chainId,
   initialSubmitterRewards,
   spaceTokens,
   handleConfirm,
   errors,
   setErrors
 }: {
+  chainId: number;
   initialSubmitterRewards: SubmitterRewards;
   spaceTokens: IToken[];
   handleConfirm: (submitterRewards: SubmitterRewards) => void;
@@ -101,7 +103,7 @@ const SubmitterRewards = ({
     >
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-5 sm gap-4">
         <div
-      className="card btn bg-base-200 h-24 normal-case"
+          className="card btn bg-base-200 h-24 normal-case"
           onClick={() => setIsModalOpen(true)}
         >
           <div className="flex flex-row gap-2 items-center">
@@ -126,6 +128,7 @@ const SubmitterRewards = ({
         errors={errors}
       />
       <TokenModal
+        chainId={chainId}
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         saveCallback={handleAddToken}
@@ -267,11 +270,10 @@ const SubmitterRewardMatrix = ({
               <tr key={index}>
                 <th className="w-24 text-center">
                   <input
-                    className={`input w-24 text-center ${
-                      errors.duplicateRanks.includes(index)
+                    className={`input w-24 text-center ${errors.duplicateRanks.includes(index)
                         ? "input-error"
                         : "input-bordered"
-                    }`}
+                      }`}
                     type="number"
                     value={payout.rank || ""}
                     onChange={(e) => updateRank(index, Number(e.target.value))}

@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: true,
 });
-import { CategoryLabel, StatusLabel } from "../ContestLabels/ContestLabels";
+import { CategoryLabel, ChainLabel, StatusLabel } from "../ContestLabels/ContestLabels";
 import Link from "next/link";
 import LiveContestState from "../ContestLabels/LiveContestState";
 import { ImageWrapper } from "../Submission/MediaWrapper";
@@ -23,7 +23,7 @@ const ContestHeading = async ({
     return { ...res, prompt: promptData };
   });
 
-  const { prompt, space, metadata } = contestData;
+  const { prompt, space, metadata, chainId } = contestData;
 
   return (
     <div className="grid grid-cols-1 w-full gap-2">

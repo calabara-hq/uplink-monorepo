@@ -13,11 +13,13 @@ import {
   TokenAction,
 } from "@/hooks/useTokenManager";
 import TokenBadge from "../TokenBadge/TokenBadge";
+import { ChainLabel } from "../ContestLabels/ContestLabels";
 
 const TokenModal = ({
   isModalOpen,
   setIsModalOpen,
   saveCallback,
+  chainId,
   existingTokens,
   quickAddTokens,
   continuous,
@@ -27,6 +29,7 @@ const TokenModal = ({
   isModalOpen: boolean;
   setIsModalOpen: (isModalOpen: boolean) => void;
   saveCallback: (token: IToken) => void;
+  chainId: number;
   existingTokens: IToken[] | null;
   quickAddTokens: IToken[] | null;
   continuous: boolean;
@@ -37,6 +40,7 @@ const TokenModal = ({
     return (
       <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <TokenManager
+          chainId={chainId}
           setIsModalOpen={setIsModalOpen}
           saveCallback={saveCallback}
           existingTokens={existingTokens}
@@ -53,6 +57,7 @@ const TokenModal = ({
 export const TokenManager = ({
   setIsModalOpen,
   saveCallback,
+  chainId,
   existingTokens,
   quickAddTokens,
   continuous,
@@ -61,6 +66,7 @@ export const TokenManager = ({
 }: {
   setIsModalOpen: (isModalOpen: boolean) => void;
   saveCallback: (token: IToken) => void;
+  chainId: number;
   existingTokens: IToken[] | null;
   quickAddTokens: IToken[] | null;
   continuous: boolean;
@@ -80,6 +86,7 @@ export const TokenManager = ({
     handleModalConfirm,
     handleAddToken,
   } = useTokenManager({
+    chainId: chainId,
     existingTokens: existingTokens,
     uniqueStandard: uniqueStandard,
     saveCallback: saveCallback,
@@ -92,6 +99,7 @@ export const TokenManager = ({
     return (
       <>
         <QuickAddToken
+          chainId={chainId}
           quickAddTokens={quickAddTokens}
           state={state}
           dispatch={dispatch}
@@ -111,6 +119,7 @@ export const TokenManager = ({
     return (
       <>
         <ManualAddToken
+          chainId={chainId}
           state={state}
           dispatch={dispatch}
           tokenMenuOptions={tokenMenuOptions}
@@ -145,11 +154,13 @@ export const TokenManager = ({
 };
 
 const QuickAddToken = ({
+  chainId,
   quickAddTokens,
   state,
   dispatch,
   setProgress,
 }: {
+  chainId: number;
   quickAddTokens: IToken[] | null;
   state: TokenState;
   dispatch: React.Dispatch<TokenAction>;
@@ -158,22 +169,25 @@ const QuickAddToken = ({
   if (!quickAddTokens) return null;
 
   return (
-    <div className="flex flex-col w-full px-1 gap-4">
-      <h2 className="text-xl text-t1">Quick Add</h2>
-
+    <div className="flex flex-col w-full p-2 gap-4">
+      <div className="flex flex-row items-center">
+        <h2 className="text-xl text-t1">Quick Add</h2>
+        <div className="ml-auto">
+          <ChainLabel chainId={chainId} px={16} />
+        </div>
+      </div>
       <ul className="menu menu-compact lg:menu-normal bg-base-100 w-full gap-2 p-2 rounded-box">
         {quickAddTokens.map((el, index) => {
           return (
             <li key={index}>
               <a
-                className={`flex flex-row justify-between border-border border hover:bg-base-200 transition-all  ${
-                  state.quickAddToken
-                    ? state.quickAddToken.type === el.type &&
-                      state.quickAddToken.symbol === el.symbol
-                      ? "bg-base-200"
-                      : "bg-base-100"
+                className={`flex flex-row justify-between border-border border hover:bg-base-200 transition-all  ${state.quickAddToken
+                  ? state.quickAddToken.type === el.type &&
+                    state.quickAddToken.symbol === el.symbol
+                    ? "bg-base-200"
                     : "bg-base-100"
-                }`}
+                  : "bg-base-100"
+                  }`}
                 onClick={() => {
                   dispatch({
                     type: "setQuickAddToken",
@@ -202,10 +216,12 @@ const QuickAddToken = ({
 };
 
 const ManualAddToken = ({
+  chainId,
   state,
   dispatch,
   tokenMenuOptions,
 }: {
+  chainId: number;
   state: TokenState;
   dispatch: React.Dispatch<TokenAction>;
   tokenMenuOptions: MenuOption[];
@@ -214,7 +230,8 @@ const ManualAddToken = ({
     <div className="w-full px-1 flex flex-col gap-2">
       <div className="flex flex-row items-center">
         <h2 className="text-2xl">Add a token</h2>
-        <div className="ml-auto">
+        <div className="ml-auto flex flex-row gap-2 items-center">
+          <ChainLabel chainId={chainId} px={16} />
           <MenuSelect
             options={tokenMenuOptions}
             selected={{

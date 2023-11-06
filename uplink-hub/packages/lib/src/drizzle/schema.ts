@@ -42,6 +42,7 @@ export const contests = mysqlTable('contests', {
     selfVote: tinyint('selfVote').notNull(),
     subLimit: int('subLimit').notNull(),
     tweetId: varchar('tweetId', { length: 255 }),
+    chainId: int('chainId').notNull().default(1),
 }, (contests) => ({
     spaceIdIndex: index("contest_space_id_idx").on(contests.spaceId),
 }))
@@ -72,6 +73,7 @@ export const tokens = mysqlTable('tokens', {
     type: varchar('type', { length: 255 }).notNull(),
     symbol: varchar('symbol', { length: 255 }).notNull(),
     decimals: int('decimals').notNull(),
+    chainId: int('chainId').notNull().default(1),
     address: varchar('address', { length: 255 }),
     tokenId: int('tokenId'),
 }, (tokens) => ({
