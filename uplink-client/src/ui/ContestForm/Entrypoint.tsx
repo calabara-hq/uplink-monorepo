@@ -8,8 +8,6 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  initialState,
-  ContestReducer,
   validateMetadata,
   validateDeadlines,
   validatePrompt,
@@ -18,8 +16,9 @@ import {
   validateVotingPolicy,
   ContestBuilderProps,
   postContest,
+  initializeContestReducer,
 } from "@/ui/ContestForm/contestHandler";
-import { IToken } from "@/types/token";
+import { INativeToken, IToken } from "@/types/token";
 import ContestMetadata from "@/ui/ContestForm/ContestMetadata";
 import Deadlines from "@/ui/ContestForm/Deadlines";
 import Prompt from "@/ui/ContestForm/Prompt";
@@ -47,8 +46,12 @@ import CreateContestTweet from "./CreateContestTweet";
 import { toast } from "react-hot-toast";
 import { useSession } from "@/providers/SessionProvider";
 import { mutateSpaceContests } from "@/app/mutate";
+import MenuSelect, { Option } from "../MenuSelect/MenuSelect";
+import { supportedChains } from "@/lib/chains/supportedChains";
+import Modal from "../Modal/Modal";
 
 const validateContestParams = (contestState: ContestBuilderProps) => {
+
   const {
     errors: metadataErrors,
     isError: isMetadataError,
@@ -107,6 +110,7 @@ const validateContestParams = (contestState: ContestBuilderProps) => {
     isVotingPolicyError;
 
   const data = {
+    chainId: contestState.chainId,
     metadata,
     deadlines,
     prompt,
@@ -169,9 +173,8 @@ const ParamsCard = ({
   return (
     <div
       className={`box cursor-pointer bg-base-100 p-2 rounded-xl flex flex-col gap-2 items-center justify-evenly relative transform 
-      transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform ${
-        error && "border-2 border-error"
-      }`}
+      transition-transform duration-300 hover:-translate-y-1.5 hover:translate-x-0 will-change-transform ${error && "border-2 border-error"
+        }`}
       onClick={() => setCurrentStep(stepIndex)}
     >
       <h2 className="font-bold text-t1 text-xl text-center">{title}</h2>
@@ -188,22 +191,92 @@ const ParamsCard = ({
   );
 };
 
-const ContestParamSectionCards = ({ steps, onSubmit }) => {
+
+const detectTokenConflict = (contestData: ContestBuilderProps) => {
+  const { submitterRewards, voterRewards, submitterRestrictions, votingPolicy } = contestData;
+
+  // check if any of the tokens in the rewards are not supported by the chain
+  if (submitterRewards.ETH || submitterRewards.ERC20 || submitterRewards.ERC721 || submitterRewards.ERC1155) return true;
+  if (voterRewards.ETH || voterRewards.ERC20) return true;
+  if (submitterRestrictions.length > 0) return true;
+  if (votingPolicy.length > 0) return true;
+
+  return false;
+
+}
+
+const createSpaceTokens = (spaceTokens: IToken[], chainId: number) => {
+  const chain_specific = spaceTokens.filter(token => token.chainId === chainId);
+
+  const withETH = chain_specific.some(
+    (token) => token.type === "ETH" && token.symbol === "ETH"
+  )
+    ? chain_specific
+    : [...chain_specific, { type: "ETH", symbol: "ETH", decimals: 18, chainId } as INativeToken];
+
+  return withETH;
+}
+
+const ChainSelect = ({ contestData, setField }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [desiredChain, setDesiredChain] = useState<Option | null>(null)
+
+  const chainOptions = supportedChains.map(chain => { return { value: String(chain.id), label: chain.name } });
+  const currentChain = chainOptions.find(chain => chain.value === String(contestData.chainId));
+
+  const handleChainToggle = (option: { value: string, label: string }) => {
+    if (option.value !== currentChain.value) {
+      // there is a change in chain.
+      // we need to check all token data and remove any tokens that are not supported by the new chain
+
+      const tokenConflict = detectTokenConflict(contestData);
+
+      if (tokenConflict) {
+        setDesiredChain(option)
+        setIsModalOpen(true)
+      } else {
+        setSelectedChain(Number(option.value))
+      }
+    }
+  }
+
+  const setSelectedChain = (chainId: number) => {
+    setField("spaceTokens", createSpaceTokens(contestData.spaceTokens, Number(chainId)));
+    setField("chainId", chainId);
+    setIsModalOpen(false);
+  }
+
+
+  const wipeTokensAndSwitchChain = (chainId: string) => {
+
+    setField("submitterRewards", {});
+    setField("voterRewards", {});
+    setField("submitterRestrictions", []);
+    setField("votingPolicy", []);
+
+    setSelectedChain(Number(chainId))
+  }
+
+
   return (
-    <div className="flex flex-col gap-4 lg:gap-8 w-10/12 m-auto">
-      <h1 className="text-3xl font-bold">Create a Contest</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr">
-        {steps.map((step, idx) => {
-          return <Fragment key={idx}>{step.componentCard}</Fragment>;
-        })}
-      </div>
-      <div className="ml-auto w-fit">
-        <WalletConnectButton styleOverride="w-full btn-primary">
-          <button className="btn btn-primary normal-case" onClick={onSubmit}>
-            Submit
-          </button>
-        </WalletConnectButton>
-      </div>
+    <div>
+      <MenuSelect options={chainOptions} selected={currentChain} setSelected={handleChainToggle} />
+      <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={"switching chains"}>
+        you are switching chains. this will remove any tokens that are not supported by the new chain.
+        do you want to continue?
+        <button onClick={() => { setIsModalOpen(false) }}>no</button>
+        <button onClick={() => wipeTokensAndSwitchChain(desiredChain.value)}>yes</button>
+      </Modal >
+    </div >
+  )
+};
+
+const ContestParamSectionCards = ({ steps }) => {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr">
+      {steps.map((step, idx) => {
+        return <Fragment key={idx}>{step.componentCard}</Fragment>;
+      })}
     </div>
   );
 };
@@ -219,17 +292,13 @@ const ContestForm = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(-1);
   const { data: session, status } = useSession();
-  // add ETH to the spaceTokens array if it doesn't exist
-  const spaceTokensWithEth: IToken[] = spaceTokens.some(
-    (token) => token.type === "ETH" && token.symbol === "ETH"
-  )
-    ? spaceTokens
-    : [{ type: "ETH", symbol: "ETH", decimals: 18 }, ...spaceTokens];
+  const { contestReducer, initialState } = initializeContestReducer(spaceTokens);
 
   const [contestState, setContestState] = useReducer(
-    ContestReducer,
+    contestReducer,
     initialState
   );
+
   const setField = (field, value) => {
     setContestState({ type: "SET_FIELD", field, value });
   };
@@ -401,8 +470,9 @@ const ContestForm = ({
       name: "votingPolicy",
       component: (
         <VotingPolicy
+          chainId={contestState.chainId}
           initialVotingPolicy={contestState.votingPolicy}
-          spaceTokens={spaceTokensWithEth}
+          spaceTokens={contestState.spaceTokens}
           handleConfirm={(data) => {
             setField("votingPolicy", data);
             handleBack();
@@ -429,8 +499,9 @@ const ContestForm = ({
       name: "submitterRewards",
       component: (
         <SubmitterRewards
+          chainId={contestState.chainId}
           initialSubmitterRewards={contestState.submitterRewards}
-          spaceTokens={spaceTokensWithEth}
+          spaceTokens={contestState.spaceTokens}
           handleConfirm={(data) => {
             setField("submitterRewards", data);
             handleBack();
@@ -456,8 +527,9 @@ const ContestForm = ({
       name: "voterRewards",
       component: (
         <VoterRewards
+          chainId={contestState.chainId}
           initialVoterRewards={contestState.voterRewards}
-          spaceTokens={spaceTokensWithEth}
+          spaceTokens={contestState.spaceTokens}
           handleConfirm={(data) => {
             setField("voterRewards", data);
             handleBack();
@@ -482,8 +554,9 @@ const ContestForm = ({
       name: "submitterRestrictions",
       component: (
         <SubmitterRestrictions
+          chainId={contestState.chainId}
           initialSubmitterRestrictions={contestState.submitterRestrictions}
-          spaceTokens={spaceTokensWithEth}
+          spaceTokens={contestState.spaceTokens}
           handleConfirm={(data) => {
             setField("submitterRestrictions", data);
             handleBack();
@@ -553,12 +626,25 @@ const ContestForm = ({
                 {steps[currentStep].component}
               </div>
             ) : (
-              <ContestParamSectionCards
-                steps={steps}
-                onSubmit={() => {
-                  onSubmit();
-                }}
-              />
+
+              <div className="flex flex-col gap-4 lg:gap-8 w-10/12 m-auto">
+                <div className="flex flex-row gap-2">
+                  <h1 className="text-3xl font-bold">Create a Contest</h1>
+                  <div className="ml-auto items-center">
+                    <ChainSelect contestData={contestState} setField={setField} />
+                  </div>
+                </div>
+                <ContestParamSectionCards
+                  steps={steps}
+                />
+                <div className="ml-auto w-fit">
+                  <WalletConnectButton styleOverride="w-full btn-primary">
+                    <button className="btn btn-primary normal-case" onClick={onSubmit}>
+                      Submit
+                    </button>
+                  </WalletConnectButton>
+                </div>
+              </div>
             )}
           </motion.div>
         )}
@@ -607,34 +693,34 @@ const AddTweetDialogue = ({
     title: string;
     icon: React.ReactNode;
   }[] = [
-    {
-      type: "text",
-      data: `\nbegins ${new Date(
-        contestState.deadlines.startTime
-      ).toLocaleString("en-US", {
-        hour12: false,
-        timeZone: "UTC",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })} UTC`,
-      title: "start time",
-      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-    },
-    {
-      type: "text",
-      data: `\n${contestState.prompt.title}`,
-      title: "prompt title",
-      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-    },
-    {
-      type: "text",
-      data: `\nhttps://uplink.wtf/${spaceName}/contest/${contestId}`,
-      title: "contest url",
-      icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
-    },
-  ];
+      {
+        type: "text",
+        data: `\nbegins ${new Date(
+          contestState.deadlines.startTime
+        ).toLocaleString("en-US", {
+          hour12: false,
+          timeZone: "UTC",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })} UTC`,
+        title: "start time",
+        icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+      },
+      {
+        type: "text",
+        data: `\n${contestState.prompt.title}`,
+        title: "prompt title",
+        icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+      },
+      {
+        type: "text",
+        data: `\nhttps://uplink.wtf/${spaceName}/contest/${contestId}`,
+        title: "contest url",
+        icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
+      },
+    ];
 
   if (hasTweeted)
     return <RenderSuccessScreen contestId={contestId} spaceName={spaceName} />;
@@ -673,7 +759,7 @@ const AddTweetDialogue = ({
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
           onSuccess={onSuccess}
-          onError={() => {}}
+          onError={() => { }}
           customDecorators={customDecorators}
         />
       </div>

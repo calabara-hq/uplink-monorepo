@@ -24,7 +24,7 @@ const queries = {
                 votesRemaining: 0,
                 userVotes: [],
             }
-            return calculateUserVotingParams(user, contestId, contestParams.deadlines);
+            return calculateUserVotingParams(user, contestId, contestParams.deadlines, contestParams.chainId);
         }
     },
 

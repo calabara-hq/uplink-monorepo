@@ -1,6 +1,6 @@
 import { BiTime } from "react-icons/bi";
 import { ContestCategory, ContestState } from "@/types/contest";
-
+import { BaseChainLogo } from "@/lib/chains/basechain"
 // return color for contest category
 const contestCategoryColor = (contestCategory: ContestCategory) => {
   switch (contestCategory) {
@@ -90,6 +90,21 @@ export const StatusLabel = ({ status }: { status: ContestState }) => {
     </p>
   );
 };
+
+export const ChainLabel = ({ chainId, px }: { chainId: number, px: number }) => {
+  if (chainId === 8453) {
+    return (
+      <div
+        className="tooltip tooltip-top cursor-pointer"
+        data-tip="Base"
+      >
+        <BaseChainLogo px={px} />
+
+      </div>
+    )
+  }
+}
+
 
 export const RemainingTimeLabel = ({
   remainingTime,

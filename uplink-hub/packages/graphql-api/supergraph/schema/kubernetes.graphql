@@ -93,6 +93,7 @@ type Contest
   voterRewards: [VoterReward!]! @join__field(graph: CONTESTS)
   submitterRestrictions: [SubmitterRestriction!]! @join__field(graph: CONTESTS)
   votingPolicy: [VotingStrategy!]! @join__field(graph: CONTESTS)
+  chainId: Int! @join__field(graph: CONTESTS)
   submissions: [Submission!]! @join__field(graph: SUBMIT, requires: "deadlines {startTime, voteTime, endTime, snapshot}, additionalParams {anonSubs, visibleVotes}")
   gnosisResults: String @join__field(graph: SUBMIT, requires: "deadlines {endTime}")
 }
@@ -134,6 +135,7 @@ enum ContestTypeEnum
 input CreateContestData
   @join__type(graph: CONTESTS)
 {
+  chainId: Int!
   metadata: MetadataInput!
   deadlines: DeadlinesInput!
   prompt: PromptInput!
@@ -172,13 +174,11 @@ input DeadlinesInput
 
 scalar Decimal
   @join__type(graph: CONTESTS)
-  @join__type(graph: RAFFLE)
   @join__type(graph: SUBMIT)
   @join__type(graph: VOTE)
 
 scalar EditorData
   @join__type(graph: CONTESTS)
-  @join__type(graph: RAFFLE)
   @join__type(graph: SUBMIT)
 
 input ERCTokenInput
@@ -188,6 +188,7 @@ input ERCTokenInput
   address: String!
   symbol: String!
   decimals: Int!
+  chainId: Int!
   tokenId: Int
 }
 
@@ -214,20 +215,17 @@ type FungibleReward
 
 scalar IpfsUrl
   @join__type(graph: CONTESTS)
-  @join__type(graph: RAFFLE)
   @join__type(graph: SPACES)
   @join__type(graph: VOTE)
 
 scalar ISODateString
   @join__type(graph: CONTESTS)
-  @join__type(graph: RAFFLE)
   @join__type(graph: SUBMIT)
 
 scalar join__FieldSet
 
 enum join__Graph {
   CONTESTS @join__graph(name: "contests", url: "http://contests:8080")
-  RAFFLE @join__graph(name: "raffle", url: "http://raffle:8080")
   SPACES @join__graph(name: "spaces", url: "http://spaces:8080")
   SUBMIT @join__graph(name: "submit", url: "http://submit:8080")
   USER @join__graph(name: "user", url: "http://user:8080")
@@ -285,6 +283,7 @@ input NativeTokenInput
   type: NativeTokenTypeEnum!
   symbol: NativeTokenTypeEnum!
   decimals: Int!
+  chainId: Int!
 }
 
 enum NativeTokenTypeEnum
@@ -338,7 +337,6 @@ input PromptInput
 
 type Query
   @join__type(graph: CONTESTS)
-  @join__type(graph: RAFFLE)
   @join__type(graph: SPACES)
   @join__type(graph: SUBMIT)
   @join__type(graph: USER)
@@ -347,7 +345,6 @@ type Query
   contest(contestId: ID!): Contest @join__field(graph: CONTESTS)
   activeContests: [Contest!]! @join__field(graph: CONTESTS)
   isContestTweetQueued(contestId: ID!): Boolean! @join__field(graph: CONTESTS)
-  generateTwitterDmCode: String! @join__field(graph: RAFFLE)
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
   submission(submissionId: ID!): Submission @join__field(graph: SUBMIT)
@@ -386,6 +383,7 @@ input RestrictionTokenInput
   address: String
   symbol: String!
   decimals: Int!
+  chainId: Int!
   tokenId: Int
 }
 
@@ -607,6 +605,7 @@ type Token
   type: String!
   symbol: String!
   decimals: Int!
+  chainId: Int!
   address: String
   tokenId: Int
 }

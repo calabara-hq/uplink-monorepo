@@ -20,7 +20,3 @@ subgraphs:
     routing_url: http://user:8080
     schema:
       file: ../../subgraphs/user/schema.graphql
-  raffle:
-    routing_url: http://raffle:8080
-    schema:
-      file: ../../subgraphs/raffle/schema.graphql

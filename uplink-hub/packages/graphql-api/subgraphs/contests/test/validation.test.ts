@@ -1,8 +1,9 @@
 import test, { describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { IncomingAdditionalParams, IncomingDeadlines, IncomingMetadata, IncomingPrompt, IncomingSubmitterRestrictions, IncomingSubmitterRewards, IncomingVoterRewards, IncomingVotingPolicy, validateAdditionalParams, validateContestData, validateDeadlines, validateMetadata, validatePrompt, validateSubmitterRestrictions, validateSubmitterRewards, validateTweetThread, validateVoterRewards, validateVotingPolicy } from '../src/utils/validate';
+import { IncomingAdditionalParams, IncomingDeadlines, IncomingMetadata, IncomingPrompt, IncomingSubmitterRestrictions, IncomingSubmitterRewards, IncomingVoterRewards, IncomingVotingPolicy, validateAdditionalParams, validateChainId, validateContestData, validateDeadlines, validateMetadata, validatePrompt, validateSubmitterRestrictions, validateSubmitterRewards, validateTweetThread, validateVoterRewards, validateVotingPolicy } from '../src/utils/validate';
 import { IERCToken, INativeToken } from 'lib';
 import { ZodError } from 'zod';
+import { ThreadItemInput } from '../src/__generated__/resolvers-types';
 
 // helper defs
 
@@ -11,6 +12,7 @@ export const sampleERC1155Token: IERCToken = {
     address: "0x7c2748C7Ec984b559EADc39C7a4944398E34911a",
     symbol: "TNS",
     decimals: 0,
+    chainId: 1,
     tokenId: 2,
 }
 
@@ -19,6 +21,7 @@ export const sampleERC20Token: IERCToken = {
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     symbol: "USDC",
     decimals: 6,
+    chainId: 1,
     tokenId: null,
 }
 
@@ -27,6 +30,7 @@ export const sampleERC721Token: IERCToken = {
     address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
     symbol: "NOUN",
     decimals: 0,
+    chainId: 1,
     tokenId: null,
 }
 
@@ -34,7 +38,32 @@ export const sampleETHToken: INativeToken = {
     type: "ETH",
     symbol: "ETH",
     decimals: 18,
+    chainId: 1,
 }
+
+// chainId unit tests 
+
+describe("chainId unit tests", () => {
+    test("invalid chainId", () => {
+        assert.throws(() => validateChainId(34), (err: any) => {
+            assert.deepEqual(err.format()._errors,
+                ["Invalid chain id"]
+            )
+            assert(err instanceof ZodError);
+            return true;
+        })
+    })
+
+    test("valid mainnet chainId", () => {
+        const result = validateChainId(1);
+        assert.deepEqual(result, 1)
+    })
+
+    test("valid base chainId", () => {
+        const result = validateChainId(8453);
+        assert.deepEqual(result, 8453)
+    })
+})
 
 
 // metadata unit tests
@@ -363,6 +392,7 @@ describe("submitter rewards validation tests", () => {
                 address: "0x" + "dead".repeat(10),
                 symbol: "invalid",
                 decimals: 18,
+                chainId: 1,
                 tokenId: null
             },
             "ERC721": sampleERC721Token,
@@ -644,6 +674,7 @@ describe("submitter restrictions validation tests", () => {
                     address: "0x" + "dead".repeat(10),
                     symbol: "invalid",
                     decimals: 18,
+                    chainId: 1,
                     tokenId: null
                 },
                 threshold: "1"
@@ -700,6 +731,7 @@ describe("voting policy validation tests", () => {
                     address: "0x" + "dead".repeat(10),
                     symbol: "invalid",
                     decimals: 18,
+                    chainId: 1,
                     tokenId: null
                 },
                 strategy: {
@@ -724,6 +756,7 @@ describe("voting policy validation tests", () => {
                     address: "0x" + "dead".repeat(10),
                     symbol: "invalid",
                     decimals: 18,
+                    chainId: 1,
                     tokenId: null
                 },
                 strategy: {
@@ -813,7 +846,7 @@ describe("additional params validation tests", () => {
 describe("tweet thread validation tests", () => {
 
     test("fail with empty thread", async () => {
-        const thread: Thr[] = []
+        const thread: ThreadItemInput[] = []
 
         assert.throws(() => validateTweetThread(thread as any), (err: any) => {
             assert.deepEqual(err.format()._errors,
@@ -826,7 +859,7 @@ describe("tweet thread validation tests", () => {
 
 
     test("fail with empty thread item", async () => {
-        const thread: Thr[] = [{}]
+        const thread: ThreadItemInput[] = [{}]
 
         assert.throws(() => validateTweetThread(thread), (err: any) => {
             assert.deepEqual(err.format()[0]._errors,
@@ -838,7 +871,7 @@ describe("tweet thread validation tests", () => {
     })
 
     test("fail without thumbnail", async () => {
-        const thread: Thr[] = [{
+        const thread: ThreadItemInput[] = [{
             text: "test",
             videoAsset: "https://xyz.com",
             assetType: "video",
@@ -855,7 +888,7 @@ describe("tweet thread validation tests", () => {
     })
 
     test("fail with text too long", async () => {
-        const thread: Thr[] = [{
+        const thread: ThreadItemInput[] = [{
             text: "69".repeat(141),
             previewAsset: "https://xyz.com",
             videoAsset: "https://xyz.com",
@@ -873,7 +906,7 @@ describe("tweet thread validation tests", () => {
     })
 
     test("pass validation", async () => {
-        const thread: Thr[] = [{
+        const thread: ThreadItemInput[] = [{
             text: "69".repeat(69),
             previewAsset: "https://xyz.com",
             videoAsset: "https://xyz.com",
@@ -886,7 +919,7 @@ describe("tweet thread validation tests", () => {
     })
 
     test("pass validation with multi item thread", async () => {
-        const thread: Thr[] = [{
+        const thread: ThreadItemInput[] = [{
             text: "69".repeat(69),
             previewAsset: "https://xyz.com",
             videoAsset: "https://xyz.com",

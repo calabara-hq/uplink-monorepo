@@ -81,6 +81,7 @@ export type Metadata = {
 }
 
 export interface ContestBuilderProps {
+    chainId: number;
     metadata: Metadata;
     deadlines: Deadlines;
     prompt: Prompt;
@@ -236,6 +237,7 @@ const someFieldPopulated = (fields: any) => {
 
 
 // validation
+
 
 export const validateMetadata = (metadata: Metadata) => {
     const { type, category } = metadata;
@@ -426,67 +428,108 @@ export const validateVotingPolicy = (votingPolicy: VotingPolicyType[]) => {
 // reducer 
 
 
-export const initialState: ContestBuilderProps = {
-    metadata: {
-        type: null,
-        category: null,
-    },
-    deadlines: {
-        snapshot: "now",
-        startTime: "now",
-        voteTime: new Date(Date.now() + 2 * 864e5).toISOString(),
-        endTime: new Date(Date.now() + 4 * 864e5).toISOString(),
-    },
 
-    prompt: {
-        title: "",
-        body: null,
-        coverUrl: null,
-        coverBlob: null,
-    },
 
-    spaceTokens: [
-        {
-            type: "ETH",
-            symbol: "ETH",
-            decimals: 18,
-        },
-    ],
-    submitterRewards: {},
-    voterRewards: {},
-    submitterRestrictions: [],
-    votingPolicy: [],
-    additionalParams: {
-        anonSubs: true,
-        visibleVotes: false,
-        selfVote: false,
-        subLimit: 1,
-    },
-    errors: {
+export const initializeContestReducer = (spaceTokens: IToken[]) => {
+
+    // only called on init. return space tokens on mainnet + ETH if not already present
+    const createSpaceTokens = () => {
+        const mainnet_only = spaceTokens.filter((token) => token.chainId === 1);
+
+        const withETH = mainnet_only.some(
+            (token) => token.type === "ETH" && token.symbol === "ETH"
+        )
+            ? mainnet_only
+            : [...mainnet_only, { type: "ETH", symbol: "ETH", decimals: 18, chainId: 1 } as INativeToken];
+
+        return withETH;
+    }
+
+    const initialState: ContestBuilderProps = {
+        chainId: 1,
         metadata: {
-            type: "",
-            category: "",
+            type: null,
+            category: null,
         },
         deadlines: {
-            startTime: "",
-            voteTime: "",
-            endTime: "",
-            snapshot: "",
+            snapshot: "now",
+            startTime: "now",
+            voteTime: new Date(Date.now() + 2 * 864e5).toISOString(),
+            endTime: new Date(Date.now() + 4 * 864e5).toISOString(),
         },
+
         prompt: {
             title: "",
-            body: "",
-            coverUrl: "",
+            body: null,
+            coverUrl: null,
+            coverBlob: null,
         },
-        submitterRewards: {
-            duplicateRanks: [],
+
+        spaceTokens: createSpaceTokens(),
+        submitterRewards: {},
+        voterRewards: {},
+        submitterRestrictions: [],
+        votingPolicy: [],
+        additionalParams: {
+            anonSubs: true,
+            visibleVotes: false,
+            selfVote: false,
+            subLimit: 1,
         },
-        voterRewards: {
-            duplicateRanks: [],
-        },
-        votingPolicy: "",
+        errors: {
+            metadata: {
+                type: "",
+                category: "",
+            },
+            deadlines: {
+                startTime: "",
+                voteTime: "",
+                endTime: "",
+                snapshot: "",
+            },
+            prompt: {
+                title: "",
+                body: "",
+                coverUrl: "",
+            },
+            submitterRewards: {
+                duplicateRanks: [],
+            },
+            voterRewards: {
+                duplicateRanks: [],
+            },
+            votingPolicy: "",
+        }
+    };
+
+
+    const contestReducer = (state, action) => {
+        switch (action.type) {
+            case "SET_FIELD": {
+                return {
+                    ...state,
+                    [action.field]: action.value,
+                };
+            }
+            case "SET_ERRORS": {
+                return {
+                    ...state,
+                    errors: action.value,
+                };
+            }
+
+            case "SET_TOTAL_STATE": return action.value;
+        }
+    };
+
+    return {
+        initialState,
+        contestReducer
     }
-};
+}
+
+
+
 
 export const ContestReducer = (state, action) => {
     switch (action.type) {

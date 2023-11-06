@@ -5,12 +5,14 @@ export const ERCTokenSchema = z.object({
     address: z.string().length(42),
     decimals: z.number(),
     symbol: z.string(),
+    chainId: z.number(),
     tokenId: z.number().nullable(),
 })
 
 export const NativeTokenSchema = z.object({
     type: z.literal("ETH"),
     symbol: z.literal("ETH"),
+    chainId: z.number(),
     decimals: z.literal(18),
 });
 

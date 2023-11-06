@@ -57,6 +57,7 @@ export type ArcadeVotingStrategyOption = {
 export type Contest = {
   __typename?: 'Contest';
   additionalParams: AdditionalParams;
+  chainId: Scalars['Int']['output'];
   created: Scalars['String']['output'];
   deadlines: Deadlines;
   id: Scalars['ID']['output'];
@@ -101,6 +102,7 @@ export enum ContestTypeEnum {
 
 export type CreateContestData = {
   additionalParams: AdditionalParamsInput;
+  chainId: Scalars['Int']['input'];
   deadlines: DeadlinesInput;
   metadata: MetadataInput;
   prompt: PromptInput;
@@ -127,6 +129,7 @@ export type DeadlinesInput = {
 
 export type ErcTokenInput = {
   address: Scalars['String']['input'];
+  chainId: Scalars['Int']['input'];
   decimals: Scalars['Int']['input'];
   symbol: Scalars['String']['input'];
   tokenId?: InputMaybe<Scalars['Int']['input']>;
@@ -180,6 +183,7 @@ export type MutationCreateContestTweetArgs = {
 };
 
 export type NativeTokenInput = {
+  chainId: Scalars['Int']['input'];
   decimals: Scalars['Int']['input'];
   symbol: NativeTokenTypeEnum;
   type: NativeTokenTypeEnum;
@@ -232,6 +236,7 @@ export type QueryIsContestTweetQueuedArgs = {
 
 export type RestrictionTokenInput = {
   address?: InputMaybe<Scalars['String']['input']>;
+  chainId: Scalars['Int']['input'];
   decimals: Scalars['Int']['input'];
   symbol: Scalars['String']['input'];
   tokenId?: InputMaybe<Scalars['Int']['input']>;
@@ -302,6 +307,7 @@ export type ThreadItemInput = {
 export type Token = {
   __typename?: 'Token';
   address?: Maybe<Scalars['String']['output']>;
+  chainId: Scalars['Int']['output'];
   decimals: Scalars['Int']['output'];
   symbol: Scalars['String']['output'];
   tokenHash: Scalars['String']['output'];
@@ -602,6 +608,7 @@ export type ArcadeVotingStrategyOptionResolvers<ContextType = any, ParentType ex
 
 export type ContestResolvers<ContextType = any, ParentType extends ResolversParentTypes['Contest'] = ResolversParentTypes['Contest']> = ResolversObject<{
   additionalParams?: Resolver<ResolversTypes['AdditionalParams'], ParentType, ContextType>;
+  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   deadlines?: Resolver<ResolversTypes['Deadlines'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -719,6 +726,7 @@ export type SubmitterTokenRewardOptionResolvers<ContextType = any, ParentType ex
 
 export type TokenResolvers<ContextType = any, ParentType extends ResolversParentTypes['Token'] = ResolversParentTypes['Token']> = ResolversObject<{
   address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   tokenHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

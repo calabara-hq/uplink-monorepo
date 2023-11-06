@@ -1,10 +1,7 @@
 import { useState, useReducer, useEffect } from "react";
-import {
-    isValidERC1155TokenId,
-    tokenGetSymbolAndDecimal,
-    verifyTokenStandard,
-} from "@/lib/contract";
+import { TokenContractApi } from "@/lib/contract";
 import { IERCToken, INativeToken, isERCToken, isNativeToken, IToken } from "@/types/token";
+import { getChainName } from "@/lib/chains/supportedChains";
 
 export type ERCOptions = "ERC20" | "ERC721" | "ERC1155";
 
@@ -37,6 +34,7 @@ export type CustomTokenOptionErrors = CustomTokenOption["errors"];
 
 
 interface UseTokenManagerOptions {
+    chainId: number;
     existingTokens: IToken[] | null;
     uniqueStandard: boolean;
     saveCallback: (token: IToken) => void;
@@ -45,21 +43,6 @@ interface UseTokenManagerOptions {
     strictTypes?: ERCOptions[];
 }
 
-const initialTokenState: TokenState = {
-    customToken: {
-        type: "ERC20",
-        symbol: "",
-        decimals: 0,
-        address: "",
-        tokenId: null,
-        errors: {
-            address: null,
-            tokenId: null,
-        },
-    },
-    quickAddToken: null,
-};
-
 export type TokenAction =
     | { type: "setCustomTokenType"; payload: ERCOptions }
     | { type: "setCustomToken"; payload: Partial<CustomTokenOption> }
@@ -67,66 +50,79 @@ export type TokenAction =
     | { type: "setCustomTokenErrors"; payload: Partial<CustomTokenOptionErrors> }
     | { type: "reset" };
 
-const tokenReducer = (
-    state: TokenState = initialTokenState,
-    action: TokenAction
-): TokenState => {
-    switch (action.type) {
-        case "setCustomTokenType":
-            return {
-                ...state,
-                customToken: {
-                    ...initialTokenState.customToken,
-                    type: action.payload,
-                },
-            };
-        case "setCustomToken":
-            return {
-                ...state,
-                customToken: {
-                    ...state.customToken,
-                    ...action.payload,
-                    errors: {
-                        address: null,
-                        tokenId: null,
-                    },
-                },
-            };
-        case "setQuickAddToken":
-            const token = isNativeToken(action.payload) ? { type: "ETH", symbol: "ETH", decimals: 18 } as INativeToken : action.payload;
-            return {
-                ...state,
-                quickAddToken: token,
-            };
-        case "setCustomTokenErrors":
-            return {
-                ...state,
-                customToken: {
-                    ...state.customToken,
-                    errors: {
-                        ...state.customToken.errors,
-                        ...action.payload,
-                    },
-                },
-            };
-        case "reset": {
-            return initialTokenState;
-        }
-        default:
-            return state;
-    }
-};
+const initializeTokenReducer = (chainId: number) => {
 
-const fetchSymbolAndDecimals = async (address: string, type: ERCOptions) => {
-    try {
-        return await tokenGetSymbolAndDecimal({
-            contractAddress: address,
-            tokenStandard: type,
-        });
-    } catch (err) {
-        console.log(err);
+    const initialTokenState: TokenState = {
+        customToken: {
+            type: "ERC20",
+            symbol: "",
+            decimals: 0,
+            address: "",
+            tokenId: null,
+            chainId: chainId,
+            errors: {
+                address: null,
+                tokenId: null,
+            },
+        },
+        quickAddToken: null,
     }
-};
+
+    const tokenReducer = (
+        state: TokenState = initialTokenState,
+        action: TokenAction
+    ): TokenState => {
+        switch (action.type) {
+            case "setCustomTokenType":
+                return {
+                    ...state,
+                    customToken: {
+                        ...initialTokenState.customToken,
+                        type: action.payload,
+                    },
+                };
+            case "setCustomToken":
+                return {
+                    ...state,
+                    customToken: {
+                        ...state.customToken,
+                        ...action.payload,
+                        errors: {
+                            address: null,
+                            tokenId: null,
+                        },
+                    },
+                };
+            case "setQuickAddToken":
+                const token = isNativeToken(action.payload) ? { type: "ETH", symbol: "ETH", decimals: 18 } as INativeToken : action.payload;
+                return {
+                    ...state,
+                    quickAddToken: token,
+                };
+            case "setCustomTokenErrors":
+                return {
+                    ...state,
+                    customToken: {
+                        ...state.customToken,
+                        errors: {
+                            ...state.customToken.errors,
+                            ...action.payload,
+                        },
+                    },
+                };
+            case "reset": {
+                return initialTokenState;
+            }
+            default:
+                return state;
+        }
+    };
+
+    return {
+        reducer: tokenReducer,
+        initialState: initialTokenState,
+    };
+}
 
 
 /**
@@ -136,6 +132,7 @@ const fetchSymbolAndDecimals = async (address: string, type: ERCOptions) => {
 
 
 export const useTokenManager = ({
+    chainId,
     existingTokens,
     uniqueStandard,
     saveCallback,
@@ -144,6 +141,8 @@ export const useTokenManager = ({
     strictTypes,
 }: UseTokenManagerOptions) => {
     const [progress, setProgress] = useState<number>(0);
+    const tokenApi = new TokenContractApi(chainId);
+    const { reducer, initialState } = initializeTokenReducer(chainId);
     const tokenMenuOptions: MenuOption[] = strictTypes
         ? strictTypes.map((type) => ({
             value: type,
@@ -151,12 +150,9 @@ export const useTokenManager = ({
         }))
         : defaultTokenOptions;
 
-    initialTokenState.customToken.type = tokenMenuOptions[0].value;
+    const menuAdjustedInitialState = { ...initialState, customToken: { ...initialState.customToken, type: tokenMenuOptions[0].value } };
 
-    const [state, dispatch] = useReducer(tokenReducer, initialTokenState);
-
-
-
+    const [state, dispatch] = useReducer(reducer, menuAdjustedInitialState);
 
     useEffect(() => {
         const isValidAddress =
@@ -165,10 +161,10 @@ export const useTokenManager = ({
 
         // attempt to autofill the symbol and decimals if the address is valid
         if (isValidAddress)
-            fetchSymbolAndDecimals(
-                state.customToken.address,
-                state.customToken.type
-            ).then((res) => {
+            tokenApi.tokenGetSymbolAndDecimal({
+                contractAddress: state.customToken.address,
+                tokenStandard: state.customToken.type
+            }).then((res) => {
                 res ? dispatch({ type: "setCustomToken", payload: res }) : null;
             });
         // reset the other fields if the address switched from valid to invalid
@@ -186,7 +182,7 @@ export const useTokenManager = ({
 
     const handleModalConfirm = async () => {
         if (progress === 1) {
-            const isValidContract = await verifyTokenStandard({
+            const isValidContract = await tokenApi.verifyTokenStandard({
                 contractAddress: state.customToken.address,
                 expectedStandard: state.customToken.type,
             });
@@ -194,7 +190,7 @@ export const useTokenManager = ({
                 return dispatch({
                     type: "setCustomTokenErrors",
                     payload: {
-                        address: `This doesn't appear to be a valid ${state.customToken.type} address`,
+                        address: `This doesn't appear to be a valid ${state.customToken.type} address on ${getChainName(chainId)}`,
                     },
                 });
             }
@@ -207,7 +203,7 @@ export const useTokenManager = ({
                         },
                     });
                 } else {
-                    const isValidId = await isValidERC1155TokenId({
+                    const isValidId = await tokenApi.isValidERC1155TokenId({
                         contractAddress: state.customToken.address,
                         tokenId: state.customToken.tokenId,
                     });
@@ -285,7 +281,7 @@ export const useTokenManager = ({
     const handleAddToken = () => {
         const { errors, ...customToken } = state.customToken;
         const currentToken = state.quickAddToken || customToken;
-        saveCallback(currentToken);
+        saveCallback({ ...currentToken, chainId });
         if (!continuous) return handleClose();
     };
 

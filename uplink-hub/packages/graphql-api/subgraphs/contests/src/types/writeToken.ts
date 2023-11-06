@@ -1,8 +1,9 @@
 import { z } from 'zod';
-import { isERCToken, ERCTokenSchema, IToken } from "lib";
-import { tokenController } from '../utils/tokenController.js';
+import { isERCToken, ERCTokenSchema, IToken, TokenController } from "lib";
+import dotenv from 'dotenv';
+dotenv.config();
 
-const validateTokenStandard = async (token: IToken): Promise<boolean> => {
+const validateTokenStandard = async (token: IToken, tokenController: TokenController): Promise<boolean> => {
     if (isERCToken(token)) {
         return tokenController.verifyTokenStandard({
             contractAddress: token.address,
@@ -14,7 +15,7 @@ const validateTokenStandard = async (token: IToken): Promise<boolean> => {
 
 // verify that the token id is valid and fungible
 
-const validateERC1155TokenId = async (token: IToken): Promise<boolean> => {
+const validateERC1155TokenId = async (token: IToken, tokenController: TokenController): Promise<boolean> => {
     if (isERCToken(token)) {
         if (token.type === "ERC1155") {
             if (!token.tokenId) return false;
@@ -39,14 +40,15 @@ const validateERC1155TokenId = async (token: IToken): Promise<boolean> => {
 // token validation helper
 
 const validateToken = async (token: IToken): Promise<boolean> => {
+    const tokenController = new TokenController(process.env.ALCHEMY_KEY!, token.chainId);
+
     const [isValidStandard, isValidTokenId] = await Promise.all([
-        validateTokenStandard(token),
-        validateERC1155TokenId(token),
+        validateTokenStandard(token, tokenController),
+        validateERC1155TokenId(token, tokenController),
     ])
     return isValidStandard && isValidTokenId;
 }
 
-const RefinedERCTokenSchema = ERCTokenSchema
 
 export const VerifiedTokenSchema = z.custom<IToken>().refine(async (token: IToken) => { return token ? await validateToken(token) : true; }, { message: "Invalid token data" })
 export type VerifiedToken = z.infer<typeof VerifiedTokenSchema>;
