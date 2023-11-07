@@ -19,7 +19,7 @@
     "push-db": "yarn run env:prod && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib push-db",
     "build:supergraph": "sh -c 'cd ./packages/graphql-api && make config compose'",
     "start:supergraph": "yarn run env:dev && cross-env ENV_PATH=./.env && dotenv -e .env -- sh -c 'cd ./packages/graphql-api && make config compose run-router-local'",
-    "dev": "yarn run env:dev &&  yarn workspace lib build && cross-env ENV_PATH=./.env dotenv -- concurrently --kill-others \"yarn run start:supergraph\" \"yarn workspace dev-proxy dev\" \"yarn workspace auth dev\" \"yarn workspace media dev\" \"yarn workspace spaces dev\" \"yarn workspace contests dev\" \"yarn workspace submit dev\" \"yarn workspace vote dev\" \"yarn workspace tweet dev\" \"yarn workspace user dev\" \"yarn workspace raffle dev\"",
+    "dev": "yarn run env:dev &&  yarn workspace lib build && cross-env ENV_PATH=./.env dotenv -- concurrently --kill-others \"yarn run start:supergraph\" \"yarn workspace dev-proxy dev\" \"yarn workspace auth dev\" \"yarn workspace media dev\" \"yarn workspace spaces dev\" \"yarn workspace contests dev\" \"yarn workspace submit dev\" \"yarn workspace vote dev\" \"yarn workspace tweet dev\" \"yarn workspace user dev\"",
     "tweet": "yarn run env:dev && cross-env ENV_PATH=./.env dotenv -- yarn workspace tweet dev"
   },
   "workspaces": [

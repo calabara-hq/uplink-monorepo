@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { publicClient } from '@/lib/viem';
+import { createWeb3Client } from '@/lib/viem';
 
-
+const publicClient = createWeb3Client(1);
 
 const useEnsName = (address: string) => {
     const [ensName, setEnsName] = useState(null);

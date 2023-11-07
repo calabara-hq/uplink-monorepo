@@ -1,6 +1,6 @@
 #!/bin/bash
 
-subgraphs=("spaces" "contests" "submit" "vote" "user" "raffle")
+subgraphs=("spaces" "contests" "submit" "vote" "user")
 
 url_spaces="http://localhost:5003"
 url_contests="http://localhost:5004"
