@@ -1,6 +1,5 @@
 "use client";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
-import { ZoraAbi } from "./ZoraAbi"
 import { useEffect } from "react";
 import { z } from "zod";
 
@@ -76,41 +75,42 @@ export default function CreateZoraEdition() {
         "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"
     ];
 
+    return null;
 
 
 
-    const { config } = usePrepareContractWrite({
-        chainId: 1,
-        address: ZORA_NFT_CREATOR_PROXY,
-        abi: ZoraAbi,
-        functionName: 'createEditionWithReferral',
-        args: args,
-        enabled: true,
-    });
+    // const { config } = usePrepareContractWrite({
+    //     chainId: 1,
+    //     address: ZORA_NFT_CREATOR_PROXY,
+    //     abi: ZoraAbi,
+    //     functionName: 'createEditionWithReferral',
+    //     args: args,
+    //     enabled: true,
+    // });
 
-    console.log(config)
+    // console.log(config)
 
-    const {
-        write,
-        isLoading,
-        error
-    } = useContractWrite(config);
+    // const {
+    //     write,
+    //     isLoading,
+    //     error
+    // } = useContractWrite(config);
 
-    const handleClick = () => {
-        console.log(write)
-        if (write) {
-            write();
-        }
-    };
+    // const handleClick = () => {
+    //     console.log(write)
+    //     if (write) {
+    //         write();
+    //     }
+    // };
 
-    console.log(write, isLoading, error)
+    // console.log(write, isLoading, error)
 
-    return (
-        <div className="flex flex-col gap-2">
-            <button className="btn btn-primary" onClick={handleClick} disabled={isLoading}>
-                {isLoading ? 'Processing...' : 'Create Edition'}
-            </button>
-            {error && <p>Error: {error.message}</p>}
-        </div>
-    );
+    // return (
+    //     <div className="flex flex-col gap-2">
+    //         <button className="btn btn-primary" onClick={handleClick} disabled={isLoading}>
+    //             {isLoading ? 'Processing...' : 'Create Edition'}
+    //         </button>
+    //         {error && <p>Error: {error.message}</p>}
+    //     </div>
+    // );
 }

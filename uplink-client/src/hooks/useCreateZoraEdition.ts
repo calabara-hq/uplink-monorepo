@@ -1,4 +1,6 @@
-import { z } from "zod";
+import { uint64MaxSafe } from "@/utils/uint64";
+import { useReducer } from "react";
+import { SafeParseReturnType, z } from "zod";
 
 export const EditionConfig = z.object({
     name: z.string(),
@@ -103,7 +105,96 @@ export type ConfigurableZoraEdition = z.infer<typeof ConfigurableZoraEditionSche
 export type ConfigurableZoraEditionInput = z.input<typeof ConfigurableZoraEditionSchema>;
 export type ConfigurableZoraEditionOutput = z.output<typeof ConfigurableZoraEditionSchema>;
 
-export default function useCreateZoraEdition() {
 
+type ZodSafeParseErrorFormat = {
+    [key: string]: { _errors: string[] };
+};
+export const EditionWizardReducer = (state: ConfigurableZoraEditionInput & { errors?: ZodSafeParseErrorFormat }, action: any) => {
+    switch (action.type) {
+        case "SET_FIELD":
+            return {
+                ...state,
+                [action.payload.field]: action.payload.value,
+                errors: { ...state.errors, [action.payload.field]: undefined }, // Clear error when field is set
+            };
+        case "SET_ERRORS":
+            return {
+                ...state,
+                errors: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+
+
+
+
+export default function useCreateZoraEdition(init_name?: string, init_imageURI?: string, init_animationURI?: string) {
+
+    const [state, dispatch] = useReducer(EditionWizardReducer, {
+        name: init_name ?? "",
+        symbol: "",
+        editionSize: uint64MaxSafe.toString(),
+        royaltyBPS: "",
+        description: "",
+        animationURI: init_animationURI ?? "",
+        imageURI: init_imageURI ?? "",
+        salesConfig: {
+            publicSalePrice: "",
+            publicSaleStart: "",
+            publicSaleEnd: "",
+        },
+        errors: {},
+    });
+
+
+    const setField = (field: string, value: string) => {
+        const keys = field.split('.');
+        const lastKey = keys.pop();
+        const lastObj = keys.reduce((stateObj, key) => stateObj[key] = stateObj[key] || {}, state);
+
+        if (lastKey) {
+            lastObj[lastKey] = value;
+        }
+
+        dispatch({
+            type: 'SET_FIELD',
+            payload: { field, value },
+        });
+    };
+
+    const validate = () => {
+        const { errors, ...rest } = state;
+        const result = ConfigurableZoraEditionSchema.safeParse(rest);
+
+        if (!result.success) {
+            // Formatting errors and dispatching
+            const formattedErrors = (result as z.SafeParseError<typeof ConfigurableZoraEditionSchema>).error.format();
+            dispatch({
+                type: "SET_ERRORS",
+                payload: formattedErrors, // Pass the formatted errors directly
+            });
+            console.log('invalid')
+        } else {
+            console.log('valid')
+        }
+
+    }
+
+
+    // user writes to ConfigurableZoraEditionInput
+    // we validate it
+    // if it fails we set the errors in the form
+    // if successful we translate it into a valid zora edition
+    // then we prepare the contract query
+
+
+    return {
+        state,
+        setField,
+        validate,
+    }
 
 }
