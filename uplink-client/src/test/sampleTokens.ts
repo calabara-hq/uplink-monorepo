@@ -15,7 +15,7 @@ export const sampleERC20Token: IERCToken = {
     symbol: "USDC",
     decimals: 6,
     tokenId: null,
-    chainId: 1
+    chainId: 1,
 }
 
 export const sampleERC721Token: IERCToken = {
@@ -24,12 +24,12 @@ export const sampleERC721Token: IERCToken = {
     symbol: "NOUN",
     decimals: 0,
     tokenId: null,
-    chainId: 1
+    chainId: 1,
 }
 
 export const sampleETHToken: INativeToken = {
     type: "ETH",
     symbol: "ETH",
     decimals: 18,
-    chainId: 1
+    chainId: 1,
 }
