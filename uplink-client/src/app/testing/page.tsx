@@ -5,6 +5,8 @@ import useCreateZoraEdition from "@/hooks/useCreateZoraEdition";
 import { useEffect, useRef, useState } from "react";
 import type { Option } from "@/ui/MenuSelect/MenuSelect";
 import { uint64MaxSafe } from "@/utils/uint64";
+import DateTimeSelector from "@/ui/DateTime/DateTime";
+import { nanoid } from "nanoid";
 
 
 
@@ -36,7 +38,7 @@ const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, cu
                         <input
                             key={idx}
                             type="radio"
-                            name="options"
+                            name={`option-${nanoid()}`}
                             className="btn normal-case"
                             data-title={option.label}
                             checked={option.value === value && !isCustom}
@@ -46,7 +48,7 @@ const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, cu
                     ))}
                     <input
                         type="radio"
-                        name="options"
+                        name={`custom-${nanoid()}`}
                         className="btn normal-case"
                         data-title={customLabel}
                         checked={isCustom}
@@ -159,17 +161,37 @@ const ZoraForm = () => {
             <OptionOrCustom
                 value={state.salesConfig.publicSaleStart}
                 label={"Mint Start"}
-                options={[{ value: "now", label: "Low" }]}
+                options={[{ value: "now", label: "Now" }]}
                 onOptionSelect={(option: Option) => setField("salesConfig.publicSaleStart", option.value)}
-                customLabel={"Fixed"}
+                customLabel={"Later"}
                 customChild={
-                    <BasicInput
-                        value={state.salesConfig.publicSaleStart === "0" ? "1699367854" : state.salesConfig.publicSaleStart}
-                        label={"Fixed Start"} placeholder={"1699367854"}
-                        onChange={(e) => setField("salesConfig.publicSaleStart", e.target.value)}
+                    <DateTimeSelector
+                        isoString={state.salesConfig.publicSaleStart || "now"}
+                        label={"Start"}
+                        callback={(value) => setField("salesConfig.publicSaleStart", value)}
                         error={state.errors?.salesConfig?.publicSaleStart?._errors} />
                 } />
 
+            <OptionOrCustom
+                value={state.salesConfig.publicSaleEnd}
+                label={"Mint End"}
+                options={[{ value: "forever", label: "Forever" }, { value: "1 week", label: "1 week" }, { value: "contest end", label: "Contest End" }]}
+                onOptionSelect={(option: Option) => setField("salesConfig.publicSaleEnd", option.value)}
+                customLabel={"Later"}
+                customChild={
+                    <div>
+                        <DateTimeSelector
+                            isoString={"now"}
+                            label={"End"}
+                            callback={(value) => setField("salesConfig.publicSaleEnd", value)}
+                            error={state.errors?.salesConfig?.publicSaleEnd?._errors} />
+                        {state.errors?.salesConfig?._errors && (
+                            <label className="label">
+                                <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{state.errors?.salesConfig?._errors.join(",")}</span>
+                            </label>
+                        )}
+                    </div>
+                } />
             <button className="btn normal-case" onClick={handleSubmit}>Submit</button>
         </div>
     )

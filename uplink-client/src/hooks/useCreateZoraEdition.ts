@@ -127,10 +127,6 @@ export const EditionWizardReducer = (state: ConfigurableZoraEditionInput & { err
     }
 }
 
-
-
-
-
 export default function useCreateZoraEdition(init_name?: string, init_imageURI?: string, init_animationURI?: string) {
 
     const [state, dispatch] = useReducer(EditionWizardReducer, {
@@ -143,8 +139,8 @@ export default function useCreateZoraEdition(init_name?: string, init_imageURI?:
         imageURI: init_imageURI ?? "",
         salesConfig: {
             publicSalePrice: "",
-            publicSaleStart: "",
-            publicSaleEnd: "",
+            publicSaleStart: "now",
+            publicSaleEnd: "forever",
         },
         errors: {},
     });
