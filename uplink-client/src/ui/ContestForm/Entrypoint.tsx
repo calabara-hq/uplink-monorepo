@@ -265,8 +265,8 @@ const ChainSelect = ({ contestData, setField }) => {
       <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <h1 className="text-t1 font-bold text-xl">Switching networks</h1>
         <div className="flex flex-col gap-2 p-2">
-          <p>You are about to switch networks. This will remove any tokens you've configured for rewards, restrictions, and voting policies that are not supported by the new chain.
-            Do you want to continue?
+          <p>{`You are about to switch networks. This will remove any tokens you've configured for rewards, restrictions, and voting policies that are not supported by the new chain.
+            Do you want to continue?`}
           </p>
           <div className="flex flex-row gap-8 items-center justify-center">
             <button className="btn btn-ghost normal-case btn-md rounded-xl" onClick={() => { setIsModalOpen(false) }}>No</button>
