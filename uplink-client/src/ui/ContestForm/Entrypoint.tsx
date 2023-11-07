@@ -259,7 +259,8 @@ const ChainSelect = ({ contestData, setField }) => {
 
 
   return (
-    <div>
+    <div className="flex flex-row gap-2 items-center">
+      <p className="text-t2 font-bold">Network</p>
       <MenuSelect options={chainOptions} selected={currentChain} setSelected={handleChainToggle} />
       <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <h1 className="text-t1 font-bold text-xl">Switching networks</h1>
