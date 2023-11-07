@@ -7,6 +7,21 @@ import { z } from "zod";
 
 const ZORA_NFT_CREATOR_PROXY = '0xf74b146ce44cc162b601dec3be331784db111dc1';
 
+/**
+ * configurable fields
+ * name
+ * symbol
+ * editionSize
+ * royaltyBPS
+ * animationURI
+ * imageURI
+ * publicSalePrice
+ * publicSaleStart
+ * publicSaleEnd
+ * network
+ */
+
+
 const SalesConfig = z.object({
     publicSalePrice: z.string(),
     maxSalePurchasePerAddress: z.number(),
@@ -30,6 +45,11 @@ const EditionConfig = z.object({
     imageURI: z.string(),
 })
 
+const ZoraEdition = z.object({
+    chainId: z.number().refine((n) => n === 8453, { message: "Must be base network" }),
+    address: z.string(),
+    config: EditionConfig,
+});
 
 
 export default function CreateZoraEdition() {

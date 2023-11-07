@@ -6,6 +6,7 @@ export const sampleERC1155Token: IERCToken = {
     symbol: "TNS",
     decimals: 0,
     tokenId: 2,
+    chainId: 1
 }
 
 export const sampleERC20Token: IERCToken = {
@@ -13,7 +14,8 @@ export const sampleERC20Token: IERCToken = {
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     symbol: "USDC",
     decimals: 6,
-    tokenId: null
+    tokenId: null,
+    chainId: 1
 }
 
 export const sampleERC721Token: IERCToken = {
@@ -21,11 +23,13 @@ export const sampleERC721Token: IERCToken = {
     address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
     symbol: "NOUN",
     decimals: 0,
-    tokenId: null
+    tokenId: null,
+    chainId: 1
 }
 
 export const sampleETHToken: INativeToken = {
     type: "ETH",
     symbol: "ETH",
     decimals: 18,
+    chainId: 1
 }

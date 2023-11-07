@@ -841,3 +841,6 @@ export const ZoraAbi = [
         "type": "function"
     }
 ] as const
+
+
+export const ZORA_NFT_CREATOR_PROXY = '0xf74b146ce44cc162b601dec3be331784db111dc1';
