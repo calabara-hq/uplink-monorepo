@@ -259,13 +259,20 @@ const ChainSelect = ({ contestData, setField }) => {
 
 
   return (
-    <div>
+    <div className="flex flex-row gap-2 items-center">
+      <p className="text-t2 font-bold">Network</p>
       <MenuSelect options={chainOptions} selected={currentChain} setSelected={handleChainToggle} />
-      <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={"switching chains"}>
-        you are switching chains. this will remove any tokens that are not supported by the new chain.
-        do you want to continue?
-        <button onClick={() => { setIsModalOpen(false) }}>no</button>
-        <button onClick={() => wipeTokensAndSwitchChain(desiredChain.value)}>yes</button>
+      <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h1 className="text-t1 font-bold text-xl">Switching networks</h1>
+        <div className="flex flex-col gap-2 p-2">
+          <p>You are about to switch networks. This will remove any tokens you've configured for rewards, restrictions, and voting policies that are not supported by the new chain.
+            Do you want to continue?
+          </p>
+          <div className="flex flex-row gap-8 items-center justify-center">
+            <button className="btn btn-ghost normal-case btn-md rounded-xl" onClick={() => { setIsModalOpen(false) }}>No</button>
+            <button className="btn btn-primary normal-case btn-md rounded-xl" onClick={() => wipeTokensAndSwitchChain(desiredChain.value)}>Yes</button>
+          </div>
+        </div>
       </Modal >
     </div >
   )
