@@ -25,7 +25,7 @@ const apiCastVotes = async (
   contestId: string,
   castVotePayload: any,
   csrfToken: string | null
-) => {
+): Promise<UserVotingParams> => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
@@ -44,7 +44,6 @@ const apiCastVotes = async (
                   votesSpent
                   userVotes {
                     id
-                    votes
                     submissionId
                     submissionUrl
                     votes
@@ -67,7 +66,7 @@ const apiRemoveSingleVote = async (
   contestId: string,
   submissionId: string,
   csrfToken: string | null
-) => {
+): Promise<UserVotingParams> => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {
@@ -108,7 +107,7 @@ const apiRemoveSingleVote = async (
 const apiRemoveAllVotes = async (
   contestId: string,
   csrfToken: string | null
-) => {
+): Promise<UserVotingParams> => {
   return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
     headers: {

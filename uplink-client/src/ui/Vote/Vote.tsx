@@ -18,12 +18,13 @@ import { HiTrash, HiDocumentText } from "react-icons/hi2";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import { Submission, isStandardSubmission, isTwitterSubmission } from "@/types/submission";
 import { ImageWrapper } from "../Submission/MediaWrapper";
+import { UserVote } from "@/providers/ContestInteractionProvider";
 
 const SubmissionVoteInput = ({
   submission,
   mode,
 }: {
-  submission: any;
+  submission: VotableSubmission;
   mode: "current" | "proposed";
 }) => {
   const { updateVoteAmount } = useVoteActionContext();
@@ -38,7 +39,7 @@ const SubmissionVoteInput = ({
         (e.target as HTMLElement).blur();
       }}
       onChange={(e) =>
-        updateVoteAmount(submission.submissionId, e.target.value, mode)
+        updateVoteAmount(submission.id, e.target.value, mode)
       }
     />
   );
@@ -48,7 +49,7 @@ const SubmissionCardVote = ({
   submission,
   mode,
 }: {
-  submission: any;
+  submission: VotableSubmission;
   mode: "current" | "proposed";
 }) => {
   const { removeSingleVote } = useVoteActionContext();
@@ -71,7 +72,7 @@ const SubmissionCardVote = ({
         <div className="flex">
           <button
             className="btn btn-ghost btn-sm ml-auto text-error"
-            onClick={() => removeSingleVote(submission.submissionId, mode)}
+            onClick={() => removeSingleVote(submission.id, mode)}
           >
             <HiTrash className="w-4 h-4" />
           </button>
@@ -162,7 +163,6 @@ const LockedCardVote = ({ submission }: { submission: any }) => {
 
 const CartMediaSubmission = ({ submission }: { submission: VotableSubmission }) => {
   const src = submission.type === "standard" ? submission.data.previewAsset : submission.data.thread[0].previewAsset
-  console.log(src)
   return (
     <div className="relative w-full h-full">
       <figure className="absolute inset-0 overflow-hidden">
@@ -304,7 +304,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
               <EditButton isEditMode={isEditMode} setIsEditMode={setIsEditMode} />
             </div>
             <div className="flex flex-col gap-2 transition-opacity">
-              {currentVotes.map((submission: any, idx: number) => {
+              {currentVotes.map((currVote: UserVote, idx: number) => {
                 if (areSubmissionsLoading || !liveSubmissions) return null;
                 if (isEditMode) {
                   return (
@@ -312,11 +312,12 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
                       key={idx}
                       mode={"current"}
                       submission={{
-                        ...submission,
-                        data: liveSubmissions.find(
-                          (el) => el.id === submission.submissionId
-                        ).data,
+                        ...liveSubmissions.find(
+                          (el) => el.id === currVote.submissionId
+                        ),
+                        votes: currVote.votes,
                       }}
+
                     />
                   );
                 } else {
@@ -324,10 +325,10 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
                     <LockedCardVote
                       key={idx}
                       submission={{
-                        ...submission,
-                        data: liveSubmissions.find(
-                          (el) => el.id === submission.submissionId
-                        ).data,
+                        ...liveSubmissions.find(
+                          (el) => el.id === currVote.submissionId
+                        ),
+                        votes: currVote.votes,
                       }}
                     />
                   );
@@ -346,7 +347,7 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
             </div>
           )}
           <div className="flex flex-col gap-2 p-2 max-h-[30vh] overflow-y-auto">
-            {proposedVotes.map((submission: any, idx: number) => (
+            {proposedVotes.map((submission: VotableSubmission, idx: number) => (
               <SubmissionCardVote
                 key={idx}
                 submission={submission}

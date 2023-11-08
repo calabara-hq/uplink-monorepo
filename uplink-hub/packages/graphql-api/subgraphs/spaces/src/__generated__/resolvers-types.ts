@@ -105,6 +105,7 @@ export type SpaceStub = {
 export type SpaceToken = {
   __typename?: 'SpaceToken';
   address?: Maybe<Scalars['String']['output']>;
+  chainId: Scalars['Int']['output'];
   decimals: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
   symbol: Scalars['String']['output'];
@@ -301,6 +302,7 @@ export type SpaceStubResolvers<ContextType = any, ParentType extends ResolversPa
 
 export type SpaceTokenResolvers<ContextType = any, ParentType extends ResolversParentTypes['SpaceToken'] = ResolversParentTypes['SpaceToken']> = ResolversObject<{
   address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
