@@ -11,8 +11,6 @@ const erc20Hash = djb2Hash(sampleERC20Token);
 const erc721Hash = djb2Hash(sampleERC721Token);
 const erc1155Hash = djb2Hash(sampleERC1155Token);
 
-
-
 describe("extractTokens", () => {
     test("all unique", () => {
         const submitterRewards: ContestSubmitterRewards = {

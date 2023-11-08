@@ -32,6 +32,7 @@ export const djb2Hash = (token: IToken): string => {
     }
     return (hash >>> 0).toString(16);
 };
+
 export const ExtractedTokenCacheSchema = z.record(VerifiedTokenSchema)
 export type ExtractedTokenCache = z.infer<typeof ExtractedTokenCacheSchema>
 
