@@ -27,18 +27,20 @@ export type UserSubmissionParams = {
 };
 
 export type UserVote = {
+  id: string;
   votes: string;
   submissionId: string;
   submissionUrl: string;
+
 };
 
 export type UserVotingParams =
   | {
-      totalVotingPower: string;
-      votesRemaining: string;
-      votesSpent: string;
-      userVotes: UserVote[] | [];
-    }
+    totalVotingPower: string;
+    votesRemaining: string;
+    votesSpent: string;
+    userVotes: Array<UserVote>;
+  }
   | undefined;
 
 export interface ContestInteractionProps {

@@ -1,6 +1,7 @@
 import useSWR from "swr";
 import { mutateSubmissions } from "@/app/mutate";
 import { useEffect } from "react";
+import { Submission } from "@/types/submission";
 
 // local client side fetch, don't use the server-only fetch
 const fetchSubmissions = async (contestId: string) => {
@@ -53,7 +54,7 @@ const useLiveSubmissions = (contestId: string) => {
         isLoading: areSubmissionsLoading,
         error: isSubmissionError,
         mutate: mutateSWRSubmissions,
-    }: { data: any; isLoading: boolean; error: any; mutate: any } = useSWR(
+    }: { data: Array<Submission>; isLoading: boolean; error: any; mutate: any } = useSWR(
         `submissions/${contestId}`,
         () => fetchSubmissions(contestId),
         { refreshInterval: 10000 }
