@@ -217,7 +217,7 @@ const createSpaceTokens = (spaceTokens: IToken[], chainId: number) => {
   return withETH;
 }
 
-const ChainSelect = ({ contestData, setField }) => {
+const ChainSelect = ({ contestData, setField, spaceTokens }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [desiredChain, setDesiredChain] = useState<Option | null>(null)
 
@@ -241,7 +241,7 @@ const ChainSelect = ({ contestData, setField }) => {
   }
 
   const setSelectedChain = (chainId: number) => {
-    setField("spaceTokens", createSpaceTokens(contestData.spaceTokens, Number(chainId)));
+    setField("spaceTokens", createSpaceTokens(spaceTokens, Number(chainId)));
     setField("chainId", chainId);
     setIsModalOpen(false);
   }
@@ -638,7 +638,7 @@ const ContestForm = ({
                 <div className="flex flex-row gap-2">
                   <h1 className="text-3xl font-bold">Create a Contest</h1>
                   <div className="ml-auto items-center">
-                    <ChainSelect contestData={contestState} setField={setField} />
+                    <ChainSelect contestData={contestState} setField={setField} spaceTokens={spaceTokens} />
                   </div>
                 </div>
                 <ContestParamSectionCards
