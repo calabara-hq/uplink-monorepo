@@ -469,6 +469,7 @@ type SpaceToken
   tokenHash: String!
   symbol: String!
   decimals: Int!
+  chainId: Int!
   address: String
   tokenId: Int
 }

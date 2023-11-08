@@ -1,8 +1,7 @@
 import { WritableStandardSubmission } from "../types/writeStandardSubmission";
 import { getCacheSubParams, setCacheSubParams } from "./cache.js";
 import { db, sqlOps } from "../utils/database.js";
-import { schema, Decimal, EditorOutputData } from "lib";
-import { tokenController } from "./tokenController.js"
+import { schema, Decimal, EditorOutputData, TokenController } from "lib";
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';
 import { nanoid } from 'nanoid';
@@ -40,6 +39,7 @@ export const fetchContestParameters = async (contestId: number) => {
     const contestParameters = await db.select({
         subLimit: schema.contests.subLimit,
         contestType: schema.contests.type,
+        chainId: schema.contests.chainId,
         deadlines: {
             startTime: schema.contests.startTime,
             voteTime: schema.contests.voteTime,
@@ -102,6 +102,7 @@ export const deadlineAdjustedSubmittingPower = (
 export const checkWalletRestrictions = async (
     user: any,
     blockNum: number,
+    tokenController: TokenController,
     restrictions: {
         restrictionType: string,
         tokenRestriction: {
@@ -120,7 +121,7 @@ export const checkWalletRestrictions = async (
         const { restrictionType, tokenRestriction } = restriction;
         const { token, threshold } = tokenRestriction;
         const userBalance = await tokenController.computeUserTokenBalance({ token, blockNum, walletAddress: user.address });
-        if (userBalance.cmp(threshold) > 0) return {
+        if (userBalance.cmp(threshold) >= 0) return {
             restriction,
             result: true
         };
@@ -161,7 +162,7 @@ export const computeMaxSubmissionPower = async (
         fetchContestParameters(contestId),
     ])
 
-    const { subLimit, deadlines } = contestParameters;
+    const { subLimit, chainId, deadlines } = contestParameters;
 
     // cache hit, no need for wallet checks
 
@@ -171,6 +172,7 @@ export const computeMaxSubmissionPower = async (
 
     else {
 
+        const tokenController = new TokenController(process.env.ALCHEMY_KEY!, chainId);
         // when there is no subLimit, set max subs per user to 10
         const maxSubPower = subLimit === 0 ? 10 : subLimit;
         const submitterRestrictions = await fetchSubmitterRestrictions(contestId);
@@ -178,7 +180,7 @@ export const computeMaxSubmissionPower = async (
         if (submitterRestrictions.length === 0) return { maxSubPower: deadlineAdjustedSubmittingPower(maxSubPower, deadlines), restrictionResults: [] };
 
         const blockNum = await tokenController.calculateBlockFromTimestamp(deadlines.snapshot)
-        const userRestrictionResult = await checkWalletRestrictions(user, blockNum, submitterRestrictions);
+        const userRestrictionResult = await checkWalletRestrictions(user, blockNum, tokenController, submitterRestrictions);
         const restrictionAdjustedSubPower = userRestrictionResult.some((token) => token.result === true) ? maxSubPower : 0;
         await setCacheSubParams(user, contestId, restrictionAdjustedSubPower, userRestrictionResult);
         return { maxSubPower: deadlineAdjustedSubmittingPower(restrictionAdjustedSubPower, deadlines), restrictionResults: userRestrictionResult };

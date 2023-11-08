@@ -21,6 +21,7 @@ const getSpace = async (name: string) => {
                 decimals
                 symbol
                 tokenId
+                chainId
               }
             }
           }
