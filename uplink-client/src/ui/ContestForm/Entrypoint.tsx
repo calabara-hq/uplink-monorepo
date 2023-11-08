@@ -207,7 +207,6 @@ const detectTokenConflict = (contestData: ContestBuilderProps) => {
 
 const createSpaceTokens = (spaceTokens: IToken[], chainId: number) => {
   const chain_specific = spaceTokens.filter(token => token.chainId === chainId);
-
   const withETH = chain_specific.some(
     (token) => token.type === "ETH" && token.symbol === "ETH"
   )
@@ -217,7 +216,7 @@ const createSpaceTokens = (spaceTokens: IToken[], chainId: number) => {
   return withETH;
 }
 
-const ChainSelect = ({ contestData, setField }) => {
+const ChainSelect = ({ contestData, setField, spaceTokens }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [desiredChain, setDesiredChain] = useState<Option | null>(null)
 
@@ -241,7 +240,8 @@ const ChainSelect = ({ contestData, setField }) => {
   }
 
   const setSelectedChain = (chainId: number) => {
-    setField("spaceTokens", createSpaceTokens(contestData.spaceTokens, Number(chainId)));
+    console.log('switching to chain', chainId)
+    setField("spaceTokens", createSpaceTokens(spaceTokens, Number(chainId)));
     setField("chainId", chainId);
     setIsModalOpen(false);
   }
@@ -347,6 +347,7 @@ const ContestForm = ({
     //5. if server returns error, render error screen
 
     const { errors, isError, data } = validateContestParams(contestState);
+
     setTotalState({ ...data, errors });
     if (isError) return;
     try {
@@ -638,7 +639,7 @@ const ContestForm = ({
                 <div className="flex flex-row gap-2">
                   <h1 className="text-3xl font-bold">Create a Contest</h1>
                   <div className="ml-auto items-center">
-                    <ChainSelect contestData={contestState} setField={setField} />
+                    <ChainSelect contestData={contestState} setField={setField} spaceTokens={spaceTokens} />
                   </div>
                 </div>
                 <ContestParamSectionCards
