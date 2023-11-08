@@ -240,7 +240,6 @@ const ChainSelect = ({ contestData, setField, spaceTokens }) => {
   }
 
   const setSelectedChain = (chainId: number) => {
-    console.log('switching to chain', chainId)
     setField("spaceTokens", createSpaceTokens(spaceTokens, Number(chainId)));
     setField("chainId", chainId);
     setIsModalOpen(false);
