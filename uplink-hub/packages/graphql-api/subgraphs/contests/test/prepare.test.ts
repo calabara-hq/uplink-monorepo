@@ -6,76 +6,10 @@ import { ContestSubmitterRestrictions, ContestSubmitterRewards, ContestVoterRewa
 import { sampleERC1155Token, sampleERC20Token, sampleERC721Token, sampleETHToken } from './validation.test'
 import { IERCToken } from 'lib'
 
-const ethHash = djb2Hash(JSON.stringify(sampleETHToken));
-const erc20Hash = djb2Hash(JSON.stringify(sampleERC20Token));
-const erc721Hash = djb2Hash(JSON.stringify(sampleERC721Token));
-const erc1155Hash = djb2Hash(JSON.stringify(sampleERC1155Token));
-
-export const BINT1: IERCToken = {
-    type: "ERC1155",
-    address: "0x32CfF5C2A7233097Efe3e8Dc708D1Df141780D69",
-    symbol: "BM1",
-    decimals: 0,
-    tokenId: 1,
-}
-export const BINT2: IERCToken = {
-    type: "ERC1155",
-    address: "0x32CfF5C2A7233097Efe3e8Dc708D1Df141780D69",
-    symbol: "BINT1",
-    decimals: 0,
-    tokenId: 2,
-}
-export const BINT3: IERCToken = {
-    type: "ERC1155",
-    address: "0x32CfF5C2A7233097Efe3e8Dc708D1Df141780D69",
-    symbol: "BINT1",
-    decimals: 0,
-    tokenId: 3,
-}
-export const BINT4: IERCToken = {
-    type: "ERC1155",
-    address: "0x32CfF5C2A7233097Efe3e8Dc708D1Df141780D69",
-    symbol: "BINT1",
-    decimals: 0,
-    tokenId: 4,
-}
-export const BINT5: IERCToken = {
-    type: "ERC1155",
-    address: "0x32CfF5C2A7233097Efe3e8Dc708D1Df141780D69",
-    symbol: "BINT1",
-    decimals: 0,
-    tokenId: 5,
-}
-export const BINT6: IERCToken = {
-    type: "ERC1155",
-    address: "0x32CfF5C2A7233097Efe3e8Dc708D1Df141780D69",
-    symbol: "BINT1",
-    decimals: 0,
-    tokenId: 6,
-}
-export const BINT7: IERCToken = {
-    type: "ERC1155",
-    address: "0x32CfF5C2A7233097Efe3e8Dc708D1Df141780D69",
-    symbol: "BINT1",
-    decimals: 0,
-    tokenId: 7,
-}
-
-export const BINT8: IERCToken = {
-    type: "ERC1155",
-    address: "0x32CfF5C2A7233097Efe3e8Dc708D1Df141780D69",
-    symbol: "BINT1",
-    decimals: 0,
-    tokenId: 8,
-}
-
-export const baseMGMT: IERCToken = {
-    type: "ERC721",
-    address: "0xB78b89EB81303a11CC597B4519035079453d8E31",
-    symbol: "MGMT",
-    decimals: 0,
-    tokenId: null,
-}
+const ethHash = djb2Hash(sampleETHToken);
+const erc20Hash = djb2Hash(sampleERC20Token);
+const erc721Hash = djb2Hash(sampleERC721Token);
+const erc1155Hash = djb2Hash(sampleERC1155Token);
 
 describe("extractTokens", () => {
     test("all unique", () => {

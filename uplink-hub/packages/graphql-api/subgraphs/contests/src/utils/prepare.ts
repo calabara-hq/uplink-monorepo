@@ -4,13 +4,34 @@ import { z } from 'zod';
 import { VerifiedTokenSchema } from "../types/writeToken.js";
 import { InsertedTokenCache } from "./insert.js";
 
-export const djb2Hash = (str: string): string => {
+// serialize a token object into an ordered string for hashing
+const serialize = (token: IToken): string => {
+    // A type assertion to let TypeScript know we're sure about what keys we're accessing
+    const tokenAsAny = token as any;
+
+    const sortedKeys = Object.keys(token).sort();
+    const serialized = sortedKeys
+        .map(key => {
+            const value = tokenAsAny[key];
+            if (value !== undefined && value !== null) {
+                return `${key}:${JSON.stringify(value)}`;
+            }
+            return '';
+        })
+        .filter(part => part.length > 0) // Remove empty strings resulting from undefined or null values
+        .join('|');
+
+    return serialized;
+};
+
+export const djb2Hash = (token: IToken): string => {
+    const ser = serialize(token);
     let hash = 5381;
-    for (let i = 0; i < str.length; i++) {
-        hash = (hash * 33) ^ str.charCodeAt(i);
+    for (let i = 0; i < ser.length; i++) {
+        hash = (hash * 33) ^ ser.charCodeAt(i);
     }
     return (hash >>> 0).toString(16);
-}
+};
 
 export const ExtractedTokenCacheSchema = z.record(VerifiedTokenSchema)
 export type ExtractedTokenCache = z.infer<typeof ExtractedTokenCacheSchema>
@@ -32,7 +53,7 @@ export const extractTokens = (
 
     const addTokenRecords = (tokens: IToken[]) => {
         for (const token of tokens) {
-            const tokenHash = djb2Hash(JSON.stringify(token));
+            const tokenHash = djb2Hash(token);
             tokenRecords[tokenHash] = token
         }
     }
@@ -62,12 +83,14 @@ export const prepareRewards = (rewards: ContestSubmitterRewards | ContestVoterRe
         const { rank, ...tokenKeys } = payout;
         for (const [tokenType, value] of Object.entries(tokenKeys)) {
             const token = tokenDefs[tokenType as keyof typeof tokenDefs];
-            const tokenLink = insertedTokenCache[djb2Hash(JSON.stringify(token))].dbTokenId;
-            output.push({
-                rank,
-                tokenLink,
-                value
-            })
+            if (token) {
+                const tokenLink = insertedTokenCache[djb2Hash(token)].dbTokenId;
+                output.push({
+                    rank,
+                    tokenLink,
+                    value
+                })
+            }
         }
     }
     return output;
@@ -83,7 +106,7 @@ export const prepareRestrictions = (restrictions: ContestSubmitterRestrictions, 
     const output: PreparedRestrictions = [];
     for (const restriction of restrictions) {
         const { token, threshold } = restriction;
-        const tokenLink = insertedTokenCache[djb2Hash(JSON.stringify(token))].dbTokenId;
+        const tokenLink = insertedTokenCache[djb2Hash(token)].dbTokenId;
         output.push({
             tokenLink,
             threshold
@@ -103,7 +126,7 @@ export const prepareVotingPolicy = (policy: ContestVotingPolicy, insertedTokenCa
     const output: PreparedVotingPolicy = [];
 
     for (const { token, ...rest } of policy) {
-        const tokenLink = insertedTokenCache[djb2Hash(JSON.stringify(token))].dbTokenId;
+        const tokenLink = insertedTokenCache[djb2Hash(token)].dbTokenId;
         output.push({
             tokenLink,
             ...rest
