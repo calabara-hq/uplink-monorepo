@@ -18,7 +18,7 @@ const formRpcUrl = (chainId: number, providerKey: string) => {
         case 1:
             return `https://eth-mainnet.alchemyapi.io/v2/${providerKey}`;
         case 8453:
-            return 'https://mainnet.base.org/'
+            return `https://base-mainnet.g.alchemy.com/v2/${providerKey}`
         default: return `https://eth-mainnet.alchemyapi.io/v2/${providerKey}`;
     }
 
