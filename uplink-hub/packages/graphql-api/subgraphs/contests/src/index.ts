@@ -7,13 +7,16 @@ import cookie from 'cookie';
 import dotenv from 'dotenv';
 import resolvers from "./resolvers/index.js";
 
-import { xor_compare, Context } from 'lib';
+import { xor_compare, Context, schema, INativeToken, TokenSchema, IToken } from 'lib';
 import { shield } from "graphql-shield";
 import { GraphQLError } from "graphql";
 import Redis from 'ioredis';
 import { createRateLimitRule, RedisStore } from "graphql-rate-limit";
 import { applyMiddleware } from "graphql-middleware";
 import { z } from "zod";
+import { db, sqlOps } from "./utils/database.js";
+import { djb2Hash } from "./utils/prepare.js";
+import { dbNewTokenType } from "lib/dist/drizzle/schema.js";
 // Initial configurations
 dotenv.config();
 
@@ -65,5 +68,55 @@ const { url } = await startStandaloneServer(server, {
     };
   }
 });
+
+let shouldRun = 1;
+
+const onStartUp = async () => {
+  if (!shouldRun) return;
+
+  const tokenData = await db.query.tokens.findMany();
+  const parsedArr: Array<{ databaseId: number, tokenHash: string, token: IToken }> = tokenData.map((token: schema.dbTokenType) => {
+    const tokenSchema = TokenSchema.parse(token);
+    const tokenHash = djb2Hash(tokenSchema);
+    return {
+      databaseId: token.id,
+      tokenHash: tokenHash,
+      token: {
+        ...tokenSchema,
+      }
+    }
+  });
+
+  for (const element of parsedArr) {
+    console.log(element)
+    const { databaseId, token, tokenHash } = element;
+
+    const newTokenEntry: dbNewTokenType = {
+      tokenHash,
+      ...token
+    }
+    //console.log(newTokenEntry)
+
+    await db.update(schema.tokens).set({
+      tokenHash: newTokenEntry.tokenHash,
+      type: newTokenEntry.type,
+      symbol: newTokenEntry.symbol,
+      decimals: newTokenEntry.decimals,
+      address: newTokenEntry.address,
+      tokenId: newTokenEntry.tokenId,
+      chainId: newTokenEntry.chainId,
+    }).where(sqlOps.eq(schema.tokens.id, databaseId))
+    console.log('updated token', databaseId, 'to have new hash', tokenHash)
+
+
+  }
+
+
+  shouldRun = 0;
+}
+
+
+//onStartUp();
+
 
 console.log(`🚀  Server ready at: ${url}`);

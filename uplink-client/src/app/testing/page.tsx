@@ -32,7 +32,7 @@ const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, cu
             <label className="label">
                 <span className="label-text">{label}</span>
             </label>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 p-2 rounded-xl bg-base-200">
                 <div className="btn-group">
                     {options.map((option, idx) => (
                         <input
@@ -121,7 +121,14 @@ const BasicInput = ({ value, label, placeholder, onChange, error }) => {
     )
 }
 
-
+const SectionWrapper = ({ title, children }: { title: string; children: React.ReactNode }) => {
+    return (
+        <div className="flex flex-col">
+            <h2 className="text-2xl font-bold p-1">{title}</h2>
+            <div className="flex flex-col gap-4 border-border border max-w-[400px] rounded-xl p-2 bg-base">{children}</div>
+        </div>
+    )
+}
 
 const ZoraForm = () => {
     const { state, setField, validate } = useCreateZoraEdition();
@@ -137,61 +144,67 @@ const ZoraForm = () => {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2 border-border border max-w-[300px]">
+            <SectionWrapper title="Token Details">
                 <BasicInput value={state.name} label={"Name"} placeholder={"An amazing new creation"} onChange={(e) => setField("name", e.target.value)} error={state.errors?.name?._errors} />
                 <BasicInput value={state.symbol} label={"Symbol"} placeholder={"$TEST"} onChange={(e) => setField("symbol", e.target.value)} error={state.errors?.symbol?._errors} />
                 <TextArea value={state.description} label={"Description"} placeholder={"blah blah blah"} onChange={(e) => setField("description", e.target.value)} error={state.errors?.description?._errors} />
-            </div>
-            <OptionOrCustom
-                value={state.editionSize}
-                label={"Edition Size"}
-                options={[{ value: uint64MaxSafe.toString(), label: "open" }]}
-                onOptionSelect={(option: Option) => setField("editionSize", option.value)}
-                customLabel={"Fixed"}
-                customChild={
-                    <BasicInput
-                        value={state.editionSize === uint64MaxSafe.toString() ? "100" : state.editionSize}
-                        label={"Fixed Supply"}
-                        placeholder={"100"}
-                        onChange={(e) => setField("editionSize", e.target.value)}
-                        error={state.errors?.editionSize?._errors} />
-                } />
-            <BasicInput value={state.royaltyBPS} label={"Royalty"} placeholder={"1000"} onChange={(e) => setField("royaltyBPS", e.target.value)} error={state.errors?.royaltyBPS?._errors} />
-            <BasicInput value={state.salesConfig.publicSalePrice} label={"Mint Price"} placeholder={"100000000000000000"} onChange={(e) => setField("salesConfig.publicSalePrice", e.target.value)} error={state.errors?.salesConfig?.publicSalePrice?._errors} />
-            <OptionOrCustom
-                value={state.salesConfig.publicSaleStart}
-                label={"Mint Start"}
-                options={[{ value: "now", label: "Now" }]}
-                onOptionSelect={(option: Option) => setField("salesConfig.publicSaleStart", option.value)}
-                customLabel={"Later"}
-                customChild={
-                    <DateTimeSelector
-                        isoString={state.salesConfig.publicSaleStart || "now"}
-                        label={"Start"}
-                        callback={(value) => setField("salesConfig.publicSaleStart", value)}
-                        error={state.errors?.salesConfig?.publicSaleStart?._errors} />
-                } />
+            </SectionWrapper>
+            <SectionWrapper title="Mint Details">
 
-            <OptionOrCustom
-                value={state.salesConfig.publicSaleEnd}
-                label={"Mint End"}
-                options={[{ value: "forever", label: "Forever" }, { value: "1 week", label: "1 week" }, { value: "contest end", label: "Contest End" }]}
-                onOptionSelect={(option: Option) => setField("salesConfig.publicSaleEnd", option.value)}
-                customLabel={"Later"}
-                customChild={
-                    <div>
+                <OptionOrCustom
+                    value={state.editionSize}
+                    label={"Edition Size"}
+                    options={[{ value: uint64MaxSafe.toString(), label: "open" }]}
+                    onOptionSelect={(option: Option) => setField("editionSize", option.value)}
+                    customLabel={"Fixed"}
+                    customChild={
+                        <BasicInput
+                            value={state.editionSize === uint64MaxSafe.toString() ? "100" : state.editionSize}
+                            label={"Fixed Supply"}
+                            placeholder={"100"}
+                            onChange={(e) => setField("editionSize", e.target.value)}
+                            error={state.errors?.editionSize?._errors} />
+                    } />
+                <BasicInput value={state.royaltyBPS} label={"Royalty"} placeholder={"1000"} onChange={(e) => setField("royaltyBPS", e.target.value)} error={state.errors?.royaltyBPS?._errors} />
+                <BasicInput value={state.salesConfig.publicSalePrice} label={"Mint Price"} placeholder={"100000000000000000"} onChange={(e) => setField("salesConfig.publicSalePrice", e.target.value)} error={state.errors?.salesConfig?.publicSalePrice?._errors} />
+            </SectionWrapper>
+            <SectionWrapper title="Mint Timing">
+
+                <OptionOrCustom
+                    value={state.salesConfig.publicSaleStart}
+                    label={"Mint Start"}
+                    options={[{ value: "now", label: "Now" }]}
+                    onOptionSelect={(option: Option) => setField("salesConfig.publicSaleStart", option.value)}
+                    customLabel={"Later"}
+                    customChild={
                         <DateTimeSelector
-                            isoString={"now"}
-                            label={"End"}
-                            callback={(value) => setField("salesConfig.publicSaleEnd", value)}
-                            error={state.errors?.salesConfig?.publicSaleEnd?._errors} />
-                        {state.errors?.salesConfig?._errors && (
-                            <label className="label">
-                                <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{state.errors?.salesConfig?._errors.join(",")}</span>
-                            </label>
-                        )}
-                    </div>
-                } />
+                            isoString={state.salesConfig.publicSaleStart || "now"}
+                            label={"Start"}
+                            callback={(value) => setField("salesConfig.publicSaleStart", value)}
+                            error={state.errors?.salesConfig?.publicSaleStart?._errors} />
+                    } />
+
+                <OptionOrCustom
+                    value={state.salesConfig.publicSaleEnd}
+                    label={"Mint Duration"}
+                    options={[{ value: "forever", label: "Forever" }, { value: "1 week", label: "1 week" }, { value: "contest end", label: "Contest End" }]}
+                    onOptionSelect={(option: Option) => setField("salesConfig.publicSaleEnd", option.value)}
+                    customLabel={"Later"}
+                    customChild={
+                        <div>
+                            <DateTimeSelector
+                                isoString={"now"}
+                                label={"End"}
+                                callback={(value) => setField("salesConfig.publicSaleEnd", value)}
+                                error={state.errors?.salesConfig?.publicSaleEnd?._errors} />
+                            {state.errors?.salesConfig?._errors && (
+                                <label className="label">
+                                    <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{state.errors?.salesConfig?._errors.join(",")}</span>
+                                </label>
+                            )}
+                        </div>
+                    } />
+            </SectionWrapper>
             <button className="btn normal-case" onClick={handleSubmit}>Submit</button>
         </div>
     )
