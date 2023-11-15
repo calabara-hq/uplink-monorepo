@@ -16,6 +16,7 @@ import {
   HiXMark,
   HiOutlineLightBulb,
   HiPhoto,
+  HiSparkles,
 } from "react-icons/hi2";
 import { ModalActions } from "@/ui/Modal/Modal";
 import { useContestInteractionState } from "@/providers/ContestInteractionProvider";
@@ -54,6 +55,7 @@ async function postTwitterSubmission(
       mutation Mutation($contestId: ID!, $submission: TwitterSubmissionPayload!) {
         createTwitterSubmission(contestId: $contestId, submission: $submission) {
           success
+          submissionId
           userSubmissionParams {
               maxSubPower
               remainingSubPower
@@ -431,6 +433,12 @@ const PreviewModal = ({
     }
   };
 
+  const submissionType = thread[0].isVideo
+    ? "video"
+    : thread[0].primaryAssetBlob
+      ? "image"
+      : "text"
+
   if (isModalOpen && !data) {
     return (
       <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
@@ -497,20 +505,17 @@ const PreviewModal = ({
                   totalVotes: null,
                   rank: null,
                   type: "twitter",
+                  nftDrop: null,
                   data: {
-                    type: thread[0].isVideo
-                      ? "video"
-                      : thread[0].primaryAssetBlob
-                      ? "image"
-                      : "text",
+                    type: submissionType,
                     title: title,
                     thread: [
                       {
                         text: thread[0].text,
                         previewAsset: thread[0].isVideo
                           ? thread[0].videoThumbnailOptions[
-                              thread[0].videoThumbnailBlobIndex
-                            ]
+                          thread[0].videoThumbnailBlobIndex
+                          ]
                           : thread[0].primaryAssetBlob,
                         videoAsset: thread[0].isVideo
                           ? thread[0].primaryAssetBlob
@@ -547,13 +552,26 @@ const PreviewModal = ({
           <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 m-auto rounded-xl">
             <HiBadgeCheck className="w-32 h-32 text-success" />
             <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
-            <Link
-              href={`/${spaceName}/contest/${contestId}`}
-              draggable={false}
-              className="btn btn-ghost text-t2 normal-case"
-            >
-              Go to contest
-            </Link>
+            <div className="flex gap-4 items-center">
+              <Link
+                href={`/${spaceName}/contest/${contestId}`}
+                draggable={false}
+                className="btn btn-ghost text-t2 normal-case"
+              >
+                Go to contest
+              </Link>
+              {submissionType !== 'text' && <Link
+                href={`/${spaceName}/contest/${contestId}/submission/${data.submissionId}/create-drop`}
+                draggable={false}
+                className="btn btn-primary normal-case"
+              >
+                <div className="flex gap-2 items-center">
+                  <p>Create Edition</p>
+                  <HiSparkles className="w-5 h-5" />
+                </div>
+              </Link>
+              }
+            </div>
           </div>
         </div>
       </div>

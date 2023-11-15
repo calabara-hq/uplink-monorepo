@@ -207,7 +207,6 @@ const detectTokenConflict = (contestData: ContestBuilderProps) => {
 
 const createSpaceTokens = (spaceTokens: IToken[], chainId: number) => {
   const chain_specific = spaceTokens.filter(token => token.chainId === chainId);
-
   const withETH = chain_specific.some(
     (token) => token.type === "ETH" && token.symbol === "ETH"
   )
@@ -347,6 +346,7 @@ const ContestForm = ({
     //5. if server returns error, render error screen
 
     const { errors, isError, data } = validateContestParams(contestState);
+
     setTotalState({ ...data, errors });
     if (isError) return;
     try {

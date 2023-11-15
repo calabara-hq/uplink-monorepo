@@ -1,14 +1,18 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import CardSubmission from "./CardSubmission";
 import { HiCheckBadge } from "react-icons/hi2";
 import { useContestState } from "@/providers/ContestStateProvider";
-import { Decimal } from "decimal.js";
 import { FaShare } from "react-icons/fa6";
 import { BiLayerPlus } from "react-icons/bi";
-import formatDecimal from "@/lib/formatDecimal";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
+import SubmissionModal, { ModalAddToCart } from "./SubmissionModal";
+import ExpandedSubmission from "./ExpandedSubmission";
+import { Submission } from "@/types/submission";
+import MintEdition from "../Zora/MintEdition";
+import Swiper from "../Swiper/Swiper";
+import SwiperSlide from "../Swiper/SwiperSlide";
 
 export const AddToCartButton = ({ submission, voteActions }) => {
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
@@ -53,11 +57,11 @@ export const AddToCartButton = ({ submission, voteActions }) => {
     );
 };
 
-const SubmissionFooter = ({ submission, sharePath }) => {
-  const totalVotes = new Decimal(submission.totalVotes ?? "0");
+const SubmissionFooter = ({ submission, openMintModal, sharePath }: { submission: Submission, openMintModal: (submission: Submission) => void, sharePath: string }) => {
   const voteActions = useVoteActionContext();
   const { contestState } = useContestState();
   const [shareText, setShareText] = useState("Share");
+
   const handleShare = (event) => {
     event.stopPropagation();
     event.preventDefault();
@@ -68,25 +72,34 @@ const SubmissionFooter = ({ submission, sharePath }) => {
     }, 2000);
   };
 
+  const handleMint = (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    openMintModal(submission);
+  }
+
+
   return (
     <div className="flex flex-col w-full">
       <div className="p-2 w-full" />
       <div className="grid grid-cols-3 w-full items-center">
-        <span className="tooltip tooltip-top mr-auto" data-tip={shareText}>
-          <button
-            className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-primary hover:bg-opacity-30 hover:text-primary"
-            onClick={(e) => handleShare(e)}
-          >
-            <FaShare className="h-6 w-6 " />
-          </button>
-        </span>
-        {totalVotes.greaterThan(0) ? (
-          <span className="text-center text-t2 text-sm font-medium">
-            {formatDecimal(totalVotes.toString()).short} votes
+        {sharePath ? (
+          <span className="tooltip tooltip-top mr-auto" data-tip={shareText}>
+            <button
+              className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-primary hover:bg-opacity-30 hover:text-primary"
+              onClick={(e) => handleShare(e)}
+            >
+              <FaShare className="h-6 w-6 " />
+            </button>
           </span>
-        ) : (
-          <span />
-        )}
+        ) : (<span />)}
+        {submission.nftDrop ? (
+          <button onClick={handleMint} className="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
+          hover:rounded-xl rounded-3xl transition-all duration-300">
+            Mint
+          </button>
+        ) : (<span />)
+        }
         {contestState === "voting" && (
           <AddToCartButton submission={submission} voteActions={voteActions} />
         )}
@@ -126,6 +139,110 @@ export const SubmissionDisplaySkeleton = () => {
   );
 };
 
+
+export const RenderPopularSubmissions = ({ submissions }) => {
+  const [isExpandModalOpen, setIsExpandModalOpen] = useState(false);
+  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [submission, setSubmission] = useState<Submission | null>(null);
+
+  const openMintModal = (submission: Submission) => {
+    setIsMintModalOpen(true)
+    setSubmission(submission)
+  }
+  const handleMint = (event, submission) => {
+    event.stopPropagation();
+    event.preventDefault();
+    openMintModal(submission);
+  }
+
+  const openExpandModal = (submission: Submission) => {
+    setIsExpandModalOpen(true)
+    setSubmission(submission)
+  }
+
+  const handleClose = () => {
+    setIsExpandModalOpen(false)
+    setIsMintModalOpen(false)
+    setSubmission(null);
+  }
+
+  return (
+    <div className="w-full">
+      <Swiper
+        spaceBetween={16}
+        slidesPerView={3.2} // adjusted for peek
+        slidesPerGroup={3}
+        breakpoints={{
+          320: {
+            slidesPerView: 1.2, // adjusted for peek
+            slidesPerGroup: 1,
+            spaceBetween: 10,
+          },
+          500: {
+            slidesPerView: 2.2, // adjusted for peek
+            slidesPerGroup: 2,
+            spaceBetween: 10,
+          },
+          850: {
+            slidesPerView: 3.2, // adjusted for peek
+            slidesPerGroup: 3,
+            spaceBetween: 16,
+          },
+          1200: {
+            slidesPerView: 4.2, // adjusted for peek
+            slidesPerGroup: 4,
+            spaceBetween: 16,
+          },
+        }}
+      >
+        {submissions.map((submission: Submission, index: number) => (
+          <SwiperSlide key={index}>
+            <div className="w-full h-full animate-scrollInX">
+              <CardSubmission
+                key={index}
+                interactive={true}
+                submission={submission}
+                handleCardClick={(submission) => openExpandModal(submission)}
+                footerChildren={
+                  <div className="flex flex-col w-full">
+                    <div className="p-2 w-full" />
+                    <div className="grid grid-cols-3 w-full items-center">
+                      <span />
+                      {submission.nftDrop ? (
+                        <button onClick={(event) => handleMint(event, submission)} className="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
+                      hover:rounded-xl rounded-3xl transition-all duration-300">
+                          Mint
+                        </button>
+                      ) : (<span />)
+                      }
+                    </div>
+                  </div>
+                }
+              />
+            </div>
+          </SwiperSlide>
+        ))}
+        <SubmissionModal isModalOpen={isExpandModalOpen || isMintModalOpen} mode={isExpandModalOpen ? "expand" : "mint"} handleClose={handleClose} >
+          {isExpandModalOpen && submission && (
+            <div className="flex w-full gap-1 lg:gap-4 p-0">
+              <div className="flex flex-col jusitfy-start w-full h-full ">
+                <ExpandedSubmission
+                  submission={submission}
+                />
+              </div>
+            </div>
+          )}
+
+          {isMintModalOpen && submission && (
+            <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} />
+          )}
+        </SubmissionModal>
+      </Swiper>
+    </div>
+  )
+}
+
+
 const SubmissionDisplay = ({
   contestId,
   spaceName,
@@ -134,30 +251,69 @@ const SubmissionDisplay = ({
   spaceName: string;
 }) => {
   const { liveSubmissions: submissions } = useLiveSubmissions(contestId);
+  const [isExpandModalOpen, setIsExpandModalOpen] = useState(false);
+  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [submission, setSubmission] = useState<Submission | null>(null);
+
+  const openMintModal = (submission: Submission) => {
+    setIsMintModalOpen(true)
+    setSubmission(submission)
+  }
+  const openExpandModal = (submission: Submission) => {
+    setIsExpandModalOpen(true)
+    setSubmission(submission)
+  }
+
+  const handleClose = () => {
+    setIsExpandModalOpen(false)
+    setIsMintModalOpen(false)
+    setSubmission(null);
+  }
+
   return (
-    <>
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex w-full justify-evenly items-center">
-          <div className="w-10/12 sm:w-full m-auto grid gap-4 submission-columns auto-rows-fr">
-            {submissions.map((submission, idx) => {
-              return (
-                <CardSubmission
-                  key={idx}
-                  interactive={true}
-                  submission={submission}
-                  footerChildren={
-                    <SubmissionFooter
-                      sharePath={`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/contest/${contestId}/submission/${submission.id}`}
-                      submission={submission}
-                    />
-                  }
-                />
-              );
-            })}
-          </div>
+    <div className="flex flex-col gap-4 w-full">
+      <div className="flex w-full justify-evenly items-center">
+        <div className="w-10/12 sm:w-full m-auto grid gap-4 submission-columns auto-rows-fr">
+          {submissions.map((submission, idx) => {
+            return (
+              <CardSubmission
+                key={idx}
+                interactive={true}
+                submission={submission}
+                handleCardClick={(submission) => openExpandModal(submission)}
+                footerChildren={
+                  <SubmissionFooter
+                    sharePath={`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/contest/${contestId}/submission/${submission.id}`}
+                    submission={submission}
+                    openMintModal={(submission) => openMintModal(submission)}
+                  />
+                }
+              />
+            );
+          })}
         </div>
       </div>
-    </>
+      <SubmissionModal isModalOpen={isExpandModalOpen || isMintModalOpen} mode={isExpandModalOpen ? "expand" : "mint"} handleClose={handleClose} >
+        {isExpandModalOpen && submission && (
+          <div className="flex w-full gap-1 lg:gap-4 p-0">
+            <div className="flex flex-col jusitfy-start w-full h-full ">
+              <ExpandedSubmission
+                submission={submission}
+                headerChildren={
+                  <div className="flex p-1 ml-auto items-center justify-center">
+                    <ModalAddToCart submission={submission} />
+                  </div>
+                }
+              />
+            </div>
+          </div>
+        )}
+
+        {isMintModalOpen && submission && (
+          <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} />
+        )}
+      </SubmissionModal>
+    </div >
   );
 };
 

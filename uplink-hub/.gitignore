@@ -12,4 +12,5 @@ migrations/
 node_modules/
 dist/
 coverage
+drizzle.config.ts
 

@@ -194,6 +194,20 @@ export const users = mysqlTable('users', {
     userAddressIndex: uniqueIndex("user_address_idx").on(user.address)
 }));
 
+export const userDrops = mysqlTable('userDrops', {
+    id: serial('id').primaryKey(),
+    userId: int('userId').notNull(),
+    created: varchar('created', { length: 255 }).notNull(),
+    contestId: int('contestId').notNull(),
+    submissionId: int('submissionId').notNull(),
+    chainId: int('chainId').notNull(),
+    contractAddress: varchar('contractAddress', { length: 255 }).notNull(),
+    dropConfig: json('dropConfig').notNull(),
+}, (userDrop) => ({
+    userDropUserIdIndex: index("userDrop_user_id_idx").on(userDrop.userId),
+    userDropUniqueIndex: uniqueIndex("userDrop_unique_idx").on(userDrop.userId, userDrop.contestId, userDrop.submissionId),
+}));
+
 
 export const spacesRelations = relations(spaces, ({ many }) => ({
     admins: many(admins),
@@ -317,6 +331,10 @@ export const submissionsRelations = relations(submissions, ({ one, many }) => ({
         fields: [submissions.contestId],
         references: [contests.id],
     }),
+    nftDrop: one(userDrops, {
+        fields: [submissions.id],
+        references: [userDrops.submissionId],
+    }),
     votes: many(votes),
 }));
 
@@ -342,6 +360,7 @@ export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
         references: [users.id],
     })
 }));
+
 
 
 export type dbSpaceType = InferModel<typeof spaces> & {
@@ -409,8 +428,11 @@ export type dbArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy>
     token: dbTokenType,
 }
 
+export type dbUserDropType = InferModel<typeof userDrops>
+
 export type dbSubmissionType = InferModel<typeof submissions> & {
     contest: dbContestType,
+    nftDrop: dbUserDropType,
     votes: dbVoteType[],
 }
 
@@ -441,3 +463,4 @@ export type dbNewSubmissionType = InferModel<typeof submissions, 'insert'>
 export type dbNewVoteType = InferModel<typeof votes, 'insert'>
 export type dbNewTweetQueueType = InferModel<typeof tweetQueue, 'insert'>
 export type dbNewUserType = InferModel<typeof users, 'insert'>
+export type dbNewUserDropType = InferModel<typeof userDrops, 'insert'>

@@ -18,6 +18,11 @@ const fetchPopularSubmissions = async (): Promise<Array<Submission>> => {
             type
             url
             version
+            nftDrop {
+              chainId
+              contractAddress
+              dropConfig
+            }
           }
         }`,
     }),

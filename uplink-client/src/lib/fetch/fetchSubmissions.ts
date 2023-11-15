@@ -23,6 +23,11 @@ const fetchSubmissions = async (contestId: string): Promise<Array<Submission>> =
                   type
                   url
                   version
+                  nftDrop {
+                    chainId
+                    contractAddress
+                    dropConfig
+                  }
               }
           }
       }`,

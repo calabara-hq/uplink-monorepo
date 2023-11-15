@@ -4,7 +4,7 @@ import type { Submission } from "@/types/submission";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { isMobile } from "@/lib/isMobile";
 import dynamic from "next/dynamic";
 import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
@@ -14,6 +14,9 @@ import { ParseThread } from "@/lib/threadParser";
 import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
 import { ModalAddToCart } from "./SubmissionModal";
 import ExpandedSubmission from "./ExpandedSubmission";
+import { Decimal } from "decimal.js";
+import formatDecimal from "@/lib/formatDecimal";
+
 const SubmissionModal = dynamic(() => import("./SubmissionModal"), {
   ssr: false,
 });
@@ -22,6 +25,8 @@ const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
 });
 
 const SubmissionBody = ({ submission }: { submission: Submission }) => {
+  const totalVotes = new Decimal(submission.totalVotes ?? "0");
+
   if (submission.data.type !== "text")
     return (
       <div className="relative flex flex-col gap-2 rounded-b-lg w-full p-2 ">
@@ -31,6 +36,13 @@ const SubmissionBody = ({ submission }: { submission: Submission }) => {
           <h3 className="break-all italic text-sm">
             <AddressOrEns address={submission.author} />
           </h3>
+          {totalVotes.greaterThan(0) ? (
+            <span className="ml-auto text-t2 text-sm font-medium">
+              {formatDecimal(totalVotes.toString()).short} votes
+            </span>
+          ) : (
+            <span />
+          )}
         </div>
       </div>
     );
@@ -141,10 +153,12 @@ const CardSubmission = ({
   submission,
   footerChildren,
   interactive = false,
+  handleCardClick,
 }: {
   submission: Submission;
   footerChildren?: React.ReactNode;
   interactive?: boolean;
+  handleCardClick: (submission: Submission, mode: "expand" | "mint") => void;
 }) => {
   const isMobileDevice = isMobile();
 
@@ -168,7 +182,7 @@ const CardSubmission = ({
       ref={ref}
       onMouseEnter={() => !isMobileDevice && setIsActive(true)}
       onMouseLeave={() => !isMobileDevice && setIsActive(false)}
-      onClick={() => setIsModalOpen(true)}
+      onClick={() => handleCardClick(submission, "expand")}
     >
       {submission.rank && (
         <TbCrown
@@ -188,7 +202,7 @@ const CardSubmission = ({
         <RenderTextSubmission submission={submission} />
       )}
       {footerChildren}
-      <SubmissionModal
+      {/* <SubmissionModal
         isModalOpen={isModalOpen}
         handleClose={() => setIsModalOpen(false)}
       >
@@ -204,7 +218,7 @@ const CardSubmission = ({
             />
           </div>
         </div>
-      </SubmissionModal>
+      </SubmissionModal> */}
     </div>
   );
 };

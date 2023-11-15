@@ -43,10 +43,25 @@ export type Deadlines = {
   voteTime: Scalars['ISODateString']['output'];
 };
 
+export type DropConfig = {
+  animationURI: Scalars['String']['input'];
+  defaultAdmin: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  editionSize: Scalars['String']['input'];
+  fundsRecipient: Scalars['String']['input'];
+  imageURI: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  referrer: Scalars['String']['input'];
+  royaltyBPS: Scalars['Int']['input'];
+  saleConfig: SaleConfig;
+  symbol: Scalars['String']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createSubmission: CreateSubmissionResponse;
   createTwitterSubmission: CreateSubmissionResponse;
+  createUserDrop: CreateUserDropResponse;
 };
 
 
@@ -61,12 +76,29 @@ export type MutationCreateTwitterSubmissionArgs = {
   submission: TwitterSubmissionPayload;
 };
 
+
+export type MutationCreateUserDropArgs = {
+  chainId: Scalars['Int']['input'];
+  contestId: Scalars['ID']['input'];
+  contractAddress: Scalars['String']['input'];
+  dropConfig: DropConfig;
+  submissionId: Scalars['ID']['input'];
+};
+
+export type NftDrop = {
+  __typename?: 'NftDrop';
+  chainId: Scalars['Int']['output'];
+  contractAddress: Scalars['String']['output'];
+  dropConfig: Scalars['String']['output'];
+};
+
 export type PopularSubmission = {
   __typename?: 'PopularSubmission';
   author: Scalars['String']['output'];
   contestId: Scalars['ID']['output'];
   created: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  nftDrop?: Maybe<NftDrop>;
   type: Scalars['String']['output'];
   url: Scalars['String']['output'];
   version: Scalars['String']['output'];
@@ -95,6 +127,16 @@ export type RestrictionResult = {
   result: Scalars['Boolean']['output'];
 };
 
+export type SaleConfig = {
+  maxSalePurchasePerAddress: Scalars['Int']['input'];
+  presaleEnd: Scalars['String']['input'];
+  presaleMerkleRoot: Scalars['String']['input'];
+  presaleStart: Scalars['String']['input'];
+  publicSaleEnd: Scalars['String']['input'];
+  publicSalePrice: Scalars['String']['input'];
+  publicSaleStart: Scalars['String']['input'];
+};
+
 export type Space = {
   __typename?: 'Space';
   id: Scalars['ID']['output'];
@@ -106,6 +148,7 @@ export type Submission = {
   contestId: Scalars['ID']['output'];
   created: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  nftDrop?: Maybe<NftDrop>;
   rank?: Maybe<Scalars['Int']['output']>;
   totalVotes?: Maybe<Scalars['Decimal']['output']>;
   type: Scalars['String']['output'];
@@ -164,8 +207,14 @@ export type UserSubmissionParams = {
 
 export type CreateSubmissionResponse = {
   __typename?: 'createSubmissionResponse';
+  submissionId?: Maybe<Scalars['ID']['output']>;
   success: Scalars['Boolean']['output'];
   userSubmissionParams: UserSubmissionParams;
+};
+
+export type CreateUserDropResponse = {
+  __typename?: 'createUserDropResponse';
+  success: Scalars['Boolean']['output'];
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -245,14 +294,17 @@ export type ResolversTypes = ResolversObject<{
   Contest: ResolverTypeWrapper<Contest>;
   Deadlines: ResolverTypeWrapper<Deadlines>;
   Decimal: ResolverTypeWrapper<Scalars['Decimal']['output']>;
+  DropConfig: DropConfig;
   EditorData: ResolverTypeWrapper<Scalars['EditorData']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   ISODateString: ResolverTypeWrapper<Scalars['ISODateString']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
+  NftDrop: ResolverTypeWrapper<NftDrop>;
   PopularSubmission: ResolverTypeWrapper<PopularSubmission>;
   Query: ResolverTypeWrapper<{}>;
   RestrictionResult: ResolverTypeWrapper<RestrictionResult>;
+  SaleConfig: SaleConfig;
   Space: ResolverTypeWrapper<Space>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Submission: ResolverTypeWrapper<Submission>;
@@ -265,6 +317,7 @@ export type ResolversTypes = ResolversObject<{
   TwitterSubmissionPayload: TwitterSubmissionPayload;
   UserSubmissionParams: ResolverTypeWrapper<UserSubmissionParams>;
   createSubmissionResponse: ResolverTypeWrapper<CreateSubmissionResponse>;
+  createUserDropResponse: ResolverTypeWrapper<CreateUserDropResponse>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -274,14 +327,17 @@ export type ResolversParentTypes = ResolversObject<{
   Contest: Contest;
   Deadlines: Deadlines;
   Decimal: Scalars['Decimal']['output'];
+  DropConfig: DropConfig;
   EditorData: Scalars['EditorData']['output'];
   ID: Scalars['ID']['output'];
   ISODateString: Scalars['ISODateString']['output'];
   Int: Scalars['Int']['output'];
   Mutation: {};
+  NftDrop: NftDrop;
   PopularSubmission: PopularSubmission;
   Query: {};
   RestrictionResult: RestrictionResult;
+  SaleConfig: SaleConfig;
   Space: Space;
   String: Scalars['String']['output'];
   Submission: Submission;
@@ -294,6 +350,7 @@ export type ResolversParentTypes = ResolversObject<{
   TwitterSubmissionPayload: TwitterSubmissionPayload;
   UserSubmissionParams: UserSubmissionParams;
   createSubmissionResponse: CreateSubmissionResponse;
+  createUserDropResponse: CreateUserDropResponse;
 }>;
 
 export type AdditionalParamsResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdditionalParams'] = ResolversParentTypes['AdditionalParams']> = ResolversObject<{
@@ -334,6 +391,14 @@ export interface IsoDateStringScalarConfig extends GraphQLScalarTypeConfig<Resol
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateSubmissionArgs, 'contestId' | 'submission'>>;
   createTwitterSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateTwitterSubmissionArgs, 'contestId' | 'submission'>>;
+  createUserDrop?: Resolver<ResolversTypes['createUserDropResponse'], ParentType, ContextType, RequireFields<MutationCreateUserDropArgs, 'chainId' | 'contestId' | 'contractAddress' | 'dropConfig' | 'submissionId'>>;
+}>;
+
+export type NftDropResolvers<ContextType = any, ParentType extends ResolversParentTypes['NftDrop'] = ResolversParentTypes['NftDrop']> = ResolversObject<{
+  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  dropConfig?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PopularSubmissionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PopularSubmission'] = ResolversParentTypes['PopularSubmission']> = ResolversObject<{
@@ -341,6 +406,7 @@ export type PopularSubmissionResolvers<ContextType = any, ParentType extends Res
   contestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  nftDrop?: Resolver<Maybe<ResolversTypes['NftDrop']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   version?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -369,6 +435,7 @@ export type SubmissionResolvers<ContextType = any, ParentType extends ResolversP
   contestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  nftDrop?: Resolver<Maybe<ResolversTypes['NftDrop']>, ParentType, ContextType>;
   rank?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalVotes?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -411,8 +478,14 @@ export type UserSubmissionParamsResolvers<ContextType = any, ParentType extends 
 }>;
 
 export type CreateSubmissionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['createSubmissionResponse'] = ResolversParentTypes['createSubmissionResponse']> = ResolversObject<{
+  submissionId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   userSubmissionParams?: Resolver<ResolversTypes['UserSubmissionParams'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type CreateUserDropResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['createUserDropResponse'] = ResolversParentTypes['createUserDropResponse']> = ResolversObject<{
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -424,6 +497,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   EditorData?: GraphQLScalarType;
   ISODateString?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
+  NftDrop?: NftDropResolvers<ContextType>;
   PopularSubmission?: PopularSubmissionResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RestrictionResult?: RestrictionResultResolvers<ContextType>;
@@ -435,5 +509,6 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Submit_TokenRestriction?: Submit_TokenRestrictionResolvers<ContextType>;
   UserSubmissionParams?: UserSubmissionParamsResolvers<ContextType>;
   createSubmissionResponse?: CreateSubmissionResponseResolvers<ContextType>;
+  createUserDropResponse?: CreateUserDropResponseResolvers<ContextType>;
 }>;
 

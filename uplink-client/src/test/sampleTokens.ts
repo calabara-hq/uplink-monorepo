@@ -6,7 +6,7 @@ export const sampleERC1155Token: IERCToken = {
     symbol: "TNS",
     decimals: 0,
     tokenId: 2,
-    chainId: 1,
+    chainId: 1
 }
 
 export const sampleERC20Token: IERCToken = {

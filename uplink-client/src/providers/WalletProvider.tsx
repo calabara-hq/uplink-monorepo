@@ -5,7 +5,7 @@ import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { SessionProvider } from "./SessionProvider";
 import { AuthenticationProvider } from "./AuthenticationProvider";
 import { Session } from "./SessionProvider";
-import Noggles from "@/ui/Noggles/Noggles";
+
 export interface IWalletProviderProps {
   children: React.ReactNode;
   session: Session | null;
@@ -18,13 +18,14 @@ import {
   connectorsForWallets,
   getDefaultWallets,
 } from "@rainbow-me/rainbowkit";
-import { configureChains, createConfig, mainnet } from "wagmi";
+import { configureChains, createConfig } from "wagmi";
+import { mainnet, base, baseGoerli } from "wagmi/chains"
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { useEffect, useState } from "react";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [mainnet],
+  [mainnet, base, baseGoerli],
   [
     alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY }),
     publicProvider(),
@@ -55,7 +56,7 @@ export default function WalletProvider({
   session,
   refetchInterval,
 }: any) {
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
   return (
     <WagmiConfig config={wagmiConfig}>
       <SessionProvider

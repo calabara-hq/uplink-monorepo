@@ -13,6 +13,11 @@ export type BaseSubmission = {
     author: string | null;
     rank: string | null;
     totalVotes: string | null;
+    nftDrop: {
+        chainId: string;
+        contractAddress: string;
+        dropConfig: string;
+    } | null;
 };
 
 export type TwitterSubmission = BaseSubmission & {
@@ -49,4 +54,8 @@ export const isStandardSubmission = (submission: Submission): submission is Stan
 
 export const isTwitterSubmission = (submission: Submission): submission is TwitterSubmission => {
     return submission.type === 'twitter';
+}
+
+export const isNftSubmission = (submission: Submission): boolean => {
+    return submission.nftDrop !== null;
 }

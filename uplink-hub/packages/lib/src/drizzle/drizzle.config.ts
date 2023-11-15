@@ -3,13 +3,15 @@ import dotenv from "dotenv"
 
 dotenv.config();
 
+
+const DATABASE_CONNECTION_STRING=''
+
 export default {
   out: "./migrations",
   schema: "./src/drizzle/schema.ts",
   driver: "mysql2",
   dbCredentials: {
-    //@ts-expect-error
-    connectionString: process.env.DATABASE_CONNECTION_STRING,
+    connectionString: DATABASE_CONNECTION_STRING
   },
   verbose: true,
   strict: true,

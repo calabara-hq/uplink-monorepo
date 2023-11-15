@@ -13,6 +13,7 @@ import {
   HiCheckBadge,
   HiXCircle,
   HiOutlineTrash,
+  HiSparkles,
 } from "react-icons/hi2";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -68,6 +69,7 @@ async function postSubmission(
       mutation Mutation($contestId: ID!, $submission: SubmissionPayload!) {
         createSubmission(contestId: $contestId, submission: $submission) {
           success
+          submissionId
           userSubmissionParams {
               maxSubPower
               remainingSubPower
@@ -515,6 +517,7 @@ const SubmissionPreviewModal = ({
                 totalVotes: null,
                 rank: null,
                 type: "standard",
+                nftDrop: null,
                 data: {
                   type: submissionType,
                   title: submission.title,
@@ -550,13 +553,26 @@ const SubmissionPreviewModal = ({
         <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 m-auto rounded-xl">
           <HiBadgeCheck className="w-32 h-32 text-success" />
           <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
-          <Link
-            href={`/${spaceName}/contest/${contestId}`}
-            draggable={false}
-            className="btn btn-ghost text-t2 normal-case"
-          >
-            Go to contest
-          </Link>
+          <div className="flex gap-4 items-center justify-center">
+            <Link
+              href={`/${spaceName}/contest/${contestId}`}
+              draggable={false}
+              className="btn btn-ghost text-t2 normal-case"
+            >
+              Go to contest
+            </Link>
+            {submissionType !== 'text' && <Link
+              href={`/${spaceName}/contest/${contestId}/submission/${data.submissionId}/create-drop`}
+              draggable={false}
+              className="btn btn-primary normal-case"
+            >
+              <div className="flex gap-2 items-center">
+                <p>Create Edition</p>
+                <HiSparkles className="w-5 h-5" />
+              </div>
+            </Link>
+            }
+          </div>
         </div>
       </Modal>
     );

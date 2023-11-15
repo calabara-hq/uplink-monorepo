@@ -180,6 +180,23 @@ describe('base token utils test suite', () => {
         expect(result.toString()).toEqual('1')
     });
 
+    test('weez erc721 balance check', async () => {
+        const token: IToken = {
+            type: 'ERC721',
+            address: '0xAde73a09Dd3B57d30436C6c4bF309bb455961b1C',
+            symbol: '$WFT',
+            decimals: 0,
+            tokenId: null,
+            chainId: 8453,
+        }
+        const walletAddress = '0x02d1b331C8Ab3dDdC27Ef4EE891F264e5e3a4435'
+        const snapshot = '2023-11-07T21:29:26.591Z';
+        const blockNum = await calculateBlockFromTimestamp(snapshot);
+        const result = await computeUserTokenBalance({ token, blockNum, walletAddress });
+        expect(result.toString()).toEqual('1')
+
+    })
+
     test('erc1155 balance check', async () => {
         const token: IToken = {
             type: 'ERC1155',

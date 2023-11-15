@@ -1,9 +1,10 @@
 import { GraphQLError } from "graphql";
 import { AuthorizationController } from "lib";
 import dotenv from "dotenv";
-import { SubmissionPayload, TwitterSubmissionPayload } from "../__generated__/resolvers-types.js";
+import { DropConfig, SubmissionPayload, TwitterSubmissionPayload } from "../__generated__/resolvers-types.js";
 import { validateStandardSubmissionPayload, validateTwitterSubmissionPayload } from "../utils/validate.js";
 import { createStandardSubmission, createTwitterSubmission } from "../utils/insert.js";
+import createDrop from "../utils/createDrop.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL!);
@@ -23,7 +24,6 @@ const mutations = {
         },
 
         createTwitterSubmission: async (_: any, { contestId, submission }: { contestId: string, submission: TwitterSubmissionPayload }, context: any) => {
-
             const user = await authController.getUser(context);
             if (!user || !user.twitter) throw new GraphQLError('Unauthorized', {
                 extensions: {
@@ -33,6 +33,29 @@ const mutations = {
 
             let validPayload = validateTwitterSubmissionPayload(submission);
             return createTwitterSubmission(user, parseInt(contestId), validPayload);
+        },
+
+        createUserDrop: async (_: any, {
+            submissionId,
+            contestId,
+            contractAddress,
+            chainId,
+            dropConfig
+        }: {
+            submissionId: string,
+            contestId: string,
+            contractAddress: string,
+            chainId: number,
+            dropConfig: DropConfig
+        }, context: any) => {
+            const user = await authController.getUser(context);
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
+            return createDrop(user, submissionId, contestId, contractAddress, chainId, dropConfig)
         }
     },
 };

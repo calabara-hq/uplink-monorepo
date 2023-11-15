@@ -95,7 +95,23 @@ export class TokenContractApi {
         }
 
         return { symbol, decimals };
+    }
 
+    public async tokenGetTotalSupply({ contractAddress }: { contractAddress: string }) {
+        let totalSupply: string = '0';
+        try {
+            totalSupply = await this.web3.readContract({
+                address: contractAddress,
+                abi: ERC721ABI,
+                functionName: 'totalSupply',
+                args: [],
+            }) as string;
+        } catch (err) {
+            console.log(err)
+            console.log('Failed to fetch totalSupply');
+        }
+
+        return totalSupply;
     }
 
     public async isValidERC1155TokenId({ contractAddress, tokenId }: {
