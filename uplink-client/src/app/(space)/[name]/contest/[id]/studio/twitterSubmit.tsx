@@ -566,7 +566,7 @@ const PreviewModal = ({
                 className="btn btn-primary normal-case"
               >
                 <div className="flex gap-2 items-center">
-                  <p>Create Edition</p>
+                  <p>Create Drop</p>
                   <HiSparkles className="w-5 h-5" />
                 </div>
               </Link>
