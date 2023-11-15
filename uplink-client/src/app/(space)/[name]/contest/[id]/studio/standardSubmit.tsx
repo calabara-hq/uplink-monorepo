@@ -553,7 +553,7 @@ const SubmissionPreviewModal = ({
         <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 m-auto rounded-xl">
           <HiBadgeCheck className="w-32 h-32 text-success" />
           <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-4 items-center justify-center">
             <Link
               href={`/${spaceName}/contest/${contestId}`}
               draggable={false}
@@ -561,7 +561,7 @@ const SubmissionPreviewModal = ({
             >
               Go to contest
             </Link>
-            <Link
+            {submissionType !== 'text' && <Link
               href={`/${spaceName}/contest/${contestId}/submission/${data.submissionId}/create-drop`}
               draggable={false}
               className="btn btn-primary normal-case"
@@ -571,6 +571,7 @@ const SubmissionPreviewModal = ({
                 <HiSparkles className="w-5 h-5" />
               </div>
             </Link>
+            }
           </div>
         </div>
       </Modal>

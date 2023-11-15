@@ -433,6 +433,12 @@ const PreviewModal = ({
     }
   };
 
+  const submissionType = thread[0].isVideo
+    ? "video"
+    : thread[0].primaryAssetBlob
+      ? "image"
+      : "text"
+
   if (isModalOpen && !data) {
     return (
       <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
@@ -501,11 +507,7 @@ const PreviewModal = ({
                   type: "twitter",
                   nftDrop: null,
                   data: {
-                    type: thread[0].isVideo
-                      ? "video"
-                      : thread[0].primaryAssetBlob
-                        ? "image"
-                        : "text",
+                    type: submissionType,
                     title: title,
                     thread: [
                       {
@@ -558,16 +560,17 @@ const PreviewModal = ({
               >
                 Go to contest
               </Link>
-              <Link
+              {submissionType !== 'text' && <Link
                 href={`/${spaceName}/contest/${contestId}/submission/${data.submissionId}/create-drop`}
                 draggable={false}
-                className="btn bg-base text-t1 gradient-border"
+                className="btn btn-primary normal-case"
               >
                 <div className="flex gap-2 items-center">
                   <p>Create Edition</p>
                   <HiSparkles className="w-5 h-5" />
                 </div>
               </Link>
+              }
             </div>
           </div>
         </div>
