@@ -139,7 +139,7 @@ const SectionWrapper = ({ title, children }: { title: string; children: React.Re
     return (
         <div className="flex flex-col">
             <h2 className="text-2xl font-bold p-1">{title}</h2>
-            <div className="flex flex-col gap-4 border-border border  rounded-xl p-2 bg-base">{children}</div>
+            <div className="flex flex-col gap-4 border-border border rounded-xl p-2 bg-base">{children}</div>
         </div>
     )
 }
@@ -423,7 +423,7 @@ const CreateEditionButton = ({
 
                     <div className="flex flex-col gap-2 relative">
                         <div className="flex">
-                            <h2 className="text-t1 text-xl font-bold">Create Edition</h2>
+                            <h2 className="text-t1 text-xl font-bold">Create Drop</h2>
                             <button className="btn btn-ghost btn-sm  ml-auto" onClick={() => setIsModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
                         </div>
                         <div className="p-2" />
