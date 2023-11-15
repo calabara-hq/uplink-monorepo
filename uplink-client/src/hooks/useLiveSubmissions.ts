@@ -24,6 +24,11 @@ const fetchSubmissions = async (contestId: string) => {
                   type
                   url
                   version
+                  nftDrop {
+                    chainId
+                    contractAddress
+                    dropConfig
+                  }
               }
           }
       }`,

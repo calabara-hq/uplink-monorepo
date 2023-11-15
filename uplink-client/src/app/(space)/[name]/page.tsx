@@ -14,7 +14,6 @@ import {
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
 import { ActiveContest } from "@/lib/fetch/fetchActiveContests";
-import CreateZoraEdition from "@/ui/Zora/CreateEdition";
 
 const SpaceInfoSekelton = () => {
   return (
@@ -116,7 +115,6 @@ const SpaceInfo = async ({ name }: { name: string }) => {
             <Link href={`/spacebuilder/edit/${name}`} draggable={false}>
               edit
             </Link>
-            <CreateZoraEdition />
           </div>
         </div>
       </div>

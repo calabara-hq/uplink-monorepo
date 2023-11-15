@@ -62,6 +62,7 @@ export default function RootLayout({
             </div>
           </ToastProvider>
         </WalletProvider>
+        <div id="modal-root" />
       </body>
     </html>
   );

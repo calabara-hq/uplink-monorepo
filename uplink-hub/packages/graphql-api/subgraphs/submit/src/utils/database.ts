@@ -13,7 +13,8 @@ const prepared_singleSubmissionById = db.query.submissions.findFirst({
     where: (submission: schema.dbSubmissionType) => sqlOps.eq(submission.id, sqlOps.placeholder('submissionId')),
     with: {
         votes: true,
-        contest: true
+        contest: true,
+        nftDrop: true,
     }
 }).prepare();
 
@@ -23,6 +24,7 @@ const prepared_submissionsByContestId = db.query.submissions.findMany({
     where: (submission: schema.dbSubmissionType) => sqlOps.eq(submission.contestId, sqlOps.placeholder('contestId')),
     with: {
         votes: true,
+        nftDrop: true,
     }
 }).prepare();
 
@@ -56,32 +58,16 @@ export const dbGetRewards = async (contestId: number): Promise<Array<schema.dbRe
 // get the last 3 contests that have ended, get submissions with more than 3 unique votes, and take a random sample of 20
 
 export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissionType>> => {
-    // const data = await db.execute(sqlOps.sql`
-    //     SELECT s.*
-    //     FROM submissions s
-    //     JOIN (
-    //         SELECT id, created, endTime
-    //         FROM contests
-    //         WHERE endTime < NOW()
-    //         ORDER BY created DESC
-    //         LIMIT 3
-    //     ) AS latest_contests ON s.contestId = latest_contests.id
-    //     WHERE EXISTS (
-    //         SELECT 1
-    //         FROM votes v
-    //         WHERE v.submissionId = s.id
-    //         GROUP BY v.submissionId
-    //         HAVING COUNT(DISTINCT v.id) > 3
-    //     )
-    //     ORDER BY RAND()
-    //     LIMIT 20;
-    // `)
-
-
-
 
     const data = await db.execute(sqlOps.sql`
-        SELECT s.*, COALESCE(vote_counts.uniqueVotes, 0) AS uniqueVotes
+        SELECT 
+            s.*,
+            COALESCE(vote_counts.uniqueVotes, 0) AS uniqueVotes,
+            JSON_OBJECT(
+                'chainId', nftDrop.chainId,
+                'contractAddress', nftDrop.contractAddress,
+                'dropConfig', nftDrop.dropConfig
+            ) AS nftDrop
         FROM submissions s
         JOIN (
             SELECT id, created, endTime
@@ -96,8 +82,12 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
             GROUP BY v.submissionId
             HAVING uniqueVotes > 1
         ) AS vote_counts ON s.id = vote_counts.submissionId
+        LEFT JOIN (
+            SELECT ud.submissionId, ud.chainId, ud.contractAddress, ud.dropConfig
+            FROM userDrops ud
+        ) AS nftDrop ON s.id = nftDrop.submissionId
         ORDER BY RAND()
-    `)
+`);
 
     // sample the subs that have more than 3 unique votes
     // if length of 3vote array is < 10, sample the subs that have 2 unique votes

@@ -2,6 +2,8 @@ scalar Decimal
 scalar EditorData
 scalar SubmissionAssetUrl
 scalar ISODateString
+
+
 extend type Contest @key(fields: "id") {
   id: ID!
   deadlines: Deadlines! @external
@@ -29,6 +31,12 @@ type Space @key(fields: "id") {
   id: ID!
 }
 
+type NftDrop {
+  chainId: Int!
+  contractAddress: String!
+  dropConfig: String!
+}
+
 type Submission @key(fields: "id") {
   id: ID!
   contestId: ID!
@@ -39,6 +47,7 @@ type Submission @key(fields: "id") {
   url: String!
   totalVotes: Decimal
   rank: Int
+  nftDrop: NftDrop
 }
 
 type PopularSubmission @key(fields: "id") {
@@ -49,6 +58,7 @@ type PopularSubmission @key(fields: "id") {
   version: String!
   author: String!
   url: String!
+  nftDrop: NftDrop
 }
 
 type Submit_Token {
@@ -91,6 +101,7 @@ type Query {
 
 type createSubmissionResponse {
   success: Boolean!
+  submissionId: ID
   userSubmissionParams: UserSubmissionParams!
 }
 
@@ -114,6 +125,34 @@ input TwitterSubmissionPayload {
   thread: [ThreadPayload!]!
 }
 
+input SaleConfig {
+  publicSalePrice: String!
+  maxSalePurchasePerAddress: Int!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  presaleStart: String!
+  presaleEnd: String!
+  presaleMerkleRoot: String!
+}
+
+input DropConfig {
+  name: String!
+  symbol: String!
+  editionSize: String!
+  royaltyBPS: Int!
+  fundsRecipient: String!
+  defaultAdmin: String!
+  saleConfig: SaleConfig!
+  description: String!
+  animationURI: String!
+  imageURI: String!
+  referrer: String!
+}
+
+type createUserDropResponse {
+  success: Boolean!
+}
+
 type Mutation {
   createSubmission(
     contestId: ID!
@@ -123,6 +162,13 @@ type Mutation {
     contestId: ID!
     submission: TwitterSubmissionPayload!
   ): createSubmissionResponse!
+  createUserDrop(
+    submissionId: ID!
+    contestId: ID!
+    contractAddress: String!
+    chainId: Int!
+    dropConfig: DropConfig!
+  ): createUserDropResponse!
 }
 
 extend schema

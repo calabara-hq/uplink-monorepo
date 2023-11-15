@@ -2,155 +2,6 @@ export const ZoraAbi = [
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "_implementation",
-                "type": "address"
-            },
-            {
-                "internalType": "contract EditionMetadataRenderer",
-                "name": "_editionMetadataRenderer",
-                "type": "address"
-            },
-            {
-                "internalType": "contract DropMetadataRenderer",
-                "name": "_dropMetadataRenderer",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "previousAdmin",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "newAdmin",
-                "type": "address"
-            }
-        ],
-        "name": "AdminChanged",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "beacon",
-                "type": "address"
-            }
-        ],
-        "name": "BeaconUpgraded",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "creator",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "editionContractAddress",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "editionSize",
-                "type": "uint256"
-            }
-        ],
-        "name": "CreatedDrop",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "previousOwner",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "newOwner",
-                "type": "address"
-            }
-        ],
-        "name": "OwnershipTransferred",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "implementation",
-                "type": "address"
-            }
-        ],
-        "name": "Upgraded",
-        "type": "event"
-    },
-    {
-        "inputs": [],
-        "name": "contractName",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            }
-        ],
-        "stateMutability": "pure",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "contractURI",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            }
-        ],
-        "stateMutability": "pure",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "contractVersion",
-        "outputs": [
-            {
-                "internalType": "uint32",
-                "name": "",
-                "type": "uint32"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "string",
                 "name": "name",
                 "type": "string"
@@ -617,230 +468,59 @@ export const ZoraAbi = [
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "dropMetadataRenderer",
-        "outputs": [
-            {
-                "internalType": "contract DropMetadataRenderer",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "editionMetadataRenderer",
-        "outputs": [
-            {
-                "internalType": "contract EditionMetadataRenderer",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "implementation",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "initialize",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "owner",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "proxiableUUID",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "renounceOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
+                "internalType": "address",
+                "name": "recipient",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "quantity",
+                "type": "uint256"
             },
             {
                 "internalType": "string",
-                "name": "symbol",
+                "name": "comment",
                 "type": "string"
             },
             {
                 "internalType": "address",
-                "name": "defaultAdmin",
-                "type": "address"
-            },
-            {
-                "internalType": "uint64",
-                "name": "editionSize",
-                "type": "uint64"
-            },
-            {
-                "internalType": "uint16",
-                "name": "royaltyBPS",
-                "type": "uint16"
-            },
-            {
-                "internalType": "address payable",
-                "name": "fundsRecipient",
-                "type": "address"
-            },
-            {
-                "components": [
-                    {
-                        "internalType": "uint104",
-                        "name": "publicSalePrice",
-                        "type": "uint104"
-                    },
-                    {
-                        "internalType": "uint32",
-                        "name": "maxSalePurchasePerAddress",
-                        "type": "uint32"
-                    },
-                    {
-                        "internalType": "uint64",
-                        "name": "publicSaleStart",
-                        "type": "uint64"
-                    },
-                    {
-                        "internalType": "uint64",
-                        "name": "publicSaleEnd",
-                        "type": "uint64"
-                    },
-                    {
-                        "internalType": "uint64",
-                        "name": "presaleStart",
-                        "type": "uint64"
-                    },
-                    {
-                        "internalType": "uint64",
-                        "name": "presaleEnd",
-                        "type": "uint64"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "presaleMerkleRoot",
-                        "type": "bytes32"
-                    }
-                ],
-                "internalType": "struct IERC721Drop.SalesConfiguration",
-                "name": "saleConfig",
-                "type": "tuple"
-            },
-            {
-                "internalType": "contract IMetadataRenderer",
-                "name": "metadataRenderer",
-                "type": "address"
-            },
-            {
-                "internalType": "bytes",
-                "name": "metadataInitializer",
-                "type": "bytes"
-            },
-            {
-                "internalType": "address",
-                "name": "createReferral",
+                "name": "mintReferral",
                 "type": "address"
             }
         ],
-        "name": "setupDropsContract",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "newOwner",
-                "type": "address"
-            }
-        ],
-        "name": "transferOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "newImplementation",
-                "type": "address"
-            }
-        ],
-        "name": "upgradeTo",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "newImplementation",
-                "type": "address"
-            },
-            {
-                "internalType": "bytes",
-                "name": "data",
-                "type": "bytes"
-            }
-        ],
-        "name": "upgradeToAndCall",
-        "outputs": [],
+        "name": "mintWithRewards",
+        "outputs":
+            [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
         "stateMutability": "payable",
         "type": "function"
     }
 ] as const
 
+const ZORA_NFT_CREATOR_PROXY_MAINNET = '0xf74b146ce44cc162b601dec3be331784db111dc1';
+const ZORA_NFT_CREATOR_PROXY_BASE = '0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c'
+const ZORA_NFT_CREATOR_PROXY_BASE_TESTNET = '0x87cfd516c5ea86e50b950678CA970a8a28de27ac'
 
-export const ZORA_NFT_CREATOR_PROXY = '0xf74b146ce44cc162b601dec3be331784db111dc1';
+export const getContractFromEnv = () => {
+    if (process.env.NODE_ENV === "development") {
+        return {
+            contract: ZORA_NFT_CREATOR_PROXY_BASE_TESTNET,
+            explorer: "https://goerli.basescan.org",
+            chainId: 84531,
+        }
+    }
+    else {
+        return {
+            contract: ZORA_NFT_CREATOR_PROXY_BASE,
+            explorer: "https://basescan.org",
+            chainId: 8453,
+        }
+    }
+}

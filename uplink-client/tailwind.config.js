@@ -70,6 +70,7 @@ module.exports = {
         'springUp': 'springUp 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
         'scrollInX': 'scrollInX 350ms ',
         'fadeIn': 'fadeIn 150ms ease-in-out',
+        'ping': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
       }
     },
     keyframes: ({ theme }) => ({
@@ -106,7 +107,12 @@ module.exports = {
           opacity: '1'
         }
       },
-
+      ping: {
+        "75%, 100%": {
+          transform: "scale(2)",
+          opacity: "0",
+        }
+      },
     })
   },
 

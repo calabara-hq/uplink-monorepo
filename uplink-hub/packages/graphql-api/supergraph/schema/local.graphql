@@ -150,7 +150,14 @@ type createSubmissionResponse
   @join__type(graph: SUBMIT)
 {
   success: Boolean!
+  submissionId: ID
   userSubmissionParams: UserSubmissionParams!
+}
+
+type createUserDropResponse
+  @join__type(graph: SUBMIT)
+{
+  success: Boolean!
 }
 
 type Deadlines
@@ -176,6 +183,22 @@ scalar Decimal
   @join__type(graph: CONTESTS)
   @join__type(graph: SUBMIT)
   @join__type(graph: VOTE)
+
+input DropConfig
+  @join__type(graph: SUBMIT)
+{
+  name: String!
+  symbol: String!
+  editionSize: String!
+  royaltyBPS: Int!
+  fundsRecipient: String!
+  defaultAdmin: String!
+  saleConfig: SaleConfig!
+  description: String!
+  animationURI: String!
+  imageURI: String!
+  referrer: String!
+}
 
 scalar EditorData
   @join__type(graph: CONTESTS)
@@ -272,6 +295,7 @@ type Mutation
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createTwitterSubmission(contestId: ID!, submission: TwitterSubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
+  createUserDrop(submissionId: ID!, contestId: ID!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createUserDropResponse! @join__field(graph: SUBMIT)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
   removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
   removeAllVotes(contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTE)
@@ -290,6 +314,14 @@ enum NativeTokenTypeEnum
   @join__type(graph: CONTESTS)
 {
   ETH @join__enumValue(graph: CONTESTS)
+}
+
+type NftDrop
+  @join__type(graph: SUBMIT)
+{
+  chainId: Int!
+  contractAddress: String!
+  dropConfig: String!
 }
 
 input NonFungiblePayoutInput
@@ -325,6 +357,7 @@ type PopularSubmission
   version: String!
   author: String!
   url: String!
+  nftDrop: NftDrop
 }
 
 input PromptInput
@@ -400,6 +433,18 @@ enum RestrictionType
   @join__type(graph: CONTESTS)
 {
   token @join__enumValue(graph: CONTESTS)
+}
+
+input SaleConfig
+  @join__type(graph: SUBMIT)
+{
+  publicSalePrice: String!
+  maxSalePurchasePerAddress: Int!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  presaleStart: String!
+  presaleEnd: String!
+  presaleMerkleRoot: String!
 }
 
 type Space
@@ -495,6 +540,7 @@ type Submission
   url: String!
   totalVotes: Decimal
   rank: Int
+  nftDrop: NftDrop
 }
 
 scalar SubmissionAssetUrl

@@ -1,6 +1,10 @@
-export const supportedChains = [
+export const supportedChains = process.env.NODE_ENV === "production" ? [
     { id: 1, name: 'Ethereum' },
     { id: 8453, name: 'Base' },
+] : [
+    { id: 1, name: 'Ethereum' },
+    { id: 8453, name: 'Base' },
+    { id: 84531, name: 'Base Testnet' }
 ]
 
 export const getChainName = (chainId: number) => {

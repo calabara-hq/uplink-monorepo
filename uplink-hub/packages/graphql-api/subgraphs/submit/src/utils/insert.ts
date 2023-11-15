@@ -353,6 +353,7 @@ export const createStandardSubmission = async (user: any, contestId: number, sub
         // return new user parameters
         return {
             success: true,
+            submissionId,
             userSubmissionParams: {
                 userSubmissions: updatedUserSubmissions,
                 remainingSubPower: remainingSubPower - 1,
@@ -398,6 +399,7 @@ export const createTwitterSubmission = async (user: any, contestId: number, subm
         // return new user parameters
         return {
             success: true,
+            submissionId,
             userSubmissionParams: {
                 userSubmissions: updatedUserSubmissions,
                 remainingSubPower: remainingSubPower - 1,

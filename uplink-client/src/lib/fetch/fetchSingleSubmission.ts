@@ -12,13 +12,13 @@ const fetchSingleSubmission = async (submissionId: string): Promise<Submission> 
             query: `
                 query submission($submissionId: ID!){
                     submission(submissionId: $submissionId) {
-                    author
-                    created
-                    rank
-                    totalVotes
-                    type
-                    url
-                    version
+                        author
+                        created
+                        rank
+                        totalVotes
+                        type
+                        url
+                        version
                     }
                 }`,
             variables: {

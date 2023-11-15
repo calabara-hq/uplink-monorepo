@@ -6,8 +6,7 @@ import { Contest, Space } from "../__generated__/resolvers-types.js";
 const queries = {
     Query: {
         async contest(_: any, args: { contestId: string }) {
-            const data = await dbSingleContestById(parseInt(args.contestId))
-            return data;
+            return dbSingleContestById(parseInt(args.contestId))
         },
 
         async activeContests() {

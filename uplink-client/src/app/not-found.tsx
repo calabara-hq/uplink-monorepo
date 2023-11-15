@@ -10,7 +10,7 @@ export default function NotFound() {
       <div className="flex flex-col gap-6 items-center">
         <Image src={loadingNoggles} alt="404" />
         <h2 className="text-3xl text-t2">thats a 404</h2>
-        <h2 className="text-xl text-t2">{`We couldn't find what you were looking for`}</h2>
+        <h2 className="text-xl text-t2 text-center">{`We couldn't find what you were looking for`}</h2>
         <div className="flex gap-6">
           <Link
             href="https://twitter.com/uplinkwtf"

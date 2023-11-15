@@ -48,11 +48,7 @@ export default function WalletConnectButton({
 
           return (
             <button
-              className={`btn normal-case ${
-                styleOverride
-                  ? styleOverride
-                  : "btn-ghost btn-active normal-case rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear"
-              }`}
+              className={`btn normal-case btn-ghost btn-active rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear ${styleOverride}`}
               onClick={openConnectModal}
             >
               Sign in

@@ -103,6 +103,18 @@ export const ChainLabel = ({ chainId, px }: { chainId: number, px: number }) => 
       </div>
     )
   }
+  if (chainId === 84531) {
+    return (
+      <div
+        className="tooltip tooltip-top cursor-pointer"
+        data-tip="Base Testnet"
+      >
+        <BaseChainLogo px={px} />
+
+      </div>
+    )
+  }
+  return null;
 }
 
 
