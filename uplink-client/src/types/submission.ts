@@ -57,5 +57,5 @@ export const isTwitterSubmission = (submission: Submission): submission is Twitt
 }
 
 export const isNftSubmission = (submission: Submission): boolean => {
-    return submission.nftDrop !== null;
+    return Boolean(submission.nftDrop);
 }

@@ -19,10 +19,12 @@ export const spaces = mysqlTable('spaces', {
 export const admins = mysqlTable('admins', {
     id: serial('id').primaryKey(),
     spaceId: int('spaceId').notNull(),
+    userId: int('userId').notNull().default(1),
     address: varchar('address', { length: 255 }).notNull(),
 
 }, (admins) => ({
     spaceIdIndex: index("admins_space_id_idx").on(admins.spaceId),
+    userIdIndex: index("admins_user_id_idx").on(admins.userId),
 }))
 
 
@@ -143,6 +145,7 @@ export const submissions = mysqlTable('submissions', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     author: varchar('author', { length: 255 }).notNull(),
+    userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     type: varchar('type', { length: 255 }).notNull(),
     url: varchar('url', { length: 255 }).notNull(),
@@ -150,6 +153,7 @@ export const submissions = mysqlTable('submissions', {
 }, (submissions) => ({
     submissionsContestIdIndex: index("submissions_contest_id_idx").on(submissions.contestId),
     submissionsAuthorIndex: index("submissions_author_idx").on(submissions.author),
+    submissionsUserIdIndex: index("submissions_user_id_idx").on(submissions.userId),
 }));
 
 export const votes = mysqlTable('votes', {
@@ -157,6 +161,7 @@ export const votes = mysqlTable('votes', {
     contestId: int('contestId').notNull(),
     submissionId: int('submissionId').notNull(),
     voter: varchar('voter', { length: 255 }).notNull(),
+    userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     amount: varchar('amount', { length: 255 }).notNull()
 }, (votes) => ({
@@ -164,6 +169,7 @@ export const votes = mysqlTable('votes', {
     votesSubmissionIdIndex: index("votes_submission_id_idx").on(votes.submissionId),
     votesVoterIndex: index("votes_voter_idx").on(votes.voter),
     votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter),
+    votesUserIdIndex: index("votes_user_id_idx").on(votes.userId),
 }));
 
 
@@ -174,6 +180,7 @@ export const tweetQueue = mysqlTable('tweetQueue', {
     contestId: int('contestId').notNull(),
     created: varchar('created', { length: 255 }).notNull(),
     author: varchar('author', { length: 255 }).notNull(),
+    userId: int('userId').notNull().default(1),
     jobContext: varchar('jobContext', { length: 255 }).notNull(),   // 'submission' or 'contest'
     payload: json('payload').notNull().default('[]'),
     accessToken: varchar('accessToken', { length: 255 }).notNull(),
@@ -181,7 +188,6 @@ export const tweetQueue = mysqlTable('tweetQueue', {
     retries: int('retries').notNull(),
     status: tinyint('status').notNull(),                        // 0 = pending, 1 = failed, 2 = success
     error: json('error'),
-
 });
 
 export const users = mysqlTable('users', {
