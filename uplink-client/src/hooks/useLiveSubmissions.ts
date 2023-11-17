@@ -17,7 +17,6 @@ const fetchSubmissions = async (contestId: string) => {
               submissions {
                   id
                   contestId
-                  author
                   totalVotes
                   rank
                   created
@@ -28,6 +27,10 @@ const fetchSubmissions = async (contestId: string) => {
                     chainId
                     contractAddress
                     dropConfig
+                  }
+                  author {
+                    id
+                    address
                   }
               }
           }

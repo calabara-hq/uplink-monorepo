@@ -32,9 +32,9 @@ const SubmissionBody = ({ submission }: { submission: Submission }) => {
       <div className="relative flex flex-col gap-2 rounded-b-lg w-full p-2 ">
         <h2 className="text-lg font-semibold">{submission.data.title}</h2>
         <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
-          <UserAvatar address={submission.author} size={28} />
+          <UserAvatar address={submission.author?.address ?? null} size={28} />
           <h3 className="break-all italic text-sm">
-            <AddressOrEns address={submission.author} />
+            <AddressOrEns address={submission.author?.address ?? null} />
           </h3>
           {totalVotes.greaterThan(0) ? (
             <span className="ml-auto text-t2 text-sm font-medium">
@@ -56,9 +56,9 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
           {submission.data.title}
         </h2>
         <div className="w-full flex items-center gap-2 flex-wrap font-semibold text-sm text-t2">
-          <UserAvatar address={submission.author} size={28} />
+          <UserAvatar address={submission.author?.address ?? null} size={28} />
           <h3 className="break-all italic text-sm ">
-            <AddressOrEns address={submission.author} />
+            <AddressOrEns address={submission.author?.address ?? null} />
           </h3>
         </div>
         <section className="break-word max-h-[18em] overflow-hidden">

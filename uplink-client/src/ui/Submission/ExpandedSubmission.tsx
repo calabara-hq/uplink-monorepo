@@ -108,9 +108,9 @@ const ExpandedSubmission = ({
         <h2 className="text-3xl text-t1 font-[500]">{submission.data.title}</h2>
         <div className="flex flex-row items-center h-8">
           <div className="flex gap-2 items-center">
-            <UserAvatar address={submission.author} size={28} />
+            <UserAvatar address={submission.author?.address ?? null} size={28} />
             <h3 className="break-all italic text-sm text-t2 font-semibold">
-              <AddressOrEns address={submission.author} />
+              <AddressOrEns address={submission.author?.address ?? null} />
             </h3>
           </div>
           {headerChildren}

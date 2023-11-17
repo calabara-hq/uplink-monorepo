@@ -10,7 +10,10 @@ export type BaseSubmission = {
     type: SubmissionType;
     url: string;
     version: string;
-    author: string | null;
+    author: {
+        id: string;
+        address: string;
+    } | null;
     rank: string | null;
     totalVotes: string | null;
     nftDrop: {

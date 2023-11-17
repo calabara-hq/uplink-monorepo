@@ -12,6 +12,7 @@ export const sqlOps = databaseController.sqlOps;
 const prepared_singleSubmissionById = db.query.submissions.findFirst({
     where: (submission: schema.dbSubmissionType) => sqlOps.eq(submission.id, sqlOps.placeholder('submissionId')),
     with: {
+        author: true,
         votes: true,
         contest: true,
         nftDrop: true,
@@ -23,6 +24,7 @@ const prepared_singleSubmissionById = db.query.submissions.findFirst({
 const prepared_submissionsByContestId = db.query.submissions.findMany({
     where: (submission: schema.dbSubmissionType) => sqlOps.eq(submission.contestId, sqlOps.placeholder('contestId')),
     with: {
+        author: true,
         votes: true,
         nftDrop: true,
     }
@@ -67,8 +69,16 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
                 'chainId', nftDrop.chainId,
                 'contractAddress', nftDrop.contractAddress,
                 'dropConfig', nftDrop.dropConfig
-            ) AS nftDrop
+            ) AS nftDrop,
+            JSON_OBJECT(
+                'id', author.id,
+                'address', author.address
+            ) AS author
         FROM submissions s
+        LEFT JOIN (
+            SELECT u.id, u.address
+            FROM users u
+        ) AS author ON s.userId = author.id
         JOIN (
             SELECT id, created, endTime
             FROM contests
@@ -76,6 +86,7 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
             ORDER BY created DESC
             LIMIT 3
         ) AS latest_contests ON s.contestId = latest_contests.id
+
         LEFT JOIN (
             SELECT v.submissionId, COUNT(DISTINCT v.id) AS uniqueVotes
             FROM votes v

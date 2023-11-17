@@ -10,6 +10,7 @@
     "build": "rm -rf ./dist && tsc",
     "generate-prisma": "prisma generate --schema=./src/prisma-client/schema.prisma",
     "push-db": "npx drizzle-kit push:mysql --config=./src/drizzle/drizzle.config.ts",
+    "patch-db": "NODE_OPTIONS='--no-warnings --loader ts-node/esm' ts-node ./src/drizzle/migrate.ts",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },

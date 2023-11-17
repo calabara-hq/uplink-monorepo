@@ -11,7 +11,6 @@ const fetchPopularSubmissions = async (): Promise<Array<Submission>> => {
       query: `
         query PopularSubmissions {
           popularSubmissions {
-            author
             contestId
             created
             id
@@ -22,6 +21,10 @@ const fetchPopularSubmissions = async (): Promise<Array<Submission>> => {
               chainId
               contractAddress
               dropConfig
+            }
+            author {
+              id
+              address
             }
           }
         }`,

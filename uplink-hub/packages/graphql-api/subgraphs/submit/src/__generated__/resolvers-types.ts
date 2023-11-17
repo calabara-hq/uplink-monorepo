@@ -94,7 +94,7 @@ export type NftDrop = {
 
 export type PopularSubmission = {
   __typename?: 'PopularSubmission';
-  author: Scalars['String']['output'];
+  author: SubmissionAuthor;
   contestId: Scalars['ID']['output'];
   created: Scalars['String']['output'];
   id: Scalars['ID']['output'];
@@ -144,7 +144,7 @@ export type Space = {
 
 export type Submission = {
   __typename?: 'Submission';
-  author?: Maybe<Scalars['String']['output']>;
+  author?: Maybe<SubmissionAuthor>;
   contestId: Scalars['ID']['output'];
   created: Scalars['String']['output'];
   id: Scalars['ID']['output'];
@@ -154,6 +154,15 @@ export type Submission = {
   type: Scalars['String']['output'];
   url: Scalars['String']['output'];
   version: Scalars['String']['output'];
+};
+
+export type SubmissionAuthor = {
+  __typename?: 'SubmissionAuthor';
+  address: Scalars['String']['output'];
+  displayName?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  profileAvatar?: Maybe<Scalars['String']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
 };
 
 export type SubmissionPayload = {
@@ -309,6 +318,7 @@ export type ResolversTypes = ResolversObject<{
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Submission: ResolverTypeWrapper<Submission>;
   SubmissionAssetUrl: ResolverTypeWrapper<Scalars['SubmissionAssetUrl']['output']>;
+  SubmissionAuthor: ResolverTypeWrapper<SubmissionAuthor>;
   SubmissionPayload: SubmissionPayload;
   Submit_Restriction: ResolverTypeWrapper<Submit_Restriction>;
   Submit_Token: ResolverTypeWrapper<Submit_Token>;
@@ -342,6 +352,7 @@ export type ResolversParentTypes = ResolversObject<{
   String: Scalars['String']['output'];
   Submission: Submission;
   SubmissionAssetUrl: Scalars['SubmissionAssetUrl']['output'];
+  SubmissionAuthor: SubmissionAuthor;
   SubmissionPayload: SubmissionPayload;
   Submit_Restriction: Submit_Restriction;
   Submit_Token: Submit_Token;
@@ -402,7 +413,7 @@ export type NftDropResolvers<ContextType = any, ParentType extends ResolversPare
 }>;
 
 export type PopularSubmissionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PopularSubmission'] = ResolversParentTypes['PopularSubmission']> = ResolversObject<{
-  author?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  author?: Resolver<ResolversTypes['SubmissionAuthor'], ParentType, ContextType>;
   contestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -431,7 +442,7 @@ export type SpaceResolvers<ContextType = any, ParentType extends ResolversParent
 }>;
 
 export type SubmissionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Submission'] = ResolversParentTypes['Submission']> = ResolversObject<{
-  author?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  author?: Resolver<Maybe<ResolversTypes['SubmissionAuthor']>, ParentType, ContextType>;
   contestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -447,6 +458,15 @@ export type SubmissionResolvers<ContextType = any, ParentType extends ResolversP
 export interface SubmissionAssetUrlScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['SubmissionAssetUrl'], any> {
   name: 'SubmissionAssetUrl';
 }
+
+export type SubmissionAuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['SubmissionAuthor'] = ResolversParentTypes['SubmissionAuthor']> = ResolversObject<{
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  profileAvatar?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  userName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
 
 export type Submit_RestrictionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Submit_Restriction'] = ResolversParentTypes['Submit_Restriction']> = ResolversObject<{
   restrictionType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -504,6 +524,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Space?: SpaceResolvers<ContextType>;
   Submission?: SubmissionResolvers<ContextType>;
   SubmissionAssetUrl?: GraphQLScalarType;
+  SubmissionAuthor?: SubmissionAuthorResolvers<ContextType>;
   Submit_Restriction?: Submit_RestrictionResolvers<ContextType>;
   Submit_Token?: Submit_TokenResolvers<ContextType>;
   Submit_TokenRestriction?: Submit_TokenRestrictionResolvers<ContextType>;

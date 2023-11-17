@@ -51,7 +51,7 @@ export const fetchUserVotes = async (user: any, contestId: any) => {
         votes: schema.votes.amount,
         submissionUrl: schema.submissions.url
     }).from(schema.votes).leftJoin(schema.submissions, sqlOps.eq(schema.votes.submissionId, schema.submissions.id))
-        .where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
+        .where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.userId, user.id)));
 
     return userVotes.map((el: any) => {
         return {
@@ -62,7 +62,7 @@ export const fetchUserVotes = async (user: any, contestId: any) => {
 }
 
 export const fetchContestSubmissions = async (contestId: number) => {
-    const contestSubmissions = await db.select({ id: schema.submissions.id, author: schema.submissions.author })
+    const contestSubmissions = await db.select({ id: schema.submissions.id, userId: schema.submissions.userId })
         .from(schema.submissions)
         .where(sqlOps.eq(schema.submissions.contestId, contestId))
     return contestSubmissions;
@@ -70,10 +70,10 @@ export const fetchContestSubmissions = async (contestId: number) => {
 
 
 export const getCacheTotalVotingPower = async (
-    user: { address: string },
+    user: { id: string },
     contestId: number
 ) => {
-    const key = `voting-power:${user.address}-${contestId}`;
+    const key = `voting-power:${user.id}-${contestId}`;
     return await getCacheValue(key).then(value => {
         if (value === null) return null
         return new Decimal(value);
@@ -81,11 +81,11 @@ export const getCacheTotalVotingPower = async (
 }
 
 export const setCacheTotalVotingPower = async (
-    user: { address: string },
+    user: { id: string },
     contestId: number,
     votingPower: Decimal
 ) => {
-    const key = `voting-power:${user.address}-${contestId}`;
+    const key = `voting-power:${user.id}-${contestId}`;
     const value = votingPower.toString();
     return await setCacheValue(key, value);
 }
@@ -170,7 +170,7 @@ export const computeWeightedVotingPowerUserValues = async (
 // calculate the total theoretical voting power and cache it. return the deadline adjusted voting power
 
 export const calculateTotalVotingPower = async (
-    user: { address: string },
+    user: any,
     contestId: number,
     deadlines: {
         startTime: string,
@@ -180,7 +180,7 @@ export const calculateTotalVotingPower = async (
     },
     chainId: number
 ) => {
-    if (!user || !user.address) return new Decimal(0);
+    if (!user || !user.id) return new Decimal(0);
 
     const cachedVotingPower = await getCacheTotalVotingPower(user, contestId);
     if (cachedVotingPower !== null) return deadlineAdjustedVotingPower(cachedVotingPower, deadlines);
@@ -255,7 +255,7 @@ export const insertVotes = async (user: any, contestId: any, payload: any) => {
             return {
                 contestId,
                 submissionId: el.submissionId,
-                voter: user.address,
+                userId: user.id,
                 created: new Date().toISOString(),
                 amount: el.votes.toString(),
             } as schema.dbNewVoteType
@@ -264,7 +264,7 @@ export const insertVotes = async (user: any, contestId: any, payload: any) => {
 
         await db.transaction(async (tx) => {
             // delete all user votes
-            await tx.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
+            await tx.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.userId, user.id)));
             // set new votes
             await tx.insert(schema.votes).values(preparedPayload);
         });
@@ -288,7 +288,7 @@ export const insertVotes = async (user: any, contestId: any, payload: any) => {
 // if the sum is less than the total voting power, cast the votes and return the updated voting power
 
 export const castVotes = async (
-    user: { address: string },
+    user: any,
     contestId: number,
     payload: {
         submissionId: number,
@@ -319,7 +319,7 @@ export const castVotes = async (
     const contestSubmissions = await fetchContestSubmissions(contestId);
 
     const contestSubmissionIds = new Set(contestSubmissions.map((el: any) => el.id.toString()));
-    const userSubmissionIds = contestParams.selfVote ? null : new Set(contestSubmissions.filter((el: any) => el.author === user.address).map((el: any) => el.id.toString()));
+    const userSubmissionIds = contestParams.selfVote ? null : new Set(contestSubmissions.filter((el: any) => el.userId === user.id).map((el: any) => el.id.toString()));
     let submissionIdErrors = [];
     let selfVoteErrors = [];
 
@@ -368,7 +368,7 @@ export const retractAllVotes = async (user: any, contestId: any) => {
 
         const totalVotingPower = await calculateTotalVotingPower(user, contestId, contestParams.deadlines, contestParams.chainId);
 
-        await db.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.voter, user.address)));
+        await db.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.contestId, contestId), sqlOps.eq(schema.votes.userId, user.id)));
         // reset the voting params state
         return {
             success: true,
@@ -400,7 +400,7 @@ export const retractSingleVote = async (user: any, contestId: any, submissionId:
     }
 
     try {
-        await db.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.submissionId, submissionId), sqlOps.eq(schema.votes.voter, user.address)));
+        await db.delete(schema.votes).where(sqlOps.and(sqlOps.eq(schema.votes.submissionId, submissionId), sqlOps.eq(schema.votes.userId, user.id)));
         const { totalVotingPower, votesSpent, votesRemaining, userVotes } = await calculateUserVotingParams(user, contestId, contestParams.deadlines, contestParams.chainId);
 
         return {

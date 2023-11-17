@@ -21,14 +21,14 @@ export const fetchUserSubmissions = async (
     const userSubmissions = await db.select({
         id: schema.submissions.id,
         contestId: schema.submissions.contestId,
-        author: schema.submissions.author,
+        userId: schema.submissions.userId,
         created: schema.submissions.created,
         type: schema.submissions.type,
         url: schema.submissions.url,
         version: schema.submissions.version,
     })
         .from(schema.submissions)
-        .where(sqlOps.and(sqlOps.eq(schema.submissions.contestId, contestId), sqlOps.eq(schema.submissions.author, user.address)));
+        .where(sqlOps.and(sqlOps.eq(schema.submissions.contestId, contestId), sqlOps.eq(schema.submissions.userId, user.id)));
 
     return userSubmissions;
 };
@@ -248,7 +248,7 @@ export const pinSubmission = async (
 const insertStandardSubmission = async (submission: WritableStandardSubmission, ipfsUrl: string, contestId: number, user: any) => {
     const newSubmission: schema.dbNewSubmissionType = {
         contestId: contestId,
-        author: user.address,
+        userId: user.id,
         created: new Date().toISOString(),
         type: "standard",
         version: 'uplink-v1',
@@ -265,7 +265,7 @@ const insertTwitterSubmission = async (submission: WritableTwitterSubmission, ip
 
     const newSubmission: schema.dbNewSubmissionType = {
         contestId: contestId,
-        author: user.address,
+        userId: user.id,
         created: new Date().toISOString(),
         type: "twitter",
         version: 'uplink-v1',
@@ -302,7 +302,7 @@ const insertTwitterSubmission = async (submission: WritableTwitterSubmission, ip
 
     const tweetJob: schema.dbNewTweetQueueType = {
         contestId: contestId,
-        author: user.id,
+        userId: user.id,
         created: new Date().toISOString(),
         jobContext: 'submission',
         payload: tweetQueueThread,

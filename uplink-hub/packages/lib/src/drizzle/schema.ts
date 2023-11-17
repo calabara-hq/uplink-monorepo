@@ -144,7 +144,7 @@ export const arcadeVotingStrategy = mysqlTable('arcadeVotingStrategy', {
 export const submissions = mysqlTable('submissions', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
-    author: varchar('author', { length: 255 }).notNull(),
+    //author: varchar('author', { length: 255 }).notNull(), // this will be removed
     userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     type: varchar('type', { length: 255 }).notNull(),
@@ -152,7 +152,6 @@ export const submissions = mysqlTable('submissions', {
     version: varchar('version', { length: 255 }).notNull(),
 }, (submissions) => ({
     submissionsContestIdIndex: index("submissions_contest_id_idx").on(submissions.contestId),
-    submissionsAuthorIndex: index("submissions_author_idx").on(submissions.author),
     submissionsUserIdIndex: index("submissions_user_id_idx").on(submissions.userId),
 }));
 
@@ -160,15 +159,15 @@ export const votes = mysqlTable('votes', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     submissionId: int('submissionId').notNull(),
-    voter: varchar('voter', { length: 255 }).notNull(),
+    //voter: varchar('voter', { length: 255 }).notNull(), // this will be removed
     userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     amount: varchar('amount', { length: 255 }).notNull()
 }, (votes) => ({
     votesContestIdIndex: index("votes_contest_id_idx").on(votes.contestId),
     votesSubmissionIdIndex: index("votes_submission_id_idx").on(votes.submissionId),
-    votesVoterIndex: index("votes_voter_idx").on(votes.voter),
-    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter),
+    //votesVoterIndex: index("votes_voter_idx").on(votes.voter),
+    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.userId),
     votesUserIdIndex: index("votes_user_id_idx").on(votes.userId),
 }));
 
@@ -179,7 +178,6 @@ export const tweetQueue = mysqlTable('tweetQueue', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     created: varchar('created', { length: 255 }).notNull(),
-    author: varchar('author', { length: 255 }).notNull(),
     userId: int('userId').notNull().default(1),
     jobContext: varchar('jobContext', { length: 255 }).notNull(),   // 'submission' or 'contest'
     payload: json('payload').notNull().default('[]'),
@@ -193,6 +191,9 @@ export const tweetQueue = mysqlTable('tweetQueue', {
 export const users = mysqlTable('users', {
     id: serial('id').primaryKey(),
     address: varchar('address', { length: 255 }).notNull(),
+    userName: varchar('username', { length: 255 }),
+    displayName: varchar('displayName', { length: 255 }),
+    profileAvatar: varchar('profileAvatar', { length: 255 }),
     twitterId: varchar('twitterId', { length: 255 }),
     twitterHandle: varchar('twitterHandle', { length: 255 }),
     twitterAvatarUrl: varchar('twitterAvatar', { length: 255 }),
@@ -333,6 +334,10 @@ export const arcadeVotingStrategyRelations = relations(arcadeVotingStrategy, ({ 
 }));
 
 export const submissionsRelations = relations(submissions, ({ one, many }) => ({
+    author: one(users, {
+        fields: [submissions.userId],
+        references: [users.id],
+    }),
     contest: one(contests, {
         fields: [submissions.contestId],
         references: [contests.id],
@@ -362,7 +367,7 @@ export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
         references: [contests.id],
     }),
     user: one(users, {
-        fields: [tweetQueue.author],
+        fields: [tweetQueue.userId],
         references: [users.id],
     })
 }));
@@ -437,6 +442,7 @@ export type dbArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy>
 export type dbUserDropType = InferModel<typeof userDrops>
 
 export type dbSubmissionType = InferModel<typeof submissions> & {
+    author: dbUserType,
     contest: dbContestType,
     nftDrop: dbUserDropType,
     votes: dbVoteType[],

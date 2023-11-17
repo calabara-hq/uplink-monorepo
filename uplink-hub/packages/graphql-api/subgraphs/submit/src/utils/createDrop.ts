@@ -1,7 +1,6 @@
 import { schema } from "lib";
 import { DropConfig } from "../__generated__/resolvers-types";
 import { db, dbSingleSubmissionById } from "./database.js";
-import { dbNewUserDropType } from "lib/dist/drizzle/schema";
 
 
 
@@ -10,11 +9,10 @@ const createDrop = async (user: any, submissionId: string, contestId: string, co
     // get the submission
 
     const submission = await dbSingleSubmissionById(parseInt(submissionId));
-    console.log(JSON.stringify(submission, null, 2))
 
     // check if user is the author of the submission
 
-    if (submission.author !== user.address) return { success: false }
+    if (submission.userId !== user.id) return { success: false }
 
     // check if submission is already dropped
 
@@ -24,7 +22,7 @@ const createDrop = async (user: any, submissionId: string, contestId: string, co
 
     try {
 
-        const newDrop: dbNewUserDropType = {
+        const newDrop: schema.dbNewUserDropType = {
             submissionId: submission.id,
             contestId: submission.contestId,
             userId: user.id,

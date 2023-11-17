@@ -1,11 +1,16 @@
 type User @key(fields: "id") {
-  id: ID
-  address: String
+  id: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+  twitterHandle: String
+  twitterAvatar: String
 }
 
 type Query {
   me: User
-  user(id: ID, address: String): User
+  user(userIdentifier: String!): User
 }
 
 extend schema

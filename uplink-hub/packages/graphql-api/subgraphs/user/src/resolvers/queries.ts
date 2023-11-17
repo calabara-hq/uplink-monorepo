@@ -3,22 +3,22 @@ import { AuthorizationController, schema } from "lib";
 
 const authController = new AuthorizationController(process.env.REDIS_URL);
 
-const userById = db.query.users.findFirst({
-    where: ((users) => sqlOps.eq(users.id, sqlOps.placeholder('id'))),
+type UserName = string;
+type UserAddress = `0x${string}`
+
+type UserIdentifier = UserName | UserAddress
+
+const isUserAddress = (userIdentifier: UserIdentifier): userIdentifier is UserAddress => {
+    return userIdentifier.startsWith('0x');
+}
+
+const userByUsername = db.query.users.findFirst({
+    where: ((users) => sqlOps.eq(users.userName, sqlOps.placeholder('userName'))),
 }).prepare();
 
 const userByAddress = db.query.users.findFirst({
-    where: ((users) => sqlOps.eq(users.address, sqlOps.placeholder('address'))),
+    where: ((users) => sqlOps.eq(users.address, sqlOps.placeholder('userAddress'))),
 }).prepare();
-
-
-///
-
-const getSubmisssion = db.query.submissions.findFirst({
-    where: ((submissions) => sqlOps.eq(submissions.created, sqlOps.placeholder('created'))),
-}).prepare()
-
-
 
 const queries = {
     Query: {
@@ -29,11 +29,11 @@ const queries = {
             return data;
         },
 
-        async user(parent, { id, address }, contextValue, info) {
-            const data = id ? await userById.execute({ id }) : address ? await userByAddress.execute({ address }) : null;
+        user(_: any, { userIdentifier }: { userIdentifier: UserIdentifier }) {
+            return isUserAddress(userIdentifier) ? userByAddress.execute({ userAddress: userIdentifier }) : userByUsername.execute({ userName: userIdentifier });
         },
-
     },
+
 };
 
 
