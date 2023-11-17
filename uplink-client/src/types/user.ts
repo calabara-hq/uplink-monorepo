@@ -12,6 +12,7 @@ export type User = {
     twitterHandle: string | null;
     profileAvatar: string | null;
     twitterAvatar: string | null;
+    visibleTwitter: boolean;
 }
 
 export const isUserAddress = (identifier: UserIdentifier): identifier is UserAddress => {

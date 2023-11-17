@@ -387,13 +387,13 @@ const CreateEditionButton = ({
                         if (!response.success) {
                             reset();
                         }
+                        return toast.success('Drop created!')
                     });
                 } catch (e) {
                     console.log(e)
                     reset();
                 }
 
-                return toast.success('Drop created!')
             }
         }
     });

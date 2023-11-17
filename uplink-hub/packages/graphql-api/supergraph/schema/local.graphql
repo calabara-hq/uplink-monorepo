@@ -287,6 +287,7 @@ type Mutation
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
   @join__type(graph: SUBMIT)
+  @join__type(graph: USER)
   @join__type(graph: VOTE)
 {
   createContest(spaceId: ID!, contestData: CreateContestData!): ContestMutationResponse! @join__field(graph: CONTESTS)
@@ -296,6 +297,7 @@ type Mutation
   createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createTwitterSubmission(contestId: ID!, submission: TwitterSubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createUserDrop(submissionId: ID!, contestId: ID!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createUserDropResponse! @join__field(graph: SUBMIT)
+  updateUser(displayName: String!, profileAvatar: String!, visibleTwitter: Boolean!): UpdateUserResponse @join__field(graph: USER)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
   removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
   removeAllVotes(contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTE)
@@ -697,6 +699,12 @@ input TwitterSubmissionPayload
   thread: [ThreadPayload!]!
 }
 
+type UpdateUserResponse
+  @join__type(graph: USER)
+{
+  success: Boolean!
+}
+
 type User
   @join__type(graph: USER, key: "id")
 {
@@ -707,6 +715,7 @@ type User
   profileAvatar: String
   twitterHandle: String
   twitterAvatar: String
+  visibleTwitter: Boolean
 }
 
 type UserSubmissionParams

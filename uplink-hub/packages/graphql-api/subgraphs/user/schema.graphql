@@ -6,11 +6,20 @@ type User @key(fields: "id") {
   profileAvatar: String
   twitterHandle: String
   twitterAvatar: String
+  visibleTwitter: Boolean
 }
 
 type Query {
   me: User
   user(userIdentifier: String!): User
+}
+
+type UpdateUserResponse {
+  success: Boolean!
+}
+
+type Mutation {
+  updateUser(displayName: String!, profileAvatar: String!, visibleTwitter: Boolean! ): UpdateUserResponse
 }
 
 extend schema

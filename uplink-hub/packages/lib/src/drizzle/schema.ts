@@ -191,12 +191,13 @@ export const tweetQueue = mysqlTable('tweetQueue', {
 export const users = mysqlTable('users', {
     id: serial('id').primaryKey(),
     address: varchar('address', { length: 255 }).notNull(),
-    userName: varchar('username', { length: 255 }),
+    userName: varchar('userName', { length: 255 }),
     displayName: varchar('displayName', { length: 255 }),
     profileAvatar: varchar('profileAvatar', { length: 255 }),
     twitterId: varchar('twitterId', { length: 255 }),
     twitterHandle: varchar('twitterHandle', { length: 255 }),
     twitterAvatarUrl: varchar('twitterAvatar', { length: 255 }),
+    visibleTwitter: tinyint('visibleTwitter').notNull().default(0),
 }, (user) => ({
     userAddressIndex: uniqueIndex("user_address_idx").on(user.address)
 }));

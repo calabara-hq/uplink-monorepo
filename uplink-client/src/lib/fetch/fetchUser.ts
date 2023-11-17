@@ -15,10 +15,11 @@ const fetchUser = async (userIdentifier: string): Promise<User> => {
                 user(userIdentifier: $userIdentifier) {
                   id
                   displayName
+                  userName
                   address
                   profileAvatar
                   twitterHandle
-                  userName
+                  visibleTwitter
                 }
             }`,
             variables: {
