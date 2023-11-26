@@ -235,8 +235,12 @@ export const flattenContractArgs = (args: ConfigurableZoraEditionOutput) => {
     })
 }
 
-export default function useCreateZoraEdition(init_name: string, init_imageURI: string, init_animationURI: string) {
+export default function useCreateZoraEdition(init_name: string, init_imageURI: string, init_animationURI: string, referrer?: string) {
     const [contractArguments, setContractArguments] = useState<ConfigurableZoraEditionOutput | null>(null);
+
+    const isReferralValid = referrer ? referrer.startsWith('0x') && referrer.length === 42 : false;
+
+
     const [state, dispatch] = useReducer(EditionWizardReducer, {
         name: init_name ?? "",
         symbol: "",
@@ -285,7 +289,10 @@ export default function useCreateZoraEdition(init_name: string, init_imageURI: s
             });
         }
         else if (result.success) {
-            setContractArguments(result.data);
+            setContractArguments({
+                ...result.data,
+                referrer: isReferralValid ? referrer : "0xa943e039B1Ce670873ccCd4024AB959082FC6Dd8"
+            });
         }
         return result;
     }

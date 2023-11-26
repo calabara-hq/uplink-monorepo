@@ -1,3 +1,5 @@
+import { Submission } from "./submission";
+
 type UserName = string;
 type UserAddress = `0x${string}`;
 
@@ -13,6 +15,7 @@ export type User = {
     profileAvatar: string | null;
     twitterAvatar: string | null;
     visibleTwitter: boolean;
+    submissions: Array<Submission>
 }
 
 export const isUserAddress = (identifier: UserIdentifier): identifier is UserAddress => {

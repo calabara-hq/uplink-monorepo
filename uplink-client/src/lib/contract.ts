@@ -3,6 +3,7 @@ import ERC20ABI from '@/lib/abi/erc20ABI.json';
 import ERC721ABI from '@/lib/abi/erc721ABI.json';
 import ERC1155ABI from '@/lib/abi/erc1155ABI.json';
 import ERC165ABI from '@/lib/abi/erc165ABI.json';
+import { ZoraAbi } from './abi/zoraEdition';
 
 
 const ERC721Interface = '0x80ac58cd';
@@ -112,6 +113,23 @@ export class TokenContractApi {
         }
 
         return totalSupply;
+    }
+
+    public async zoraGetRewardBalance({ contractAddress, userAddress }: { contractAddress: string, userAddress: string }) {
+        let balance: string = '0';
+        try {
+            balance = await this.web3.readContract({
+                address: contractAddress,
+                abi: ZoraAbi,
+                functionName: 'balanceOf',
+                args: [userAddress]
+            }) as string;
+        } catch (err) {
+            console.log(err)
+            console.log('failed to read reward balance')
+        }
+
+        return balance;
     }
 
     public async isValidERC1155TokenId({ contractAddress, tokenId }: {

@@ -716,6 +716,34 @@ type User
   twitterHandle: String
   twitterAvatar: String
   visibleTwitter: Boolean
+  submissions: [UserSubmission!]!
+}
+
+type UserNftDrop
+  @join__type(graph: USER)
+{
+  chainId: Int!
+  contractAddress: String!
+  dropConfig: String!
+}
+
+type UserSubmission
+  @join__type(graph: USER)
+{
+  id: ID!
+  contestId: ID!
+  type: String!
+  version: String!
+  url: String!
+  nftDrop: UserNftDrop
+  author: UserSubmissionAuthor
+}
+
+type UserSubmissionAuthor
+  @join__type(graph: USER)
+{
+  id: ID!
+  address: String!
 }
 
 type UserSubmissionParams

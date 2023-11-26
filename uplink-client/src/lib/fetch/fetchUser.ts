@@ -1,5 +1,6 @@
 import { User } from "@/types/user";
 import handleNotFound from "../handleNotFound";
+import { BaseSubmission, Submission } from "@/types/submission";
 
 
 const fetchUser = async (userIdentifier: string): Promise<User> => {
@@ -20,6 +21,22 @@ const fetchUser = async (userIdentifier: string): Promise<User> => {
                   profileAvatar
                   twitterHandle
                   visibleTwitter
+                  submissions {
+                    id
+                    contestId
+                    type
+                    version
+                    url
+                    author {
+                        id
+                        address
+                    }
+                    nftDrop {
+                        chainId
+                        contractAddress
+                        dropConfig
+                    }
+                  }
                 }
             }`,
             variables: {
@@ -30,7 +47,19 @@ const fetchUser = async (userIdentifier: string): Promise<User> => {
     })
         .then((res) => res.json())
         .then((res) => res.data.user)
-        .then(handleNotFound);
+        .then(handleNotFound)
+        .then(async (res) => {
+            const subData = await Promise.all(
+                res.submissions.map(async (submission: BaseSubmission) => {
+                    const data: Submission = await fetch(submission.url).then((res) => res.json());
+                    return { ...submission, data: data, author: { id: res.id, address: res.address } };
+                })
+            );
+            return {
+                ...res,
+                submissions: subData
+            }
+        });
     return data;
 };
 

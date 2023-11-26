@@ -73,6 +73,10 @@ const useLiveSubmissions = (contestId: string) => {
         mutateSubmissions(contestId); // mutate the server cache
     };
 
+    useEffect(() => {
+        console.log(liveSubmissions)
+    }, [])
+
     return {
         liveSubmissions,
         areSubmissionsLoading,

@@ -13,6 +13,9 @@ import { Submission } from "@/types/submission";
 import MintEdition from "../Zora/MintEdition";
 import Swiper from "../Swiper/Swiper";
 import SwiperSlide from "../Swiper/SwiperSlide";
+import { useRouter } from "next/navigation";
+import { User } from "@/types/user";
+import useMe from "@/hooks/useMe";
 
 export const AddToCartButton = ({ submission, voteActions }) => {
   const { addProposedVote, currentVotes, proposedVotes } = voteActions;
@@ -166,6 +169,9 @@ export const RenderPopularSubmissions = ({ submissions }) => {
     setSubmission(null);
   }
 
+  // base64 the homepage context
+  const context = Buffer.from('/').toString('base64')
+
   return (
     <div className="w-full">
       <Swiper
@@ -242,8 +248,107 @@ export const RenderPopularSubmissions = ({ submissions }) => {
   )
 }
 
+export const UserSubmissionDisplay = ({ user }: { user: User }) => {
+  const [isExpandModalOpen, setIsExpandModalOpen] = useState(false);
+  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [submission, setSubmission] = useState<Submission | null>(null);
+  const { me, getFallbackData } = useMe(user.address);
+  console.log('HERES ME', me)
+  const router = useRouter();
 
-const SubmissionDisplay = ({
+  const openMintModal = (submission: Submission) => {
+    setIsMintModalOpen(true)
+    setSubmission(submission)
+  }
+  const openExpandModal = (submission: Submission) => {
+    setIsExpandModalOpen(true)
+    setSubmission(submission)
+  }
+
+  const handleMint = (event, submission) => {
+    event.stopPropagation();
+    event.preventDefault();
+    openMintModal(submission);
+  }
+
+  const handleClose = () => {
+    setIsExpandModalOpen(false)
+    setIsMintModalOpen(false)
+    setSubmission(null);
+  }
+
+
+  const isAnonSubmission = (submission: Submission) => {
+    // we can't expose the submission author on backwards nav (i.e. authorized user shared their own stuff)
+    // we need to check if the original submission data (without any credentials) has a visible author
+    // to do so, we need to get the fallback data from the user swr hook 
+    const fallbackData = getFallbackData();
+    const [sub] = fallbackData.submissions.filter((el: Submission) => el.id === submission.id)
+    return !sub.author
+  }
+
+
+
+  const calcNavContext = (submission: Submission) => {
+    if (isAnonSubmission(submission)) {
+      return Buffer.from(`/contest/${submission.contestId}`).toString('base64')
+    }
+    else {
+      return Buffer.from(`/user/${user.address}`).toString('base64')
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <div className="flex w-full justify-evenly items-center">
+        <div className="w-10/12 sm:w-full m-auto grid gap-4 submission-columns auto-rows-fr">
+          {user.submissions.map((submission, idx) => {
+            return (
+              <CardSubmission
+                key={idx}
+                interactive={true}
+                submission={submission}
+                handleCardClick={(submission) => router.push(`/submission2/${submission.id}?context=${calcNavContext(submission)}`)}
+                footerChildren={
+                  <div className="flex flex-col w-full">
+                    <div className="p-2 w-full" />
+                    <div className="grid grid-cols-3 w-full items-center">
+                      <span />
+                      {submission.nftDrop ? (
+                        <button onClick={(event) => handleMint(event, submission)} className="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
+                      hover:rounded-xl rounded-3xl transition-all duration-300">
+                          Mint
+                        </button>
+                      ) : (<span />)
+                      }
+                    </div>
+                  </div>
+                }
+              />
+            );
+          })}
+        </div>
+      </div>
+      <SubmissionModal isModalOpen={isExpandModalOpen || isMintModalOpen} mode={isExpandModalOpen ? "expand" : "mint"} handleClose={handleClose} >
+        {isExpandModalOpen && submission && (
+          <div className="flex w-full gap-1 lg:gap-4 p-0">
+            <div className="flex flex-col jusitfy-start w-full h-full ">
+              <ExpandedSubmission
+                submission={submission}
+              />
+            </div>
+          </div>
+        )}
+
+        {isMintModalOpen && submission && (
+          <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} />
+        )}
+      </SubmissionModal>
+    </div >
+  );
+}
+
+export const LiveSubmissionDisplay = ({
   contestId,
   spaceName,
 }: {
@@ -254,7 +359,7 @@ const SubmissionDisplay = ({
   const [isExpandModalOpen, setIsExpandModalOpen] = useState(false);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const [submission, setSubmission] = useState<Submission | null>(null);
-
+  const router = useRouter();
   const openMintModal = (submission: Submission) => {
     setIsMintModalOpen(true)
     setSubmission(submission)
@@ -270,6 +375,9 @@ const SubmissionDisplay = ({
     setSubmission(null);
   }
 
+  // base64 the spaceName & contestId
+  const context = Buffer.from(`/${spaceName}/contest/${contestId}`).toString('base64')
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex w-full justify-evenly items-center">
@@ -280,7 +388,7 @@ const SubmissionDisplay = ({
                 key={idx}
                 interactive={true}
                 submission={submission}
-                handleCardClick={(submission) => openExpandModal(submission)}
+                handleCardClick={(submission) => router.push(`/submission2/${submission.id}?context=${context}`)}
                 footerChildren={
                   <SubmissionFooter
                     sharePath={`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/contest/${contestId}/submission/${submission.id}`}
@@ -317,4 +425,3 @@ const SubmissionDisplay = ({
   );
 };
 
-export default SubmissionDisplay;

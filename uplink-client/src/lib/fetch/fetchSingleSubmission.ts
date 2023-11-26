@@ -12,6 +12,7 @@ const fetchSingleSubmission = async (submissionId: string): Promise<Submission> 
             query: `
                 query submission($submissionId: ID!){
                     submission(submissionId: $submissionId) {
+                        id
                         created
                         rank
                         totalVotes
@@ -22,6 +23,11 @@ const fetchSingleSubmission = async (submissionId: string): Promise<Submission> 
                             id
                             address
                           }
+                        nftDrop {
+                            chainId
+                            contractAddress
+                            dropConfig
+                        }
                     }
                 }`,
             variables: {

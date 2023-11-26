@@ -65,11 +65,14 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
         SELECT 
             s.*,
             COALESCE(vote_counts.uniqueVotes, 0) AS uniqueVotes,
-            JSON_OBJECT(
-                'chainId', nftDrop.chainId,
-                'contractAddress', nftDrop.contractAddress,
-                'dropConfig', nftDrop.dropConfig
-            ) AS nftDrop,
+            CASE
+                WHEN nftDrop.chainId IS NULL AND nftDrop.contractAddress IS NULL AND nftDrop.dropConfig IS NULL THEN NULL
+                ELSE JSON_OBJECT(
+                    'chainId', nftDrop.chainId,
+                    'contractAddress', nftDrop.contractAddress,
+                    'dropConfig', nftDrop.dropConfig
+                )
+            END AS nftDrop,
             JSON_OBJECT(
                 'id', author.id,
                 'address', author.address

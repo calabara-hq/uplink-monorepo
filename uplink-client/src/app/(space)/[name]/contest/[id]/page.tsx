@@ -1,4 +1,5 @@
-import SubmissionDisplay, {
+import {
+  LiveSubmissionDisplay,
   SubmissionDisplaySkeleton,
 } from "@/ui/Submission/SubmissionDisplay";
 import ContestHeading, {
@@ -14,6 +15,7 @@ import fetchContest from "@/lib/fetch/fetchContest";
 import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
 import SwrProvider from "@/providers/SwrProvider";
 import { Submission } from "@/types/submission";
+
 
 const SubmissionDisplayWrapper = async ({
   submissionPromise,
@@ -54,7 +56,7 @@ export default async function Page({
           <div className="flex flex-col w-full gap-4 transition-all duration-200 ease-in-out">
             <Suspense fallback={<ContestHeadingSkeleton />}>
               {/*@ts-expect-error*/}
-              <ContestHeading contest={contestPromise} contestId={contestId}/>
+              <ContestHeading contest={contestPromise} contestId={contestId} />
             </Suspense>
             <MobileContestActions
               contestId={contestId}
@@ -70,7 +72,7 @@ export default async function Page({
                 submissionPromise={submissionPromise}
                 contestId={contestId}
               >
-                <SubmissionDisplay
+                <LiveSubmissionDisplay
                   contestId={contestId}
                   spaceName={spaceName}
                 />

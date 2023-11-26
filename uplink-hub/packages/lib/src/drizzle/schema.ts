@@ -373,7 +373,9 @@ export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
     })
 }));
 
-
+export const userRelations = relations(users, ({ one, many }) => ({
+    submissions: many(submissions)
+}));
 
 export type dbSpaceType = InferModel<typeof spaces> & {
     admins: dbAdminType[],
@@ -459,7 +461,9 @@ export type dbTweetQueueType = InferModel<typeof tweetQueue> & {
     user: dbUserType,
 }
 
-export type dbUserType = InferModel<typeof users>
+export type dbUserType = InferModel<typeof users> & {
+    submissions: dbSubmissionType
+}
 
 
 export type dbNewContestType = InferModel<typeof contests, 'insert'>

@@ -169,6 +169,7 @@ const CreateEdition = ({
     imageURI,
     animationURI,
     routeOnSuccess,
+    referrer,
 }: {
     contestId: string,
     submissionId: string,
@@ -176,8 +177,9 @@ const CreateEdition = ({
     imageURI: string,
     animationURI: string,
     routeOnSuccess: string,
+    referrer?: string
 }) => {
-    const { contractArguments, state, setField, validate } = useCreateZoraEdition(name, imageURI, animationURI);
+    const { contractArguments, state, setField, validate } = useCreateZoraEdition(name, imageURI, animationURI, referrer);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -325,11 +327,11 @@ const CreateEditionButton = ({
 }) => {
     const { data: session, status } = useSession();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { contract, chainId, explorer } = getContractFromEnv();
+    const { creator_contract, chainId, explorer } = getContractFromEnv();
 
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
         chainId: chainId,
-        address: contract,
+        address: creator_contract,
         abi: ZoraAbi,
         functionName: 'createEditionWithReferral',
         args: flattenContractArgs(contractArguments),
