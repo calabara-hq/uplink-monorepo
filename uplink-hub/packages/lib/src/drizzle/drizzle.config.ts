@@ -3,12 +3,15 @@ import dotenv from "dotenv"
 
 dotenv.config();
 
+const DATABASE_CONNECTION_STRING = ''
+
+
 export default {
   out: "./migrations",
   schema: "./src/drizzle/schema.ts",
   driver: "mysql2",
   dbCredentials: {
-    connectionString: 'mysql://f7gayyuoqjhme5win9dr:pscale_pw_osWJPORpJidTG2qjc7eGvfftVMUecsppXmHuppAeT30@aws.connect.psdb.cloud/uplink?ssl={"rejectUnauthorized":true}'
+    connectionString: DATABASE_CONNECTION_STRING
   },
   verbose: true,
   strict: true,
