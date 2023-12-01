@@ -13,7 +13,7 @@ import { MdOutlineCancelPresentation } from "react-icons/md";
 
 export const BackButton = ({ context }: { context: string | null }) => {
     const router = useRouter();
-    const decodedContext = context ? decodeURIComponent(Buffer.from(context, 'base64').toString('utf8')) : null
+    const decodedContext = context ? decodeURIComponent(Buffer.from(context, 'base64').toString('utf8')) : ''
     const buttonText = decodedContext.includes('user') ? "Author Profile" : decodedContext.includes('contest') ? "Back" : "Home"
     const [hasNavd, setHasNavd] = useState(false);
 

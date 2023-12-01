@@ -1,13 +1,33 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 
 const MintSubmissionModal = ({ isModalOpen, onClose, children }) => {
+
   if (isModalOpen) {
     return ReactDOM.createPortal(
       <div className="modal modal-open bg-black transition-colors duration-500 ease-in-out">
         <div
           className="modal-box bg-black border border-[#ffffff14] animate-springUp max-w-4xl"
+        >
+          {children}
+        </div>
+      </div>
+      , document.body);
+  }
+  return null;
+}
+
+
+const ExpandSubmissionModal = ({ isModalOpen, onClose, children }) => {
+
+  if (isModalOpen) {
+
+    return ReactDOM.createPortal(
+      <div className="modal modal-open bg-black  transition-colors duration-500 ease-in-out w-[100vw]">
+        <div
+          className="modal-box bg-black animate-springUp max-w-full h-[100vh] overflow-y-scroll"
         >
           {children}
         </div>
@@ -40,10 +60,13 @@ export default function SubmissionModal({
   children,
 }: {
   isModalOpen: boolean;
-  handleClose: () => void;
-  mode: "mint" | "share";
+
+  mode: "mint" | "share" | "expand";
   children: React.ReactNode;
+  handleClose?: () => void;
 }) {
+
+  const router = useRouter();
 
   if (mode === "mint") {
     return (
@@ -58,6 +81,14 @@ export default function SubmissionModal({
       <ShareSubmissionModal isModalOpen={isModalOpen} onClose={handleClose}>
         {children}
       </ShareSubmissionModal>
+    )
+  }
+
+  if (mode === "expand") {
+    return (
+      <ExpandSubmissionModal isModalOpen={isModalOpen} onClose={() => router.back()}>
+        {children}
+      </ExpandSubmissionModal>
     )
   }
 
