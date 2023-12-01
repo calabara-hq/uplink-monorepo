@@ -301,7 +301,6 @@ export const LiveSubmissionDisplay = ({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const [submission, setSubmission] = useState<Submission | null>(null);
-  const { status } = useSession();
   const router = useRouter();
   const openMintModal = (submission: Submission) => {
     setIsMintModalOpen(true)

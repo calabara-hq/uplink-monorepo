@@ -17,17 +17,17 @@ export const BackButton = ({ context }: { context: string | null }) => {
     const buttonText = decodedContext.includes('user') ? "Author Profile" : decodedContext.includes('contest') ? "Back" : "Home"
     const [hasNavd, setHasNavd] = useState(false);
 
-    // useEffect(() => {
-    //     if (typeof window !== 'undefined') {
-    //         const nav = window.sessionStorage.getItem('nav')
-    //         if (nav === 'true') {
-    //             setHasNavd(true);
-    //         }
-    //         else {
-    //             setHasNavd(false);
-    //         }
-    //     }
-    // }, [])
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const nav = window.sessionStorage.getItem('nav')
+            if (nav === 'true') {
+                setHasNavd(true);
+            }
+            else {
+                setHasNavd(false);
+            }
+        }
+    }, [])
 
     const handleNav = () => {
         if (hasNavd) {
@@ -120,7 +120,7 @@ export const ShareButton = ({ submission, onClick, context }: { submission: Subm
         }
         else {
             if (status === 'authenticated') {
-                handleShare(event, `${process.env.NEXT_PUBLIC_CLIENT_URL}/submission/${submission.id}?context=${context}?referrer=${session?.user?.address}`)
+                handleShare(event, `${process.env.NEXT_PUBLIC_CLIENT_URL}/submission/${submission.id}?context=${context}&referrer=${session?.user?.address}`)
             }
             else {
                 onClick(event);

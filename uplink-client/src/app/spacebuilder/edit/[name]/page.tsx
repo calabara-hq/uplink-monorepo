@@ -7,6 +7,7 @@ export default async function Page({ params }: { params: { name: string } }) {
 
   const initialState = {
     ...spaceData,
+    name: spaceData.displayName,
     logoBlob: spaceData.logoUrl,
     admins: spaceData.admins.map((admin: Admin) => admin.address),
     errors: {
