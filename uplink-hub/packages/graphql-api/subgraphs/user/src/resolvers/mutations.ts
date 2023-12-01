@@ -1,14 +1,13 @@
 import { GraphQLError } from "graphql";
-import { AuthorizationController } from "lib";
 import { updateUser } from "../utils/updateUser.js";
-
-const authController = new AuthorizationController(process.env.REDIS_URL!);
+import { authController } from "../utils/authController.js"
+import { Context } from "lib";
 
 
 const mutations = {
 
     Mutation: {
-        updateUser: async (_: any, { displayName, profileAvatar, visibleTwitter }: { displayName: string, profileAvatar: string, visibleTwitter: boolean }, context: any) => {
+        updateUser: async (_: any, { displayName, profileAvatar, visibleTwitter }: { displayName: string, profileAvatar: string, visibleTwitter: boolean }, context: Context) => {
             const user = await authController.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {
@@ -17,7 +16,7 @@ const mutations = {
             })
 
 
-            return updateUser(user, displayName, profileAvatar, visibleTwitter);
+            return updateUser(user, context, displayName, profileAvatar, visibleTwitter);
 
         }
     }

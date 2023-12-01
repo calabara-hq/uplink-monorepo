@@ -88,7 +88,7 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
         LEFT JOIN (
             SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
             FROM users u
-        ) AS sub_author ON s.userId = author.id
+        ) AS sub_author ON s.userId = sub_author.id
         JOIN (
             SELECT id, created, endTime
             FROM contests

@@ -125,7 +125,11 @@ export const updateDbSpace = async (
 
         return updatedSpaceName
     } catch (e) {
-        throw new GraphQLError('something went wrong', {
+        if (e instanceof GraphQLError) {
+            throw e;
+        }
+
+        else throw new GraphQLError('something went wrong', {
             extensions: {
                 code: 'INTERNAL_SERVER_ERROR'
             }

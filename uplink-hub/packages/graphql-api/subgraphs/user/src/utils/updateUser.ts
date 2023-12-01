@@ -1,7 +1,9 @@
-import { schema } from "lib"
+import { schema, Context } from "lib"
 import { db, sqlOps } from "./database.js"
+import { authController } from "./authController.js"
 
-export const updateUser = async (user: any, displayName: string, profileAvatar: string, visibleTwitter: boolean) => {
+
+export const updateUser = async (user: any, context: Context, displayName: string, profileAvatar: string, visibleTwitter: boolean) => {
 
     try {
         await db.update(schema.users).set({
@@ -10,6 +12,12 @@ export const updateUser = async (user: any, displayName: string, profileAvatar: 
             profileAvatar,
             visibleTwitter
         }).where(sqlOps.eq(schema.users.id, user.id))
+        await authController.updateUserSession(context, {
+            ...user,
+            displayName,
+            userName: displayName.replace(/\s/g, '').toLowerCase(),
+            profileAvatar,
+        })
         return {
             success: true,
         }

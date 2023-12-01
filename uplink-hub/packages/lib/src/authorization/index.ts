@@ -57,4 +57,34 @@ export class AuthorizationController {
             return null;
         }
     }
+
+    async updateUserSession(context: Context, user: UserSession): Promise<boolean> {
+        if (!context || !context.token || !context.csrfToken) {
+            return false;
+        }
+
+        const { token, csrfToken } = context;
+        const { 'uplink-hub': uplinkHub } = token;
+
+        if (!uplinkHub || !csrfToken) return false;
+
+        const sid = uplinkHub.split('.')[0]?.split(':')[1];
+
+        // Attempt to fetch from the Redis store.
+        try {
+            const data = await this.redisClient.get(`uplink-session:${sid}`);
+
+            if (data) {
+                const { user: existingUser, ...existingSession } = JSON.parse(data);
+                if (existingSession.csrfToken !== csrfToken) return false; // check for csrf token match
+                await this.redisClient.set(`uplink-session:${sid}`, JSON.stringify({ ...existingSession, user }));
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error(`Failed to fetch user from Redis: ${error}`);
+            return false;
+        }
+    }
 }
