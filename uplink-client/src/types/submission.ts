@@ -13,6 +13,9 @@ export type BaseSubmission = {
     author: {
         id: string;
         address: string;
+        userName: string | null;
+        displayName: string | null;
+        profileAvatar: string | null;
     } | null;
     rank: string | null;
     totalVotes: string | null;

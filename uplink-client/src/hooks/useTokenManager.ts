@@ -243,12 +243,14 @@ export const useTokenManager = ({
                     if (existingToken.address === currentToken.address) {
                         if (currentToken.type === "ERC1155") {
                             // set tokenid error
-                            return dispatch({
-                                type: "setCustomTokenErrors",
-                                payload: {
-                                    tokenId: "This token id is already in your list",
-                                },
-                            });
+                            if (existingToken.tokenId === currentToken.tokenId) {
+                                return dispatch({
+                                    type: "setCustomTokenErrors",
+                                    payload: {
+                                        tokenId: "This token id is already in your list",
+                                    },
+                                });
+                            }
                         }
                         else {
                             return dispatch({

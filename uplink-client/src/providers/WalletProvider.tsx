@@ -11,7 +11,7 @@ export interface IWalletProviderProps {
   session: Session | null;
   refetchInterval: number;
 }
-import { CustomAvatar } from "@/ui/AddressDisplay/AddressDisplay";
+import { UserAvatar } from "@/ui/AddressDisplay/AddressDisplay";
 
 import "@rainbow-me/rainbowkit/styles.css";
 import {
@@ -56,7 +56,7 @@ export default function WalletProvider({
   session,
   refetchInterval,
 }: any) {
-  useEffect(() => { }, []);
+
   return (
     <WagmiConfig config={wagmiConfig}>
       <SessionProvider
@@ -68,7 +68,7 @@ export default function WalletProvider({
             appInfo={appInfo}
             theme={darkTheme()}
             chains={chains}
-            avatar={CustomAvatar}
+            avatar={(user) => <UserAvatar user={user} size={160} styleOverride="flex items-center rounded-full overflow-hidden p-2.5" />}
           >
             {children}
           </RainbowKitProvider>

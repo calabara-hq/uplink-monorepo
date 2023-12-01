@@ -44,7 +44,6 @@ type Session = {
     expires: ISODateString;
 }
 
-
 const prepareMessage = (message: SiweMessage) => {
     const header = `${message.domain} wants you to sign in with your Ethereum account:`;
     const uriField = `URI: ${message.uri}`;
@@ -78,12 +77,27 @@ const setCacheValue = async (key: string, value: string) => {
 }
 
 // add user to db. if anything fails, let it throw
-const addUser = async (user: Session['user']) => {
+const upsertUser = async (address: string): Promise<{ id: string, userName: string | null, displayName: string | null, profileAvatar: string | null }> => {
 
-    const [existing] = await db.select({ id: schema.users.id }).from(schema.users).where(sqlOps.eq(schema.users.address, user.address));
-    if (existing) return existing.id;
-    const insertResult = await db.insert(schema.users).values(user)
-    return insertResult.insertId;
+    const [existing] = await db.select({
+        id: schema.users.id,
+        userName: schema.users.userName,
+        displayName: schema.users.displayName,
+        profileAvatar: schema.users.profileAvatar,
+    }).from(schema.users).where(sqlOps.eq(schema.users.address, address));
+    if (existing) return {
+        id: existing.id.toString(),
+        userName: existing.userName,
+        displayName: existing.displayName,
+        profileAvatar: existing.profileAvatar
+    }
+    const insertResult = await db.insert(schema.users).values({ address })
+    return {
+        id: insertResult.insertId.toString(),
+        userName: null,
+        displayName: null,
+        profileAvatar: null
+    }
 }
 
 export const getCsrfToken = function (req, res) {
@@ -117,12 +131,11 @@ export const verifySignature = async (req, res) => {
         if (!isValid) return res.sendStatus(401);
 
         const session = req.session;
-        const user = { address: parsedMessage.address }
-        const userId = await addUser(user);
-        const userWithId = { ...user, id: userId }
-        req.session.user = userWithId;
+        const user = await upsertUser(parsedMessage.address);
+        const userWithDbInfo = { ...user, address: parsedMessage.address }
+        req.session.user = userWithDbInfo;
 
-        res.send({ user: userWithId, expires: req.session.cookie.expires, csrfToken: session.csrfToken })
+        res.send({ user: userWithDbInfo, expires: req.session.cookie.expires, csrfToken: session.csrfToken })
     } catch (err) {
         console.error(err)
         res.sendStatus(401)

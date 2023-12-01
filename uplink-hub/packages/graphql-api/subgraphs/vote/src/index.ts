@@ -35,7 +35,7 @@ const rateLimitRule = createRateLimitRule({
 // Setting up GraphQL permissions
 const permissions = shield({
   Query: {
-    getUserVotingParams: rateLimitRule({ window: '1m', max: 15 }),
+    getUserVotingParams: rateLimitRule({ window: '1m', max: 25 }),
   },
   Mutation: {
     castVotes: rateLimitRule({ window: '1m', max: 8 }),

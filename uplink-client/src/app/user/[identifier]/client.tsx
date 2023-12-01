@@ -21,9 +21,21 @@ export const ManageAccountButton = ({ }) => {
 
 }
 
+export const RewardsSkeleton = () => {
+    return (
+        <div className="flex flex-col bg-base-100 h-40 w-fit min-w-[300px] rounded-xl border border-border p-2 gap-4 m-auto md:mt-auto md:mr-0 md:ml-auto md:mb-0">
+            <div className="bg-base-200 shimmer h-4 rounded-lg w-1/3" />
+            <div className="flex flex-row items-center w-full gap-8">
+                <div className="bg-base-200 shimmer h-2 w-1/2 rounded-lg" />
+                <div className="bg-base-200 shimmer h-2 w-1/2 rounded-lg" />
+            </div>
+            <div />
+        </div>
+    )
+}
+
 export const UserSubmissions = ({ accountAddress, isMintableOnly }: { accountAddress: string, isMintableOnly: boolean }) => {
     const { me, isMeLoading, isMeError } = useMe(accountAddress);
-    console.log('IS MINTABLE ONLY', isMintableOnly)
     const filteredSubs = isMintableOnly ? me.submissions.filter((el: Submission) => el.nftDrop) : me.submissions
 
     const user: User = {
@@ -42,7 +54,6 @@ const useClaimableBalance = (chainId: number, contractAddress: string) => {
 
     const getBalance = (userAddress: string) => {
         tokenApi.zoraGetRewardBalance({ contractAddress, userAddress }).then(balance => {
-            console.log('balance is', balance)
             setBalance(balance.toString());
         })
     }
@@ -117,44 +128,53 @@ export const ClaimableUserRewards = ({ accountAddress }: { accountAddress: strin
         }
     }, [isTxSuccessful])
 
-    if (isMeLoading) return <p>loading</p>
-    if (!isUserAuthorized) return null
+    if (isMeLoading) return <RewardsSkeleton />
+    if (!isMeLoading && !isUserAuthorized) return null
 
     else return (
         <div className="flex flex-col bg-base-100 h-40 w-fit min-w-[300px] justify-between rounded-xl border border-border p-2 gap-4 m-auto md:mt-auto md:mr-0 md:ml-auto md:mb-0">
-            <h2 className="text-t1 font-bold text-xl">Creator Balance</h2>
+            <h2 className="text-t1 font-bold text-xl">Protocol Rewards</h2>
             <div className="flex flex-row items-center w-full">
                 <div className="flex gap-2 items-center">
                     <p className="text-t1 ">{getChainName(chainId)}</p>
                     <ChainLabel chainId={chainId} px={16} />
                 </div>
 
-                <div className="text-t1 font-bold ml-auto">{`${new Decimal(balance).div(Decimal.pow(10, 18)).toString()} ETH`}</div>
+                {isBalanceLoading ?
+                    (
+                        <TbLoader2 className="w-4 h-4 text-t2 animate-spin ml-auto" />
+                    )
+                    :
+                    (
+                        <div className="text-t1 font-bold ml-auto">{`${new Decimal(balance).div(Decimal.pow(10, 18)).toString()} ETH`}</div>
+                    )
+                }
             </div>
-            {isInsufficientFundsError
-                ?
-                (<Link className="btn btn-outline btn-warning normal-case" href='https://bridge.base.org/deposit' prefetch={false} target="_blank">Add Funds</Link>)
-                :
-                <SwitchNetworkButton chainId={chainId}>
-                    <button className="btn btn-primary normal-case " disabled={isBalanceLoading || balance === '0' || isTxPending || isWriteLoading}
-                        onClick={() => write?.()}
-                    >
-                        {isWriteLoading ?
-                            <div className="flex gap-2 items-center">
-                                <p className="text-sm">Awaiting signature</p>
-                                <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
-                            </div>
-                            :
-                            isTxPending ? (
+            {
+                isInsufficientFundsError
+                    ?
+                    (<Link className="btn btn-outline btn-warning normal-case" href='https://bridge.base.org/deposit' prefetch={false} target="_blank">Add Funds</Link>)
+                    :
+                    <SwitchNetworkButton chainId={chainId}>
+                        <button className="btn btn-primary normal-case " disabled={isBalanceLoading || balance === '0' || isTxPending || isWriteLoading}
+                            onClick={() => write?.()}
+                        >
+                            {isWriteLoading ?
                                 <div className="flex gap-2 items-center">
-                                    <p className="text-sm">Claiming</p>
+                                    <p className="text-sm">Awaiting signature</p>
                                     <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
                                 </div>
-                            ) : "Claim"
-                        }
-                    </button>
-                </SwitchNetworkButton>
+                                :
+                                isTxPending ? (
+                                    <div className="flex gap-2 items-center">
+                                        <p className="text-sm">Claiming</p>
+                                        <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                    </div>
+                                ) : "Claim"
+                            }
+                        </button>
+                    </SwitchNetworkButton>
             }
-        </div>
+        </div >
     )
 }

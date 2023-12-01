@@ -25,7 +25,11 @@ const mutations = {
 
         createTwitterSubmission: async (_: any, { contestId, submission }: { contestId: string, submission: TwitterSubmissionPayload }, context: any) => {
             const user = await authController.getUser(context);
-            if (!user || !user.twitter) throw new GraphQLError('Unauthorized', {
+
+            const isTwitterAuth = Boolean(user?.twitter?.accessToken)
+            const isTwitterExpired = (new Date(user?.twitter?.expiresAt ?? '1') > new Date(Date.now()));
+
+            if (!user || !isTwitterAuth || isTwitterExpired) throw new GraphQLError('Unauthorized', {
                 extensions: {
                     code: 'UNAUTHORIZED'
                 }

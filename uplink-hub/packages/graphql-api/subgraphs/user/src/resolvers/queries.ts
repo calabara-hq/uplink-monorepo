@@ -37,11 +37,14 @@ const restrictedSubmissionsByUserAddress = async (userId: string) => {
             END AS nftDrop,
             JSON_OBJECT(
                 'id', author.id,
-                'address', author.address
+                'address', author.address,
+                'userName', author.userName,
+                'displayName', author.displayName,
+                'profileAvatar', author.profileAvatar
             ) AS author
         FROM submissions s
         LEFT JOIN (
-            SELECT u.id, u.address
+            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
             FROM users u
         ) AS author ON s.userId = author.id
         JOIN (
@@ -52,7 +55,8 @@ const restrictedSubmissionsByUserAddress = async (userId: string) => {
             SELECT ud.submissionId, ud.chainId, ud.contractAddress, ud.dropConfig
             FROM userDrops ud
         ) AS nftDrop ON s.id = nftDrop.submissionId
-        WHERE s.userId = ${userId}
+        WHERE s.userId = ${userId} AND (c.anonSubs = false OR c.endTime < NOW())
+        ORDER BY s.created DESC
 
     `)
 
@@ -75,11 +79,14 @@ const unrestrictedSubmissionsByUserAddress = async (userId: string) => {
             END AS nftDrop,
             JSON_OBJECT(
                 'id', author.id,
-                'address', author.address
+                'address', author.address,
+                'userName', author.userName,
+                'displayName', author.displayName,
+                'profileAvatar', author.profileAvatar
             ) AS author
         FROM submissions s
         LEFT JOIN (
-            SELECT u.id, u.address
+            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
             FROM users u
         ) AS author ON s.userId = author.id
         JOIN (
@@ -91,7 +98,7 @@ const unrestrictedSubmissionsByUserAddress = async (userId: string) => {
             FROM userDrops ud
         ) AS nftDrop ON s.id = nftDrop.submissionId
         WHERE s.userId = ${userId}
-
+        ORDER BY s.created DESC
     `)
 
     return data.rows

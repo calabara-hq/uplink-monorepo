@@ -25,6 +25,9 @@ const fetchPopularSubmissions = async (): Promise<Array<Submission>> => {
             author {
               id
               address
+              userName
+              displayName
+              profileAvatar
             }
           }
         }`,

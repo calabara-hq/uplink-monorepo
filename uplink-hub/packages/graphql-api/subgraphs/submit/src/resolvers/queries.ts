@@ -180,45 +180,45 @@ const queries = {
             let csvContent = "data:text/csv;charset=utf-8,token_type,token_address,receiver,amount,id\r\n"
 
             try {
-                // submitterRewards.forEach((reward) => {
-                //     const winner = submissions[reward.rank - 1];
-                //     if (winner) { // in case rewards.length > winners.length
-                //         switch (reward.tokenReward.token.type) {
-                //             case 'ETH':
-                //                 csvContent += `native,,${winner.author},${reward.tokenReward.amount},\r\n`;
-                //                 break;
-                //             case 'ERC20':
-                //                 csvContent += `erc20,${reward.tokenReward.token.address},${winner.author},${reward.tokenReward.amount},\r\n`;
-                //                 break;
-                //             case 'ERC721':
-                //                 csvContent += `nft,${reward.tokenReward.token.address},${winner.author},,${reward.tokenReward.tokenId},\r\n`;
-                //                 break;
-                //             case 'ERC1155':
-                //                 csvContent += `nft,${reward.tokenReward.token.address},${winner.author},${reward.tokenReward.amount},${reward.tokenReward.token.tokenId},\r\n`;
-                //                 break;
-                //         }
-                //     }
+                submitterRewards.forEach((reward) => {
+                    const winner = submissions[reward.rank - 1];
+                    if (winner) { // in case rewards.length > winners.length
+                        switch (reward.tokenReward.token.type) {
+                            case 'ETH':
+                                csvContent += `native,,${winner?.author?.address ?? ''},${reward.tokenReward.amount},\r\n`;
+                                break;
+                            case 'ERC20':
+                                csvContent += `erc20,${reward.tokenReward.token.address},${winner?.author?.address ?? ''},${reward.tokenReward.amount},\r\n`;
+                                break;
+                            case 'ERC721':
+                                csvContent += `nft,${reward.tokenReward.token.address},${winner?.author?.address ?? ''},,${reward.tokenReward.tokenId},\r\n`;
+                                break;
+                            case 'ERC1155':
+                                csvContent += `nft,${reward.tokenReward.token.address},${winner?.author?.address ?? ''},${reward.tokenReward.amount},${reward.tokenReward.token.tokenId},\r\n`;
+                                break;
+                        }
+                    }
+                })
 
-                //     voterRewards.forEach((reward) => {
-                //         const winner = submissions[reward.rank - 1];
-                //         if (winner) { // in case rewards.length > winners.length
-                //             winner.votes.forEach((vote: schema.dbVoteType) => {
-                //                 const decRewardAmount = new Decimal(reward.tokenReward.amount ?? 0); // TODO: better typing solves this
-                //                 const decVoteAmount = new Decimal(vote.amount);
-                //                 const decTotalVotes = new Decimal(winner.totalVotes ?? 1); // TODO: better typing solves this
-                //                 const voterShare = decRewardAmount.mul(decVoteAmount.div(decTotalVotes)).toString();
-                //                 switch (reward.tokenReward.token.type) {
-                //                     case 'ETH':
-                //                         csvContent += `native,,${vote.voter},${voterShare},\r\n`;
-                //                         break;
-                //                     case 'ERC20':
-                //                         csvContent += `erc20,${reward.tokenReward.token.address},${vote.voter},${voterShare},\r\n`;
-                //                         break;
-                //                 }
-                //             })
-                //         }
-                //     })
-                // })
+                voterRewards.forEach((reward) => {
+                    const winner = submissions[reward.rank - 1];
+                    if (winner) { // in case rewards.length > winners.length
+                        winner.votes.forEach((vote: schema.dbVoteType) => {
+                            const decRewardAmount = new Decimal(reward.tokenReward.amount ?? 0); // TODO: better typing solves this
+                            const decVoteAmount = new Decimal(vote.amount);
+                            const decTotalVotes = new Decimal(winner.totalVotes ?? 1); // TODO: better typing solves this
+                            const voterShare = decRewardAmount.mul(decVoteAmount.div(decTotalVotes)).toString();
+                            switch (reward.tokenReward.token.type) {
+                                case 'ETH':
+                                    csvContent += `native,,${vote.voter.address},${voterShare},\r\n`;
+                                    break;
+                                case 'ERC20':
+                                    csvContent += `erc20,${reward.tokenReward.token.address},${vote.voter.address},${voterShare},\r\n`;
+                                    break;
+                            }
+                        })
+                    }
+                })
 
             } catch (e) {
                 return "";

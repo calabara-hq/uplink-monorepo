@@ -19,12 +19,10 @@ export const spaces = mysqlTable('spaces', {
 export const admins = mysqlTable('admins', {
     id: serial('id').primaryKey(),
     spaceId: int('spaceId').notNull(),
-    userId: int('userId').notNull().default(1),
     address: varchar('address', { length: 255 }).notNull(),
-
 }, (admins) => ({
     spaceIdIndex: index("admins_space_id_idx").on(admins.spaceId),
-    userIdIndex: index("admins_user_id_idx").on(admins.userId),
+    userAddressIndex: index("admins_address_idx").on(admins.address),
 }))
 
 
@@ -144,7 +142,7 @@ export const arcadeVotingStrategy = mysqlTable('arcadeVotingStrategy', {
 export const submissions = mysqlTable('submissions', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
-    //author: varchar('author', { length: 255 }).notNull(), // this will be removed
+    author_deprecated: varchar('author_deprecated', { length: 255 }).notNull().default('test'), // this will be removed
     userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     type: varchar('type', { length: 255 }).notNull(),
@@ -153,21 +151,23 @@ export const submissions = mysqlTable('submissions', {
 }, (submissions) => ({
     submissionsContestIdIndex: index("submissions_contest_id_idx").on(submissions.contestId),
     submissionsUserIdIndex: index("submissions_user_id_idx").on(submissions.userId),
+    submissionsAuthorIndex: index("submissions_author_idx").on(submissions.author_deprecated),
 }));
 
 export const votes = mysqlTable('votes', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     submissionId: int('submissionId').notNull(),
-    //voter: varchar('voter', { length: 255 }).notNull(), // this will be removed
+    voter_deprecated: varchar('voter_deprecated', { length: 255 }).notNull().default('test'), // this will be removed
     userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     amount: varchar('amount', { length: 255 }).notNull()
 }, (votes) => ({
     votesContestIdIndex: index("votes_contest_id_idx").on(votes.contestId),
     votesSubmissionIdIndex: index("votes_submission_id_idx").on(votes.submissionId),
-    //votesVoterIndex: index("votes_voter_idx").on(votes.voter),
-    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.userId),
+    votesVoterIndex: index("votes_voter_idx").on(votes.voter_deprecated),
+    voterUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.userId),
+    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter_deprecated),
     votesUserIdIndex: index("votes_user_id_idx").on(votes.userId),
 }));
 
@@ -201,6 +201,7 @@ export const users = mysqlTable('users', {
 }, (user) => ({
     userAddressIndex: uniqueIndex("user_address_idx").on(user.address)
 }));
+
 
 export const userDrops = mysqlTable('userDrops', {
     id: serial('id').primaryKey(),
@@ -352,6 +353,10 @@ export const submissionsRelations = relations(submissions, ({ one, many }) => ({
 
 
 export const votesRelations = relations(votes, ({ one }) => ({
+    voter: one(users, {
+        fields: [votes.userId],
+        references: [users.id],
+    }),
     contest: one(contests, {
         fields: [votes.contestId],
         references: [contests.id],
@@ -454,6 +459,7 @@ export type dbSubmissionType = InferModel<typeof submissions> & {
 export type dbVoteType = InferModel<typeof votes> & {
     contest: dbContestType,
     submission: dbSubmissionType,
+    voter: dbUserType,
 }
 
 export type dbTweetQueueType = InferModel<typeof tweetQueue> & {

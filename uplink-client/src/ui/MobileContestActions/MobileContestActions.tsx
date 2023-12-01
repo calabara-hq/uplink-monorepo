@@ -1,6 +1,6 @@
 "use client";
+import { useVote } from "@/hooks/useVote";
 import { useContestState } from "@/providers/ContestStateProvider";
-import { useVoteActionContext } from "@/providers/VoteActionProvider";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -116,15 +116,13 @@ export const DetailsMenuDrawer = ({
 
 const MobileContestActions = ({
   contestId,
-  spaceName,
   detailChildren,
 }: {
   contestId: string;
-  spaceName: string;
   detailChildren: React.ReactNode;
 }) => {
   const { contestState, stateRemainingTime } = useContestState();
-  const { proposedVotes } = useVoteActionContext();
+  const { proposedVotes } = useVote(contestId);
 
   if (!contestState) return null;
 
@@ -136,7 +134,7 @@ const MobileContestActions = ({
             <DetailsMenuDrawer detailChildren={detailChildren} />
             <div className="flex p-2 w-full">
               <Link
-                href={`/${spaceName}/contest/${contestId}/studio`}
+                href={`/contest/${contestId}/studio`}
                 className="btn btn-primary flex flex-1 normal-case rounded-r-none"
                 draggable={false}
               >
@@ -161,7 +159,7 @@ const MobileContestActions = ({
             <div className="flex p-2 w-full">
               {" "}
               <Link
-                href={`/${spaceName}/contest/${contestId}/vote`}
+                href={`/contest/${contestId}/vote`}
                 className="btn btn-warning flex flex-1 normal-case rounded-r-none indicator"
                 draggable={false}
               >

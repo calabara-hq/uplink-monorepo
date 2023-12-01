@@ -25,7 +25,11 @@ const prepared_submissionsByContestId = db.query.submissions.findMany({
     where: (submission: schema.dbSubmissionType) => sqlOps.eq(submission.contestId, sqlOps.placeholder('contestId')),
     with: {
         author: true,
-        votes: true,
+        votes: {
+            with: {
+                voter: true
+            }
+        },
         nftDrop: true,
     }
 }).prepare();
@@ -74,14 +78,17 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
                 )
             END AS nftDrop,
             JSON_OBJECT(
-                'id', author.id,
-                'address', author.address
+                'id', sub_author.id,
+                'address', sub_author.address,
+                'userName', sub_author.userName,
+                'displayName', sub_author.displayName,
+                'profileAvatar', sub_author.profileAvatar
             ) AS author
         FROM submissions s
         LEFT JOIN (
-            SELECT u.id, u.address
+            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
             FROM users u
-        ) AS author ON s.userId = author.id
+        ) AS sub_author ON s.userId = author.id
         JOIN (
             SELECT id, created, endTime
             FROM contests

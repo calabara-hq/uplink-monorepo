@@ -6,7 +6,7 @@ const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
 });
 import { ParseThread } from "@/lib/threadParser";
 import { ImageWrapper } from "./MediaWrapper";
-import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
+import { UsernameDisplay, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import dynamic from "next/dynamic";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 
@@ -108,9 +108,9 @@ const ExpandedSubmission = ({
         <h2 className="text-3xl text-t1 font-[500]">{submission.data.title}</h2>
         <div className="flex flex-row items-center h-8">
           <div className="flex gap-2 items-center">
-            <UserAvatar address={submission.author?.address ?? null} size={28} />
+            <UserAvatar user={submission.author} size={28} />
             <h3 className="break-all italic text-sm text-t2 font-semibold">
-              <AddressOrEns address={submission.author?.address ?? null} />
+              <UsernameDisplay user={submission.author} />
             </h3>
           </div>
           {headerChildren}

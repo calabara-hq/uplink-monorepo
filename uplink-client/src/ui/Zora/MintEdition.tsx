@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import { useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
-import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
+import { UsernameDisplay, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { format, set } from "date-fns";
 import { uint64MaxSafe } from "@/utils/uint64";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
@@ -203,7 +203,6 @@ const RenderFeeInfo = ({ feeStructure }: { feeStructure: FeeStructure }) => {
 
 const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Submission, setIsModalOpen: (val: boolean) => void, referrer?: string }) => {
     const dropConfig = submission.nftDrop.dropConfig ? JSON.parse(submission.nftDrop.dropConfig) : null;
-    dropConfig.saleConfig.publicSaleEnd = new Date()
     const { chainId, contractAddress } = submission.nftDrop;
     const { data: session, status } = useSession();
     const [numEditions, setNumEditions] = useState<string>('1');
@@ -213,7 +212,6 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
     const { isLoading: isTotalSupplyLoading, totalSupply } = useTotalSupply(chainId, contractAddress);
 
     const isReferralValid = referrer ? referrer.startsWith('0x') && referrer.length === 42 : false;
-
     const { config, error: prepareError, isError: isPrepareError, isLoading: isPrepareLoading } = usePrepareContractWrite({
         chainId: chainId,
         address: contractAddress,
@@ -309,8 +307,8 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
                                 <div className="flex flex-col gap-2">
                                     <p className="line-clamp-3 font-bold text-lg break-all">{dropConfig.name}</p>
                                     <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1">
-                                        <UserAvatar address={submission.author.address} size={28} />
-                                        <AddressOrEns address={submission.author.address} />
+                                        <UserAvatar user={submission?.author} size={28} />
+                                        <UsernameDisplay user={submission?.author} />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2 w-full">
@@ -357,7 +355,7 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
                                         </div>
                                         <div className="flex flex-col">
                                             <p className="text-t2">{isMintPeriodOver ? "Ended" : "Until"}</p>
-                                            <p className="font-bold text-t1">{dropConfig.saleConfig.publicSaleEnd === uint64MaxSafe.toString() ? "Forever" : format(new Date(dropConfig.saleConfig.publicSaleEnd * 1000), "MMM d, h:mm aa")}</p>
+                                            <p className="font-bold text-t1">{dropConfig.saleConfig.publicSaleEnd == uint64MaxSafe.toString() ? "Forever" : format(new Date(dropConfig.saleConfig.publicSaleEnd * 1000), "MMM d, h:mm aa")}</p>
                                         </div>
                                         <div className="flex flex-col">
                                             <p className="text-t2">Price</p>

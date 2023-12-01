@@ -744,6 +744,9 @@ type UserSubmissionAuthor
 {
   id: ID!
   address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
 }
 
 type UserSubmissionParams

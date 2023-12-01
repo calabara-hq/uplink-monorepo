@@ -1,8 +1,6 @@
 import { Space } from "@/types/space";
 import handleNotFound from "../handleNotFound";
 
-
-
 const fetchSingleSpace = async (name: string): Promise<Space> => {
   const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
     method: "POST",
@@ -22,6 +20,16 @@ const fetchSingleSpace = async (name: string): Promise<Space> => {
               website
               admins{
                   address
+              }
+              spaceTokens {
+                token {
+                  type
+                  address
+                  decimals
+                  symbol
+                  tokenId
+                  chainId
+                }
               }
             }
         }`,

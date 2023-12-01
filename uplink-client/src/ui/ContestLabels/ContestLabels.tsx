@@ -92,9 +92,7 @@ export const StatusLabel = ({ status }: { status: ContestState }) => {
 };
 
 export const ChainLabel = ({ chainId, px }: { chainId: number, px: number }) => {
-  console.log('in chain label')
   if (chainId === 8453) {
-    console.log('got chain 8453')
     return (
       <div
         className="tooltip tooltip-top cursor-pointer"

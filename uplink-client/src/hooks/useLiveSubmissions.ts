@@ -31,6 +31,9 @@ const fetchSubmissions = async (contestId: string) => {
                   author {
                     id
                     address
+                    userName
+                    displayName
+                    profileAvatar
                   }
               }
           }
@@ -72,10 +75,6 @@ const useLiveSubmissions = (contestId: string) => {
         mutateSWRSubmissions(); // mutate the SWR cache
         mutateSubmissions(contestId); // mutate the server cache
     };
-
-    useEffect(() => {
-        console.log(liveSubmissions)
-    }, [])
 
     return {
         liveSubmissions,

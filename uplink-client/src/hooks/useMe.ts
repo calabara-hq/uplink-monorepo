@@ -34,6 +34,9 @@ const fetchMe = async (csrfToken: string) => {
                         author {
                             address
                             id
+                            displayName
+                            userName
+                            profileAvatar
                         }
                     }
                     twitterAvatar
@@ -51,7 +54,7 @@ const fetchMe = async (csrfToken: string) => {
             const subData = await Promise.all(
                 res.submissions.map(async (submission: BaseSubmission) => {
                     const data: Submission = await fetch(submission.url).then((res) => res.json());
-                    return { ...submission, data: data, author: { id: res.id, address: res.address } };
+                    return { ...submission, data: data };
                 })
             );
             return {
@@ -77,6 +80,7 @@ const useMe = (accountAddress: string) => {
         data,
         isLoading: isMeLoading,
         error: isMeError,
+        mutate: mutateMe
     }: { data: any; isLoading: boolean; error: any; mutate: any } = useSWR(
         meParamsSwrKey,
         () => fetchMe(session.csrfToken),
@@ -91,6 +95,7 @@ const useMe = (accountAddress: string) => {
         me: meParamsSwrKey ? data : getCachedFallback(),
         getFallbackData: () => getCachedFallback(),
         isUserAuthorized: isAuthed,
+        mutateMe,
         isMeLoading,
         isMeError,
     }

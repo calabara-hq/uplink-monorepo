@@ -1,7 +1,9 @@
 "use client";
 
+import { User } from "@/types/user";
 import Noggles from "../Noggles/Noggles";
 import useEnsName from "@/hooks/useEnsName";
+import { Session } from "@/providers/SessionProvider";
 
 // returns one of the following:
 // "anonymous" if address is null | undefined
@@ -53,14 +55,14 @@ const generateColorFromAddress = (address) => {
   };
 };
 
-export const CustomAvatar = ({
+export const NoggleAvatar = ({
   address,
   size,
-  context,
+  styleOverride,
 }: {
   address: string;
   size: number;
-  context?: string;
+  styleOverride?: string;
 }) => {
   const colors = generateColorFromAddress(address);
   const avatarStyle = {
@@ -68,26 +70,18 @@ export const CustomAvatar = ({
     width: size,
     height: size,
   };
-  if (!context) {
-    return (
-      <div
-        style={avatarStyle}
-        className="flex items-center rounded-full overflow-hidden p-2.5"
-      >
-        <Noggles color={colors.foreground} />
-      </div>
-    );
-  } else {
-    return (
-      <div
-        style={avatarStyle}
-        className="flex h-full items-center overflow-hidden p-1 rounded-lg transition-all duration-300 ease-linear"
-      >
-        <Noggles color={colors.foreground} />
-      </div>
-    );
-  }
+
+  return (
+    <div
+      style={avatarStyle}
+      className={styleOverride ? styleOverride : "flex h-full items-center overflow-hidden p-1 rounded-lg transition-all duration-300 ease-linear"}
+    >
+      <Noggles color={colors.foreground} />
+    </div>
+  );
 };
+
+
 
 export const AddressOrEns = ({
   address,
@@ -101,16 +95,23 @@ export const AddressOrEns = ({
   return <span>{shortAddress}</span>;
 };
 
-// return the userAvatar for an address
-// if address is null | undefined, return a default avatar
-// otherwise, return the user's avatar
+
 export const UserAvatar = ({
-  address,
+  user,
   size,
+  styleOverride,
 }: {
-  address: null | undefined | string;
+  user: Session['user'] | User;
   size: number;
+  styleOverride?: string;
 }) => {
-  const dispAddr = address ? address : "0xe31f92";
-  return <CustomAvatar address={dispAddr} size={size} context="true" />;
+  if (user?.profileAvatar) return <img src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} width={size} height={size} />
+
+  const dispAddr = user?.address ? user.address : "0x123456";
+  return <NoggleAvatar address={dispAddr} size={size} styleOverride={styleOverride} />;
 };
+
+export const UsernameDisplay = ({ user }: { user: Session['user'] | User }) => {
+  if (user?.displayName) return <span>{user.displayName}</span>;
+  return AddressOrEns({ address: user?.address });
+}

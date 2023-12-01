@@ -24,8 +24,12 @@ export type UserTwitterObject = {
 
 export interface Session {
   user?: {
+    id?: string | null;
     address?: string | null;
     twitter?: UserTwitterObject | null;
+    displayName?: string | null;
+    userName?: string | null;
+    profileAvatar?: string | null
   };
   expires: ISODateString;
   csrfToken: string | null;

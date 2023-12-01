@@ -12,8 +12,7 @@ const createDrop = async (user: any, submissionId: string, contestId: string, co
 
     // check if user is the author of the submission
 
-    if (submission.userId !== user.id) return { success: false }
-
+    if (submission.author.id !== parseInt(user.id)) return { success: false }
     // check if submission is already dropped
 
     if (submission.nftDrop) return { success: false }

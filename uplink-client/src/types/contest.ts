@@ -156,7 +156,6 @@ export const isWeightedVotingStrategy = (votingStrategy: VotingStrategy): voting
 
 export type ContestState = "pending" | "submitting" | "voting" | "closed";
 
-
 export type ContestPromptData = {
   title: string;
   coverUrl?: string | null;

@@ -251,10 +251,8 @@ export const useThreadCreator = (initialThread?: ThreadItem[]) => {
                     setIsVideo(id, mimeType.includes("video"));
                     setTweetAssetType(id, mimeType)
                 },
-                (base64) => {
-                    if (!isVideo) {
-                        setTweetPrimaryAssetBlob(id, base64);
-                    }
+                (base64, mimeType) => {
+                    setTweetPrimaryAssetBlob(id, base64);
                 },
                 (ipfsUrl) => {
                     setTweetPrimaryAssetUrl(id, ipfsUrl);

@@ -1,11 +1,12 @@
 "use client"
+import useMe from "@/hooks/useMe";
 import { handleMutationError } from "@/lib/handleMutationError";
 import handleMediaUpload from "@/lib/mediaUpload";
 import { useSession } from "@/providers/SessionProvider";
 import { User } from "@/types/user";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { HiUser } from "react-icons/hi2";
 import { TbLoader2 } from "react-icons/tb";
@@ -32,11 +33,13 @@ const PFP = ({
     profileAvatarBlob,
     error,
     dispatch,
+    setIsUploading,
 }: {
     profileAvatarUrl: string;
     profileAvatarBlob: string;
     error: Array<string>;
     dispatch: any;
+    setIsUploading: (val: boolean) => void;
 }) => {
     const imageUploader = useRef<HTMLInputElement>(null);
     return (
@@ -50,6 +53,7 @@ const PFP = ({
                 accept="image/*"
                 className="hidden"
                 onChange={async (event) => {
+                    setIsUploading(true);
                     handleMediaUpload(
                         event,
                         ["image", "svg"],
@@ -61,13 +65,16 @@ const PFP = ({
                             });
                         },
                         (ipfsUrl) => {
+                            setIsUploading(false);
                             dispatch({
                                 type: "SET_FIELD",
                                 payload: { field: "profileAvatarUrl", value: ipfsUrl },
                             });
                         }
                     ).catch((err) => {
+                        setIsUploading(false);
                         return toast.error("couldn't upload your image");
+
                     });
                 }}
                 ref={imageUploader}
@@ -252,6 +259,8 @@ const validateForm = (state: ConfigurableUserSettings, dispatch: any) => {
 
 const Settings = ({ user }: { user: User }) => {
     const { data: session, status } = useSession();
+    const [isUploading, setIsUploading] = useState(false);
+    const { mutateMe } = useMe(user.address)
     const router = useRouter();
     const [state, dispatch] = useReducer(reducer, {
         profileAvatarUrl: user.profileAvatar || "",
@@ -284,11 +293,13 @@ const Settings = ({ user }: { user: User }) => {
                     visibleTwitter: result.data.visibleTwitter,
                     csrfToken: session.csrfToken,
                 }).then((response) => {
-                    console.log(response)
+
                     if (!response.success) {
                         reset();
                     }
+
                     toast.success('Profile updated!')
+                    mutateMe();
                     router.refresh();
                     router.push(`/user/${user.address}`);
                     return;
@@ -317,6 +328,7 @@ const Settings = ({ user }: { user: User }) => {
                             profileAvatarUrl={state.profileAvatarUrl}
                             profileAvatarBlob={state.profileAvatarBlob}
                             error={state.errors?.profileAvatarUrl?._errors}
+                            setIsUploading={setIsUploading}
                             dispatch={dispatch}
                         />
                         <BasicInput
@@ -330,13 +342,18 @@ const Settings = ({ user }: { user: User }) => {
                         <TwitterDisplayToggle state={state} dispatch={dispatch} />
                     </div>
                     <div className="h-0.5 w-full bg-base-100" />
-                    <button onClick={onSubmit} className="btn btn-primary normal-case w-fit ml-auto">
+                    <button onClick={onSubmit} disabled={isMutating || isUploading} className="btn btn-primary normal-case w-fit ml-auto">
                         {isMutating ?
                             <div className="flex gap-2 items-center">
                                 <p className="text-sm">Saving</p>
                                 <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
                             </div>
-                            : "Save"
+                            : isUploading ? (
+                                <div className="flex gap-2 items-center">
+                                    <p className="text-sm">Uploading</p>
+                                    <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                </div>
+                            ) : "Save"
                         }
                     </button>
                 </div>

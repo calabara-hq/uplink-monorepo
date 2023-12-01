@@ -19,6 +19,9 @@ const fetchSubmissions = async (contestId: string): Promise<Array<Submission>> =
                   author {
                     id
                     address
+                    profileAvatar
+                    userName
+                    displayName
                   }
                   totalVotes
                   rank

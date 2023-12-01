@@ -18,3 +18,9 @@ export const mutateSubmissions = (contestId: string) => {
         revalidateDataCache([`submissions/${contestId}`]); // reval server cache
     });
 }
+
+export const mutateUser = (identifier: string) => {
+    startTransition(() => {
+        revalidateDataCache([`user/${identifier}`]); // reval server cache
+    });
+}

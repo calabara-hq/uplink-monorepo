@@ -30,6 +30,9 @@ const fetchUser = async (userIdentifier: string): Promise<User> => {
                     author {
                         id
                         address
+                        displayName
+                        userName
+                        profileAvatar
                     }
                     nftDrop {
                         chainId
@@ -52,7 +55,7 @@ const fetchUser = async (userIdentifier: string): Promise<User> => {
             const subData = await Promise.all(
                 res.submissions.map(async (submission: BaseSubmission) => {
                     const data: Submission = await fetch(submission.url).then((res) => res.json());
-                    return { ...submission, data: data, author: { id: res.id, address: res.address } };
+                    return { ...submission, data: data };
                 })
             );
             return {
