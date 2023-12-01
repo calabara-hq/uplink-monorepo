@@ -65,7 +65,7 @@ const handleMediaUpload = async (
     event: any,
     acceptedFormats: string[],
     mimeTypeCallback: (mimeType: string) => void,
-    readerCallback: (data: any) => void,
+    readerCallback: (data: any, mimeType: string) => void,
     ipfsCallback: (uri: string) => void,
     videoThumbnailCallback?: (thumbnails: string[]) => void,
     fileSizeCallback?: (size: number) => void,
@@ -112,7 +112,7 @@ const handleMediaUpload = async (
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-        readerCallback(reader.result);
+        readerCallback(reader.result, mimeType);
     };
     reader.onerror = (error) => {
         throw new MediaUploadError({ code: 4, message: 'Error reading file' })

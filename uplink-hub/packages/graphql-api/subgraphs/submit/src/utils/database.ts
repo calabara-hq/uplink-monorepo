@@ -12,6 +12,7 @@ export const sqlOps = databaseController.sqlOps;
 const prepared_singleSubmissionById = db.query.submissions.findFirst({
     where: (submission: schema.dbSubmissionType) => sqlOps.eq(submission.id, sqlOps.placeholder('submissionId')),
     with: {
+        author: true,
         votes: true,
         contest: true,
         nftDrop: true,
@@ -23,7 +24,12 @@ const prepared_singleSubmissionById = db.query.submissions.findFirst({
 const prepared_submissionsByContestId = db.query.submissions.findMany({
     where: (submission: schema.dbSubmissionType) => sqlOps.eq(submission.contestId, sqlOps.placeholder('contestId')),
     with: {
-        votes: true,
+        author: true,
+        votes: {
+            with: {
+                voter: true
+            }
+        },
         nftDrop: true,
     }
 }).prepare();
@@ -63,12 +69,26 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
         SELECT 
             s.*,
             COALESCE(vote_counts.uniqueVotes, 0) AS uniqueVotes,
+            CASE
+                WHEN nftDrop.chainId IS NULL AND nftDrop.contractAddress IS NULL AND nftDrop.dropConfig IS NULL THEN NULL
+                ELSE JSON_OBJECT(
+                    'chainId', nftDrop.chainId,
+                    'contractAddress', nftDrop.contractAddress,
+                    'dropConfig', nftDrop.dropConfig
+                )
+            END AS nftDrop,
             JSON_OBJECT(
-                'chainId', nftDrop.chainId,
-                'contractAddress', nftDrop.contractAddress,
-                'dropConfig', nftDrop.dropConfig
-            ) AS nftDrop
+                'id', sub_author.id,
+                'address', sub_author.address,
+                'userName', sub_author.userName,
+                'displayName', sub_author.displayName,
+                'profileAvatar', sub_author.profileAvatar
+            ) AS author
         FROM submissions s
+        LEFT JOIN (
+            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
+            FROM users u
+        ) AS sub_author ON s.userId = author.id
         JOIN (
             SELECT id, created, endTime
             FROM contests
@@ -76,6 +96,7 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
             ORDER BY created DESC
             LIMIT 3
         ) AS latest_contests ON s.contestId = latest_contests.id
+
         LEFT JOIN (
             SELECT v.submissionId, COUNT(DISTINCT v.id) AS uniqueVotes
             FROM votes v

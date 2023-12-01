@@ -37,7 +37,7 @@ const permissions = shield({
   Query: {
     submission: rateLimitRule({ window: '1m', max: 15 }),
     popularSubmissions: rateLimitRule({ window: '1m', max: 15 }),
-    getUserSubmissionParams: rateLimitRule({ window: '1m', max: 25 }),
+    getUserSubmissionParams: rateLimitRule({ window: '1m', max: 50 }),
 
   },
   Mutation: {

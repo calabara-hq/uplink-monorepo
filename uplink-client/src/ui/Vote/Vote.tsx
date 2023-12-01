@@ -8,27 +8,24 @@ import {
   HiPlus,
   HiSparkles,
 } from "react-icons/hi2";
-import { VotableSubmission, useVoteActionContext } from "@/providers/VoteActionProvider";
-import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import formatDecimal from "@/lib/formatDecimal";
 import { useContestState } from "@/providers/ContestStateProvider";
 import Image from "next/image";
-import { HiTrash, HiDocumentText } from "react-icons/hi2";
+import { HiTrash } from "react-icons/hi2";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
-import { Submission, isStandardSubmission, isTwitterSubmission } from "@/types/submission";
-import { ImageWrapper } from "../Submission/MediaWrapper";
-import { UserVote } from "@/providers/ContestInteractionProvider";
-
+import { UserVote } from "@/hooks/useContestInteractionAPI";
+import { useVote } from "@/hooks/useVote";
+import { VotableSubmission } from "@/hooks/useVote";
 const SubmissionVoteInput = ({
   submission,
   mode,
+  updateVoteAmount
 }: {
   submission: VotableSubmission;
   mode: "current" | "proposed";
+  updateVoteAmount: (submissionId: string, votes: string, mode: "current" | "proposed") => void;
 }) => {
-  const { updateVoteAmount } = useVoteActionContext();
-
   return (
     <input
       type="number"
@@ -48,11 +45,15 @@ const SubmissionVoteInput = ({
 const SubmissionCardVote = ({
   submission,
   mode,
+  removeSingleVote,
+  updateVoteAmount
 }: {
   submission: VotableSubmission;
   mode: "current" | "proposed";
+  removeSingleVote: (submissionId: string, mode: "current" | "proposed") => void;
+  updateVoteAmount: (submissionId: string, votes: string, mode: "current" | "proposed") => void;
 }) => {
-  const { removeSingleVote } = useVoteActionContext();
+
 
   return (
     <div className="grid grid-cols-[70%_30%] w-full h-24 max-h-24 bg-base-100 rounded-xl">
@@ -78,44 +79,14 @@ const SubmissionCardVote = ({
           </button>
         </div>
         <div className="rounded-br-xl">
-          <SubmissionVoteInput submission={submission} mode={mode} />
+          <SubmissionVoteInput submission={submission} mode={mode} updateVoteAmount={updateVoteAmount} />
         </div>
       </div>
     </div>
-
-    // <div className="grid grid-cols-2 w-full h-24 max-h-24 bg-base-100 rounded-xl overflow-hidden items-center">
-    //   {submission.data.type === "text" && (
-    //     <div className="flex flex-col justify-center w-full p-2">
-    //       <p className="text-base line-clamp-4 text-t1">
-    //         {submission.data.title}
-    //       </p>
-    //     </div>
-    //   )}
-    //   {submission.data.type !== "text" && (
-    //     <div className="w-full h-full">
-    //       <CartMediaSubmission submission={submission} />
-    //     </div>
-    //   )}
-
-
-    //   <div className="flex flex-col gap-2 w-1/2 ml-auto mr-1">
-    //     <div className="flex">
-    //       <button
-    //         className="btn btn-ghost btn-sm ml-auto text-error"
-    //         onClick={() => removeSingleVote(submission.submissionId, mode)}
-    //       >
-    //         <HiTrash className="w-4 h-4" />
-    //       </button>
-    //     </div>
-    //     <div className="rounded-br-xl">
-    //       <SubmissionVoteInput submission={submission} mode={mode} />
-    //     </div>
-    //   </div>
-    // </div>
   );
 };
 
-const LockedCardVote = ({ submission }: { submission: any }) => {
+const LockedCardVote = ({ submission }: { submission: VotableSubmission }) => {
   const displayableVotes = formatDecimal(submission.votes);
 
   return (
@@ -136,24 +107,6 @@ const LockedCardVote = ({ submission }: { submission: any }) => {
         <p>{displayableVotes.short}</p>
       </div>
     </div>
-
-    // <div className="grid grid-cols-2 w-full h-24 max-h-24 bg-base-100 rounded-xl overflow-hidden items-center">
-    //   {submission.data.type === "text" && (
-    //     <div className="flex flex-col justify-center w-full p-2">
-    //       <p className="text-base line-clamp-4 text-t1">
-    //         {submission.data.title}
-    //       </p>
-    //     </div>
-    //   )}
-    //   {submission.data.type !== "text" && (
-    //     <div className="w-full h-full">
-    //       <CartMediaSubmission submission={submission} />
-    //     </div>
-    //   )}
-    //   <div className="flex flex-col w-1/2 ml-auto mr-1 items-center justify-center m-auto gap-1 px-2">
-    //     <p className="text-t2">{displayableVotes.short} votes</p>
-    //   </div>
-    // </div>
   );
 };
 
@@ -180,18 +133,21 @@ const CartMediaSubmission = ({ submission }: { submission: VotableSubmission }) 
 
 export const VoteButton = ({
   setIsEditMode,
+  submitVotes,
+  areCurrentVotesDirty,
+  proposedVotes,
+  areUserVotingParamsLoading,
+  contestId,
 }: {
   setIsEditMode: (isEditMode: boolean) => void;
+  submitVotes: () => void;
+  areCurrentVotesDirty: boolean;
+  proposedVotes: Array<VotableSubmission>;
+  areUserVotingParamsLoading: boolean;
+  contestId: string;
 }) => {
-  const {
-    submitVotes,
-    areCurrentVotesDirty,
-    proposedVotes,
-    areUserVotingParamsLoading,
-  } = useVoteActionContext();
-  const { stateRemainingTime } = useContestState();
 
-  const { status } = useSession();
+  const { stateRemainingTime } = useContestState();
 
   const isVoteButtonEnabled =
     !areUserVotingParamsLoading &&
@@ -260,6 +216,7 @@ const itemVariants = {
 };
 
 export const VoteTab = ({ contestId }: { contestId: string }) => {
+  const voteActions = useVote(contestId);
   const {
     removeAllVotes,
     proposedVotes,
@@ -267,14 +224,17 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
     totalVotingPower,
     votesSpent,
     votesRemaining,
+    removeSingleVote,
+    updateVoteAmount,
     areUserVotingParamsLoading,
-  } = useVoteActionContext();
+  } = voteActions;
 
   const { liveSubmissions, areSubmissionsLoading } = useLiveSubmissions(contestId);
   const [isEditMode, setIsEditMode] = useState(false);
   const displayableVotesSpent = formatDecimal(votesSpent);
   const displayableVotesRemaining = formatDecimal(votesRemaining);
   const displayableTotalVotingPower = formatDecimal(totalVotingPower);
+
 
   return (
     <motion.div
@@ -311,6 +271,8 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
                     <SubmissionCardVote
                       key={idx}
                       mode={"current"}
+                      removeSingleVote={removeSingleVote}
+                      updateVoteAmount={updateVoteAmount}
                       submission={{
                         ...liveSubmissions.find(
                           (el) => el.id === currVote.submissionId
@@ -350,6 +312,8 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
             {proposedVotes.map((submission: VotableSubmission, idx: number) => (
               <SubmissionCardVote
                 key={idx}
+                removeSingleVote={removeSingleVote}
+                updateVoteAmount={updateVoteAmount}
                 submission={submission}
                 mode={"proposed"}
               />
@@ -412,24 +376,21 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
           </div>
         </div>
       </motion.div>
-      <VoteButton setIsEditMode={setIsEditMode} />
+      <VoteButton
+        contestId={contestId}
+        setIsEditMode={setIsEditMode}
+        submitVotes={voteActions.submitVotes}
+        areUserVotingParamsLoading={voteActions.areUserVotingParamsLoading}
+        areCurrentVotesDirty={voteActions.areCurrentVotesDirty}
+        proposedVotes={voteActions.proposedVotes}
+      />
     </motion.div>
   );
 };
 
 const SidebarVote = ({ contestId }: { contestId: string }) => {
   const { contestState } = useContestState();
-  const { proposedVotes } = useVoteActionContext();
-
-  //if (!contestState || contestState !== "voting") {
-  // if (!contestState) {
-  //   // return placeholder
-  //   return (
-  //     <div className="hidden w-1/3 lg:flex lg:flex-col items-center gap-4">
-  //       <div className="sticky top-3 right-0 flex flex-col justify-center items-center gap-4 w-full h-[60vh] rounded-xl mt-2"></div>
-  //     </div>
-  //   );
-  // }
+  const voteActions = useVote(contestId)
 
   if (contestState === "voting") {
     return (
@@ -437,9 +398,9 @@ const SidebarVote = ({ contestId }: { contestId: string }) => {
         <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
           <div className="flex flex-row items-center gap-2">
             <h2 className="text-t1 text-lg font-semibold">My Selections </h2>
-            {proposedVotes.length > 0 && (
+            {voteActions.proposedVotes.length > 0 && (
               <span className="badge badge-sm text-sm badge-warning font-bold">
-                {proposedVotes.length}
+                {voteActions.proposedVotes.length}
               </span>
             )}
           </div>

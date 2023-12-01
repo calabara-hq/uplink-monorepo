@@ -11,8 +11,6 @@ const mutations = {
     Mutation: {
 
         castVotes: async (_: any, args: any, context: any) => {
-
-
             const user = await authController.getUser(context);
             if (!user) throw new GraphQLError('Unauthorized', {
                 extensions: {

@@ -7,13 +7,11 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { isMobile } from "@/lib/isMobile";
 import dynamic from "next/dynamic";
-import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
+import { UsernameDisplay, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { ImageWrapper } from "./MediaWrapper";
 import { TbCrown } from "react-icons/tb";
 import { ParseThread } from "@/lib/threadParser";
 import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
-import { ModalAddToCart } from "./SubmissionModal";
-import ExpandedSubmission from "./ExpandedSubmission";
 import { Decimal } from "decimal.js";
 import formatDecimal from "@/lib/formatDecimal";
 
@@ -32,9 +30,9 @@ const SubmissionBody = ({ submission }: { submission: Submission }) => {
       <div className="relative flex flex-col gap-2 rounded-b-lg w-full p-2 ">
         <h2 className="text-lg font-semibold">{submission.data.title}</h2>
         <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
-          <UserAvatar address={submission.author} size={28} />
+          <UserAvatar user={submission.author} size={28} />
           <h3 className="break-all italic text-sm">
-            <AddressOrEns address={submission.author} />
+            <UsernameDisplay user={submission.author} />
           </h3>
           {totalVotes.greaterThan(0) ? (
             <span className="ml-auto text-t2 text-sm font-medium">
@@ -56,9 +54,9 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
           {submission.data.title}
         </h2>
         <div className="w-full flex items-center gap-2 flex-wrap font-semibold text-sm text-t2">
-          <UserAvatar address={submission.author} size={28} />
+          <UserAvatar user={submission.author} size={28} />
           <h3 className="break-all italic text-sm ">
-            <AddressOrEns address={submission.author} />
+            <UsernameDisplay user={submission.author} />
           </h3>
         </div>
         <section className="break-word max-h-[18em] overflow-hidden">
@@ -167,7 +165,6 @@ const CardSubmission = ({
   });
 
   const [isActive, setIsActive] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (inView && isMobileDevice) {
@@ -175,6 +172,7 @@ const CardSubmission = ({
     }
   }, [inView, isMobileDevice]);
 
+  
   return (
     <div
       className="relative w-full h-full cursor-pointer p-2 shadow-black shadow-sm flex flex-col justify-between rounded-xl bg-base-100 border border-border no-select transform
@@ -202,23 +200,6 @@ const CardSubmission = ({
         <RenderTextSubmission submission={submission} />
       )}
       {footerChildren}
-      {/* <SubmissionModal
-        isModalOpen={isModalOpen}
-        handleClose={() => setIsModalOpen(false)}
-      >
-        <div className="flex w-full gap-1 lg:gap-4 p-0">
-          <div className="flex flex-col jusitfy-start w-full h-full ">
-            <ExpandedSubmission
-              submission={submission}
-              headerChildren={
-                <div className="flex p-1 ml-auto items-center justify-center">
-                  {interactive && <ModalAddToCart submission={submission} />}
-                </div>
-              }
-            />
-          </div>
-        </div>
-      </SubmissionModal> */}
     </div>
   );
 };

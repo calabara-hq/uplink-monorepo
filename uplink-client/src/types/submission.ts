@@ -10,7 +10,13 @@ export type BaseSubmission = {
     type: SubmissionType;
     url: string;
     version: string;
-    author: string | null;
+    author: {
+        id: string;
+        address: string;
+        userName: string | null;
+        displayName: string | null;
+        profileAvatar: string | null;
+    } | null;
     rank: string | null;
     totalVotes: string | null;
     nftDrop: {
@@ -57,5 +63,5 @@ export const isTwitterSubmission = (submission: Submission): submission is Twitt
 }
 
 export const isNftSubmission = (submission: Submission): boolean => {
-    return submission.nftDrop !== null;
+    return Boolean(submission.nftDrop);
 }

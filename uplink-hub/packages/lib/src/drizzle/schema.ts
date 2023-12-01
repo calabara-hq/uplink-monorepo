@@ -20,9 +20,9 @@ export const admins = mysqlTable('admins', {
     id: serial('id').primaryKey(),
     spaceId: int('spaceId').notNull(),
     address: varchar('address', { length: 255 }).notNull(),
-
 }, (admins) => ({
     spaceIdIndex: index("admins_space_id_idx").on(admins.spaceId),
+    userAddressIndex: index("admins_address_idx").on(admins.address),
 }))
 
 
@@ -142,28 +142,33 @@ export const arcadeVotingStrategy = mysqlTable('arcadeVotingStrategy', {
 export const submissions = mysqlTable('submissions', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
-    author: varchar('author', { length: 255 }).notNull(),
+    author_deprecated: varchar('author_deprecated', { length: 255 }).notNull().default('test'), // this will be removed
+    userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     type: varchar('type', { length: 255 }).notNull(),
     url: varchar('url', { length: 255 }).notNull(),
     version: varchar('version', { length: 255 }).notNull(),
 }, (submissions) => ({
     submissionsContestIdIndex: index("submissions_contest_id_idx").on(submissions.contestId),
-    submissionsAuthorIndex: index("submissions_author_idx").on(submissions.author),
+    submissionsUserIdIndex: index("submissions_user_id_idx").on(submissions.userId),
+    submissionsAuthorIndex: index("submissions_author_idx").on(submissions.author_deprecated),
 }));
 
 export const votes = mysqlTable('votes', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     submissionId: int('submissionId').notNull(),
-    voter: varchar('voter', { length: 255 }).notNull(),
+    voter_deprecated: varchar('voter_deprecated', { length: 255 }).notNull().default('test'), // this will be removed
+    userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     amount: varchar('amount', { length: 255 }).notNull()
 }, (votes) => ({
     votesContestIdIndex: index("votes_contest_id_idx").on(votes.contestId),
     votesSubmissionIdIndex: index("votes_submission_id_idx").on(votes.submissionId),
-    votesVoterIndex: index("votes_voter_idx").on(votes.voter),
-    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter),
+    votesVoterIndex: index("votes_voter_idx").on(votes.voter_deprecated),
+    voterUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.userId),
+    votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter_deprecated),
+    votesUserIdIndex: index("votes_user_id_idx").on(votes.userId),
 }));
 
 
@@ -173,7 +178,7 @@ export const tweetQueue = mysqlTable('tweetQueue', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     created: varchar('created', { length: 255 }).notNull(),
-    author: varchar('author', { length: 255 }).notNull(),
+    userId: int('userId').notNull().default(1),
     jobContext: varchar('jobContext', { length: 255 }).notNull(),   // 'submission' or 'contest'
     payload: json('payload').notNull().default('[]'),
     accessToken: varchar('accessToken', { length: 255 }).notNull(),
@@ -181,18 +186,22 @@ export const tweetQueue = mysqlTable('tweetQueue', {
     retries: int('retries').notNull(),
     status: tinyint('status').notNull(),                        // 0 = pending, 1 = failed, 2 = success
     error: json('error'),
-
 });
 
 export const users = mysqlTable('users', {
     id: serial('id').primaryKey(),
     address: varchar('address', { length: 255 }).notNull(),
+    userName: varchar('userName', { length: 255 }),
+    displayName: varchar('displayName', { length: 255 }),
+    profileAvatar: varchar('profileAvatar', { length: 255 }),
     twitterId: varchar('twitterId', { length: 255 }),
     twitterHandle: varchar('twitterHandle', { length: 255 }),
     twitterAvatarUrl: varchar('twitterAvatar', { length: 255 }),
+    visibleTwitter: tinyint('visibleTwitter').notNull().default(0),
 }, (user) => ({
     userAddressIndex: uniqueIndex("user_address_idx").on(user.address)
 }));
+
 
 export const userDrops = mysqlTable('userDrops', {
     id: serial('id').primaryKey(),
@@ -327,6 +336,10 @@ export const arcadeVotingStrategyRelations = relations(arcadeVotingStrategy, ({ 
 }));
 
 export const submissionsRelations = relations(submissions, ({ one, many }) => ({
+    author: one(users, {
+        fields: [submissions.userId],
+        references: [users.id],
+    }),
     contest: one(contests, {
         fields: [submissions.contestId],
         references: [contests.id],
@@ -340,6 +353,10 @@ export const submissionsRelations = relations(submissions, ({ one, many }) => ({
 
 
 export const votesRelations = relations(votes, ({ one }) => ({
+    voter: one(users, {
+        fields: [votes.userId],
+        references: [users.id],
+    }),
     contest: one(contests, {
         fields: [votes.contestId],
         references: [contests.id],
@@ -356,12 +373,14 @@ export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
         references: [contests.id],
     }),
     user: one(users, {
-        fields: [tweetQueue.author],
+        fields: [tweetQueue.userId],
         references: [users.id],
     })
 }));
 
-
+export const userRelations = relations(users, ({ one, many }) => ({
+    submissions: many(submissions)
+}));
 
 export type dbSpaceType = InferModel<typeof spaces> & {
     admins: dbAdminType[],
@@ -431,6 +450,7 @@ export type dbArcadeVotingStrategyType = InferModel<typeof arcadeVotingStrategy>
 export type dbUserDropType = InferModel<typeof userDrops>
 
 export type dbSubmissionType = InferModel<typeof submissions> & {
+    author: dbUserType,
     contest: dbContestType,
     nftDrop: dbUserDropType,
     votes: dbVoteType[],
@@ -439,6 +459,7 @@ export type dbSubmissionType = InferModel<typeof submissions> & {
 export type dbVoteType = InferModel<typeof votes> & {
     contest: dbContestType,
     submission: dbSubmissionType,
+    voter: dbUserType,
 }
 
 export type dbTweetQueueType = InferModel<typeof tweetQueue> & {
@@ -446,7 +467,9 @@ export type dbTweetQueueType = InferModel<typeof tweetQueue> & {
     user: dbUserType,
 }
 
-export type dbUserType = InferModel<typeof users>
+export type dbUserType = InferModel<typeof users> & {
+    submissions: dbSubmissionType
+}
 
 
 export type dbNewContestType = InferModel<typeof contests, 'insert'>

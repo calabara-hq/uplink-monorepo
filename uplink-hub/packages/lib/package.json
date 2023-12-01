@@ -10,6 +10,7 @@
     "build": "rm -rf ./dist && tsc",
     "generate-prisma": "prisma generate --schema=./src/prisma-client/schema.prisma",
     "push-db": "npx drizzle-kit push:mysql --config=./src/drizzle/drizzle.config.ts",
+    "patch-db": "NODE_OPTIONS='--no-warnings --loader ts-node/esm' ts-node ./src/drizzle/migrate.ts",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },
@@ -20,7 +21,7 @@
     "decimal.js": "^10.4.3",
     "dotenv": "^16.0.3",
     "drizzle-kit": "cjs",
-    "drizzle-orm": "^0.27.2",
+    "drizzle-orm": "0.27.2",
     "ethereum-block-by-date": "^1.4.7",
     "ethers": "5.7.2",
     "graphql": "^16.6.0",

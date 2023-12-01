@@ -53,11 +53,10 @@ const MenuSelect = ({
                 setSelected(option);
                 setIsOpen(false);
               }}
-              className={`rounded-lg w-full ${
-                selected.value === option.value
+              className={`rounded-lg w-full ${selected.value === option.value
                   ? "bg-primary disabled:pointer-events-none text-black"
                   : ""
-              }`}
+                }`}
             >
               <p className="">{option.label}</p>
             </li>
@@ -83,7 +82,6 @@ const MenuSelect = ({
             </a>
           </li>
             */}
-          <li></li>
         </ul>
       )}
     </div>

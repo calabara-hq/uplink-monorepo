@@ -37,13 +37,21 @@ type NftDrop {
   dropConfig: String!
 }
 
+type SubmissionAuthor {
+  id: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+}
+
 type Submission @key(fields: "id") {
   id: ID!
   contestId: ID!
   created: String!
   type: String!
   version: String!
-  author: String
+  author: SubmissionAuthor
   url: String!
   totalVotes: Decimal
   rank: Int
@@ -56,7 +64,7 @@ type PopularSubmission @key(fields: "id") {
   created: String!
   type: String!
   version: String!
-  author: String!
+  author: SubmissionAuthor!
   url: String!
   nftDrop: NftDrop
 }

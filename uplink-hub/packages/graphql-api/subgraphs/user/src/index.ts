@@ -16,7 +16,7 @@ import { applyMiddleware } from "graphql-middleware";
 // Initial configurations
 dotenv.config();
 
-export const redisClient = new Redis(process.env.REDIS_URL);
+export const redisClient = new Redis(process.env.REDIS_URL!);
 
 const typeDefs = gql(readFileSync("./schema.graphql").toString('utf-8'));
 
@@ -35,9 +35,15 @@ const rateLimitRule = createRateLimitRule({
 // Setting up GraphQL permissions
 const permissions = shield({
   Query: {
-    me: rateLimitRule({ window: '1m', max: 15 }),
-    user: rateLimitRule({ window: '1m', max: 15 }),
+    // submission: rateLimitRule({ window: '1m', max: 15 }),
+    // popularSubmissions: rateLimitRule({ window: '1m', max: 15 }),
+    // getUserSubmissionParams: rateLimitRule({ window: '1m', max: 25 }),
+
   },
+  Mutation: {
+    // createSubmission: rateLimitRule({ window: '1m', max: 3 }),
+    // createTwitterSubmission: rateLimitRule({ window: '1m', max: 3 }),
+  }
 }, { allowExternalErrors: true }
 );
 
@@ -48,13 +54,13 @@ const server = new ApolloServer({
 
 // Start the server
 const { url } = await startStandaloneServer(server, {
-  listen: { port: parseInt(process.env.USER_SERVICE_PORT) },
+  listen: { port: parseInt(process.env.USER_SERVICE_PORT!) },
   context: async ({ req }) => {
     return {
-      token: cookie.parse(parseHeader(req.headers['session-cookie'])),
-      csrfToken: parseHeader(req.headers['x-csrf-token']),
-      ip: parseHeader(req.headers['x-forwarded-for']) || req.socket.remoteAddress,
-      hasApiToken: xor_compare(parseHeader(req.headers['x-api-token']), process.env.FRONTEND_API_SECRET)
+      token: cookie.parse(parseHeader(req.headers['session-cookie'] || '')),
+      csrfToken: parseHeader(req.headers['x-csrf-token'] || ''),
+      ip: parseHeader(req.headers['x-forwarded-for'] || '') || (req?.socket?.remoteAddress ?? "localhost"),
+      hasApiToken: xor_compare(parseHeader(req.headers['x-api-token'] || ''), process.env.FRONTEND_API_SECRET!)
     };
   }
 });

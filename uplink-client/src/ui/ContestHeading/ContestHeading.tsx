@@ -10,15 +10,14 @@ import { ImageWrapper } from "../Submission/MediaWrapper";
 import { DetailsMenuDrawer } from "../MobileContestActions/MobileContestActions";
 import ContestDetails from "../ContestDetails/ContestDetails";
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
+import fetchContest from "@/lib/fetch/fetchContest";
 
 const ContestHeading = async ({
-  contest,
   contestId,
 }: {
-  contest: Promise<FetchSingleContestResponse>;
   contestId: string;
 }) => {
-  const contestData = await contest.then(async (res) => {
+  const contestData = await fetchContest(contestId).then(async (res) => {
     const promptData = await fetch(res.promptUrl).then((res) => res.json());
     return { ...res, prompt: promptData };
   });
@@ -60,7 +59,7 @@ const ContestHeading = async ({
                 <DetailsMenuDrawer
                   detailChildren={
                     // @ts-expect-error
-                    <ContestDetails contestId={contestId} contest={contest} />
+                    <ContestDetails contestId={contestId} />
                   }
                   ui={{
                     classNames:

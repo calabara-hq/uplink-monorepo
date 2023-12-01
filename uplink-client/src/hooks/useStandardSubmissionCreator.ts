@@ -162,10 +162,8 @@ export const useStandardSubmissionCreator = () => {
                 (mimeType) => {
                     setIsVideo(mimeType.includes("video"));
                 },
-                (base64) => {
-                    if (!isVideo) {
-                        setPrimaryAssetBlob(base64);
-                    }
+                (base64, mimeType) => {
+                    setPrimaryAssetBlob(base64);
                 },
                 (ipfsUrl) => {
                     setPrimaryAssetUrl(ipfsUrl);
@@ -179,11 +177,9 @@ export const useStandardSubmissionCreator = () => {
             ).catch((err) => {
 
                 if (err instanceof MediaUploadError) {
-                    // toast the message
                     toast.error(err.message)
                 }
                 else {
-                    // log the message and toast a generic error
                     console.log(err)
                     toast.error('Something went wrong. Please try again later.')
                 }

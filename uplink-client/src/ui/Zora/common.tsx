@@ -31,6 +31,8 @@ export const SwitchNetworkButton = ({ children, chainId }: { children: React.Rea
         switchNetwork(chainId);
     }
 
+    if (!chain) return null; // bail early if user not connected
+
     if (isLoading && pendingChainId === chainId) {
         return (
             <button className="btn normal-case" onClick={handleSwitch} disabled={true}>

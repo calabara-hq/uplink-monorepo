@@ -501,24 +501,65 @@ export const ZoraAbi = [
             ],
         "stateMutability": "payable",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     }
 ] as const
 
 const ZORA_NFT_CREATOR_PROXY_MAINNET = '0xf74b146ce44cc162b601dec3be331784db111dc1';
 const ZORA_NFT_CREATOR_PROXY_BASE = '0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c'
+const ZORA_PROTOCOL_REWARDS_BASE = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
+const ZORA_PROTOCOL_REWARDS_BASE_TESTNET = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
 const ZORA_NFT_CREATOR_PROXY_BASE_TESTNET = '0x87cfd516c5ea86e50b950678CA970a8a28de27ac'
 
 export const getContractFromEnv = () => {
     if (process.env.NODE_ENV === "development") {
         return {
-            contract: ZORA_NFT_CREATOR_PROXY_BASE_TESTNET,
+            creator_contract: ZORA_NFT_CREATOR_PROXY_BASE_TESTNET,
+            rewards_contract: ZORA_PROTOCOL_REWARDS_BASE_TESTNET,
             explorer: "https://goerli.basescan.org",
             chainId: 84531,
         }
     }
     else {
         return {
-            contract: ZORA_NFT_CREATOR_PROXY_BASE,
+            creator_contract: ZORA_NFT_CREATOR_PROXY_BASE,
+            rewards_contract: ZORA_PROTOCOL_REWARDS_BASE,
             explorer: "https://basescan.org",
             chainId: 8453,
         }

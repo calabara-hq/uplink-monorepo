@@ -1,133 +1,60 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
-import {
-  differenceInSeconds,
-  differenceInMinutes,
-  differenceInHours,
-  differenceInDays,
-  parseISO,
-} from "date-fns";
+import { useTicks } from "@/hooks/useTicks";
 import { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
 import { ContestState } from "@/types/contest";
+import { calculateContestStatus } from "@/utils/staticContestState";
+import React, { createContext, useState } from "react"
 
-export interface ContestStateProps {
-  contestAdmins: string[];
-  contestState: string | null;
-  stateRemainingTime: string | null;
-  category: string;
-  type: string;
-  tweetId: string | null;
+
+export type ContestStateContextValue = {
+    contestState: ContestState | null,
+    stateRemainingTime: string | null,
+    isLoading: boolean,
+    tweetId: string,
+    type: string,
+    category: string,
+    contestAdmins: string[],
 }
 
-const ContestStateContext = createContext<ContestStateProps | undefined>(
-  undefined
+export const ContestStateContext = createContext?.<ContestStateContextValue | undefined>(
+    undefined
 );
 
-// this is a bit of an anti pattern but it is done to make navigation instant
-// the alternative would awaiting the promise in the layout component, but that would block the navigation
-// we'll make the ugliness-tradeoff for now with plans to redesign later
+export const ContestStateProvider = ({ contest, children }: { contest: FetchSingleContestResponse, children: React.ReactNode }) => {
+    const [contestState, setContestState] = useState<ContestState | null>(null);
+    const [stateRemainingTime, setStateRemainingTime] = useState<string | null>(null);
 
-export function ContestStateProvider({
-  children,
-  contestPromise,
-}: {
-  children: React.ReactNode;
-  contestPromise: Promise<FetchSingleContestResponse>;
-}) {
-  const [contestState, setContestState] = useState<ContestState | null>(null);
-  const [stateRemainingTime, setStateRemainingTime] = useState<string | null>(
-    null
-  );
-  const [contestData, setContestData] = useState<any>(null);
-
-  useEffect(() => {
-    const processContest = async (contest: Promise<any>) => {
-      // await the preloaded promise;
-      const data = await contest;
-      // extract the data from the promise
-      setContestData(data);
-    };
-
-    processContest(contestPromise);
-  }, []);
-
-  useEffect(() => {
-    if (contestData) {
-      const { metadata, deadlines, tweetId } = contestData;
-      if (metadata.type === "twitter" && !tweetId) {
-        setContestState("pending");
-        setStateRemainingTime(null);
-        return;
-      }
-      const { startTime, voteTime, endTime } = deadlines;
-      const start = parseISO(startTime);
-      const vote = parseISO(voteTime);
-      const end = parseISO(endTime);
-
-      if (new Date() > end) return setContestState("closed");
-
-      const interval = setInterval(() => {
-        const now = new Date();
-        let nextDeadline = end;
-        if (now < start) {
-          setContestState("pending");
-          nextDeadline = start;
-        } else if (now < vote) {
-          setContestState("submitting");
-          nextDeadline = vote;
-        } else if (now < end) {
-          setContestState("voting");
-        } else {
-          setContestState("closed");
-          clearInterval(interval);
-        }
-
-        const seconds = differenceInSeconds(nextDeadline, now);
-        const minutes = differenceInMinutes(nextDeadline, now);
-        const hours = differenceInHours(nextDeadline, now);
-        const days = differenceInDays(nextDeadline, now);
-        if (days > 0) {
-          setStateRemainingTime(`${days} days`);
-        } else if (hours > 0) {
-          setStateRemainingTime(`${hours} hrs`);
-        } else if (minutes > 0) {
-          setStateRemainingTime(`${minutes} mins`);
-        } else if (seconds < 59) {
-          setStateRemainingTime(`${seconds} s`);
-        }
-      }, 1000);
-
-      return () => {
-        clearInterval(interval);
-      };
+    const update = (data: FetchSingleContestResponse) => {
+        if (!data) return
+        const { contestState: v1, stateRemainingTime: v2 } = calculateContestStatus(data.deadlines, data.metadata.type, data.tweetId);
+        setContestState(v1);
+        setStateRemainingTime(v2)
     }
-  }, [contestData]);
 
-  return (
-    <ContestStateContext.Provider
-      value={{
+    useTicks(() => update(contest))
+
+    const value = {
+        isLoading: contestState === null,
         contestState,
         stateRemainingTime,
-        category: contestData?.metadata.category,
-        type: contestData?.metadata.type,
-        tweetId: contestData?.tweetId,
-        contestAdmins:
-          contestData?.space.admins?.map((admin: any) => {
-            return admin.address;
-          }) ?? [],
-      }}
-    >
-      {children}
-    </ContestStateContext.Provider>
-  );
+        tweetId: contest.tweetId,
+        type: contest.metadata.type,
+        category: contest.metadata.category,
+        contestAdmins: contest.space.admins.map((admin) => admin.address),
+    }
+    return (
+        <ContestStateContext.Provider value={value}>
+            {children}
+        </ContestStateContext.Provider>
+    )
 }
 
-export function useContestState() {
-  const context = useContext(ContestStateContext);
-  if (context === undefined) {
-    throw new Error(
-      "useContestState must be used within a ContestStateProvider"
-    );
-  }
-  return context;
+export const useContestState = () => {
+    const context = React.useContext(ContestStateContext);
+    if (context === undefined) {
+        throw new Error(
+            "useContestState must be used within a ContestStateProvider"
+        );
+    }
+    return context;
 }

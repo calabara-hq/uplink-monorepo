@@ -1,11 +1,50 @@
 type User @key(fields: "id") {
-  id: ID
-  address: String
+  id: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+  twitterHandle: String
+  twitterAvatar: String
+  visibleTwitter: Boolean
+  submissions: [UserSubmission!]!
+}
+
+type UserNftDrop {
+  chainId: Int!
+  contractAddress: String!
+  dropConfig: String!
+}
+
+type UserSubmissionAuthor {
+  id: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+}
+
+type UserSubmission {
+  id: ID!
+  contestId: ID!
+  type: String!
+  version: String!
+  url: String!
+  nftDrop: UserNftDrop
+  author: UserSubmissionAuthor
 }
 
 type Query {
   me: User
-  user(id: ID, address: String): User
+  user(userIdentifier: String!): User
+}
+
+type UpdateUserResponse {
+  success: Boolean!
+}
+
+type Mutation {
+  updateUser(displayName: String!, profileAvatar: String!, visibleTwitter: Boolean! ): UpdateUserResponse
 }
 
 extend schema

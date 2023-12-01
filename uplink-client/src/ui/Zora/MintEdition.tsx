@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import { useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
-import { AddressOrEns, UserAvatar } from "../AddressDisplay/AddressDisplay";
+import { UsernameDisplay, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { format, set } from "date-fns";
 import { uint64MaxSafe } from "@/utils/uint64";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
@@ -21,6 +21,7 @@ import Link from "next/link";
 import { TbLoader2 } from "react-icons/tb";
 import { Decimal } from "decimal.js";
 import { LuMinusSquare, LuPlusSquare } from "react-icons/lu";
+import { Submission } from "@/types/submission";
 
 
 type FeeStructure = {
@@ -200,9 +201,8 @@ const RenderFeeInfo = ({ feeStructure }: { feeStructure: FeeStructure }) => {
     )
 }
 
-const MintEdition = ({ submission, setIsModalOpen }) => {
+const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Submission, setIsModalOpen: (val: boolean) => void, referrer?: string }) => {
     const dropConfig = submission.nftDrop.dropConfig ? JSON.parse(submission.nftDrop.dropConfig) : null;
-    dropConfig.saleConfig.publicSaleEnd = new Date()
     const { chainId, contractAddress } = submission.nftDrop;
     const { data: session, status } = useSession();
     const [numEditions, setNumEditions] = useState<string>('1');
@@ -211,6 +211,7 @@ const MintEdition = ({ submission, setIsModalOpen }) => {
     const feeStructure = computeEthToSpend(dropConfig.saleConfig.publicSalePrice, debouncedNumEditions)
     const { isLoading: isTotalSupplyLoading, totalSupply } = useTotalSupply(chainId, contractAddress);
 
+    const isReferralValid = referrer ? referrer.startsWith('0x') && referrer.length === 42 : false;
     const { config, error: prepareError, isError: isPrepareError, isLoading: isPrepareLoading } = usePrepareContractWrite({
         chainId: chainId,
         address: contractAddress,
@@ -220,7 +221,7 @@ const MintEdition = ({ submission, setIsModalOpen }) => {
             session?.user?.address,
             debouncedNumEditions,
             "",
-            "0xa943e039B1Ce670873ccCd4024AB959082FC6Dd8"
+            isReferralValid ? referrer : "0xa943e039B1Ce670873ccCd4024AB959082FC6Dd8"
         ],
         enabled: true,
         value: feeStructure.total.toString(),
@@ -306,8 +307,8 @@ const MintEdition = ({ submission, setIsModalOpen }) => {
                                 <div className="flex flex-col gap-2">
                                     <p className="line-clamp-3 font-bold text-lg break-all">{dropConfig.name}</p>
                                     <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1">
-                                        <UserAvatar address={submission.author} size={28} />
-                                        <AddressOrEns address={submission.author} />
+                                        <UserAvatar user={submission?.author} size={28} />
+                                        <UsernameDisplay user={submission?.author} />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2 w-full">
@@ -315,8 +316,8 @@ const MintEdition = ({ submission, setIsModalOpen }) => {
                                         <div className="flex flex-col justify-start">
                                             <p className="text-t2">Network</p>
                                             <div className="flex gap-2 items-center">
-                                                <p className="text-t1 font-bold">{getChainName(chainId)}</p>
-                                                <ChainLabel chainId={chainId} px={16} />
+                                                <p className="text-t1 font-bold">{getChainName(parseInt(chainId))}</p>
+                                                <ChainLabel chainId={parseInt(chainId)} px={16} />
                                             </div>
 
                                         </div>
@@ -354,7 +355,7 @@ const MintEdition = ({ submission, setIsModalOpen }) => {
                                         </div>
                                         <div className="flex flex-col">
                                             <p className="text-t2">{isMintPeriodOver ? "Ended" : "Until"}</p>
-                                            <p className="font-bold text-t1">{dropConfig.saleConfig.publicSaleEnd === uint64MaxSafe.toString() ? "Forever" : format(new Date(dropConfig.saleConfig.publicSaleEnd * 1000), "MMM d, h:mm aa")}</p>
+                                            <p className="font-bold text-t1">{dropConfig.saleConfig.publicSaleEnd == uint64MaxSafe.toString() ? "Forever" : format(new Date(dropConfig.saleConfig.publicSaleEnd * 1000), "MMM d, h:mm aa")}</p>
                                         </div>
                                         <div className="flex flex-col">
                                             <p className="text-t2">Price</p>
@@ -386,7 +387,7 @@ const MintEdition = ({ submission, setIsModalOpen }) => {
                                                     (<Link className="btn btn-outline btn-warning normal-case w-full" href='https://bridge.base.org/deposit' prefetch={false} target="_blank">Add Funds</Link>)
                                                     :
                                                     (
-                                                        <SwitchNetworkButton chainId={chainId}>
+                                                        <SwitchNetworkButton chainId={parseInt(chainId)}>
 
                                                             <button className="btn btn-primary normal-case w-full" disabled={isMintDisabled} onClick={() => write?.()}>
                                                                 {isWriteLoading ?

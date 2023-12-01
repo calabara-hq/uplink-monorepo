@@ -5,6 +5,8 @@ import { Decimal } from 'decimal.js';
 import { handleMutationError } from "@/lib/handleMutationError";
 import { Session } from "@/providers/SessionProvider";
 import { parseIpfsUrl } from "@/lib/ipfs";
+import handleMediaUpload, { MediaUploadError } from "@/lib/mediaUpload";
+import toast from "react-hot-toast";
 
 export const EditionConfig = z.object({
     name: z.string(),
@@ -235,23 +237,37 @@ export const flattenContractArgs = (args: ConfigurableZoraEditionOutput) => {
     })
 }
 
-export default function useCreateZoraEdition(init_name: string, init_imageURI: string, init_animationURI: string) {
+export default function useCreateZoraEdition(referrer?: string, templateConfig?: ConfigurableZoraEditionInput) {
     const [contractArguments, setContractArguments] = useState<ConfigurableZoraEditionOutput | null>(null);
-    const [state, dispatch] = useReducer(EditionWizardReducer, {
-        name: init_name ?? "",
+    const [isUploading, setIsUploading] = useState(false);
+    const [animationBlob, setAnimationBlob] = useState<string | null>(null);
+    const [imageBlob, setImageBlob] = useState<string | null>(null);
+    const [thumbnailOptions, setThumbnailOptions] = useState<string[]>([]);
+    const [thumbnailBlobIndex, setThumbnailBlobIndex] = useState<number | null>(null);
+    const [isVideo, setIsVideo] = useState(false);
+
+
+    const isReferralValid = referrer ? referrer.startsWith('0x') && referrer.length === 42 : false;
+
+    const baseConfig = {
+        name: "",
         symbol: "",
         editionSize: "open",
         royaltyBPS: "zero",
         description: "",
-        animationURI: init_animationURI ?? "",
-        imageURI: init_imageURI ?? "",
+        animationURI: "",
+        imageURI: "",
         saleConfig: {
             publicSalePrice: "free",
             publicSaleStart: "now",
             publicSaleEnd: "forever",
         },
         errors: {},
-    });
+    }
+
+    const initState = templateConfig ? { ...baseConfig, ...templateConfig } : baseConfig;
+
+    const [state, dispatch] = useReducer(EditionWizardReducer, initState);
 
 
     const setField = (field: string, value: string) => {
@@ -285,15 +301,109 @@ export default function useCreateZoraEdition(init_name: string, init_imageURI: s
             });
         }
         else if (result.success) {
-            setContractArguments(result.data);
+            setContractArguments({
+                ...result.data,
+                referrer: isReferralValid ? referrer : "0xa943e039B1Ce670873ccCd4024AB959082FC6Dd8"
+            });
         }
         return result;
     }
+
+
+    const handleFileChange = ({
+        event,
+        isVideo,
+        mode,
+    }: {
+        event: any;
+        isVideo: boolean;
+        mode: "primary" | "thumbnail";
+    }) => {
+        if (mode === "primary") {
+            setIsUploading(true)
+
+            handleMediaUpload(
+                event,
+                ["image", "video", "svg"],
+                (mimeType) => {
+                    setIsVideo(mimeType.includes("video"));
+                },
+                (base64, mimeType) => {
+                    if (mimeType.includes("video")) setAnimationBlob(base64);
+                    else setImageBlob(base64);
+                },
+                (ipfsUrl) => {
+                    setField('imageURI', ipfsUrl);
+                    setIsUploading(false);
+                },
+                (thumbnails) => {
+                    setThumbnailOptions(thumbnails);
+                    setThumbnailBlobIndex(0);
+                },
+                (size) => { }
+            ).catch((err) => {
+
+                if (err instanceof MediaUploadError) {
+                    toast.error(err.message)
+                }
+                else {
+                    console.log(err)
+                    toast.error('Something went wrong. Please try again later.')
+                }
+
+                // clear out all the fields for the users next attempt
+                setField('imageURI', '');
+                setField('animationURI', '');
+                setThumbnailOptions([]);
+                setThumbnailBlobIndex(null);
+                setImageBlob(null);
+                setAnimationBlob(null);
+
+            });
+        }
+        else if (mode === "thumbnail") {
+            handleMediaUpload(
+                event,
+                ["image"],
+                (mimeType) => { },
+                (base64) => {
+                    const existingThumbnailOptions = [...thumbnailOptions];
+                    setThumbnailOptions([...existingThumbnailOptions, base64])
+                    setThumbnailBlobIndex(existingThumbnailOptions.length);
+                },
+                (ipfsUrl) => {
+                    setField("imageURI", ipfsUrl);
+                },
+
+            ).catch(() => {
+
+            });
+        }
+    }
+
+
 
     return {
         contractArguments,
         state,
         setField,
         validate,
+        isUploading,
+        animationBlob,
+        imageBlob,
+        thumbnailOptions,
+        thumbnailBlobIndex,
+        isVideo,
+        setThumbnailBlobIndex,
+        removeMedia: () => {
+            setField('imageURI', '');
+            setField('animationURI', '');
+            setThumbnailOptions([]);
+            setThumbnailBlobIndex(null);
+            setImageBlob(null);
+            setAnimationBlob(null);
+            setIsVideo(false);
+        },
+        handleFileChange,
     }
 }

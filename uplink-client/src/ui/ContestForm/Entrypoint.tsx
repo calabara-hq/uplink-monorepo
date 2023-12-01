@@ -660,7 +660,6 @@ const ContestForm = ({
             <motion.div className="flex flex-col gap-8 w-full h-screen items-center justify-center mr-16">
               <FinalStep
                 contestState={contestState}
-                spaceName={spaceName}
                 contestId={data.contestId}
                 spaceId={spaceId}
               />
@@ -677,12 +676,10 @@ const ContestForm = ({
 const AddTweetDialogue = ({
   contestState,
   contestId,
-  spaceName,
   spaceId,
 }: {
   contestState: ContestBuilderProps;
   contestId: string;
-  spaceName: string;
   spaceId: string;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -723,14 +720,14 @@ const AddTweetDialogue = ({
       },
       {
         type: "text",
-        data: `\nhttps://uplink.wtf/${spaceName}/contest/${contestId}`,
+        data: `\nhttps://uplink.wtf/contest/${contestId}`,
         title: "contest url",
         icon: <HiPlusCircle className="w-5 h-5 text-t2" />,
       },
     ];
 
   if (hasTweeted)
-    return <RenderSuccessScreen contestId={contestId} spaceName={spaceName} />;
+    return <RenderSuccessScreen contestId={contestId} />;
   else
     return (
       <div className="flex flex-col items-center justify-center gap-6 p-4 w-10/12 md:w-1/3 h-1/2 bg-base-100 rounded-xl transition-colors duration-300 ease-in-out animate-springUp">
@@ -748,7 +745,7 @@ const AddTweetDialogue = ({
             className="btn btn-ghost text-t2"
             onClick={() => {
               router.refresh();
-              router.push(`/${spaceName}/contest/${contestId}`);
+              router.push(`/contest/${contestId}`);
             }}
           >
             Go to contest
@@ -773,21 +770,20 @@ const AddTweetDialogue = ({
     );
 };
 
-const FinalStep = ({ contestState, spaceName, contestId, spaceId }) => {
+const FinalStep = ({ contestState, contestId, spaceId }) => {
   const isTwitter = contestState.metadata.type === "twitter";
   if (isTwitter) {
     return (
       <AddTweetDialogue
         contestState={contestState}
         contestId={contestId}
-        spaceName={spaceName}
         spaceId={spaceId}
       />
     );
   } else
-    return <RenderSuccessScreen contestId={contestId} spaceName={spaceName} />;
+    return <RenderSuccessScreen contestId={contestId} />;
 };
-const RenderSuccessScreen = ({ contestId, spaceName }) => {
+const RenderSuccessScreen = ({ contestId }) => {
   const router = useRouter();
   return (
     <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 md:w-1/3 h-1/2 bg-base-100 rounded-xl transition-colors duration-300 ease-in-out animate-springUp">
@@ -797,7 +793,7 @@ const RenderSuccessScreen = ({ contestId, spaceName }) => {
         className="btn btn-ghost text-t2"
         onClick={() => {
           router.refresh();
-          router.push(`/${spaceName}/contest/${contestId}`);
+          router.push(`/contest/${contestId}`);
         }}
       >
         Go to contest

@@ -9,6 +9,17 @@ const ContextSchema = z.object({
     hasApiToken: z.boolean()
 })
 
+export type UserSession = {
+    id: string;
+    address: string;
+    twitter: {
+        id: string;
+        accessToken: string;
+        expiresAt: string;
+    } | null;
+} | null;
+
+
 export type Context = z.infer<typeof ContextSchema>;
 
 export class AuthorizationController {
@@ -18,7 +29,7 @@ export class AuthorizationController {
         this.redisClient = new Redis(redisUrl);
     }
 
-    async getUser(context: Context) {
+    async getUser(context: Context): Promise<UserSession> {
         if (!context || !context.token || !context.csrfToken) {
             return null;
         }
@@ -37,7 +48,7 @@ export class AuthorizationController {
             if (data) {
                 const { user, csrfToken: sessionCsrf } = JSON.parse(data);
                 if (sessionCsrf !== csrfToken) return null; // check for csrf token match
-                return user || null;
+                return user || null
             }
 
             return null;

@@ -30,7 +30,7 @@ export const getCacheSubParams = async (
     user: any,
     contestId: number
 ) => {
-    const key = `sub-params:${user.address}-${contestId}`;
+    const key = `sub-params:${user.id}-${contestId}`;
     return await getCacheValue(key).then(value => {
         if (value === null) return null
         return {
@@ -62,7 +62,7 @@ export const setCacheSubParams = async (
         result: boolean
     }[]
 ) => {
-    const key = `sub-params:${user.address}-${contestId}`;
+    const key = `sub-params:${user.id}-${contestId}`;
     const value = JSON.stringify({
         subPower: subPower.toString(),
         restrictionResults,

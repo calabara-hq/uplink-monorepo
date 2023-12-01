@@ -23,7 +23,7 @@ export const calculateContestStatus = (deadlines: Deadlines, contestType: Contes
 
     if (contestType === "twitter" && !tweetId) {
         return {
-            contestState: "pending",
+            contestState: "pending" as ContestState,
             stateRemainingTime: null,
         };
     }

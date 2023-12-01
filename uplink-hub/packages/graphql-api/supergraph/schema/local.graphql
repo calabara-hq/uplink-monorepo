@@ -287,6 +287,7 @@ type Mutation
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
   @join__type(graph: SUBMIT)
+  @join__type(graph: USER)
   @join__type(graph: VOTE)
 {
   createContest(spaceId: ID!, contestData: CreateContestData!): ContestMutationResponse! @join__field(graph: CONTESTS)
@@ -296,6 +297,7 @@ type Mutation
   createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createTwitterSubmission(contestId: ID!, submission: TwitterSubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createUserDrop(submissionId: ID!, contestId: ID!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createUserDropResponse! @join__field(graph: SUBMIT)
+  updateUser(displayName: String!, profileAvatar: String!, visibleTwitter: Boolean!): UpdateUserResponse @join__field(graph: USER)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
   removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
   removeAllVotes(contestId: ID!): RemoveAllVotesResponse! @join__field(graph: VOTE)
@@ -355,7 +357,7 @@ type PopularSubmission
   created: String!
   type: String!
   version: String!
-  author: String!
+  author: SubmissionAuthor!
   url: String!
   nftDrop: NftDrop
 }
@@ -384,7 +386,7 @@ type Query
   popularSubmissions: [PopularSubmission!]! @join__field(graph: SUBMIT)
   getUserSubmissionParams(contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
   me: User @join__field(graph: USER)
-  user(id: ID, address: String): User @join__field(graph: USER)
+  user(userIdentifier: String!): User @join__field(graph: USER)
   getUserVotingParams(contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
 }
 
@@ -536,7 +538,7 @@ type Submission
   created: String!
   type: String!
   version: String!
-  author: String
+  author: SubmissionAuthor
   url: String!
   totalVotes: Decimal
   rank: Int
@@ -545,6 +547,16 @@ type Submission
 
 scalar SubmissionAssetUrl
   @join__type(graph: SUBMIT)
+
+type SubmissionAuthor
+  @join__type(graph: SUBMIT)
+{
+  id: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+}
 
 input SubmissionPayload
   @join__type(graph: SUBMIT)
@@ -687,11 +699,54 @@ input TwitterSubmissionPayload
   thread: [ThreadPayload!]!
 }
 
+type UpdateUserResponse
+  @join__type(graph: USER)
+{
+  success: Boolean!
+}
+
 type User
   @join__type(graph: USER, key: "id")
 {
-  id: ID
-  address: String
+  id: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+  twitterHandle: String
+  twitterAvatar: String
+  visibleTwitter: Boolean
+  submissions: [UserSubmission!]!
+}
+
+type UserNftDrop
+  @join__type(graph: USER)
+{
+  chainId: Int!
+  contractAddress: String!
+  dropConfig: String!
+}
+
+type UserSubmission
+  @join__type(graph: USER)
+{
+  id: ID!
+  contestId: ID!
+  type: String!
+  version: String!
+  url: String!
+  nftDrop: UserNftDrop
+  author: UserSubmissionAuthor
+}
+
+type UserSubmissionAuthor
+  @join__type(graph: USER)
+{
+  id: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
 }
 
 type UserSubmissionParams

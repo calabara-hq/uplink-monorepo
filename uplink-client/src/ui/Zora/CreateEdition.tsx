@@ -13,7 +13,7 @@ import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { useSession } from "@/providers/SessionProvider";
 import { useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
 import { ZoraAbi, getContractFromEnv } from "@/lib/abi/zoraEdition";
-import { AddressOrEns, UserAvatar } from "@/ui/AddressDisplay/AddressDisplay";
+import { UsernameDisplay, UserAvatar } from "@/ui/AddressDisplay/AddressDisplay";
 import { format } from "date-fns";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import useSWRMutation from "swr/mutation";
@@ -169,6 +169,7 @@ const CreateEdition = ({
     imageURI,
     animationURI,
     routeOnSuccess,
+    referrer,
 }: {
     contestId: string,
     submissionId: string,
@@ -176,8 +177,9 @@ const CreateEdition = ({
     imageURI: string,
     animationURI: string,
     routeOnSuccess: string,
+    referrer?: string
 }) => {
-    const { contractArguments, state, setField, validate } = useCreateZoraEdition(name, imageURI, animationURI);
+    const { contractArguments, state, setField, validate } = useCreateZoraEdition(referrer, { name, imageURI, animationURI });
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -325,11 +327,11 @@ const CreateEditionButton = ({
 }) => {
     const { data: session, status } = useSession();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { contract, chainId, explorer } = getContractFromEnv();
+    const { creator_contract, chainId, explorer } = getContractFromEnv();
 
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
         chainId: chainId,
-        address: contract,
+        address: creator_contract,
         abi: ZoraAbi,
         functionName: 'createEditionWithReferral',
         args: flattenContractArgs(contractArguments),
@@ -387,13 +389,13 @@ const CreateEditionButton = ({
                         if (!response.success) {
                             reset();
                         }
+                        return toast.success('Drop created!')
                     });
                 } catch (e) {
                     console.log(e)
                     reset();
                 }
 
-                return toast.success('Drop created!')
             }
         }
     });
@@ -436,8 +438,8 @@ const CreateEditionButton = ({
                                     <div className="flex flex-col gap-2">
                                         <p className="line-clamp-3 font-bold text-lg break-all">{contractArguments.name}</p>
                                         <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
-                                            <UserAvatar address={session?.user?.address} size={28} />
-                                            <AddressOrEns address={session?.user?.address} />
+                                            <UserAvatar user={session?.user} size={28} />
+                                            <UsernameDisplay user={session?.user} />
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-2 w-full">

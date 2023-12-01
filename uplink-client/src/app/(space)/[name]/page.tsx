@@ -124,10 +124,8 @@ const SpaceInfo = async ({ name }: { name: string }) => {
 
 const ContestCard = ({
   contest,
-  spaceName,
 }: {
   contest: ActiveContest;
-  spaceName: string;
 }) => {
   const { id, metadata, promptData, deadlines, tweetId } = contest;
   const contestId = id;
@@ -140,7 +138,7 @@ const ContestCard = ({
   );
 
   return (
-    <Link href={`${spaceName}/contest/${contestId}`} draggable={false}>
+    <Link href={`/contest/${contestId}`} draggable={false}>
       <div
         key={contestId}
         className="card bg-base-100
@@ -171,15 +169,13 @@ const ContestCard = ({
 
 const CardMap = ({
   contests,
-  spaceName,
 }: {
   contests: Array<ActiveContest>;
-  spaceName: string;
 }) => {
   return (
     <div className="grid grid-rows-1 lg:grid-cols-2 gap-4 w-full animate-fadeIn p-6">
       {contests.map((contest, idx) => {
-        return <ContestCard key={idx} {...{ contest, spaceName }} />;
+        return <ContestCard key={idx} {...{ contest }} />;
       })}
     </div>
   );
@@ -194,15 +190,15 @@ const SpaceContests = async ({ name }: { name: string }) => {
 
   return (
     <ListContests
-      allContestsChild={<CardMap contests={allContests} spaceName={name} />}
+      allContestsChild={<CardMap contests={allContests} />}
       activeContestsChild={
-        <CardMap contests={activeContests} spaceName={name} />
+        <CardMap contests={activeContests} />
       }
       isActiveContests={activeContests.length > 0}
       isContests={allContests.length > 0}
       newContestChild={
         <Link
-          href={`${name}/contest/create`}
+          href={`${name}/create-contest`}
           className="btn btn-ghost btn-sm text-t2 normal-case ml-2"
         >
           <span>New</span>
@@ -228,24 +224,6 @@ export default async function Page({ params }: { params: { name: string } }) {
         <Suspense fallback={<SpaceInfoSekelton />}>
           {/*@ts-expect-error*/}
           <SpaceInfo name={name} />
-        </Suspense>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="flex flex-col md:flex-row m-auto py-6 w-11/12 gap-4">
-      <div className="flex flex-col w-full md:w-56 gap-4">
-        <Suspense fallback={<SpaceInfoSekelton />}>
-          {/*@ts-expect-error*/}
-          <SpaceInfo name={name} />
-        </Suspense>
-        {/* <Stats /> */}
-      </div>
-      <div className="flex flex-col flex-grow">
-        <Suspense fallback={<SpaceContestsSkeleton />}>
-          {/*@ts-expect-error*/}
-          <SpaceContests name={name} />
         </Suspense>
       </div>
     </div>
