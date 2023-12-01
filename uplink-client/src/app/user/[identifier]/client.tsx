@@ -16,9 +16,16 @@ import { SwitchNetworkButton } from "@/ui/Zora/common";
 import { Submission } from "@/types/submission";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { User } from "@/types/user";
+import Image from "next/image";
+import { HiPencil } from "react-icons/hi2";
+import { FaTwitter } from "react-icons/fa";
 
 export const ManageAccountButton = ({ }) => {
 
+}
+
+const hasProfile = (user: User) => {
+    return user.userName && user.displayName
 }
 
 export const RewardsSkeleton = () => {
@@ -31,6 +38,84 @@ export const RewardsSkeleton = () => {
             </div>
             <div />
         </div>
+    )
+}
+
+export const ClientUserProfile = ({ accountAddress }: { accountAddress: string }) => {
+    const { me: user, isMeLoading, isMeError } = useMe(accountAddress);
+    return (
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center md:m-auto gap-4 w-full">
+            <div className="relative w-fit pt-8 m-auto md:mr-auto md:ml-0">
+                <div className="absolute top-0 left-0 right-0 ml-auto mr-auto md:-left-5 md:right-full w-32 h-32 z-10">
+                    {user.profileAvatar ? (<Image
+                        src={user.profileAvatar}
+                        alt="avatar"
+                        fill
+                        className="rounded-full object-cover"
+                        sizes="10vw"
+                        quality={100}
+                    />) : (
+                        <div className="rounded-full bg-base-200 shimmer w-32 h-32" />
+                    )}
+                </div>
+
+                <div className="relative h-fit w-[300px] rounded-xl border border-border p-2 grid grid-rows-[100px_auto] md:grid-cols-[100px_auto]">
+                    <div className="" />
+                    {hasProfile(user) ? (
+                        <>
+                            <div className="h-full p-2 hidden md:flex md:flex-col" >
+                                <p className="text-xl font-bold text-t1 text-center md:text-left">{user.displayName}</p>
+                                <p className="text-sm text-t1 text-center md:text-left">{user.userName}</p>
+                                <Link className="btn btn-ghost btn-sm absolute text-t2 bottom-0 right-0" href={`/user/${user.address}/settings`}>
+                                    <HiPencil className="w-5 h-5" />
+                                </Link>
+
+                            </div>
+                        </>
+                    ) : (
+                        <div className="justify-center items-center hidden md:flex md:flex-col">
+                            <Link href={`/user/${user.address}/settings`} className="btn btn-primary btn-sm normal-case">Set up profile</Link>
+                        </div>
+                    )}
+
+                    <div className="col-span-2 flex flex-col gap-6">
+                        {hasProfile(user) ? (
+                            <>
+                                <div className="flex flex-col md:hidden">
+                                    <p className="text-xl font-bold text-t1 text-center md:text-left">{user.displayName}</p>
+                                    <p className="text-sm text-t1 text-center md:text-left">{user.userName}</p>
+                                </div>
+                                <Link className="btn btn-ghost absolute top-0 right-0 text-t2 md:hidden" href={`/user/${user.address}/settings`} draggable={false}>
+                                    <HiPencil className="w-5 h-5" />
+                                </Link>
+                            </>
+                        ) : (
+                            <div className="flex flex-col justify-center items-center md:hidden">
+                                <Link href={`/user/${user.address}/settings`} className="btn btn-primary btn-sm normal-case">Set up profile</Link>
+                            </div>
+                        )}
+
+                        {user.twitterHandle && user.visibleTwitter && (
+                            <div className="flex flex-row gap-2 items-center hover:text-blue-500 justify-center md:justify-start">
+                                <FaTwitter className="w-4 h-4 text-t2" />
+                                <Link
+                                    href={`https://twitter.com/${user.twitterHandle}`}
+                                    rel="noopener noreferrer"
+                                    draggable={false}
+                                    target="_blank"
+                                    className="text-blue-500 hover:underline"
+                                    prefetch={false}
+                                >
+                                    nickddsn
+                                </Link>
+                            </div>
+                        )}
+                        {!hasProfile && <button className="btn normal-case mb-1">Claim Account</button>}
+                    </div>
+                </div>
+            </div>
+            <ClaimableUserRewards accountAddress={user.address} />
+        </div >
     )
 }
 

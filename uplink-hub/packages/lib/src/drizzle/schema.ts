@@ -197,7 +197,7 @@ export const users = mysqlTable('users', {
     twitterId: varchar('twitterId', { length: 255 }),
     twitterHandle: varchar('twitterHandle', { length: 255 }),
     twitterAvatarUrl: varchar('twitterAvatar', { length: 255 }),
-    visibleTwitter: tinyint('visibleTwitter').notNull().default(0),
+    visibleTwitter: tinyint('visibleTwitter').default(0),
 }, (user) => ({
     userAddressIndex: uniqueIndex("user_address_idx").on(user.address)
 }));
