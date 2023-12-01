@@ -256,11 +256,23 @@ const validateForm = (state: ConfigurableUserSettings, dispatch: any) => {
     return result;
 }
 
+const LoadingDialog = () => {
+    return (
+        <div
+            className="animate-springUp flex flex-col gap-2 w-full h-[50vh] items-center justify-center" >
+            <p className="text-lg text-t1 font-semibold">Getting ready ...</p>
+            <div
+                className="text-xs text-primary ml-1 inline-block h-10 w-10 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                role="status"
+            />
+        </div >
+    );
+};
 
-const Settings = ({ user }: { user: User }) => {
+const Settings = ({ accountAddress }: { accountAddress: string }) => {
     const { data: session, status } = useSession();
     const [isUploading, setIsUploading] = useState(false);
-    const { mutateMe } = useMe(user.address)
+    const { me: user, isMeLoading, mutateMe } = useMe(accountAddress)
     const router = useRouter();
     const [state, dispatch] = useReducer(reducer, {
         profileAvatarUrl: user.profileAvatar || "",
@@ -312,7 +324,7 @@ const Settings = ({ user }: { user: User }) => {
         }
     }
 
-    if (status === 'loading') return <div>Loading...</div>
+    if (status === 'loading' || isMeLoading) return <LoadingDialog />
     if (status === 'authenticated') {
         if (session?.user?.address !== user.address) {
             return (

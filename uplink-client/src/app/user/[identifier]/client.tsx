@@ -106,7 +106,7 @@ export const ClientUserProfile = ({ accountAddress }: { accountAddress: string }
                                     className="text-blue-500 hover:underline"
                                     prefetch={false}
                                 >
-                                    nickddsn
+                                    {user.twitterHandle}
                                 </Link>
                             </div>
                         )}

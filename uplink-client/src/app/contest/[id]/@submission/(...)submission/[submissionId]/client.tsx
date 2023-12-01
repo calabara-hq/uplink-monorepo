@@ -1,5 +1,6 @@
 "use client"
 import { VoteActionProps, useVote } from "@/hooks/useVote";
+import { useContestState } from "@/providers/ContestStateProvider";
 import { useSession } from "@/providers/SessionProvider";
 import { Submission, isNftSubmission } from "@/types/submission"
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
@@ -30,6 +31,7 @@ export const BackButton = () => {
 export const HeaderButtons = ({ submission, referrer, context }: { submission: Submission, referrer: string | null, context: string | null }) => {
     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
     const voteActions = useVote(submission.contestId);
     const handleClose = () => {
         setIsMintModalOpen(false);
@@ -100,7 +102,7 @@ export const ShareButton = ({ submission, onClick, context }: { submission: Subm
         }
         else {
             if (status === 'authenticated') {
-                handleShare(event, `${process.env.NEXT_PUBLIC_CLIENT_URL}/submission/${submission.id}?context=${context}?referrer=${session?.user?.address}`)
+                handleShare(event, `${process.env.NEXT_PUBLIC_CLIENT_URL}/submission/${submission.id}?context=${context}&referrer=${session?.user?.address}`)
             }
             else {
                 onClick(event);
@@ -115,6 +117,8 @@ export const ShareButton = ({ submission, onClick, context }: { submission: Subm
 
 export const AddToCartButton = ({ submission, voteActions }: { submission: Submission, voteActions: VoteActionProps }) => {
     const { addProposedVote, currentVotes, proposedVotes } = voteActions;
+    const { contestState } = useContestState();
+
     const [isSelected, setIsSelected] = useState(false);
 
     useEffect(() => {
@@ -131,24 +135,29 @@ export const AddToCartButton = ({ submission, voteActions }: { submission: Submi
         setIsSelected(!isSelected);
     };
 
-    if (isSelected) {
-        return (
-            <span
-                className="tooltip tooltip-top pr-2.5"
-                data-tip={"Selected"}
-            >
-                <HiCheckBadge className="h-7 w-7 text-warning" />
-            </span>
-        );
-    } else
-        return (
-            <span className="tooltip tooltip-top " data-tip={"Add to cart"}>
-                <button
-                    className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-warning hover:bg-opacity-30 hover:text-warning"
-                    onClick={handleSelect}
+    if (contestState === "voting") {
+
+        if (isSelected) {
+            return (
+                <span
+                    className="tooltip tooltip-top pr-2.5"
+                    data-tip={"Selected"}
                 >
-                    <BiLayerPlus className="h-6 w-6 " />
-                </button>
-            </span>
-        );
+                    <HiCheckBadge className="h-7 w-7 text-warning" />
+                </span>
+            );
+        } else
+            return (
+                <span className="tooltip tooltip-top " data-tip={"Add to cart"}>
+                    <button
+                        className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-warning hover:bg-opacity-30 hover:text-warning"
+                        onClick={handleSelect}
+                    >
+                        <BiLayerPlus className="h-6 w-6 " />
+                    </button>
+                </span>
+            );
+    }
+
+    return null;
 };
