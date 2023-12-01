@@ -1,9 +1,11 @@
 "use client"
+import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import { VoteActionProps, useVote } from "@/hooks/useVote";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useSession } from "@/providers/SessionProvider";
 import { Submission, isNftSubmission } from "@/types/submission"
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
+import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission";
 import SubmissionModal from "@/ui/Submission/SubmissionModal";
 import MintEdition from "@/ui/Zora/MintEdition";
 import Link from "next/link";
@@ -114,7 +116,6 @@ export const ShareButton = ({ submission, onClick, context }: { submission: Subm
 
 }
 
-
 export const AddToCartButton = ({ submission, voteActions }: { submission: Submission, voteActions: VoteActionProps }) => {
     const { addProposedVote, currentVotes, proposedVotes } = voteActions;
     const { contestState } = useContestState();
@@ -161,3 +162,60 @@ export const AddToCartButton = ({ submission, voteActions }: { submission: Submi
 
     return null;
 };
+
+
+
+const ExpandedSubmissionSkeleton = () => {
+    return (
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+                <div className="w-64 h-8 bg-base-100 shimmer rounded-lg" />
+                <div className="flex flex-row items-center h-8">
+                    <div className="flex gap-2 items-center">
+                        <div className="w-6 h-6 bg-base-100 shimmer rounded-xl" />
+                        <div className="w-16 h-4 bg-base-100 shimmer rounded-lg" />
+                    </div>
+                </div>
+            </div>
+            <div className="w-full h-0.5 bg-base-200" />
+            <div className="w-96 m-auto h-96 bg-base-100 shimmer rounded-lg" />
+        </div>
+    );
+};
+
+export const RenderClientSubmission = ({ submissionId, context }: { submissionId: string, context }) => {
+    const { contestId } = useContestState();
+    const { liveSubmissions, areSubmissionsLoading } = useLiveSubmissions(contestId);
+    const submission = liveSubmissions.find((submission) => submission.id === submissionId);
+
+
+    useEffect(() => {
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = `-${window.scrollY}px`;
+
+        return () => {
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        }
+    }, [])
+
+
+    return (
+        <SubmissionModal isModalOpen={true} mode="expand" handleClose={() => { }}>
+            <div className="grid grid-cols-1 w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full mt-4 p-4">
+                <BackButton />
+                {areSubmissionsLoading ?
+                    (
+                        <ExpandedSubmissionSkeleton />
+                    ) :
+                    (
+                        <ExpandedSubmission submission={submission} headerChildren={<HeaderButtons submission={submission} referrer={null} context={context} />} />
+                    )
+                }
+            </div>
+        </SubmissionModal>
+    )
+}

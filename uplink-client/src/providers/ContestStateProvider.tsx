@@ -7,6 +7,7 @@ import React, { createContext, useState } from "react"
 
 
 export type ContestStateContextValue = {
+    contestId: string,
     contestState: ContestState | null,
     stateRemainingTime: string | null,
     isLoading: boolean,
@@ -34,6 +35,7 @@ export const ContestStateProvider = ({ contest, children }: { contest: FetchSing
     useTicks(() => update(contest))
 
     const value = {
+        contestId: contest.id,
         isLoading: contestState === null,
         contestState,
         stateRemainingTime,
