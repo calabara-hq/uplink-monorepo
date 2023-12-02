@@ -1,8 +1,10 @@
+"use client";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import type { OutputData } from "@editorjs/editorjs";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect } from "react";
 import sanitizeHtml from "sanitize-html";
+import Output, { LinkToolOutput, ListOutput, ParagraphOutput } from 'editorjs-react-renderer';
 
 const createLinks = (text: string): string => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -16,28 +18,6 @@ const createLinks = (text: string): string => {
       const linkUrl = `https://twitter.com/${handle.replace(" ", "")}`;
       return `<a target="_blank" href="${linkUrl}">${handle}</a>`;
     });
-};
-
-const ParagraphRenderer = ({ data }) => {
-  if (!data) return <></>;
-  let content = null;
-  if (typeof data === "string") content = data;
-  else if (
-    typeof data === "object" &&
-    data.text &&
-    typeof data.text === "string"
-  )
-    content = data.text;
-  return content ? (
-    <p
-      className="text-t1 hyperlinks"
-      dangerouslySetInnerHTML={{
-        __html: sanitizeHtml(createLinks(content)),
-      }}
-    ></p>
-  ) : (
-    <></>
-  );
 };
 
 const ImageRenderer = ({ data }: { data: any }) => {
@@ -56,23 +36,14 @@ const ImageRenderer = ({ data }: { data: any }) => {
   );
 };
 
-const ListOutput = ({ data }) => {
-  if (!data || !data.items || !Array.isArray(data.items)) return <></>;
+const ParagraphRenderer = ({ data }) => {
+  return <ParagraphOutput data={data} />;
+}
 
-  const content = data.items.map((item, idx) => {
-    return (
-      <li
-        key={idx}
-        className="text-t1 hyperlinks"
-        dangerouslySetInnerHTML={{ __html: sanitizeHtml(createLinks(item)) }}
-      />
-    );
-  });
-
-  return <ul className="list-disc list-inside pl-2">{content}</ul>;
-
-
+const ListRenderer = ({ data }) => {
+  return <ListOutput data={data} />;
 };
+
 
 const ParseBlocks = ({
   data,
@@ -84,21 +55,18 @@ const ParseBlocks = ({
   const renderers = {
     image: omitImages ? null : ImageRenderer,
     paragraph: ParagraphRenderer,
-    list: ListOutput,
+    list: ListRenderer,
   };
 
   if (!data || !data.blocks || !Array.isArray(data.blocks)) return null;
 
+
   return (
-    <>
-      {data.blocks.map((block, idx) => {
-        const key = block.type.toLowerCase();
-        let Renderer = renderers[key];
-        if (!Renderer) return <></>;
-        return <Renderer key={idx} data={block.data} />;
-      })}
-    </>
-  );
+    <section className="hyperlinks">
+      <Output data={data} renderers={renderers} />
+    </section>
+  )
+
 };
 
 export default ParseBlocks;

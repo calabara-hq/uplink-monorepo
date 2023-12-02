@@ -1,7 +1,17 @@
 import Image from "next/image";
 import dynamic from "next/dynamic";
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
-  ssr: true,
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col gap-2 w-full">
+      <div className="shimmer h-4 w-64 bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+    </div>
+  )
 });
 import { CategoryLabel, ChainLabel, StatusLabel } from "../ContestLabels/ContestLabels";
 import Link from "next/link";

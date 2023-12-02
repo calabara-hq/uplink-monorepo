@@ -1,4 +1,6 @@
 "use client"
+import { VoteActionProps } from "@/hooks/useVote";
+import { useContestState } from "@/providers/ContestStateProvider";
 import { useSession } from "@/providers/SessionProvider";
 import { Submission, isNftSubmission } from "@/types/submission"
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
@@ -7,9 +9,58 @@ import MintEdition from "@/ui/Zora/MintEdition";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BiLayerPlus } from "react-icons/bi";
 import { HiArrowNarrowLeft } from "react-icons/hi";
+import { HiCheckBadge } from "react-icons/hi2";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 
+
+export const AddToCartButton = ({ submission, voteActions }: { submission: Submission, voteActions: VoteActionProps }) => {
+    const { addProposedVote, currentVotes, proposedVotes } = voteActions;
+    const { contestState } = useContestState();
+
+    const [isSelected, setIsSelected] = useState(false);
+
+    useEffect(() => {
+        const isSelected = currentVotes.some(vote => vote.submissionId === submission.id) || proposedVotes.some(vote => vote.id === submission.id)
+        setIsSelected(isSelected);
+    }, [currentVotes, proposedVotes, submission.id]);
+
+    const handleSelect = (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        if (!isSelected) {
+            addProposedVote(submission);
+        }
+        setIsSelected(!isSelected);
+    };
+
+    if (contestState === "voting") {
+
+        if (isSelected) {
+            return (
+                <span
+                    className="tooltip tooltip-top pr-2.5"
+                    data-tip={"Selected"}
+                >
+                    <HiCheckBadge className="h-7 w-7 text-warning" />
+                </span>
+            );
+        } else
+            return (
+                <span className="tooltip tooltip-top " data-tip={"Add to cart"}>
+                    <button
+                        className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-warning hover:bg-opacity-30 hover:text-warning"
+                        onClick={handleSelect}
+                    >
+                        <BiLayerPlus className="h-6 w-6 " />
+                    </button>
+                </span>
+            );
+    }
+
+    return null;
+};
 
 export const BackButton = ({ context }: { context: string | null }) => {
     const router = useRouter();
