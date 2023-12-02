@@ -15,11 +15,8 @@ import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
 import { Decimal } from "decimal.js";
 import formatDecimal from "@/lib/formatDecimal";
 
-const SubmissionModal = dynamic(() => import("./SubmissionModal"), {
-  ssr: false,
-});
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
-  ssr: true,
+  ssr: false,
 });
 
 const SubmissionBody = ({ submission }: { submission: Submission }) => {
@@ -156,7 +153,7 @@ const CardSubmission = ({
   submission: Submission;
   footerChildren?: React.ReactNode;
   interactive?: boolean;
-  handleCardClick: (submission: Submission, mode: "expand" | "mint") => void;
+  handleCardClick: (submission: Submission) => void;
 }) => {
   const isMobileDevice = isMobile();
 
@@ -172,7 +169,7 @@ const CardSubmission = ({
     }
   }, [inView, isMobileDevice]);
 
-  
+
   return (
     <div
       className="relative w-full h-full cursor-pointer p-2 shadow-black shadow-sm flex flex-col justify-between rounded-xl bg-base-100 border border-border no-select transform
@@ -180,7 +177,7 @@ const CardSubmission = ({
       ref={ref}
       onMouseEnter={() => !isMobileDevice && setIsActive(true)}
       onMouseLeave={() => !isMobileDevice && setIsActive(false)}
-      onClick={() => handleCardClick(submission, "expand")}
+      onClick={() => handleCardClick(submission)}
     >
       {submission.rank && (
         <TbCrown

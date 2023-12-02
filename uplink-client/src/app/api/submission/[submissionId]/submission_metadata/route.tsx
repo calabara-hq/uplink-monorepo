@@ -1,5 +1,4 @@
-import { NextRequest } from "next/server";
-import { ImageResponse } from "next/og"
+import { NextRequest, ImageResponse } from "next/server";
 import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
 
 export async function GET(req: NextRequest) {

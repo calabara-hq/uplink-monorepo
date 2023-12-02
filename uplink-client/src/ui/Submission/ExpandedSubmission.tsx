@@ -2,7 +2,17 @@
 import type { Submission } from "@/types/submission";
 import Image from "next/image";
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
-  ssr: true,
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col gap-2 w-full">
+      <div className="shimmer h-4 w-64 bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+      <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+    </div>
+  )
 });
 import { ParseThread } from "@/lib/threadParser";
 import { ImageWrapper } from "./MediaWrapper";

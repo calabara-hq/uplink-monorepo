@@ -86,7 +86,7 @@ export default function SubmissionModal({
 
   if (mode === "expand") {
     return (
-      <ExpandSubmissionModal isModalOpen={isModalOpen} onClose={() => router.back()}>
+      <ExpandSubmissionModal isModalOpen={isModalOpen} onClose={handleClose}>
         {children}
       </ExpandSubmissionModal>
     )

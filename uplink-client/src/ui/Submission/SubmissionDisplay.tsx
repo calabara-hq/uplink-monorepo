@@ -13,9 +13,10 @@ import useMe from "@/hooks/useMe";
 import { useVote, VoteActionProps } from "@/hooks/useVote";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import { MdOutlineCancelPresentation } from "react-icons/md";
-import { MintButton, ShareButton, ShareModalContent } from "@/app/submission/[submissionId]/client";
+import { MintButton, ShareButton, ShareModalContent, AddToCartButton } from "@/app/submission/[submissionId]/client";
 import { useSession } from "@/providers/SessionProvider";
-import { AddToCartButton } from "@/app/contest/[id]/@submission/(...)submission/[submissionId]/client";
+import ExpandedSubmission from "./ExpandedSubmission";
+import { HiArrowNarrowLeft } from "react-icons/hi";
 
 
 export const SubmissionDisplaySkeleton = () => {
@@ -291,6 +292,36 @@ export const UserSubmissionDisplay = ({ user }: { user: User }) => {
   );
 }
 
+
+const HeaderButtons = ({ submission, referrer, context }: { submission: Submission, referrer: string | null, context: string | null }) => {
+  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  const voteActions = useVote(submission.contestId);
+  const handleClose = () => {
+    setIsMintModalOpen(false);
+    setIsShareModalOpen(false);
+  }
+
+  return (
+    <div className="flex gap-2 ml-auto items-center">
+      <ShareButton submission={submission} onClick={() => setIsShareModalOpen(true)} context={context} />
+      <MintButton submission={submission} onClick={() => setIsMintModalOpen(true)} />
+      <AddToCartButton submission={submission} voteActions={voteActions} />
+      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleClose} >
+        {isShareModalOpen && (
+          <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
+        )}
+
+        {isMintModalOpen && (
+          <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} referrer={referrer} />
+        )}
+      </SubmissionModal>
+    </div>
+  )
+}
+
+
 export const LiveSubmissionDisplay = ({
   contestId,
 }: {
@@ -300,7 +331,9 @@ export const LiveSubmissionDisplay = ({
   const voteActions = useVote(contestId);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [isExpandModalOpen, setIsExpandModalOpen] = useState(false);
   const [submission, setSubmission] = useState<Submission | null>(null);
+
   const router = useRouter();
   const openMintModal = (submission: Submission) => {
     setIsMintModalOpen(true)
@@ -309,6 +342,11 @@ export const LiveSubmissionDisplay = ({
 
   const openShareModal = (submission: Submission) => {
     setIsShareModalOpen(true)
+    setSubmission(submission)
+  }
+
+  const openExpandModal = (submission: Submission) => {
+    setIsExpandModalOpen(true)
     setSubmission(submission)
   }
 
@@ -328,7 +366,14 @@ export const LiveSubmissionDisplay = ({
   const handleClose = () => {
     setIsShareModalOpen(false)
     setIsMintModalOpen(false)
+    setIsExpandModalOpen(false)
     setSubmission(null);
+  }
+
+
+  const handleExpand = (submission) => {
+    console.log('expanding')
+    openExpandModal(submission)
   }
 
 
@@ -345,7 +390,7 @@ export const LiveSubmissionDisplay = ({
                 key={idx}
                 interactive={true}
                 submission={submission}
-                handleCardClick={(submission) => router.push(`/submission/${submission.id}?context=${context}`)}
+                handleCardClick={(submission) => handleExpand(submission)}
                 footerChildren={
                   <div className="flex flex-col w-full">
                     <div className="p-2 w-full" />
@@ -373,13 +418,27 @@ export const LiveSubmissionDisplay = ({
           })}
         </div>
       </div>
-      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleClose} >
+      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isExpandModalOpen} mode={isMintModalOpen ? "mint" : isExpandModalOpen ? "expand" : "share"} handleClose={handleClose} >
         {isShareModalOpen && submission && (
           <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
         )}
 
         {isMintModalOpen && submission && (
           <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} />
+        )}
+
+        {isExpandModalOpen && submission && (
+          <div className="flex flex-col w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full mt-4 p-4">
+            <button className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0 "
+              onClick={handleClose}
+            >
+              <HiArrowNarrowLeft className="w-6 h-6" />
+              <p>{"Back"}</p>
+            </button>
+            <ExpandedSubmission submission={submission} headerChildren={
+              <HeaderButtons submission={submission} referrer={null} context={context} />
+            } />
+          </div>
         )}
       </SubmissionModal>
     </div >

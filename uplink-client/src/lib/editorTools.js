@@ -8,12 +8,13 @@ import { IpfsUpload } from "@/lib/mediaUpload";
 const EDITOR_JS_TOOLS = {
     paragraph: {
         class: Paragraph,
-        inlineToolbar: ['bold', 'italic']
+        inlineToolbar: ['bold', 'italic', 'link'],
     },
     list: {
         class: List,
-        inlineToolbar: ['bold', 'italic'],
+        inlineToolbar: ['bold', 'italic', 'link'],
     },
+
     image: {
         class: Image,
         config: {
