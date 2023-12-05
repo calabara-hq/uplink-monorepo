@@ -15,6 +15,7 @@ const singleSpaceById = db.query.spaces.findFirst({
     where: ((spaces) => sqlOps.eq(spaces.id, sqlOps.placeholder('id'))),
     with: {
         admins: true,
+        mintBoard: true,
         spaceTokens: {
             with: {
                 token: true
@@ -24,10 +25,19 @@ const singleSpaceById = db.query.spaces.findFirst({
 }).prepare();
 
 
-const singleSpaceByName = db.query.spaces.findFirst({
+export const singleSpaceByName = db.query.spaces.findFirst({
     where: ((spaces) => sqlOps.eq(spaces.name, sqlOps.placeholder('name'))),
     with: {
         admins: true,
+        mintBoard: {
+            with: {
+                submissions: {
+                    with: {
+                        author: true
+                    }
+                }
+            }
+        },
         spaceTokens: {
             with: {
                 token: true

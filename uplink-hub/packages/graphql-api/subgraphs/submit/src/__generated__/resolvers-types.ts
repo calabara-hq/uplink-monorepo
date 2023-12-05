@@ -59,9 +59,19 @@ export type DropConfig = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createMintBoardSubmission: CreateMintBoardSubmissionResponse;
   createSubmission: CreateSubmissionResponse;
   createTwitterSubmission: CreateSubmissionResponse;
   createUserDrop: CreateUserDropResponse;
+  reserveMintBoardSlot: ReserveMintBoardSlotResponse;
+};
+
+
+export type MutationCreateMintBoardSubmissionArgs = {
+  chainId: Scalars['Int']['input'];
+  contractAddress: Scalars['String']['input'];
+  dropConfig: DropConfig;
+  spaceName: Scalars['String']['input'];
 };
 
 
@@ -83,6 +93,11 @@ export type MutationCreateUserDropArgs = {
   contractAddress: Scalars['String']['input'];
   dropConfig: DropConfig;
   submissionId: Scalars['ID']['input'];
+};
+
+
+export type MutationReserveMintBoardSlotArgs = {
+  spaceName: Scalars['String']['input'];
 };
 
 export type NftDrop = {
@@ -214,6 +229,11 @@ export type UserSubmissionParams = {
   userSubmissions: Array<Submission>;
 };
 
+export type CreateMintBoardSubmissionResponse = {
+  __typename?: 'createMintBoardSubmissionResponse';
+  success: Scalars['Boolean']['output'];
+};
+
 export type CreateSubmissionResponse = {
   __typename?: 'createSubmissionResponse';
   submissionId?: Maybe<Scalars['ID']['output']>;
@@ -223,6 +243,12 @@ export type CreateSubmissionResponse = {
 
 export type CreateUserDropResponse = {
   __typename?: 'createUserDropResponse';
+  success: Scalars['Boolean']['output'];
+};
+
+export type ReserveMintBoardSlotResponse = {
+  __typename?: 'reserveMintBoardSlotResponse';
+  slot?: Maybe<Scalars['Int']['output']>;
   success: Scalars['Boolean']['output'];
 };
 
@@ -326,8 +352,10 @@ export type ResolversTypes = ResolversObject<{
   ThreadPayload: ThreadPayload;
   TwitterSubmissionPayload: TwitterSubmissionPayload;
   UserSubmissionParams: ResolverTypeWrapper<UserSubmissionParams>;
+  createMintBoardSubmissionResponse: ResolverTypeWrapper<CreateMintBoardSubmissionResponse>;
   createSubmissionResponse: ResolverTypeWrapper<CreateSubmissionResponse>;
   createUserDropResponse: ResolverTypeWrapper<CreateUserDropResponse>;
+  reserveMintBoardSlotResponse: ResolverTypeWrapper<ReserveMintBoardSlotResponse>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -360,8 +388,10 @@ export type ResolversParentTypes = ResolversObject<{
   ThreadPayload: ThreadPayload;
   TwitterSubmissionPayload: TwitterSubmissionPayload;
   UserSubmissionParams: UserSubmissionParams;
+  createMintBoardSubmissionResponse: CreateMintBoardSubmissionResponse;
   createSubmissionResponse: CreateSubmissionResponse;
   createUserDropResponse: CreateUserDropResponse;
+  reserveMintBoardSlotResponse: ReserveMintBoardSlotResponse;
 }>;
 
 export type AdditionalParamsResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdditionalParams'] = ResolversParentTypes['AdditionalParams']> = ResolversObject<{
@@ -400,9 +430,11 @@ export interface IsoDateStringScalarConfig extends GraphQLScalarTypeConfig<Resol
 }
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  createMintBoardSubmission?: Resolver<ResolversTypes['createMintBoardSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateMintBoardSubmissionArgs, 'chainId' | 'contractAddress' | 'dropConfig' | 'spaceName'>>;
   createSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateSubmissionArgs, 'contestId' | 'submission'>>;
   createTwitterSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateTwitterSubmissionArgs, 'contestId' | 'submission'>>;
   createUserDrop?: Resolver<ResolversTypes['createUserDropResponse'], ParentType, ContextType, RequireFields<MutationCreateUserDropArgs, 'chainId' | 'contestId' | 'contractAddress' | 'dropConfig' | 'submissionId'>>;
+  reserveMintBoardSlot?: Resolver<ResolversTypes['reserveMintBoardSlotResponse'], ParentType, ContextType, RequireFields<MutationReserveMintBoardSlotArgs, 'spaceName'>>;
 }>;
 
 export type NftDropResolvers<ContextType = any, ParentType extends ResolversParentTypes['NftDrop'] = ResolversParentTypes['NftDrop']> = ResolversObject<{
@@ -497,6 +529,11 @@ export type UserSubmissionParamsResolvers<ContextType = any, ParentType extends 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type CreateMintBoardSubmissionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['createMintBoardSubmissionResponse'] = ResolversParentTypes['createMintBoardSubmissionResponse']> = ResolversObject<{
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type CreateSubmissionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['createSubmissionResponse'] = ResolversParentTypes['createSubmissionResponse']> = ResolversObject<{
   submissionId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -505,6 +542,12 @@ export type CreateSubmissionResponseResolvers<ContextType = any, ParentType exte
 }>;
 
 export type CreateUserDropResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['createUserDropResponse'] = ResolversParentTypes['createUserDropResponse']> = ResolversObject<{
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ReserveMintBoardSlotResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['reserveMintBoardSlotResponse'] = ResolversParentTypes['reserveMintBoardSlotResponse']> = ResolversObject<{
+  slot?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -529,7 +572,9 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Submit_Token?: Submit_TokenResolvers<ContextType>;
   Submit_TokenRestriction?: Submit_TokenRestrictionResolvers<ContextType>;
   UserSubmissionParams?: UserSubmissionParamsResolvers<ContextType>;
+  createMintBoardSubmissionResponse?: CreateMintBoardSubmissionResponseResolvers<ContextType>;
   createSubmissionResponse?: CreateSubmissionResponseResolvers<ContextType>;
   createUserDropResponse?: CreateUserDropResponseResolvers<ContextType>;
+  reserveMintBoardSlotResponse?: ReserveMintBoardSlotResponseResolvers<ContextType>;
 }>;
 

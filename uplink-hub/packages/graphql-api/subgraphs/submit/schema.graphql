@@ -161,6 +161,15 @@ type createUserDropResponse {
   success: Boolean!
 }
 
+type reserveMintBoardSlotResponse {
+  success: Boolean!
+  slot: Int
+}
+
+type createMintBoardSubmissionResponse {
+  success: Boolean!
+}
+
 type Mutation {
   createSubmission(
     contestId: ID!
@@ -177,6 +186,15 @@ type Mutation {
     chainId: Int!
     dropConfig: DropConfig!
   ): createUserDropResponse!
+  reserveMintBoardSlot (
+    spaceName: String!
+  ): reserveMintBoardSlotResponse!
+  createMintBoardSubmission (
+    spaceName: String!
+    contractAddress: String!
+    chainId: Int!
+    dropConfig: DropConfig!
+  ): createMintBoardSubmissionResponse! 
 }
 
 extend schema

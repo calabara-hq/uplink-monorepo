@@ -1,14 +1,36 @@
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
+import { Boundary } from "@/ui/Boundary/Boundary";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+import SwrProvider from "@/providers/SwrProvider";
+import { RenderPosts } from "./renderPosts";
+import { HiTrash } from "react-icons/hi2";
+import { MdOutlineCancelPresentation } from "react-icons/md";
+
+
+const BoardInfoSkeleton = () => {
+    return (
+        <div className="flex flex-col gap-2 w-full">
+            <div className="h-6 w-1/3 bg-base-200 shimmer rounded-lg" />
+            <div className="flex gap-2 items-center">
+                <div className="rounded-full w-8 h-8 shimmer bg-base-200" />
+                <div className="rounded-lg w-16 h-5 shimmer bg-base-200" />
+            </div>
+            <div className="shimmer h-4 w-80 bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-80 bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-80 bg-base-200 rounded-lg" />
+            {/* <p className="text-t2">{space.mintBoard.boardDescription}</p> */}
+        </div>
+    )
+}
 
 const BoardInfo = async ({ spaceName }: { spaceName: string }) => {
     const space = await fetchSingleSpace(spaceName);
 
     return (
         <div className="flex flex-col gap-2 ">
-            <h1 className="font-bold text-3xl text-t1">Title</h1>
+            <h1 className="font-bold text-3xl text-t1">{space.mintBoard.boardTitle}</h1>
             <div className="flex flex-row gap-2 items-center">
                 <Link
                     className="relative w-8 h-8 flex flex-col"
@@ -30,39 +52,29 @@ const BoardInfo = async ({ spaceName }: { spaceName: string }) => {
                     {space.displayName}
                 </Link>
             </div>
-            <p className="text-t2">{`is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.`}</p>
+            <p className="text-t2">{space.mintBoard.boardDescription}</p>
         </div>
     )
 }
 
-
-const CreatePost = ({ spaceName }: { spaceName: string }) => {
-    return (
-        <div className="flex flex-col ">
-            <Link href={`/${spaceName}/board/studio`} className="btn btn-primary w-full h-full normal-case">Post</Link>
-        </div>
-    )
-}
-
-
-const PageFilter = ({ spaceName, isAll, isPopular, isUnminted }: { spaceName: string, isAll: boolean, isPopular: boolean, isUnminted: boolean }) => {
+const PageFilter = ({ spaceName, isLatest, isPopular }: { spaceName: string, isLatest: boolean, isPopular: boolean, }) => {
     return (
         <div className="flex ml-auto gap-2">
             <div className="flex flex-col gap-1 w-fit">
                 <Link
                     href={`/${spaceName}/board`}
-                    className={`hover:text-t1 ${isAll && "text-t1 "}`}
+                    className={`hover:text-t1 ${isLatest ? "text-t1" : "text-t2"}`}
                     scroll={false}
                     draggable={false}
                 >
-                    All
+                    Latest
                 </Link>
-                {isAll && <div className={`bg-t1 w-full h-0.5 animate-scrollInX`} />}
+                {isLatest && <div className={`bg-t1 w-full h-0.5 animate-scrollInX`} />}
             </div>
             <div className="flex flex-col gap-1">
                 <Link
                     href={`/${spaceName}/board?popular=true`}
-                    className={`hover:text-t1 ${isPopular && "text-t1 "}`}
+                    className={`hover:text-t1 ${isPopular ? "text-t1" : "text-t2"}`}
                     scroll={false}
                     draggable={false}
                 >
@@ -70,18 +82,20 @@ const PageFilter = ({ spaceName, isAll, isPopular, isUnminted }: { spaceName: st
                 </Link>
                 {isPopular && <div className={`bg-t1 w-full h-0.5 animate-scrollInX`} />}
             </div>
-            <div className="flex flex-col gap-1">
-                <Link
-                    href={`/${spaceName}/board?unminted=true`}
-                    className={`hover:text-t1 ${isUnminted && "text-t1 "}`}
-                    scroll={false}
-                    draggable={false}
-                >
-                    Un-Minted
-                </Link>
-                {isUnminted && <div className={`bg-t1 w-full h-0.5 animate-scrollInX`} />}
-            </div>
         </div>
+    )
+}
+
+
+const CreatePostButton = ({ spaceName }: { spaceName: string }) => {
+    return (
+        <Boundary labels={['Create Post']}>
+            <div className="flex flex-col gap-2 h-full justify-between">
+                <p className="text-sm text-t2">Earn 0.000333 ETH for every mint your post receives!</p>
+                <Link href={`/${spaceName}/board/studio`} className="btn btn-primary  normal-case">Post</Link>
+            </div>
+        </Boundary>
+
     )
 }
 
@@ -90,21 +104,31 @@ export default async function Page({ params, searchParams }: { params: { name: s
     const spaceName = params.name;
     const space = await fetchSingleSpace(spaceName);
     const isPopular = searchParams?.popular === "true"
-    const isUnminted = searchParams?.unminted === "true"
-    const isAll = !isPopular && !isUnminted
+    const isLatest = !isPopular
+
+    const fallback = {
+        [`mintBoard/${spaceName}`]: space,
+    };
 
     return (
-        <div className=" flex flex-col gap-6 w-full md:w-10/12 m-auto mt-4 mb-16 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-[auto_25%] gap-6 w-full p-4">
-                <Suspense fallback={<p>loading</p>}>
+        <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-[auto_35%] gap-8 w-full p-4">
+                <Suspense fallback={<BoardInfoSkeleton />}>
                     {/*@ts-expect-error*/}
                     <BoardInfo spaceName={spaceName} />
                 </Suspense>
-                <CreatePost spaceName={spaceName} />
+
+                <CreatePostButton spaceName={spaceName} />
+
             </div>
-            <div className="flex flex-col">
-                <PageFilter spaceName={spaceName} isAll={isAll} isPopular={isPopular} isUnminted={isUnminted} />
+            <div className="flex flex-col gap-1">
+                <PageFilter spaceName={spaceName} isLatest={isLatest} isPopular={isPopular} />
                 <div className="w-full bg-base-200 h-0.5" />
+            </div>
+            <div className="flex flex-col gap-4">
+                <SwrProvider fallback={fallback}>
+                    <RenderPosts spaceName={spaceName} />
+                </SwrProvider>
             </div>
         </div>
     )

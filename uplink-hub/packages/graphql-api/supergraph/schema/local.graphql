@@ -76,6 +76,12 @@ type CastVoteResponse
   userVotingParams: UserVotingParams!
 }
 
+type ConfigureMintBoardResponse
+  @join__type(graph: SPACES)
+{
+  success: Boolean!
+}
+
 type Contest
   @join__type(graph: CONTESTS, key: "id")
   @join__type(graph: SUBMIT, key: "id", extension: true)
@@ -144,6 +150,12 @@ input CreateContestData
   submitterRestrictions: [SubmitterRestrictionInput!]!
   votingPolicy: [VotingPolicyInput!]!
   additionalParams: AdditionalParamsInput!
+}
+
+type createMintBoardSubmissionResponse
+  @join__type(graph: SUBMIT)
+{
+  success: Boolean!
 }
 
 type createSubmissionResponse
@@ -283,6 +295,67 @@ input MetadataInput
   category: ContestCategoryEnum!
 }
 
+type MintBoard
+  @join__type(graph: SPACES, key: "id")
+{
+  id: ID!
+  spaceId: ID!
+  created: String!
+  chainId: Int!
+  enabled: Boolean!
+  boardTitle: String!
+  boardDescription: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  publicSalePrice: String!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  description: String!
+  referrer: String!
+  submissions: [MintBoardSubmission!]!
+}
+
+type MintBoardAuthor
+  @join__type(graph: SPACES, key: "id")
+{
+  id: ID!
+  userId: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+}
+
+input MintBoardInput
+  @join__type(graph: SPACES)
+{
+  chainId: Int!
+  enabled: Boolean!
+  boardTitle: String!
+  boardDescription: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  publicSalePrice: String!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  description: String!
+  referrer: String!
+}
+
+type MintBoardSubmission
+  @join__type(graph: SPACES, key: "id")
+{
+  id: ID!
+  spaceId: ID!
+  created: String!
+  chainId: Int!
+  contractAddress: String!
+  dropConfig: String!
+  author: MintBoardAuthor!
+}
+
 type Mutation
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
@@ -294,9 +367,12 @@ type Mutation
   createContestTweet(contestId: ID!, spaceId: ID!, tweetThread: [ThreadItemInput!]!): ContestTweetResponse! @join__field(graph: CONTESTS)
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
+  configureMintBoard(spaceName: String!, mintBoardData: MintBoardInput!): ConfigureMintBoardResponse! @join__field(graph: SPACES)
   createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createTwitterSubmission(contestId: ID!, submission: TwitterSubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createUserDrop(submissionId: ID!, contestId: ID!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createUserDropResponse! @join__field(graph: SUBMIT)
+  reserveMintBoardSlot(spaceName: String!): reserveMintBoardSlotResponse! @join__field(graph: SUBMIT)
+  createMintBoardSubmission(spaceName: String!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createMintBoardSubmissionResponse! @join__field(graph: SUBMIT)
   updateUser(displayName: String!, profileAvatar: String!, visibleTwitter: Boolean!): UpdateUserResponse @join__field(graph: USER)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
   removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
@@ -404,6 +480,13 @@ type RemoveSingleVoteResponse
   userVotingParams: UserVotingParams!
 }
 
+type reserveMintBoardSlotResponse
+  @join__type(graph: SUBMIT)
+{
+  success: Boolean!
+  slot: Int
+}
+
 type RestrictionResult
   @join__type(graph: SUBMIT)
 {
@@ -464,6 +547,7 @@ type Space
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
   spaceTokens: [SpaceTokenMap!]! @join__field(graph: SPACES)
+  mintBoard: MintBoard @join__field(graph: SPACES)
 }
 
 type SpaceBuilderErrors

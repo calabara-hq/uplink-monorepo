@@ -548,7 +548,7 @@ const ZORA_PROTOCOL_REWARDS_BASE_TESTNET = '0x7777777F279eba3d3Ad8F4E708545291A6
 const ZORA_NFT_CREATOR_PROXY_BASE_TESTNET = '0x87cfd516c5ea86e50b950678CA970a8a28de27ac'
 
 export const getContractFromEnv = () => {
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_CLIENT_URL === "https://staging.uplink.wtf") {
         return {
             creator_contract: ZORA_NFT_CREATOR_PROXY_BASE_TESTNET,
             rewards_contract: ZORA_PROTOCOL_REWARDS_BASE_TESTNET,

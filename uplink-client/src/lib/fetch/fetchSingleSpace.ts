@@ -31,6 +31,33 @@ const fetchSingleSpace = async (name: string): Promise<Space> => {
                   chainId
                 }
               }
+              mintBoard {
+                id
+                chainId
+                enabled
+                boardTitle
+                boardDescription
+                name
+                symbol
+                editionSize
+                publicSalePrice
+                publicSaleStart
+                publicSaleEnd
+                description
+                referrer
+                submissions {
+                  id
+                  chainId
+                  contractAddress
+                  created
+                  dropConfig
+                  spaceId
+                  author {
+                    id
+                    address
+                  }
+                }
+              }
             }
         }`,
       variables: {
