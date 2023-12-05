@@ -10,6 +10,7 @@ type Space @key(fields: "id") {
   website: String
   admins: [Admin!]!
   spaceTokens: [SpaceTokenMap!]!
+  mintBoard: MintBoard
 }
 
 # this is a stub for the federated space to avoid circular reference.
@@ -31,6 +32,43 @@ type Admin @key(fields: "id"){
   address: String!
 }
 
+type MintBoard @key(fields: "id"){
+  id: ID!
+  spaceId: ID!
+  created: String!
+  chainId: Int!
+  enabled: Boolean!
+  boardTitle: String!
+  boardDescription: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  publicSalePrice: String!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  description: String!
+  referrer: String!
+  submissions: [MintBoardSubmission!]!
+}
+
+type MintBoardSubmission @key(fields: "id"){
+  id: ID!
+  spaceId: ID!
+  created: String!
+  chainId: Int!
+  contractAddress: String!
+  dropConfig: String!
+  author: MintBoardAuthor!
+}
+
+type MintBoardAuthor @key(fields: "id"){
+  id: ID!
+  userId: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+}
 
 enum TokenStandard {
   ETH
@@ -86,9 +124,29 @@ input SpaceBuilderInput {
   admins: [String!]!
 }
 
+input MintBoardInput {
+  chainId: Int!
+  enabled: Boolean!
+  boardTitle: String!
+  boardDescription: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  publicSalePrice: String!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  description: String!
+  referrer: String!
+}
+
+type ConfigureMintBoardResponse {
+  success: Boolean!
+}
+
 type Mutation {
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse!
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse!
+  configureMintBoard(spaceName: String! mintBoardData: MintBoardInput!): ConfigureMintBoardResponse!
 }
 
 extend schema

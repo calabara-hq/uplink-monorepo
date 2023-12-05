@@ -1,10 +1,12 @@
 import { GraphQLError } from "graphql";
-import { AuthorizationController } from "lib";
+import { AuthorizationController, Context } from "lib";
 import dotenv from "dotenv";
 import { DropConfig, SubmissionPayload, TwitterSubmissionPayload } from "../__generated__/resolvers-types.js";
 import { validateStandardSubmissionPayload, validateTwitterSubmissionPayload } from "../utils/validate.js";
 import { createStandardSubmission, createTwitterSubmission } from "../utils/insert.js";
 import createDrop from "../utils/createDrop.js";
+import reserveMintBoardSlot from "../utils/reserveMintBoardSlot.js";
+import { createMintBoardSubmission } from "../utils/mintBoard.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL!);
@@ -60,8 +62,40 @@ const mutations = {
             })
 
             return createDrop(user, submissionId, contestId, contractAddress, chainId, dropConfig)
-        }
-    },
+        },
+
+        reserveMintBoardSlot: async (_: any, { spaceName }: { spaceName: string }, context: Context) => {
+            // const user = await authController.getUser(context);
+            // if (!user) throw new GraphQLError('Unauthorized', {
+            //     extensions: {
+            //         code: 'UNAUTHORIZED'
+            //     }
+            // })
+
+            // return reserveMintBoardSlot(user, spaceName);
+        },
+
+        createMintBoardSubmission: async (_: any, {
+            spaceName,
+            contractAddress,
+            chainId,
+            dropConfig
+        }: {
+            spaceName: string,
+            contractAddress: string,
+            chainId: number,
+            dropConfig: DropConfig
+        }, context: any) => {
+            const user = await authController.getUser(context);
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
+            return createMintBoardSubmission(user, spaceName, chainId, contractAddress, dropConfig)
+        },
+    }
 };
 
 export default mutations;

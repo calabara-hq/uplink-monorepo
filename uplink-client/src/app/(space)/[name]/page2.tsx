@@ -14,6 +14,8 @@ import {
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
 import { ActiveContest } from "@/lib/fetch/fetchActiveContests";
+import { HiArrowNarrowRight } from "react-icons/hi";
+import { Boundary } from "@/ui/Boundary/Boundary";
 
 const SpaceInfoSekelton = () => {
   return (
@@ -209,71 +211,91 @@ const SpaceContests = async ({ name }: { name: string }) => {
   );
 };
 
+const SpaceBoard = ({ name }: { name: string }) => {
+  const items = Array(16).fill(0)
+  return (
+    <div className="flex flex-col">
+      <h1>Board</h1>
+      <div className="grid grid-cols-[auto_100px] gap-2">
+        <div className="grid grid-cols-4 gap-2">
+          {items.map((_, idx) => {
+            return <p key={idx}>hey</p>
+          })}
+        </div>
+        <Link href={`/${name}/board`} className="btn btn-ghost btn-sm text-t2 normal-case ml-2">
+          <span>Board</span>
+          <HiArrowNarrowRight className="h-5 w-5 text-secondary pl-0.5" />
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+
+const AdminButtons = ({ name }: { name: string }) => {
+
+  return (
+    <Boundary labels={["Admin"]}>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-row gap-2 items-end">
+          <div className="flex flex-col gap-1">
+            <p className="text-lg font-bold text-t1">Configure Art Board</p>
+            <p className="text-t2">Earn protocol rewards with your users by allowing them to mint under a template config</p>
+          </div>
+          <Link
+            href={`${name}/board/settings`}
+            className="btn btn-ghost btn-active btn-sm text-t1 normal-case ml-auto hover:text-primary"
+          >
+            <span>Configure</span>
+          </Link>
+        </div>
+        <div className="flex flex-row gap-2 items-end">
+          <div className="flex flex-col gap-1">
+            <p className="text-lg font-bold text-t1">Contest</p>
+            <p className="text-t2">Create a contest</p>
+          </div>
+          <Link
+            href={`${name}/create-contest`}
+            className="btn btn-ghost btn-active btn-sm text-t1 normal-case ml-auto hover:text-secondary"
+          >
+            <span>New</span>
+            <HiSparkles className="h-5 w-5 pl-0.5" />
+          </Link>
+        </div>
+      </div>
+    </Boundary>
+  )
+}
+
+
 export default async function Page({ params }: { params: { name: string } }) {
   const { name } = params;
 
   return (
-    <div className="w-full lg:w-11/12 m-auto py-6 px-2 flex flex-col-reverse lg:flex-row gap-8">
-      <div className="w-full md:w-[70%] flex-grow m-auto">
-        <Suspense fallback={<SpaceContestsSkeleton />}>
-          {/*@ts-expect-error*/}
-          <SpaceContests name={name} />
-        </Suspense>
+    <div className="flex flex-col w-full lg:w-11/12 m-auto py-6 px-2 gap-8">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="w-full md:w-[70%] lg:w-[20%] ml-auto mr-auto bg-blue-200">
+          <Suspense fallback={<SpaceInfoSekelton />}>
+            {/*@ts-expect-error*/}
+            <SpaceInfo name={name} />
+          </Suspense>
+        </div>
+        <div className="w-full flex flex-col md:w-[70%] flex-grow m-auto gap-8 ">
+          <AdminButtons name={name} />
+          <Suspense fallback={<SpaceContestsSkeleton />}>
+            <SpaceBoard name={name} />
+          </Suspense>
+          <Suspense fallback={<SpaceContestsSkeleton />}>
+            {/*@ts-expect-error*/}
+            <SpaceContests name={name} />
+
+          </Suspense>
+        </div>
+
       </div>
-      <div className="w-full md:w-[70%] lg:w-[20%] ml-auto mr-auto">
-        <Suspense fallback={<SpaceInfoSekelton />}>
-          {/*@ts-expect-error*/}
-          <SpaceInfo name={name} />
-        </Suspense>
+      <div className="flex flex-col bg-red-200">
+
       </div>
     </div>
   );
 }
-
-// const Stats = () => {
-//   return (
-//     <div className="stats stats-horizontal md:stats-vertical w-full bg-transparent border-2 border-border shadow-box">
-//       <div className="stat">
-//         <div className="stat-figure text-primary">
-//           <svg
-//             xmlns="http://www.w3.org/2000/svg"
-//             fill="none"
-//             viewBox="0 0 24 24"
-//             className="inline-block w-8 h-8 stroke-current"
-//           >
-//             <path
-//               strokeLinecap="round"
-//               strokeLinejoin="round"
-//               strokeWidth="2"
-//               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-//             ></path>
-//           </svg>
-//         </div>
-//         <div className="stat-title">ETH rewards</div>
-//         <div className="stat-value text-primary">25.6K</div>
-//         <div className="stat-desc"></div>
-//       </div>
-
-//       <div className="stat">
-//         <div className="stat-figure text-secondary">
-//           <svg
-//             xmlns="http://www.w3.org/2000/svg"
-//             fill="none"
-//             viewBox="0 0 24 24"
-//             className="inline-block w-8 h-8 stroke-current"
-//           >
-//             <path
-//               strokeLinecap="round"
-//               strokeLinejoin="round"
-//               strokeWidth="2"
-//               d="M13 10V3L4 14h7v7l9-11h-7z"
-//             ></path>
-//           </svg>
-//         </div>
-//         <div className="stat-title">ERC rewards</div>
-//         <div className="stat-value text-secondary">2.6M</div>
-//         <div className="stat-desc">tokens + nfts</div>
-//       </div>
-//     </div>
-//   );
-// };

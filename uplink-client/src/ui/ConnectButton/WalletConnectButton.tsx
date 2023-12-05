@@ -61,7 +61,7 @@ export default function WalletConnectButton({
 }) {
   const { data: session, status } = useSession();
   if (!status || status === "loading")
-    return <div className="h-12 w-20 rounded-full shimmer"></div>;
+    return <div className="h-12 w-full rounded-full shimmer"></div>;
   else
     return (
       <ConnectButton.Custom>

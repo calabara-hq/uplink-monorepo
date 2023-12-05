@@ -202,7 +202,6 @@ export const users = mysqlTable('users', {
     userAddressIndex: uniqueIndex("user_address_idx").on(user.address)
 }));
 
-
 export const userDrops = mysqlTable('userDrops', {
     id: serial('id').primaryKey(),
     userId: int('userId').notNull(),
@@ -217,10 +216,44 @@ export const userDrops = mysqlTable('userDrops', {
     userDropUniqueIndex: uniqueIndex("userDrop_unique_idx").on(userDrop.userId, userDrop.contestId, userDrop.submissionId),
 }));
 
+export const mintBoards = mysqlTable('mintBoards', {
+    id: serial('id').primaryKey(),
+    spaceId: int('spaceId').notNull(),
+    created: varchar('created', { length: 255 }).notNull(),
+    enabled: tinyint('enabled').notNull(),
+    chainId: int('chainId').notNull(),
+    boardTitle: varchar('boardTitle', { length: 255 }).notNull(),
+    boardDescription: text('boardDescription').notNull(),
+    name: varchar('name', { length: 255 }).notNull(),
+    symbol: varchar('symbol', { length: 255 }).notNull(),
+    editionSize: varchar('editionSize', { length: 255 }).notNull(),
+    publicSalePrice: varchar('publicSalePrice', { length: 255 }).notNull(),
+    publicSaleStart: varchar('publicSaleStart', { length: 255 }).notNull(),
+    publicSaleEnd: varchar('publicSaleEnd', { length: 255 }).notNull(),
+    description: text('description').notNull(),
+    referrer: varchar('referrer', { length: 255 }).notNull(),
+})
 
-export const spacesRelations = relations(spaces, ({ many }) => ({
+export const mintBoardSubmissions = mysqlTable('mintBoardSubmissions', {
+    id: serial('id').primaryKey(),
+    spaceId: int('spaceId').notNull(),
+    boardId: int('boardId').notNull(),
+    userId: int('userId').notNull(),
+    created: varchar('created', { length: 255 }).notNull(),
+    reserved: tinyint('reserved').notNull(),
+    mintBoardSlot: int('mintBoardSlot').notNull(),
+    contractAddress: varchar('contractAddress', { length: 255 }),
+    chainId: int('chainId'),
+    dropConfig: json('dropConfig'),
+})
+
+export const spacesRelations = relations(spaces, ({ one, many }) => ({
     admins: many(admins),
-    spaceTokens: many(spaceTokens)
+    spaceTokens: many(spaceTokens),
+    mintBoard: one(mintBoards, {
+        fields: [spaces.id],
+        references: [mintBoards.spaceId],
+    }),
 }));
 
 export const adminsRelations = relations(admins, ({ one }) => ({
@@ -228,6 +261,21 @@ export const adminsRelations = relations(admins, ({ one }) => ({
         fields: [admins.spaceId],
         references: [spaces.id]
     })
+}));
+
+export const mintBoardRelations = relations(mintBoards, ({ one, many }) => ({
+    submissions: many(mintBoardSubmissions),
+}));
+
+export const mintBoardSubmissionsRelations = relations(mintBoardSubmissions, ({ one, many }) => ({
+    author: one(users, {
+        fields: [mintBoardSubmissions.userId],
+        references: [users.id],
+    }),
+    mintBoard: one(mintBoards, {
+        fields: [mintBoardSubmissions.boardId],
+        references: [mintBoards.id],
+    }),
 }));
 
 export const contestsRelations = relations(contests, ({ many }) => ({
@@ -382,9 +430,12 @@ export const userRelations = relations(users, ({ one, many }) => ({
     submissions: many(submissions)
 }));
 
+
+
 export type dbSpaceType = InferModel<typeof spaces> & {
     admins: dbAdminType[],
     spaceTokens: dbSpaceToTokenType[],
+    mintBoard: dbMintBoardType,
 }
 export type dbNewSpaceType = InferModel<typeof spaces, 'insert'>
 
@@ -471,6 +522,13 @@ export type dbUserType = InferModel<typeof users> & {
     submissions: dbSubmissionType
 }
 
+export type dbMintBoardType = InferModel<typeof mintBoards> & {
+    submissions: dbMintBoardSubmissionType[]
+}
+
+export type dbMintBoardSubmissionType = InferModel<typeof mintBoardSubmissions> & {
+    author: dbUserType,
+}
 
 export type dbNewContestType = InferModel<typeof contests, 'insert'>
 export type dbNewRewardType = InferModel<typeof rewards, 'insert'>
@@ -487,3 +545,5 @@ export type dbNewVoteType = InferModel<typeof votes, 'insert'>
 export type dbNewTweetQueueType = InferModel<typeof tweetQueue, 'insert'>
 export type dbNewUserType = InferModel<typeof users, 'insert'>
 export type dbNewUserDropType = InferModel<typeof userDrops, 'insert'>
+export type dbNewMintBoardType = InferModel<typeof mintBoards, 'insert'>
+export type dbNewMintBoardSubmissionType = InferModel<typeof mintBoardSubmissions, 'insert'>

@@ -31,7 +31,7 @@ export const EditionConfig = z.object({
 })
 
 export const ZoraEdition = z.object({
-    chainId: z.number().refine((n) => n === 8453, { message: "Must be base network" }),
+    chainId: z.number().refine((n) => n === 8453 || n === 84531, { message: "Must be base network" }),
     address: z.string(),
     config: EditionConfig,
 });
@@ -66,17 +66,37 @@ export const EditionPublicSalePriceSchema = z.union([z.literal("free"), z.string
     return new Decimal(val).times(10 ** 18).toString();
 })
 
+
+
+const calcSaleStart = (saleStart: string) => {
+    const unixInS = (str: string | number | Date) => Math.floor(new Date(str).getTime() / 1000);
+    const now = unixInS(new Date(Date.now()));
+    if (saleStart === "now") return now;
+    return unixInS(saleStart);
+}
+
+const calcSaleEnd = (saleEnd: string) => {
+    const unixInS = (str: string | number | Date) => Math.floor(new Date(str).getTime() / 1000);
+    const now = unixInS(new Date(Date.now()));
+    const three_days = now + 259200;
+    const week = now + 604800;
+    if (saleEnd === "forever") return uint64MaxSafe;
+    if (saleEnd === "3 days") return three_days;
+    if (saleEnd === "week") return week;
+    return unixInS(saleEnd);
+}
+
 export const EditionSaleConfigSchema = z.object({
     publicSalePrice: EditionPublicSalePriceSchema,
     publicSaleStart: z.union([z.string().datetime(), z.literal("now")]),
-    publicSaleEnd: z.union([z.string().datetime(), z.literal("forever"), z.literal("week")]),
+    publicSaleEnd: z.union([z.string().datetime(), z.literal("forever"), z.literal("week"), z.literal("3 days")]),
 }).transform((val, ctx) => {
     const { publicSalePrice, publicSaleStart, publicSaleEnd } = val;
     const unixInS = (str: string | number | Date) => Math.floor(new Date(str).getTime() / 1000);
     const now = unixInS(new Date(Date.now()));
     const week = now + 604800;
-    const unixSaleStart = publicSaleStart === "now" ? now : unixInS(publicSaleStart);
-    const unixSaleEnd = publicSaleEnd === "forever" ? uint64MaxSafe : (publicSaleEnd === "week" ? week : unixInS(publicSaleEnd));
+    const unixSaleStart = calcSaleStart(publicSaleStart);
+    const unixSaleEnd = calcSaleEnd(publicSaleEnd);
     if (unixSaleStart < now) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -182,6 +202,86 @@ export const EditionWizardReducer = (state: ConfigurableZoraEditionInput & { err
         default:
             return state;
     }
+}
+
+export const reserveMintBoardSlot = async (url,
+    {
+        arg,
+    }: {
+        url: string;
+        arg: {
+            csrfToken: string;
+            spaceName: string;
+        }
+    }
+) => {
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": arg.csrfToken,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            query: `
+                mutation ReserveMintBoardSlot($spaceName: String!){
+                    reserveMintBoardSlot(spaceName: $spaceName){
+                        success
+                        slot
+                    }
+                }`,
+            variables: {
+                csrfToken: arg.csrfToken,
+                spaceName: arg.spaceName,
+            },
+        }),
+    })
+        .then((res) => res.json())
+        .then(handleMutationError)
+        .then((res) => res.data.reserveMintBoardSlot);
+}
+
+
+export const postToMintBoard = async (url,
+    {
+        arg,
+    }: {
+        url: string;
+        arg: {
+            csrfToken: string;
+            spaceName: string;
+            contractAddress: string;
+            chainId: number;
+            dropConfig: ConfigurableZoraEditionOutput;
+        }
+    }
+) => {
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": arg.csrfToken,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            query: `
+                mutation CreateMintBoardSubmission($spaceName: String!, $contractAddress: String!, $chainId: Int!, $dropConfig: DropConfig!){
+                    createMintBoardSubmission(spaceName: $spaceName, contractAddress: $contractAddress, chainId: $chainId, dropConfig: $dropConfig){
+                        success
+                    }
+                }`,
+            variables: {
+                csrfToken: arg.csrfToken,
+                spaceName: arg.spaceName,
+                contractAddress: arg.contractAddress,
+                chainId: arg.chainId,
+                dropConfig: arg.dropConfig,
+            },
+        }),
+    })
+        .then((res) => res.json())
+        .then(handleMutationError)
+        .then((res) => res.data.createMintBoardSubmission);
 }
 
 
@@ -385,6 +485,7 @@ export default function useCreateZoraEdition(referrer?: string, templateConfig?:
 
     return {
         contractArguments,
+        setContractArguments,
         state,
         setField,
         validate,
