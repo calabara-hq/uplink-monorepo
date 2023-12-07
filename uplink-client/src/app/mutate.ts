@@ -24,3 +24,9 @@ export const mutateUser = (identifier: string) => {
         revalidateDataCache([`user/${identifier}`]); // reval server cache
     });
 }
+
+export const mutateMintBoard = (name: string) => {
+    startTransition(() => {
+        revalidateDataCache([`mintBoard/${name}`]); // reval server cache
+    });
+}

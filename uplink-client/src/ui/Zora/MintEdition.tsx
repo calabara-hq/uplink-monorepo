@@ -22,6 +22,10 @@ import { TbLoader2 } from "react-icons/tb";
 import { Decimal } from "decimal.js";
 import { LuMinusSquare, LuPlusSquare } from "react-icons/lu";
 import { Submission } from "@/types/submission";
+import { User } from "@/types/user";
+import { Edition } from "@/types/edition";
+import useSWRMutation from "swr/mutation";
+import { nanoid } from "nanoid";
 
 
 type FeeStructure = {
@@ -201,17 +205,72 @@ const RenderFeeInfo = ({ feeStructure }: { feeStructure: FeeStructure }) => {
     )
 }
 
-const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Submission, setIsModalOpen: (val: boolean) => void, referrer?: string }) => {
-    const dropConfig = submission.nftDrop.dropConfig ? JSON.parse(submission.nftDrop.dropConfig) : null;
-    const { chainId, contractAddress } = submission.nftDrop;
+
+export const postMint = async (url,
+    {
+        arg,
+    }: {
+        url: string;
+        arg: {
+            csrfToken: string;
+            editionId: string;
+            amount: number;
+        }
+    }
+) => {
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": arg.csrfToken,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            query: `
+                mutation RegisterMint($editionId: ID!, $amount: Int!){
+                    registerMint(editionId: $editionId, amount: $amount){
+                        success
+                    }
+                }`,
+            variables: {
+                csrfToken: arg.csrfToken,
+                editionId: arg.editionId,
+                amount: arg.amount,
+            },
+        }),
+    })
+        .then((res) => res.json())
+        .then((res) => res.data.registerMint);
+}
+
+
+
+
+const MintEdition = ({ edition, author, setIsModalOpen, referrer, onMintCallback }: { edition: Edition, author: User, setIsModalOpen: (val: boolean) => void, referrer?: string, onMintCallback?: (editionId: string, mintAmount: number) => void; }) => {
+    const { chainId, contractAddress } = edition;
     const { data: session, status } = useSession();
     const [numEditions, setNumEditions] = useState<string>('1');
     const debouncedNumEditions = useDebounce(numEditions);
     const { explorer } = getContractFromEnv();
-    const feeStructure = computeEthToSpend(dropConfig.saleConfig.publicSalePrice, debouncedNumEditions)
+    const feeStructure = computeEthToSpend(edition.saleConfig.publicSalePrice, debouncedNumEditions)
     const { isLoading: isTotalSupplyLoading, totalSupply } = useTotalSupply(chainId, contractAddress);
-
     const isReferralValid = referrer ? referrer.startsWith('0x') && referrer.length === 42 : false;
+
+
+
+    const { trigger, data: registerMintData, reset: resetRegisterMint } = useSWRMutation(
+        `/api/registerMint/${nanoid()}`,
+        postMint,
+        {
+            onError: (err) => {
+                console.log(err);
+                resetRegisterMint();
+            },
+        }
+    )
+
+
+
     const { config, error: prepareError, isError: isPrepareError, isLoading: isPrepareLoading } = usePrepareContractWrite({
         chainId: chainId,
         address: contractAddress,
@@ -246,11 +305,10 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
         }
     );
 
-    const availableEditions = BigInt(dropConfig.editionSize) - BigInt(totalSupply || 0)
+    const availableEditions = BigInt(edition.editionSize) - BigInt(totalSupply || 0)
     const areEditionsSoldOut = availableEditions <= 0;
-    const isMintPeriodOver = dropConfig.saleConfig.publicSaleEnd === uint64MaxSafe.toString() ? false : parseInt(dropConfig.saleConfig.publicSaleEnd) < Date.now() / 1000;
+    const isMintPeriodOver = edition.saleConfig.publicSaleEnd === uint64MaxSafe.toString() ? false : parseInt(edition.saleConfig.publicSaleEnd) < Date.now() / 1000;
     const isMintDisabled = areEditionsSoldOut || isMintPeriodOver || !write || isWriteLoading
-
 
     const { isLoading: isTxPending, isSuccess: isTxSuccessful } = useWaitForTransaction({
         hash: data?.hash,
@@ -259,6 +317,24 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
                 console.log(err)
                 setIsModalOpen(false);
                 return toast.error('Error minting edition')
+            }
+
+            if (data) {
+                try {
+                    trigger({
+                        editionId: edition.id,
+                        amount: parseInt(debouncedNumEditions),
+                        csrfToken: session.csrfToken,
+                    }).then((response) => {
+                        if (!response.success) {
+                            resetRegisterMint();
+                        }
+                    });
+                    onMintCallback?.(edition.id, parseInt(debouncedNumEditions));
+                } catch (e) {
+                    console.log(e)
+                    resetRegisterMint();
+                }
             }
         }
     })
@@ -279,13 +355,13 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
     }
 
     const RenderEditionSize = () => {
-        if (dropConfig.editionSize === uint64MaxSafe.toString()) {
+        if (edition.editionSize === uint64MaxSafe.toString()) {
             return (
                 <PiInfinity className="w-6 h-6 text-t1" />
             )
         }
         else return (
-            <p className="text-t1 font-bold">{dropConfig.editionSize}</p>
+            <p className="text-t1 font-bold">{edition.editionSize}</p>
         )
     }
 
@@ -298,17 +374,17 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
                         <button className="btn btn-ghost btn-sm  ml-auto" onClick={() => setIsModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
                     </div>
                     <div className="p-2" />
-                    {dropConfig && (
+                    {edition && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-black ">
                             <div className="items-center justify-center">
-                                <RenderMintMedia imageURI={dropConfig.imageURI || ""} animationURI={dropConfig.animationURI || ""} />
+                                <RenderMintMedia imageURI={edition.imageURI || ""} animationURI={edition.animationURI || ""} />
                             </div>
                             <div className="bg-black-200 items-start flex flex-col gap-8 relative">
                                 <div className="flex flex-col gap-2">
-                                    <p className="line-clamp-3 font-bold text-lg break-all">{dropConfig.name}</p>
+                                    <p className="line-clamp-3 font-bold text-lg break-all">{edition.name}</p>
                                     <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1">
-                                        <UserAvatar user={submission?.author} size={28} />
-                                        <UsernameDisplay user={submission?.author} />
+                                        <UserAvatar user={author} size={28} />
+                                        <UsernameDisplay user={author} />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2 w-full">
@@ -316,16 +392,16 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
                                         <div className="flex flex-col justify-start">
                                             <p className="text-t2">Network</p>
                                             <div className="flex gap-2 items-center">
-                                                <p className="text-t1 font-bold">{getChainName(parseInt(chainId))}</p>
-                                                <ChainLabel chainId={parseInt(chainId)} px={16} />
+                                                <p className="text-t1 font-bold">{getChainName(chainId)}</p>
+                                                <ChainLabel chainId={chainId} px={16} />
                                             </div>
 
                                         </div>
                                         <div className="flex flex-col justify-start m-auto">
-                                            {parseInt(dropConfig.saleConfig.publicSaleStart) > Date.now() / 1000 ? (
+                                            {parseInt(edition.saleConfig.publicSaleStart) > Date.now() / 1000 ? (
                                                 <>
                                                     <p className="text-t2">Mint Begins</p>
-                                                    <p className="font-bold text-t1">{format(new Date(parseInt(dropConfig.saleConfig.publicSaleStart) * 1000), "MMM d, h:mm aa")}</p>
+                                                    <p className="font-bold text-t1">{format(new Date(parseInt(edition.saleConfig.publicSaleStart) * 1000), "MMM d, h:mm aa")}</p>
                                                 </>
                                             ) : (
                                                 <>
@@ -355,15 +431,15 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
                                         </div>
                                         <div className="flex flex-col">
                                             <p className="text-t2">{isMintPeriodOver ? "Ended" : "Until"}</p>
-                                            <p className="font-bold text-t1">{dropConfig.saleConfig.publicSaleEnd == uint64MaxSafe.toString() ? "Forever" : format(new Date(dropConfig.saleConfig.publicSaleEnd * 1000), "MMM d, h:mm aa")}</p>
+                                            <p className="font-bold text-t1">{edition.saleConfig.publicSaleEnd == uint64MaxSafe.toString() ? "Forever" : format(new Date(parseInt(edition.saleConfig.publicSaleEnd) * 1000), "MMM d, h:mm aa")}</p>
                                         </div>
                                         <div className="flex flex-col">
                                             <p className="text-t2">Price</p>
-                                            <p className="font-bold text-t1">{dropConfig.saleConfig.publicSalePrice === "0" ? "Free" : `${dropConfig.saleConfig.publicSalePrice * 10 ** -18} ETH`}</p>
+                                            <p className="font-bold text-t1">{edition.saleConfig.publicSalePrice === "0" ? "Free" : `${parseInt(edition.saleConfig.publicSalePrice) * 10 ** -18} ETH`}</p>
                                         </div>
                                         <div className="flex flex-col justify-start m-auto">
                                             <p className="text-t2">Minted</p>
-                                            <div className="flex gap-1">
+                                            <div className="flex gap-1 items-center">
                                                 <RenderTotalSupply />
                                                 <p className="text-t1">/</p>
                                                 <RenderEditionSize />
@@ -387,7 +463,7 @@ const MintEdition = ({ submission, setIsModalOpen, referrer }: { submission: Sub
                                                     (<Link className="btn btn-outline btn-warning normal-case w-full" href='https://bridge.base.org/deposit' prefetch={false} target="_blank">Add Funds</Link>)
                                                     :
                                                     (
-                                                        <SwitchNetworkButton chainId={parseInt(chainId)}>
+                                                        <SwitchNetworkButton chainId={chainId}>
 
                                                             <button className="btn btn-primary normal-case w-full" disabled={isMintDisabled} onClick={() => write?.()}>
                                                                 {isWriteLoading ?

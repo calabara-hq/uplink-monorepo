@@ -142,7 +142,6 @@ export const arcadeVotingStrategy = mysqlTable('arcadeVotingStrategy', {
 export const submissions = mysqlTable('submissions', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
-    //author_deprecated: varchar('author_deprecated', { length: 255 }).notNull().default('test'), // this will be removed
     userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     type: varchar('type', { length: 255 }).notNull(),
@@ -151,23 +150,19 @@ export const submissions = mysqlTable('submissions', {
 }, (submissions) => ({
     submissionsContestIdIndex: index("submissions_contest_id_idx").on(submissions.contestId),
     submissionsUserIdIndex: index("submissions_user_id_idx").on(submissions.userId),
-    //submissionsAuthorIndex: index("submissions_author_idx").on(submissions.author_deprecated),
 }));
 
 export const votes = mysqlTable('votes', {
     id: serial('id').primaryKey(),
     contestId: int('contestId').notNull(),
     submissionId: int('submissionId').notNull(),
-    //voter_deprecated: varchar('voter_deprecated', { length: 255 }).notNull().default('test'), // this will be removed
     userId: int('userId').notNull().default(1),
     created: varchar('created', { length: 255 }).notNull(),
     amount: varchar('amount', { length: 255 }).notNull()
 }, (votes) => ({
     votesContestIdIndex: index("votes_contest_id_idx").on(votes.contestId),
     votesSubmissionIdIndex: index("votes_submission_id_idx").on(votes.submissionId),
-    //votesVoterIndex: index("votes_voter_idx").on(votes.voter_deprecated),
     voterUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.userId),
-    //votesUniqueIndex: uniqueIndex("votes_unique_idx").on(votes.contestId, votes.submissionId, votes.voter_deprecated),
     votesUserIdIndex: index("votes_user_id_idx").on(votes.userId),
 }));
 
@@ -216,6 +211,55 @@ export const userDrops = mysqlTable('userDrops', {
     userDropUniqueIndex: uniqueIndex("userDrop_unique_idx").on(userDrop.userId, userDrop.contestId, userDrop.submissionId),
 }));
 
+export const submissionDrops = mysqlTable('submissionDrops', {
+    id: serial('id').primaryKey(),
+    userId: int('userId').notNull(),
+    created: varchar('created', { length: 255 }).notNull(),
+    contestId: int('contestId').notNull(),
+    submissionId: int('submissionId').notNull(),
+    editionId: int('editionId').notNull(),
+}, (submissionDrop) => ({
+    submissionDropUserIdIndex: index("submissionDrop_user_id_idx").on(submissionDrop.userId),
+    submissionDropContestIdIndex: index("submissionDrop_contest_id_idx").on(submissionDrop.contestId),
+    submissionDropUniqueIndex: uniqueIndex("submissionDrop_unique_idx").on(submissionDrop.userId, submissionDrop.contestId, submissionDrop.submissionId),
+}));
+
+export const zoraEditions = mysqlTable('zoraEditions', {
+    id: serial('id').primaryKey(),
+    chainId: int('chainId').notNull(),
+    contractAddress: varchar('contractAddress', { length: 255 }).notNull(),
+    name: varchar('name', { length: 255 }).notNull(),
+    symbol: varchar('symbol', { length: 255 }).notNull(),
+    editionSize: varchar('editionSize', { length: 255 }).notNull(),
+    royaltyBPS: int('royaltyBPS').notNull(),
+    fundsRecipient: varchar('fundsRecipient', { length: 255 }).notNull(),
+    defaultAdmin: varchar('defaultAdmin', { length: 255 }).notNull(),
+    description: text('description').notNull(),
+    animationURI: varchar('animationURI', { length: 255 }).notNull(),
+    imageURI: varchar('imageURI', { length: 255 }).notNull(),
+    referrer: varchar('referrer', { length: 255 }).notNull(),
+    publicSalePrice: varchar('publicSalePrice', { length: 255 }).notNull(),
+    maxSalePurchasePerAddress: int('maxSalePurchasePerAddress').notNull(),
+    publicSaleStart: varchar('publicSaleStart', { length: 255 }).notNull(),
+    publicSaleEnd: varchar('publicSaleEnd', { length: 255 }).notNull(),
+    presaleStart: varchar('presaleStart', { length: 255 }).notNull(),
+    presaleEnd: varchar('presaleEnd', { length: 255 }).notNull(),
+    presaleMerkleRoot: varchar('presaleMerkleRoot', { length: 255 }).notNull(),
+}, (zoraEdition) => ({
+
+}));
+
+export const editionMints = mysqlTable('editionMints', {
+    id: serial('id').primaryKey(),
+    userId: int('userId').notNull(),
+    editionId: int('editionId').notNull(),
+    amount: int('amount').notNull(),
+}, (editionMint) => ({
+    editionMintEditionIdIndex: index("editionMint_edition_id_idx").on(editionMint.editionId),
+    editionMintUserIdIndex: index("editionMint_user_id_idx").on(editionMint.userId),
+}));
+
+
 export const mintBoards = mysqlTable('mintBoards', {
     id: serial('id').primaryKey(),
     spaceId: int('spaceId').notNull(),
@@ -234,18 +278,19 @@ export const mintBoards = mysqlTable('mintBoards', {
     referrer: varchar('referrer', { length: 255 }).notNull(),
 })
 
-export const mintBoardSubmissions = mysqlTable('mintBoardSubmissions', {
+export const mintBoardPosts = mysqlTable('mintBoardPosts', {
     id: serial('id').primaryKey(),
     spaceId: int('spaceId').notNull(),
     boardId: int('boardId').notNull(),
     userId: int('userId').notNull(),
     created: varchar('created', { length: 255 }).notNull(),
-    reserved: tinyint('reserved').notNull(),
-    mintBoardSlot: int('mintBoardSlot').notNull(),
-    contractAddress: varchar('contractAddress', { length: 255 }),
-    chainId: int('chainId'),
-    dropConfig: json('dropConfig'),
-})
+    editionId: int('editionId').notNull(),
+}, (mintBoardPost) => ({
+    mintBoardPostUserIdIndex: index("mintBoardPost_user_id_idx").on(mintBoardPost.userId),
+    mintBoardPostSpaceIdIndex: index("mintBoardPost_space_id_idx").on(mintBoardPost.spaceId),
+    mintBoardPostBoardIdIndex: index("mintBoardPost_board_id_idx").on(mintBoardPost.boardId),
+    mintBoardPostEditionIdIndex: index("mintBoardPost_edition_id_idx").on(mintBoardPost.editionId),
+}))
 
 export const spacesRelations = relations(spaces, ({ one, many }) => ({
     admins: many(admins),
@@ -264,18 +309,26 @@ export const adminsRelations = relations(admins, ({ one }) => ({
 }));
 
 export const mintBoardRelations = relations(mintBoards, ({ one, many }) => ({
-    submissions: many(mintBoardSubmissions),
+    posts: many(mintBoardPosts),
 }));
 
-export const mintBoardSubmissionsRelations = relations(mintBoardSubmissions, ({ one, many }) => ({
+export const mintBoardPostsRelations = relations(mintBoardPosts, ({ one, many }) => ({
     author: one(users, {
-        fields: [mintBoardSubmissions.userId],
+        fields: [mintBoardPosts.userId],
         references: [users.id],
     }),
     mintBoard: one(mintBoards, {
-        fields: [mintBoardSubmissions.boardId],
+        fields: [mintBoardPosts.boardId],
         references: [mintBoards.id],
     }),
+    edition: one(zoraEditions, {
+        fields: [mintBoardPosts.editionId],
+        references: [zoraEditions.id],
+    })
+}));
+
+export const zoraEditionRelations = relations(zoraEditions, ({ one, many }) => ({
+    mints: many(editionMints),
 }));
 
 export const contestsRelations = relations(contests, ({ many }) => ({
@@ -392,13 +445,20 @@ export const submissionsRelations = relations(submissions, ({ one, many }) => ({
         fields: [submissions.contestId],
         references: [contests.id],
     }),
-    nftDrop: one(userDrops, {
+    nftDrop: one(submissionDrops, {
         fields: [submissions.id],
-        references: [userDrops.submissionId],
+        references: [submissionDrops.submissionId],
     }),
     votes: many(votes),
 }));
 
+
+export const submissionDropRelations = relations(submissionDrops, ({ one }) => ({
+    edition: one(zoraEditions, {
+        fields: [submissionDrops.editionId],
+        references: [zoraEditions.id],
+    }),
+}));
 
 export const votesRelations = relations(votes, ({ one }) => ({
     voter: one(users, {
@@ -429,6 +489,7 @@ export const tweetQueueRelations = relations(tweetQueue, ({ one }) => ({
 export const userRelations = relations(users, ({ one, many }) => ({
     submissions: many(submissions)
 }));
+
 
 
 
@@ -503,7 +564,7 @@ export type dbUserDropType = InferModel<typeof userDrops>
 export type dbSubmissionType = InferModel<typeof submissions> & {
     author: dbUserType,
     contest: dbContestType,
-    nftDrop: dbUserDropType,
+    nftDrop: dbSubmissionDropType,
     votes: dbVoteType[],
 }
 
@@ -523,11 +584,23 @@ export type dbUserType = InferModel<typeof users> & {
 }
 
 export type dbMintBoardType = InferModel<typeof mintBoards> & {
-    submissions: dbMintBoardSubmissionType[]
+    submissions: dbMintBoardPostType[]
 }
 
-export type dbMintBoardSubmissionType = InferModel<typeof mintBoardSubmissions> & {
+export type dbZoraEditionType = InferModel<typeof zoraEditions> & {
+    mints: dbEditionMintType[],
+}
+
+export type dbEditionMintType = InferModel<typeof editionMints>
+
+export type dbMintBoardPostType = InferModel<typeof mintBoardPosts> & {
     author: dbUserType,
+    mintBoard: dbMintBoardType,
+    edition: dbZoraEditionType,
+}
+
+export type dbSubmissionDropType = InferModel<typeof submissionDrops> & {
+    edition: dbZoraEditionType,
 }
 
 export type dbNewContestType = InferModel<typeof contests, 'insert'>
@@ -546,4 +619,7 @@ export type dbNewTweetQueueType = InferModel<typeof tweetQueue, 'insert'>
 export type dbNewUserType = InferModel<typeof users, 'insert'>
 export type dbNewUserDropType = InferModel<typeof userDrops, 'insert'>
 export type dbNewMintBoardType = InferModel<typeof mintBoards, 'insert'>
-export type dbNewMintBoardSubmissionType = InferModel<typeof mintBoardSubmissions, 'insert'>
+export type dbNewMintBoardPostType = InferModel<typeof mintBoardPosts, 'insert'>
+export type dbNewZoraEditionType = InferModel<typeof zoraEditions, 'insert'>
+export type dbNewSubmissionDropType = InferModel<typeof submissionDrops, 'insert'>
+export type dbNewEditionMintType = InferModel<typeof editionMints, 'insert'>

@@ -15,6 +15,58 @@ extend type Contest @key(fields: "id") {
   gnosisResults: String @requires(fields: "deadlines {endTime}")
 }
 
+extend type MintBoard @key(fields: "id") {
+  id: ID!
+  posts: [MintBoardPost!]!
+}
+
+type MintBoardPost @key(fields: "id"){
+  id: ID!
+  spaceId: ID!
+  created: String!
+  chainId: Int!
+  contractAddress: String!
+  author: MintBoardAuthor!
+  edition: ZoraEdition!
+  totalMints: Int!
+}
+
+type ZoraEdition @key(fields: "id"){
+  id: ID!
+  chainId: Int!
+  contractAddress: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  royaltyBPS: Int!
+  fundsRecipient: String!
+  defaultAdmin: String!
+  saleConfig: ZoraSaleConfig!
+  description: String!
+  animationURI: String!
+  imageURI: String!
+  referrer: String!
+
+}
+
+type  ZoraSaleConfig {
+  publicSalePrice: String!
+  maxSalePurchasePerAddress: Int!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  presaleStart: String!
+  presaleEnd: String!
+  presaleMerkleRoot: String!
+}
+
+type MintBoardAuthor @key(fields: "id"){
+  id: ID!
+  address: String!
+  userName: String
+  displayName: String
+  profileAvatar: String
+}
+
 type Deadlines {
   startTime: ISODateString! @external
   voteTime: ISODateString! @external
@@ -29,12 +81,6 @@ type AdditionalParams {
 
 type Space @key(fields: "id") {
   id: ID!
-}
-
-type NftDrop {
-  chainId: Int!
-  contractAddress: String!
-  dropConfig: String!
 }
 
 type SubmissionAuthor {
@@ -55,7 +101,7 @@ type Submission @key(fields: "id") {
   url: String!
   totalVotes: Decimal
   rank: Int
-  nftDrop: NftDrop
+  edition: ZoraEdition
 }
 
 type PopularSubmission @key(fields: "id") {
@@ -66,7 +112,7 @@ type PopularSubmission @key(fields: "id") {
   version: String!
   author: SubmissionAuthor!
   url: String!
-  nftDrop: NftDrop
+  edition: ZoraEdition
 }
 
 type Submit_Token {
@@ -161,12 +207,11 @@ type createUserDropResponse {
   success: Boolean!
 }
 
-type reserveMintBoardSlotResponse {
+type createMintBoardPostResponse {
   success: Boolean!
-  slot: Int
 }
 
-type createMintBoardSubmissionResponse {
+type registerMintResponse {
   success: Boolean!
 }
 
@@ -186,15 +231,16 @@ type Mutation {
     chainId: Int!
     dropConfig: DropConfig!
   ): createUserDropResponse!
-  reserveMintBoardSlot (
-    spaceName: String!
-  ): reserveMintBoardSlotResponse!
-  createMintBoardSubmission (
+  createMintBoardPost (
     spaceName: String!
     contractAddress: String!
     chainId: Int!
     dropConfig: DropConfig!
-  ): createMintBoardSubmissionResponse! 
+  ): createMintBoardPostResponse!
+  registerMint (
+    editionId: ID!
+    amount: Int!
+  ) : registerMintResponse!
 }
 
 extend schema

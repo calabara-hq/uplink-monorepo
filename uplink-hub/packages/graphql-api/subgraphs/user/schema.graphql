@@ -10,10 +10,33 @@ type User @key(fields: "id") {
   submissions: [UserSubmission!]!
 }
 
-type UserNftDrop {
+
+type UserZoraEdition @key(fields: "id"){
+  id: ID!
   chainId: Int!
   contractAddress: String!
-  dropConfig: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  royaltyBPS: Int!
+  fundsRecipient: String!
+  defaultAdmin: String!
+  saleConfig: UserZoraSaleConfig!
+  description: String!
+  animationURI: String!
+  imageURI: String!
+  referrer: String!
+
+}
+
+type UserZoraSaleConfig {
+  publicSalePrice: String!
+  maxSalePurchasePerAddress: Int!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  presaleStart: String!
+  presaleEnd: String!
+  presaleMerkleRoot: String!
 }
 
 type UserSubmissionAuthor {
@@ -30,7 +53,7 @@ type UserSubmission {
   type: String!
   version: String!
   url: String!
-  nftDrop: UserNftDrop
+  edition: UserZoraEdition
   author: UserSubmissionAuthor
 }
 

@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import { validateContestData, validateTweetThread } from "../utils/validate.js";
 import { insertContest, queueTweet } from "../utils/insert.js";
 import { CreateContestData, ThreadItemInput } from "../__generated__/resolvers-types.js";
+import { configureMintBoard } from "../utils/configureMintBoard.js";
+import { MintBoardInput } from "../__generated__/resolvers-types.js";
 
 dotenv.config();
 
@@ -88,6 +90,17 @@ const mutations = {
                 return { success: false }
             }
         },
+
+        configureMintBoard: async (_: any, { spaceName, mintBoardData }: { spaceName: string, mintBoardData: MintBoardInput }, context: Context) => {
+            const user = await authController.getUser(context);
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
+            return configureMintBoard(user, spaceName, mintBoardData)
+        }
     },
 
 

@@ -18,6 +18,25 @@ extend type SpaceStub @key(fields: "id") {
   id: ID! @external
 }
 
+type MintBoard @key(fields: "id"){
+  id: ID!
+  spaceId: ID!
+  space: SpaceStub!  
+  created: String!
+  chainId: Int!
+  enabled: Boolean!
+  boardTitle: String!
+  boardDescription: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  publicSalePrice: String!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  description: String!
+  referrer: String!
+}
+
 enum ContestTypeEnum {
   standard
   twitter
@@ -168,6 +187,7 @@ extend type Query {
   contest(contestId: ID!): Contest
   activeContests: [Contest!]!
   isContestTweetQueued(contestId: ID!): Boolean!
+  mintBoard(spaceName: String!): MintBoard
 }
 
 ## muts
@@ -304,6 +324,22 @@ input CreateContestData {
   additionalParams: AdditionalParamsInput!
 }
 
+input MintBoardInput {
+  chainId: Int!
+  enabled: Boolean!
+  boardTitle: String!
+  boardDescription: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  publicSalePrice: String!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  description: String!
+  referrer: String!
+}
+
+
 type ContestMutationResponse {
   success: Boolean!
   contestId: ID
@@ -312,6 +348,10 @@ type ContestMutationResponse {
 type ContestTweetResponse {
   success: Boolean!
   errors: String
+}
+
+type ConfigureMintBoardResponse {
+  success: Boolean!
 }
 
 type Mutation {
@@ -324,6 +364,8 @@ type Mutation {
     spaceId: ID!
     tweetThread: [ThreadItemInput!]!
   ): ContestTweetResponse!
+  configureMintBoard(spaceName: String! mintBoardData: MintBoardInput!): ConfigureMintBoardResponse!
+
 }
 
 extend schema

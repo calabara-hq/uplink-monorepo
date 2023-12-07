@@ -9,9 +9,6 @@ import {
 import { updateDbSpace, createDbSpace } from "../utils/database.js";
 import { GraphQLError } from "graphql";
 import dotenv from 'dotenv';
-import { MintBoardInput } from "../__generated__/resolvers-types.js";
-import { Context } from "lib";
-import { configureMintBoard } from "../utils/configureMintBoard.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL);
@@ -92,16 +89,7 @@ const mutations = {
             }
         },
 
-        configureMintBoard: async (_: any, { spaceName, mintBoardData }: { spaceName: string, mintBoardData: MintBoardInput }, context: Context) => {
-            const user = await authController.getUser(context);
-            if (!user) throw new GraphQLError('Unauthorized', {
-                extensions: {
-                    code: 'UNAUTHORIZED'
-                }
-            })
 
-            return configureMintBoard(user, spaceName, mintBoardData)
-        }
     },
 };
 

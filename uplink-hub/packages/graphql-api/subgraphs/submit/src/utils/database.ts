@@ -15,7 +15,11 @@ const prepared_singleSubmissionById = db.query.submissions.findFirst({
         author: true,
         votes: true,
         contest: true,
-        nftDrop: true,
+        nftDrop: {
+            with: {
+                edition: true,
+            }
+        },
     }
 }).prepare();
 
@@ -30,7 +34,11 @@ const prepared_submissionsByContestId = db.query.submissions.findMany({
                 voter: true
             }
         },
-        nftDrop: true,
+        nftDrop: {
+            with: {
+                edition: true,
+            }
+        },
     }
 }).prepare();
 
@@ -60,6 +68,82 @@ export const dbGetRewards = async (contestId: number): Promise<Array<schema.dbRe
     return prepared_getRewards.execute({ contestId });
 }
 
+export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Array<schema.dbMintBoardPostType>> => {
+    const data = await db.execute(sqlOps.sql`
+        SELECT
+            mbp.*,
+            SUM(mints.amount) AS totalMints,
+            JSON_OBJECT(
+                'id', post_author.id,
+                'address', post_author.address,
+                'userName', post_author.userName,
+                'displayName', post_author.displayName,
+                'profileAvatar', post_author.profileAvatar
+            ) AS author,
+            JSON_OBJECT(
+                'id', edition.id,
+                'chainId', edition.chainId,
+                'contractAddress', edition.contractAddress,
+                'name', edition.name,
+                'symbol', edition.symbol,
+                'editionSize', edition.editionSize,
+                'royaltyBPS', edition.royaltyBPS,
+                'fundsRecipient', edition.fundsRecipient,
+                'defaultAdmin', edition.defaultAdmin,
+                'description', edition.description,
+                'animationURI', edition.animationURI,
+                'imageURI', edition.imageURI,
+                'referrer', edition.referrer,
+                'saleConfig', JSON_OBJECT(
+                    'publicSalePrice', edition.publicSalePrice,
+                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+                    'publicSaleStart', edition.publicSaleStart,
+                    'publicSaleEnd', edition.publicSaleEnd,
+                    'presaleStart', edition.presaleStart,
+                    'presaleEnd', edition.presaleEnd,
+                    'presaleMerkleRoot', edition.presaleMerkleRoot
+                )
+            ) AS edition
+
+        FROM mintBoardPosts mbp
+        LEFT JOIN (
+            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
+            FROM users u
+        ) AS post_author ON mbp.userId = post_author.id
+        LEFT JOIN (
+            SELECT e.*
+            FROM zoraEditions e
+        ) AS edition ON mbp.editionId = edition.id
+        LEFT JOIN (
+            SELECT mints.*
+            FROM editionMints mints
+        ) AS mints ON mbp.editionId = mints.editionId
+        WHERE mbp.boardId = ${boardId}
+        GROUP BY mbp.id
+        ORDER BY mbp.created DESC
+    `)
+
+    return data.rows.map((post: any) => {
+        return {
+            ...post,
+            totalMints: parseInt(post.totalMints) || 0
+        }
+    });
+}
+
+
+/**
+
+            CASE
+                WHEN nftDrop.chainId IS NULL AND nftDrop.contractAddress IS NULL AND nftDrop.dropConfig IS NULL THEN NULL
+                ELSE JSON_OBJECT(
+                    'chainId', nftDrop.chainId,
+                    'contractAddress', nftDrop.contractAddress,
+                    'dropConfig', nftDrop.dropConfig
+                )
+            END AS edition,
+
+ */
 
 // get the last 3 contests that have ended, get submissions with more than 3 unique votes, and take a random sample of 20
 
@@ -69,14 +153,33 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
         SELECT 
             s.*,
             COALESCE(vote_counts.uniqueVotes, 0) AS uniqueVotes,
-            CASE
-                WHEN nftDrop.chainId IS NULL AND nftDrop.contractAddress IS NULL AND nftDrop.dropConfig IS NULL THEN NULL
+            CASE 
+                WHEN edition.id IS NULL 
+                THEN NULL 
                 ELSE JSON_OBJECT(
-                    'chainId', nftDrop.chainId,
-                    'contractAddress', nftDrop.contractAddress,
-                    'dropConfig', nftDrop.dropConfig
-                )
-            END AS nftDrop,
+                    'id', edition.id,
+                    'chainId', edition.chainId,
+                    'contractAddress', edition.contractAddress,
+                    'name', edition.name,
+                    'symbol', edition.symbol,
+                    'editionSize', edition.editionSize,
+                    'royaltyBPS', edition.royaltyBPS,
+                    'fundsRecipient', edition.fundsRecipient,
+                    'defaultAdmin', edition.defaultAdmin,
+                    'description', edition.description,
+                    'animationURI', edition.animationURI,
+                    'imageURI', edition.imageURI,
+                    'referrer', edition.referrer,
+                    'saleConfig', JSON_OBJECT(
+                        'publicSalePrice', edition.publicSalePrice,
+                        'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+                        'publicSaleStart', edition.publicSaleStart,
+                        'publicSaleEnd', edition.publicSaleEnd,
+                        'presaleStart', edition.presaleStart,
+                        'presaleEnd', edition.presaleEnd,
+                        'presaleMerkleRoot', edition.presaleMerkleRoot
+                    )
+                ) END AS edition,
             JSON_OBJECT(
                 'id', sub_author.id,
                 'address', sub_author.address,
@@ -104,12 +207,17 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
             HAVING uniqueVotes > 1
         ) AS vote_counts ON s.id = vote_counts.submissionId
         LEFT JOIN (
-            SELECT ud.submissionId, ud.chainId, ud.contractAddress, ud.dropConfig
-            FROM userDrops ud
-        ) AS nftDrop ON s.id = nftDrop.submissionId
+            SELECT sd.*
+            FROM submissionDrops sd
+        ) AS submissionDrop ON s.id = submissionDrop.submissionId
+        LEFT JOIN (
+            SELECT e.*
+            FROM zoraEditions e
+        ) AS edition ON submissionDrop.editionId = edition.id
         ORDER BY RAND()
 `);
 
+    console.log(JSON.stringify(data.rows, null, 2))
     // sample the subs that have more than 3 unique votes
     // if length of 3vote array is < 10, sample the subs that have 2 unique votes
     // if length of 2vote array is < 10, just return the original array
@@ -145,5 +253,6 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
     }
 
     // otherwise return the original array
+
     return data.rows
 }

@@ -24,78 +24,10 @@ export type Admin = {
   spaceId: Scalars['ID']['output'];
 };
 
-export type ConfigureMintBoardResponse = {
-  __typename?: 'ConfigureMintBoardResponse';
-  success: Scalars['Boolean']['output'];
-};
-
-export type MintBoard = {
-  __typename?: 'MintBoard';
-  boardDescription: Scalars['String']['output'];
-  boardTitle: Scalars['String']['output'];
-  chainId: Scalars['Int']['output'];
-  created: Scalars['String']['output'];
-  description: Scalars['String']['output'];
-  editionSize: Scalars['String']['output'];
-  enabled: Scalars['Boolean']['output'];
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  publicSaleEnd: Scalars['String']['output'];
-  publicSalePrice: Scalars['String']['output'];
-  publicSaleStart: Scalars['String']['output'];
-  referrer: Scalars['String']['output'];
-  spaceId: Scalars['ID']['output'];
-  submissions: Array<MintBoardSubmission>;
-  symbol: Scalars['String']['output'];
-};
-
-export type MintBoardAuthor = {
-  __typename?: 'MintBoardAuthor';
-  address: Scalars['String']['output'];
-  displayName?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  profileAvatar?: Maybe<Scalars['String']['output']>;
-  userId: Scalars['ID']['output'];
-  userName?: Maybe<Scalars['String']['output']>;
-};
-
-export type MintBoardInput = {
-  boardDescription: Scalars['String']['input'];
-  boardTitle: Scalars['String']['input'];
-  chainId: Scalars['Int']['input'];
-  description: Scalars['String']['input'];
-  editionSize: Scalars['String']['input'];
-  enabled: Scalars['Boolean']['input'];
-  name: Scalars['String']['input'];
-  publicSaleEnd: Scalars['String']['input'];
-  publicSalePrice: Scalars['String']['input'];
-  publicSaleStart: Scalars['String']['input'];
-  referrer: Scalars['String']['input'];
-  symbol: Scalars['String']['input'];
-};
-
-export type MintBoardSubmission = {
-  __typename?: 'MintBoardSubmission';
-  author: MintBoardAuthor;
-  chainId: Scalars['Int']['output'];
-  contractAddress: Scalars['String']['output'];
-  created: Scalars['String']['output'];
-  dropConfig: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  spaceId: Scalars['ID']['output'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
-  configureMintBoard: ConfigureMintBoardResponse;
   createSpace: SpaceMutationResponse;
   editSpace: SpaceMutationResponse;
-};
-
-
-export type MutationConfigureMintBoardArgs = {
-  mintBoardData: MintBoardInput;
-  spaceName: Scalars['String']['input'];
 };
 
 
@@ -128,7 +60,6 @@ export type Space = {
   id: Scalars['ID']['output'];
   logoUrl: Scalars['String']['output'];
   members: Scalars['Int']['output'];
-  mintBoard?: Maybe<MintBoard>;
   name: Scalars['String']['output'];
   spaceTokens: Array<SpaceTokenMap>;
   twitter?: Maybe<Scalars['String']['output']>;
@@ -272,14 +203,9 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = ResolversObject<{
   Admin: ResolverTypeWrapper<Admin>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  ConfigureMintBoardResponse: ResolverTypeWrapper<ConfigureMintBoardResponse>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   IpfsUrl: ResolverTypeWrapper<Scalars['IpfsUrl']['output']>;
-  MintBoard: ResolverTypeWrapper<MintBoard>;
-  MintBoardAuthor: ResolverTypeWrapper<MintBoardAuthor>;
-  MintBoardInput: MintBoardInput;
-  MintBoardSubmission: ResolverTypeWrapper<MintBoardSubmission>;
   Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   Space: ResolverTypeWrapper<Space>;
@@ -297,14 +223,9 @@ export type ResolversTypes = ResolversObject<{
 export type ResolversParentTypes = ResolversObject<{
   Admin: Admin;
   Boolean: Scalars['Boolean']['output'];
-  ConfigureMintBoardResponse: ConfigureMintBoardResponse;
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   IpfsUrl: Scalars['IpfsUrl']['output'];
-  MintBoard: MintBoard;
-  MintBoardAuthor: MintBoardAuthor;
-  MintBoardInput: MintBoardInput;
-  MintBoardSubmission: MintBoardSubmission;
   Mutation: {};
   Query: {};
   Space: Space;
@@ -324,58 +245,11 @@ export type AdminResolvers<ContextType = any, ParentType extends ResolversParent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type ConfigureMintBoardResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ConfigureMintBoardResponse'] = ResolversParentTypes['ConfigureMintBoardResponse']> = ResolversObject<{
-  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export interface IpfsUrlScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['IpfsUrl'], any> {
   name: 'IpfsUrl';
 }
 
-export type MintBoardResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoard'] = ResolversParentTypes['MintBoard']> = ResolversObject<{
-  boardDescription?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  boardTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  editionSize?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  publicSaleEnd?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  publicSalePrice?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  publicSaleStart?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  referrer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  spaceId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  submissions?: Resolver<Array<ResolversTypes['MintBoardSubmission']>, ParentType, ContextType>;
-  symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type MintBoardAuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoardAuthor'] = ResolversParentTypes['MintBoardAuthor']> = ResolversObject<{
-  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  profileAvatar?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  userName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type MintBoardSubmissionResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoardSubmission'] = ResolversParentTypes['MintBoardSubmission']> = ResolversObject<{
-  author?: Resolver<ResolversTypes['MintBoardAuthor'], ParentType, ContextType>;
-  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  dropConfig?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  spaceId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  configureMintBoard?: Resolver<ResolversTypes['ConfigureMintBoardResponse'], ParentType, ContextType, RequireFields<MutationConfigureMintBoardArgs, 'mintBoardData' | 'spaceName'>>;
   createSpace?: Resolver<ResolversTypes['SpaceMutationResponse'], ParentType, ContextType, RequireFields<MutationCreateSpaceArgs, 'spaceData'>>;
   editSpace?: Resolver<ResolversTypes['SpaceMutationResponse'], ParentType, ContextType, RequireFields<MutationEditSpaceArgs, 'spaceData' | 'spaceId'>>;
 }>;
@@ -391,7 +265,6 @@ export type SpaceResolvers<ContextType = any, ParentType extends ResolversParent
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   logoUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   members?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  mintBoard?: Resolver<Maybe<ResolversTypes['MintBoard']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   spaceTokens?: Resolver<Array<ResolversTypes['SpaceTokenMap']>, ParentType, ContextType>;
   twitter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -449,11 +322,7 @@ export type SpaceTokenMapResolvers<ContextType = any, ParentType extends Resolve
 
 export type Resolvers<ContextType = any> = ResolversObject<{
   Admin?: AdminResolvers<ContextType>;
-  ConfigureMintBoardResponse?: ConfigureMintBoardResponseResolvers<ContextType>;
   IpfsUrl?: GraphQLScalarType;
-  MintBoard?: MintBoardResolvers<ContextType>;
-  MintBoardAuthor?: MintBoardAuthorResolvers<ContextType>;
-  MintBoardSubmission?: MintBoardSubmissionResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Space?: SpaceResolvers<ContextType>;

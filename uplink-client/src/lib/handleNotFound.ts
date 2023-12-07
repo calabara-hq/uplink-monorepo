@@ -3,6 +3,7 @@
 import { notFound } from "next/navigation"
 
 const handleNotFound = (response: any) => {
+  
     if (!response) notFound();
     return response;
 }

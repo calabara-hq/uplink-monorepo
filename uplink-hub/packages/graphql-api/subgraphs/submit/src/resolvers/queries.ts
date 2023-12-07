@@ -1,7 +1,7 @@
-import { sqlOps, db, dbSingleSubmissionById, dbGetPopularSubmissions, dbSubmissionsByContestId, dbGetRewards } from "../utils/database.js";
+import { sqlOps, db, dbSingleSubmissionById, dbGetPopularSubmissions, dbSubmissionsByContestId, dbGetRewards, dbGetMintBoardPostsByBoardId } from "../utils/database.js";
 import { GraphQLError } from "graphql";
 import { AuthorizationController, schema, Decimal, Context } from "lib";
-import type { Contest, Submission } from "../__generated__/resolvers-types.js";
+import type { Contest, Submission, ZoraEdition } from "../__generated__/resolvers-types.js";
 import dotenv from 'dotenv'
 import { computeSubmissionParams } from "../utils/insert.js";
 dotenv.config();
@@ -11,6 +11,7 @@ const authController = new AuthorizationController(process.env.REDIS_URL!);
 type ProcessedSubmission = Omit<schema.dbSubmissionType, 'author'> & {
     totalVotes: Decimal | null,
     author: schema.dbUserType | null,
+    edition: any 
 }
 
 const postProcessSubmission = (submission: schema.dbSubmissionType, withAuthor: boolean, withVotes: boolean): ProcessedSubmission => {
@@ -20,7 +21,19 @@ const postProcessSubmission = (submission: schema.dbSubmissionType, withAuthor: 
     return {
         ...submission,
         totalVotes: withVotes ? submission.votes.reduce((acc: Decimal, vote: { amount: string }) => acc.plus(new Decimal(vote.amount)), new Decimal(0)) : null,
-        author: withAuthor ? submission.author : null
+        author: withAuthor ? submission.author : null,
+        edition: Boolean(submission.nftDrop) ? {
+            ...submission.nftDrop.edition,
+            saleConfig: {
+                publicSalePrice: submission.nftDrop.edition.publicSalePrice,
+                maxSalePurchasePerAddress: submission.nftDrop.edition.maxSalePurchasePerAddress,
+                publicSaleStart: submission.nftDrop.edition.publicSaleStart,
+                publicSaleEnd: submission.nftDrop.edition.publicSaleEnd,
+                presaleStart: submission.nftDrop.edition.presaleStart,
+                presaleEnd: submission.nftDrop.edition.presaleEnd,
+                presaleMerkleRoot: submission.nftDrop.edition.presaleMerkleRoot,
+            }
+        } : null,
     }
 }
 
@@ -110,6 +123,7 @@ const queries = {
         async submission(_: any, { submissionId }: { submissionId: string }) {
             // determine if we need to filter out some of the hidden fields
             const data = await dbSingleSubmissionById(parseInt(submissionId));
+            if(!data) return null;
             const { endTime, anonSubs, visibleVotes } = data.contest;
             const withAuthor = !anonSubs || endTime < new Date().toISOString();
             const withVotes = Boolean(visibleVotes) || endTime < new Date().toISOString();
@@ -226,6 +240,12 @@ const queries = {
 
             return csvContent;
         },
+    },
+
+    MintBoard: {
+        async posts({ id }: { id: string }) {
+            return dbGetMintBoardPostsByBoardId(parseInt(id));
+        }
     }
 
 };

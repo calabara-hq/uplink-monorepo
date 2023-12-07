@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import loadingNoggles from "../../public/loading-noggles.svg";
-export default function NotFound() {
+export default function NotFound() {  
   const router = useRouter();
   return (
     <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-6">

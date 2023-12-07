@@ -121,7 +121,7 @@ export const ClientUserProfile = ({ accountAddress }: { accountAddress: string }
 
 export const UserSubmissions = ({ accountAddress, isMintableOnly }: { accountAddress: string, isMintableOnly: boolean }) => {
     const { me, isMeLoading, isMeError } = useMe(accountAddress);
-    const filteredSubs = isMintableOnly ? me.submissions.filter((el: Submission) => el.nftDrop) : me.submissions
+    const filteredSubs = isMintableOnly ? me.submissions.filter((el: Submission) => el.edition) : me.submissions
 
     const user: User = {
         ...me,

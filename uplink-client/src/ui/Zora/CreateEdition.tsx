@@ -401,8 +401,8 @@ const CreateEditionButton = ({
     });
 
 
-    const handleSubmit = () => {
-        const result = validate(session?.user?.address);
+    const handleSubmit = async () => {
+        const result = await validate(session?.user?.address);
         if (!result.success) {
             console.log(result)
             return toast.error("Some of your fields are invalid")

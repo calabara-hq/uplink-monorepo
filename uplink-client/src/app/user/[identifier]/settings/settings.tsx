@@ -246,7 +246,6 @@ const validateForm = (state: ConfigurableUserSettings, dispatch: any) => {
     if (!result.success) {
         // Formatting errors and dispatching
         const formattedErrors = (result as z.SafeParseError<typeof configurableUserSettings>).error.format();
-        console.log(formattedErrors)
         dispatch({
             type: "SET_ERRORS",
             payload: formattedErrors, // Pass the formatted errors directly
@@ -295,8 +294,6 @@ const Settings = ({ accountAddress }: { accountAddress: string }) => {
     const onSubmit = async () => {
         const result = validateForm(state, dispatch);
         if (result.success) {
-
-            console.log(result.data)
 
             try {
                 trigger({

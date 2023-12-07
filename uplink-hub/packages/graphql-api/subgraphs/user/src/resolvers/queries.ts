@@ -27,14 +27,33 @@ const restrictedSubmissionsByUserAddress = async (userId: string) => {
         SELECT
             s.*,
             c.id as contestId,
-            CASE
-                WHEN nftDrop.chainId IS NULL AND nftDrop.contractAddress IS NULL AND nftDrop.dropConfig IS NULL THEN NULL
+            CASE 
+                WHEN edition.id IS NULL 
+                THEN NULL 
                 ELSE JSON_OBJECT(
-                    'chainId', nftDrop.chainId,
-                    'contractAddress', nftDrop.contractAddress,
-                    'dropConfig', nftDrop.dropConfig
-                )
-            END AS nftDrop,
+                    'id', edition.id,
+                    'chainId', edition.chainId,
+                    'contractAddress', edition.contractAddress,
+                    'name', edition.name,
+                    'symbol', edition.symbol,
+                    'editionSize', edition.editionSize,
+                    'royaltyBPS', edition.royaltyBPS,
+                    'fundsRecipient', edition.fundsRecipient,
+                    'defaultAdmin', edition.defaultAdmin,
+                    'description', edition.description,
+                    'animationURI', edition.animationURI,
+                    'imageURI', edition.imageURI,
+                    'referrer', edition.referrer,
+                    'saleConfig', JSON_OBJECT(
+                        'publicSalePrice', edition.publicSalePrice,
+                        'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+                        'publicSaleStart', edition.publicSaleStart,
+                        'publicSaleEnd', edition.publicSaleEnd,
+                        'presaleStart', edition.presaleStart,
+                        'presaleEnd', edition.presaleEnd,
+                        'presaleMerkleRoot', edition.presaleMerkleRoot
+                    )
+                ) END AS edition,
             JSON_OBJECT(
                 'id', author.id,
                 'address', author.address,
@@ -52,9 +71,14 @@ const restrictedSubmissionsByUserAddress = async (userId: string) => {
             FROM contests
         ) AS c ON s.contestId = c.id
         LEFT JOIN (
-            SELECT ud.submissionId, ud.chainId, ud.contractAddress, ud.dropConfig
-            FROM userDrops ud
-        ) AS nftDrop ON s.id = nftDrop.submissionId
+            SELECT sd.submissionId, sd.editionId
+            FROM submissionDrops sd
+        ) AS submissionDrop ON s.id = submissionDrop.submissionId
+        LEFT JOIN (
+            SELECT e.*
+            FROM zoraEditions e
+        ) AS edition ON submissionDrop.editionId = edition.id
+        
         WHERE s.userId = ${userId} AND (c.anonSubs = false OR c.endTime < NOW())
         ORDER BY s.created DESC
 
@@ -69,14 +93,33 @@ const unrestrictedSubmissionsByUserAddress = async (userId: string) => {
         SELECT
         s.*,
         c.id as contestId,
-        CASE
-            WHEN nftDrop.chainId IS NULL AND nftDrop.contractAddress IS NULL AND nftDrop.dropConfig IS NULL THEN NULL
+        CASE 
+            WHEN edition.id IS NULL 
+            THEN NULL 
             ELSE JSON_OBJECT(
-                'chainId', nftDrop.chainId,
-                'contractAddress', nftDrop.contractAddress,
-                'dropConfig', nftDrop.dropConfig
-            )
-            END AS nftDrop,
+                'id', edition.id,
+                'chainId', edition.chainId,
+                'contractAddress', edition.contractAddress,
+                'name', edition.name,
+                'symbol', edition.symbol,
+                'editionSize', edition.editionSize,
+                'royaltyBPS', edition.royaltyBPS,
+                'fundsRecipient', edition.fundsRecipient,
+                'defaultAdmin', edition.defaultAdmin,
+                'description', edition.description,
+                'animationURI', edition.animationURI,
+                'imageURI', edition.imageURI,
+                'referrer', edition.referrer,
+                'saleConfig', JSON_OBJECT(
+                    'publicSalePrice', edition.publicSalePrice,
+                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+                    'publicSaleStart', edition.publicSaleStart,
+                    'publicSaleEnd', edition.publicSaleEnd,
+                    'presaleStart', edition.presaleStart,
+                    'presaleEnd', edition.presaleEnd,
+                    'presaleMerkleRoot', edition.presaleMerkleRoot
+                )
+            ) END AS edition,
             JSON_OBJECT(
                 'id', author.id,
                 'address', author.address,
@@ -94,9 +137,13 @@ const unrestrictedSubmissionsByUserAddress = async (userId: string) => {
             FROM contests
         ) AS c ON s.contestId = c.id
         LEFT JOIN (
-            SELECT ud.submissionId, ud.chainId, ud.contractAddress, ud.dropConfig
-            FROM userDrops ud
-        ) AS nftDrop ON s.id = nftDrop.submissionId
+            SELECT sd.submissionId, sd.editionId
+            FROM submissionDrops sd
+        ) AS submissionDrop ON s.id = submissionDrop.submissionId
+        LEFT JOIN (
+            SELECT e.*
+            FROM zoraEditions e
+        ) AS edition ON submissionDrop.editionId = edition.id
         WHERE s.userId = ${userId}
         ORDER BY s.created DESC
     `)

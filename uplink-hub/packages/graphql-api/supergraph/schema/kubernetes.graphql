@@ -77,7 +77,7 @@ type CastVoteResponse
 }
 
 type ConfigureMintBoardResponse
-  @join__type(graph: SPACES)
+  @join__type(graph: CONTESTS)
 {
   success: Boolean!
 }
@@ -152,7 +152,7 @@ input CreateContestData
   additionalParams: AdditionalParamsInput!
 }
 
-type createMintBoardSubmissionResponse
+type createMintBoardPostResponse
   @join__type(graph: SUBMIT)
 {
   success: Boolean!
@@ -296,31 +296,32 @@ input MetadataInput
 }
 
 type MintBoard
-  @join__type(graph: SPACES, key: "id")
+  @join__type(graph: CONTESTS, key: "id")
+  @join__type(graph: SUBMIT, key: "id", extension: true)
 {
   id: ID!
-  spaceId: ID!
-  created: String!
-  chainId: Int!
-  enabled: Boolean!
-  boardTitle: String!
-  boardDescription: String!
-  name: String!
-  symbol: String!
-  editionSize: String!
-  publicSalePrice: String!
-  publicSaleStart: String!
-  publicSaleEnd: String!
-  description: String!
-  referrer: String!
-  submissions: [MintBoardSubmission!]!
+  spaceId: ID! @join__field(graph: CONTESTS)
+  space: SpaceStub! @join__field(graph: CONTESTS)
+  created: String! @join__field(graph: CONTESTS)
+  chainId: Int! @join__field(graph: CONTESTS)
+  enabled: Boolean! @join__field(graph: CONTESTS)
+  boardTitle: String! @join__field(graph: CONTESTS)
+  boardDescription: String! @join__field(graph: CONTESTS)
+  name: String! @join__field(graph: CONTESTS)
+  symbol: String! @join__field(graph: CONTESTS)
+  editionSize: String! @join__field(graph: CONTESTS)
+  publicSalePrice: String! @join__field(graph: CONTESTS)
+  publicSaleStart: String! @join__field(graph: CONTESTS)
+  publicSaleEnd: String! @join__field(graph: CONTESTS)
+  description: String! @join__field(graph: CONTESTS)
+  referrer: String! @join__field(graph: CONTESTS)
+  posts: [MintBoardPost!]! @join__field(graph: SUBMIT)
 }
 
 type MintBoardAuthor
-  @join__type(graph: SPACES, key: "id")
+  @join__type(graph: SUBMIT, key: "id")
 {
   id: ID!
-  userId: ID!
   address: String!
   userName: String
   displayName: String
@@ -328,7 +329,7 @@ type MintBoardAuthor
 }
 
 input MintBoardInput
-  @join__type(graph: SPACES)
+  @join__type(graph: CONTESTS)
 {
   chainId: Int!
   enabled: Boolean!
@@ -344,16 +345,17 @@ input MintBoardInput
   referrer: String!
 }
 
-type MintBoardSubmission
-  @join__type(graph: SPACES, key: "id")
+type MintBoardPost
+  @join__type(graph: SUBMIT, key: "id")
 {
   id: ID!
   spaceId: ID!
   created: String!
   chainId: Int!
   contractAddress: String!
-  dropConfig: String!
   author: MintBoardAuthor!
+  edition: ZoraEdition!
+  totalMints: Int!
 }
 
 type Mutation
@@ -365,14 +367,14 @@ type Mutation
 {
   createContest(spaceId: ID!, contestData: CreateContestData!): ContestMutationResponse! @join__field(graph: CONTESTS)
   createContestTweet(contestId: ID!, spaceId: ID!, tweetThread: [ThreadItemInput!]!): ContestTweetResponse! @join__field(graph: CONTESTS)
+  configureMintBoard(spaceName: String!, mintBoardData: MintBoardInput!): ConfigureMintBoardResponse! @join__field(graph: CONTESTS)
   createSpace(spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
   editSpace(spaceId: ID!, spaceData: SpaceBuilderInput!): SpaceMutationResponse! @join__field(graph: SPACES)
-  configureMintBoard(spaceName: String!, mintBoardData: MintBoardInput!): ConfigureMintBoardResponse! @join__field(graph: SPACES)
   createSubmission(contestId: ID!, submission: SubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createTwitterSubmission(contestId: ID!, submission: TwitterSubmissionPayload!): createSubmissionResponse! @join__field(graph: SUBMIT)
   createUserDrop(submissionId: ID!, contestId: ID!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createUserDropResponse! @join__field(graph: SUBMIT)
-  reserveMintBoardSlot(spaceName: String!): reserveMintBoardSlotResponse! @join__field(graph: SUBMIT)
-  createMintBoardSubmission(spaceName: String!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createMintBoardSubmissionResponse! @join__field(graph: SUBMIT)
+  createMintBoardPost(spaceName: String!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createMintBoardPostResponse! @join__field(graph: SUBMIT)
+  registerMint(editionId: ID!, amount: Int!): registerMintResponse! @join__field(graph: SUBMIT)
   updateUser(displayName: String!, profileAvatar: String!, visibleTwitter: Boolean!): UpdateUserResponse @join__field(graph: USER)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
   removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
@@ -392,14 +394,6 @@ enum NativeTokenTypeEnum
   @join__type(graph: CONTESTS)
 {
   ETH @join__enumValue(graph: CONTESTS)
-}
-
-type NftDrop
-  @join__type(graph: SUBMIT)
-{
-  chainId: Int!
-  contractAddress: String!
-  dropConfig: String!
 }
 
 input NonFungiblePayoutInput
@@ -435,7 +429,7 @@ type PopularSubmission
   version: String!
   author: SubmissionAuthor!
   url: String!
-  nftDrop: NftDrop
+  edition: ZoraEdition
 }
 
 input PromptInput
@@ -456,6 +450,7 @@ type Query
   contest(contestId: ID!): Contest @join__field(graph: CONTESTS)
   activeContests: [Contest!]! @join__field(graph: CONTESTS)
   isContestTweetQueued(contestId: ID!): Boolean! @join__field(graph: CONTESTS)
+  mintBoard(spaceName: String!): MintBoard @join__field(graph: CONTESTS)
   space(id: ID, name: String): Space @join__field(graph: SPACES)
   spaces: [Space!]! @join__field(graph: SPACES)
   submission(submissionId: ID!): Submission @join__field(graph: SUBMIT)
@@ -464,6 +459,12 @@ type Query
   me: User @join__field(graph: USER)
   user(userIdentifier: String!): User @join__field(graph: USER)
   getUserVotingParams(contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
+}
+
+type registerMintResponse
+  @join__type(graph: SUBMIT)
+{
+  success: Boolean!
 }
 
 type RemoveAllVotesResponse
@@ -478,13 +479,6 @@ type RemoveSingleVoteResponse
 {
   success: Boolean!
   userVotingParams: UserVotingParams!
-}
-
-type reserveMintBoardSlotResponse
-  @join__type(graph: SUBMIT)
-{
-  success: Boolean!
-  slot: Int
 }
 
 type RestrictionResult
@@ -547,7 +541,6 @@ type Space
   twitter: String @join__field(graph: SPACES)
   website: String @join__field(graph: SPACES)
   spaceTokens: [SpaceTokenMap!]! @join__field(graph: SPACES)
-  mintBoard: MintBoard @join__field(graph: SPACES)
 }
 
 type SpaceBuilderErrors
@@ -626,7 +619,7 @@ type Submission
   url: String!
   totalVotes: Decimal
   rank: Int
-  nftDrop: NftDrop
+  edition: ZoraEdition
 }
 
 scalar SubmissionAssetUrl
@@ -803,14 +796,6 @@ type User
   submissions: [UserSubmission!]!
 }
 
-type UserNftDrop
-  @join__type(graph: USER)
-{
-  chainId: Int!
-  contractAddress: String!
-  dropConfig: String!
-}
-
 type UserSubmission
   @join__type(graph: USER)
 {
@@ -819,7 +804,7 @@ type UserSubmission
   type: String!
   version: String!
   url: String!
-  nftDrop: UserNftDrop
+  edition: UserZoraEdition
   author: UserSubmissionAuthor
 }
 
@@ -849,6 +834,37 @@ type UserVotingParams
   votesSpent: Decimal!
   votesRemaining: Decimal!
   userVotes: [VoteObject!]!
+}
+
+type UserZoraEdition
+  @join__type(graph: USER, key: "id")
+{
+  id: ID!
+  chainId: Int!
+  contractAddress: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  royaltyBPS: Int!
+  fundsRecipient: String!
+  defaultAdmin: String!
+  saleConfig: UserZoraSaleConfig!
+  description: String!
+  animationURI: String!
+  imageURI: String!
+  referrer: String!
+}
+
+type UserZoraSaleConfig
+  @join__type(graph: USER)
+{
+  publicSalePrice: String!
+  maxSalePurchasePerAddress: Int!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  presaleStart: String!
+  presaleEnd: String!
+  presaleMerkleRoot: String!
 }
 
 type Vote
@@ -937,4 +953,35 @@ type WeightedVotingStrategyOption
 {
   strategyType: VotingStrategyTypeEnum!
   weightedVotingStrategy: WeightedVotingStrategy!
+}
+
+type ZoraEdition
+  @join__type(graph: SUBMIT, key: "id")
+{
+  id: ID!
+  chainId: Int!
+  contractAddress: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  royaltyBPS: Int!
+  fundsRecipient: String!
+  defaultAdmin: String!
+  saleConfig: ZoraSaleConfig!
+  description: String!
+  animationURI: String!
+  imageURI: String!
+  referrer: String!
+}
+
+type ZoraSaleConfig
+  @join__type(graph: SUBMIT)
+{
+  publicSalePrice: String!
+  maxSalePurchasePerAddress: Int!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  presaleStart: String!
+  presaleEnd: String!
+  presaleMerkleRoot: String!
 }

@@ -2,6 +2,8 @@
 export type SubmissionType = "standard" | "twitter"
 export type SubmissionFormat = "image" | "video" | "text"
 import type { OutputData } from "@editorjs/editorjs";
+import { Edition } from "./edition";
+import { User } from "./user";
 
 export type BaseSubmission = {
     id: string;
@@ -10,20 +12,10 @@ export type BaseSubmission = {
     type: SubmissionType;
     url: string;
     version: string;
-    author: {
-        id: string;
-        address: string;
-        userName: string | null;
-        displayName: string | null;
-        profileAvatar: string | null;
-    } | null;
+    author: User | null;
     rank: string | null;
     totalVotes: string | null;
-    nftDrop: {
-        chainId: string;
-        contractAddress: string;
-        dropConfig: string;
-    } | null;
+    edition: Edition | null;
 };
 
 export type TwitterSubmission = BaseSubmission & {
@@ -63,5 +55,5 @@ export const isTwitterSubmission = (submission: Submission): submission is Twitt
 }
 
 export const isNftSubmission = (submission: Submission): boolean => {
-    return Boolean(submission.nftDrop);
+    return Boolean(submission.edition);
 }
