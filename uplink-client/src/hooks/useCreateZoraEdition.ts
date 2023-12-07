@@ -5,7 +5,7 @@ import { Decimal } from 'decimal.js';
 import { handleMutationError } from "@/lib/handleMutationError";
 import { Session } from "@/providers/SessionProvider";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import handleMediaUpload, { MediaUploadError } from "@/lib/mediaUpload";
+import handleMediaUpload, { IpfsUpload, MediaUploadError } from "@/lib/mediaUpload";
 import toast from "react-hot-toast";
 
 export const EditionConfig = z.object({
@@ -265,8 +265,8 @@ export const postToMintBoard = async (url,
         credentials: "include",
         body: JSON.stringify({
             query: `
-                mutation CreateMintBoardSubmission($spaceName: String!, $contractAddress: String!, $chainId: Int!, $dropConfig: DropConfig!){
-                    createMintBoardSubmission(spaceName: $spaceName, contractAddress: $contractAddress, chainId: $chainId, dropConfig: $dropConfig){
+                mutation CreateMintBoardPost($spaceName: String!, $contractAddress: String!, $chainId: Int!, $dropConfig: DropConfig!){
+                    createMintBoardPost(spaceName: $spaceName, contractAddress: $contractAddress, chainId: $chainId, dropConfig: $dropConfig){
                         success
                     }
                 }`,
@@ -281,7 +281,7 @@ export const postToMintBoard = async (url,
     })
         .then((res) => res.json())
         .then(handleMutationError)
-        .then((res) => res.data.createMintBoardSubmission);
+        .then((res) => res.data.createMintBoardPost);
 }
 
 
@@ -385,11 +385,35 @@ export default function useCreateZoraEdition(referrer?: string, templateConfig?:
         });
     };
 
-    const validate = (userAddress: Session['user']['address']) => {
+
+    const handleThumbnailChoice = async () => {
+        if (thumbnailBlobIndex === null) return null;
+        if (state.imageURI) return state.imageURI;
+        try {
+            setIsUploading(true)
+            const blob = await fetch(thumbnailOptions[thumbnailBlobIndex]).then(r => r.blob())
+            return await IpfsUpload(blob).then(url => {
+                setField('imageURI', url);
+                setIsUploading(false);
+                return url;
+            })
+        } catch (e) {
+            console.log(e);
+            setIsUploading(false);
+            setField('imageURI', '');
+        }
+    }
+
+    const validate = async (userAddress: Session['user']['address']) => {
+
+        const videoThumbnailUrl = state.animationURI ? await handleThumbnailChoice() : '';
+
         const { errors, ...rest } = state;
+
         const result = ConfigurableZoraEditionSchema.safeParse({
             ...rest,
             creator: userAddress,
+            imageURI: videoThumbnailUrl || state.imageURI,
         });
 
         if (!result.success) {
@@ -432,13 +456,15 @@ export default function useCreateZoraEdition(referrer?: string, templateConfig?:
                     if (mimeType.includes("video")) setAnimationBlob(base64);
                     else setImageBlob(base64);
                 },
-                (ipfsUrl) => {
-                    setField('imageURI', ipfsUrl);
+                (ipfsUrl, mimeType) => {
+                    if (mimeType.includes("video")) setField('animationURI', ipfsUrl);
+                    else setField('imageURI', ipfsUrl);
                     setIsUploading(false);
                 },
                 (thumbnails) => {
                     setThumbnailOptions(thumbnails);
                     setThumbnailBlobIndex(0);
+
                 },
                 (size) => { }
             ).catch((err) => {

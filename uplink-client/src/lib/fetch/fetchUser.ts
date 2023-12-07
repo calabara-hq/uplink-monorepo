@@ -34,10 +34,29 @@ const fetchUser = async (userIdentifier: string): Promise<User> => {
                         userName
                         profileAvatar
                     }
-                    nftDrop {
+                    edition {
+                        id
                         chainId
                         contractAddress
-                        dropConfig
+                        name
+                        symbol
+                        editionSize
+                        royaltyBPS
+                        fundsRecipient
+                        defaultAdmin
+                        saleConfig {
+                            publicSalePrice
+                            maxSalePurchasePerAddress
+                            publicSaleStart
+                            publicSaleEnd
+                            presaleStart
+                            presaleEnd
+                            presaleMerkleRoot
+                        }
+                        description
+                        animationURI
+                        imageURI
+                        referrer
                     }
                   }
                 }

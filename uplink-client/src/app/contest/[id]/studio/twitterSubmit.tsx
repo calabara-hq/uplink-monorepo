@@ -498,12 +498,16 @@ const PreviewModal = ({
                     address: session?.user?.address as `0x${string}`,
                     userName: session?.user?.userName,
                     displayName: session?.user?.displayName,
-                    profileAvatar: session?.user?.profileAvatar
+                    profileAvatar: session?.user?.profileAvatar,
+                    twitterHandle: null,
+                    twitterAvatar: null,
+                    visibleTwitter: false,
+                    submissions: []
                   },
                   totalVotes: null,
                   rank: null,
                   type: "twitter",
-                  nftDrop: null,
+                  edition: null,
                   data: {
                     type: submissionType,
                     title: title,

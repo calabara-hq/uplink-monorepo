@@ -66,7 +66,7 @@ const handleMediaUpload = async (
     acceptedFormats: string[],
     mimeTypeCallback: (mimeType: string) => void,
     readerCallback: (data: any, mimeType: string) => void,
-    ipfsCallback: (uri: string) => void,
+    ipfsCallback: (uri: string, mimeType: string) => void,
     videoThumbnailCallback?: (thumbnails: string[]) => void,
     fileSizeCallback?: (size: number) => void,
 ) => {
@@ -121,7 +121,7 @@ const handleMediaUpload = async (
     const response = await IpfsUpload(file);
     if (!response) throw new MediaUploadError({ code: 5, message: 'Error uploading to IPFS' })
 
-    ipfsCallback(response);
+    ipfsCallback(response, mimeType);
 };
 
 export default handleMediaUpload;

@@ -54,6 +54,11 @@ export type ArcadeVotingStrategyOption = {
   strategyType: VotingStrategyTypeEnum;
 };
 
+export type ConfigureMintBoardResponse = {
+  __typename?: 'ConfigureMintBoardResponse';
+  success: Scalars['Boolean']['output'];
+};
+
 export type Contest = {
   __typename?: 'Contest';
   additionalParams: AdditionalParams;
@@ -163,10 +168,52 @@ export type MetadataInput = {
   type: ContestTypeEnum;
 };
 
+export type MintBoard = {
+  __typename?: 'MintBoard';
+  boardDescription: Scalars['String']['output'];
+  boardTitle: Scalars['String']['output'];
+  chainId: Scalars['Int']['output'];
+  created: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  editionSize: Scalars['String']['output'];
+  enabled: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  publicSaleEnd: Scalars['String']['output'];
+  publicSalePrice: Scalars['String']['output'];
+  publicSaleStart: Scalars['String']['output'];
+  referrer: Scalars['String']['output'];
+  space: SpaceStub;
+  spaceId: Scalars['ID']['output'];
+  symbol: Scalars['String']['output'];
+};
+
+export type MintBoardInput = {
+  boardDescription: Scalars['String']['input'];
+  boardTitle: Scalars['String']['input'];
+  chainId: Scalars['Int']['input'];
+  description: Scalars['String']['input'];
+  editionSize: Scalars['String']['input'];
+  enabled: Scalars['Boolean']['input'];
+  name: Scalars['String']['input'];
+  publicSaleEnd: Scalars['String']['input'];
+  publicSalePrice: Scalars['String']['input'];
+  publicSaleStart: Scalars['String']['input'];
+  referrer: Scalars['String']['input'];
+  symbol: Scalars['String']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
+  configureMintBoard: ConfigureMintBoardResponse;
   createContest: ContestMutationResponse;
   createContestTweet: ContestTweetResponse;
+};
+
+
+export type MutationConfigureMintBoardArgs = {
+  mintBoardData: MintBoardInput;
+  spaceName: Scalars['String']['input'];
 };
 
 
@@ -222,6 +269,7 @@ export type Query = {
   activeContests: Array<Contest>;
   contest?: Maybe<Contest>;
   isContestTweetQueued: Scalars['Boolean']['output'];
+  mintBoard?: Maybe<MintBoard>;
 };
 
 
@@ -232,6 +280,11 @@ export type QueryContestArgs = {
 
 export type QueryIsContestTweetQueuedArgs = {
   contestId: Scalars['ID']['input'];
+};
+
+
+export type QueryMintBoardArgs = {
+  spaceName: Scalars['String']['input'];
 };
 
 export type RestrictionTokenInput = {
@@ -463,6 +516,7 @@ export type ResolversTypes = ResolversObject<{
   ArcadeVotingStrategy: ResolverTypeWrapper<ArcadeVotingStrategy>;
   ArcadeVotingStrategyOption: ResolverTypeWrapper<ArcadeVotingStrategyOption>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  ConfigureMintBoardResponse: ResolverTypeWrapper<ConfigureMintBoardResponse>;
   Contest: ResolverTypeWrapper<Omit<Contest, 'submitterRestrictions' | 'votingPolicy'> & { submitterRestrictions: Array<ResolversTypes['SubmitterRestriction']>, votingPolicy: Array<ResolversTypes['VotingStrategy']> }>;
   ContestCategoryEnum: ContestCategoryEnum;
   ContestMutationResponse: ResolverTypeWrapper<ContestMutationResponse>;
@@ -483,6 +537,8 @@ export type ResolversTypes = ResolversObject<{
   IpfsUrl: ResolverTypeWrapper<Scalars['IpfsUrl']['output']>;
   Metadata: ResolverTypeWrapper<Metadata>;
   MetadataInput: MetadataInput;
+  MintBoard: ResolverTypeWrapper<MintBoard>;
+  MintBoardInput: MintBoardInput;
   Mutation: ResolverTypeWrapper<{}>;
   NativeTokenInput: NativeTokenInput;
   NativeTokenTypeEnum: NativeTokenTypeEnum;
@@ -529,6 +585,7 @@ export type ResolversParentTypes = ResolversObject<{
   ArcadeVotingStrategy: ArcadeVotingStrategy;
   ArcadeVotingStrategyOption: ArcadeVotingStrategyOption;
   Boolean: Scalars['Boolean']['output'];
+  ConfigureMintBoardResponse: ConfigureMintBoardResponse;
   Contest: Omit<Contest, 'submitterRestrictions' | 'votingPolicy'> & { submitterRestrictions: Array<ResolversParentTypes['SubmitterRestriction']>, votingPolicy: Array<ResolversParentTypes['VotingStrategy']> };
   ContestMutationResponse: ContestMutationResponse;
   ContestTweetResponse: ContestTweetResponse;
@@ -546,6 +603,8 @@ export type ResolversParentTypes = ResolversObject<{
   IpfsUrl: Scalars['IpfsUrl']['output'];
   Metadata: Metadata;
   MetadataInput: MetadataInput;
+  MintBoard: MintBoard;
+  MintBoardInput: MintBoardInput;
   Mutation: {};
   NativeTokenInput: NativeTokenInput;
   NonFungiblePayoutInput: NonFungiblePayoutInput;
@@ -603,6 +662,11 @@ export type ArcadeVotingStrategyResolvers<ContextType = any, ParentType extends 
 export type ArcadeVotingStrategyOptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ArcadeVotingStrategyOption'] = ResolversParentTypes['ArcadeVotingStrategyOption']> = ResolversObject<{
   arcadeVotingStrategy?: Resolver<ResolversTypes['ArcadeVotingStrategy'], ParentType, ContextType>;
   strategyType?: Resolver<ResolversTypes['VotingStrategyTypeEnum'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ConfigureMintBoardResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ConfigureMintBoardResponse'] = ResolversParentTypes['ConfigureMintBoardResponse']> = ResolversObject<{
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -672,7 +736,28 @@ export type MetadataResolvers<ContextType = any, ParentType extends ResolversPar
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type MintBoardResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoard'] = ResolversParentTypes['MintBoard']> = ResolversObject<{
+  boardDescription?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  boardTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  editionSize?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  publicSaleEnd?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  publicSalePrice?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  publicSaleStart?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  referrer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  space?: Resolver<ResolversTypes['SpaceStub'], ParentType, ContextType>;
+  spaceId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  configureMintBoard?: Resolver<ResolversTypes['ConfigureMintBoardResponse'], ParentType, ContextType, RequireFields<MutationConfigureMintBoardArgs, 'mintBoardData' | 'spaceName'>>;
   createContest?: Resolver<ResolversTypes['ContestMutationResponse'], ParentType, ContextType, RequireFields<MutationCreateContestArgs, 'contestData' | 'spaceId'>>;
   createContestTweet?: Resolver<ResolversTypes['ContestTweetResponse'], ParentType, ContextType, RequireFields<MutationCreateContestTweetArgs, 'contestId' | 'spaceId' | 'tweetThread'>>;
 }>;
@@ -687,6 +772,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   activeContests?: Resolver<Array<ResolversTypes['Contest']>, ParentType, ContextType>;
   contest?: Resolver<Maybe<ResolversTypes['Contest']>, ParentType, ContextType, RequireFields<QueryContestArgs, 'contestId'>>;
   isContestTweetQueued?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<QueryIsContestTweetQueuedArgs, 'contestId'>>;
+  mintBoard?: Resolver<Maybe<ResolversTypes['MintBoard']>, ParentType, ContextType, RequireFields<QueryMintBoardArgs, 'spaceName'>>;
 }>;
 
 export type SpaceResolvers<ContextType = any, ParentType extends ResolversParentTypes['Space'] = ResolversParentTypes['Space']> = ResolversObject<{
@@ -786,6 +872,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Admin?: AdminResolvers<ContextType>;
   ArcadeVotingStrategy?: ArcadeVotingStrategyResolvers<ContextType>;
   ArcadeVotingStrategyOption?: ArcadeVotingStrategyOptionResolvers<ContextType>;
+  ConfigureMintBoardResponse?: ConfigureMintBoardResponseResolvers<ContextType>;
   Contest?: ContestResolvers<ContextType>;
   ContestMutationResponse?: ContestMutationResponseResolvers<ContextType>;
   ContestTweetResponse?: ContestTweetResponseResolvers<ContextType>;
@@ -796,6 +883,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   ISODateString?: GraphQLScalarType;
   IpfsUrl?: GraphQLScalarType;
   Metadata?: MetadataResolvers<ContextType>;
+  MintBoard?: MintBoardResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   NonFungibleReward?: NonFungibleRewardResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

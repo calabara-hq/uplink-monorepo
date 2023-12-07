@@ -1,12 +1,12 @@
-import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { Boundary } from "@/ui/Boundary/Boundary";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import SwrProvider from "@/providers/SwrProvider";
-import { RenderPosts } from "./renderPosts";
+import { PostSkeleton, RenderPosts } from "./renderPosts";
 import { HiTrash } from "react-icons/hi2";
 import { MdOutlineCancelPresentation } from "react-icons/md";
+import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 
 
 const BoardInfoSkeleton = () => {
@@ -20,25 +20,24 @@ const BoardInfoSkeleton = () => {
             <div className="shimmer h-4 w-80 bg-base-200 rounded-lg" />
             <div className="shimmer h-4 w-80 bg-base-200 rounded-lg" />
             <div className="shimmer h-4 w-80 bg-base-200 rounded-lg" />
-            {/* <p className="text-t2">{space.mintBoard.boardDescription}</p> */}
         </div>
     )
 }
 
 const BoardInfo = async ({ spaceName }: { spaceName: string }) => {
-    const space = await fetchSingleSpace(spaceName);
+    const mintBoard = await fetchMintBoard(spaceName);
 
     return (
         <div className="flex flex-col gap-2 ">
-            <h1 className="font-bold text-3xl text-t1">{space.mintBoard.boardTitle}</h1>
+            <h1 className="font-bold text-3xl text-t1">{mintBoard.boardTitle}</h1>
             <div className="flex flex-row gap-2 items-center">
                 <Link
                     className="relative w-8 h-8 flex flex-col"
-                    href={`/${space.name}`}
+                    href={`/${spaceName}`}
                     draggable={false}
                 >
                     <Image
-                        src={space.logoUrl}
+                        src={mintBoard.space.logoUrl}
                         alt="Org Avatar"
                         fill
                         className="rounded-full object-cover"
@@ -46,13 +45,13 @@ const BoardInfo = async ({ spaceName }: { spaceName: string }) => {
                 </Link>
                 <Link
                     className="card-title text-sm text-t2 hover:underline hover:text-t1"
-                    href={`/${space.name}`}
+                    href={`/${spaceName}`}
                     draggable={false}
                 >
-                    {space.displayName}
+                    {mintBoard.space.displayName}
                 </Link>
             </div>
-            <p className="text-t2">{space.mintBoard.boardDescription}</p>
+            <p className="text-t2">{mintBoard.boardDescription}</p>
         </div>
     )
 }
@@ -62,7 +61,7 @@ const PageFilter = ({ spaceName, isLatest, isPopular }: { spaceName: string, isL
         <div className="flex ml-auto gap-2">
             <div className="flex flex-col gap-1 w-fit">
                 <Link
-                    href={`/${spaceName}/board`}
+                    href={`/${spaceName}/mintboard`}
                     className={`hover:text-t1 ${isLatest ? "text-t1" : "text-t2"}`}
                     scroll={false}
                     draggable={false}
@@ -73,7 +72,7 @@ const PageFilter = ({ spaceName, isLatest, isPopular }: { spaceName: string, isL
             </div>
             <div className="flex flex-col gap-1">
                 <Link
-                    href={`/${spaceName}/board?popular=true`}
+                    href={`/${spaceName}/mintboard?popular=true`}
                     className={`hover:text-t1 ${isPopular ? "text-t1" : "text-t2"}`}
                     scroll={false}
                     draggable={false}
@@ -87,28 +86,57 @@ const PageFilter = ({ spaceName, isLatest, isPopular }: { spaceName: string, isL
 }
 
 
-const CreatePostButton = ({ spaceName }: { spaceName: string }) => {
+const CreatePostButton = async ({ spaceName }: { spaceName: string }) => {
+    const mintBoard = await fetchMintBoard(spaceName);
+
     return (
-        <Boundary labels={['Create Post']}>
-            <div className="flex flex-col gap-2 h-full justify-between">
-                <p className="text-sm text-t2">Earn 0.000333 ETH for every mint your post receives!</p>
-                <Link href={`/${spaceName}/board/studio`} className="btn btn-primary  normal-case">Post</Link>
+        <Boundary size="small">
+            <div className="flex flex-col gap-4 h-full justify-between">
+                <ol className="text-t2 list-disc space-y-2">
+                    <li className="text-sm text-t2">Share posts to earn referral rewards.</li>
+                    <li className="text-sm text-t2">Earn 0.000333 ETH for every mint your post receives!</li>
+                    <li className="text-sm text-t2">0.000111 ETH from every mint goes to the {mintBoard.space.displayName} treasury.</li>
+                </ol>
+                <Link href={`/${spaceName}/mintboard/studio`} className="btn btn-primary normal-case">Post</Link>
             </div>
         </Boundary>
 
     )
 }
 
+const CreatePostSkeleton = () => {
+    return (
+        <Boundary size="small">
+            <div className="flex flex-col gap-4 h-full justify-between">
+                <div className="flex flex-col gap-2">
+                    <div className="h-4 w-3/4 bg-base-200 shimmer rounded-lg" />
+                    <div className="h-4 w-3/4 bg-base-200 shimmer rounded-lg" />
+                    <div className="h-4 w-3/4 bg-base-200 shimmer rounded-lg" />
+                </div>
+                <div className="bg-base-100 w-full h-12 shimmer rounded-lg" />
+            </div>
+        </Boundary>
+    )
+}
+
+const Posts = async ({ spaceName, isPopular }: { spaceName: string, isPopular: boolean }) => {
+    const mintBoard = await fetchMintBoard(spaceName);
+
+    const fallback = {
+        [`/mintBoard/${spaceName}`]: mintBoard,
+    };
+
+    return (
+        <SwrProvider fallback={fallback}>
+            <RenderPosts spaceName={spaceName} isPopular={isPopular} />
+        </SwrProvider>
+    )
+}
 
 export default async function Page({ params, searchParams }: { params: { name: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
     const spaceName = params.name;
-    const space = await fetchSingleSpace(spaceName);
     const isPopular = searchParams?.popular === "true"
     const isLatest = !isPopular
-
-    const fallback = {
-        [`mintBoard/${spaceName}`]: space,
-    };
 
     return (
         <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4">
@@ -117,8 +145,10 @@ export default async function Page({ params, searchParams }: { params: { name: s
                     {/*@ts-expect-error*/}
                     <BoardInfo spaceName={spaceName} />
                 </Suspense>
-
-                <CreatePostButton spaceName={spaceName} />
+                <Suspense fallback={<CreatePostSkeleton />}>
+                    {/*@ts-expect-error*/}
+                    <CreatePostButton spaceName={spaceName} />
+                </Suspense>
 
             </div>
             <div className="flex flex-col gap-1">
@@ -126,9 +156,10 @@ export default async function Page({ params, searchParams }: { params: { name: s
                 <div className="w-full bg-base-200 h-0.5" />
             </div>
             <div className="flex flex-col gap-4">
-                <SwrProvider fallback={fallback}>
-                    <RenderPosts spaceName={spaceName} />
-                </SwrProvider>
+                <Suspense fallback={<PostSkeleton />}>
+                    {/*@ts-expect-error*/}
+                    <Posts spaceName={spaceName} isPopular={isPopular} />
+                </Suspense>
             </div>
         </div>
     )

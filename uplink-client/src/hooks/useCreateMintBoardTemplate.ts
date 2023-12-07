@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Decimal } from 'decimal.js';
 import { handleMutationError } from "@/lib/handleMutationError";
 import { Session } from "@/providers/SessionProvider";
+import { validateEthAddress } from "@/lib/ethAddress";
 
 export const MintBoardTemplateSchema = z.object({
     chainId: z.number().refine((n) => n === 8453 || n === 84531, { message: "Must be base network" }),
@@ -17,7 +18,26 @@ export const MintBoardTemplateSchema = z.object({
     publicSalePrice: z.string(),
     publicSaleStart: z.string(),
     publicSaleEnd: z.string(),
-    referrer: z.string().min(1, { message: "Referral reward recipient is required" }),
+    referrer: z.string().min(1, { message: "Referral reward recipient is required" })
+}).superRefine(async (data, ctx) => {
+
+    const isEns = data.referrer.endsWith(".eth");
+    if (isEns) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["referrer"],
+            message: "ENS not supported",
+        })
+    }
+
+    const cleanAddress = await validateEthAddress(data.referrer);
+    if (!Boolean(cleanAddress)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["referrer"],
+            message: "Invalid Address",
+        })
+    }
 })
 
 
@@ -118,10 +138,9 @@ export default function useCreateMintBoardTemplate(templateConfig?: MintBoardTem
     }
 
 
-    const validate = () => {
+    const validate = async () => {
         const { errors, ...rest } = state;
-        const result = MintBoardTemplateSchema.safeParse(rest);
-        console.log(result)
+        const result = await MintBoardTemplateSchema.safeParseAsync(rest);
         if (!result.success) {
             const formattedErrors = (result as z.SafeParseError<typeof MintBoardTemplateSchema>).error.format();
             dispatch({
@@ -129,7 +148,6 @@ export default function useCreateMintBoardTemplate(templateConfig?: MintBoardTem
                 payload: formattedErrors,
             });
         }
-
         return result;
     }
 

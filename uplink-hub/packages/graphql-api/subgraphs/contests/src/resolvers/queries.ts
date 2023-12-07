@@ -1,6 +1,6 @@
 import { Decimal, schema } from "lib";
-import { sqlOps, db, dbSingleContestById, dbActiveContests, dbMultiContestsBySpaceId, dbIsContestTweetQueued } from '../utils/database.js';
-import { Contest, Space } from "../__generated__/resolvers-types.js";
+import { sqlOps, db, dbSingleContestById, dbActiveContests, dbMultiContestsBySpaceId, dbIsContestTweetQueued, dbSingleSpaceByName } from '../utils/database.js';
+import { Contest, MintBoard, Space } from "../__generated__/resolvers-types.js";
 
 
 const queries = {
@@ -15,6 +15,11 @@ const queries = {
 
         async isContestTweetQueued(_: any, args: { contestId: string }) {
             return dbIsContestTweetQueued(parseInt(args.contestId))
+        },
+
+        async mintBoard(_: any, args: { spaceName: string }) {
+            const data = await dbSingleSpaceByName(args.spaceName)
+            return data?.mintBoard ?? null
         }
     },
 
@@ -22,16 +27,19 @@ const queries = {
     Space: {
         async contests(space: Space) {
             return dbMultiContestsBySpaceId(parseInt(space.id))
-        }
+        },
     },
 
     Contest: {
-
         space: async (contest: Contest) => {
             return { id: contest.spaceId };
         },
+    },
 
-
+    MintBoard: {
+        space: async (mintBoard: MintBoard) => {
+            return { id: mintBoard.spaceId };
+        }
     },
 
     ActiveContest: {

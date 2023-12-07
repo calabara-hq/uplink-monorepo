@@ -1,28 +1,24 @@
-import { ConfigurableZoraEditionInput, ConfigurableZoraEditionSchema } from "@/hooks/useCreateZoraEdition";
 import { CreateBoardPost } from "./client";
-import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { Suspense } from "react";
+import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
+import { MintBoard } from "@/types/mintBoard";
+import SwrProvider from "@/providers/SwrProvider";
 
-const fetchDropTemplate = async (spaceName: string) => {
-    const space = await fetchSingleSpace(spaceName);
-    const { mintBoard, ...rest } = space;
-    if (mintBoard) {
-        return {
-            dropConfig: {
-                ...mintBoard,
-                imageURI: "",
-                animationURI: "",
-                saleConfig: {
-                    publicSalePrice: mintBoard.publicSalePrice,
-                    publicSaleStart: mintBoard.publicSaleStart,
-                    publicSaleEnd: mintBoard.publicSaleEnd,
-                },
-                editionSize: mintBoard.editionSize,
+const createDropTemplate = (mintBoard: MintBoard) => {
+    if (!mintBoard) return null;
+    return {
+        dropConfig: {
+            ...mintBoard,
+            imageURI: "",
+            animationURI: "",
+            saleConfig: {
+                publicSalePrice: mintBoard.publicSalePrice,
+                publicSaleStart: mintBoard.publicSaleStart,
+                publicSaleEnd: mintBoard.publicSaleEnd,
             },
-            referrer: mintBoard.referrer
-        }
+        },
+        referrer: mintBoard.referrer
     }
-    return null;
 }
 
 
@@ -42,8 +38,18 @@ const LoadingDialog = () => {
 
 
 const PageContent = async ({ spaceName }: { spaceName: string }) => {
-    const { dropConfig, referrer } = await fetchDropTemplate(spaceName);
-    return <CreateBoardPost spaceName={spaceName} templateConfig={dropConfig} referrer={referrer} />
+    const mintBoard = await fetchMintBoard(spaceName);
+    const { dropConfig, referrer } = createDropTemplate(mintBoard);
+
+    const fallback = {
+        [`/mintBoard/${spaceName}`]: mintBoard,
+    };
+
+    return (
+        <SwrProvider fallback={fallback}>
+            <CreateBoardPost spaceName={spaceName} displayName={mintBoard.space.displayName} templateConfig={dropConfig} referrer={referrer} />
+        </SwrProvider>
+    )
 }
 
 

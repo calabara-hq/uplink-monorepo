@@ -6,32 +6,53 @@ import { db, dbSingleSubmissionById } from "./database.js";
 
 const createDrop = async (user: any, submissionId: string, contestId: string, contractAddress: string, chainId: number, dropConfig: DropConfig) => {
 
-    // get the submission
-
     const submission = await dbSingleSubmissionById(parseInt(submissionId));
 
-    // check if user is the author of the submission
-
     if (submission.author.id !== parseInt(user.id)) return { success: false }
-    // check if submission is already dropped
 
     if (submission.nftDrop) return { success: false }
 
-    // insert drop into db
-
     try {
 
-        const newDrop: schema.dbNewUserDropType = {
-            submissionId: submission.id,
-            contestId: submission.contestId,
-            userId: user.id,
-            contractAddress: contractAddress,
-            chainId: chainId,
-            dropConfig: JSON.stringify(dropConfig),
-            created: new Date().toISOString(),
-        }
+        await db.transaction(async (tx: any) => {
 
-        await db.insert(schema.userDrops).values(newDrop)
+            const newEdition: schema.dbNewZoraEditionType = {
+                chainId,
+                contractAddress,
+                name: dropConfig.name,
+                symbol: dropConfig.symbol,
+                editionSize: dropConfig.editionSize,
+                royaltyBPS: dropConfig.royaltyBPS,
+                fundsRecipient: dropConfig.fundsRecipient,
+                defaultAdmin: dropConfig.defaultAdmin,
+                description: dropConfig.description,
+                animationURI: dropConfig.animationURI,
+                imageURI: dropConfig.imageURI,
+                referrer: dropConfig.referrer,
+                publicSalePrice: dropConfig.saleConfig.publicSalePrice,
+                maxSalePurchasePerAddress: dropConfig.saleConfig.maxSalePurchasePerAddress,
+                publicSaleStart: dropConfig.saleConfig.publicSaleStart,
+                publicSaleEnd: dropConfig.saleConfig.publicSaleEnd,
+                presaleStart: dropConfig.saleConfig.presaleStart,
+                presaleEnd: dropConfig.saleConfig.presaleEnd,
+                presaleMerkleRoot: dropConfig.saleConfig.presaleMerkleRoot,
+            }
+
+            const insertedEdition = await tx.insert(schema.zoraEditions).values(newEdition)
+            const editionId = insertedEdition.insertId
+
+            const newSubmissionDrop: schema.dbNewSubmissionDropType = {
+                userId: user.id,
+                created: new Date().toISOString(),
+                contestId: submission.contestId,
+                submissionId: submission.id,
+                editionId,
+            }
+
+            await tx.insert(schema.submissionDrops).values(newSubmissionDrop)
+
+        });
+
         return { success: true }
 
     } catch (e) {

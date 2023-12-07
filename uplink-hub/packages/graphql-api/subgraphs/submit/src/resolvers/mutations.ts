@@ -5,8 +5,8 @@ import { DropConfig, SubmissionPayload, TwitterSubmissionPayload } from "../__ge
 import { validateStandardSubmissionPayload, validateTwitterSubmissionPayload } from "../utils/validate.js";
 import { createStandardSubmission, createTwitterSubmission } from "../utils/insert.js";
 import createDrop from "../utils/createDrop.js";
-import reserveMintBoardSlot from "../utils/reserveMintBoardSlot.js";
-import { createMintBoardSubmission } from "../utils/mintBoard.js";
+import { createMintBoardPost } from "../utils/mintBoard.js";
+import { registerMint } from "../utils/registerMint.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL!);
@@ -64,18 +64,7 @@ const mutations = {
             return createDrop(user, submissionId, contestId, contractAddress, chainId, dropConfig)
         },
 
-        reserveMintBoardSlot: async (_: any, { spaceName }: { spaceName: string }, context: Context) => {
-            // const user = await authController.getUser(context);
-            // if (!user) throw new GraphQLError('Unauthorized', {
-            //     extensions: {
-            //         code: 'UNAUTHORIZED'
-            //     }
-            // })
-
-            // return reserveMintBoardSlot(user, spaceName);
-        },
-
-        createMintBoardSubmission: async (_: any, {
+        createMintBoardPost: async (_: any, {
             spaceName,
             contractAddress,
             chainId,
@@ -93,8 +82,25 @@ const mutations = {
                 }
             })
 
-            return createMintBoardSubmission(user, spaceName, chainId, contractAddress, dropConfig)
+            return createMintBoardPost(user, spaceName, chainId, contractAddress, dropConfig)
         },
+
+        registerMint: async (_: any, {
+            editionId,
+            amount
+        }: {
+            editionId: string,
+            amount: number
+        }, context: Context) => {
+            const user = await authController.getUser(context);
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+            
+            return registerMint(user, editionId, amount)
+        }
     }
 };
 

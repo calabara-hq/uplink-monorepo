@@ -167,7 +167,7 @@ export const RenderPopularSubmissions = ({ submissions }) => {
           )}
 
           {isMintModalOpen && submission && (
-            <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} />
+            <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} />
           )}
         </SubmissionModal>
       </Swiper>
@@ -285,7 +285,7 @@ export const UserSubmissionDisplay = ({ user }: { user: User }) => {
         )}
 
         {isMintModalOpen && submission && (
-          <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} />
+          <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} />
         )}
       </SubmissionModal>
     </div >
@@ -314,7 +314,7 @@ const HeaderButtons = ({ submission, referrer, context }: { submission: Submissi
         )}
 
         {isMintModalOpen && (
-          <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} referrer={referrer} />
+          <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} referrer={referrer} />
         )}
       </SubmissionModal>
     </div>
@@ -372,7 +372,6 @@ export const LiveSubmissionDisplay = ({
 
 
   const handleExpand = (submission) => {
-    console.log('expanding')
     openExpandModal(submission)
   }
 
@@ -424,7 +423,7 @@ export const LiveSubmissionDisplay = ({
         )}
 
         {isMintModalOpen && submission && (
-          <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} />
+          <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} />
         )}
 
         {isExpandModalOpen && submission && (

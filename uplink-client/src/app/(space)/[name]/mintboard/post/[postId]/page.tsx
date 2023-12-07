@@ -1,5 +1,3 @@
-import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
@@ -7,6 +5,8 @@ import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import Image from "next/image";
 import { Suspense } from "react";
 import { BackButton, HeaderButtons } from "./client";
+import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
+import { MintBoardPost } from "@/types/mintBoard";
 
 
 const ExpandedPostSkeleton = () => {
@@ -28,11 +28,10 @@ const ExpandedPostSkeleton = () => {
 };
 
 
-const PostRenderer = ({ post }: { post: any }) => {
-    const { id, dropConfig, author } = post;
-    const parsedConfig = JSON.parse(dropConfig);
-    const siteImageURI = parseIpfsUrl(parsedConfig.imageURI);
-    const siteAnimationURI = parseIpfsUrl(parsedConfig.animationURI);
+const PostRenderer = ({ post }: { post: MintBoardPost }) => {
+    const { id, edition, author } = post;
+    const siteImageURI = parseIpfsUrl(edition.imageURI);
+    const siteAnimationURI = parseIpfsUrl(edition.animationURI);
 
 
     return (
@@ -45,7 +44,7 @@ const PostRenderer = ({ post }: { post: any }) => {
                     </div>
                 )}
 
-                {siteImageURI.gateway && (
+                {siteImageURI.gateway && !siteAnimationURI.gateway && (
                     <div>
                         <ImageWrapper>
                             <Image
@@ -69,17 +68,16 @@ const ExpandedPost = ({
     post,
     headerChildren,
 }: {
-    post: any;
+    post: MintBoardPost;
     headerChildren?: React.ReactNode;
 }) => {
-    const { id, dropConfig, author } = post;
-    const parsedConfig = JSON.parse(dropConfig);
+    const { id, edition, author } = post;
 
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-                <h2 className="text-3xl text-t1 font-[500]">{parsedConfig.name}</h2>
-                <div className="flex flex-row items-center h-8">
+                <h2 className="text-3xl text-t1 font-[500]">{edition.name}</h2>
+                <div className="flex flex-col sm:flex-row md:items-center">
                     <div className="flex gap-2 items-center">
                         <UserAvatar user={author} size={28} />
                         <h3 className="break-all italic text-sm text-t2 font-semibold">
@@ -97,11 +95,11 @@ const ExpandedPost = ({
 
 
 // extract this out so we can suspend it
-const PageContent = async ({ spaceName, postId, referrer, context }: { spaceName: string, postId: string, referrer: string | null, context: string | null }) => {
-    const space = await fetchSingleSpace(spaceName);
-    const post = space.mintBoard.submissions.find((submission) => submission.id === postId);
+const PageContent = async ({ spaceName, postId, referrer }: { spaceName: string, postId: string, referrer: string | null }) => {
+    const mintBoard = await fetchMintBoard(spaceName);
+    const post = mintBoard.posts.find((post) => post.id === postId);
     return <ExpandedPost post={post} headerChildren={
-        <HeaderButtons spaceName={spaceName} post={post} referrer={referrer} />
+        <HeaderButtons spaceName={spaceName} post={post} referrer={referrer ?? mintBoard.referrer} />
     } />;
 };
 

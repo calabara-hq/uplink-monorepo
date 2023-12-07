@@ -27,10 +27,29 @@ const fetchSingleSubmission = async (submissionId: string): Promise<Submission> 
                             userName
                             displayName
                           }
-                        nftDrop {
+                        edition {
+                            id
                             chainId
                             contractAddress
-                            dropConfig
+                            name
+                            symbol
+                            editionSize
+                            royaltyBPS
+                            fundsRecipient
+                            defaultAdmin
+                            saleConfig {
+                                publicSalePrice
+                                maxSalePurchasePerAddress
+                                publicSaleStart
+                                publicSaleEnd
+                                presaleStart
+                                presaleEnd
+                                presaleMerkleRoot
+                            }
+                            description
+                            animationURI
+                            imageURI
+                            referrer
                         }
                     }
                 }`,

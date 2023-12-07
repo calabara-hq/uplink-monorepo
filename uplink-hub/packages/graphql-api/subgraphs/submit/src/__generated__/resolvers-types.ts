@@ -57,17 +57,44 @@ export type DropConfig = {
   symbol: Scalars['String']['input'];
 };
 
+export type MintBoard = {
+  __typename?: 'MintBoard';
+  id: Scalars['ID']['output'];
+  posts: Array<MintBoardPost>;
+};
+
+export type MintBoardAuthor = {
+  __typename?: 'MintBoardAuthor';
+  address: Scalars['String']['output'];
+  displayName?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  profileAvatar?: Maybe<Scalars['String']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+export type MintBoardPost = {
+  __typename?: 'MintBoardPost';
+  author: MintBoardAuthor;
+  chainId: Scalars['Int']['output'];
+  contractAddress: Scalars['String']['output'];
+  created: Scalars['String']['output'];
+  edition: ZoraEdition;
+  id: Scalars['ID']['output'];
+  spaceId: Scalars['ID']['output'];
+  totalMints: Scalars['Int']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
-  createMintBoardSubmission: CreateMintBoardSubmissionResponse;
+  createMintBoardPost: CreateMintBoardPostResponse;
   createSubmission: CreateSubmissionResponse;
   createTwitterSubmission: CreateSubmissionResponse;
   createUserDrop: CreateUserDropResponse;
-  reserveMintBoardSlot: ReserveMintBoardSlotResponse;
+  registerMint: RegisterMintResponse;
 };
 
 
-export type MutationCreateMintBoardSubmissionArgs = {
+export type MutationCreateMintBoardPostArgs = {
   chainId: Scalars['Int']['input'];
   contractAddress: Scalars['String']['input'];
   dropConfig: DropConfig;
@@ -96,15 +123,9 @@ export type MutationCreateUserDropArgs = {
 };
 
 
-export type MutationReserveMintBoardSlotArgs = {
-  spaceName: Scalars['String']['input'];
-};
-
-export type NftDrop = {
-  __typename?: 'NftDrop';
-  chainId: Scalars['Int']['output'];
-  contractAddress: Scalars['String']['output'];
-  dropConfig: Scalars['String']['output'];
+export type MutationRegisterMintArgs = {
+  amount: Scalars['Int']['input'];
+  editionId: Scalars['ID']['input'];
 };
 
 export type PopularSubmission = {
@@ -112,8 +133,8 @@ export type PopularSubmission = {
   author: SubmissionAuthor;
   contestId: Scalars['ID']['output'];
   created: Scalars['String']['output'];
+  edition?: Maybe<ZoraEdition>;
   id: Scalars['ID']['output'];
-  nftDrop?: Maybe<NftDrop>;
   type: Scalars['String']['output'];
   url: Scalars['String']['output'];
   version: Scalars['String']['output'];
@@ -162,8 +183,8 @@ export type Submission = {
   author?: Maybe<SubmissionAuthor>;
   contestId: Scalars['ID']['output'];
   created: Scalars['String']['output'];
+  edition?: Maybe<ZoraEdition>;
   id: Scalars['ID']['output'];
-  nftDrop?: Maybe<NftDrop>;
   rank?: Maybe<Scalars['Int']['output']>;
   totalVotes?: Maybe<Scalars['Decimal']['output']>;
   type: Scalars['String']['output'];
@@ -229,8 +250,37 @@ export type UserSubmissionParams = {
   userSubmissions: Array<Submission>;
 };
 
-export type CreateMintBoardSubmissionResponse = {
-  __typename?: 'createMintBoardSubmissionResponse';
+export type ZoraEdition = {
+  __typename?: 'ZoraEdition';
+  animationURI: Scalars['String']['output'];
+  chainId: Scalars['Int']['output'];
+  contractAddress: Scalars['String']['output'];
+  defaultAdmin: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  editionSize: Scalars['String']['output'];
+  fundsRecipient: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  imageURI: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  referrer: Scalars['String']['output'];
+  royaltyBPS: Scalars['Int']['output'];
+  saleConfig: ZoraSaleConfig;
+  symbol: Scalars['String']['output'];
+};
+
+export type ZoraSaleConfig = {
+  __typename?: 'ZoraSaleConfig';
+  maxSalePurchasePerAddress: Scalars['Int']['output'];
+  presaleEnd: Scalars['String']['output'];
+  presaleMerkleRoot: Scalars['String']['output'];
+  presaleStart: Scalars['String']['output'];
+  publicSaleEnd: Scalars['String']['output'];
+  publicSalePrice: Scalars['String']['output'];
+  publicSaleStart: Scalars['String']['output'];
+};
+
+export type CreateMintBoardPostResponse = {
+  __typename?: 'createMintBoardPostResponse';
   success: Scalars['Boolean']['output'];
 };
 
@@ -246,9 +296,8 @@ export type CreateUserDropResponse = {
   success: Scalars['Boolean']['output'];
 };
 
-export type ReserveMintBoardSlotResponse = {
-  __typename?: 'reserveMintBoardSlotResponse';
-  slot?: Maybe<Scalars['Int']['output']>;
+export type RegisterMintResponse = {
+  __typename?: 'registerMintResponse';
   success: Scalars['Boolean']['output'];
 };
 
@@ -334,8 +383,10 @@ export type ResolversTypes = ResolversObject<{
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   ISODateString: ResolverTypeWrapper<Scalars['ISODateString']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  MintBoard: ResolverTypeWrapper<MintBoard>;
+  MintBoardAuthor: ResolverTypeWrapper<MintBoardAuthor>;
+  MintBoardPost: ResolverTypeWrapper<MintBoardPost>;
   Mutation: ResolverTypeWrapper<{}>;
-  NftDrop: ResolverTypeWrapper<NftDrop>;
   PopularSubmission: ResolverTypeWrapper<PopularSubmission>;
   Query: ResolverTypeWrapper<{}>;
   RestrictionResult: ResolverTypeWrapper<RestrictionResult>;
@@ -352,10 +403,12 @@ export type ResolversTypes = ResolversObject<{
   ThreadPayload: ThreadPayload;
   TwitterSubmissionPayload: TwitterSubmissionPayload;
   UserSubmissionParams: ResolverTypeWrapper<UserSubmissionParams>;
-  createMintBoardSubmissionResponse: ResolverTypeWrapper<CreateMintBoardSubmissionResponse>;
+  ZoraEdition: ResolverTypeWrapper<ZoraEdition>;
+  ZoraSaleConfig: ResolverTypeWrapper<ZoraSaleConfig>;
+  createMintBoardPostResponse: ResolverTypeWrapper<CreateMintBoardPostResponse>;
   createSubmissionResponse: ResolverTypeWrapper<CreateSubmissionResponse>;
   createUserDropResponse: ResolverTypeWrapper<CreateUserDropResponse>;
-  reserveMintBoardSlotResponse: ResolverTypeWrapper<ReserveMintBoardSlotResponse>;
+  registerMintResponse: ResolverTypeWrapper<RegisterMintResponse>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -370,8 +423,10 @@ export type ResolversParentTypes = ResolversObject<{
   ID: Scalars['ID']['output'];
   ISODateString: Scalars['ISODateString']['output'];
   Int: Scalars['Int']['output'];
+  MintBoard: MintBoard;
+  MintBoardAuthor: MintBoardAuthor;
+  MintBoardPost: MintBoardPost;
   Mutation: {};
-  NftDrop: NftDrop;
   PopularSubmission: PopularSubmission;
   Query: {};
   RestrictionResult: RestrictionResult;
@@ -388,10 +443,12 @@ export type ResolversParentTypes = ResolversObject<{
   ThreadPayload: ThreadPayload;
   TwitterSubmissionPayload: TwitterSubmissionPayload;
   UserSubmissionParams: UserSubmissionParams;
-  createMintBoardSubmissionResponse: CreateMintBoardSubmissionResponse;
+  ZoraEdition: ZoraEdition;
+  ZoraSaleConfig: ZoraSaleConfig;
+  createMintBoardPostResponse: CreateMintBoardPostResponse;
   createSubmissionResponse: CreateSubmissionResponse;
   createUserDropResponse: CreateUserDropResponse;
-  reserveMintBoardSlotResponse: ReserveMintBoardSlotResponse;
+  registerMintResponse: RegisterMintResponse;
 }>;
 
 export type AdditionalParamsResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdditionalParams'] = ResolversParentTypes['AdditionalParams']> = ResolversObject<{
@@ -429,27 +486,47 @@ export interface IsoDateStringScalarConfig extends GraphQLScalarTypeConfig<Resol
   name: 'ISODateString';
 }
 
+export type MintBoardResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoard'] = ResolversParentTypes['MintBoard']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  posts?: Resolver<Array<ResolversTypes['MintBoardPost']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type MintBoardAuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoardAuthor'] = ResolversParentTypes['MintBoardAuthor']> = ResolversObject<{
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  profileAvatar?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  userName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type MintBoardPostResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoardPost'] = ResolversParentTypes['MintBoardPost']> = ResolversObject<{
+  author?: Resolver<ResolversTypes['MintBoardAuthor'], ParentType, ContextType>;
+  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  edition?: Resolver<ResolversTypes['ZoraEdition'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  spaceId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  totalMints?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  createMintBoardSubmission?: Resolver<ResolversTypes['createMintBoardSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateMintBoardSubmissionArgs, 'chainId' | 'contractAddress' | 'dropConfig' | 'spaceName'>>;
+  createMintBoardPost?: Resolver<ResolversTypes['createMintBoardPostResponse'], ParentType, ContextType, RequireFields<MutationCreateMintBoardPostArgs, 'chainId' | 'contractAddress' | 'dropConfig' | 'spaceName'>>;
   createSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateSubmissionArgs, 'contestId' | 'submission'>>;
   createTwitterSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateTwitterSubmissionArgs, 'contestId' | 'submission'>>;
   createUserDrop?: Resolver<ResolversTypes['createUserDropResponse'], ParentType, ContextType, RequireFields<MutationCreateUserDropArgs, 'chainId' | 'contestId' | 'contractAddress' | 'dropConfig' | 'submissionId'>>;
-  reserveMintBoardSlot?: Resolver<ResolversTypes['reserveMintBoardSlotResponse'], ParentType, ContextType, RequireFields<MutationReserveMintBoardSlotArgs, 'spaceName'>>;
-}>;
-
-export type NftDropResolvers<ContextType = any, ParentType extends ResolversParentTypes['NftDrop'] = ResolversParentTypes['NftDrop']> = ResolversObject<{
-  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  dropConfig?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  registerMint?: Resolver<ResolversTypes['registerMintResponse'], ParentType, ContextType, RequireFields<MutationRegisterMintArgs, 'amount' | 'editionId'>>;
 }>;
 
 export type PopularSubmissionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PopularSubmission'] = ResolversParentTypes['PopularSubmission']> = ResolversObject<{
   author?: Resolver<ResolversTypes['SubmissionAuthor'], ParentType, ContextType>;
   contestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  edition?: Resolver<Maybe<ResolversTypes['ZoraEdition']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  nftDrop?: Resolver<Maybe<ResolversTypes['NftDrop']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   version?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -477,8 +554,8 @@ export type SubmissionResolvers<ContextType = any, ParentType extends ResolversP
   author?: Resolver<Maybe<ResolversTypes['SubmissionAuthor']>, ParentType, ContextType>;
   contestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   created?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  edition?: Resolver<Maybe<ResolversTypes['ZoraEdition']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  nftDrop?: Resolver<Maybe<ResolversTypes['NftDrop']>, ParentType, ContextType>;
   rank?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalVotes?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -529,7 +606,36 @@ export type UserSubmissionParamsResolvers<ContextType = any, ParentType extends 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type CreateMintBoardSubmissionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['createMintBoardSubmissionResponse'] = ResolversParentTypes['createMintBoardSubmissionResponse']> = ResolversObject<{
+export type ZoraEditionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ZoraEdition'] = ResolversParentTypes['ZoraEdition']> = ResolversObject<{
+  animationURI?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  defaultAdmin?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  editionSize?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  fundsRecipient?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  imageURI?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  referrer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  royaltyBPS?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  saleConfig?: Resolver<ResolversTypes['ZoraSaleConfig'], ParentType, ContextType>;
+  symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ZoraSaleConfigResolvers<ContextType = any, ParentType extends ResolversParentTypes['ZoraSaleConfig'] = ResolversParentTypes['ZoraSaleConfig']> = ResolversObject<{
+  maxSalePurchasePerAddress?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  presaleEnd?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  presaleMerkleRoot?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  presaleStart?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  publicSaleEnd?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  publicSalePrice?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  publicSaleStart?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type CreateMintBoardPostResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['createMintBoardPostResponse'] = ResolversParentTypes['createMintBoardPostResponse']> = ResolversObject<{
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -546,8 +652,7 @@ export type CreateUserDropResponseResolvers<ContextType = any, ParentType extend
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type ReserveMintBoardSlotResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['reserveMintBoardSlotResponse'] = ResolversParentTypes['reserveMintBoardSlotResponse']> = ResolversObject<{
-  slot?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+export type RegisterMintResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['registerMintResponse'] = ResolversParentTypes['registerMintResponse']> = ResolversObject<{
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -559,8 +664,10 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Decimal?: GraphQLScalarType;
   EditorData?: GraphQLScalarType;
   ISODateString?: GraphQLScalarType;
+  MintBoard?: MintBoardResolvers<ContextType>;
+  MintBoardAuthor?: MintBoardAuthorResolvers<ContextType>;
+  MintBoardPost?: MintBoardPostResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
-  NftDrop?: NftDropResolvers<ContextType>;
   PopularSubmission?: PopularSubmissionResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RestrictionResult?: RestrictionResultResolvers<ContextType>;
@@ -572,9 +679,11 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Submit_Token?: Submit_TokenResolvers<ContextType>;
   Submit_TokenRestriction?: Submit_TokenRestrictionResolvers<ContextType>;
   UserSubmissionParams?: UserSubmissionParamsResolvers<ContextType>;
-  createMintBoardSubmissionResponse?: CreateMintBoardSubmissionResponseResolvers<ContextType>;
+  ZoraEdition?: ZoraEditionResolvers<ContextType>;
+  ZoraSaleConfig?: ZoraSaleConfigResolvers<ContextType>;
+  createMintBoardPostResponse?: CreateMintBoardPostResponseResolvers<ContextType>;
   createSubmissionResponse?: CreateSubmissionResponseResolvers<ContextType>;
   createUserDropResponse?: CreateUserDropResponseResolvers<ContextType>;
-  reserveMintBoardSlotResponse?: ReserveMintBoardSlotResponseResolvers<ContextType>;
+  registerMintResponse?: RegisterMintResponseResolvers<ContextType>;
 }>;
 

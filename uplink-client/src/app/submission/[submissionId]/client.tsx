@@ -118,7 +118,7 @@ export const HeaderButtons = ({ submission, referrer, context }: { submission: S
                 )}
 
                 {isMintModalOpen && (
-                    <MintEdition submission={submission} setIsModalOpen={setIsMintModalOpen} referrer={referrer} />
+                    <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} referrer={referrer} />
                 )}
             </SubmissionModal>
         </div>

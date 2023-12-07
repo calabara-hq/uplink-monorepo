@@ -29,10 +29,29 @@ const fetchSubmissions = async (contestId: string): Promise<Array<Submission>> =
                   type
                   url
                   version
-                  nftDrop {
+                  edition {
+                    id
                     chainId
                     contractAddress
-                    dropConfig
+                    name
+                    symbol
+                    editionSize
+                    royaltyBPS
+                    fundsRecipient
+                    defaultAdmin
+                    saleConfig {
+                      publicSalePrice
+                      maxSalePurchasePerAddress
+                      publicSaleStart
+                      publicSaleEnd
+                      presaleStart
+                      presaleEnd
+                      presaleMerkleRoot
+                    }
+                    description
+                    animationURI
+                    imageURI
+                    referrer
                   }
               }
           }

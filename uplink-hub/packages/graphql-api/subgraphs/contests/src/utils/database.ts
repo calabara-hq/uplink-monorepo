@@ -129,6 +129,14 @@ const prepared_dbUserSpaceAdmin = db.query.admins.findFirst({
 
 }).prepare();
 
+const prepared_dbSingleSpaceByName = db.query.spaces.findFirst({
+    where: ((spaces: schema.dbSpaceType) => sqlOps.eq(spaces.name, sqlOps.placeholder('name'))),
+    with: {
+        admins: true,
+        mintBoard: true
+    }
+}).prepare();
+
 
 export const dbSingleContestById = async (contestId: number) => {
     return prepared_dbSingleContestById.execute({ contestId }).then(postProcessContest)
@@ -149,4 +157,9 @@ export const dbIsContestTweetQueued = async (contestId: number) => {
 export const dbIsUserSpaceAdmin = async (user: any, spaceId: number) => {
     const isAdmin = await prepared_dbUserSpaceAdmin.execute({ address: user.address, spaceId: spaceId })
     return isAdmin
+}
+
+export const dbSingleSpaceByName = async (name: string) => {
+    return prepared_dbSingleSpaceByName.execute({ name })
+
 }

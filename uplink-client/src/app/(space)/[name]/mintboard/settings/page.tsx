@@ -1,6 +1,8 @@
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace"
 import BoardForm from "./form";
 import { Suspense } from "react";
+import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
+import { getContractFromEnv } from "@/lib/abi/zoraEdition";
 
 
 const LoadingDialog = () => {
@@ -18,10 +20,10 @@ const LoadingDialog = () => {
 };
 
 const PageContent = async ({ spaceName }: { spaceName: string }) => {
-    const data = await fetchSingleSpace(spaceName);
-    const { mintBoard, ...space } = data;
+    const mintBoard = await fetchMintBoard(spaceName).catch(() => { return null });
+    const { chainId } = getContractFromEnv();
 
-    return <BoardForm spaceName={spaceName} initialConfig={mintBoard} />
+    return <BoardForm spaceName={spaceName} initialConfig={{ ...mintBoard, chainId }} />
 
 }
 

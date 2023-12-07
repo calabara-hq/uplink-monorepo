@@ -45,6 +45,7 @@ const permissions = shield({
   Mutation: {
     createContest: rateLimitRule({ window: '1m', max: 3 }),
     createContestTweet: rateLimitRule({ window: '1m', max: 3 }),
+    configureMintBoard: rateLimitRule({ window: '1m', max: 5 }),
   },
 }, { allowExternalErrors: true }
 );

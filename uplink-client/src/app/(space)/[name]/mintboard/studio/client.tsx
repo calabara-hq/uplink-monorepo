@@ -21,6 +21,7 @@ import { MdOutlineCancelPresentation } from "react-icons/md";
 import Link from "next/link";
 import { TbLoader2 } from "react-icons/tb";
 import useLiveMintBoard from "@/hooks/useLiveMintBoard";
+import { Boundary } from "@/ui/Boundary/Boundary";
 
 const MediaUpload = ({
     handleFileChange,
@@ -182,7 +183,7 @@ const MediaUpload = ({
 
 
 
-export const CreateBoardPost = ({ spaceName, referrer, templateConfig }: { spaceName: string, referrer: string, templateConfig: ConfigurableZoraEditionInput }) => {
+export const CreateBoardPost = ({ spaceName, displayName, referrer, templateConfig }: { spaceName: string, displayName: string, referrer: string, templateConfig: ConfigurableZoraEditionInput }) => {
     const { data: session, status } = useSession();
     const {
         state,
@@ -201,51 +202,55 @@ export const CreateBoardPost = ({ spaceName, referrer, templateConfig }: { space
         handleFileChange,
     } = useCreateZoraEdition(referrer, templateConfig)
 
-    const handleSubmit = () => {
-        const result = validate(session?.user?.address);
-        console.log(result)
-
-        // if (!result.success) {
-        //     console.log(result)
-        //     return toast.error("Some of your fields are invalid")
-        // } else {
-        //     setIsModalOpen(true);
-        // }
-    }
-
-
     return (
-        <div className="flex flex-col gap-6 w-full m-auto mt-4 mb-16 p-4">
-            <h1 className="text-3xl font-bold text-t1">Create Post</h1>
-            <div className="bg-base-100 p-4 rounded-lg">
-                <p className="text-t1">Post to the {spaceName} mint board and earn 0.000333 ETH for every mint!</p>
-            </div>
-            <div className="flex flex-col gap-2">
-                <MediaUpload
-                    handleFileChange={handleFileChange}
-                    isUploading={isUploading}
-                    animationBlob={animationBlob}
-                    imageBlob={imageBlob}
-                    thumbnailOptions={thumbnailOptions}
-                    thumbnailBlobIndex={thumbnailBlobIndex}
-                    isVideo={isVideo}
-                    setThumbnailBlobIndex={setThumbnailBlobIndex}
-                    removeMedia={removeMedia}
-                />
+        <Boundary>
 
+            <div className="flex flex-col gap-6 w-full m-auto mt-4 mb-16 p-4">
+                <h1 className="text-3xl font-bold text-t1">Create Post</h1>
+                <div className="bg-base-100 p-4 rounded-lg">
+                    <p className="text-t1">Post to the {displayName} mint board and earn 0.000333 ETH for every mint!</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                    <MediaUpload
+                        handleFileChange={handleFileChange}
+                        isUploading={isUploading}
+                        animationBlob={animationBlob}
+                        imageBlob={imageBlob}
+                        thumbnailOptions={thumbnailOptions}
+                        thumbnailBlobIndex={thumbnailBlobIndex}
+                        isVideo={isVideo}
+                        setThumbnailBlobIndex={setThumbnailBlobIndex}
+                        removeMedia={removeMedia}
+                    />
+
+                </div>
+                <CreateEditionButton
+                    isUploading={isUploading}
+                    spaceName={spaceName}
+                    validate={validate}
+                    contractArguments={contractArguments}
+                    routeOnSuccess={`/${spaceName}/mintboard`}
+                    setContractArguments={setContractArguments}
+                />
             </div>
-            <CreateEditionButton
-                isUploading={isUploading}
-                spaceName={spaceName}
-                validate={validate}
-                contractArguments={contractArguments}
-                routeOnSuccess={`/${spaceName}/board`}
-                setContractArguments={setContractArguments}
-            />
-        </div>
+        </Boundary>
+
     )
 }
 
+
+const generateTokenIdAdjustedContractArgs = (contractArgs: ConfigurableZoraEditionOutput | null, tokenID: number | null) => {
+
+    const appendedTokenID = tokenID ? tokenID.toString() : "";
+
+    if (!contractArgs) {
+        return null;
+    }
+    return {
+        ...contractArgs,
+        name: contractArgs.name + " " + appendedTokenID,
+    }
+}
 
 const CreateEditionButton = ({
     spaceName,
@@ -265,13 +270,14 @@ const CreateEditionButton = ({
     const { data: session, status } = useSession();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { creator_contract, chainId, explorer } = getContractFromEnv();
+    const [editionSlot, setEditionSlot] = useState<number | null>(null);
     const { mutateLiveBoard } = useLiveMintBoard(spaceName);
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
         chainId: chainId,
         address: creator_contract,
         abi: ZoraAbi,
         functionName: 'createEditionWithReferral',
-        args: flattenContractArgs(contractArguments),
+        args: flattenContractArgs(generateTokenIdAdjustedContractArgs(contractArguments, editionSlot)),
         enabled: true,
     });
 
@@ -350,11 +356,10 @@ const CreateEditionButton = ({
     });
 
 
-    const handleSubmit = () => {
-        const result = validate(session?.user?.address);
+    const handleSubmit = async () => {
+        const result = await validate(session?.user?.address);
         if (!result.success) {
-            console.log(result)
-            return toast.error("Some of your fields are invalid")
+            return toast.error("Media Required")
         } else {
             setIsModalOpen(true);
         }
@@ -369,10 +374,7 @@ const CreateEditionButton = ({
                 if (!response.success) {
                     resetReserve();
                 }
-                setContractArguments({
-                    ...contractArguments,
-                    name: contractArguments.name + ' ' + response.slot
-                })
+                setEditionSlot(response.slot);
                 write?.();
             });
         } catch (e) {
@@ -416,7 +418,7 @@ const CreateEditionButton = ({
                                 </div>
                                 <div className="bg-black-200 items-start flex flex-col gap-8 relative">
                                     <div className="flex flex-col gap-2">
-                                        <p className="line-clamp-3 font-bold text-lg break-all">{contractArguments.name}</p>
+                                        <p className="line-clamp-3 font-bold text-lg break-all">{generateTokenIdAdjustedContractArgs(contractArguments, editionSlot).name}</p>
                                         <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
                                             <UserAvatar user={session?.user} size={28} />
                                             <UsernameDisplay user={session?.user} />
@@ -460,7 +462,15 @@ const CreateEditionButton = ({
                                                         <p className="text-sm">Awaiting signature</p>
                                                         <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
                                                     </div>
-                                                    : "Create"
+                                                    // :
+                                                    // isReserving ? (
+                                                    //     <div className="flex gap-2 items-center">
+                                                    //         <p className="text-sm">Generating</p>
+                                                    //         <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                                    //     </div>
+                                                    // )
+                                                    :
+                                                    "Create"
                                                 }</button>
                                         </SwitchNetworkButton>
                                     ))

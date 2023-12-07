@@ -2,6 +2,8 @@
 import { mutateSpaces } from "@/app/mutate";
 import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import useCreateMintBoardTemplate, { MintBoardTemplate, configureMintBoard } from "@/hooks/useCreateMintBoardTemplate";
+import { getContractFromEnv } from "@/lib/abi/zoraEdition";
+import { getChainName } from "@/lib/chains/supportedChains";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
@@ -10,6 +12,7 @@ import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { TbLoader2 } from "react-icons/tb";
 import useSWRMutation from "swr/mutation";
 
 
@@ -173,7 +176,7 @@ const asPositiveInt = (value: string) => {
     return value.trim() === "" ? "" : Math.abs(Math.round(Number(value))).toString();
 }
 
-const asPositiveFloat = (value: string, maxMantissaLen: number, maxWhole?: number,) => {
+const asPositiveFloat = (value: string, maxMantissaLen: number, maxWhole?: number) => {
     const [whole, fractional] = value.split(".");
     if (!whole) return "";
     const wholeNum = Math.abs(Number(whole)).toString();
@@ -201,26 +204,26 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
     );
 
 
-    const handleSubmit = () => {
-        const result = validate();
+    const handleSubmit = async () => {
+        const result = await validate();
         if (!result.success) {
-            console.log(result)
             return toast.error("Some of your fields are invalid")
         }
 
         try {
-            trigger({
+            await trigger({
                 csrfToken: session.csrfToken,
                 spaceName,
                 mintBoardData: result.data
             }).then((response) => {
                 if (!response.success) {
-                    reset();
+                    toast.error('Something went wrong')
+                    return reset();
                 }
                 mutateSpaces(spaceName);
-                router.push(`/${spaceName}/board`, { scroll: false })
+                router.push(`/${spaceName}/mintboard`, { scroll: false })
                 router.refresh();
-                return toast.success('Board Configured!')
+                return toast.success('Mintboard Configured!')
             });
         } catch (e) {
             console.log(e)
@@ -258,8 +261,8 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
                         <div className="flex flex-row gap-2">
                             <h1 className="text-xl font-bold text-t1">Network</h1>
                             <div className="flex flex-row gap-2 ml-auto items-center">
-                                <ChainLabel chainId={84531} px={24} />
-                                <h3 className="text-lg font-bold text-t1">Base Goerli</h3>
+                                <ChainLabel chainId={state.chainId} px={24} />
+                                <h3 className="text-lg font-bold text-t1">{getChainName(state.chainId)}</h3>
                             </div>
                         </div>
                     </div>
@@ -306,7 +309,18 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
                 </div>
             )}
             <WalletConnectButton>
-                <button className="btn btn-primary normal-case" onClick={handleSubmit}>Submit</button>
+                <button className="btn btn-primary normal-case" disabled={isMutating} onClick={handleSubmit}>
+                    {isMutating ? (
+                        <div className="flex gap-2 items-center w-full">
+                            <p className="text-sm">Saving</p>
+                            <TbLoader2 className="w-4 h-4 text-t2 animate-spin ml-auto" />
+                        </div>
+                    )
+                        :
+                        "Save"
+                    }
+
+                </button>
             </WalletConnectButton>
         </div>
     )
