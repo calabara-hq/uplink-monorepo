@@ -8,6 +8,7 @@ import React, { createContext, useState } from "react"
 
 export type ContestStateContextValue = {
     contestId: string,
+    chainId: number,
     contestState: ContestState | null,
     stateRemainingTime: string | null,
     isLoading: boolean,
@@ -36,6 +37,7 @@ export const ContestStateProvider = ({ contest, children }: { contest: FetchSing
 
     const value = {
         contestId: contest.id,
+        chainId: contest.chainId,
         isLoading: contestState === null,
         contestState,
         stateRemainingTime,

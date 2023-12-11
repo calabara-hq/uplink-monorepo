@@ -52,8 +52,7 @@ const PostRenderer = ({ post }: { post: MintBoardPost }) => {
                                 draggable={false}
                                 alt="submission image"
                                 fill
-                                sizes="30vw"
-                                className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
+                                className="object-contain w-full h-full transition-transform duration-300 ease-in-out"
                             />
                         </ImageWrapper>
                     </div>

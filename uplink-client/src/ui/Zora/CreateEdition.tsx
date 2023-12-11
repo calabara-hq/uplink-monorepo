@@ -12,16 +12,17 @@ import { HiCheckBadge, HiSparkles } from "react-icons/hi2";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { useSession } from "@/providers/SessionProvider";
 import { useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
-import { ZoraAbi, getContractFromEnv } from "@/lib/abi/zoraEdition";
+import { ZoraAbi, getContractFromChainId } from "@/lib/abi/zoraEdition";
 import { UsernameDisplay, UserAvatar } from "@/ui/AddressDisplay/AddressDisplay";
 import { format } from "date-fns";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import useSWRMutation from "swr/mutation";
 import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
-import { RenderMintMedia, SwitchNetworkButton } from "./common";
+import { AddFundsButton, RenderMintMedia, SwitchNetworkButton } from "./common";
 import { Decimal } from "decimal.js";
 import Link from "next/link";
 import { TbLoader2 } from "react-icons/tb";
+import { getChainName } from "@/lib/chains/supportedChains";
 
 // select from options or render custom child
 
@@ -164,6 +165,7 @@ const asPositiveFloat = (value: string, maxMantissaLen: number, maxWhole?: numbe
 
 const CreateEdition = ({
     contestId,
+    chainId,
     submissionId,
     name,
     imageURI,
@@ -172,6 +174,7 @@ const CreateEdition = ({
     referrer,
 }: {
     contestId: string,
+    chainId: number,
     submissionId: string,
     name: string,
     imageURI: string,
@@ -189,7 +192,7 @@ const CreateEdition = ({
                         <p className="text-xl font-bold text-t1">Create a drop</p>
                         <HiSparkles className="w-6 h-6 text-t1" />
                         <div className="ml-auto">
-                            <ChainLabel chainId={8453} px={18} />
+                            <ChainLabel chainId={chainId} px={18} />
                         </div>
                     </div>
 
@@ -204,7 +207,7 @@ const CreateEdition = ({
                             prefetch={false}>
                             protocol rewards
                         </Link>
-                        {` by customizing a Zora NFT drop on Base.`}
+                        {` by customizing a Zora NFT drop on the ${getChainName(chainId)} network.`}
                     </p>
                 </div>
                 <SectionWrapper title="">
@@ -304,7 +307,7 @@ const CreateEdition = ({
                         } />
                 </SectionWrapper>
                 <span className="p-2" />
-                <CreateEditionButton validate={validate} contractArguments={contractArguments} contestId={contestId} submissionId={submissionId} routeOnSuccess={routeOnSuccess} />
+                <CreateEditionButton chainId={chainId} validate={validate} contractArguments={contractArguments} contestId={contestId} submissionId={submissionId} routeOnSuccess={routeOnSuccess} />
             </div>
         </div>
     )
@@ -313,12 +316,14 @@ const CreateEdition = ({
 
 
 const CreateEditionButton = ({
+    chainId,
     validate,
     contractArguments,
     contestId,
     submissionId,
     routeOnSuccess,
 }: {
+    chainId: number,
     validate: any,
     contractArguments: ConfigurableZoraEditionOutput,
     contestId: string,
@@ -327,7 +332,7 @@ const CreateEditionButton = ({
 }) => {
     const { data: session, status } = useSession();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { creator_contract, chainId, explorer } = getContractFromEnv();
+    const { creator_contract, explorer, bridge } = getContractFromChainId(chainId);
 
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
         chainId: chainId,
@@ -470,7 +475,7 @@ const CreateEditionButton = ({
                             {status === "authenticated" && (
                                 isInsufficientFundsError
                                     ?
-                                    (<Link className="btn btn-outline btn-warning normal-case" href='https://bridge.base.org/deposit' prefetch={false} target="_blank">Add Funds</Link>)
+                                    (<AddFundsButton chainId={chainId} />)
                                     :
                                     (
                                         <SwitchNetworkButton chainId={chainId}>

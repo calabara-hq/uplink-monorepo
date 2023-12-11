@@ -17,6 +17,7 @@ const createDropTemplate = (mintBoard: MintBoard) => {
                 publicSaleEnd: mintBoard.publicSaleEnd,
             },
         },
+        chainId: mintBoard.chainId,
         referrer: mintBoard.referrer
     }
 }
@@ -39,7 +40,7 @@ const LoadingDialog = () => {
 
 const PageContent = async ({ spaceName }: { spaceName: string }) => {
     const mintBoard = await fetchMintBoard(spaceName);
-    const { dropConfig, referrer } = createDropTemplate(mintBoard);
+    const { dropConfig, chainId, referrer } = createDropTemplate(mintBoard);
 
     const fallback = {
         [`/mintBoard/${spaceName}`]: mintBoard,
@@ -47,7 +48,7 @@ const PageContent = async ({ spaceName }: { spaceName: string }) => {
 
     return (
         <SwrProvider fallback={fallback}>
-            <CreateBoardPost spaceName={spaceName} displayName={mintBoard.space.displayName} templateConfig={dropConfig} referrer={referrer} />
+            <CreateBoardPost spaceName={spaceName} displayName={mintBoard.space.displayName} templateConfig={dropConfig} chainId={chainId} referrer={referrer} />
         </SwrProvider>
     )
 }

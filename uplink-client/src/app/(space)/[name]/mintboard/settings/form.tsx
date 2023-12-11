@@ -1,16 +1,15 @@
 "use client";
-import { mutateSpaces } from "@/app/mutate";
+import { mutateMintBoard, mutateSpaces } from "@/app/mutate";
 import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import useCreateMintBoardTemplate, { MintBoardTemplate, configureMintBoard } from "@/hooks/useCreateMintBoardTemplate";
-import { getContractFromEnv } from "@/lib/abi/zoraEdition";
-import { getChainName } from "@/lib/chains/supportedChains";
+import { getChainName, supportedChains } from "@/lib/chains/supportedChains";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
-import { Option } from "@/ui/MenuSelect/MenuSelect";
+import MenuSelect, { Option } from "@/ui/MenuSelect/MenuSelect";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { TbLoader2 } from "react-icons/tb";
 import useSWRMutation from "swr/mutation";
@@ -192,6 +191,12 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
     const { state, setField, validate } = useCreateMintBoardTemplate(initialConfig);
     const { data: session, status } = useSession();
     const router = useRouter();
+    const chainOptions = supportedChains.map(chain => { return { value: String(chain.id), label: chain.name } });
+    const currentChain = chainOptions.find(chain => chain.value === String(state.chainId));
+    useEffect(() => {
+        console.log(state)
+    }, [state])
+
     const { trigger, data: configureMintBoardResponse, error, isMutating, reset } = useSWRMutation(
         `/api/configureMintBoard/${spaceName}`,
         configureMintBoard,
@@ -220,7 +225,7 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
                     toast.error('Something went wrong')
                     return reset();
                 }
-                mutateSpaces(spaceName);
+                mutateMintBoard(spaceName)
                 router.push(`/${spaceName}/mintboard`, { scroll: false })
                 router.refresh();
                 return toast.success('Mintboard Configured!')
@@ -258,11 +263,11 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
 
 
                     <div className="flex flex-col gap-2 bg-base-100 w-full p-6 rounded-lg">
-                        <div className="flex flex-row gap-2">
+                        <div className="flex flex-row gap-2 items-center">
                             <h1 className="text-xl font-bold text-t1">Network</h1>
-                            <div className="flex flex-row gap-2 ml-auto items-center">
-                                <ChainLabel chainId={state.chainId} px={24} />
-                                <h3 className="text-lg font-bold text-t1">{getChainName(state.chainId)}</h3>
+                            <div className="flex gap-0.5 items-center ml-auto">
+                                <ChainLabel chainId={state.chainId} px={16} />
+                                <MenuSelect options={chainOptions} selected={currentChain} setSelected={(option: { value: string, label: string }) => setField("chainId", Number(option.value))} />
                             </div>
                         </div>
                     </div>

@@ -83,6 +83,11 @@ ol {
   grid-template-columns: repeat(auto-fill, minmax(275px, 2fr));
 }
 
+.contest-columns {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+
 .glass,
 .glass:hover,
 .glass.btn-active {

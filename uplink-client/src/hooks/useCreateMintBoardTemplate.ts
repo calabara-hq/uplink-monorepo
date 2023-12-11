@@ -5,9 +5,10 @@ import { Decimal } from 'decimal.js';
 import { handleMutationError } from "@/lib/handleMutationError";
 import { Session } from "@/providers/SessionProvider";
 import { validateEthAddress } from "@/lib/ethAddress";
+import { supportedChains } from "@/lib/chains/supportedChains";
 
 export const MintBoardTemplateSchema = z.object({
-    chainId: z.number().refine((n) => n === 8453 || n === 84531, { message: "Must be base network" }),
+    chainId: z.number().refine((n) => supportedChains.map(chain => chain.id).includes(n), { message: "Must be base network" }),
     enabled: z.boolean(),
     boardTitle: z.string().min(1, { message: "Board title is required" }),
     boardDescription: z.string().min(1, { message: "Board description is required" }),
@@ -110,7 +111,7 @@ export const configureMintBoard = async (url,
 export default function useCreateMintBoardTemplate(templateConfig?: MintBoardTemplate) {
 
     const baseConfig = {
-        chainId: 84531,
+        chainId: supportedChains[0].id,
         enabled: false,
         boardTitle: "",
         boardDescription: "",
@@ -130,7 +131,7 @@ export default function useCreateMintBoardTemplate(templateConfig?: MintBoardTem
     const [state, dispatch] = useReducer(EditionWizardReducer, initState)
 
 
-    const setField = (field: string, value: string | boolean) => {
+    const setField = (field: string, value: string | boolean | number) => {
         dispatch({
             type: 'SET_FIELD',
             payload: { field, value },

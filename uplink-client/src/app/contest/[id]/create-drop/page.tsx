@@ -9,6 +9,7 @@ import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import useMe from "@/hooks/useMe";
 import { useSession } from "@/providers/SessionProvider";
 import { useEffect } from "react";
+import { useContestState } from "@/providers/ContestStateProvider";
 
 
 const LoadingDialog = () => {
@@ -35,10 +36,9 @@ export default function Page({
     const submissionId = searchParams?.sid ?? null
     if (!submissionId) throw notFound();
 
-    // const { liveSubmissions, areSubmissionsLoading, isSubmissionError } = useLiveSubmissions(contestId);
-    // const submission = liveSubmissions ? liveSubmissions.find(el => el.id === submissionId) : null;
     const { data: session, status } = useSession();
     const { me, isMeLoading, isUserAuthorized, isMeError } = useMe(session?.user?.address);
+    const { chainId } = useContestState();
     const submission = me?.submissions ? me?.submissions.find(el => el.id === submissionId) : null;
 
     const calcImageURI = (submission: Submission) => {
@@ -95,6 +95,7 @@ export default function Page({
         <div className="w-8/12 m-auto animate-fadeIn duration-300 mt-4 mb-16">
             <CreateEdition
                 contestId={params.id}
+                chainId={chainId}
                 submissionId={submissionId}
                 name={submission.data.title}
                 imageURI={calcImageURI(submission)}

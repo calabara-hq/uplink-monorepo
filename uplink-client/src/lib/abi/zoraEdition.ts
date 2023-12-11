@@ -1,3 +1,5 @@
+import { supportedChains } from "../chains/supportedChains";
+
 export const ZoraAbi = [
     {
         "inputs": [
@@ -541,27 +543,96 @@ export const ZoraAbi = [
     }
 ] as const
 
-const ZORA_NFT_CREATOR_PROXY_MAINNET = '0xf74b146ce44cc162b601dec3be331784db111dc1';
-const ZORA_NFT_CREATOR_PROXY_BASE = '0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c'
-const ZORA_PROTOCOL_REWARDS_BASE = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
-const ZORA_PROTOCOL_REWARDS_BASE_TESTNET = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
-const ZORA_NFT_CREATOR_PROXY_BASE_TESTNET = '0x87cfd516c5ea86e50b950678CA970a8a28de27ac'
 
-export const getContractFromEnv = () => {
-    if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_CLIENT_URL === "https://staging.uplink.wtf") {
-        return {
-            creator_contract: ZORA_NFT_CREATOR_PROXY_BASE_TESTNET,
-            rewards_contract: ZORA_PROTOCOL_REWARDS_BASE_TESTNET,
-            explorer: "https://goerli.basescan.org",
-            chainId: 84531,
-        }
-    }
-    else {
-        return {
-            creator_contract: ZORA_NFT_CREATOR_PROXY_BASE,
-            rewards_contract: ZORA_PROTOCOL_REWARDS_BASE,
-            explorer: "https://basescan.org",
-            chainId: 8453,
-        }
+// creator mainnet
+const ZORA_NFT_CREATOR_PROXY_MAINNET = '0xf74b146ce44cc162b601dec3be331784db111dc1'
+const ZORA_NFT_CREATOR_PROXY_BASE = '0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c'
+const ZORA_NFT_CREATOR_PROXY_OP = '0x7d1a46c6e614A0091c39E102F2798C27c1fA8892'
+const ZORA_NFT_CREATOR_PROXY_ZORA = '0xA2c2A96A232113Dd4993E8b048EEbc3371AE8d85'
+
+// rewards mainnet
+const ZORA_PROTOCOL_REWARDS_MAINNET = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
+const ZORA_PROTOCOL_REWARDS_BASE = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
+const ZORA_PROTOCOL_REWARDS_OP = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
+const ZORA_PROTOCOL_REWARDS_ZORA = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
+
+// creator testnet
+const ZORA_NFT_CREATOR_PROXY_BASE_TESTNET = '0x87cfd516c5ea86e50b950678CA970a8a28de27ac'
+const ZORA_NFT_CREATOR_PROXY_OP_TESTNET = '0x3C1ebcF36Ca9DD9371c9aA99c274e4988906c6E3'
+const ZORA_NFT_CREATOR_PROXY_ZORA_TESTNET = '0xeB29A4e5b84fef428c072debA2444e93c080CE87'
+
+// rewards testnet
+const ZORA_PROTOCOL_REWARDS_BASE_TESTNET = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
+const ZORA_PROTOCOL_REWARDS_OP_TESTNET = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
+const ZORA_PROTOCOL_REWARDS_ZORA_TESTNET = '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
+
+export const getContractFromChainId = (chainId: number) => {
+    if (!supportedChains.map(chain => chain.id).includes(chainId)) throw new Error("Chain not supported");
+
+    switch (chainId) {
+        case 1:
+            return {
+                creator_contract: ZORA_NFT_CREATOR_PROXY_MAINNET,
+                rewards_contract: ZORA_PROTOCOL_REWARDS_MAINNET,
+                explorer: "https://etherscan.io",
+                bridge: "https://app.uniswap.org/swap",
+                chainId: 1,
+            }
+        case 8453:
+            return {
+                creator_contract: ZORA_NFT_CREATOR_PROXY_BASE,
+                rewards_contract: ZORA_PROTOCOL_REWARDS_BASE,
+                explorer: "https://basescan.org",
+                bridge: "https://bridge.base.org/deposit",
+                chainId: 8453,
+            }
+        case 10:
+            return {
+                creator_contract: ZORA_NFT_CREATOR_PROXY_OP,
+                rewards_contract: ZORA_PROTOCOL_REWARDS_OP,
+                explorer: "https://optimistic.etherscan.io",
+                bridge: "https://app.optimism.io/bridge/deposit",
+                chainId: 10,
+            }
+        case 7777777:
+            return {
+                creator_contract: ZORA_NFT_CREATOR_PROXY_ZORA,
+                rewards_contract: ZORA_PROTOCOL_REWARDS_ZORA,
+                explorer: "https://explorer.zora.energy",
+                bridge: "https://bridge.zora.energy/",
+                chainId: 7777777,
+            }
+        case 84531:
+            return {
+                creator_contract: ZORA_NFT_CREATOR_PROXY_BASE_TESTNET,
+                rewards_contract: ZORA_PROTOCOL_REWARDS_BASE_TESTNET,
+                explorer: "https://goerli.basescan.org",
+                bridge: "https://goerli-bridge.base.org/deposit",
+                chainId: 84531,
+            }
+        case 420:
+            return {
+                creator_contract: ZORA_NFT_CREATOR_PROXY_OP_TESTNET,
+                rewards_contract: ZORA_PROTOCOL_REWARDS_OP_TESTNET,
+                explorer: "https://goerli-optimism.etherscan.io",
+                bridge: "https://app.optimism.io/bridge/deposit",
+                chainId: 420,
+            }
+        case 999:
+            return {
+                creator_contract: ZORA_NFT_CREATOR_PROXY_ZORA_TESTNET,
+                rewards_contract: ZORA_PROTOCOL_REWARDS_ZORA_TESTNET,
+                explorer: "https://testnet.explorer.zora.energy",
+                bridge: "https://testnet.bridge.zora.energy",
+                chainId: 999,
+            }
+        default:
+            return {
+                creator_contract: ZORA_NFT_CREATOR_PROXY_MAINNET,
+                rewards_contract: ZORA_PROTOCOL_REWARDS_MAINNET,
+                explorer: "https://etherscan.io",
+                bridge: "https://app.uniswap.org/swap",
+                chainId: 1,
+            }
     }
 }

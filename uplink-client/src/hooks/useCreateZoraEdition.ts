@@ -7,6 +7,10 @@ import { Session } from "@/providers/SessionProvider";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import handleMediaUpload, { IpfsUpload, MediaUploadError } from "@/lib/mediaUpload";
 import toast from "react-hot-toast";
+import { supportedChains } from "@/lib/chains/supportedChains";
+
+
+
 
 export const EditionConfig = z.object({
     name: z.string(),
@@ -31,7 +35,7 @@ export const EditionConfig = z.object({
 })
 
 export const ZoraEdition = z.object({
-    chainId: z.number().refine((n) => n === 8453 || n === 84531, { message: "Must be base network" }),
+    chainId: z.number().refine((n) => supportedChains.map(val => val.id).includes(n), { message: "Unsupported network" }),
     address: z.string(),
     config: EditionConfig,
 });
@@ -65,8 +69,6 @@ export const EditionPublicSalePriceSchema = z.union([z.literal("free"), z.string
     if (val === "free") return "0";
     return new Decimal(val).times(10 ** 18).toString();
 })
-
-
 
 const calcSaleStart = (saleStart: string) => {
     const unixInS = (str: string | number | Date) => Math.floor(new Date(str).getTime() / 1000);

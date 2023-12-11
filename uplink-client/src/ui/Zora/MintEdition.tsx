@@ -1,6 +1,6 @@
 "use client";
 
-import { ZoraAbi, getContractFromEnv } from "@/lib/abi/zoraEdition";
+import { ZoraAbi, getContractFromChainId } from "@/lib/abi/zoraEdition";
 import { useSession } from "@/providers/SessionProvider";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -11,7 +11,7 @@ import { format, set } from "date-fns";
 import { uint64MaxSafe } from "@/utils/uint64";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import { HiCheckBadge, HiOutlineLockClosed } from "react-icons/hi2";
-import { RenderMintMedia, SwitchNetworkButton } from "./common";
+import { AddFundsButton, RenderMintMedia, SwitchNetworkButton } from "./common";
 import { getChainName } from "@/lib/chains/supportedChains";
 import { ChainLabel } from "../ContestLabels/ContestLabels";
 import { TokenContractApi } from "@/lib/contract";
@@ -251,7 +251,7 @@ const MintEdition = ({ edition, author, setIsModalOpen, referrer, onMintCallback
     const { data: session, status } = useSession();
     const [numEditions, setNumEditions] = useState<string>('1');
     const debouncedNumEditions = useDebounce(numEditions);
-    const { explorer } = getContractFromEnv();
+    const { explorer } = getContractFromChainId(chainId);
     const feeStructure = computeEthToSpend(edition.saleConfig.publicSalePrice, debouncedNumEditions)
     const { isLoading: isTotalSupplyLoading, totalSupply } = useTotalSupply(chainId, contractAddress);
     const isReferralValid = referrer ? referrer.startsWith('0x') && referrer.length === 42 : false;
@@ -286,7 +286,6 @@ const MintEdition = ({ edition, author, setIsModalOpen, referrer, onMintCallback
         value: feeStructure.total.toString(),
     });
 
-    const isInsufficientFundsError = isPrepareError ? prepareError.message.includes("insufficient funds for gas * price + value") : false;
 
     const {
         data,
@@ -304,6 +303,15 @@ const MintEdition = ({ edition, author, setIsModalOpen, referrer, onMintCallback
             }
         }
     );
+
+    const isInsufficientFundsPrepareError = isPrepareError ? prepareError.message.includes("insufficient funds for gas * price + value") : false;
+    const isInsufficientFundsWriteError = isWriteError ? writeError.message.includes("insufficient funds for gas * price + value") : false;
+
+
+    useEffect(() => {
+        if (isInsufficientFundsPrepareError) toast.error("Insufficient funds")
+    }, [isInsufficientFundsWriteError])
+
 
     const availableEditions = BigInt(edition.editionSize) - BigInt(totalSupply || 0)
     const areEditionsSoldOut = availableEditions <= 0;
@@ -458,9 +466,9 @@ const MintEdition = ({ edition, author, setIsModalOpen, referrer, onMintCallback
                                                 </button>
                                             )}
                                             {status === "authenticated" && !isPrepareLoading && (
-                                                isInsufficientFundsError
+                                                isInsufficientFundsPrepareError || isInsufficientFundsWriteError
                                                     ?
-                                                    (<Link className="btn btn-outline btn-warning normal-case w-full" href='https://bridge.base.org/deposit' prefetch={false} target="_blank">Add Funds</Link>)
+                                                    (<AddFundsButton chainId={chainId} />)
                                                     :
                                                     (
                                                         <SwitchNetworkButton chainId={chainId}>
