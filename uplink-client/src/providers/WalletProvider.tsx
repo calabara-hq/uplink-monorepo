@@ -19,13 +19,13 @@ import {
   getDefaultWallets,
 } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig } from "wagmi";
-import { mainnet, base, baseGoerli } from "wagmi/chains"
+import { mainnet, base, baseGoerli, optimism, optimismGoerli, zora, zoraTestnet } from "wagmi/chains"
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { useEffect, useState } from "react";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [mainnet, base, baseGoerli],
+  [mainnet, base, optimism, zora, baseGoerli, optimismGoerli, zoraTestnet],
   [
     alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY }),
     publicProvider(),

@@ -51,7 +51,7 @@ const BoardInfo = async ({ spaceName }: { spaceName: string }) => {
                     {mintBoard.space.displayName}
                 </Link>
             </div>
-            <p className="text-t2">{mintBoard.boardDescription}</p>
+            <p className="text-t2 whitespace-pre-line">{mintBoard.boardDescription}</p>
         </div>
     )
 }

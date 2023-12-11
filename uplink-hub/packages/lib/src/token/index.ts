@@ -11,15 +11,26 @@ const ERC721Interface = '0x80ac58cd';
 const ERC1155Interface = '0xd9b67a26';
 const ERC1155MetaDataURIInterface = '0xd9b67a26';
 
-
-
 const formRpcUrl = (chainId: number, providerKey: string) => {
     switch (chainId) {
         case 1:
             return `https://eth-mainnet.alchemyapi.io/v2/${providerKey}`;
         case 8453:
-            return `https://base-mainnet.g.alchemy.com/v2/${providerKey}`
+            return `https://base-mainnet.g.alchemy.com/v2/${providerKey}`;
+        case 10:
+            return `https://opt-mainnet.g.alchemy.com/v2/${providerKey}`;
+        case 7777777:
+            return `https://rpc.zora.energy`;
+
+        case 84531:
+            return `https://base-goerli.g.alchemy.com/v2/${providerKey}`
+        case 420:
+            return `https://opt-goerli.g.alchemy.com/v2/${providerKey}`;
+        case 999:
+            return `https://testnet.rpc.zora.energy`;
+
         default: return `https://eth-mainnet.alchemyapi.io/v2/${providerKey}`;
+
     }
 
 }

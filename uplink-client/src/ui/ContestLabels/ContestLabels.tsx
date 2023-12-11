@@ -1,6 +1,8 @@
 import { BiTime } from "react-icons/bi";
 import { ContestCategory, ContestState } from "@/types/contest";
 import { BaseChainLogo } from "@/lib/chains/basechain"
+import { OpChainLogo } from "@/lib/chains/opchain";
+import { ZoraChainLogo } from "@/lib/chains/zorachain";
 // return color for contest category
 const contestCategoryColor = (contestCategory: ContestCategory) => {
   switch (contestCategory) {
@@ -103,6 +105,32 @@ export const ChainLabel = ({ chainId, px }: { chainId: number, px: number }) => 
       </div>
     )
   }
+
+  if (chainId === 10) {
+    return (
+      <div
+        className="tooltip tooltip-top cursor-pointer"
+        data-tip="Optimism"
+      >
+        <OpChainLogo px={px} />
+
+      </div>
+    )
+  }
+
+  if (chainId === 7777777) {
+    return (
+      <div
+        className="tooltip tooltip-top cursor-pointer"
+        data-tip="Zora"
+      >
+        <ZoraChainLogo px={px} />
+
+      </div>
+    )
+  }
+
+
   if (chainId === 84531) {
     return (
       <div
@@ -114,6 +142,35 @@ export const ChainLabel = ({ chainId, px }: { chainId: number, px: number }) => 
       </div>
     )
   }
+
+
+  if (chainId === 420) {
+    return (
+      <div
+        className="tooltip tooltip-top cursor-pointer"
+        data-tip="Optimism Goerli"
+      >
+        <OpChainLogo px={px} />
+
+      </div>
+    )
+  }
+
+  if (chainId === 999) {
+    return (
+      <div
+        className="tooltip tooltip-top cursor-pointer"
+        data-tip="Zora Goerli"
+      >
+        <ZoraChainLogo px={px} />
+
+      </div>
+    )
+  }
+
+
+
+
   return null;
 }
 

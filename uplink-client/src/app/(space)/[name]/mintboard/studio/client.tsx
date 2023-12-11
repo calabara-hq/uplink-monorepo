@@ -4,7 +4,7 @@ import { useSession } from "@/providers/SessionProvider";
 import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
-import { RenderMintMedia, SwitchNetworkButton } from "@/ui/Zora/common";
+import { AddFundsButton, RenderMintMedia, SwitchNetworkButton } from "@/ui/Zora/common";
 import { uint64MaxSafe } from "@/utils/uint64";
 import { format } from "date-fns";
 import Image from "next/image";
@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 import { BiPlusCircle, BiSolidCircle } from "react-icons/bi";
 import { HiCamera, HiCheckBadge, HiOutlineTrash } from "react-icons/hi2";
 import Decimal from "decimal.js";
-import { ZoraAbi, getContractFromEnv } from "@/lib/abi/zoraEdition";
+import { ZoraAbi, getContractFromChainId } from "@/lib/abi/zoraEdition";
 import { useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
 import useSWRMutation from "swr/mutation";
 import { nanoid } from "nanoid";
@@ -22,6 +22,8 @@ import Link from "next/link";
 import { TbLoader2 } from "react-icons/tb";
 import useLiveMintBoard from "@/hooks/useLiveMintBoard";
 import { Boundary } from "@/ui/Boundary/Boundary";
+import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
+import { getChainName } from "@/lib/chains/supportedChains";
 
 const MediaUpload = ({
     handleFileChange,
@@ -183,7 +185,7 @@ const MediaUpload = ({
 
 
 
-export const CreateBoardPost = ({ spaceName, displayName, referrer, templateConfig }: { spaceName: string, displayName: string, referrer: string, templateConfig: ConfigurableZoraEditionInput }) => {
+export const CreateBoardPost = ({ spaceName, displayName, chainId, referrer, templateConfig }: { spaceName: string, displayName: string, chainId: number, referrer: string, templateConfig: ConfigurableZoraEditionInput }) => {
     const { data: session, status } = useSession();
     const {
         state,
@@ -207,6 +209,7 @@ export const CreateBoardPost = ({ spaceName, displayName, referrer, templateConf
 
             <div className="flex flex-col gap-6 w-full m-auto mt-4 mb-16 p-4">
                 <h1 className="text-3xl font-bold text-t1">Create Post</h1>
+
                 <div className="bg-base-100 p-4 rounded-lg">
                     <p className="text-t1">Post to the {displayName} mint board and earn 0.000333 ETH for every mint!</p>
                 </div>
@@ -225,6 +228,7 @@ export const CreateBoardPost = ({ spaceName, displayName, referrer, templateConf
 
                 </div>
                 <CreateEditionButton
+                    chainId={chainId}
                     isUploading={isUploading}
                     spaceName={spaceName}
                     validate={validate}
@@ -253,6 +257,7 @@ const generateTokenIdAdjustedContractArgs = (contractArgs: ConfigurableZoraEditi
 }
 
 const CreateEditionButton = ({
+    chainId,
     spaceName,
     validate,
     contractArguments,
@@ -260,6 +265,7 @@ const CreateEditionButton = ({
     routeOnSuccess,
     isUploading
 }: {
+    chainId: number,
     spaceName: string,
     validate: any,
     contractArguments: ConfigurableZoraEditionOutput,
@@ -269,7 +275,7 @@ const CreateEditionButton = ({
 }) => {
     const { data: session, status } = useSession();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { creator_contract, chainId, explorer } = getContractFromEnv();
+    const { creator_contract, explorer } = getContractFromChainId(chainId);
     const [editionSlot, setEditionSlot] = useState<number | null>(null);
     const { mutateLiveBoard } = useLiveMintBoard(spaceName);
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
@@ -452,7 +458,7 @@ const CreateEditionButton = ({
                             {status === "authenticated" && (
                                 isInsufficientFundsError
                                     ?
-                                    (<Link className="btn btn-outline btn-warning normal-case" href='https://bridge.base.org/deposit' prefetch={false} target="_blank">Add Funds</Link>)
+                                    (<AddFundsButton chainId={chainId} />)
                                     :
                                     (
                                         <SwitchNetworkButton chainId={chainId}>

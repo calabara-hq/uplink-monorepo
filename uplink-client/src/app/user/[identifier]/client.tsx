@@ -1,7 +1,7 @@
 "use client"
 import useMe from "@/hooks/useMe"
-import { ZoraAbi, getContractFromEnv } from "@/lib/abi/zoraEdition";
-import { getChainName } from "@/lib/chains/supportedChains";
+import { ZoraAbi, getContractFromChainId } from "@/lib/abi/zoraEdition";
+import { getChainName, supportedChains } from "@/lib/chains/supportedChains";
 import { TokenContractApi } from "@/lib/contract";
 import { useSession } from "@/providers/SessionProvider";
 import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
@@ -12,13 +12,14 @@ import { useContractWrite, usePrepareContractWrite, useWaitForTransaction } from
 import toast from "react-hot-toast";
 import { TbLoader2 } from "react-icons/tb";
 import Link from "next/link";
-import { SwitchNetworkButton } from "@/ui/Zora/common";
+import { AddFundsButton, SwitchNetworkButton } from "@/ui/Zora/common";
 import { Submission } from "@/types/submission";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { User } from "@/types/user";
 import Image from "next/image";
 import { HiPencil } from "react-icons/hi2";
 import { FaTwitter } from "react-icons/fa";
+import { MdOutlineCancelPresentation } from "react-icons/md";
 
 export const ManageAccountButton = ({ }) => {
 
@@ -30,11 +31,21 @@ const hasProfile = (user: User) => {
 
 export const RewardsSkeleton = () => {
     return (
-        <div className="flex flex-col bg-base-100 h-40 w-fit min-w-[300px] rounded-xl border border-border p-2 gap-4 m-auto md:mt-auto md:mr-0 md:ml-auto md:mb-0">
+        <div className="flex flex-col bg-base-100 h-60 w-fit min-w-[350px] rounded-xl border border-border p-2 gap-4 m-auto md:mt-auto md:mr-0 md:ml-auto md:mb-0">
             <div className="bg-base-200 shimmer h-4 rounded-lg w-1/3" />
-            <div className="flex flex-row items-center w-full gap-8">
-                <div className="bg-base-200 shimmer h-2 w-1/2 rounded-lg" />
-                <div className="bg-base-200 shimmer h-2 w-1/2 rounded-lg" />
+            <div className="grid grid-cols-3 space-y-4">
+                <div className="bg-base-200 shimmer h-4 w-3/4 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-3/4 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-1/2 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-3/4 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-3/4 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-1/2 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-3/4 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-3/4 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-1/2 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-3/4 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-3/4 m-auto rounded-lg" />
+                <div className="bg-base-200 shimmer h-4 w-1/2 m-auto rounded-lg" />
             </div>
             <div />
         </div>
@@ -45,7 +56,7 @@ export const ClientUserProfile = ({ accountAddress }: { accountAddress: string }
     const { me: user, isMeLoading, isMeError } = useMe(accountAddress);
     return (
         <div className="flex flex-col md:flex-row md:justify-between md:items-center md:m-auto gap-4 w-full">
-            <div className="relative w-fit pt-8 m-auto md:mr-auto md:ml-0">
+            <div className="relative w-fit pt-8 m-auto mt-0 md:mr-auto md:ml-0">
                 <div className="absolute top-0 left-0 right-0 ml-auto mr-auto md:-left-5 md:right-full w-32 h-32 z-10">
                     {user.profileAvatar ? (<Image
                         src={user.profileAvatar}
@@ -114,7 +125,7 @@ export const ClientUserProfile = ({ accountAddress }: { accountAddress: string }
                     </div>
                 </div>
             </div>
-            <ClaimableUserRewards accountAddress={user.address} />
+            <ProtocolRewards accountAddress={accountAddress} />
         </div >
     )
 }
@@ -159,20 +170,67 @@ const useClaimableBalance = (chainId: number, contractAddress: string) => {
     }
 }
 
-export const ClaimableUserRewards = ({ accountAddress }: { accountAddress: string }) => {
+
+const ProtocolRewards = ({ accountAddress }: { accountAddress: string }) => {
     const { me, isUserAuthorized, isMeLoading, isMeError } = useMe(accountAddress);
+    if (isMeLoading) return <RewardsSkeleton />
+    if (!isMeLoading && !isUserAuthorized) return null;
+    return (
+        <div className="flex flex-col bg-base-100 w-fit min-w-[350px] justify-between rounded-xl border border-border p-2 gap-4 m-auto md:mt-auto md:mr-0 md:ml-auto md:mb-0">
+            <h2 className="text-t1 font-bold text-xl">Protocol Rewards</h2>
+            {supportedChains.map(chain => {
+                return <ClaimableUserRewards key={chain.id} accountAddress={accountAddress} chainId={chain.id} />
+            })}
+        </div>
+    )
+}
+
+
+export const ClaimableUserRewards = ({ accountAddress, chainId }: { accountAddress: string, chainId: number }) => {
     const { data: session, status } = useSession();
-    const { rewards_contract, chainId } = getContractFromEnv();
+    const { rewards_contract } = getContractFromChainId(chainId);
     const { balance, isLoading: isBalanceLoading, triggerRefresh } = useClaimableBalance(chainId, rewards_contract)
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    return (
+
+        <div className="grid grid-cols-3 items-center w-full">
+            <div className="flex gap-2 items-center">
+                <p className="text-t1 ">{getChainName(chainId)}</p>
+                <ChainLabel chainId={chainId} px={16} />
+            </div>
+
+            <div className="ml-auto text-left">
+                {isBalanceLoading ?
+                    (<TbLoader2 className="w-4 h-4 text-t2 animate-spin ml-auto" />)
+                    :
+                    (<div className="text-t1 font-bold">{`${new Decimal(balance).div(Decimal.pow(10, 18)).toString()} ETH`}</div>)
+                }
+            </div>
+            <div className="ml-auto">
+                {!isBalanceLoading && new Decimal(balance).greaterThan(0) ? (
+                    <button className="btn btn-sm btn-primary normal-case" onClick={() => setIsModalOpen(true)}>Claim</button>
+                ) : (
+                    <span />
+                )}
+            </div>
+            <ClaimRewardsModal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)} chainId={chainId} claimableBalance={balance} rewardsContract={rewards_contract} triggerRefresh={triggerRefresh} />
+        </div>
+
+    )
+}
 
 
 
+
+const ClaimRewardsModal = ({ isModalOpen, onClose, chainId, claimableBalance, rewardsContract, triggerRefresh }) => {
+    const { data: session, status } = useSession();
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
         chainId: chainId,
-        address: rewards_contract,
+        address: rewardsContract,
         abi: ZoraAbi,
         functionName: 'withdraw',
-        args: [session?.user?.address, BigInt(balance || '0')],
+        args: [session?.user?.address, BigInt(claimableBalance || '0')],
         enabled: true,
     });
 
@@ -210,56 +268,53 @@ export const ClaimableUserRewards = ({ accountAddress }: { accountAddress: strin
     useEffect(() => {
         if (isTxSuccessful) {
             triggerRefresh();
+            toast.success('Successfully claimed your rewards')
+            onClose();
         }
     }, [isTxSuccessful])
 
-    if (isMeLoading) return <RewardsSkeleton />
-    if (!isMeLoading && !isUserAuthorized) return null
 
-    else return (
-        <div className="flex flex-col bg-base-100 h-40 w-fit min-w-[300px] justify-between rounded-xl border border-border p-2 gap-4 m-auto md:mt-auto md:mr-0 md:ml-auto md:mb-0">
-            <h2 className="text-t1 font-bold text-xl">Protocol Rewards</h2>
-            <div className="flex flex-row items-center w-full">
-                <div className="flex gap-2 items-center">
-                    <p className="text-t1 ">{getChainName(chainId)}</p>
-                    <ChainLabel chainId={chainId} px={16} />
+    if (isModalOpen) {
+        return (
+            <div className="modal modal-open bg-black transition-colors duration-500 ease-in-out">
+                <div
+                    className="modal-box bg-black border border-border animate-springUp max-w-sm"
+                >
+                    <div className="flex flex-col gap-4 items-center justify-center">
+                        <div className="flex items-center w-full">
+                            <h2 className="text-t1 font-bold text-xl">Claim Rewards</h2>
+                            <button className="btn btn-ghost btn-sm ml-auto" onClick={onClose}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
+                        </div>
+                        <ChainLabel chainId={chainId} px={128} />
+                        <p className="text-t1 text-center">Nice work! You have <b>{`${new Decimal(claimableBalance).div(Decimal.pow(10, 18)).toString()} ETH`}</b> in protocol rewards on {getChainName(chainId)}.</p>
+                        {isInsufficientFundsError
+                            ?
+                            (<AddFundsButton chainId={chainId} />)
+                            :
+                            <SwitchNetworkButton chainId={chainId}>
+                                <button className="btn btn-primary normal-case w-full" disabled={isTxPending || isWriteLoading}
+                                    onClick={() => write?.()}
+                                >
+                                    {isWriteLoading ?
+                                        <div className="flex gap-2 items-center">
+                                            <p className="text-sm">Awaiting signature</p>
+                                            <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                        </div>
+                                        :
+                                        isTxPending ? (
+                                            <div className="flex gap-2 items-center">
+                                                <p className="text-sm">Claiming</p>
+                                                <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                            </div>
+                                        ) : "Claim"
+                                    }
+                                </button>
+                            </SwitchNetworkButton>
+                        }
+                    </div>
                 </div>
-
-                {isBalanceLoading ?
-                    (
-                        <TbLoader2 className="w-4 h-4 text-t2 animate-spin ml-auto" />
-                    )
-                    :
-                    (
-                        <div className="text-t1 font-bold ml-auto">{`${new Decimal(balance).div(Decimal.pow(10, 18)).toString()} ETH`}</div>
-                    )
-                }
             </div>
-            {
-                isInsufficientFundsError
-                    ?
-                    (<Link className="btn btn-outline btn-warning normal-case" href='https://bridge.base.org/deposit' prefetch={false} target="_blank">Add Funds</Link>)
-                    :
-                    <SwitchNetworkButton chainId={chainId}>
-                        <button className="btn btn-primary normal-case " disabled={isBalanceLoading || balance === '0' || isTxPending || isWriteLoading}
-                            onClick={() => write?.()}
-                        >
-                            {isWriteLoading ?
-                                <div className="flex gap-2 items-center">
-                                    <p className="text-sm">Awaiting signature</p>
-                                    <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
-                                </div>
-                                :
-                                isTxPending ? (
-                                    <div className="flex gap-2 items-center">
-                                        <p className="text-sm">Claiming</p>
-                                        <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
-                                    </div>
-                                ) : "Claim"
-                            }
-                        </button>
-                    </SwitchNetworkButton>
-            }
-        </div >
-    )
+        );
+    }
+    return null;
 }

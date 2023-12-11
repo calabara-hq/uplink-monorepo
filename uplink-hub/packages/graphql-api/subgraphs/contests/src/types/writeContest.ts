@@ -2,12 +2,24 @@ import { z } from 'zod';
 import type { EditorOutputData } from "lib";
 import { VerifiedTokenSchema } from './writeToken.js';
 
+
+const validChainIds = [
+    1,  // mainnet
+    8453, // base mainnet
+    7777777, // zora mainnet
+    10, // optimism mainnet
+
+    84531, // base testnet
+    999, // zora testnet
+    420, // optimism testnet
+];
+
 // metadata
 
 export const ContestTypeSchema = z.enum(["standard", "twitter"]);
 export const EditorOutputSchema: z.ZodType<EditorOutputData> = z.any();
 
-export const ContestChainSchema = z.number().refine(val => { return val === 1 || val === 8453 }, { message: "Invalid chain id" })
+export const ContestChainSchema = z.number().refine(val => { return validChainIds.includes(val) }, { message: "Invalid chain id" })
 
 export const ContestCategorySchema = z.enum([
     "art",
