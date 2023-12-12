@@ -28,14 +28,13 @@
       "@/*": [
         "./src/*"
       ]
-    },
+    }
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.js",
     ".next/types/**/*.ts"
-, "src/lib/editorTools.js",
   ],
   "exclude": [
     "node_modules",
