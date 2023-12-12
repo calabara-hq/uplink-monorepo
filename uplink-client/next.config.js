@@ -2,9 +2,6 @@
 
 const nextConfig = {
   reactStrictMode: false,
-  experimental: {
-    webpackBuildWorker: true,
-  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
