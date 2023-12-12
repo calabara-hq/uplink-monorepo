@@ -1536,9 +1536,10 @@
   dependencies:
     mime "^3.0.0"
 
-"@cloudflare/next-on-pages@https://prerelease-registry.devprod.cloudflare.dev/next-on-pages/runs/7167734618/npm-package-next-on-pages-585":
-  version "0.0.0-407e8ba"
-  resolved "https://prerelease-registry.devprod.cloudflare.dev/next-on-pages/runs/7167734618/npm-package-next-on-pages-585#ca0257b1d62a0a34ce764672c3c897547178437c"
+"@cloudflare/next-on-pages@^1.8.2":
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/@cloudflare/next-on-pages/-/next-on-pages-1.8.2.tgz#3dd464831cf154aca8f7c118dd6191fc16840e9a"
+  integrity sha512-TVQL+1Xdmy/7qyuWrEb12k9DxIhEqdi8k2qat0oLifERqc3s9udzaS4jHPVghQmiR5xfaZhrt3fzBnqH5437RA==
   dependencies:
     acorn "^8.8.0"
     ast-types "^0.14.2"

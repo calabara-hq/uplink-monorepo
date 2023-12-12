@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
-    "@cloudflare/next-on-pages": "https://prerelease-registry.devprod.cloudflare.dev/next-on-pages/runs/7167734618/npm-package-next-on-pages-585",
+    "@cloudflare/next-on-pages": "^1.8.2",
     "@next/bundle-analyzer": "^13.5.1",
     "@opentelemetry/api": "^1.6.0",
     "@storybook/addon-essentials": "^7.4.5",
