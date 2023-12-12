@@ -12,6 +12,7 @@ env:
   GKE_ZONE: us-east4-a
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  NODE_OPTIONS: --max-old-space-size=16384
 
 jobs:
   build:
@@ -123,9 +124,6 @@ jobs:
         with:
           name: chart
           path: uplink-hub/helm/uplink-charts-0.1.0.tgz
-      
-      - name: Increase Node memory limit
-        run: echo "NODE_OPTIONS=--max-old-space-size=16384" >> $GITHUB_ENV
 
       - name: Deploy staging FE
         run: |
@@ -193,9 +191,6 @@ jobs:
           cd uplink-hub/helm
           helm upgrade -i uplink-hub ./uplink-charts-0.1.0.tgz -n production \
           -f ./uplink-charts/values.production.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
-      
-      - name: Increase Node memory limit
-        run: echo "NODE_OPTIONS=--max-old-space-size=16384" >> $GITHUB_ENV
 
       - name: Deploy production FE
         run: |
