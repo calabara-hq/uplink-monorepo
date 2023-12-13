@@ -6,7 +6,6 @@
     "dev": "next dev",
     "https-dev": "next dev | npx local-ssl-proxy --source 3001 --target 3000 --key ./client-ss.key --cert ./client-ss.cert",
     "build": "next build",
-    "build:pages": "npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "next lint",
     "storybook": "storybook dev -p 6006",
@@ -27,7 +26,7 @@
     "@rainbow-me/rainbowkit": "^1.1.2",
     "@rajesh896/video-thumbnails-generator": "^2.3.9",
     "@react-icons/all-files": "^4.1.0",
-    "@types/node": "18.11.18",
+    "@types/node": "^20.10.4",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
     "@vercel/analytics": "^1.0.2",
@@ -60,12 +59,10 @@
     "typescript": "5.0.4",
     "viem": "1.16.3",
     "wagmi": "1.4.3",
-    "webpack": "^5.89.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
-    "@cloudflare/next-on-pages": "^1.8.2",
     "@next/bundle-analyzer": "^13.5.1",
     "@opentelemetry/api": "^1.6.0",
     "@storybook/addon-essentials": "^7.4.5",
@@ -90,9 +87,6 @@
     "postcss": "^8",
     "postcss-loader": "^7.0.2",
     "storybook": "^7.4.5",
-    "tailwindcss": "3.3.3",
-    "vercel": "^32.7.0",
-    "wrangler": "^3.19.0"
-  },
-  "packageManager": "yarn@3.6.3"
+    "tailwindcss": "3.3.3"
+  }
 }

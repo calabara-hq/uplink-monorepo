@@ -2,6 +2,8 @@
 
 const nextConfig = {
   reactStrictMode: false,
+  experimental: {
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
