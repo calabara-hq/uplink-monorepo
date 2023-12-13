@@ -117,11 +117,9 @@ export default async function Page({ params, searchParams }: { params: { identif
         <div className="w-full lg:w-9/12 m-auto mt-4 mb-16 p-4">
             <div className="flex flex-col gap-4 items-center ">
                 <Suspense fallback={<UserCardSkeleton />}>
-                    {/*@ts-expect-error*/}
                     <SuspendableUserCard userPromise={userPromise} accountAddress={params.identifier} />
                 </Suspense>
                 <Suspense fallback={<UserSubmissionSkeleton />}>
-                    {/*@ts-expect-error*/}
                     <SuspendableUserSubmissions userPromise={userPromise} isMintableOnly={isMintableOnly} />
                 </Suspense>
             </div>

@@ -182,7 +182,6 @@ const ContestCard = ({
             {contest.space.displayName}
           </h1>
         </div>
-        {/*@ts-expect-error*/}
         <PromptSummary contest={contest} />
         <div className="flex flex-row gap-2">
           <CategoryLabel category={contest.metadata.category} />
@@ -359,9 +358,7 @@ export default async function Page() {
     <div className="flex flex-col w-full gap-12 mb-16">
       <BannerSection />
       <div className="flex flex-col w-full md:w-10/12 m-auto gap-12">
-        {/*@ts-expect-error*/}
         <ActiveContests />
-        {/*@ts-expect-error*/}
         <PopularSubmissions />
         <div className="w-full px-4 lg:px-12">
           <ContestBanner />

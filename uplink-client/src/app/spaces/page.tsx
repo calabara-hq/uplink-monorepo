@@ -89,7 +89,6 @@ export default async function Page() {
       </div>
       <Suspense fallback={<SpaceListSkeleton />}>
         {/* render empty div so it doesn't mess with our animation */}
-        {/*@ts-expect-error*/}
         <ListSpaces />
       </Suspense>
     </div>

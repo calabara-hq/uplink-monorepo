@@ -102,13 +102,12 @@ const PageContent = async ({ spaceName, postId, referrer }: { spaceName: string,
     } />;
 };
 
-export default function Page({ params, searchParams }: { params: { name: string, postId: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
+export default function Page({ params, searchParams }: { params: { name: string, postId: string }, searchParams: { [key: string]: string | undefined } }) {
 
     return (
         <div className="grid grid-cols-1 w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full mt-4 p-4">
             <BackButton spaceName={params.name} />
             <Suspense fallback={<ExpandedPostSkeleton />}>
-                {/*@ts-expect-error*/}
                 <PageContent spaceName={params.name} postId={params.postId} referrer={searchParams?.referrer ?? null} />
             </Suspense>
         </div>

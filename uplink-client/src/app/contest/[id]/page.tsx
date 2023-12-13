@@ -19,7 +19,7 @@ const SubmissionDisplayWrapper = async ({
     children,
 }: {
     contestId: string;
-    children: string;
+    children: React.ReactNode;
 }) => {
     const submissions = await fetchSubmissions(contestId);
     const fallback = {
@@ -39,26 +39,22 @@ export default async function Page({ params }: { params: { id: string } }) {
             <div className="flex w-full gap-6 ">
                 <div className="hidden xl:block w-1/4 max-w-[300px] h-fit flex-shrink-0 border border-border rounded-lg">
                     <Suspense fallback={<DetailsSkeleton />}>
-                        {/*@ts-expect-error*/}
                         <ContestDetails contestId={contestId} />
                     </Suspense>
                 </div>
                 <div className="w-[60%] flex-grow ">
                     <div className="flex flex-col w-full gap-4 transition-all duration-200 ease-in-out">
                         <Suspense fallback={<ContestHeadingSkeleton />}>
-                            {/*@ts-expect-error*/}
                             <ContestHeading contestId={contestId} />
                         </Suspense>
                         <MobileContestActions
                             contestId={contestId}
                             detailChildren={
-                                // @ts-expect-error
                                 <ContestDetails contestId={contestId}
                                 />
                             }
                         />
                         <Suspense fallback={<SubmissionDisplaySkeleton />}>
-                            {/*@ts-expect-error*/}
                             <SubmissionDisplayWrapper contestId={contestId}>
                                 <LiveSubmissionDisplay contestId={contestId} />
                             </SubmissionDisplayWrapper>

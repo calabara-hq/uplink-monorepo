@@ -376,21 +376,17 @@ export default async function Page({ params, searchParams }: { params: { name: s
       <div className="grid grid-cols-1 lg:grid-cols-[25%_auto] w-full gap-8">
         <div className="lg:sticky lg:top-6 lg:left-0 w-full h-fit">
           <Suspense fallback={<SpaceInfoSekelton />}>
-            {/*@ts-expect-error*/}
             <SpaceInfo name={spaceName} />
           </Suspense>
         </div>
         <div className="w-full h-full flex flex-col gap-6">
           <Suspense>
-            {/*@ts-expect-error*/}
             <AdminButtons spaceName={spaceName} />
           </Suspense>
           <Suspense fallback={<HeatMapSkeleton />}>
-            {/*@ts-expect-error*/}
             <MintboardHeatMap spaceName={spaceName} />
           </Suspense>
           <Suspense fallback={<SpaceContestsSkeleton />}>
-            {/*@ts-expect-error*/}
             <ContestDisplay spaceName={spaceName} isAll={isAll} isActive={isActive} />
           </Suspense>
         </div>

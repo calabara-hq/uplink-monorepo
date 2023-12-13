@@ -54,7 +54,6 @@ export default function RootLayout({
                 <MobileNav />
               </div>
               <main className="pb-20 md:pb-0 md:pl-[64px] h-full">
-                {/*@ts-expect-error*/}
                 <Nav />
                 {children}
                 <Analytics />

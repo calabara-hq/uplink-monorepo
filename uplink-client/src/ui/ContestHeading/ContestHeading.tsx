@@ -68,7 +68,6 @@ const ContestHeading = async ({
               <div className="hidden lg:block xl:hidden">
                 <DetailsMenuDrawer
                   detailChildren={
-                    // @ts-expect-error
                     <ContestDetails contestId={contestId} />
                   }
                   ui={{
