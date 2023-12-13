@@ -27,7 +27,7 @@
     "@rajesh896/video-thumbnails-generator": "^2.3.9",
     "@react-icons/all-files": "^4.1.0",
     "@types/node": "18.11.18",
-    "@types/react": "18.0.27",
+    "@types/react": "18.2.21",
     "@types/react-dom": "18.0.10",
     "@vercel/analytics": "^1.0.2",
     "daisyui": "^2.50.1",
@@ -56,7 +56,7 @@
     "sharp": "^0.31.3",
     "swiper": "^10.2.0",
     "swr": "^2.1.5",
-    "typescript": "5.0.4",
+    "typescript": "^5.3.3",
     "viem": "1.16.3",
     "wagmi": "1.4.3",
     "zod": "^3.22.4"
