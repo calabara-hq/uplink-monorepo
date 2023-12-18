@@ -20,6 +20,7 @@ import fetchActiveContests, {
 } from "@/lib/fetch/fetchActiveContests";
 import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 import { RenderPopularSubmissions } from "@/ui/Submission/SubmissionDisplay";
+import UplinkImage from "@/lib/UplinkImage";
 
 const Swiper = dynamic(() => import("@/ui/Swiper/Swiper"), {
   ssr: false,
@@ -82,7 +83,7 @@ const BannerSection = () => {
           <div className="m-auto w-full max-w-[300px] sm:max-w-sm lg:max-w-lg animate-springUp">
             <div className="mockup-window bg-base-100 border border-border">
               <div className="grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
-                <Image
+                <UplinkImage
                   src={ArtistPfp}
                   alt="swim shady"
                   width={50}
@@ -96,11 +97,11 @@ const BannerSection = () => {
                   </p>
                   <div className="flex-grow flex flex-col items-center">
                     <div className="relative w-full">
-                      <Image
+                      <UplinkImage
                         src={ArtistSubmission}
                         alt="twitter submission"
                         className="rounded-lg object-contain"
-                        sizes="50vw"
+                        width={600}
                         priority
                       />
                     </div>
@@ -138,7 +139,7 @@ const BannerSection = () => {
           </div>
         </div>
       </div>
-      <Image
+      <UplinkImage
         src={landingBg}
         alt=""
         fill
@@ -171,11 +172,12 @@ const ContestCard = ({
       <div className="card-body items-center p-0">
         <div className="flex flex-col gap-2 items-center">
           <div className="relative w-20 h-20 avatar online">
-            <Image
+            <UplinkImage
               src={contest.space.logoUrl}
               alt="spaceLogo"
               fill
               className="mask mask-squircle object-cover"
+              sizes="10vw"
             />
           </div>
           <h1 className="font-semibold text-xl line-clamp-1 overflow-ellipsis">

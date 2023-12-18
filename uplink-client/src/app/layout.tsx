@@ -5,7 +5,6 @@ import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
 import MobileNav from "@/ui/MobileNav/MobileNav";
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react";
 
 export const runtime = "edge";
 export const preferredRegion = "iad1";
@@ -56,7 +55,6 @@ export default function RootLayout({
               <main className="pb-20 md:pb-0 md:pl-[64px] h-full">
                 <Nav />
                 {children}
-                <Analytics />
               </main>
             </div>
           </ToastProvider>

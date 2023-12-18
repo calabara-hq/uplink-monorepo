@@ -1,5 +1,6 @@
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import UplinkImage from "@/lib/UplinkImage"
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: false,
   loading: () => (
@@ -48,7 +49,7 @@ const ContestHeading = async ({
                 href={`/${space.name}`}
                 draggable={false}
               >
-                <Image
+                <UplinkImage
                   src={space.logoUrl}
                   alt="Org Avatar"
                   fill
@@ -85,7 +86,7 @@ const ContestHeading = async ({
           <div className="grid grid-cols-1 items-start  w-full gap-2">
             {prompt.coverUrl && (
               <ImageWrapper>
-                <Image
+                <UplinkImage
                   src={prompt.coverUrl}
                   alt="contest image"
                   sizes="20vw"

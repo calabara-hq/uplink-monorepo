@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Metadata } from "next";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
+import UplinkImage from "@/lib/UplinkImage"
 
 export const metadata: Metadata = {
   openGraph: {
@@ -38,7 +38,7 @@ const ListSpaces = async () => {
               transition-transform duration-300 hoverCard will-change-transform no-select animate-fadeIn"
           >
             <div className="relative w-28 h-28">
-              <Image
+              <UplinkImage
                 src={space.logoUrl}
                 fill
                 alt="spaceLogo"

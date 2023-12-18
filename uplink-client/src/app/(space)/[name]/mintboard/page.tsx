@@ -1,5 +1,5 @@
 import { Boundary } from "@/ui/Boundary/Boundary";
-import Image from "next/image";
+import UplinkImage from "@/lib/UplinkImage"
 import Link from "next/link";
 import { Suspense } from "react";
 import SwrProvider from "@/providers/SwrProvider";
@@ -36,7 +36,7 @@ const BoardInfo = async ({ spaceName }: { spaceName: string }) => {
                     href={`/${spaceName}`}
                     draggable={false}
                 >
-                    <Image
+                    <UplinkImage
                         src={mintBoard.space.logoUrl}
                         alt="Org Avatar"
                         fill

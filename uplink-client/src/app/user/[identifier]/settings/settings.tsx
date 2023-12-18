@@ -4,7 +4,6 @@ import { handleMutationError } from "@/lib/handleMutationError";
 import handleMediaUpload from "@/lib/mediaUpload";
 import { useSession } from "@/providers/SessionProvider";
 import { User } from "@/types/user";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useReducer, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -12,7 +11,7 @@ import { HiUser } from "react-icons/hi2";
 import { TbLoader2 } from "react-icons/tb";
 import useSWRMutation from "swr/mutation";
 import { z } from "zod";
-
+import UplinkImage from "@/lib/UplinkImage"
 
 const configurableUserSettings = z.object({
     profileAvatarUrl: z.string().min(1, { message: "profile picture is required" }),
@@ -85,7 +84,7 @@ const PFP = ({
                     onClick={() => imageUploader.current?.click()}
                 >
                     {profileAvatarBlob && (
-                        <Image src={profileAvatarBlob} alt="space avatar" fill />
+                        <UplinkImage src={profileAvatarBlob} alt="space avatar" fill />
                     )}
                     {!profileAvatarBlob && (
                         <div className="flex justify-center items-center w-full h-full">

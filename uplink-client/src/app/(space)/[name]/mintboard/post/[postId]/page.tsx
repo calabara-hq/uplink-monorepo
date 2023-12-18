@@ -2,12 +2,11 @@ import { parseIpfsUrl } from "@/lib/ipfs";
 import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
-import Image from "next/image";
 import { Suspense } from "react";
 import { BackButton, HeaderButtons } from "./client";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { MintBoardPost } from "@/types/mintBoard";
-
+import UplinkImage from "@/lib/UplinkImage"
 
 const ExpandedPostSkeleton = () => {
     return (
@@ -47,11 +46,12 @@ const PostRenderer = ({ post }: { post: MintBoardPost }) => {
                 {siteImageURI.gateway && !siteAnimationURI.gateway && (
                     <div>
                         <ImageWrapper>
-                            <Image
+                            <UplinkImage
                                 src={siteImageURI.gateway}
                                 draggable={false}
                                 alt="submission image"
                                 fill
+                                sizes="40vw"
                                 className="object-contain w-full h-full transition-transform duration-300 ease-in-out"
                             />
                         </ImageWrapper>

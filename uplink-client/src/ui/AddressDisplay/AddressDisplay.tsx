@@ -4,7 +4,8 @@ import { User } from "@/types/user";
 import Noggles from "../Noggles/Noggles";
 import useEnsName from "@/hooks/useEnsName";
 import { Session } from "@/providers/SessionProvider";
-
+import UplinkImage from "@/lib/UplinkImage";
+import {ImageWrapper} from "@/ui/Submission/MediaWrapper"
 // returns one of the following:
 // "anonymous" if address is null | undefined
 // "0x..." if address is a string and doesn't have an ens name
@@ -105,7 +106,13 @@ export const UserAvatar = ({
   size: number;
   styleOverride?: string;
 }) => {
-  if (user?.profileAvatar) return <img src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} width={size} height={size} />
+  if (user?.profileAvatar) return (
+    <div style={{ width: `${size}px` }}>
+    <ImageWrapper>
+      <UplinkImage src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} fill blur/>
+  </ImageWrapper>
+  </div>
+  )
 
   const dispAddr = user?.address ? user.address : "0x123456";
   return <NoggleAvatar address={dispAddr} size={size} styleOverride={styleOverride} />;

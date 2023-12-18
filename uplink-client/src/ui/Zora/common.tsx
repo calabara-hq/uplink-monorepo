@@ -1,4 +1,4 @@
-import Image from "next/image";
+import UplinkImage from "@/lib/UplinkImage"
 import { ImageWrapper } from "../Submission/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "../VideoPlayer";
 import { useNetwork, useSwitchNetwork } from "wagmi";
@@ -20,7 +20,7 @@ export const RenderMintMedia = ({ imageURI, animationURI }: { imageURI: string; 
     else if (gatewayImageURI) {
         return (
             <ImageWrapper>
-                <Image src={gatewayImageURI} layout="fill" objectFit="contain" alt="media" />
+                <UplinkImage src={gatewayImageURI} fill alt="media" className="object-contain"/>
             </ImageWrapper>
         )
     }
