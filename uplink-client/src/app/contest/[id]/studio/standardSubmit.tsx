@@ -16,7 +16,7 @@ import {
   HiSparkles,
 } from "react-icons/hi2";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import UplinkImage from "@/lib/UplinkImage"
 import { useSession } from "@/providers/SessionProvider";
 import { BiInfoCircle, BiPlusCircle, BiSolidCircle } from "react-icons/bi";
 import Modal, { ModalActions } from "@/ui/Modal/Modal";
@@ -215,7 +215,7 @@ const MediaUpload = ({
                       className="relative cursor-pointer h-[100px] w-[100px]"
                       onClick={() => setVideoThumbnailBlobIndex(thumbIdx)}
                     >
-                      <Image
+                      <UplinkImage
                         src={thumbOp}
                         alt="Media"
                         width={64}
@@ -261,7 +261,7 @@ const MediaUpload = ({
           >
             <HiOutlineTrash className="w-5 h-5" />
           </button>
-          <Image
+          <UplinkImage
             src={submission.primaryAssetBlob}
             alt="Media"
             width={300}

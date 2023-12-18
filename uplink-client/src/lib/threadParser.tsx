@@ -3,7 +3,7 @@ import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import Image from "next/image";
 import sanitizeHtml from "sanitize-html";
-
+import UplinkImage from "@/lib/UplinkImage"
 const createLinks = (text: string): string => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const twitterRegex = /([^\S]|^)@(\w+)/gi;
@@ -41,15 +41,15 @@ export const ParseThread = ({
                   posterUrl={tweet.previewAsset}
                 />
               ) : (
-                <div className="w-9/12 m-auto pt-4 pb-4">
+                <div className="w-full m-auto pt-4 pb-4">
                   <ImageWrapper>
-                    <Image
+                    <UplinkImage
                       key={index}
                       src={tweet.previewAsset}
                       alt="content media"
                       fill
                       className="object-contain rounded-xl w-full h-full overflow-hidden"
-                      sizes="80vw"
+                      sizes="40vw"
                     />
                   </ImageWrapper>
                 </div>

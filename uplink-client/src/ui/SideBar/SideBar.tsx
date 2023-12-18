@@ -1,8 +1,6 @@
-import Image from "next/image";
+import UplinkImage from "@/lib/UplinkImage"
 import Link from "next/link";
 import {
-  HiHome,
-  HiMagnifyingGlass,
   HiOutlineRectangleGroup,
   HiPlus,
 } from "react-icons/hi2";
@@ -13,7 +11,7 @@ export default function Sidebar() {
     <div className="h-full w-full bg-base-100 shadow-xl hidden md:flex md:flex-col py-2">
       <SideBarIcon
         icon={
-          <Image src={uplinkLogo} alt="uplink logo" height={28} width={28} />
+          <UplinkImage src={uplinkLogo} alt="uplink logo" height={28} width={28} blur={false}/>
         }
         text="Home"
         path={"/"}

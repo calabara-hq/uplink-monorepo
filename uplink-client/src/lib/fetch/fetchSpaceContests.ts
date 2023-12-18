@@ -1,6 +1,25 @@
 import handleNotFound from "../handleNotFound";
+import { Deadlines, Metadata, ContestPromptData } from '@/types/contest';
 
-const fetchSpaceContests = async (spaceName: string) => {
+
+
+export type SpaceContest = {
+    id: string;
+    tweetId: string | null;
+    deadlines: Deadlines
+    metadata: Metadata;
+    promptUrl: string;
+    promptData: ContestPromptData;
+}
+
+export type FetchSpaceContestResponse = {
+    id: string;
+    logoUrl: string;
+    contests: Array<SpaceContest>
+}
+
+
+const fetchSpaceContests = async (spaceName: string): Promise<FetchSpaceContestResponse> => {
 
     const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
         method: "POST",
@@ -12,6 +31,8 @@ const fetchSpaceContests = async (spaceName: string) => {
             query: `
                 query space($name: String!){
                   space(name: $name) {
+                    id
+                    logoUrl
                     contests {
                         id
                         tweetId
@@ -38,10 +59,9 @@ const fetchSpaceContests = async (spaceName: string) => {
         .then((res) => res.json())
         .then(res => res.data.space)
         .then(handleNotFound)
-        .then((res) => res.contests)
-        .then(async contests => {
-            return await Promise.all(
-                contests.map(async (contest) => {
+        .then(async spaceWithContests => {
+            const resolvedContests = await Promise.all(
+                spaceWithContests.contests.map(async (contest) => {
                     // fetch prompt url
                     const promptData = await fetch(contest.promptUrl).then((res) =>
                         res.json()
@@ -52,6 +72,10 @@ const fetchSpaceContests = async (spaceName: string) => {
                     };
                 })
             );
+            return {
+                ...spaceWithContests,
+                contests: resolvedContests,
+            }
         })
     return data;
 }

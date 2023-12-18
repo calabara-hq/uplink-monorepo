@@ -28,7 +28,6 @@ export default async function Page({ params }: { params: { name: string } }) {
   return (
     <div className="w-11/12 h-full lg:w-9/12 m-auto">
       <Suspense fallback={<Skeleton />}>
-        {/*@ts-expect-error*/}
         <PageContent params={params} />
       </Suspense>
     </div>

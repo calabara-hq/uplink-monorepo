@@ -2,8 +2,6 @@
 "use client";
 import type { Submission } from "@/types/submission";
 import { useInView } from "react-intersection-observer";
-import Image from "next/image";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { isMobile } from "@/lib/isMobile";
 import dynamic from "next/dynamic";
@@ -14,6 +12,7 @@ import { ParseThread } from "@/lib/threadParser";
 import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
 import { Decimal } from "decimal.js";
 import formatDecimal from "@/lib/formatDecimal";
+import UplinkImage from "@/lib/UplinkImage"
 
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: false,
@@ -96,7 +95,7 @@ const RenderVideoSubmission = ({
 const RenderImageSubmission = ({ submission }) => {
   return (
     <ImageWrapper>
-      <Image
+      <UplinkImage
         src={
           submission.type === "standard"
             ? submission.data.previewAsset
@@ -105,7 +104,6 @@ const RenderImageSubmission = ({ submission }) => {
         draggable={false}
         alt="submission image"
         fill
-        sizes="30vw"
         className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
       />
     </ImageWrapper>

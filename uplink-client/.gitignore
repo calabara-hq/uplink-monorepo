@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 .vscode
+.yarn/cache
 # testing
 /coverage
 /storybook-static
@@ -32,6 +33,9 @@ yarn-error.log*
 .env
 # vercel
 .vercel
+
+# cloudflare
+.wrangler
 
 # typescript
 *.tsbuildinfo

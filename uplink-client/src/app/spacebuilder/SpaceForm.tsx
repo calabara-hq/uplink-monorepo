@@ -14,10 +14,11 @@ import {
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import WalletConnectButton from "../../ui/ConnectButton/WalletConnectButton";
-import Image from "next/image";
 import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
 import { mutateSpaces } from "../mutate";
+import UplinkImage from "@/lib/UplinkImage"
+
 export default function SpaceForm({
   initialState,
   isNewSpace,
@@ -223,7 +224,7 @@ const SpaceLogo = ({
           onClick={() => imageUploader.current?.click()}
         >
           {state.logoBlob && (
-            <Image src={state.logoBlob} alt="space avatar" fill />
+            <UplinkImage src={state.logoBlob} alt="space avatar" fill />
           )}
           {!state.logoBlob && (
             <div className="flex justify-center items-center w-full h-full">

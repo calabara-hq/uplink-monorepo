@@ -12,15 +12,14 @@ import SubmissionModal from "@/ui/Submission/SubmissionModal";
 import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
 import MintEdition from "@/ui/Zora/MintEdition";
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from "date-fns";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaRegClock } from "react-icons/fa";
 import { HiCheckBadge } from "react-icons/hi2";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import { useInView } from "react-intersection-observer";
+import UplinkImage from "@/lib/UplinkImage"
 
-
-const MintBoardPost = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }) => {
+const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }) => {
 
     const { name, description, imageURI, animationURI } = post.edition;
 
@@ -47,7 +46,7 @@ const MintBoardPost = ({ post, footer }: { post: MintBoardPost, footer: React.Re
                 <RenderInteractiveVideoWithLoader videoUrl={siteAnimationURI.gateway} posterUrl={siteAnimationURI.gateway} isActive={true} />
             ) : (
                 <ImageWrapper>
-                    <Image
+                    <UplinkImage
                         src={siteImageURI.gateway}
                         draggable={false}
                         alt="submission image"
@@ -248,7 +247,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
     const [focusedSubmission, setFocusedSubmission] = useState(null);
     const isMobileDevice = isMobile();
 
-    const boardPosts = isPopular ? liveBoard?.posts?.sort((a, b) => b.totalMints - a.totalMints) : liveBoard?.posts?.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+    const boardPosts = isPopular ? liveBoard?.posts?.toSorted((a, b) => b.totalMints - a.totalMints) : [...liveBoard.posts];
 
     useEffect(() => {
         if (window) window.sessionStorage.setItem('nav', 'true')
@@ -310,7 +309,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
                         onMouseLeave={() => !isMobileDevice && setIsActive(false)}
                         onClick={() => openMintModal(post)}
                     >
-                        <MintBoardPost
+                        <Post
                             post={post}
                             footer={
                                 <PostFooter

@@ -1,9 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 
-const MintSubmissionModal = ({ isModalOpen, onClose, children }) => {
+const MintSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen: boolean, onClose: () => void, children: React.ReactNode }) => {
 
   if (isModalOpen) {
     return ReactDOM.createPortal(
@@ -20,7 +19,7 @@ const MintSubmissionModal = ({ isModalOpen, onClose, children }) => {
 }
 
 
-const ExpandSubmissionModal = ({ isModalOpen, onClose, children }) => {
+const ExpandSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen: boolean, onClose: () => void, children: React.ReactNode }) => {
 
   if (isModalOpen) {
 
@@ -37,7 +36,7 @@ const ExpandSubmissionModal = ({ isModalOpen, onClose, children }) => {
   return null;
 }
 
-const ShareSubmissionModal = ({ isModalOpen, onClose, children }) => {
+const ShareSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen: boolean, onClose: () => void, children: React.ReactNode }) => {
   if (isModalOpen) {
     return ReactDOM.createPortal(
       <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-black bg-opacity-80 transition-colors duration-300 ease-in-out">
@@ -48,6 +47,7 @@ const ShareSubmissionModal = ({ isModalOpen, onClose, children }) => {
         </div>
       </div>
       , document.body);
+
   }
   return null;
 }

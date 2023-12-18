@@ -3,10 +3,11 @@ import { ThreadItem, ApiThreadItem } from "@/hooks/useThreadCreator";
 import { useSession } from "@/providers/SessionProvider";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import CreateThread from "@/ui/CreateThread/CreateThread";
+import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+
 import Stack from "@/ui/Stack/Stack";
 import TwitterConnectButton from "@/ui/TwitterConnectButton/TwitterConnectButton";
 import { nanoid } from "nanoid";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { BiInfoCircle, BiPlusCircle } from "react-icons/bi";
 import useSWRMutation from "swr/mutation";
@@ -27,6 +28,7 @@ import { handleMutationError } from "@/lib/handleMutationError";
 import { SimplePreview } from "@/ui/Submission/CardSubmission";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import { useContestInteractionApi } from "@/hooks/useContestInteractionAPI";
+import UplinkImage from "@/lib/UplinkImage"
 
 async function postTwitterSubmission(
   url,
@@ -217,12 +219,12 @@ const Step2 = ({ contestId }: { contestId: string }) => {
               <p className="font-bold">Twitter</p>
               {session?.user?.twitter ? (
                 <div className="flex flex-col gap-2 items-center justify-between h-full ">
-                  <Image
+                  <UplinkImage
                     src={session?.user?.twitter?.profile_image_url_large}
                     alt="twitter profile image"
                     width={96}
                     height={96}
-                    className="rounded-full"
+                    className="rounded-full w-full h-full max-w-[100px] max-h-[100px] m-auto"
                   />
                   <p className="font-bold">
                     @{session?.user?.twitter?.username}
@@ -616,7 +618,7 @@ const ExplainerSection = () => {
         <div className="m-auto w-full max-w-[300px] sm:max-w-sm  animate-springUp">
           <div className="mockup-window bg-base-100 border border-border">
             <div className="grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] bg-base-200 p-4">
-              <Image
+              <UplinkImage
                 src={"/swim-shady.png"}
                 alt="swim shady"
                 width={50}
@@ -627,7 +629,7 @@ const ExplainerSection = () => {
                 <p className="text-t1">Noun 9999 in 3333D!</p>
                 <div className="flex flex-col w-10/12 m-auto">
                   <div className="relative">
-                    <Image
+                    <UplinkImage
                       src={"/9999-winner.jpeg"}
                       alt="twitter submission"
                       width={200}

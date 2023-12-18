@@ -10,6 +10,7 @@ import {
   MediaMuteButton,
   MediaLoadingIndicator,
 } from "media-chrome/dist/react";
+import { transformVideoAsset } from './index';
 
 const InteractiveVideoPlayer = ({ videoUrl, posterUrl, isActive }) => {
   const vidRef = useRef<HTMLVideoElement>(null);
@@ -32,19 +33,19 @@ const InteractiveVideoPlayer = ({ videoUrl, posterUrl, isActive }) => {
 
   return (
     <MediaController className="w-full h-fit bg-transparent animate-fadeIn">
-    <video
+      <video
         ref={vidRef}
         autoPlay={isActive}
         playsInline
         slot="media"
         loop={true}
-        src={videoUrl}
-        poster={posterUrl}
+        src={videoUrl ? transformVideoAsset(videoUrl, 'video', 300) : null}
+        poster={posterUrl ? transformVideoAsset(posterUrl, 'image', 300) : null}
         preload="auto"
         muted
         crossOrigin=""
         className="w-full aspect-square object-cover rounded-2xl"
-        />
+      />
       <MediaLoadingIndicator slot="centered-chrome" />
       <div slot="top-chrome" className="flex flex-row w-full mt-2">
         {isActive ? (

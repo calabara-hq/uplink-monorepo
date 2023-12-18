@@ -16,10 +16,10 @@ import { AddFundsButton, SwitchNetworkButton } from "@/ui/Zora/common";
 import { Submission } from "@/types/submission";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { User } from "@/types/user";
-import Image from "next/image";
 import { HiPencil } from "react-icons/hi2";
 import { FaTwitter } from "react-icons/fa";
 import { MdOutlineCancelPresentation } from "react-icons/md";
+import UplinkImage from "@/lib/UplinkImage"
 
 export const ManageAccountButton = ({ }) => {
 
@@ -58,7 +58,7 @@ export const ClientUserProfile = ({ accountAddress }: { accountAddress: string }
         <div className="flex flex-col md:flex-row md:justify-between md:items-center md:m-auto gap-4 w-full">
             <div className="relative w-fit pt-8 m-auto mt-0 md:mr-auto md:ml-0">
                 <div className="absolute top-0 left-0 right-0 ml-auto mr-auto md:-left-5 md:right-full w-32 h-32 z-10">
-                    {user.profileAvatar ? (<Image
+                    {user.profileAvatar ? (<UplinkImage
                         src={user.profileAvatar}
                         alt="avatar"
                         fill

@@ -66,7 +66,8 @@ const mutations = {
 
             const user = await authController.getUser(context);
             const isTwitterAuth = Boolean(user?.twitter?.accessToken)
-            const isTwitterExpired = (new Date(user?.twitter?.expiresAt ?? '1') > new Date(Date.now()));
+            const isTwitterExpired = user?.twitter?.expiresAt ? new Date(user?.twitter?.expiresAt) < new Date(Date.now()) : false;
+            
             if (!user || !isTwitterAuth || isTwitterExpired) throwMutationError('UNAUTHORIZED')
 
             const isSpaceAdmin = await dbIsUserSpaceAdmin(user, parseInt(args.spaceId))
