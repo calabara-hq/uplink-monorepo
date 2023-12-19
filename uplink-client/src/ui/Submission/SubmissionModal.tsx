@@ -46,7 +46,6 @@ const ShareSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen:
         </div>
       </div>
       );
-
   }
   return null;
 }
