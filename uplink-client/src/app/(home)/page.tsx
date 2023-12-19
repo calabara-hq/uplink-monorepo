@@ -22,9 +22,12 @@ import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 import { RenderPopularSubmissions } from "@/ui/Submission/SubmissionDisplay";
 import UplinkImage from "@/lib/UplinkImage";
 <<<<<<< HEAD:uplink-client/src/app/(home)/page.tsx
+<<<<<<< HEAD:uplink-client/src/app/(home)/page.tsx
 import Swiper from "@/ui/Swiper/Swiper";
 =======
 >>>>>>> 7b13570e6158b9e3d7635cb388619bacaf12accf:uplink-client/src/app/page.tsx
+=======
+>>>>>>> main:uplink-client/src/app/page.tsx
 
 
 const DelayedGridLayout = dynamic(
