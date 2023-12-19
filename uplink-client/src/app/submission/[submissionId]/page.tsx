@@ -17,7 +17,7 @@ const ExpandedSubmissionSkeleton = () => {
                 </div>
             </div>
             <div className="w-full h-0.5 bg-base-200" />
-            <div className="w-96 m-auto h-96 bg-base-100 shimmer rounded-lg" />
+            <div className="w-full m-auto h-96 bg-base-100 shimmer rounded-lg" />
         </div>
     );
 };

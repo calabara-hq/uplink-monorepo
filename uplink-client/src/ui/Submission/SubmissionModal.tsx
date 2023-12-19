@@ -1,11 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
-import ReactDOM from "react-dom";
 
 const MintSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen: boolean, onClose: () => void, children: React.ReactNode }) => {
 
   if (isModalOpen) {
-    return ReactDOM.createPortal(
+    return (
       <div className="modal modal-open bg-black transition-colors duration-500 ease-in-out">
         <div
           className="modal-box bg-black border border-[#ffffff14] animate-springUp max-w-4xl"
@@ -13,7 +12,7 @@ const MintSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen: 
           {children}
         </div>
       </div>
-      , document.body);
+      );
   }
   return null;
 }
@@ -23,7 +22,7 @@ const ExpandSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen
 
   if (isModalOpen) {
 
-    return ReactDOM.createPortal(
+    return (
       <div className="modal modal-open bg-black  transition-colors duration-500 ease-in-out w-[100vw]">
         <div
           className="modal-box bg-black animate-springUp max-w-full h-[100vh] overflow-y-scroll"
@@ -31,14 +30,14 @@ const ExpandSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen
           {children}
         </div>
       </div>
-      , document.body);
+      );
   }
   return null;
 }
 
 const ShareSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen: boolean, onClose: () => void, children: React.ReactNode }) => {
   if (isModalOpen) {
-    return ReactDOM.createPortal(
+    return (
       <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-black bg-opacity-80 transition-colors duration-300 ease-in-out">
         <div
           className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-xl animate-springUp"
@@ -46,8 +45,7 @@ const ShareSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen:
           {children}
         </div>
       </div>
-      , document.body);
-
+      );
   }
   return null;
 }

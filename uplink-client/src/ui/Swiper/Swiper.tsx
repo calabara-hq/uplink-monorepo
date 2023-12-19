@@ -1,96 +1,72 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { register } from "swiper/element";
-import { Navigation, Grid } from "swiper/modules";
-import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import React, { useState, useEffect, useRef } from 'react';
+import { isMobile } from "@/lib/isMobile";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
+import { useDebounce } from '@/hooks/useDebounce';
 
-register();
-
-const Swiper = (props: {
-  children: React.ReactNode;
-  spaceBetween?: number;
-  slidesPerView?: number;
-  slidesPerGroup?: number;
-  breakpoints?: any;
-}) => {
-  const swiperRef = useRef(null);
-  const { children, ...rest } = props;
-  const [isReady, setIsReady] = useState(false);
-  const [disablePrev, setDisablePrev] = useState(true);
-  const [disableNext, setDisableNext] = useState(false);
-
-  const handlePrev = useCallback(() => {
-    if (!swiperRef.current) return;
-    swiperRef.current.swiper.slidePrev();
-  }, []);
-
-  const handleNext = useCallback(() => {
-    if (!swiperRef.current) return;
-    swiperRef.current.swiper.slideNext();
-  }, []);
+const Swiper = ({ listSize, children }) => {
+  const [isStart, setIsStart] = useState(true);
+  const [isEnd, setIsEnd] = useState(true);
+  const scrollContainerRef = useRef(null);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  
+  const calculateButtonVisibility = (timeout: number) => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setTimeout(() => {
+        setIsStart(scrollLeft === 0)
+        setIsEnd(scrollLeft + clientWidth >= scrollWidth)
+      },timeout)
+    }
+  };
 
   useEffect(() => {
-    // Register Swiper web component
+    setIsMobileDevice(isMobile());
+    const container = scrollContainerRef.current;
 
-    // pass component props to parameters
-    const params = {
-      ...rest,
-      preventClicks: true,
-      preventClicksPropagation: true,
-      on: {
-        init: (swiper) => {
-          setIsReady(true);
-        },
-        slideChange: (swiper) => {
-          setDisablePrev(swiper.isBeginning);
-          setDisableNext(swiper.isEnd);
-        },
-      },
-      // modules: [Grid],
-      // grid: { rows: 1 },
-      // centeredSlides: true,
-      // centeredSlidesBounds: true,
-      injectStyles: [
-        `
-        .swiper {
-          overflow-y: visible;
-        }
-        `,
-      ],
-    };
+    if (container) {
+      container.addEventListener('scroll', () => calculateButtonVisibility(500));
 
-    // Assign it to swiper element
-    Object.assign(swiperRef.current, params);
+      calculateButtonVisibility(0);
 
-    // initialize swiper
-    swiperRef.current.initialize();
+      // Remove the event listener when the component unmounts
+      return () => {
+        container.removeEventListener('scroll', () => calculateButtonVisibility(500) );
+      };
+    }
   }, []);
 
+  const handleScroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const containerWidth = scrollContainerRef.current.offsetWidth;
+      const scrollAmount = direction === 'next' ? containerWidth : -containerWidth;
+      scrollContainerRef.current.scrollTo({
+        left: scrollContainerRef.current.scrollLeft + scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <div className="mx-auto w-full px-12 relative">
-      {/* @ts-expect-error */}
-      <swiper-container init="false" ref={swiperRef}>
-        {isReady && children}
-        {/* @ts-expect-error */}
-      </swiper-container>
-      {!disablePrev && (
-        <div
-          className="absolute hidden md:flex md:flex-col justify-center items-center hover:bg-base-100 opacity-60 h-full w-8 left-0 top-0 cursor-pointer transition-all duration-300 ease-in-out rounded-lg"
-          onClick={handlePrev}
-        >
-          <HiChevronLeft className="h-10 w-10 text-t1" />
+    <div className="mx-auto px-2 sm:px-8 w-full h-full flex gap-2">
+      {!isMobileDevice ? !isStart ? (
+        <div className="rounded-lg bg-base-200 bg-opacity-30 cursor-pointer hover:bg-opacity-50 transition-all duration-200 flex flex-col items-center justify-center p-1 animate-fadeIn" onClick={() => handleScroll('prev')}>
+          <MdKeyboardArrowLeft className="w-6 h-6"/>
         </div>
-      )}
-      {!disableNext && (
-        <div
-          className="absolute hidden md:flex md:flex-col justify-center items-center hover:bg-base-100 opacity-60 h-full w-8 right-0 top-0 cursor-pointer transition-all duration-300 ease-in-out rounded-lg"
-          onClick={handleNext}
-        >
-          <HiChevronRight className="h-10 w-10 text-t1" />
+      ) : (<span className="w-7" />): null }
+      <div
+        className="no-scrollbar m-auto h-full w-full snap-x snap-mandatory flex flex-row gap-4 overflow-auto px-0 py-2"
+        ref={scrollContainerRef}
+      >
+        {children}
+      </div>
+      {!isMobileDevice ? !isEnd ? (
+        <div className="rounded-lg bg-base-200 bg-opacity-30 cursor-pointer hover:bg-opacity-50 transition-all duration-200 flex flex-col items-center justify-center p-1 animate-fadeIn" onClick={() => handleScroll('next')}>
+          <MdKeyboardArrowRight className="w-6 h-6"/>
         </div>
-      )}
+      ) : (<span className="w-7" />) : null }
     </div>
   );
 };
 
-export default Swiper;
+export default Swiper

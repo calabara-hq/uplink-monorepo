@@ -21,16 +21,14 @@ import fetchActiveContests, {
 import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 import { RenderPopularSubmissions } from "@/ui/Submission/SubmissionDisplay";
 import UplinkImage from "@/lib/UplinkImage";
+<<<<<<< HEAD:uplink-client/src/app/(home)/page.tsx
+<<<<<<< HEAD:uplink-client/src/app/(home)/page.tsx
+import Swiper from "@/ui/Swiper/Swiper";
+=======
+>>>>>>> 7b13570e6158b9e3d7635cb388619bacaf12accf:uplink-client/src/app/page.tsx
+=======
+>>>>>>> main:uplink-client/src/app/page.tsx
 
-const Swiper = dynamic(() => import("@/ui/Swiper/Swiper"), {
-  ssr: false,
-  loading: () => {
-    return <SwiperSkeleton />;
-  },
-});
-const SwiperSlide = dynamic(() => import("@/ui/Swiper/SwiperSlide"), {
-  ssr: false,
-});
 
 const DelayedGridLayout = dynamic(
   () => import("@/ui/DelayedGrid/DelayedGridLayout"),
@@ -90,6 +88,7 @@ const BannerSection = () => {
                   height={50}
                   sizes="10vw"
                   className="rounded-full"
+                  blur={false}
                 />
                 <div className="flex-grow flex flex-col gap-2 ml-4">
                   <p className="text-t1">
@@ -103,6 +102,7 @@ const BannerSection = () => {
                         className="rounded-lg object-contain"
                         width={600}
                         priority
+                        blur={false}
                       />
                     </div>
                     <div className="text-sm text-t2 italic font-[500] self-start text-left">
@@ -144,6 +144,7 @@ const BannerSection = () => {
         alt=""
         fill
         className="absolute !h-[70%] !bottom-0 !left-0 !top-auto object-cover"
+        blur={false}
       />
     </div>
   );
@@ -164,7 +165,7 @@ const ContestCard = ({
   return (
     <Link
       className="card bg-base-100 animate-scrollInX
-    cursor-pointer border border-border rounded-2xl p-4 h-fit overflow-hidden w-full transform 
+    cursor-pointer border border-border rounded-2xl p-4 h-full overflow-hidden w-full min-w-[250px] transform 
     transition-transform duration-300 hoverCard will-change-transform no-select"
       href={linkTo}
       draggable={false}
@@ -208,46 +209,19 @@ const ActiveContests = async () => {
   if (activeContests.length > 0) {
     return (
       <div className="w-full flex flex-col gap-4">
-        <h1 className="font-bold text-3xl text-t1 px-12">Active Contests</h1>
-
-        <div className="w-full min-h-[296px]">
-          <Swiper
-            spaceBetween={30}
-            slidesPerView={3.2}
-            slidesPerGroup={3}
-            breakpoints={{
-              320: {
-                slidesPerView: 1.2,
-                slidesPerGroup: 1,
-                spaceBetween: 10,
-              },
-              500: {
-                slidesPerView: 2.2,
-                slidesPerGroup: 2,
-                spaceBetween: 10,
-              },
-              850: {
-                slidesPerView: 3.2,
-                slidesPerGroup: 3,
-                spaceBetween: 16,
-              },
-              1200: {
-                slidesPerView: 4.2,
-                slidesPerGroup: 4,
-                spaceBetween: 16,
-              },
-            }}
-          >
-            {activeContests.map((contest, index) => (
-              <SwiperSlide key={index}>
-                <ContestCard
-                  contest={contest}
-                  linkTo={`/contest/${contest.id}`}
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+        <div className="flex flex-row gap-2 px-2 md:px-12 items-end">
+          <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
         </div>
+        <Swiper listSize={activeContests.length -1}>
+          {activeContests.map((contest, index) => (
+            <div className="snap-start snap-always h-full" key={index}>
+              <ContestCard
+                contest={contest}
+                linkTo={`/contest/${contest.id}`}
+              />
+            </div>
+          ))}
+        </Swiper>
       </div>
     );
   }
@@ -257,10 +231,11 @@ const ActiveContests = async () => {
 const PopularSubmissions = async () => {
   const popularSubmissions = await fetchPopularSubmissions();
   if (popularSubmissions.length === 0) return null;
+
   return (
     <div className="w-full flex flex-col gap-2 m-auto">
-      <h1 className="font-bold text-3xl text-t1 px-12">Weekly Wave</h1>
-      <h2 className="text-lg text-t2 px-12">
+      <h1 className="font-bold text-3xl text-t1 px-2 md:px-12">Weekly Wave</h1>
+      <h2 className="text-lg text-t2 px-2 md:px-12">
         Popular submissions. Updated weekly.
       </h2>
       <RenderPopularSubmissions submissions={popularSubmissions} />

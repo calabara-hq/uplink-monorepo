@@ -8,8 +8,8 @@ const normalizeSrc = (src) => {
 
 const imageLoader = ({ src, width, quality }) => {
     const qualitySetting = quality || 'auto:best'; // default to auto:good if not specified
-    const adjustedWidth = width > 600 ? 600 : width
-    const modifiers = `w_${adjustedWidth},q_${qualitySetting},c_limit,f_auto`; // c_fill for Cloudinary fill mode
+    //const adjustedWidth = width > 600 ? 600 : width
+    const modifiers = `w_${width},q_${qualitySetting},c_limit,f_auto`; // c_fill for Cloudinary fill mode
     return `https://res.cloudinary.com/drrkx8iye/image/fetch/${modifiers}/${normalizeSrc(src)}`;
 };
 
