@@ -4,13 +4,12 @@ import { Submission, isNftSubmission, isStandardSubmission, isTwitterSubmission 
 import { notFound } from "next/navigation";
 import CreateEdition from "@/ui/Zora/CreateEdition";
 import uplinkLoadingGif from "@/../public/uplink-loading.gif"
-import Image from "next/image";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import useMe from "@/hooks/useMe";
 import { useSession } from "@/providers/SessionProvider";
 import { useEffect } from "react";
 import { useContestState } from "@/providers/ContestStateProvider";
-
+import UplinkImage from "@/lib/UplinkImage"
 
 const LoadingDialog = () => {
     return (
@@ -68,7 +67,7 @@ export default function Page({
         return (
             <div className="w-full h-[95vh] flex flex-col items-center justify-center animate-fadeIn">
                 <p className="text-t1 font-bold text-2xl text-center">You are not the owner of this content.</p>
-                <Image src={uplinkLoadingGif} alt="loading" width={250} height={250} sizes="20vw" />
+                <UplinkImage src={uplinkLoadingGif} alt="loading" width={250} height={250} sizes="20vw" />
             </div>
         )
     }
@@ -76,7 +75,7 @@ export default function Page({
         return (
             <div className="w-full h-[95vh] flex flex-col items-center justify-center animate-fadeIn">
                 <p className="text-t1 font-bold text-2xl text-center">A drop has already been created for this submission.</p>
-                <Image src={uplinkLoadingGif} alt="loading" width={250} height={250} sizes="20vw" />
+                <UplinkImage src={uplinkLoadingGif} alt="loading" width={250} height={250} sizes="20vw" />
             </div>
         )
     }

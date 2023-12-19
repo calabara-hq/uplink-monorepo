@@ -7,7 +7,6 @@ import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import { AddFundsButton, RenderMintMedia, SwitchNetworkButton } from "@/ui/Zora/common";
 import { uint64MaxSafe } from "@/utils/uint64";
 import { format } from "date-fns";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { BiPlusCircle, BiSolidCircle } from "react-icons/bi";
@@ -24,6 +23,8 @@ import useLiveMintBoard from "@/hooks/useLiveMintBoard";
 import { Boundary } from "@/ui/Boundary/Boundary";
 import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
 import { getChainName } from "@/lib/chains/supportedChains";
+import UplinkImage from "@/lib/UplinkImage"
+
 
 const MediaUpload = ({
     handleFileChange,
@@ -106,7 +107,7 @@ const MediaUpload = ({
                                             className="relative cursor-pointer h-[100px] w-[100px]"
                                             onClick={() => setThumbnailBlobIndex(thumbIdx)}
                                         >
-                                            <Image
+                                            <UplinkImage
                                                 src={thumbOp}
                                                 alt="Media"
                                                 fill
@@ -153,7 +154,7 @@ const MediaUpload = ({
                     >
                         <HiOutlineTrash className="w-5 h-5" />
                     </button>
-                    <Image
+                    <UplinkImage
                         src={imageBlob}
                         alt="Media"
                         width={300}

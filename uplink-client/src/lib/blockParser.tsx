@@ -1,11 +1,10 @@
 "use client";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import type { OutputData } from "@editorjs/editorjs";
-import Image from "next/image";
 import React, { useEffect } from "react";
 import sanitizeHtml from "sanitize-html";
 import Output, { LinkToolOutput, ListOutput, ParagraphOutput } from 'editorjs-react-renderer';
-
+import UplinkImage from "@/lib/UplinkImage"
 const createLinks = (text: string): string => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const twitterRegex = /([^\S]|^)@(\w+)/gi;
@@ -22,14 +21,14 @@ const createLinks = (text: string): string => {
 
 const ImageRenderer = ({ data }: { data: any }) => {
   return (
-    <div className="w-9/12 m-auto pt-4 pb-4">
+    <div className="m-auto pt-4 pb-4">
       <ImageWrapper>
-        <Image
+        <UplinkImage
           src={data.file.url}
           alt="content media"
           fill
           className="object-contain rounded-xl w-full h-full overflow-hidden"
-          sizes="80vw"
+          sizes="40vw"
         />
       </ImageWrapper>
     </div>

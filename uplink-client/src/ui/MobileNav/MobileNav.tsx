@@ -1,14 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
 import { HiOutlineRectangleGroup } from "react-icons/hi2";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import uplinkLogo from "../../../public/uplink-logo.svg";
-
+import UplinkImage from "@/lib/UplinkImage"
 const MobileNav = () => {
   return (
     <>
       <Link href="/" draggable={false}>
-        <Image src={uplinkLogo} alt="uplink logo" height={20} width={20} />
+        <UplinkImage src={uplinkLogo} alt="uplink logo" height={20} width={20} />
         <span className="btm-nav-label">Home</span>
       </Link>
 

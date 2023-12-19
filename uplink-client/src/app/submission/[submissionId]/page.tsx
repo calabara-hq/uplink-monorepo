@@ -42,7 +42,6 @@ export default async function Page({
         <div className="grid grid-cols-1 w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full mt-4 p-4">
             <BackButton context={searchParams?.context ?? null} />
             <Suspense fallback={<ExpandedSubmissionSkeleton />}>
-                {/*@ts-expect-error*/}
                 <PageContent submissionId={params.submissionId} referrer={searchParams?.referrer ?? null} context={searchParams?.context ?? null} />
             </Suspense>
         </div>

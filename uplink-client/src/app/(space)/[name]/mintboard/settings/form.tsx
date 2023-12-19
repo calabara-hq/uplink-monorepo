@@ -193,9 +193,6 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
     const router = useRouter();
     const chainOptions = supportedChains.map(chain => { return { value: String(chain.id), label: chain.name } });
     const currentChain = chainOptions.find(chain => chain.value === String(state.chainId));
-    useEffect(() => {
-        console.log(state)
-    }, [state])
 
     const { trigger, data: configureMintBoardResponse, error, isMutating, reset } = useSWRMutation(
         `/api/configureMintBoard/${spaceName}`,

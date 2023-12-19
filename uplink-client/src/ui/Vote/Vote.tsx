@@ -11,12 +11,12 @@ import {
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import formatDecimal from "@/lib/formatDecimal";
 import { useContestState } from "@/providers/ContestStateProvider";
-import Image from "next/image";
 import { HiTrash } from "react-icons/hi2";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import { UserVote } from "@/hooks/useContestInteractionAPI";
 import { useVote } from "@/hooks/useVote";
 import { VotableSubmission } from "@/hooks/useVote";
+import UplinkImage from "@/lib/UplinkImage"
 const SubmissionVoteInput = ({
   submission,
   mode,
@@ -119,7 +119,7 @@ const CartMediaSubmission = ({ submission }: { submission: VotableSubmission }) 
   return (
     <div className="relative w-full h-full">
       <figure className="absolute inset-0 overflow-hidden">
-        <Image
+        <UplinkImage
           src={src}
           alt="submission image"
           fill

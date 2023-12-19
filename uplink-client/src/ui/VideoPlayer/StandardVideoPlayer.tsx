@@ -9,6 +9,7 @@ import {
   MediaLoadingIndicator,
 } from "media-chrome/dist/react";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
+import {transformVideoAsset} from './index'
 
 const StandardVideoPlayer = ({ videoUrl, posterUrl }: { videoUrl: string, posterUrl: string }) => {
   return (
@@ -17,11 +18,11 @@ const StandardVideoPlayer = ({ videoUrl, posterUrl }: { videoUrl: string, poster
         autoPlay={false}
         playsInline
         slot="media"
-        src={videoUrl || null}
+        src={videoUrl ? transformVideoAsset(videoUrl, 'video', 600) : null}
         preload="auto"
         crossOrigin=""
         className="rounded-2xl aspect-video"
-        poster={posterUrl || null}
+        poster={posterUrl ? transformVideoAsset(posterUrl, 'image', 600) : null}
       />
       <MediaLoadingIndicator slot="centered-chrome" />
 

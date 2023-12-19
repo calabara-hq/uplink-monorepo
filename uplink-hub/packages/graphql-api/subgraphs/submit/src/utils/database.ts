@@ -131,20 +131,6 @@ export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Arr
     });
 }
 
-
-/**
-
-            CASE
-                WHEN nftDrop.chainId IS NULL AND nftDrop.contractAddress IS NULL AND nftDrop.dropConfig IS NULL THEN NULL
-                ELSE JSON_OBJECT(
-                    'chainId', nftDrop.chainId,
-                    'contractAddress', nftDrop.contractAddress,
-                    'dropConfig', nftDrop.dropConfig
-                )
-            END AS edition,
-
- */
-
 // get the last 3 contests that have ended, get submissions with more than 3 unique votes, and take a random sample of 20
 
 export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissionType>> => {
@@ -216,8 +202,6 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
         ) AS edition ON submissionDrop.editionId = edition.id
         ORDER BY RAND()
 `);
-
-    console.log(JSON.stringify(data.rows, null, 2))
     // sample the subs that have more than 3 unique votes
     // if length of 3vote array is < 10, sample the subs that have 2 unique votes
     // if length of 2vote array is < 10, just return the original array
