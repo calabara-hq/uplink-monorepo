@@ -47,6 +47,18 @@ ol {
   margin-left: 2rem !important;
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.edge-mask {
+  mask-image: linear-gradient(to right, transparent, white 8px calc(100% - 8px), transparent);
+}
+
 
 @media (hover: hover) {
   .hoverCard:hover {

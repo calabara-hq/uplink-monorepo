@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
-import Image from "next/image";
 import { ThreadItem, useThreadCreator } from "@/hooks/useThreadCreator";
 import { HiOutlineTrash, HiPhoto, HiSparkles, HiXMark } from "react-icons/hi2";
 import TwitterConnectButton from "../TwitterConnectButton/TwitterConnectButton";
@@ -10,7 +9,8 @@ import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import { BiPlusCircle, BiSolidCircle } from "react-icons/bi";
 import { FaTwitterSquare } from "react-icons/fa";
 import { RenderStandardVideoWithLoader } from "../VideoPlayer";
-
+import UplinkImage from "@/lib/UplinkImage"
+import { ImageWrapper } from "../Submission/MediaWrapper";
 const isStringBlank = (str: string) => {
   return !str.trim();
 };
@@ -39,13 +39,15 @@ const RenderAccount = ({ isBarVisible }: { isBarVisible: boolean }) => {
   if (session?.user?.twitter) {
     return (
       <div className="flex flex-col items-center">
-        <Image
-          src={session.user.twitter.profile_image_url_large}
-          alt="User Avatar"
-          width={50}
-          height={50}
-          className="rounded-full"
-        />
+        <ImageWrapper>
+          <UplinkImage
+            src={session.user.twitter.profile_image_url_large}
+            alt="User Avatar"
+            width={50}
+            height={50}
+            className="rounded-full w-full max-w-[50px] h-full max-h-[50px]"
+          />
+        </ImageWrapper>
         {isBarVisible && <div className="bg-border w-1 h-full" />}
       </div>
     );
@@ -78,8 +80,8 @@ const RenderMedia = ({
           posterUrl={
             threadItem.videoThumbnailBlobIndex !== null
               ? threadItem.videoThumbnailOptions[
-                  threadItem.videoThumbnailBlobIndex
-                ]
+              threadItem.videoThumbnailBlobIndex
+              ]
               : ""
           }
         />
@@ -120,7 +122,7 @@ const RenderMedia = ({
               <HiOutlineTrash className="w-5 h-5" />
             </button>
           )}
-          <Image
+          <UplinkImage
             src={threadItem.primaryAssetBlob}
             alt="Tweet Media"
             width={200}
@@ -255,16 +257,15 @@ const TweetFooter = ({
                       setTweetVideoThumbnailBlobIndex(tweet.id, thumbIdx)
                     }
                   >
-                    <Image
+                    <UplinkImage
                       src={thumbOp}
                       alt="Tweet Media"
                       width={64}
                       height={64}
-                      className={`hover:opacity-50 rounded aspect-video object-contain ${
-                        tweet.videoThumbnailBlobIndex === thumbIdx
+                      className={`hover:opacity-50 rounded aspect-video object-contain ${tweet.videoThumbnailBlobIndex === thumbIdx
                           ? "opacity-50"
                           : ""
-                      }`}
+                        }`}
                     />
 
                     {tweet.videoThumbnailBlobIndex === thumbIdx && (
@@ -453,9 +454,8 @@ const CreateThread = ({
             {thread.map((tweet, index) => (
               <div
                 key={index}
-                className={`grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] w-full ml-auto mr-auto overflow-hidden relative ${
-                  focusedTweet !== tweet.id ? "opacity-50" : ""
-                }`}
+                className={`grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] w-full ml-auto mr-auto overflow-hidden relative ${focusedTweet !== tweet.id ? "opacity-50" : ""
+                  }`}
                 onClick={() => setFocusedTweet(tweet.id)}
               >
                 {focusedTweet === tweet.id && thread.length > 1 && (

@@ -6,7 +6,6 @@ import SubmissionModal from "./SubmissionModal";
 import { Submission } from "@/types/submission";
 import MintEdition from "../Zora/MintEdition";
 import Swiper from "../Swiper/Swiper";
-import SwiperSlide from "../Swiper/SwiperSlide";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
 import useMe from "@/hooks/useMe";
@@ -98,79 +97,52 @@ export const RenderPopularSubmissions = ({ submissions }) => {
 
   return (
     <div className="w-full">
-      <Swiper
-        spaceBetween={16}
-        slidesPerView={3.2} // adjusted for peek
-        slidesPerGroup={3}
-        breakpoints={{
-          320: {
-            slidesPerView: 1.2, // adjusted for peek
-            slidesPerGroup: 1,
-            spaceBetween: 10,
-          },
-          500: {
-            slidesPerView: 2.2, // adjusted for peek
-            slidesPerGroup: 2,
-            spaceBetween: 10,
-          },
-          850: {
-            slidesPerView: 3.2, // adjusted for peek
-            slidesPerGroup: 3,
-            spaceBetween: 16,
-          },
-          1200: {
-            slidesPerView: 4.2, // adjusted for peek
-            slidesPerGroup: 4,
-            spaceBetween: 16,
-          },
-        }}
-      >
+
+      <Swiper listSize={submissions.length - 1}>
         {submissions.map((submission: Submission, index: number) => (
-          <SwiperSlide key={index}>
-            <div className="w-full h-full animate-scrollInX">
-              <CardSubmission
-                key={index}
-                interactive={true}
-                submission={submission}
-                handleCardClick={(submission) => router.push(`/submission/${submission.id}?context=${context}`)}
+            <div className="snap-start snap-always w-full min-w-[250px] min-h-[300px] sm:min-w-[320px] sm:h-[500px]" key={index}>
+            <CardSubmission
+              key={index}
+              interactive={true}
+              submission={submission}
+              handleCardClick={(submission) => router.push(`/submission/${submission.id}?context=${context}`)}
 
-                footerChildren={
-                  <div className="flex flex-col w-full">
-                    <div className="p-2 w-full" />
-                    <div className="grid grid-cols-3 w-full items-center">
-                      <ShareButton submission={submission} onClick={(event) => handleShare(event, submission)} context={context} />
-                      <MintButton
-                        styleOverride="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
+              footerChildren={
+                <div className="flex flex-col w-full">
+                  <div className="p-2 w-full" />
+                  <div className="grid grid-cols-3 w-full items-center">
+                    <ShareButton submission={submission} onClick={(event) => handleShare(event, submission)} context={context} />
+                    <MintButton
+                      styleOverride="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
                         hover:rounded-xl rounded-3xl transition-all duration-300"
-                        submission={submission}
-                        onClick={(event) => handleMint(event, submission)}
-                      />
-                    </div>
+                      submission={submission}
+                      onClick={(event) => handleMint(event, submission)}
+                    />
                   </div>
-                }
-              />
-            </div>
-          </SwiperSlide>
+                </div>
+              }
+            />
+          </div>
         ))}
-        <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleClose} >
-          {isShareModalOpen && submission && (
-            <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
-              <div className="flex justify-between">
-                <h2 className="text-t1 text-xl font-bold">Share</h2>
-                <button className="btn btn-ghost btn-sm  ml-auto" onClick={() => setIsShareModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
-              </div>
-              {status !== 'authenticated' && <p className="text-t1 text-lg">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
-              <WalletConnectButton>
-                <ShareButton submission={submission} onClick={() => { }} context={context} />
-              </WalletConnectButton>
-            </div>
-          )}
-
-          {isMintModalOpen && submission && (
-            <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} />
-          )}
-        </SubmissionModal>
       </Swiper>
+      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleClose} >
+        {isShareModalOpen && submission && (
+          <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
+            <div className="flex justify-between">
+              <h2 className="text-t1 text-xl font-bold">Share</h2>
+              <button className="btn btn-ghost btn-sm  ml-auto" onClick={() => setIsShareModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
+            </div>
+            {status !== 'authenticated' && <p className="text-t1 text-lg">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
+            <WalletConnectButton>
+              <ShareButton submission={submission} onClick={() => { }} context={context} />
+            </WalletConnectButton>
+          </div>
+        )}
+
+        {isMintModalOpen && submission && (
+          <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} />
+        )}
+      </SubmissionModal>
     </div>
   )
 }

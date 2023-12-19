@@ -11,8 +11,7 @@ import {
   ContestBuilderProps,
   PromptError,
 } from "./contestHandler";
-import Image from "next/image";
-
+import UplinkImage from "@/lib/UplinkImage"
 const Prompt = ({
   initialPrompt,
   handleConfirm,
@@ -108,7 +107,7 @@ const Prompt = ({
                     onClick={() => imageUploader.current?.click()}
                   >
                     {promptData.coverBlob && (
-                      <Image
+                      <UplinkImage
                         src={promptData.coverBlob}
                         alt="prompt cover image"
                         height={32}

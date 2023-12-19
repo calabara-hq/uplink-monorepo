@@ -1,17 +1,16 @@
 import Link from "next/link";
-import Image from "next/image";
 import { BiLink, BiPencil, BiWorld } from "react-icons/bi";
 import { FaRegClock, FaTwitter } from "react-icons/fa";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-import fetchSpaceContests from "@/lib/fetch/fetchSpaceContests";
+import fetchSpaceContests, { FetchSpaceContestResponse, SpaceContest } from "@/lib/fetch/fetchSpaceContests";
 import { Suspense } from "react";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import { HiSparkles } from "react-icons/hi2";
+import UplinkImage from "@/lib/UplinkImage"
 import {
   CategoryLabel,
   StatusLabel,
 } from "@/ui/ContestLabels/ContestLabels";
-import { ActiveContest } from "@/lib/fetch/fetchActiveContests";
 import { Boundary } from "@/ui/Boundary/Boundary";
 import { AdminWrapper } from "@/lib/AdminWrapper";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
@@ -79,7 +78,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
     <div className="flex flex-row lg:flex-col gap-2 w-full lg:w-56  items-start">
       <div className="avatar">
         <div className="w-28 lg:w-48 rounded-full lg:rounded-xl">
-          <Image
+          <UplinkImage
             src={logoUrl}
             alt={"org avatar"}
             fill
@@ -144,8 +143,10 @@ const SpaceInfo = async ({ name }: { name: string }) => {
 
 const ContestCard = ({
   contest,
+  spaceLogo,
 }: {
-  contest: ActiveContest;
+  contest: SpaceContest;
+  spaceLogo: string;
 }) => {
   const { id, metadata, promptData, deadlines, tweetId } = contest;
   const contestId = id;
@@ -165,8 +166,8 @@ const ContestCard = ({
         <h3 className="text-t1 text-lg font-bold line-clamp-2">{promptData.title}</h3>
         <div className="mt-auto" />
         <ImageWrapper>
-          <Image
-            src={promptData?.coverUrl ?? contest.space.logoUrl}
+          <UplinkImage
+            src={promptData?.coverUrl ?? spaceLogo}
             draggable={false}
             alt="contest image"
             fill
@@ -261,18 +262,20 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
             </Link>
           </div>
         </div>
-        <div className="flex flex-row flex-wrap gap-2 ">
+        <div className="flex flex-row flex-wrap gap-2">
           {mintBoard.posts.map((post, idx) => {
             return (
-              <Image
-                key={idx}
-                src={parseIpfsUrl(post.edition.imageURI).gateway}
-                width={40}
-                height={40}
-                alt="post"
-                sizes="10vw"
-                className="rounded-xl object-cover cursor-pointer aspect-square"
-              />
+              <div className="w-[40px]" key={idx}> {/* Adjust this class as needed for sizing */}
+                <ImageWrapper>
+                  <UplinkImage
+                    src={parseIpfsUrl(post.edition.imageURI).gateway}
+                    fill
+                    alt="post"
+                    sizes="10vw"
+                    className="rounded-xl object-cover cursor-pointer aspect-square"
+                  />
+                </ImageWrapper>
+              </div>
             )
           })}
         </div>
@@ -282,7 +285,7 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
 
 }
 
-const Contests = ({ contests, spaceName, isActive, isAll }: { contests: Array<ActiveContest>, spaceName: string, isActive: boolean, isAll: boolean }) => {
+const Contests = ({ contests, spaceName, spaceLogo, isActive, isAll }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string, isActive: boolean, isAll: boolean }) => {
   const now = new Date().toISOString();
   const listChildren = isActive ? contests.filter((contest) => {
     return contest.deadlines.endTime > now;
@@ -320,7 +323,7 @@ const Contests = ({ contests, spaceName, isActive, isAll }: { contests: Array<Ac
   else return (
     <div className="w-9/12 sm:w-full m-auto grid gap-4 contest-columns auto-rows-fr">
       {listChildren.map((contest) => {
-        return <ContestCard key={contest.id} contest={contest} />;
+        return <ContestCard key={contest.id} contest={contest} spaceLogo={spaceLogo} />;
       })}
     </div>
   )
@@ -328,7 +331,7 @@ const Contests = ({ contests, spaceName, isActive, isAll }: { contests: Array<Ac
 
 
 const ContestDisplay = async ({ spaceName, isAll, isActive }: { spaceName: string, isAll: boolean, isActive: boolean }) => {
-  const contests = await fetchSpaceContests(spaceName);
+  const spaceWithContests = await fetchSpaceContests(spaceName);
   return (
     <div className="flex flex-col gap-2 w-full ">
       <div className="flex flex-row gap-2 items-center">
@@ -361,7 +364,7 @@ const ContestDisplay = async ({ spaceName, isAll, isActive }: { spaceName: strin
         </div>
       </div>
       <div className="w-full h-1 bg-base-100 rounded-lg" />
-      <Contests contests={contests} spaceName={spaceName} isActive={isActive} isAll={isAll} />
+      <Contests contests={spaceWithContests.contests} spaceName={spaceName} spaceLogo={spaceWithContests.logoUrl} isActive={isActive} isAll={isAll} />
     </div>
   )
 }
@@ -376,21 +379,17 @@ export default async function Page({ params, searchParams }: { params: { name: s
       <div className="grid grid-cols-1 lg:grid-cols-[25%_auto] w-full gap-8">
         <div className="lg:sticky lg:top-6 lg:left-0 w-full h-fit">
           <Suspense fallback={<SpaceInfoSekelton />}>
-            {/*@ts-expect-error*/}
             <SpaceInfo name={spaceName} />
           </Suspense>
         </div>
         <div className="w-full h-full flex flex-col gap-6">
           <Suspense>
-            {/*@ts-expect-error*/}
             <AdminButtons spaceName={spaceName} />
           </Suspense>
           <Suspense fallback={<HeatMapSkeleton />}>
-            {/*@ts-expect-error*/}
             <MintboardHeatMap spaceName={spaceName} />
           </Suspense>
           <Suspense fallback={<SpaceContestsSkeleton />}>
-            {/*@ts-expect-error*/}
             <ContestDisplay spaceName={spaceName} isAll={isAll} isActive={isActive} />
           </Suspense>
         </div>

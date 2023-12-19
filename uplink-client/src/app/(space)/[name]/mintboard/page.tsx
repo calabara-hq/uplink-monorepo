@@ -1,5 +1,5 @@
 import { Boundary } from "@/ui/Boundary/Boundary";
-import Image from "next/image";
+import UplinkImage from "@/lib/UplinkImage"
 import Link from "next/link";
 import { Suspense } from "react";
 import SwrProvider from "@/providers/SwrProvider";
@@ -36,7 +36,7 @@ const BoardInfo = async ({ spaceName }: { spaceName: string }) => {
                     href={`/${spaceName}`}
                     draggable={false}
                 >
-                    <Image
+                    <UplinkImage
                         src={mintBoard.space.logoUrl}
                         alt="Org Avatar"
                         fill
@@ -142,11 +142,9 @@ export default async function Page({ params, searchParams }: { params: { name: s
         <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4">
             <div className="grid grid-cols-1 md:grid-cols-[auto_35%] gap-8 w-full p-4">
                 <Suspense fallback={<BoardInfoSkeleton />}>
-                    {/*@ts-expect-error*/}
                     <BoardInfo spaceName={spaceName} />
                 </Suspense>
                 <Suspense fallback={<CreatePostSkeleton />}>
-                    {/*@ts-expect-error*/}
                     <CreatePostButton spaceName={spaceName} />
                 </Suspense>
 
@@ -157,7 +155,6 @@ export default async function Page({ params, searchParams }: { params: { name: s
             </div>
             <div className="flex flex-col gap-4">
                 <Suspense fallback={<PostSkeleton />}>
-                    {/*@ts-expect-error*/}
                     <Posts spaceName={spaceName} isPopular={isPopular} />
                 </Suspense>
             </div>

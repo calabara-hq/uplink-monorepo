@@ -2,12 +2,11 @@ import { parseIpfsUrl } from "@/lib/ipfs";
 import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
-import Image from "next/image";
 import { Suspense } from "react";
 import { BackButton, HeaderButtons } from "./client";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { MintBoardPost } from "@/types/mintBoard";
-
+import UplinkImage from "@/lib/UplinkImage"
 
 const ExpandedPostSkeleton = () => {
     return (
@@ -47,11 +46,12 @@ const PostRenderer = ({ post }: { post: MintBoardPost }) => {
                 {siteImageURI.gateway && !siteAnimationURI.gateway && (
                     <div>
                         <ImageWrapper>
-                            <Image
+                            <UplinkImage
                                 src={siteImageURI.gateway}
                                 draggable={false}
                                 alt="submission image"
                                 fill
+                                sizes="40vw"
                                 className="object-contain w-full h-full transition-transform duration-300 ease-in-out"
                             />
                         </ImageWrapper>
@@ -102,13 +102,12 @@ const PageContent = async ({ spaceName, postId, referrer }: { spaceName: string,
     } />;
 };
 
-export default function Page({ params, searchParams }: { params: { name: string, postId: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
+export default function Page({ params, searchParams }: { params: { name: string, postId: string }, searchParams: { [key: string]: string | undefined } }) {
 
     return (
         <div className="grid grid-cols-1 w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full mt-4 p-4">
             <BackButton spaceName={params.name} />
             <Suspense fallback={<ExpandedPostSkeleton />}>
-                {/*@ts-expect-error*/}
                 <PageContent spaceName={params.name} postId={params.postId} referrer={searchParams?.referrer ?? null} />
             </Suspense>
         </div>

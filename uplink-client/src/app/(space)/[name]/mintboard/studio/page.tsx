@@ -59,7 +59,6 @@ export default async function Page({ params }: { params: { name: string } }) {
     return (
         <div className=" flex flex-col gap-6 w-full md:w-10/12 max-w-[600px] m-auto mt-4 mb-16 p-4">
             <Suspense fallback={<LoadingDialog />}>
-                {/*@ts-expect-error*/}
                 <PageContent spaceName={params.name} />
             </Suspense>
         </div >

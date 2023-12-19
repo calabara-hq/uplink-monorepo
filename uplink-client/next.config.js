@@ -11,6 +11,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
         hostname: 'calabara.mypinata.cloud',
         port: '',
       },

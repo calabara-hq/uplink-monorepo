@@ -17,7 +17,7 @@ const ExpandedSubmissionSkeleton = () => {
                 </div>
             </div>
             <div className="w-full h-0.5 bg-base-200" />
-            <div className="w-96 m-auto h-96 bg-base-100 shimmer rounded-lg" />
+            <div className="w-full m-auto h-96 bg-base-100 shimmer rounded-lg" />
         </div>
     );
 };
@@ -42,7 +42,6 @@ export default async function Page({
         <div className="grid grid-cols-1 w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full mt-4 p-4">
             <BackButton context={searchParams?.context ?? null} />
             <Suspense fallback={<ExpandedSubmissionSkeleton />}>
-                {/*@ts-expect-error*/}
                 <PageContent submissionId={params.submissionId} referrer={searchParams?.referrer ?? null} context={searchParams?.context ?? null} />
             </Suspense>
         </div>
