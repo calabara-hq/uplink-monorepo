@@ -56,11 +56,13 @@ export const upload = async (req, res) => {
 
         // Listen for data events on the file stream to update the uploaded bytes counter
         file.on('data', (data) => {
+            console.log('Received data:', data.length)
             uploadedBytes += data.length;
             // Update the upload progress in the database
         });
 
         try {
+            console.log('posting new data')
             const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
                 headers: {
                     'Authorization': `Bearer ${process.env.PINATA_JWT}`,
