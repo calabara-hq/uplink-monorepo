@@ -109,7 +109,7 @@ export const UserAvatar = ({
   if (user?.profileAvatar) return (
     <div style={{ width: `${size}px` }}>
     <ImageWrapper>
-      <UplinkImage src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} fill blur/>
+      <UplinkImage src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} fill blur sizes="5vw"/>
   </ImageWrapper>
   </div>
   )

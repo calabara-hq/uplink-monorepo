@@ -20,7 +20,7 @@ export const RenderMintMedia = ({ imageURI, animationURI }: { imageURI: string; 
     else if (gatewayImageURI) {
         return (
             <ImageWrapper>
-                <UplinkImage src={gatewayImageURI} fill alt="media" className="object-contain"/>
+                <UplinkImage src={gatewayImageURI} fill sizes={"30vw"} alt="media" className="object-contain" blur={false}/>
             </ImageWrapper>
         )
     }
