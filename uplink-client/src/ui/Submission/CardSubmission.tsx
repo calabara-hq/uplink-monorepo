@@ -104,6 +104,7 @@ const RenderImageSubmission = ({ submission }) => {
         draggable={false}
         alt="submission image"
         fill
+        sizes="20vw"
         className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
       />
     </ImageWrapper>
