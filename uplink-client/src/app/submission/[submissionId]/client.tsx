@@ -137,17 +137,49 @@ export const MintButton = ({ submission, onClick, styleOverride }: { submission:
 }
 
 export const ShareModalContent = ({ submission, handleClose, context }: { submission: Submission, handleClose: () => void, context: string }) => {
-    const { status } = useSession();
+    const { status, data: session } = useSession();
+    const [success, setSuccess] = useState(false);
+
+    const handleShare = () => {
+        const referralLink = session?.user?.address ? `&refferrer=${session?.user?.address}` : ''
+        navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_CLIENT_URL}/submission/${submission.id}?context=${context}${referralLink}`);
+        setSuccess(true)
+        setTimeout(() => {
+            handleClose();
+        }, 2000)
+    };
+
+    useEffect(() => {
+        if (status === 'authenticated') {
+            handleShare();
+        }
+    }, [status])
+
+    
     return (
         <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
             <div className="flex justify-between">
                 <h2 className="text-t1 text-xl font-bold">Share</h2>
                 <button className="btn btn-ghost btn-sm  ml-auto" onClick={handleClose}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
             </div>
-            {status !== 'authenticated' && <p className="text-t1 text-lg">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
+            {status !== 'authenticated' && <p className="text-t2">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
             <WalletConnectButton>
-                <ShareButton submission={submission} onClick={() => { }} context={context} />
+                {success && (
+                    <div className="flex flex-col gap-2 items-center text-center animate-springUp">
+                        <HiCheckBadge className="w-16 h-16 text-success" />
+                        <p className="text-t1 text-lg font-bold">Link Copied!</p>
+                    </div>
+                )}
             </WalletConnectButton>
+            {status !== 'authenticated' && 
+            <>
+                <div className="w-full h-0.5 bg-base-200"/>
+                <div className="flex flex-col gap-2">
+                    <p className="text-t2">Or just copy link</p>
+                    <button className="secondary-btn btn-sm" onClick={handleShare}>Copy Link</button>
+                </div>
+            </>
+            }
         </div>
     )
 }

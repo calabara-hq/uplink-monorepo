@@ -80,7 +80,8 @@ export const ShareModalContent = ({ spaceName, post, handleClose }: { spaceName:
     const [success, setSuccess] = useState(false);
 
     const handleShare = () => {
-        navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/post/${post.id}?referrer=${session?.user?.address}`);
+        const referralLink = session?.user?.address ? `?refferrer=${session?.user?.address}` : ''
+        navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/post/${post.id}${referralLink}`);
         setSuccess(true)
         setTimeout(() => {
             handleClose();
@@ -100,7 +101,7 @@ export const ShareModalContent = ({ spaceName, post, handleClose }: { spaceName:
                 <h2 className="text-t1 text-xl font-bold">Share</h2>
                 <button className="btn btn-ghost btn-sm  ml-auto" onClick={handleClose}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
             </div>
-            {status !== 'authenticated' && <p className="text-t1 text-lg">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
+            {status !== 'authenticated' && <p className="text-t2">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
             <WalletConnectButton>
                 {success && (
                     <div className="flex flex-col gap-2 items-center text-center animate-springUp">
@@ -109,6 +110,15 @@ export const ShareModalContent = ({ spaceName, post, handleClose }: { spaceName:
                     </div>
                 )}
             </WalletConnectButton>
+            {status !== 'authenticated' && 
+            <>
+                <div className="w-full h-0.5 bg-base-200"/>
+                <div className="flex flex-col gap-2">
+                    <p className="text-t2">Or just copy link</p>
+                    <button className="secondary-btn btn-sm" onClick={handleShare}>Copy Link</button>
+                </div>
+            </>
+            }
         </div>
     )
 }
