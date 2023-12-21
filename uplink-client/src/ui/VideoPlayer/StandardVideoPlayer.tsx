@@ -10,11 +10,21 @@ import {
 } from "media-chrome/dist/react";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import {transformVideoAsset} from './index'
+import {useRef, useEffect} from 'react';
 
 const StandardVideoPlayer = ({ videoUrl, posterUrl }: { videoUrl: string, posterUrl: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+  videoRef.current.addEventListener("error", () => {
+    console.log('error loading video, switching to unoptimized url')
+    videoRef.current.src = videoUrl
+  })
+},[])
   return (
     <MediaController className="w-full h-fit animate-fadeIn rounded-2xl">
       <video
+        ref={videoRef}
         autoPlay={false}
         playsInline
         slot="media"

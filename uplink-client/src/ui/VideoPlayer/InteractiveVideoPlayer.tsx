@@ -16,6 +16,13 @@ const InteractiveVideoPlayer = ({ videoUrl, posterUrl, isActive }) => {
   const vidRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    vidRef.current.addEventListener("error", () => {
+      console.log('error loading video, switching to unoptimized url')
+      vidRef.current.src = videoUrl
+    })
+  },[])
+
+  useEffect(() => {
     if (isActive && vidRef.current) vidRef.current.play();
     else if (!isActive && vidRef.current) vidRef.current.pause();
   }, [isActive]);
@@ -39,7 +46,7 @@ const InteractiveVideoPlayer = ({ videoUrl, posterUrl, isActive }) => {
         playsInline
         slot="media"
         loop={true}
-        src={videoUrl ? transformVideoAsset(videoUrl, 'video', 300) : null}
+        src={videoUrl}
         poster={posterUrl ? transformVideoAsset(posterUrl, 'image', 300) : null}
         preload="auto"
         muted

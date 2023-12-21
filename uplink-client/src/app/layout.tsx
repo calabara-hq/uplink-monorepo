@@ -5,6 +5,7 @@ import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
 import MobileNav from "@/ui/MobileNav/MobileNav";
 import type { Metadata } from "next";
+import { Analytics } from '@vercel/analytics/react';
 
 export const runtime = "edge";
 export const preferredRegion = "iad1";
@@ -59,7 +60,7 @@ export default function RootLayout({
             </div>
           </ToastProvider>
         </WalletProvider>
-        <div id="modal-root" />
+        <Analytics/>
       </body>
     </html>
   );
