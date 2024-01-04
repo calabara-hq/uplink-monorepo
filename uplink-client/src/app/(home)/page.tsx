@@ -22,6 +22,7 @@ import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 import { RenderPopularSubmissions } from "@/ui/Submission/SubmissionDisplay";
 import UplinkImage from "@/lib/UplinkImage";
 import Swiper from "@/ui/Swiper/Swiper";
+import { ContestFeatureCard, ContestSubCardA, ContestSubCardB, MintboardCard, MintboardSubCardA, MintboardSubCardB } from "./feature";
 
 const DelayedGridLayout = dynamic(
   () => import("@/ui/DelayedGrid/DelayedGridLayout"),
@@ -205,7 +206,7 @@ const ActiveContests = async () => {
         <div className="flex flex-row gap-2 px-2 md:px-12 items-end">
           <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
         </div>
-        <Swiper listSize={activeContests.length -1}>
+        <Swiper listSize={activeContests.length - 1}>
           {activeContests.map((contest, index) => (
             <div className="snap-start snap-always h-full" key={index}>
               <ContestCard
@@ -327,12 +328,85 @@ export default async function Page() {
   return (
     <div className="flex flex-col w-full gap-12 mb-16">
       <BannerSection />
-      <div className="flex flex-col w-full md:w-10/12 m-auto gap-12">
-        <ActiveContests />
+      <div className="flex flex-col w-11/12 md:w-8/12 m-auto gap-6">
+        <p className="text-2xl font-bold text-center leading-7 text-t2 ">
+          <span className="text-t1">What's Inside?</span>
+        </p>
+        <ContestFeatureCard />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ContestSubCardA />
+          <ContestSubCardB >
+            <div className="absolute -top-16 -right-12 md:-right-24 m-auto w-full max-w-[360px] animate-springUp z-10">
+              <div className="mockup-window bg-base-100 border border-border">
+                <div className="grid grid-cols-[32px_auto] md:grid-cols-[40px_auto] bg-base-200 p-4">
+                  <UplinkImage
+                    src={ArtistPfp}
+                    alt="artist pfp"
+                    width={50}
+                    height={50}
+                    sizes="5vw"
+                    className="rounded-full"
+                    blur={false}
+                  />
+                  <div className="flex-grow flex flex-col gap-2 ml-4">
+                    <p className="text-t1">
+                      <span className="text-primary">@vinniehager</span> noggles!
+                    </p>
+                    <div className="flex-grow flex flex-col items-center">
+                      <div className="relative w-full">
+                        <UplinkImage
+                          src={ArtistSubmission}
+                          alt="twitter submission"
+                          className="rounded-lg object-contain"
+                          width={600}
+                          priority
+                          blur={false}
+                        />
+                      </div>
+                      <div className="text-sm text-t2 italic font-[500] self-start text-left">
+                        <Link
+                          href="https://twitter.com/pumey_arts"
+                          target="_blank"
+                          className="hover:underline"
+                          prefetch={false}
+                          draggable={false}
+                        >
+                          @pumey_arts -
+                        </Link>{" "}
+                        Vinnie Hager x Nouns contest
+                      </div>
+                    </div>
+                    <div className="w-full h-0.5 bg-border"></div>
+                    <div className="flex items-center justify-start w-full">
+                      <HiPhoto className="w-5 h-5 opacity-50" />
+                      <BiPlusCircle className="w-5 h-5 opacity-50 ml-auto mr-2" />
+                      <button
+                        className="btn btn-xs btn-primary normal-case"
+                        disabled
+                      >
+                        Submitting
+                        <div
+                          className="text-xs ml-1 inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                          role="status"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ContestSubCardB>
+        </div>
+        <MintboardCard />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MintboardSubCardA />
+          <MintboardSubCardB />
+        </div>
+        {/* <ActiveContests />
         <PopularSubmissions />
         <div className="w-full px-4 lg:px-12">
           <ContestBanner />
-        </div>
+        </div> */}
       </div>
     </div>
   );
