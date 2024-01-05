@@ -23,22 +23,22 @@ export const SubmissionDisplaySkeleton = () => {
     <div className="flex flex-col gap-4 w-full">
       <div className="flex w-full justify-evenly items-center">
         <div className="w-10/12 sm:w-full m-auto grid gap-4 submission-columns auto-rows-fr">
-          <div className="space-y-2 border-border border p-2 rounded-xl h-[318px] shimmer">
+          <div className="space-y-2 border-border border p-2 rounded-xl h-[480px] shimmer">
             <div className="h-5 w-2/3 rounded-lg bg-base-100" />
             <div className="h-3 w-1/3 rounded-lg bg-base-100" />
             <div className="h-4 w-3/4 rounded-lg bg-base-100" />
           </div>
-          <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer">
+          <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[480px] shimmer">
             <div className="h-5 w-2/3 rounded-lg bg-base-100" />
             <div className="h-3 w-1/3 rounded-lg bg-base-100" />
             <div className="h-4 w-3/4 rounded-lg bg-base-100" />
           </div>
-          <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer">
+          <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[480px] shimmer">
             <div className="h-5 w-2/3 rounded-lg bg-base-100" />
             <div className="h-3 w-1/3 rounded-lg bg-base-100" />
             <div className="h-4 w-3/4 rounded-lg bg-base-100" />
           </div>
-          <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer">
+          <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[480px] shimmer">
             <div className="h-5 w-2/3 rounded-lg bg-base-100" />
             <div className="h-3 w-1/3 rounded-lg bg-base-100" />
             <div className="h-4 w-3/4 rounded-lg bg-base-100" />

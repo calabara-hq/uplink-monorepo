@@ -133,13 +133,17 @@ const BannerSection = () => {
           </div>
         </div>
       </div>
+      {/* <div className="absolute bottom-36 left-24 z-10">
+        <h1 className="text-2xl font-bold text-t1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">Whats inside?</h1>
+      </div> */}
       <UplinkImage
         src={landingBg}
         alt=""
         fill
-        className="absolute !h-[70%] !bottom-0 !left-0 !top-auto object-cover"
+        className="absolute !h-[70%] !-bottom-4 !left-0 !top-auto object-cover"
         blur={false}
       />
+
     </div>
   );
 };
@@ -326,17 +330,14 @@ const ContestBanner = () => {
 
 export default async function Page() {
   return (
-    <div className="flex flex-col w-full gap-12 mb-16">
+    <div className="flex flex-col w-full mb-16 gap-12">
       <BannerSection />
       <div className="flex flex-col w-11/12 md:w-8/12 m-auto gap-6">
-        <p className="text-2xl font-bold text-center leading-7 text-t2 ">
-          <span className="text-t1">What's Inside?</span>
-        </p>
         <ContestFeatureCard />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ContestSubCardA />
           <ContestSubCardB >
-            <div className="absolute -top-16 -right-12 md:-right-24 m-auto w-full max-w-[360px] animate-springUp z-10">
+            <div className="absolute -top-10 right-0 left-0 sm:-top-16 sm:left-auto sm:-right-12 md:-top-10 md:-right-24  m-auto w-full max-w-[275px] md:max-w-[360px] animate-springUp z-10">
               <div className="mockup-window bg-base-100 border border-border">
                 <div className="grid grid-cols-[32px_auto] md:grid-cols-[40px_auto] bg-base-200 p-4">
                   <UplinkImage

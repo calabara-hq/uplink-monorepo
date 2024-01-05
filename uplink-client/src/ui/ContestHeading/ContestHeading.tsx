@@ -22,6 +22,7 @@ import { DetailsMenuDrawer } from "../MobileContestActions/MobileContestActions"
 import ContestDetails from "../ContestDetails/ContestDetails";
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
 import fetchContest from "@/lib/fetch/fetchContest";
+import ExpandableTextSection from "../ExpandableTextSection/ExpandableTextSection";
 
 const ContestHeading = async ({
   contestId,
@@ -80,7 +81,9 @@ const ContestHeading = async ({
               </div>
             </div>
             <div className="grid grid-cols-1">
-              <ParseBlocks data={prompt.body} omitImages={false} />
+              <ExpandableTextSection>
+                <ParseBlocks data={prompt.body} omitImages={false} />
+              </ExpandableTextSection>
             </div>
           </div>
           <div className="grid grid-cols-1 items-start  w-full gap-2">

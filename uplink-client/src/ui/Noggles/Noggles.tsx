@@ -7,7 +7,7 @@ const Noggles = ({color}) => {
       viewBox="0 0 160 60"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-        shapeRendering="crispEdges"
+      shapeRendering="crispEdges"
     >
       <path d="M90 0H30V10H90V0Z" fill={color} />
       <path d="M160 0H100V10H160V0Z" fill={color} />

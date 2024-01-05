@@ -207,6 +207,7 @@ const SubmitterRewardsSection = ({
                                                     {isFungibleReward(reward)
                                                         ? formatDecimal(reward.amount).short
                                                         : "0"}
+                                                        {" "}
                                                     {reward.token.symbol}
                                                     {idx !== rewards.length - 1 && ","}
                                                 </p>
