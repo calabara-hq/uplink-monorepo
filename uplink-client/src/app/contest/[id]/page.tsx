@@ -17,7 +17,7 @@ const ContestSidebar = dynamic(
     () => import("@/ui/ContestSidebar/ContestSidebar"),
     {
         ssr: false,
-        loading: () => <div className="flex flex-col gap-2 border border-border rounded-lg"><DetailsSkeleton /></div>
+        loading: () => <div className="flex flex-col gap-2 border border-border rounded-lg w-full"><DetailsSkeleton /></div>
     }
 )
 
@@ -43,26 +43,24 @@ export default async function Page({ params }: { params: { id: string } }) {
 
     return (
         <div className="flex gap-6 m-auto w-full lg:w-[90vw]">
-            <div className="w-full ">
-                <div className="flex flex-col w-full gap-4 transition-all duration-200 ease-in-out">
-                    <Suspense fallback={<ContestHeadingSkeleton />}>
-                        <ContestHeading contestId={contestId} />
-                    </Suspense>
-                    <MobileContestActions
-                        contestId={contestId}
-                        detailChildren={
-                            <ContestDetails contestId={contestId}
-                            />
-                        }
-                    />
-                    <Suspense fallback={<SubmissionDisplaySkeleton />}>
-                        <SubmissionDisplayWrapper contestId={contestId}>
-                            <LiveSubmissionDisplay contestId={contestId} />
-                        </SubmissionDisplayWrapper>
-                    </Suspense>
-                </div>
+            <div className="flex flex-col w-full gap-4 transition-all duration-200 ease-in-out">
+                <Suspense fallback={<ContestHeadingSkeleton />}>
+                    <ContestHeading contestId={contestId} />
+                </Suspense>
+                <MobileContestActions
+                    contestId={contestId}
+                    detailChildren={
+                        <ContestDetails contestId={contestId}
+                        />
+                    }
+                />
+                <Suspense fallback={<SubmissionDisplaySkeleton />}>
+                    <SubmissionDisplayWrapper contestId={contestId}>
+                        <LiveSubmissionDisplay contestId={contestId} />
+                    </SubmissionDisplayWrapper>
+                </Suspense>
             </div>
-            <div className="sticky top-3 right-0 hidden xl:block w-[30%] max-w-[450px] flex-shrink-0 h-full ">
+            <div className="hidden xl:block sticky top-3 right-0 w-full max-w-[450px] flex-grow h-full">
                 <ContestSidebar
                     detailsChild={<Suspense fallback={<DetailsSkeleton />}><ContestDetails contestId={contestId} /></Suspense>}
                     voteChild={<VoteTab contestId={contestId} />}

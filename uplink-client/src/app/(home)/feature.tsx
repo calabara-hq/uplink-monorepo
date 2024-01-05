@@ -13,19 +13,11 @@ import dynamic from 'next/dynamic'
 import { BiCategoryAlt, BiTime } from "react-icons/bi";
 import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument } from "react-icons/hi2";
-import { UsernameDisplay, UserAvatar } from "@/ui/AddressDisplay/AddressDisplay";
-import { BiPlusCircle } from "react-icons/bi";
-import { HiPhoto } from "react-icons/hi2";
-import { HiCheckBadge, HiOutlineLockClosed, HiOutlineTrash } from "react-icons/hi2";
-import { AddFundsButton, RenderMintMedia, SwitchNetworkButton } from "@/ui/Zora/common";
-import { getChainName } from "@/lib/chains/supportedChains";
+import { HiOutlineLockClosed, HiOutlineTrash } from "react-icons/hi2";
+import {  RenderMintMedia } from "@/ui/Zora/common";
 import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
-import { TokenContractApi } from "@/lib/contract";
 import { PiInfinity } from "react-icons/pi";
-import { useDebounce } from "@/hooks/useDebounce";
-import Link from "next/link";
 import { TbLoader2 } from "react-icons/tb";
-import { Decimal } from "decimal.js";
 import { LuMinusSquare, LuPlusSquare } from "react-icons/lu";
 import UplinkImage from "@/lib/UplinkImage";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper"
@@ -33,14 +25,11 @@ import { useInView } from "react-intersection-observer";
 import { Boundary } from "@/ui/Boundary/Boundary";
 import uplinkLogo from "@/../public/uplink-logo.svg";
 import contestImg from "@/../public/testing.png";
-import { Suspense } from "react";
+import Image from "next/image";
+
 import { CategoryLabel, StatusLabel } from "@/ui/ContestLabels/ContestLabels";
 import CardSubmission from "@/ui/Submission/CardSubmission";
 
-
-import ContestHeading, {
-    ContestHeadingSkeleton,
-} from "@/ui/ContestHeading/ContestHeading";
 
 const DelayedGridLayout = dynamic(
     () => import("@/ui/DelayedGrid/DelayedGridLayout"),
@@ -87,7 +76,7 @@ export const FeatureCard = ({ children }: { children: React.ReactNode }) => {
                 } as WrapperStyle
             }
         >
-            <div className='group w-full rounded-xl border border-base-100 bg-gradient-to-b transition duration-300 bg-base-100 bg-opacity-80'>
+            <div className='group w-full rounded-xl bg-gradient-to-b transition duration-300 bg-base-100 bg-opacity-80 border border-border'>
                 {children}
             </div>
         </motion.div>
@@ -161,12 +150,13 @@ export const ContestFeatureCard = () => {
                                                 "id": "7733",
                                                 "contestId": "263",
                                                 "totalVotes": "73",
-                                                "rank": 1,
+                                                "rank": "1",
                                                 "created": "2023-11-23T08:33:53.022Z",
                                                 "type": "twitter",
                                                 "url": "https://uplink.mypinata.cloud/ipfs/QmZJV7cojpmPEXDK45txvaSqfSzcqj4X5oSdfvxYhkDJam",
                                                 "version": "uplink-v1",
                                                 "edition": null,
+                                                /*@ts-ignore*/
                                                 "author": {
                                                     "id": "554",
                                                     "address": "0x72D4e991040e3B65FdDbE5f340f65Cf03C506e6F",
@@ -196,12 +186,13 @@ export const ContestFeatureCard = () => {
                                                 "id": "7714",
                                                 "contestId": "263",
                                                 "totalVotes": "49",
-                                                "rank": 2,
+                                                "rank": "2",
                                                 "created": "2023-11-22T03:27:50.542Z",
                                                 "type": "twitter",
                                                 "url": "https://uplink.mypinata.cloud/ipfs/QmWxJ5nJd14uEnHVvRpmmzLPHbaHukN1pm9TBLWHrQ41SU",
                                                 "version": "uplink-v1",
                                                 "edition": null,
+                                                /*@ts-ignore*/
                                                 "author": {
                                                     "id": "147",
                                                     "address": "0xe851ED2a5816dC03887dFD2713dcD4217425DFe5",
@@ -232,12 +223,13 @@ export const ContestFeatureCard = () => {
                                                 "id": "7728",
                                                 "contestId": "263",
                                                 "totalVotes": "47",
-                                                "rank": 3,
+                                                "rank": "3",
                                                 "created": "2023-11-22T22:21:51.873Z",
                                                 "type": "twitter",
                                                 "url": "https://uplink.mypinata.cloud/ipfs/QmdH1gmW3fvzj3Zj1RTWrFzf6CoPj2SFQVyyDYVYf9KLae",
                                                 "version": "uplink-v1",
                                                 "edition": null,
+                                                /*@ts-ignore*/
                                                 "author": {
                                                     "id": "552",
                                                     "address": "0x7ce294D2Bcb2dE76a15fcf7055b0B14253Dd3B33",
@@ -267,12 +259,13 @@ export const ContestFeatureCard = () => {
                                                 "id": "7710",
                                                 "contestId": "263",
                                                 "totalVotes": "38",
-                                                "rank": 4,
+                                                "rank": "4",
                                                 "created": "2023-11-21T00:39:13.119Z",
                                                 "type": "twitter",
                                                 "url": "https://uplink.mypinata.cloud/ipfs/QmX4s19s1Xr6tzG9nyVyiR4JrUUrWBHA6Z8hWs6Mz1zTs3",
                                                 "version": "uplink-v1",
                                                 "edition": null,
+                                                /*@ts-ignore*/
                                                 "author": {
                                                     "id": "235",
                                                     "address": "0xA09AA75da763D4aEB692672897C057786Cdd258B",
@@ -417,7 +410,7 @@ export const ContestSubCardB = ({ children }: { children: React.ReactNode }) => 
 
 export const MintboardCard = () => {
     return (
-        <div className="w-full flex flex-col gap-4 mt-24">
+        <div className="w-full grid grid-cols-1 xl:grid-cols-[30%_auto] items-center gap-4 mt-24">
             <h1 className="text-3xl font-bold text-t2 lg:max-w-[30vw] ">
                 <span className="text-t1">The Mintboard.</span> <br /> A collective canvas for onchain creation.
             </h1>
@@ -570,12 +563,12 @@ export const MintboardSubCardB = () => {
                     </p>
                     <div className="flex flex-row gap-6 items-center m-auto">
 
-                        <UplinkImage
+                        <Image
                             src={uplinkLogo}
                             alt="logo"
                             width={75}
                             height={75}
-                            style={{ filter: "grayscale(100%)" }}
+                            className="grayscale"
                         />
 
                         <div className="flex flex-col gap-2 mt-6 w-full">

@@ -22,12 +22,12 @@ const ContestSidebar = ({ detailsChild, voteChild }: { detailsChild: React.React
     }, [contestState])
 
     if (!contestState) return (
-        <div className="flex flex-col gap-2 border border-border rounded-lg">
+        <div className="flex flex-col gap-2 border border-border rounded-lg w-full">
             <DetailsSkeleton />
         </div>
     )
     return (
-        <div className="flex flex-col gap-2 border border-border rounded-lg">
+        <div className="flex flex-col gap-2 border border-border rounded-lg w-full">
             {isVoting &&
                 <div className="flex flex-col gap-2 p-2">
                     <div className="w-full grid grid-cols-2 gap-2">

@@ -1,57 +1,16 @@
-import {
-  CategoryLabel,
-  RemainingTimeLabel,
-  StatusLabel,
-} from "@/ui/ContestLabels/ContestLabels";
-import { calculateContestStatus } from "@/utils/staticContestState";
+
 import Image from "next/image";
 import Link from "next/link";
 import ArtistPfp from "@/../public/pumey_pfp.jpg";
 import ArtistSubmission from "@/../public/vinnie_noggles.png";
 import landingBg from "@/../public/landing-bg.svg";
-import dynamic from "next/dynamic";
-import { BiCategoryAlt, BiTime } from "react-icons/bi";
-import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
-import { HiOutlineDocument, HiOutlineLockClosed } from "react-icons/hi2";
 import { BiPlusCircle } from "react-icons/bi";
 import { HiPhoto } from "react-icons/hi2";
-import fetchActiveContests, {
-  ActiveContest,
-} from "@/lib/fetch/fetchActiveContests";
-import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
-import { RenderPopularSubmissions } from "@/ui/Submission/SubmissionDisplay";
 import UplinkImage from "@/lib/UplinkImage";
-import Swiper from "@/ui/Swiper/Swiper";
 import { ContestFeatureCard, ContestSubCardA, ContestSubCardB, MintboardCard, MintboardSubCardA, MintboardSubCardB } from "./feature";
 
-const DelayedGridLayout = dynamic(
-  () => import("@/ui/DelayedGrid/DelayedGridLayout"),
-  {
-    ssr: false,
-  }
-);
-
-const DelayedGridItem = dynamic(
-  () => import("@/ui/DelayedGrid/DelayedGridItem"),
-  {
-    ssr: false,
-  }
-);
-
-const CardSubmission = dynamic(() => import("@/ui/Submission/CardSubmission"), {
-  ssr: false,
-});
-
-const SwiperSkeleton = () => {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 px-12 m-auto">
-      <div className="w-full shimmer h-72 bg-base-100 rounded-lg" />
-      <div className="w-full shimmer h-72 bg-base-100 rounded-lg hidden md:block" />
-      <div className="w-full shimmer h-72 bg-base-100 rounded-lg hidden lg:block" />
-      <div className="w-full shimmer h-72 bg-base-100 rounded-lg hidden lg:block" />
-    </div>
-  );
-};
+export const dynamic = 'force-static';
+export const runtime = 'nodejs';
 
 const BannerSection = () => {
   return (
@@ -133,200 +92,20 @@ const BannerSection = () => {
           </div>
         </div>
       </div>
-      {/* <div className="absolute bottom-36 left-24 z-10">
-        <h1 className="text-2xl font-bold text-t1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">Whats inside?</h1>
-      </div> */}
-      <UplinkImage
+      <Image
         src={landingBg}
         alt=""
         fill
         className="absolute !h-[70%] !-bottom-4 !left-0 !top-auto object-cover"
-        blur={false}
       />
 
     </div>
   );
 };
 
-const ContestCard = ({
-  linkTo,
-  contest,
-}: {
-  contest: ActiveContest;
-  linkTo: string;
-}) => {
-  const { contestState, stateRemainingTime } = calculateContestStatus(
-    contest.deadlines,
-    contest.metadata.type,
-    contest.tweetId
-  );
-  return (
-    <Link
-      className="card bg-base-100 animate-scrollInX
-    cursor-pointer border border-border rounded-2xl p-4 h-full overflow-hidden w-full min-w-[250px] transform 
-    transition-transform duration-300 hoverCard will-change-transform no-select"
-      href={linkTo}
-      draggable={false}
-    >
-      <div className="card-body items-center p-0">
-        <div className="flex flex-col gap-2 items-center">
-          <div className="relative w-20 h-20 avatar online">
-            <UplinkImage
-              src={contest.space.logoUrl}
-              alt="spaceLogo"
-              fill
-              className="mask mask-squircle object-cover"
-              sizes="10vw"
-            />
-          </div>
-          <h1 className="font-semibold text-xl line-clamp-1 overflow-ellipsis">
-            {contest.space.displayName}
-          </h1>
-        </div>
-        <PromptSummary contest={contest} />
-        <div className="flex flex-row gap-2">
-          <CategoryLabel category={contest.metadata.category} />
-          <StatusLabel status={contestState} />
-        </div>
-        <RemainingTimeLabel remainingTime={stateRemainingTime} />
-      </div>
-    </Link>
-  );
-};
 
-const PromptSummary = async ({ contest }: { contest: ActiveContest }) => {
-  return (
-    <h2 className="line-clamp-1 text-center">
-      {contest.promptData.title}
-    </h2>
-  );
-};
 
-const ActiveContests = async () => {
-  const activeContests = await fetchActiveContests();
-  if (activeContests.length > 0) {
-    return (
-      <div className="w-full flex flex-col gap-4">
-        <div className="flex flex-row gap-2 px-2 md:px-12 items-end">
-          <h1 className="font-bold text-3xl text-t1">Active Contests</h1>
-        </div>
-        <Swiper listSize={activeContests.length - 1}>
-          {activeContests.map((contest, index) => (
-            <div className="snap-start snap-always h-full" key={index}>
-              <ContestCard
-                contest={contest}
-                linkTo={`/contest/${contest.id}`}
-              />
-            </div>
-          ))}
-        </Swiper>
-      </div>
-    );
-  }
-  return null;
-};
 
-const PopularSubmissions = async () => {
-  const popularSubmissions = await fetchPopularSubmissions();
-  if (popularSubmissions.length === 0) return null;
-
-  return (
-    <div className="w-full flex flex-col gap-2 m-auto">
-      <h1 className="font-bold text-3xl text-t1 px-2 md:px-12">Weekly Wave</h1>
-      <h2 className="text-lg text-t2 px-2 md:px-12">
-        Popular submissions. Updated weekly.
-      </h2>
-      <RenderPopularSubmissions submissions={popularSubmissions} />
-    </div>
-  );
-};
-
-const ContestBanner = () => {
-  const steps = [
-    {
-      name: "Contest Type",
-      background: "bg-primary",
-      icon: <BiCategoryAlt className="w-24 h-24 text-primary" />,
-    },
-
-    {
-      name: "Deadlines",
-      background: "bg-error",
-      icon: <BiTime className="w-24 h-24 text-error" />,
-    },
-
-    {
-      name: "Prompt",
-      background: "bg-purple-500",
-      icon: <HiOutlineDocument className="w-24 h-24 text-purple-500" />,
-    },
-    {
-      name: "Voting Policy",
-      background: "bg-warning",
-      icon: <LuVote className="w-24 h-24 text-warning" />,
-    },
-
-    {
-      name: "Submitter Rewards",
-      background: "bg-green-400",
-      icon: <LuCoins className="w-24 h-24 text-green-400" />,
-    },
-
-    {
-      name: "Voter Rewards",
-      background: "bg-purple-500",
-      icon: <LuCoins className="w-24 h-24 text-purple-500" />,
-    },
-    {
-      name: "Submitter Restrictions",
-      background: "bg-orange-600",
-      icon: <HiOutlineLockClosed className="w-24 h-24 text-orange-600" />,
-    },
-
-    {
-      name: "Extras",
-      background: "bg-gray-500",
-      icon: <LuSettings2 className="w-24 h-24 text-t2" />,
-    },
-  ];
-
-  return (
-    <div className="w-full m-auto grid grid-cols-1 lg:grid-cols-2 rounded-xl bg-base-100 bg-opacity-40">
-      <div className="flex flex-col items-start md:items-center lg:items-start justify-end lg:justify-center w-3/4 lg:w-2/3 m-auto gap-6 break-words h-[36vh] lg:h-[60vh]">
-        <span className="flex flex-col gap-0.5 items-start font-bold text-3xl">
-          <h1 className="text-t1">Unlimited flexibility</h1>
-          <h1 className="text-t2">for your next big idea. </h1>
-        </span>
-        <Link
-          href={"/spacebuilder/create"}
-          className="btn btn-primary btn-md rounded-md normal-case shadow-black shadow-2xl"
-          draggable={false}
-        >
-          Create a Contest
-        </Link>
-      </div>
-
-      <div className="relative w-full overflow-hidden h-[60vh]">
-        <DelayedGridLayout gridStyle="absolute top-0 left-0 md:right-0 w-[600px] h-full grid grid-cols-3 auto-rows-fr gap-2 !rotate-[-20deg]">
-          {steps.map((step, idx) => {
-            return (
-              <DelayedGridItem
-                key={idx}
-                gridItemStyle="box border border-border p-2 rounded-xl flex flex-col gap-2 items-center justify-evenly"
-                delay={idx * 0.2}
-              >
-                <h2 className="font-bold text-t1 text-xl text-center">
-                  {step.name}
-                </h2>
-                {step.icon}
-              </DelayedGridItem>
-            );
-          })}
-        </DelayedGridLayout>
-      </div>
-    </div>
-  );
-};
 
 export default async function Page() {
   return (

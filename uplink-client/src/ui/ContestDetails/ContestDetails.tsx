@@ -93,7 +93,7 @@ const DetailSectionWrapper = ({
             <div className="flex gap-2 items-center">
                 <h2 className="font-semibold text-t1 text-[16px]">{title}</h2>
                 {tooltipContent && (
-                    <div className="dropdown dropdown-right dropdown-hover">
+                    <div className="dropdown dropdown-left dropdown-hover">
                         <label tabIndex={0} className="cursor-pointer">
                             <FaRegCircleQuestion className="w-4 h-4 text-t2" />
                         </label>
