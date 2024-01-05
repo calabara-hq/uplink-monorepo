@@ -67,7 +67,7 @@ ol {
 }
 
 .hyperlinks a {
-  @apply text-blue-500 hover:text-blue-600;
+  @apply text-blue-500 hover:text-blue-600 break-all;
 }
 
 .tooltip::before {
@@ -95,8 +95,16 @@ ol {
   grid-template-columns: repeat(auto-fill, minmax(275px, 2fr));
 }
 
+.homepage-sub-columns {
+  grid-template-columns: repeat(auto-fill, minmax(275px, 2fr));
+}
+
 .contest-columns {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.testimonial-columns {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 }
 
 .primary-btn {
@@ -107,6 +115,10 @@ ol {
   @apply btn btn-md normal-case btn-ghost w-fit bg-secondary bg-opacity-20 hover:bg-secondary text-secondary hover:text-black hover:rounded-xl rounded-3xl transition-all duration-300;
 }
 
+
+.grayscale {
+  filter: grayscale(100%)
+}
 
 .glass,
 .glass:hover,
@@ -142,4 +154,63 @@ ol {
   ::-webkit-scrollbar {
     width: 0px;
   }
+}
+
+.features-background-mask {
+  mask-image: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 1) 100%);
+  -webkit-mask-image: linear-gradient(
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+}
+
+.animated-feature-cards::before {
+  @apply pointer-events-none absolute select-none rounded-xl opacity-0 transition-opacity duration-300 hover:opacity-100;
+  background: radial-gradient(
+    750px circle at var(--x) var(--y),
+    #3aecf8 0,
+    #5295dc 25%,
+    rgba(255, 255, 255, 0) 50%,
+    transparent 80%
+  );
+  z-index: -1;
+  content: '';
+  inset: -1px;
+}
+
+.wavy {
+  @apply overflow-hidden;
+}
+
+.wavy::before {
+  content: attr(data-text); 
+  font-size: 4em;
+  top: -42px;
+  left: 0px;
+  position: relative;
+  display: flex;
+  color: transparent;
+  width: calc(100% + 33px);
+  text-decoration-style: wavy;
+  text-decoration-color: #57BAD7;
+  text-decoration-line: underline;
+  animation: wave 1s linear infinite;
+}
+
+@keyframes wave {
+  0% {
+    left: 3px;
+  }
+  100% {
+    left: -30px;
+  }
+}
+
+.expandable-text-container {
+  @apply bg-green-300 h-full max-h-[30vh]
+}
+
+.expand-text-btn-container {
+  @apply bg-red-300
 }

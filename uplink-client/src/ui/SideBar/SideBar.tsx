@@ -1,4 +1,5 @@
 import UplinkImage from "@/lib/UplinkImage"
+import Image from "next/image";
 import Link from "next/link";
 import {
   HiOutlineRectangleGroup,
@@ -11,7 +12,7 @@ export default function Sidebar() {
     <div className="h-full w-full bg-base-100 shadow-xl hidden md:flex md:flex-col py-2">
       <SideBarIcon
         icon={
-          <UplinkImage src={uplinkLogo} alt="uplink logo" height={28} width={28} blur={false}/>
+          <Image src={uplinkLogo} alt="uplink logo" height={28} width={28}/>
         }
         text="Home"
         path={"/"}

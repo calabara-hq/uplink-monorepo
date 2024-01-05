@@ -6,7 +6,7 @@
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": false,
     "forceConsistentCasingInFileNames": true,
@@ -33,7 +33,6 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "**/*.js",
     ".next/types/**/*.ts"
   ],
   "exclude": [

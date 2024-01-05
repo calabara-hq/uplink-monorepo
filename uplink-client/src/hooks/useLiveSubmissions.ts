@@ -72,7 +72,7 @@ const fetchSubmissions = async (contestId: string) => {
                     return { ...submission, data: data };
                 })
             );
-        });
+        })
     return data;
 };
 

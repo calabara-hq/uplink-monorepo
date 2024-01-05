@@ -15,12 +15,13 @@ import {useRef, useEffect} from 'react';
 const StandardVideoPlayer = ({ videoUrl, posterUrl }: { videoUrl: string, posterUrl: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  useEffect(() => {
-  videoRef.current.addEventListener("error", () => {
-    console.log('error loading video, switching to unoptimized url')
-    videoRef.current.src = videoUrl
-  })
-},[])
+    useEffect(() => {
+      videoRef.current.addEventListener("error", () => {
+        console.log('error loading video, switching to unoptimized url')
+        videoRef.current.src = videoUrl
+      })
+    },[])
+
   return (
     <MediaController className="w-full h-fit animate-fadeIn rounded-2xl">
       <video

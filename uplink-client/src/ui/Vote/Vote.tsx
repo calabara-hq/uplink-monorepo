@@ -110,10 +110,6 @@ const LockedCardVote = ({ submission }: { submission: VotableSubmission }) => {
   );
 };
 
-
-
-
-
 const CartMediaSubmission = ({ submission }: { submission: VotableSubmission }) => {
   const src = submission.type === "standard" ? submission.data.previewAsset : submission.data.thread[0].previewAsset
   return (
