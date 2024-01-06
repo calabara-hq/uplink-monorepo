@@ -187,7 +187,7 @@ ol {
   content: attr(data-text); 
   font-size: 4em;
   top: -42px;
-  left: 0px;
+  left: 3px;
   position: relative;
   display: flex;
   color: transparent;

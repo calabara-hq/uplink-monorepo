@@ -7,6 +7,37 @@ import { BackButton, HeaderButtons } from "./client";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { MintBoardPost } from "@/types/mintBoard";
 import UplinkImage from "@/lib/UplinkImage"
+import { Metadata } from "next";
+
+export async function generateMetadata({
+    params,
+  }: {
+    params: { name: string, postId: string};
+  }): Promise<Metadata> {
+    const mintboard = await fetchMintBoard(params.name);
+    const post = mintboard.posts.find(el => el.id === params.postId)
+    const author = post.author.displayName || post.author.address
+
+    return {
+      title: `${author}`,
+      description: `New mint from ${author}`,
+      openGraph: {
+        title: `${author}`,
+        description: `New mint from ${author} on Uplink`,
+        images: [
+          {
+            url: `api/space/${params.name}/mintboard/post/${params.postId}/post_metadata`,
+            width: 600,
+            height: 600,
+            alt: `${params.postId} media`,
+          },
+        ],
+        locale: "en_US",
+        type: "website",
+      },
+    };
+  }
+
 
 const ExpandedPostSkeleton = () => {
     return (

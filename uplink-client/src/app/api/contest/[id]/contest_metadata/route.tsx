@@ -1,25 +1,17 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og"
-import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
-import { isTwitterSubmission } from "@/types/submission";
+import fetchContest from "@/lib/fetch/fetchContest";
 
 export async function GET(req: NextRequest) {
-  const submissionId = req.nextUrl.pathname.split("/")[3];
-  const submission = await fetchSingleSubmission(submissionId)
-
-  const calculatePreview = () => {
-    if (submission.data.type === 'image') {
-      if (isTwitterSubmission(submission)) {
-        return submission.data.thread[0].previewAsset
-      }
-      return submission.data.previewAsset
-    }
-    return null;
-  }
+  const contestId = req.nextUrl.pathname.split("/")[3];
+  const contest = await fetchContest(contestId).then(async (res) => {
+    const promptData = await fetch(res.promptUrl).then((res) => res.json());
+    return { ...res, prompt: promptData };
+  });
 
 
   const RenderPreview = () => {
-    const preview_image = calculatePreview();
+    const preview_image = contest?.prompt?.coverUrl ?? null
     if(preview_image){
       return (
         <img
@@ -75,25 +67,49 @@ export async function GET(req: NextRequest) {
             left: 0,
             top: 0,
             flexDirection: "column",
+            gap: '0px',
             width: "100%",
             height: "100%",
-            paddingLeft: "5px",
+            paddingLeft: "12px",
             justifyContent: "center",
             background: "#1c1f26",
             clipPath: "polygon(0% 0%, 75% 0%, 150% 100%, 0% 100%)",
           }}
         >
+
           <h1
             style={{
               width: "100%",
               maxWidth: "50%",
               textAlign: "left",
-              padding: "12px",
               fontSize: 36
             }}
           >
-            {submission.data.title}
+            {contest.prompt.title}
           </h1>
+          {/* <div 
+            style={{
+                display: "flex",
+                alignItems: "center",
+                gap: '10px'
+            }}
+          >
+            <img
+                src={contest.space.logoUrl}
+                alt="logo"
+                width="40px"
+                height="40px"
+                style={{ objectFit: "contain", borderRadius: "100%" }}
+            /> 
+            <p
+                style={{
+                    fontSize: 20,
+                    color: "gray"
+                }}
+            >
+                {contest.space.displayName}
+            </p>
+          </div> */}
         </div>
       </div>
     ),

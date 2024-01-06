@@ -35,8 +35,6 @@ const SpaceContestsSkeleton = () => {
     <div className="flex flex-col w-full gap-10 min-h-[500px]">
       <div className="flex w-full items-center">
         <div className="w-48 h-8 bg-base-100 rounded-lg shimmer" />
-        <div className="bg-base-100 w-16 ml-auto mr-1 h-8 rounded-lg shimmer" />
-        <div className="bg-base-100 h-8 w-16 rounded-lg shimmer" />
       </div>
       <div className="w-9/12 sm:w-full m-auto grid gap-4 contest-columns auto-rows-fr">
         <div className="bg-base-100 h-72 rounded-xl shimmer" />
@@ -248,12 +246,6 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
 
           <div className="flex flex-row items-center gap-4">
             <p className="text-t2 mr-2">Earn ETH by posting and sharing posts on the {mintBoard.space.displayName} mintboard.</p>
-            {/* <div className="flex flex-row gap-2 items-center hover:text-t1 w-fit ml-auto">
-            <Link className="hover:underline text-blue-500 cursor-pointer" href={`/${spaceName}/mintboard`} draggable={false}>
-              enter
-            </Link>
-            <HiArrowNarrowRight className="h-4 w-4" />
-          </div> */}
             <Link
               href={`${spaceName}/mintboard`}
               className="btn btn-sm normal-case ml-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black hover:rounded-xl rounded-3xl transition-all duration-300"
@@ -285,28 +277,9 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
 
 }
 
-const Contests = ({ contests, spaceName, spaceLogo, isActive, isAll }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string, isActive: boolean, isAll: boolean }) => {
-  const now = new Date().toISOString();
-  const listChildren = isActive ? contests.filter((contest) => {
-    return contest.deadlines.endTime > now;
-  }) : contests;
+const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string}) => {
 
-
-
-  if (listChildren.length < 1) {
-    if (isActive) {
-      return (
-        <div className="w-9/12 sm:w-full m-auto flex flex-col gap-2">
-          <div className="flex flex-col gap-2 items-center m-auto mt-10">
-            <p className="text-t1 text-lg font-bold">No active contests</p>
-            <Link href={`/${spaceName}/?all=true`} className="btn btn-ghost btn-sm text-t2 normal-case">
-              <span>View previous</span>
-            </Link>
-          </div>
-        </div>
-      )
-    }
-    else {
+  if (contests.length < 1) {
       return (
         <div className="w-9/12 sm:w-full m-auto flex flex-col gap-2">
           <div className="flex flex-col gap-2 items-center m-auto mt-10">
@@ -318,19 +291,19 @@ const Contests = ({ contests, spaceName, spaceLogo, isActive, isAll }: { contest
         </div>
       )
     }
-  }
 
   else return (
     <div className="w-9/12 sm:w-full m-auto grid gap-4 contest-columns auto-rows-fr">
-      {listChildren.map((contest) => {
+      {contests.map((contest) => {
         return <ContestCard key={contest.id} contest={contest} spaceLogo={spaceLogo} />;
       })}
     </div>
   )
+
 }
 
 
-const ContestDisplay = async ({ spaceName, isAll, isActive }: { spaceName: string, isAll: boolean, isActive: boolean }) => {
+const ContestDisplay = async ({ spaceName }: { spaceName: string }) => {
   const spaceWithContests = await fetchSpaceContests(spaceName);
   return (
     <div className="flex flex-col gap-2 w-full ">
@@ -338,41 +311,15 @@ const ContestDisplay = async ({ spaceName, isAll, isActive }: { spaceName: strin
         <h2 className="text-t1 font-semibold text-2xl break-words">
           Contests
         </h2>
-        <div className="flex ml-auto gap-3">
-          <div className="flex flex-col gap-1 w-fit">
-            <Link
-              href={`/${spaceName}`}
-              className={`hover:text-t1 ${isActive ? "text-t1" : "text-t2"}`}
-              scroll={false}
-              draggable={false}
-            >
-              Active
-            </Link>
-            {isActive && <div className={`bg-t1 w-full h-0.5 animate-scrollInX`} />}
-          </div>
-          <div className="flex flex-col gap-1">
-            <Link
-              href={`/${spaceName}/?all=true`}
-              className={`hover:text-t1 ${isAll ? "text-t1" : "text-t2"}`}
-              scroll={false}
-              draggable={false}
-            >
-              All
-            </Link>
-            {isAll && <div className={`bg-t1 w-full h-0.5 animate-scrollInX`} />}
-          </div>
-        </div>
       </div>
       <div className="w-full h-1 bg-base-100 rounded-lg" />
-      <Contests contests={spaceWithContests.contests} spaceName={spaceName} spaceLogo={spaceWithContests.logoUrl} isActive={isActive} isAll={isAll} />
+      <Contests contests={spaceWithContests.contests} spaceName={spaceName} spaceLogo={spaceWithContests.logoUrl} />
     </div>
   )
 }
 
-export default async function Page({ params, searchParams }: { params: { name: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function Page({ params }: { params: { name: string } }) {
   const spaceName = params.name;
-  const isAll = searchParams?.all === "true";
-  const isActive = !isAll;
 
   return (
     <div className="flex flex-col gap-2 w-full lg:w-11/12 m-auto py-6 px-4">
@@ -390,7 +337,7 @@ export default async function Page({ params, searchParams }: { params: { name: s
             <MintboardHeatMap spaceName={spaceName} />
           </Suspense>
           <Suspense fallback={<SpaceContestsSkeleton />}>
-            <ContestDisplay spaceName={spaceName} isAll={isAll} isActive={isActive} />
+            <ContestDisplay spaceName={spaceName} />
           </Suspense>
         </div>
       </div>
