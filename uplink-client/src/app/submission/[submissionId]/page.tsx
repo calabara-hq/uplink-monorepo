@@ -2,7 +2,34 @@ import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission"
 import ExpandedSubmission from "@/ui/Submission/ExpandedSubmission"
 import { Suspense } from "react";
 import { BackButton, HeaderButtons, MintButton, ShareButton } from "./client";
+import { Metadata } from "next";
 
+export async function generateMetadata({
+    params,
+  }: {
+    params: { submissionId: string };
+  }): Promise<Metadata> {
+    const submission = await fetchSingleSubmission(params.submissionId)
+
+    return {
+      title: `${submission.data.title}`,
+      description: `${submission.data.title} on Uplink`,
+      openGraph: {
+        title: `${submission.data.title}`,
+        description: `${submission.data.title} on Uplink`,
+        images: [
+          {
+            url: `api/submission/${params.submissionId}/submission_metadata`,
+            width: 600,
+            height: 600,
+            alt: `${submission.data.title} media`,
+          },
+        ],
+        locale: "en_US",
+        type: "website",
+      },
+    };
+  }
 
 const ExpandedSubmissionSkeleton = () => {
     return (

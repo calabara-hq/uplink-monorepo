@@ -410,7 +410,7 @@ export const ContestSubCardB = ({ children }: { children: React.ReactNode }) => 
 
 export const MintboardCard = () => {
     return (
-        <div className="w-full grid grid-cols-1 xl:grid-cols-[30%_auto] items-center gap-4 mt-24">
+        <div className="w-full grid grid-cols-1 xl:grid-cols-[30%_auto] items-center gap-4 mt-36 sm:mt-24">
             <h1 className="text-3xl font-bold text-t2 lg:max-w-[30vw] ">
                 <span className="text-t1">The Mintboard.</span> <br /> A collective canvas for onchain creation.
             </h1>
