@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
             gap: '0px',
             width: "100%",
             height: "100%",
-            paddingLeft: "12px",
+            paddingLeft: "5px",
             justifyContent: "center",
             background: "#1c1f26",
             clipPath: "polygon(0% 0%, 75% 0%, 150% 100%, 0% 100%)",
@@ -80,6 +80,7 @@ export async function GET(req: NextRequest) {
           <h1
             style={{
               width: "100%",
+              padding: "30px",
               maxWidth: "50%",
               textAlign: "left",
               fontSize: 36

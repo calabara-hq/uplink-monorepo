@@ -111,7 +111,7 @@ export default async function Page() {
   return (
     <div className="flex flex-col w-full mb-16 gap-12">
       <BannerSection />
-      <div className="flex flex-col w-11/12 md:w-8/12 m-auto gap-6">
+      <div className="flex flex-col w-11/12 md:w-10/12 xl:w-8/12 m-auto gap-6">
         <ContestFeatureCard />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ContestSubCardA />
