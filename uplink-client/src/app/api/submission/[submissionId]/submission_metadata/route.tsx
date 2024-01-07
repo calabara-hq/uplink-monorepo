@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
               width: "100%",
               maxWidth: "50%",
               textAlign: "left",
-              padding: "12px",
+              padding: "30px",
               fontSize: 36
             }}
           >
