@@ -88,6 +88,7 @@ export async function GET(req: NextRequest) {
           >
             {contest.prompt.title}
           </h1>
+          
           {/* <div 
             style={{
                 display: "flex",

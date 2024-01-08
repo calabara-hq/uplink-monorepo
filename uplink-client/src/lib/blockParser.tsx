@@ -2,7 +2,6 @@
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import type { OutputData } from "@editorjs/editorjs";
 import React, { useEffect } from "react";
-import sanitizeHtml from "sanitize-html";
 import Output, { LinkToolOutput, ListOutput, ParagraphOutput } from 'editorjs-react-renderer';
 import UplinkImage from "@/lib/UplinkImage"
 const createLinks = (text: string): string => {
