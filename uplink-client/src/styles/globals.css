@@ -19,6 +19,10 @@
 
 }
 
+:root {
+  color-scheme: dark;
+}
+
 .no-select p,
 .no-select h1,
 .no-select h2,
@@ -214,3 +218,5 @@ ol {
 .expand-text-btn-container {
   @apply bg-red-300
 }
+
+

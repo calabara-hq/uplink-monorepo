@@ -52,6 +52,7 @@ type WrapperStyle = MotionStyle & {
 };
 
 
+
 export const FeatureCard = ({ children }: { children: React.ReactNode }) => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);

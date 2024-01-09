@@ -8,6 +8,7 @@ import { BiPlusCircle } from "react-icons/bi";
 import { HiPhoto } from "react-icons/hi2";
 import UplinkImage from "@/lib/UplinkImage";
 import { ContestFeatureCard, ContestSubCardA, ContestSubCardB, MintboardCard, MintboardSubCardA, MintboardSubCardB } from "./feature";
+import "@/styles/stars.css";
 
 export const dynamic = 'force-static';
 export const runtime = 'nodejs';
@@ -15,20 +16,28 @@ export const runtime = 'nodejs';
 const BannerSection = () => {
   return (
     <div className="w-full h-screen min-h-[750px] flex-grow flex flex-col bg-base-100 relative">
+      <div className="stars">
+        <div className="small"></div>
+        <div className="medium"></div>
+        <div className="big"></div>
+      </div>
       <div className="grid place-items-center items-center bg-gradient-to-br">
-        <div className="hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-5 lg:gap-10 lg:flex-row xl:gap-20 z-[1]">
+        <div className="hero-content col-start-1 row-start-1 w-full flex-col justify-between gap-5 lg:gap-10 lg:flex-row xl:gap-20 z-[1] ">
           <div className="lg:pl-10 ">
-            <div className="flex flex-col gap-2 py-4 text-left ">
-              <div className="flex gap-2">
+            <div className="flex flex-col gap-2 py-4 text-center items-center lg:items-start lg:text-left">
                 <h1 className="mb-2 text-5xl font-[700] text-t1 w-fit">
                   Unleash your biggest fans
                 </h1>
-              </div>
-              <h2 className="text-lg max-w-md text-t1">
-                Uplink lets individuals, brands, and decentralized orgs create
-                rewards systems to amplify their reach and co-create
-                masterpieces with their most passionate supporters.
-              </h2>
+                <h2 className="text-lg max-w-md text-t2 m-auto lg:m-0">
+                  Join individuals, brands, and decentralized orgs using Uplink to organize onchain and co-create masterpieces with their most passionate supporters.
+                </h2>
+              <Link 
+                className="btn primary-btn normal-case m-auto lg:ml-0 lg:mr-auto"
+                href={"/spaces"}
+                draggable={false}
+              >
+                Explore
+              </Link>
             </div>
           </div>
           <div className="m-auto w-full max-w-[300px] sm:max-w-sm lg:max-w-lg animate-springUp">
