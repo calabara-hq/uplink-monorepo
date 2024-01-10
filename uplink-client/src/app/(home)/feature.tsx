@@ -130,7 +130,7 @@ export const ContestFeatureCard = () => {
                                             <UplinkImage
                                                 src="https://uplink.mypinata.cloud/ipfs/QmbZXDcXcL3DKBMnSBht8witDCMissHdsb2BqW2vqvp2hE"
                                                 alt="contest image"
-                                                sizes="10vw"
+                                                sizes="20vw"
                                                 fill
                                                 className="object-contain rounded-xl"
                                             />

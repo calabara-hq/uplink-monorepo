@@ -48,6 +48,7 @@ export const HeaderButtons = ({ spaceName, post, referrer }: { spaceName: string
     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const remainingTime = useMintTimer(post);
+
     const handleClose = () => {
         setIsMintModalOpen(false);
         setIsShareModalOpen(false);

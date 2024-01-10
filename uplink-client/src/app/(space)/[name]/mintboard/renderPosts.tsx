@@ -17,7 +17,8 @@ import { FaRegClock } from "react-icons/fa";
 import { HiCheckBadge } from "react-icons/hi2";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import { useInView } from "react-intersection-observer";
-import UplinkImage from "@/lib/UplinkImage"
+import UplinkImage from "@/lib/UplinkImage";
+import { uint64MaxSafe } from '@/utils/uint64';
 
 const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }) => {
 
@@ -193,10 +194,12 @@ export const PostSkeleton = () => {
 
 export const useMintTimer = (post: MintBoardPost) => {
     const [remainingTime, setRemainingTime] = useState<string | null>(null);
-    const mintEnd = Number(post.edition.saleConfig.publicSaleEnd) * 1000;
-
-
+    const mintEnd = post.edition.saleConfig.publicSaleEnd === uint64MaxSafe.toString() ? 'forever' : Number(post.edition.saleConfig.publicSaleEnd) * 1000;
     useTicks(() => {
+        if(mintEnd === 'forever') {
+            setRemainingTime('forever')
+            return null;
+        }
         const now = Date.now();
         if (now > mintEnd) return null;
 
