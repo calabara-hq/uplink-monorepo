@@ -30,7 +30,7 @@ export default function UplinkImage(props: { src: string | StaticImageData, alt:
             alt={alt}
             sizes={sizes}
             {...rest}
-            />
+        />
     )
 
     if (blur) {
