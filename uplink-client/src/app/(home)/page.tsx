@@ -112,10 +112,6 @@ const BannerSection = () => {
   );
 };
 
-
-
-
-
 export default async function Page() {
   return (
     <div className="flex flex-col w-full mb-16 gap-12">

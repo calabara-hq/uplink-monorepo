@@ -317,7 +317,7 @@ const ContestForm = ({
   };
 
   const setTotalState = (data) => {
-    setContestState({ type: "SET_TOTAL_STATE", value: data });
+    setContestState({ type: "SET_TOTAL_STATE", value: {...data, spaceTokens: contestState.spaceTokens} });
   };
 
   const handleBack = () => {
