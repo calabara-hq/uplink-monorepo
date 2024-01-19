@@ -20,6 +20,7 @@ const fetchMintBoard = async (spaceName: string): Promise<MintBoard> => {
                     displayName
                   }
                 enabled
+                threshold
                 editionSize
                 description
                 chainId

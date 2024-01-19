@@ -10,6 +10,7 @@ import { supportedChains } from "@/lib/chains/supportedChains";
 export const MintBoardTemplateSchema = z.object({
     chainId: z.number().refine((n) => supportedChains.map(chain => chain.id).includes(n), { message: "Must be base network" }),
     enabled: z.boolean(),
+    threshold: z.number(),
     boardTitle: z.string().min(1, { message: "Board title is required" }),
     boardDescription: z.string().min(1, { message: "Board description is required" }),
     name: z.string().min(1, { message: "Name is required" }),
@@ -113,6 +114,7 @@ export default function useCreateMintBoardTemplate(templateConfig?: MintBoardTem
     const baseConfig = {
         chainId: supportedChains[0].id,
         enabled: false,
+        threshold: 0,
         boardTitle: "",
         boardDescription: "",
         name: "",
@@ -141,6 +143,7 @@ export default function useCreateMintBoardTemplate(templateConfig?: MintBoardTem
 
     const validate = async () => {
         const { errors, ...rest } = state;
+        console.log(rest)
         const result = await MintBoardTemplateSchema.safeParseAsync(rest);
         if (!result.success) {
             const formattedErrors = (result as z.SafeParseError<typeof MintBoardTemplateSchema>).error.format();

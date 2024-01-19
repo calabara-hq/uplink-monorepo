@@ -186,6 +186,7 @@ export type MintBoard = {
   space: SpaceStub;
   spaceId: Scalars['ID']['output'];
   symbol: Scalars['String']['output'];
+  threshold: Scalars['Int']['output'];
 };
 
 export type MintBoardInput = {
@@ -201,6 +202,7 @@ export type MintBoardInput = {
   publicSaleStart: Scalars['String']['input'];
   referrer: Scalars['String']['input'];
   symbol: Scalars['String']['input'];
+  threshold: Scalars['Int']['input'];
 };
 
 export type Mutation = {
@@ -753,6 +755,7 @@ export type MintBoardResolvers<ContextType = any, ParentType extends ResolversPa
   space?: Resolver<ResolversTypes['SpaceStub'], ParentType, ContextType>;
   spaceId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  threshold?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

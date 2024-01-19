@@ -3,8 +3,8 @@ import useLiveMintBoard from "@/hooks/useLiveMintBoard"
 import { useTicks } from "@/hooks/useTicks";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { isMobile } from "@/lib/isMobile";
-import { useSession } from "@/providers/SessionProvider";
-import { MintBoardPost } from "@/types/mintBoard";
+import { Session, useSession } from "@/providers/SessionProvider";
+import { MintBoard, MintBoardPost } from "@/types/mintBoard";
 import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
@@ -19,6 +19,7 @@ import { MdOutlineCancelPresentation } from "react-icons/md";
 import { useInView } from "react-intersection-observer";
 import UplinkImage from "@/lib/UplinkImage";
 import { uint64MaxSafe } from '@/utils/uint64';
+import { TokenContractApi } from "@/lib/contract";
 
 const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }) => {
 
@@ -111,14 +112,14 @@ export const ShareModalContent = ({ spaceName, post, handleClose }: { spaceName:
                     </div>
                 )}
             </WalletConnectButton>
-            {status !== 'authenticated' && 
-            <>
-                <div className="w-full h-0.5 bg-base-200"/>
-                <div className="flex flex-col gap-2">
-                    <p className="text-t2">Or just copy link</p>
-                    <button className="secondary-btn btn-sm" onClick={handleShare}>Copy Link</button>
-                </div>
-            </>
+            {status !== 'authenticated' &&
+                <>
+                    <div className="w-full h-0.5 bg-base-200" />
+                    <div className="flex flex-col gap-2">
+                        <p className="text-t2">Or just copy link</p>
+                        <button className="secondary-btn btn-sm" onClick={handleShare}>Copy Link</button>
+                    </div>
+                </>
             }
         </div>
     )
@@ -196,7 +197,7 @@ export const useMintTimer = (post: MintBoardPost) => {
     const [remainingTime, setRemainingTime] = useState<string | null>(null);
     const mintEnd = post.edition.saleConfig.publicSaleEnd === uint64MaxSafe.toString() ? 'forever' : Number(post.edition.saleConfig.publicSaleEnd) * 1000;
     useTicks(() => {
-        if(mintEnd === 'forever') {
+        if (mintEnd === 'forever') {
             setRemainingTime('forever')
             return null;
         }
@@ -251,6 +252,156 @@ const PostFooter = ({ post, spaceName, handleMint, handleShare }) => {
             </div>
         </div>
     )
+}
+
+// 3 states - no thresholds, not signed in, signed in
+// if no threshold, show nothing
+// if signed in, show progress bar
+// if not signed in, show sign in button
+
+
+type ThresholdProgress = {
+    threshold: number,
+    mints: number,
+}
+
+// const useThresholdProgress = (mintBoard: MintBoard, userAddress: string): ThresholdProgress => {
+
+//     if (!mintBoard.threshold) return { threshold: mintBoard.threshold, mints: 0, status: 'noThreshold' };
+//     else if (!userAddress) return { threshold: 0, mints: 0, status: 'notSignedIn' };
+//     else {
+//         const userPosts = mintBoard.posts.filter(post => post.author.address === userAddress);
+//         const totalMints = userPosts.reduce((acc, post) => acc + post.totalMints, 0);
+//         return { threshold: mintBoard.threshold, mints: totalMints, status: 'signedIn' };
+//     }
+// }
+
+
+
+// const useTotalSupply = (chainId, contractAddress) => {
+//     const [totalSupply, setTotalSupply] = useState<string | null>(null);
+//     const tokenApi = new TokenContractApi(chainId);
+
+//     const getSupply = () => {
+//         tokenApi.tokenGetTotalSupply({ contractAddress }).then(supply => {
+//             setTotalSupply(supply.toString());
+//         })
+//     }
+
+//     useEffect(() => {
+//         getSupply();
+//         const interval = setInterval(() => {
+//             getSupply();
+//         }, 10_000);
+
+//         return () => clearInterval(interval);
+
+//     }, [])
+
+//     return {
+//         totalSupply,
+//         isLoading: totalSupply === null,
+//     }
+// }
+
+
+const useThresholdProgress = (spaceName: string) => {
+    const { status, data: session } = useSession();
+    const { liveBoard, isBoardLoading } = useLiveMintBoard(spaceName);
+    const [aggMints, setAggMints] = useState(0);
+    const tokenApi = new TokenContractApi(liveBoard.chainId);
+    const userPosts = liveBoard.posts.filter(post => post.author.address === session?.user?.address);
+    
+    const getAggMints = async () => {
+        const mints = await Promise.all(userPosts.map(post => tokenApi.tokenGetTotalSupply({ contractAddress: post.edition.contractAddress })));
+        const totalMints = mints.reduce((acc, mint) => acc + Number(mint.toString()), 0);
+        setAggMints(totalMints);
+    }
+
+    useEffect(() => {
+        getAggMints();
+    },[userPosts])
+
+
+    return aggMints;
+
+}
+
+
+
+export const UserProgressSkeleton = () => {
+    return (
+        <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-row gap-2 items-center">
+                <div className="w-28 h-4 rounded-xl bg-base-100 shimmer"/>
+                <div className="ml-auto w-16 h-8 rounded-xl bg-base-100 shimmer"/>
+            </div>
+            <div className="flex flex-col gap-2 w-full">
+                <progress className="progress progress-primary w-full shimmer" value={0} max="100"></progress>
+                <div className="flex gap-2 items-center text-t2">
+                    <p>0</p>
+                    <p className="ml-auto">100</p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+
+const ProgressBar = ({ spaceName }: { spaceName: string }) => {
+    const { status, data: session } = useSession();
+    const { liveBoard, isBoardLoading } = useLiveMintBoard(spaceName);
+    const threshold = liveBoard.threshold;
+    const userMints = useThresholdProgress(spaceName)
+
+    if(status === 'loading') return <UserProgressSkeleton/>
+
+    if(status !== 'authenticated'){
+        return (
+            <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-row gap-2 items-center">
+                    <p className="text-t2 font-bold">sign in to check progress!</p>
+                    <div className="ml-auto"><WalletConnectButton styleOverride={"btn-sm"}/></div>
+                </div>
+                <div className="flex flex-col gap-2 w-full">
+                    <progress className="progress progress-primary w-full" value={0} max={threshold}></progress>
+                    <div className="flex gap-2 items-center text-t2">
+                        <p>0</p>
+                        <p className="ml-auto">{threshold}</p>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-row gap-2 items-center">
+                {/* <UserAvatar user={session?.user} size={28} /> */}
+                <p className="font-bold text-t2">my progress</p>
+                <div className="ml-auto w-16 h-8"/>
+            </div>
+            <div className="flex flex-col gap-2 w-full">
+                <progress className="progress progress-primary w-full" value={userMints} max={threshold}></progress>
+                <div className="grid grid-cols-3 gap-2 items-center text-t2">
+                    <p>0</p>
+                    <p className="m-auto">{userMints} mints</p>
+                    <p className="ml-auto">{threshold}</p>
+                </div>
+            </div>
+        </div>
+    )
+
+
+}
+
+
+export const RenderProgress = ({ spaceName }: { spaceName: string }) => {
+    const { liveBoard, isBoardLoading } = useLiveMintBoard(spaceName);
+    const { status, data: session } = useSession();
+    if (!liveBoard.threshold) return null;
+    return <ProgressBar spaceName={spaceName} />
+
 }
 
 export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPopular: boolean }) => {

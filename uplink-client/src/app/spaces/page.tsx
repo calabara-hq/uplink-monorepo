@@ -65,7 +65,7 @@ const ContestCard = ({
   return (
     <Link
       className="card bg-base-100 animate-scrollInX
-    cursor-pointer border border-border rounded-2xl p-4 h-full overflow-hidden w-full min-w-[250px] transform 
+    cursor-pointer border border-border rounded-2xl p-4 h-full overflow-hidden w-[275px] transform 
     transition-transform duration-300 hoverCard will-change-transform no-select"
       href={linkTo}
       draggable={false}

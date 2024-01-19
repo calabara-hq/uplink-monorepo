@@ -265,6 +265,7 @@ export const mintBoards = mysqlTable('mintBoards', {
     spaceId: int('spaceId').notNull(),
     created: varchar('created', { length: 255 }).notNull(),
     enabled: tinyint('enabled').notNull(),
+    threshold: int('threshold').default(0),
     chainId: int('chainId').notNull(),
     boardTitle: varchar('boardTitle', { length: 255 }).notNull(),
     boardDescription: text('boardDescription').notNull(),

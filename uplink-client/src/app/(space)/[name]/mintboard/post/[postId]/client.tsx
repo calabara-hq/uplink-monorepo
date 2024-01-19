@@ -5,7 +5,7 @@ import MintEdition from "@/ui/Zora/MintEdition";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { HiArrowNarrowLeft } from "react-icons/hi";
-import { MintButton, ShareButton, ShareModalContent, useMintTimer } from "../../renderPosts";
+import { MintButton, ShareButton, ShareModalContent, useMintTimer } from "../../client";
 import { FaRegClock } from "react-icons/fa";
 
 export const BackButton = ({ spaceName }: { spaceName: string }) => {
