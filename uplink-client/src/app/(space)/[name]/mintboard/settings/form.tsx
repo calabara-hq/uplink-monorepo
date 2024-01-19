@@ -315,7 +315,7 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
                                 <p className="text-t2">Reward posters when they reach a certain # of mints. Enabling a threshold will show users their progress on the mintboard page.</p>
                             </div>
                         </div>
-                        <Options label={""} options={[{ value: 0, label: "none" }, { value: 100, label: "100" }, { value: 500, label: "500" }, {value: 1000, label: "1000"}]} selected={state.threshold} onSelect={(option: Option) => setField("threshold", option.value)} />
+                        <Options label={""} options={[{ value: "0", label: "none" }, { value: "100", label: "100" }, { value: "500", label: "500" }, {value: "1000", label: "1000"}]} selected={state.threshold.toString()} onSelect={(option: Option) => setField("threshold", Number(option.value))} />
                     </div>
                 </div>
             )}
