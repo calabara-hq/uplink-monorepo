@@ -3,7 +3,7 @@ import UplinkImage from "@/lib/UplinkImage"
 import Link from "next/link";
 import { Suspense } from "react";
 import SwrProvider from "@/providers/SwrProvider";
-import { PostSkeleton, RenderPosts } from "./renderPosts";
+import { PostSkeleton, RenderPosts, RenderProgress, UserProgressSkeleton } from "./client";
 import { HiTrash } from "react-icons/hi2";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
@@ -134,6 +134,28 @@ const Posts = async ({ spaceName, isPopular }: { spaceName: string, isPopular: b
     )
 }
 
+const Progress = async ({spaceName}: {spaceName: string}) => {
+    const mintBoard = await fetchMintBoard(spaceName)
+
+    const fallback = {
+        [`/mintBoard/${spaceName}`]: mintBoard,
+    };
+
+    const threshold = 1000;
+
+    if (!threshold) return null;
+    return (
+        <SwrProvider fallback={fallback}>
+            <RenderProgress spaceName={spaceName}/>
+        </SwrProvider>
+    )
+
+}
+
+// 1. get contracts by user account
+// 2. fetch # mints
+// 3. render over threshold
+
 export default async function Page({ params, searchParams }: { params: { name: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
     const spaceName = params.name;
     const isPopular = searchParams?.popular === "true"
@@ -142,13 +164,20 @@ export default async function Page({ params, searchParams }: { params: { name: s
     return (
         <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4">
             <div className="grid grid-cols-1 md:grid-cols-[auto_35%] gap-8 w-full p-4">
-                <Suspense fallback={<BoardInfoSkeleton />}>
-                    <BoardInfo spaceName={spaceName} />
-                </Suspense>
-                <Suspense fallback={<CreatePostSkeleton />}>
-                    <CreatePostButton spaceName={spaceName} />
-                </Suspense>
-
+                <div className="flex flex-col gap-2">
+                    <Suspense fallback={<BoardInfoSkeleton />}>
+                        <BoardInfo spaceName={spaceName} />
+                    </Suspense>
+                </div>
+                <div className="flex flex-col gap-4">
+                    <Suspense fallback={<UserProgressSkeleton/> }>
+                        <Progress spaceName={spaceName} />
+                    </Suspense>
+                    <Suspense fallback={<CreatePostSkeleton />}>
+                        <CreatePostButton spaceName={spaceName} />
+                    </Suspense>
+                    
+                </div>
             </div>
             <div className="flex flex-col gap-1">
                 <PageFilter spaceName={spaceName} isLatest={isLatest} isPopular={isPopular} />

@@ -137,7 +137,6 @@ export const rewardsObjectToArray = (rewards: SubmitterRewards | VoterRewards, s
 };
 
 export const arraysSubtract = (arr1: IToken[], arr2: IToken[], strictTypes?: string[]) => {
-    console.log('subtracting arr1', arr1, 'and arr2', arr2)
     return arr1.filter((item) => {
         // Check if the item is not in arr2
         return !arr2.some((obj) => {

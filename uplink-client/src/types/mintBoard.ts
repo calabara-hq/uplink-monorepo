@@ -9,6 +9,7 @@ export type MintBoard = {
     created: string;
     chainId: number;
     enabled: boolean;
+    threshold: number;
     boardTitle: string;
     boardDescription: string;
     name: string;

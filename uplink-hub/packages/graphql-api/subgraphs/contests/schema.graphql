@@ -25,6 +25,7 @@ type MintBoard @key(fields: "id"){
   created: String!
   chainId: Int!
   enabled: Boolean!
+  threshold: Int!
   boardTitle: String!
   boardDescription: String!
   name: String!
@@ -327,6 +328,7 @@ input CreateContestData {
 input MintBoardInput {
   chainId: Int!
   enabled: Boolean!
+  threshold: Int!
   boardTitle: String!
   boardDescription: String!
   name: String!

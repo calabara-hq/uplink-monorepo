@@ -305,6 +305,7 @@ type MintBoard
   created: String! @join__field(graph: CONTESTS)
   chainId: Int! @join__field(graph: CONTESTS)
   enabled: Boolean! @join__field(graph: CONTESTS)
+  threshold: Int! @join__field(graph: CONTESTS)
   boardTitle: String! @join__field(graph: CONTESTS)
   boardDescription: String! @join__field(graph: CONTESTS)
   name: String! @join__field(graph: CONTESTS)
@@ -333,6 +334,7 @@ input MintBoardInput
 {
   chainId: Int!
   enabled: Boolean!
+  threshold: Int!
   boardTitle: String!
   boardDescription: String!
   name: String!
