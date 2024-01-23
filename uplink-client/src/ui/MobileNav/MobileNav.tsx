@@ -11,9 +11,9 @@ const MobileNav = () => {
         <span className="btm-nav-label">Home</span>
       </Link>
 
-      <Link href="/spaces" draggable={false}>
+      <Link href="/explore" draggable={false}>
         <HiOutlineRectangleGroup className="h-8 w-8" />
-        <span className="btm-nav-label">spaces</span>
+        <span className="btm-nav-label">Explore</span>
       </Link>
       <div>
         <WalletConnectButton />

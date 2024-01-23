@@ -33,7 +33,7 @@ const BannerSection = () => {
                 </h2>
               <Link 
                 className="btn primary-btn normal-case m-auto lg:ml-0 lg:mr-auto"
-                href={"/spaces"}
+                href={"/explore"}
                 draggable={false}
               >
                 Explore
