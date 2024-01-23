@@ -26,14 +26,14 @@ const BannerSection = () => {
           <div className="lg:pl-10 ">
             <div className="flex flex-col gap-2 py-4 text-center items-center lg:items-start lg:text-left">
                 <h1 className="mb-2 text-5xl font-[700] text-t1 w-fit">
-                  Unleash your biggest fans
+                  {`Let's Create`}
                 </h1>
                 <h2 className="text-lg max-w-md text-t2 m-auto lg:m-0">
                   Join individuals, brands, and decentralized orgs using Uplink to organize onchain and co-create masterpieces with their most passionate supporters.
                 </h2>
               <Link 
                 className="btn primary-btn normal-case m-auto lg:ml-0 lg:mr-auto"
-                href={"/spaces"}
+                href={"/explore"}
                 draggable={false}
               >
                 Explore

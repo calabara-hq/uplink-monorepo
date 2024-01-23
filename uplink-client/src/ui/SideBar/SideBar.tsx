@@ -21,8 +21,8 @@ export default function Sidebar() {
       <Divider />
       <SideBarIcon
         icon={<HiOutlineRectangleGroup className="h-6 w-6" />}
-        text="Spaces"
-        path={"/spaces"}
+        text="Explore"
+        path={"/explore"}
       />
       <SideBarIcon
         icon={<HiPlus className="h-6 w-6" />}
