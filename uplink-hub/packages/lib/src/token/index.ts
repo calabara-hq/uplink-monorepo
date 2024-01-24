@@ -207,8 +207,8 @@ export class TokenController {
                 // if lil nouns, check if user is delegated any votes
 
                 if (token.address === "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B") {
-                    const nounsContract = new ethers.Contract(token.address, ERC721ABI, this.provider);
-                    const balance = await nounsContract.getPriorVotes(walletAddress, blockNum);
+                    const lilsContract = new ethers.Contract(token.address, ERC721ABI, this.provider);
+                    const balance = await lilsContract.getPriorVotes(walletAddress, blockNum);
                     return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
                 }
 
