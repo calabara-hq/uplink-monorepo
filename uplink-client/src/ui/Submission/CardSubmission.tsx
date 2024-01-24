@@ -19,9 +19,9 @@ const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
 });
 
 const SubmissionBody = ({ submission }: { submission: Submission }) => {
-  const totalVotes = new Decimal(submission.totalVotes ?? "0");
-
-  if (submission.data.type !== "text")
+  
+  if (submission.data.type === "text") return null;
+    const totalVotes = new Decimal(submission.totalVotes ?? "0");
     return (
       <div className="relative flex flex-col gap-2 rounded-b-lg w-full p-2 ">
         <h2 className="text-lg font-semibold">{submission.data.title}</h2>
@@ -43,6 +43,7 @@ const SubmissionBody = ({ submission }: { submission: Submission }) => {
 };
 
 const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
+  const totalVotes = new Decimal(submission.totalVotes ?? "0");
   return (
     <div className="relative h-full w-full min-h-[330px] rounded-xl text-t1 gap-1">
       <div className="p-2 w-full h-full flex flex-col gap-1 transition-transform duration-300 ease-in-out will-change-transform">
@@ -54,6 +55,13 @@ const RenderTextSubmission = ({ submission }: { submission: Submission }) => {
           <h3 className="break-all italic text-sm ">
             <UsernameDisplay user={submission.author} />
           </h3>
+          {totalVotes.greaterThan(0) ? (
+            <span className="ml-auto text-t2 text-sm font-medium">
+              {formatDecimal(totalVotes.toString()).short} votes
+            </span>
+          ) : (
+            <span />
+          )}
         </div>
         <section className="break-word max-h-[18em] overflow-hidden">
           {submission.type === "twitter" ? (
