@@ -7,8 +7,8 @@ import MobileNav from "@/ui/MobileNav/MobileNav";
 import type { Metadata } from "next";
 import { Analytics } from '@vercel/analytics/react';
 
-export const runtime = "edge";
-export const preferredRegion = "iad1";
+// export const runtime = "edge";
+// export const preferredRegion = "iad1";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_CLIENT_URL!),
