@@ -1,5 +1,4 @@
 "use client";
-import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import { Submission, isNftSubmission, isStandardSubmission, isTwitterSubmission } from "@/types/submission";
 import { notFound } from "next/navigation";
 import CreateEdition from "@/ui/Zora/CreateEdition";
@@ -7,7 +6,6 @@ import uplinkLoadingGif from "@/../public/uplink-loading.gif"
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import useMe from "@/hooks/useMe";
 import { useSession } from "@/providers/SessionProvider";
-import { useEffect } from "react";
 import { useContestState } from "@/providers/ContestStateProvider";
 import UplinkImage from "@/lib/UplinkImage"
 
