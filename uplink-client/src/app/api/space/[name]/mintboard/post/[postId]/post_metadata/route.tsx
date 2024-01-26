@@ -3,6 +3,8 @@ import { ImageResponse } from "next/og"
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { parseIpfsUrl } from "@/lib/ipfs";
 
+export const runtime = 'edge'
+
 export async function GET(req: NextRequest) {
   const name = req.nextUrl.pathname.split("/")[3];
   const postId = req.nextUrl.pathname.split("/")[6];

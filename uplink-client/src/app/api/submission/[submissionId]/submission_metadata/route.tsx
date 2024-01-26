@@ -3,6 +3,8 @@ import { ImageResponse } from "next/og"
 import fetchSingleSubmission from "@/lib/fetch/fetchSingleSubmission";
 import { isTwitterSubmission } from "@/types/submission";
 
+export const runtime = 'edge'
+
 export async function GET(req: NextRequest) {
   const submissionId = req.nextUrl.pathname.split("/")[3];
   const submission = await fetchSingleSubmission(submissionId)

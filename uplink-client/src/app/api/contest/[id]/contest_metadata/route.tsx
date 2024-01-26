@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og"
 import fetchContest from "@/lib/fetch/fetchContest";
 
+export const runtime = 'edge'
+
 export async function GET(req: NextRequest) {
   const contestId = req.nextUrl.pathname.split("/")[3];
   const contest = await fetchContest(contestId).then(async (res) => {
@@ -26,9 +28,9 @@ export async function GET(req: NextRequest) {
     return null;
   }
   
-  const ubuntuBold = fetch(
-    new URL('@/styles/fonts/Ubuntu-Bold.ttf', import.meta.url)
-  ).then((res) => res.arrayBuffer())
+  // const ubuntuBold = fetch(
+  //   new URL('@/styles/fonts/Ubuntu-Bold.ttf', import.meta.url)
+  // ).then((res) => res.arrayBuffer())
 
   return new ImageResponse(
     (
@@ -118,14 +120,14 @@ export async function GET(req: NextRequest) {
     {
       width: 1200,
       height: 600,
-      fonts: [
-        {
-          name: 'Ubuntu',
-          data: await ubuntuBold,
-          style: 'normal',
-          weight: 400
-        }
-      ]
+      // fonts: [
+      //   {
+      //     name: 'Ubuntu',
+      //     data: await ubuntuBold,
+      //     style: 'normal',
+      //     weight: 400
+      //   }
+      // ]
     }
   );
 }
