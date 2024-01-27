@@ -18,6 +18,13 @@ export async function generateMetadata({
     const post = mintboard.posts.find(el => el.id === params.postId)
     const author = post.author.displayName || post.author.address
 
+    const fcMetadata: Record<string, string> = {
+        "fc:frame": "vNext",
+        "fc:frame:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${params.name}/mintboard/post/${params.postId}/farcaster_handler`,
+        "fc:frame:image": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${params.name}/mintboard/post/${params.postId}/post_metadata`,
+        "fc:frame:button:1": "Mint"
+    };
+
     return {
       title: `${author}`,
       description: `New mint from ${author}`,
@@ -35,6 +42,9 @@ export async function generateMetadata({
         locale: "en_US",
         type: "website",
       },
+      other: {
+        ...fcMetadata
+      }
     };
   }
 

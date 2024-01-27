@@ -1,5 +1,7 @@
-import { createPublicClient, http } from 'viem'
-import { mainnet, base } from 'viem/chains'
+import { createPublicClient, createWalletClient, http } from 'viem'
+import { mainnet, base, zora, optimism, baseGoerli, zoraTestnet, optimismGoerli } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
+
 
 export const createWeb3Client = (chainId?: number) => {
     if (!chainId || chainId === 1) return createPublicClient({
@@ -19,7 +21,7 @@ export const createWeb3Client = (chainId?: number) => {
     });
 
     else if (chainId === 10) return createPublicClient({
-        chain: base,
+        chain: optimism,
         transport: http(`https://opt-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
         batch: {
             multicall: true
@@ -27,7 +29,7 @@ export const createWeb3Client = (chainId?: number) => {
     });
 
     else if (chainId === 7777777) return createPublicClient({
-        chain: base,
+        chain: zora,
         transport: http(`https://rpc.zora.energy`),
         batch: {
             multicall: true
@@ -35,7 +37,7 @@ export const createWeb3Client = (chainId?: number) => {
     });
 
     else if (chainId === 84531) return createPublicClient({
-        chain: base,
+        chain: baseGoerli,
         transport: http(`https://base-goerli.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
         batch: {
             multicall: true
@@ -43,7 +45,7 @@ export const createWeb3Client = (chainId?: number) => {
     });
 
     else if (chainId === 420) return createPublicClient({
-        chain: base,
+        chain: optimismGoerli,
         transport: http(`https://opt-goerli.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
         batch: {
             multicall: true
@@ -51,11 +53,22 @@ export const createWeb3Client = (chainId?: number) => {
     });
 
     else if (chainId === 999) return createPublicClient({
-        chain: base,
+        chain: zoraTestnet,
         transport: http(`https://testnet.rpc.zora.energy`),
         batch: {
             multicall: true
         }
     });
+}
+
+export const createPrivClient = () => {
+    const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+    return {
+        account,
+        client: createWalletClient({
+            chain: base,
+            transport: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
+        })
+    }
 }
 
