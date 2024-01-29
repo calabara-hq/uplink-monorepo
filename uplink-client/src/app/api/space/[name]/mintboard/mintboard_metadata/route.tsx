@@ -18,9 +18,7 @@ export async function GET(req: NextRequest) {
     // for each post, the optimized img can be constructed via parseIpfsUrl(post.edition.imageURI)
     // this function will return an object with 2 keys
     // { raw: ipfs://cid, gateway: https://uplink.mypinata.cloud/ipfs/cid }
-    
-    
-
+  
 
   return new ImageResponse(
     (
