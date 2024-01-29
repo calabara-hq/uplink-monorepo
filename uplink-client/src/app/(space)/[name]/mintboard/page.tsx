@@ -8,7 +8,34 @@ import { HiTrash } from "react-icons/hi2";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 
+import { Metadata } from "next";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: { name: string };
+}): Promise<Metadata> {
+  const name = params.name;
+  const mintboard = await fetchMintBoard(name);
+  return {
+    title: `${mintboard.space.displayName}`,
+    description: `${mintboard.space.displayName} on Uplink`,
+    openGraph: {
+      title: `${mintboard.space.displayName}`,
+      description: `Create with ${mintboard.space.displayName} on Uplink`,
+      images: [
+        {
+          url: `api/space/${name}/mintboard/mintboard_metadata`,
+          width: 600,
+          height: 600,
+          alt: `${mintboard.space.displayName} logo`,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+  };
+}
 
 const BoardInfoSkeleton = () => {
     return (
