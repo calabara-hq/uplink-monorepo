@@ -11,38 +11,11 @@ dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL);
 
-
-// export const preUpload = async (req, res) => {
-
-//     const { filesize } = req.query;
-
-
-
-//     // 1. authenticate the user
-//     // 2. generate an upload ID
-//     // 3. save the upload ID and file size in the database
-
-
-//     // 1. authenticate the user
-
-//     const user = await authController.getUser({ token: req.token });
-//     if (!user) return res.status(401).json({ message: 'Unauthorized' });
-
-//     // 2. generate an upload ID
-//     const uploadId = randomUUID().slice(0, 8);
-//     res.send({ uploadId, filesize }).status(200)
-
-
-// }
-
 export const upload = async (req, res) => {
     // 1. Extract the upload ID from the request
     const { filesize } = req.query;
 
-    // 2. Retrieve the file size from the database using the upload ID
-    // If the upload ID is not in the database, send a 400 Bad Request response
-    // If there's an error, send a 500 Internal Server Error response
-    // 3. Initialize the uploaded bytes counter
+
     let uploadedBytes = 0;
 
     const bb = busboy({ headers: req.headers });

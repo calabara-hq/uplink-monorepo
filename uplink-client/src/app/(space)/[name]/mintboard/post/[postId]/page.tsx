@@ -11,42 +11,46 @@ import { Metadata } from "next";
 
 export async function generateMetadata({
     params,
-  }: {
-    params: { name: string, postId: string};
-  }): Promise<Metadata> {
+    searchParams
+}: {
+    params: { name: string, postId: string };
+    searchParams: { [key: string]: string | undefined }
+}): Promise<Metadata> {
+
     const mintboard = await fetchMintBoard(params.name);
     const post = mintboard.posts.find(el => el.id === params.postId)
     const author = post.author.displayName || post.author.address
+    const referrer = searchParams?.referrer ?? null
 
     const fcMetadata: Record<string, string> = {
-        "fc:frame": "vNext",
-        "fc:frame:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${params.name}/mintboard/post/${params.postId}/farcaster_handler`,
+        // "fc:frame": "vNext",
+        // "fc:frame:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${params.name}/mintboard/post/${params.postId}/farcaster_handler?referrer=${referrer}`,
         "fc:frame:image": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${params.name}/mintboard/post/${params.postId}/post_metadata`,
-        "fc:frame:button:1": "Mint"
+        // "fc:frame:button:1": "Mint"
     };
 
     return {
-      title: `${author}`,
-      description: `New mint from ${author}`,
-      openGraph: {
         title: `${author}`,
-        description: `New mint from ${author} on Uplink`,
-        images: [
-          {
-            url: `api/space/${params.name}/mintboard/post/${params.postId}/post_metadata`,
-            width: 600,
-            height: 600,
-            alt: `${params.postId} media`,
-          },
-        ],
-        locale: "en_US",
-        type: "website",
-      },
-      other: {
-        ...fcMetadata
-      }
+        description: `New mint from ${author}`,
+        openGraph: {
+            title: `${author}`,
+            description: `New mint from ${author} on Uplink`,
+            images: [
+                {
+                    url: `api/space/${params.name}/mintboard/post/${params.postId}/post_metadata`,
+                    width: 600,
+                    height: 600,
+                    alt: `${params.postId} media`,
+                },
+            ],
+            locale: "en_US",
+            type: "website",
+        },
+        other: {
+            ...fcMetadata
+        }
     };
-  }
+}
 
 
 const ExpandedPostSkeleton = () => {
