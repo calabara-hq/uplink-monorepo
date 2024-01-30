@@ -20,11 +20,12 @@ const NavMenu = ({ openAccountModal }: { openAccountModal: () => void }) => {
   };
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
 
   return (
     <div className="flex items-center cursor-pointer lg:gap-2" ref={dropdownRef}>
@@ -39,9 +40,18 @@ const NavMenu = ({ openAccountModal }: { openAccountModal: () => void }) => {
           </div>
         </div>
         {isDropdownOpen && <ul className="menu menu-sm dropdown-content mb-3 mt-0 md:mb-0 md:mt-3 mr-4 md:mr-0 z-[1] p-2 border border-border shadow-2xl  shadow-black bg-base-100 rounded-box w-fit">
-          <Link href={`/user/${session?.user?.address}`} onClick={() => setIsDropdownOpen(false)} className="btn btn-ghost normal-case">Profile</Link>
+          <Link 
+            href={`/user/${session?.user?.address}`} 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDropdownOpen(false);
+            }}
+            className="btn btn-ghost normal-case">
+              Profile
+            </Link>
           <button className="btn btn-ghost normal-case"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setIsDropdownOpen(false)
               openAccountModal()
             }}
