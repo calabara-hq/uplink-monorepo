@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import { MintButton, ShareButton, ShareModalContent, useMintTimer } from "../../client";
 import { FaRegClock } from "react-icons/fa";
+const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
+
 
 export const BackButton = ({ spaceName }: { spaceName: string }) => {
     const router = useRouter();
@@ -58,7 +60,7 @@ export const HeaderButtons = ({ spaceName, post, referrer }: { spaceName: string
         <div className="flex gap-2 ml-auto items-center">
             {post.totalMints > 0 ? (
                 <span className="ml-auto text-t2 text-sm font-medium">
-                    {post.totalMints} mints
+                    {compact_formatter.format(post.totalMints)} mints
                 </span>
             ) : (
                 <span />

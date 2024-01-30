@@ -6,7 +6,78 @@ import { Decimal } from 'decimal.js'
 
 describe('mainnet token utils test suite', () => {
 
-    const { computeUserTokenBalance, calculateBlockFromTimestamp } = new TokenController(process.env.ALCHEMY_KEY!, 1);
+    const { verifyTokenStandard, isValidERC1155TokenId, tokenGetSymbolAndDecimal, computeUserTokenBalance, calculateBlockFromTimestamp, validateEthAddress, validateERC20, validateInterface } = new TokenController(process.env.ALCHEMY_KEY!, 1);
+
+
+
+    describe('validate eth address', () => {
+        test('empty address', async () => {
+            const result = await validateEthAddress('');
+            expect(result).toEqual(null)
+        })
+
+        test('valid ens', async () => {
+            const result = await validateEthAddress('nickdodson.eth')
+            expect(result).toEqual('0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C')
+        })
+        test('valid hex addr', async () => {
+            const result = await validateEthAddress('0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C')
+            expect(result).toEqual('0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C')
+        })
+        test('invalid hex addr', async () => {
+            const result = await validateEthAddress('0xedcC867bc8B5FEBd0459af17a6f134F41f422f')
+            expect(result).toEqual(null)
+        })
+        test('invalid ens addr', async () => {
+            const result = await validateEthAddress('nickdodasdfasdfasdfasdfasdfason.eth')
+            expect(result).toEqual(null)
+        })
+    })
+
+    describe('validateERC20', () => {
+        test('valid erc20', async () => {
+            const result = await validateERC20('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+            expect(result).toEqual(true)
+        })
+        test('invalid when erc721', async () => {
+            const result = await validateERC20('0xDb6fd84921272E288998a4B321B6C187BBd2BA4C')
+            expect(result).toEqual(false)
+        })
+    })
+
+    describe('validate token standard', () => {
+        test('erc20', async () => {
+            const result = await verifyTokenStandard({ contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', expectedStandard: 'ERC20' })
+            expect(result).toEqual(true)
+        })
+        test('erc721', async () => {
+            const result = await verifyTokenStandard({ contractAddress: '0xDb6fd84921272E288998a4B321B6C187BBd2BA4C', expectedStandard: 'ERC721' })
+            expect(result).toEqual(true)
+        })
+        test('erc1155', async () => {
+            const result = await verifyTokenStandard({ contractAddress: '0xB48176c8779559f01eff37834fa563be997aE5e6', expectedStandard: 'ERC1155' })
+            expect(result).toEqual(true)
+        })
+    })
+
+    describe('token get symbol / decimal', () => {
+        test('erc20', async () => {
+            const result = await tokenGetSymbolAndDecimal({ contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', tokenStandard: "ERC20" })
+            expect(result).toEqual({ symbol: 'USDC', decimals: 6 })
+        })
+    })
+
+    describe('is valid 1155 token id', () => {
+        test('should pass', async () => {
+            const result = await isValidERC1155TokenId({ contractAddress: '0xB48176c8779559f01eff37834fa563be997aE5e6', tokenId: 139 })
+            expect(result).toBe(true)
+        })
+        test('should fail', async () => {
+            const result = await isValidERC1155TokenId({ contractAddress: '0xB48176c8779559f01eff37834fa563be997aE5e6', tokenId: 9999 })
+            expect(result).toBe(false)
+        })
+    })
+
 
     describe('blockFromTimestamp', () => {
         test('blockFromTimestamp', async () => {
@@ -212,6 +283,15 @@ describe('base token utils test suite', () => {
         expect(result.toString()).toEqual('1')
     });
 
+});
 
+describe('zora total mints base', () => {
+
+    const { zora721TotalSupply } = new TokenController(process.env.ALCHEMY_KEY!, 8453);
+
+    test('fetch total mints for a base drop', async () => {
+        const supply = await zora721TotalSupply({ contractAddress: '0xdebc81933a4121e3de5a761e12074f1ee0d6024e' })
+        expect(supply).toBe("6")
+    })
 
 });

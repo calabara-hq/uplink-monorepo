@@ -20,6 +20,7 @@ import { useInView } from "react-intersection-observer";
 import UplinkImage from "@/lib/UplinkImage";
 import { uint64MaxSafe } from '@/utils/uint64';
 import { TokenContractApi } from "@/lib/contract";
+const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
 const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }) => {
 
@@ -38,7 +39,7 @@ const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }
                 </h3>
                 {post.totalMints > 0 ? (
                     <span className="ml-auto text-t2 text-sm font-medium">
-                        {post.totalMints} mints
+                        {compact_formatter.format(post.totalMints)} mints
                     </span>
                 ) : (
                     <span />
@@ -254,57 +255,6 @@ const PostFooter = ({ post, spaceName, handleMint, handleShare }) => {
     )
 }
 
-// 3 states - no thresholds, not signed in, signed in
-// if no threshold, show nothing
-// if signed in, show progress bar
-// if not signed in, show sign in button
-
-
-type ThresholdProgress = {
-    threshold: number,
-    mints: number,
-}
-
-// const useThresholdProgress = (mintBoard: MintBoard, userAddress: string): ThresholdProgress => {
-
-//     if (!mintBoard.threshold) return { threshold: mintBoard.threshold, mints: 0, status: 'noThreshold' };
-//     else if (!userAddress) return { threshold: 0, mints: 0, status: 'notSignedIn' };
-//     else {
-//         const userPosts = mintBoard.posts.filter(post => post.author.address === userAddress);
-//         const totalMints = userPosts.reduce((acc, post) => acc + post.totalMints, 0);
-//         return { threshold: mintBoard.threshold, mints: totalMints, status: 'signedIn' };
-//     }
-// }
-
-
-
-// const useTotalSupply = (chainId, contractAddress) => {
-//     const [totalSupply, setTotalSupply] = useState<string | null>(null);
-//     const tokenApi = new TokenContractApi(chainId);
-
-//     const getSupply = () => {
-//         tokenApi.tokenGetTotalSupply({ contractAddress }).then(supply => {
-//             setTotalSupply(supply.toString());
-//         })
-//     }
-
-//     useEffect(() => {
-//         getSupply();
-//         const interval = setInterval(() => {
-//             getSupply();
-//         }, 10_000);
-
-//         return () => clearInterval(interval);
-
-//     }, [])
-
-//     return {
-//         totalSupply,
-//         isLoading: totalSupply === null,
-//     }
-// }
-
-
 const useThresholdProgress = (spaceName: string) => {
     const { status, data: session } = useSession();
     const { liveBoard, isBoardLoading } = useLiveMintBoard(spaceName);
@@ -313,8 +263,7 @@ const useThresholdProgress = (spaceName: string) => {
     const userPosts = liveBoard.posts.filter(post => post.author.address === session?.user?.address);
     
     const getAggMints = async () => {
-        const mints = await Promise.all(userPosts.map(post => tokenApi.tokenGetTotalSupply({ contractAddress: post.edition.contractAddress })));
-        const totalMints = mints.reduce((acc, mint) => acc + Number(mint.toString()), 0);
+        const totalMints = userPosts.reduce((acc, post) => acc + Number(post.totalMints.toString()), 0);
         setAggMints(totalMints);
     }
 
@@ -377,7 +326,6 @@ const ProgressBar = ({ spaceName }: { spaceName: string }) => {
     return (
         <div className="flex flex-col gap-2 w-full">
             <div className="flex flex-row gap-2 items-center">
-                {/* <UserAvatar user={session?.user} size={28} /> */}
                 <p className="font-bold text-t2">my progress</p>
                 <div className="ml-auto w-16 h-8"/>
             </div>
@@ -398,7 +346,6 @@ const ProgressBar = ({ spaceName }: { spaceName: string }) => {
 
 export const RenderProgress = ({ spaceName }: { spaceName: string }) => {
     const { liveBoard, isBoardLoading } = useLiveMintBoard(spaceName);
-    const { status, data: session } = useSession();
     if (!liveBoard.threshold) return null;
     return <ProgressBar spaceName={spaceName} />
 
@@ -410,8 +357,6 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [focusedSubmission, setFocusedSubmission] = useState(null);
     const isMobileDevice = isMobile();
-
-    const boardPosts = isPopular ? liveBoard?.posts?.toSorted((a, b) => b.totalMints - a.totalMints) : [...liveBoard.posts];
 
     useEffect(() => {
         if (window) window.sessionStorage.setItem('nav', 'true')
@@ -460,8 +405,11 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
 
 
     if (isBoardLoading) return <PostSkeleton />
+
+    const boardPosts = isPopular ? liveBoard?.posts?.toSorted((a, b) => b.totalMints - a.totalMints) : [...liveBoard.posts];    
+
+
     return (
-        // <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-8 w-full p-4 submission-columns auto-rows-fr ">
         <div className="w-10/12 sm:w-full m-auto grid gap-4 xl:gap-8 submission-columns auto-rows-fr ">
 
             {boardPosts.map((post) => {
