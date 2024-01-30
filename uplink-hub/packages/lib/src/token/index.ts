@@ -6,6 +6,10 @@ import ERC721ABI from './abi/erc721ABI.js';
 import ERC1155ABI from './abi/erc1155ABI.js';
 import ERC165ABI from './abi/erc165ABI.js';
 import { IToken } from '../types/token.js';
+import type { Transport, Chain, PublicClient } from 'viem'
+import { getAddress } from 'viem';
+import { createViemClient } from './viem.js';
+import { normalize } from 'viem/ens'
 
 const ERC721Interface = '0x80ac58cd';
 const ERC1155Interface = '0xd9b67a26';
@@ -37,32 +41,34 @@ const formRpcUrl = (chainId: number, providerKey: string) => {
 
 export class TokenController {
     private provider: ethers.providers.JsonRpcProvider;
-
+    private viemClient: any;
     private dater: EthDater;
 
     constructor(providerKey: string, chainId: number) {
         const rpc = formRpcUrl(chainId, providerKey);
         this.provider = new ethers.providers.JsonRpcProvider(rpc);
         this.dater = new EthDater(this.provider);
+        this.viemClient = createViemClient(providerKey, chainId);
     }
 
-    validateEthAddress = async (address: string) => {
-
+    validateEthAddress = async (address: string): Promise<string | null> => {
         if (!address) return null
         address = address.trim();
 
         const isEns = address.match(/\.eth$/); // check if address is ens or hex
-        let resolvedAddress: string | null = null;
 
         if (isEns) {
-            resolvedAddress = await this.provider.resolveName(address);
-            if (!resolvedAddress) return null;
-            return resolvedAddress;
+            const resolvedEns = await this.viemClient.getEnsAddress({
+                name: normalize(address),
+            })
+
+            return resolvedEns ?? null;
         }
 
         try {
-            resolvedAddress = ethers.utils.getAddress(address);
-            return resolvedAddress as string;
+
+            return getAddress(address) ?? null
+
         } catch (error) {
             return null;
         }
@@ -70,8 +76,12 @@ export class TokenController {
 
     validateERC20 = async (address: string) => {
         try {
-            const erc20Contract = new ethers.Contract(address, ERC20ABI, this.provider);
-            await erc20Contract.totalSupply();
+            await this.viemClient.readContract({
+                address: address as `0x${string}`,
+                abi: ERC20ABI,
+                functionName: 'totalSupply',
+                args: [],
+            })
             return true;
         } catch (err) {
             return false;
@@ -80,8 +90,12 @@ export class TokenController {
 
     validateInterface = async (address: string, interfaceId: '0x80ac58cd' | '0xd9b67a26') => {
         try {
-            const erc165Contract = new ethers.Contract(address, ERC165ABI, this.provider);
-            return await erc165Contract.supportsInterface(interfaceId);
+            return await this.viemClient.readContract({
+                address: address as `0x${string}`,
+                abi: ERC165ABI,
+                functionName: 'supportsInterface',
+                args: [interfaceId],
+            })
         } catch (err) {
             return false;
         }
@@ -111,13 +125,16 @@ export class TokenController {
 
     tokenGetSymbolAndDecimal = async ({ contractAddress, tokenStandard }: { contractAddress: string, tokenStandard: "ERC20" | "ERC721" | "ERC1155" }) => {
 
-        // use the erc20 abi since we only want symbol and decimals
-        const tokenContract = new ethers.Contract(contractAddress, ERC20ABI, this.provider);
+        let symbol: string = '';
+        let decimals: number = 0;
 
-        let symbol = '';
-        let decimals = 0;
         try {
-            symbol = await tokenContract.symbol();
+            symbol = await this.viemClient.readContract({
+                address: contractAddress as `0x${string}`,
+                abi: ERC20ABI,
+                functionName: 'symbol',
+                args: [],
+            }) as string;
         } catch (err) {
             if (tokenStandard !== 'ERC1155') {
                 console.log('Failed to fetch symbol');
@@ -126,7 +143,12 @@ export class TokenController {
 
         if (tokenStandard === 'ERC20') {
             try {
-                decimals = await tokenContract.decimals();
+                decimals = await this.viemClient.readContract({
+                    address: contractAddress as `0x${string}`,
+                    abi: ERC20ABI,
+                    functionName: 'decimals',
+                    args: [],
+                }) as number;
             } catch (err) {
                 console.log('Failed to fetch decimals');
             }
@@ -140,8 +162,12 @@ export class TokenController {
         contractAddress: string, tokenId: number
     }) => {
         try {
-            const tokenContract = new ethers.Contract(contractAddress, ERC1155ABI, this.provider);
-            const uri = await tokenContract.uri(tokenId);
+            const uri = await this.viemClient.readContract({
+                address: contractAddress as `0x${string}`,
+                abi: ERC1155ABI,
+                functionName: 'uri',
+                args: [tokenId],
+            }) as string;
 
             // Check if the URI is valid
             const uriRegex = new RegExp('^(https?|ipfs):\\/\\/[^\\s/$.?#].[^\\s]*$', 'i');
@@ -156,10 +182,9 @@ export class TokenController {
         contractAddress: string, tokenId: number
     }) => {
         try {
-            const tokenContract = new ethers.Contract(contractAddress, ERC1155ABI, this.provider);
-            const isFungible = await tokenContract.supportsInterface(ERC1155MetaDataURIInterface);
-            if (isFungible) return true;
-            return false;
+            const isFungible = await this.validateInterface(contractAddress, ERC1155MetaDataURIInterface)
+            if (isFungible) return true
+            return false
         } catch (err) {
             return false;
         }
@@ -187,33 +212,57 @@ export class TokenController {
 
         try {
             if (token.type === "ETH") {
-                const balance = await this.provider.getBalance(walletAddress, blockNum);
-                return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
+                const balance = await this.viemClient.getBalance({ address: walletAddress, blockNumber: blockNum })
+                return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals))
             }
             else if (token.type === "ERC1155") {
-                const tokenContract = new ethers.Contract(token.address, ERC1155ABI, this.provider);
-                const balance = await tokenContract.balanceOf(walletAddress, token.tokenId, { blockTag: blockNum });
+                const balance = await this.viemClient.readContract({
+                    address: token.address,
+                    abi: ERC1155ABI,
+                    functionName: 'balanceOf',
+                    args: [walletAddress, token.tokenId],
+                    blockNumber: blockNum
+                }) as string;
+
                 return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
             }
             else { // ERC20 / ERC721
 
-                // if nouns token, check if user is delegated any votes
+                // if nouns token, check delegations
                 if (token.address === "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03") {
-                    const nounsContract = new ethers.Contract(token.address, ERC721ABI, this.provider);
-                    const balance = await nounsContract.getPriorVotes(walletAddress, blockNum);
+                    const balance = await this.viemClient.readContract({
+                        address: token.address,
+                        abi: ERC721ABI,
+                        functionName: 'getPriorVotes',
+                        args: [walletAddress, blockNum],
+                    }) as string;
+
                     return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
+
                 }
 
-                // if lil nouns, check if user is delegated any votes
+                // if lil nouns, check delegations
 
                 if (token.address === "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B") {
-                    const lilsContract = new ethers.Contract(token.address, ERC721ABI, this.provider);
-                    const balance = await lilsContract.getPriorVotes(walletAddress, blockNum);
+
+                    const balance = await this.viemClient.readContract({
+                        address: token.address,
+                        abi: ERC721ABI,
+                        functionName: 'getPriorVotes',
+                        args: [walletAddress, blockNum],
+                    }) as string;
+
                     return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
                 }
 
-                const tokenContract = new ethers.Contract(token.address, ERC20ABI, this.provider);
-                const balance = await tokenContract.balanceOf(walletAddress, { blockTag: blockNum });
+                const balance = await this.viemClient.readContract({
+                    address: token.address,
+                    abi: ERC20ABI,
+                    functionName: 'balanceOf',
+                    args: [walletAddress],
+                    blockNumber: blockNum
+                }) as string;
+
                 return new Decimal(balance.toString()).div(new Decimal(10).pow(token.decimals));
             }
         } catch (err) {
@@ -222,5 +271,22 @@ export class TokenController {
         }
 
     }
+
+    zora721TotalSupply = async ({ contractAddress }: { contractAddress: string }) => {
+        try {
+            const totalSupply = await this.viemClient.readContract({
+                address: contractAddress,
+                abi: ERC721ABI,
+                functionName: 'totalSupply',
+                args: [],
+            }).then((res: BigInt) => res.toString())
+            return totalSupply
+        } catch (err) {
+            console.log(err)
+            console.log('Failed to fetch totalSupply');
+            return "0"
+        }
+    }
+
 
 }

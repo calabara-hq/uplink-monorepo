@@ -9,8 +9,7 @@ import {
   RenderProgress,
   UserProgressSkeleton,
 } from "./client";
-import { HiTrash } from "react-icons/hi2";
-import { MdOutlineCancelPresentation } from "react-icons/md";
+
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 
 import { Metadata } from "next";

@@ -1,11 +1,13 @@
-import { DatabaseController, schema } from "lib";
+import { DatabaseController, schema, TokenController } from "lib";
 import dotenv from 'dotenv';
 import { Submission } from "../__generated__/resolvers-types";
+import {calculateTotalMints} from "./totalMints.js"
 dotenv.config();
 
 const databaseController = new DatabaseController(process.env.DATABASE_HOST!, process.env.DATABASE_USERNAME!, process.env.DATABASE_PASSWORD!);
 export const db = databaseController.db;
 export const sqlOps = databaseController.sqlOps;
+
 
 
 // include the contest object so we can filter fields that may need to be hidden (votes, author)
@@ -69,10 +71,9 @@ export const dbGetRewards = async (contestId: number): Promise<Array<schema.dbRe
 }
 
 export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Array<schema.dbMintBoardPostType>> => {
-    const data = await db.execute(sqlOps.sql`
+    return db.execute(sqlOps.sql`
         SELECT
             mbp.*,
-            SUM(mints.amount) AS totalMints,
             JSON_OBJECT(
                 'id', post_author.id,
                 'address', post_author.address,
@@ -114,21 +115,13 @@ export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Arr
             SELECT e.*
             FROM zoraEditions e
         ) AS edition ON mbp.editionId = edition.id
-        LEFT JOIN (
-            SELECT mints.*
-            FROM editionMints mints
-        ) AS mints ON mbp.editionId = mints.editionId
         WHERE mbp.boardId = ${boardId}
         GROUP BY mbp.id
         ORDER BY mbp.created DESC
     `)
+    .then((data: any) => data.rows)
+    .then(calculateTotalMints)
 
-    return data.rows.map((post: any) => {
-        return {
-            ...post,
-            totalMints: parseInt(post.totalMints) || 0
-        }
-    });
 }
 
 // get the last 3 contests that have ended, get submissions with more than 3 unique votes, and take a random sample of 20
