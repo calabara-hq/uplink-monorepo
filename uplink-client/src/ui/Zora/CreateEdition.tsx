@@ -186,7 +186,7 @@ const CreateEdition = ({
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2 max-w-[400px]">
+            <div className="flex flex-col gap-2 w-full min-w-[300px] sm:min-w-[1px] md:max-w-[400px]">
                 <div className="flex flex-col bg-base-100 p-2 rounded-lg text-t2 gap-2">
                     <div className="flex gap-2 items-center">
                         <p className="text-xl font-bold text-t1">Create a drop</p>
@@ -215,7 +215,7 @@ const CreateEdition = ({
                 </SectionWrapper>
 
             </div>
-            <div className="flex flex-col gap-2 max-w-[400px] min-w-[300px]">
+            <div className="flex flex-col gap-2 w-full min-w-[300px]">
                 <SectionWrapper title="Token Details">
                     <BasicInput inputType="text" value={state.name} label={"Name"} placeholder={"An amazing new creation"} onChange={(e) => setField("name", e.target.value)} error={state.errors?.name?._errors} />
                     <BasicInput inputType="text" value={state.symbol} label={"Symbol"} placeholder={"$NOUN"} onChange={(e) => setField("symbol", e.target.value)} error={state.errors?.symbol?._errors} />
