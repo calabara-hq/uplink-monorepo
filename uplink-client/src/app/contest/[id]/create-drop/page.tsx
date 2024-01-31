@@ -89,7 +89,7 @@ export default function Page({
     }
 
     return (
-        <div className="w-8/12 m-auto animate-fadeIn duration-300 mt-4 mb-16">
+        <div className="w-10/12 md:w-8/12 m-auto animate-fadeIn duration-300 mt-4 mb-16">
             <CreateEdition
                 contestId={params.id}
                 chainId={chainId}

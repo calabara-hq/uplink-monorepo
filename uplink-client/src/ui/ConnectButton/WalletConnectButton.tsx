@@ -3,61 +3,97 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useSession } from "@/providers/SessionProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
+import { useDisconnect } from 'wagmi'
 import Link from "next/link";
+import { FaSignOutAlt, FaUser } from "react-icons/fa"
 
-const NavMenu = ({ openAccountModal }: { openAccountModal: () => void }) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+function AccountModal({
+  isModalOpen,
+  handleClose,
+}: {
+  isModalOpen: boolean;
+  handleClose?: () => void;
+}) {
+  const modalRef = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
-
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target as Node)
-    ) {
-      setIsDropdownOpen(false);
+  const { disconnect } = useDisconnect({
+    onSuccess(data) {
+      console.log(data)
+      console.log('success!')
     }
-  };
-
+  });
   useEffect(() => {
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        handleClose();
+      }
     };
-  }, []);
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [modalRef]);
 
-  return (
-    <div className="flex items-center cursor-pointer lg:gap-2" ref={dropdownRef}>
-      <div className="dropdown dropdown-top md:dropdown-bottom left-[-20px]">
-        <div tabIndex={0} role="button" onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="flex md:gap-2 items-center justify-start text-sm font-bold md:pl-0 btn btn-ghost normal-case rounded-xl hover:bg-base-200 transition-all duration-200 ease-linear h-fit min-h-fit text-t2 hover:text-t1 ">
+   if(isModalOpen) return (
+    <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-black bg-opacity-30 animate-fadeIn" >
+      <div className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-lg animate-springUp shadow-none" ref={modalRef}>
+        <div className="flex flex-col items-center gap-4">
           <UserAvatar
             user={session?.user}
-            size={40}
+            size={80}
           />
-          <div className="hidden md:block">
+          <div className="font-bold text-lg">
             <UsernameDisplay user={session?.user} />
           </div>
-        </div>
-        {isDropdownOpen && <ul className="menu menu-sm dropdown-content mb-3 mt-0 md:mb-0 md:mt-3 mr-4 md:mr-0 z-[1] p-2 border border-border shadow-2xl  shadow-black bg-base-100 rounded-box w-fit">
-          <Link 
-            href={`/user/${session?.user?.address}`} 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsDropdownOpen(false);
-            }}
-            className="btn btn-ghost normal-case">
-              Profile
+          <div className="flex flex-row gap-4">
+            <div className="flex flex-col gap-0.5 bg-[#42454c] rounded-lg items-center p-1 pl-4 pr-4 cursor-pointer"
+              onClick={() => {
+                disconnect()
+              }}
+            >
+              
+                <FaSignOutAlt className="w-4 h-4"/>
+                <p>Sign out</p>
+            </div>
+            <Link 
+              href={`/user/${session?.user?.address}`}
+              onClick={() => handleClose()}
+              className="flex flex-col gap-0.5 bg-[#42454c] rounded-lg items-center p-1 pl-4 pr-4 cursor-pointer"
+              >
+                <FaUser className="w-4 h-4"/>
+                <p>Profile</p>
             </Link>
-          <button className="btn btn-ghost normal-case"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsDropdownOpen(false)
-              openAccountModal()
-            }}
-          >Wallet</button>
-        </ul>}
+          </div>
+        </div>
       </div>
+    </div>
+    );
+
+    return null;
+  
+}
+
+
+const NavMenu = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { data: session, status } = useSession();
+
+  return (
+    <div className="flex items-center lg:gap-2">
+      <div tabIndex={0} role="button" onClick={() => setIsModalOpen(!isModalOpen)} className="flex md:gap-2 items-center no-select justify-start text-sm font-bold md:pl-0 btn btn-ghost normal-case rounded-xl hover:bg-base-200 transition-all duration-200 ease-linear h-fit min-h-fit text-t2 hover:text-t1 ">
+        <UserAvatar
+          user={session?.user}
+          size={40}
+        />
+        <div className="hidden md:block">
+          <UsernameDisplay user={session?.user} />
+        </div>
+      </div>
+      <AccountModal isModalOpen={isModalOpen} handleClose={() => setIsModalOpen(false)}/>
     </div >
   );
 };
@@ -78,7 +114,7 @@ export default function WalletConnectButton({
         {({ account, openAccountModal, openConnectModal }) => {
           if (status === "authenticated") {
             if (children) return children;
-            else return <NavMenu openAccountModal={openAccountModal} />
+            else return <NavMenu />
           }
 
           return (

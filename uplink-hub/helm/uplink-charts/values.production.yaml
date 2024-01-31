@@ -14,15 +14,6 @@ auth:
     maxReplicas: 5
     targetCpuPercentage: 80
     
-media:
-  image:
-    repository: nickdodson/media-service
-  replicaCount: 3
-  hpa:
-    minReplicas: 2
-    maxReplicas: 5
-    targetCpuPercentage: 80
-
 router:
   image:
     repository: nickdodson/router-service

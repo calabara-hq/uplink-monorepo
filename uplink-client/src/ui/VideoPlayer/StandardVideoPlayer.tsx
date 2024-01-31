@@ -14,6 +14,9 @@ import {useRef, useEffect} from 'react';
 
 const StandardVideoPlayer = ({ videoUrl, posterUrl }: { videoUrl: string, posterUrl: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isVideoBase64 = !videoUrl.startsWith('http')
+  const isPosterBase64 = !posterUrl.startsWith('http')
+
 
     useEffect(() => {
       videoRef.current.addEventListener("error", () => {
@@ -29,11 +32,11 @@ const StandardVideoPlayer = ({ videoUrl, posterUrl }: { videoUrl: string, poster
         autoPlay={false}
         playsInline
         slot="media"
-        src={videoUrl ? transformVideoAsset(videoUrl, 'video', 600) : null}
+        src={videoUrl ? isVideoBase64 ? videoUrl : transformVideoAsset(videoUrl, 'video', 600) : null}
         preload="auto"
         crossOrigin=""
         className="rounded-2xl aspect-video"
-        poster={posterUrl ? transformVideoAsset(posterUrl, 'image', 600) : null}
+        poster={posterUrl ? isPosterBase64 ? posterUrl : transformVideoAsset(posterUrl, 'image', 600) : null}
       />
       <MediaLoadingIndicator slot="centered-chrome" />
 

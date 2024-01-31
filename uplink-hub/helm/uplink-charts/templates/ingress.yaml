@@ -6,7 +6,6 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.uplink.wtf, https://uplink.wtf"
-    nginx.ingress.kubernetes.io/proxy-body-size: "150m" #TODO: should implement streaming instead
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,Cookie,X-CSRF-TOKEN,X-API-TOKEN"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
@@ -27,14 +26,6 @@ spec:
         backend:
           service:
             name: auth
-            port:
-              number: 8080
-
-      - path: /api/media/(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: media
             port:
               number: 8080
 
