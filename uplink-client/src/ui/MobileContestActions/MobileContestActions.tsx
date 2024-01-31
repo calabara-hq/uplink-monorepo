@@ -14,7 +14,7 @@ const StickyContainer = ({ children }: { children: React.ReactNode }) => {
 
   useScrollPosition(
     ({ prevPos, currPos }) => {
-      const shouldStick = currPos.y < -350;
+      const shouldStick = false //currPos.y < -350;
       const shouldBeStyle = shouldStick
         ? "fixed top-0 left-0 bg-gradient-to-b from-[#121212] items h-32 md:pl-[64px]"
         : "relative";

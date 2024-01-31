@@ -60,7 +60,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                     </SubmissionDisplayWrapper>
                 </Suspense>
             </div>
-            <div className="hidden xl:block sticky top-3 right-0 w-full max-w-[450px] flex-grow h-full">
+            <div className="hidden lg:block sticky top-3 right-0 w-full max-w-[450px] flex-grow h-full">
                 <ContestSidebar
                     detailsChild={<Suspense fallback={<DetailsSkeleton />}><ContestDetails contestId={contestId} /></Suspense>}
                     voteChild={<VoteTab contestId={contestId} />}
