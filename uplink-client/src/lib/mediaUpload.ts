@@ -1,5 +1,7 @@
 import { generateVideoThumbnails } from "@rajesh896/video-thumbnails-generator";
-//import generateVideoThumbnails from "./generateVideoThumbnails";
+import { uploadMedia } from "@/app/actions";
+import { useState, useTransition, useEffect } from "react";
+import FormData from 'form-data';
 
 export class MediaUploadError {
     code: number;
@@ -15,26 +17,13 @@ export const dataURLtoBlob = (dataUrl: string) => {
         .then(res => res.blob())
 }
 
-// This function is used to upload images to the ipfs network
-// the function takes a File object as input
-
 export const IpfsUpload = async (file: File | Blob) => {
 
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/media/upload?filesize=${file.size}`, {
-        method: 'POST',
-        body: formData
-    });
-
-    if (!response.ok) {
-        console.error('Error uploading file:', response.statusText);
-        return null;
-    }
-
-    const data = await response.json();
-    return `https://uplink.mypinata.cloud/ipfs/${data.IpfsHash}`;
+    const result = await uploadMedia(formData)
+    return result
 };
 
 const loadVideo = (file: File) =>

@@ -28,6 +28,7 @@
     "@rajesh896/video-thumbnails-generator": "^2.3.9",
     "@react-icons/all-files": "^4.1.0",
     "@vercel/analytics": "^1.1.1",
+    "axios": "^1.6.7",
     "daisyui": "^2.50.1",
     "date-fns": "^2.29.3",
     "editorjs-react-renderer": "^3.5.1",
