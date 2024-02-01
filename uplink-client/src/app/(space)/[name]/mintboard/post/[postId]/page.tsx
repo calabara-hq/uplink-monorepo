@@ -22,6 +22,15 @@ export async function generateMetadata({
     const author = post.author.displayName || post.author.address
     const referrer = searchParams?.referrer ?? null
 
+    const nftMetadata: Record<string, string> = {
+        "eth:nft:contract_address": post.edition.contractAddress,
+        "eth:nft:schema": "ERC721",
+        "eth:nft:collection": post.edition.name,
+        "eth:nft:creator_address": post.edition.defaultAdmin,
+        "eth:nft:media_url": parseIpfsUrl(post.edition.imageURI).gateway,
+        "eth:nft:mint_count": post.totalMints.toString()
+    }
+
     const fcMetadata: Record<string, string> = {
         // "fc:frame": "vNext",
         // "fc:frame:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${params.name}/mintboard/post/${params.postId}/farcaster_handler?referrer=${referrer}`,
@@ -47,7 +56,8 @@ export async function generateMetadata({
             type: "website",
         },
         other: {
-            ...fcMetadata
+            ...fcMetadata,
+            ...nftMetadata
         }
     };
 }
