@@ -3,14 +3,12 @@ import useCreateZoraEdition, { ConfigurableZoraEditionInput, ConfigurableZoraEdi
 import { useSession } from "@/providers/SessionProvider";
 import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
-import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import { AddFundsButton, RenderMintMedia, SwitchNetworkButton } from "@/ui/Zora/common";
 import { uint64MaxSafe } from "@/utils/uint64";
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { BiPlusCircle, BiSolidCircle } from "react-icons/bi";
-import { HiCamera, HiCheckBadge, HiOutlineTrash } from "react-icons/hi2";
+import { HiCheckBadge } from "react-icons/hi2";
 import Decimal from "decimal.js";
 import { ZoraAbi, getContractFromChainId } from "@/lib/abi/zoraEdition";
 import { useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
@@ -21,170 +19,7 @@ import Link from "next/link";
 import { TbLoader2 } from "react-icons/tb";
 import useLiveMintBoard from "@/hooks/useLiveMintBoard";
 import { Boundary } from "@/ui/Boundary/Boundary";
-import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
-import { getChainName } from "@/lib/chains/supportedChains";
-import UplinkImage from "@/lib/UplinkImage"
-
-
-const MediaUpload = ({
-    handleFileChange,
-    isUploading,
-    animationBlob,
-    imageBlob,
-    thumbnailOptions,
-    thumbnailBlobIndex,
-    isVideo,
-    removeMedia,
-    setThumbnailBlobIndex,
-}: {
-    handleFileChange: any;
-    isUploading: boolean;
-    animationBlob: string | null;
-    imageBlob: string | null;
-    thumbnailOptions: string[];
-    thumbnailBlobIndex: number | null;
-    isVideo: boolean;
-    removeMedia: () => void;
-    setThumbnailBlobIndex: (val: number) => void;
-}) => {
-    const imageUploader = useRef<HTMLInputElement>(null);
-    const thumbnailUploader = useRef<HTMLInputElement>(null);
-
-    const Input = ({
-        mode,
-        children,
-    }: {
-        mode: "primary" | "thumbnail";
-        children: React.ReactNode;
-    }) => (
-        <div className="w-full h-full">
-            <input
-                placeholder="asset"
-                type="file"
-                accept={mode === "primary" ? "image/*, video/mp4" : "image/*"}
-                className="hidden"
-                onChange={(event) =>
-                    handleFileChange({ event, isVideo, mode })
-                }
-                ref={mode === "primary" ? imageUploader : thumbnailUploader}
-            />
-            {children}
-        </div>
-    );
-
-    if (isVideo) {
-        return (
-            <div className="relative w-full m-auto">
-                <label className="label">
-                    <span className="label-text text-t2">Media</span>
-                </label>
-                <button
-                    className="absolute top-5 -right-3 btn btn-error btn-sm btn-circle z-10 shadow-lg"
-                    onClick={removeMedia}
-                >
-                    <HiOutlineTrash className="w-5 h-5" />
-                </button>
-                <RenderStandardVideoWithLoader
-                    videoUrl={animationBlob || ""}
-                    posterUrl={
-                        thumbnailBlobIndex !== null
-                            ? thumbnailOptions[thumbnailBlobIndex]
-                            : ""
-                    }
-                />
-                {thumbnailOptions?.length > 0 && (
-                    <>
-                        <label className="label">
-                            <span className="label-text text-t2">Thumbnail</span>
-                        </label>
-
-                        <div className="flex flex-col sm:flex-row gap-2 items-center justify-center bg-base-100 border border-border p-2 w-full m-auto rounded">
-                            <div className="flex flex-wrap w-full gap-2">
-                                {thumbnailOptions.map((thumbOp, thumbIdx) => {
-                                    return (
-                                        <div
-                                            key={thumbIdx}
-                                            className="relative cursor-pointer h-[100px] w-[100px]"
-                                            onClick={() => setThumbnailBlobIndex(thumbIdx)}
-                                        >
-                                            <UplinkImage
-                                                src={thumbOp}
-                                                alt="Media"
-                                                fill
-                                                className={`hover:opacity-50 rounded aspect-square h-full w-full object-cover ${thumbnailBlobIndex === thumbIdx
-                                                    ? "border border-primary"
-                                                    : ""
-                                                    }`}
-                                            />
-
-                                            {thumbnailBlobIndex === thumbIdx && (
-                                                <BiSolidCircle className="absolute text-primary w-5 h-5 top-[-10px] right-[-10px]" />
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                                <div>
-                                    <Input mode="thumbnail">
-                                        <div
-                                            className="w-full h-full"
-                                            onClick={() => thumbnailUploader.current?.click()}
-                                        >
-                                            <div className="w-[100px] h-[100px] bg-base-100 border border-border rounded opacity-50 hover:opacity-90 flex flex-col p-2 items-center justify-center cursor-pointer text-gray-500">
-                                                <BiPlusCircle className="w-4 h-4" />
-                                            </div>
-                                        </div>
-                                    </Input>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                )}
-            </div>
-        );
-    } else if (imageBlob) {
-        return (
-            <div className="flex flex-col items-center">
-                <label className="label self-start">
-                    <span className="label-text text-t2">Media</span>
-                </label>
-                <div className="relative">
-                    <button
-                        className="absolute top-0 right-0 mt-[-10px] mr-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg"
-                        onClick={removeMedia}
-                    >
-                        <HiOutlineTrash className="w-5 h-5" />
-                    </button>
-                    <UplinkImage
-                        src={imageBlob}
-                        alt="Media"
-                        width={300}
-                        height={300}
-                        className="rounded-lg object-contain"
-                    />
-                </div>
-            </div>
-        );
-    } else {
-        return (
-            <Input mode="primary">
-                <label className="label">
-                    <span className="label-text text-t2">Media</span>
-                </label>
-                <div
-                    className="w-full h-56 cursor-pointer flex justify-center items-center hover:bg-base-100 transition-all rounded-xl border-2 border-border border-dashed"
-                    onClick={() => imageUploader.current?.click()}
-                >
-                    <div className="flex justify-center items-center w-full h-full">
-                        <HiCamera className="w-8 h-8" />
-                    </div>
-                </div>
-            </Input>
-        );
-    }
-};
-
-
-
+import { MediaUpload } from "@/ui/MediaUpload/MediaUpload";
 
 export const CreateBoardPost = ({ spaceName, displayName, chainId, referrer, templateConfig }: { spaceName: string, displayName: string, chainId: number, referrer: string, templateConfig: ConfigurableZoraEditionInput }) => {
     const { data: session, status } = useSession();
@@ -193,17 +28,28 @@ export const CreateBoardPost = ({ spaceName, displayName, chainId, referrer, tem
         setField,
         contractArguments,
         setContractArguments,
-        validate,
-        isUploading,
-        animationBlob,
-        imageBlob,
-        thumbnailOptions,
-        thumbnailBlobIndex,
-        isVideo,
-        removeMedia,
-        setThumbnailBlobIndex,
-        handleFileChange,
+        validate
     } = useCreateZoraEdition(referrer, templateConfig)
+    const [isUploading, setIsUploading] = useState(false);
+    const [ipfsImageURI, setIpfsImageUri] = useState()
+
+    const uploadStatusCallback = (status: boolean) => {
+        setIsUploading(status)
+    }
+
+    const ipfsImageCallback = (url: string) => {
+        setField("imageURI", url)
+    }
+
+    const ipfsAnimationCallback = (url: string) => {
+        setField("animationURI", url)
+    }
+
+
+    useEffect(() => {
+        console.log(contractArguments)
+    },[contractArguments])
+
 
     return (
         <Boundary>
@@ -216,15 +62,11 @@ export const CreateBoardPost = ({ spaceName, displayName, chainId, referrer, tem
                 </div>
                 <div className="flex flex-col gap-2">
                     <MediaUpload
-                        handleFileChange={handleFileChange}
-                        isUploading={isUploading}
-                        animationBlob={animationBlob}
-                        imageBlob={imageBlob}
-                        thumbnailOptions={thumbnailOptions}
-                        thumbnailBlobIndex={thumbnailBlobIndex}
-                        isVideo={isVideo}
-                        setThumbnailBlobIndex={setThumbnailBlobIndex}
-                        removeMedia={removeMedia}
+                        acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
+                        uploadStatusCallback={uploadStatusCallback}
+                        ipfsImageCallback={ipfsImageCallback}
+                        ipfsAnimationCallback={ipfsAnimationCallback}
+                        maxVideoDuration={140}
                     />
 
                 </div>
@@ -280,13 +122,18 @@ const CreateEditionButton = ({
     const [editionSlot, setEditionSlot] = useState<number | null>(null);
     const { mutateLiveBoard } = useLiveMintBoard(spaceName);
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
-        chainId: chainId,
+        //chainId: chainId,
         address: creator_contract,
         abi: ZoraAbi,
         functionName: 'createEditionWithReferral',
         args: flattenContractArgs(generateTokenIdAdjustedContractArgs(contractArguments, editionSlot)),
         enabled: true,
+        onError: (err) => {
+            console.log('there was an error')
+            console.log(err)
+        }
     });
+
 
     const { trigger, data: postContestData, error, isMutating, reset } = useSWRMutation(
         `/api/createMintBoardPost/${spaceName}/${nanoid()}}`,
@@ -469,13 +316,6 @@ const CreateEditionButton = ({
                                                         <p className="text-sm">Awaiting signature</p>
                                                         <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
                                                     </div>
-                                                    // :
-                                                    // isReserving ? (
-                                                    //     <div className="flex gap-2 items-center">
-                                                    //         <p className="text-sm">Generating</p>
-                                                    //         <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
-                                                    //     </div>
-                                                    // )
                                                     :
                                                     "Create"
                                                 }</button>

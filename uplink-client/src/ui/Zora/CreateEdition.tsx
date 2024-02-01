@@ -335,7 +335,7 @@ const CreateEditionButton = ({
     const { creator_contract, explorer, bridge } = getContractFromChainId(chainId);
 
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
-        chainId: chainId,
+        //chainId: chainId,
         address: creator_contract,
         abi: ZoraAbi,
         functionName: 'createEditionWithReferral',

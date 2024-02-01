@@ -341,13 +341,6 @@ export const flattenContractArgs = (args: ConfigurableZoraEditionOutput) => {
 
 export default function useCreateZoraEdition(referrer?: string, templateConfig?: ConfigurableZoraEditionInput) {
     const [contractArguments, setContractArguments] = useState<ConfigurableZoraEditionOutput | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const [animationBlob, setAnimationBlob] = useState<string | null>(null);
-    const [imageBlob, setImageBlob] = useState<string | null>(null);
-    const [thumbnailOptions, setThumbnailOptions] = useState<string[]>([]);
-    const [thumbnailBlobIndex, setThumbnailBlobIndex] = useState<number | null>(null);
-    const [isVideo, setIsVideo] = useState(false);
-
 
     const isReferralValid = referrer ? referrer.startsWith('0x') && referrer.length === 42 : false;
 
@@ -388,34 +381,17 @@ export default function useCreateZoraEdition(referrer?: string, templateConfig?:
     };
 
 
-    const handleThumbnailChoice = async () => {
-        if (thumbnailBlobIndex === null) return null;
-        if (state.imageURI) return state.imageURI;
-        try {
-            setIsUploading(true)
-            const blob = await fetch(thumbnailOptions[thumbnailBlobIndex]).then(r => r.blob())
-            return await IpfsUpload(blob).then(url => {
-                setField('imageURI', url);
-                setIsUploading(false);
-                return url;
-            })
-        } catch (e) {
-            console.log(e);
-            setIsUploading(false);
-            setField('imageURI', '');
-        }
-    }
-
     const validate = async (userAddress: Session['user']['address']) => {
 
-        const videoThumbnailUrl = state.animationURI ? await handleThumbnailChoice() : '';
+        //const videoThumbnailUrl = state.animationURI ? await handleThumbnailChoice() : '';
 
         const { errors, ...rest } = state;
 
         const result = ConfigurableZoraEditionSchema.safeParse({
             ...rest,
             creator: userAddress,
-            imageURI: videoThumbnailUrl || state.imageURI,
+            imageURI: state.imageURI,
+            animationURI: state.animationURI
         });
 
         if (!result.success) {
@@ -436,103 +412,11 @@ export default function useCreateZoraEdition(referrer?: string, templateConfig?:
     }
 
 
-    const handleFileChange = ({
-        event,
-        isVideo,
-        mode,
-    }: {
-        event: any;
-        isVideo: boolean;
-        mode: "primary" | "thumbnail";
-    }) => {
-        if (mode === "primary") {
-            setIsUploading(true)
-
-            handleMediaUpload(
-                event,
-                ["image", "video", "svg"],
-                (mimeType) => {
-                    setIsVideo(mimeType.includes("video"));
-                },
-                (base64, mimeType) => {
-                    if (mimeType.includes("video")) setAnimationBlob(base64);
-                    else setImageBlob(base64);
-                },
-                (ipfsUrl, mimeType) => {
-                    if (mimeType.includes("video")) setField('animationURI', ipfsUrl);
-                    else setField('imageURI', ipfsUrl);
-                    setIsUploading(false);
-                },
-                (thumbnails) => {
-                    setThumbnailOptions(thumbnails);
-                    setThumbnailBlobIndex(0);
-
-                },
-                (size) => { }
-            ).catch((err) => {
-
-                if (err instanceof MediaUploadError) {
-                    toast.error(err.message)
-                }
-                else {
-                    console.log(err)
-                    toast.error('Something went wrong. Please try again later.')
-                }
-
-                // clear out all the fields for the users next attempt
-                setField('imageURI', '');
-                setField('animationURI', '');
-                setThumbnailOptions([]);
-                setThumbnailBlobIndex(null);
-                setImageBlob(null);
-                setAnimationBlob(null);
-
-            });
-        }
-        else if (mode === "thumbnail") {
-            handleMediaUpload(
-                event,
-                ["image"],
-                (mimeType) => { },
-                (base64) => {
-                    const existingThumbnailOptions = [...thumbnailOptions];
-                    setThumbnailOptions([...existingThumbnailOptions, base64])
-                    setThumbnailBlobIndex(existingThumbnailOptions.length);
-                },
-                (ipfsUrl) => {
-                    setField("imageURI", ipfsUrl);
-                },
-
-            ).catch(() => {
-
-            });
-        }
-    }
-
-
-
     return {
         contractArguments,
         setContractArguments,
         state,
         setField,
         validate,
-        isUploading,
-        animationBlob,
-        imageBlob,
-        thumbnailOptions,
-        thumbnailBlobIndex,
-        isVideo,
-        setThumbnailBlobIndex,
-        removeMedia: () => {
-            setField('imageURI', '');
-            setField('animationURI', '');
-            setThumbnailOptions([]);
-            setThumbnailBlobIndex(null);
-            setImageBlob(null);
-            setAnimationBlob(null);
-            setIsVideo(false);
-        },
-        handleFileChange,
     }
 }

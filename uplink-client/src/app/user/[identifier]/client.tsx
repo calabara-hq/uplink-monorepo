@@ -226,7 +226,7 @@ export const ClaimableUserRewards = ({ accountAddress, chainId }: { accountAddre
 const ClaimRewardsModal = ({ isModalOpen, onClose, chainId, claimableBalance, rewardsContract, triggerRefresh }) => {
     const { data: session, status } = useSession();
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
-        chainId: chainId,
+        //chainId: chainId,
         address: rewardsContract,
         abi: ZoraAbi,
         functionName: 'withdraw',

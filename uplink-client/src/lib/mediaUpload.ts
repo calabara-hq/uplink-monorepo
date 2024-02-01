@@ -1,5 +1,4 @@
 import { generateVideoThumbnails } from "@rajesh896/video-thumbnails-generator";
-import { uploadMedia } from "@/app/actions";
 import { useState, useTransition, useEffect } from "react";
 import FormData from 'form-data';
 
@@ -22,8 +21,27 @@ export const IpfsUpload = async (file: File | Blob) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const result = await uploadMedia(formData)
-    return result
+    try {
+        const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
+            },
+            // @ts-expect-error
+            body: formData 
+        });
+    
+        if (!response.ok) {
+            console.error(`HTTP error! Status: ${response.status}`);
+            return null
+        }
+    
+        const responseData = await response.json();
+        return `https://uplink.mypinata.cloud/ipfs/${responseData.IpfsHash}`;
+    } catch (err) {
+        console.error("Fetch error:", err);
+        return null;
+    }
 };
 
 const loadVideo = (file: File) =>
