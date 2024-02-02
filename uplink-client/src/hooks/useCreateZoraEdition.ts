@@ -5,7 +5,6 @@ import { Decimal } from 'decimal.js';
 import { handleMutationError } from "@/lib/handleMutationError";
 import { Session } from "@/providers/SessionProvider";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import handleMediaUpload, { IpfsUpload, MediaUploadError } from "@/lib/mediaUpload";
 import toast from "react-hot-toast";
 import { supportedChains } from "@/lib/chains/supportedChains";
 

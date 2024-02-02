@@ -65,11 +65,14 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
     const [animationURI, setAnimationURI] = useState<string>("")
 
     const clearFields = () => {
+        console.log('clearing fields')
         setIsUploading(false);
         URL.revokeObjectURL(animationObjectURL);
         URL.revokeObjectURL(imageObjectURL);
         setAnimationObjectURL("");
         setImageObjectURL("");
+        setImageURI("");
+        setAnimationURI("");
         setThumbnailOptions([]);
         setThumbnailBlobIndex(-1);
         setMimeType(null);

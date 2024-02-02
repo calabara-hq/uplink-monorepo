@@ -1,9 +1,8 @@
 "use client";
-import { startTransition, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { HiTrash, HiUser } from "react-icons/hi2";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
-import handleMediaUpload from "@/lib/mediaUpload";
 import {
   reducer,
   SpaceBuilderProps,
@@ -18,6 +17,7 @@ import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
 import { mutateSpaces } from "../mutate";
 import UplinkImage from "@/lib/UplinkImage"
+import { AvatarUpload } from "@/ui/MediaUpload/AvatarUpload";
 
 export default function SpaceForm({
   initialState,
@@ -32,6 +32,7 @@ export default function SpaceForm({
   const router = useRouter();
   const { data: session, status } = useSession();
   const { mutate } = useSWRConfig();
+  const [isUploading, setIsUploading] = useState(false);
   const { trigger, error, isMutating, reset } = useSWRMutation(
     isNewSpace
       ? `/api/createContest/${spaceId}`
@@ -108,7 +109,21 @@ export default function SpaceForm({
     <div className="flex flex-col w-full px-2 pt-2 pb-6 rounded-lg justify-center items-center">
       <div className="flex flex-col gap-2  w-full border-2 border-border p-6 rounded-xl shadow-box">
         <h2 className="text-3xl font-bold text-center">Space Builder</h2>
-        <SpaceLogo state={state} dispatch={dispatch} />
+        <AvatarUpload
+          fieldLabel={"logo"}
+          initialData={state.logoBlob || ""}
+          acceptedFormats={['image/png', 'image/jpeg', 'image/jpg']}
+          uploadStatusCallback={(status) => setIsUploading(status)}
+          ipfsImageCallback={(url) => {
+            if(url){
+              dispatch({
+                type: "setLogoUrl",
+                payload: url,
+              })
+            }
+          }}
+          error={state.errors.logoUrl}
+        />
         <SpaceName state={state} dispatch={dispatch} />
         <SpaceWebsite state={state} dispatch={dispatch} />
         <SpaceTwitter state={state} dispatch={dispatch} />
@@ -122,11 +137,11 @@ export default function SpaceForm({
           <button
             className="btn btn-primary normal-case"
             onClick={onFormSubmit}
-            disabled={isMutating}
+            disabled={isMutating || isUploading}
           >
             <div className="flex w-full items-center justify-center">
               Save
-              {isMutating && (
+              {isMutating || isUploading && (
                 <div
                   className="inline-block h-4 w-4 animate-spin rounded-full border-2 ml-auto border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                   role="status"
@@ -164,80 +179,12 @@ const SpaceName = ({
           });
         }}
         placeholder="Nouns"
-        className={`input w-full max-w-xs ${
-          state.errors?.name ? "input-error" : "input"
-        }`}
+        className={`input w-full max-w-xs ${state.errors?.name ? "input-error" : "input"
+          }`}
       />
       {state.errors?.name && (
         <label className="label">
           <span className="label-text-alt text-error">{state.errors.name}</span>
-        </label>
-      )}
-    </div>
-  );
-};
-
-const SpaceLogo = ({
-  state,
-  dispatch,
-}: {
-  state: SpaceBuilderProps;
-  dispatch: any;
-}) => {
-  const imageUploader = useRef<HTMLInputElement>(null);
-  return (
-    <div>
-      <label className="label">
-        <span className="label-text">Logo</span>
-      </label>
-      <input
-        placeholder="Logo"
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={async (event) => {
-          handleMediaUpload(
-            event,
-            ["image", "svg"],
-            (mimeType) => {},
-            (base64) => {
-              dispatch({
-                type: "setLogoBlob",
-                payload: base64,
-              });
-            },
-            (ipfsUrl) => {
-              dispatch({
-                type: "setLogoUrl",
-                payload: ipfsUrl,
-              });
-            }
-          ).catch((err) => {
-            return toast.error("couldn't upload your image");
-          });
-        }}
-        ref={imageUploader}
-      />
-      <div className="avatar">
-        <div
-          className="relative w-28 h-28 rounded-full cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all"
-          onClick={() => imageUploader.current?.click()}
-        >
-          {state.logoBlob && (
-            <UplinkImage src={state.logoBlob} alt="space avatar" fill />
-          )}
-          {!state.logoBlob && (
-            <div className="flex justify-center items-center w-full h-full">
-              <HiUser className="w-8 h-8" />
-            </div>
-          )}
-        </div>
-      </div>
-      {state.errors?.logoUrl && (
-        <label className="label">
-          <span className="label-text-alt text-error">
-            {state.errors.logoUrl}
-          </span>
         </label>
       )}
     </div>
@@ -268,9 +215,8 @@ const SpaceWebsite = ({
           });
         }}
         placeholder="nouns.wtf"
-        className={`input w-full max-w-xs ${
-          state.errors?.website ? "input-error" : "input"
-        }`}
+        className={`input w-full max-w-xs ${state.errors?.website ? "input-error" : "input"
+          }`}
       />
       {state.errors?.website && (
         <label className="label">
@@ -307,9 +253,8 @@ const SpaceTwitter = ({
           });
         }}
         placeholder="@nounsdao"
-        className={`input w-full max-w-xs ${
-          state.errors?.twitter ? "input-error" : "input"
-        }`}
+        className={`input w-full max-w-xs ${state.errors?.twitter ? "input-error" : "input"
+          }`}
       />
       {state.errors?.twitter && (
         <label className="label">
@@ -384,8 +329,8 @@ const AdminRow = ({
   const isLocked = isNewSpace
     ? index === 0
     : status === "authenticated"
-    ? session?.user?.address === admin
-    : true;
+      ? session?.user?.address === admin
+      : true;
 
   // set the
   useEffect(() => {

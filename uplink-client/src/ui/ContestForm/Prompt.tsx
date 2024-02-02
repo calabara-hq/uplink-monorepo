@@ -1,17 +1,16 @@
-import handleMediaUpload from "@/lib/mediaUpload";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { PromptUpload } from "@/ui/MediaUpload/PromptUpload";
+import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { OutputData } from "@editorjs/editorjs";
 import { BlockWrapper } from "./Entrypoint";
 const Editor = dynamic(() => import("../Editor/Editor"), { ssr: false });
-import { HiPhoto } from "react-icons/hi2";
-import { toast } from "react-hot-toast";
+
 import {
   validatePrompt,
   ContestBuilderProps,
   PromptError,
 } from "./contestHandler";
-import UplinkImage from "@/lib/UplinkImage"
+import { TbLoader2 } from "react-icons/tb";
 const Prompt = ({
   initialPrompt,
   handleConfirm,
@@ -23,9 +22,8 @@ const Prompt = ({
   errors: PromptError;
   setErrors: (errors: PromptError) => void;
 }) => {
-  const imageUploader = useRef<HTMLInputElement>(null);
   const [promptData, setPromptData] = useState(initialPrompt);
-
+  const [isUploading, setIsUploading] = useState(false);
   const editorCallback = (data: OutputData) => {
     setPromptData((prevPromptData) => ({ ...prevPromptData, body: data }));
     setErrors({ ...errors, body: "" });
@@ -68,67 +66,21 @@ const Prompt = ({
                   </label>
                 )}
               </div>
-              <div className="flex flex-col ml-auto">
-                <label className="text-sm p-1">Cover Image</label>
-                <input
-                  placeholder="Logo"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (event) => {
-                    handleMediaUpload(
-                      event,
-                      ["image"],
-                      (mimeType) => {},
-                      (base64) => {
-                        setPromptData((prevPromptData) => ({
-                          ...prevPromptData,
-                          coverBlob: base64,
-                        }));
-                      },
-                      (ipfsUrl) => {
-                        setPromptData((prevPromptData) => ({
-                          ...prevPromptData,
-                          coverUrl: ipfsUrl,
-                        }));
-                        setErrors({ ...errors, coverUrl: "" });
-                      }
-                    ).catch((err) => {
-                      console.log(err);
-                      setErrors({ ...errors, coverUrl: "" });
-                      return toast.error("couldn't upload your image");
-                    });
-                  }}
-                  ref={imageUploader}
-                />
-                <div className="avatar">
-                  <div
-                    className="w-36 rounded-lg cursor-pointer flex justify-center items-center"
-                    onClick={() => imageUploader.current?.click()}
-                  >
-                    {promptData.coverBlob && (
-                      <UplinkImage
-                        src={promptData.coverBlob}
-                        alt="prompt cover image"
-                        height={32}
-                        width={32}
-                      />
-                    )}
-                    {!promptData.coverBlob && (
-                      <div className="flex justify-center items-center w-full h-full rounded-lg bg-base-100 hover:bg-base-200 transition-all">
-                        <HiPhoto className="w-10 h-10" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {errors?.coverUrl && (
-                  <label className="label">
-                    <span className="label-text-alt text-error">
-                      {errors?.coverUrl}
-                    </span>
-                  </label>
-                )}
-              </div>
+              <PromptUpload
+                acceptedFormats={['image/png', 'image/jpeg', 'image/jpg']}
+                uploadStatusCallback={(status) => { setIsUploading(status)}}
+                ipfsImageCallback={(url) => {
+                  if(url){
+                    setPromptData((prevPromptData) => ({
+                      ...prevPromptData,
+                      coverUrl: url,
+                    }));
+                    setErrors({ ...errors, coverUrl: "" });
+                  }
+                }}
+                error={errors?.coverUrl ?? ""}
+                initialData={promptData.coverUrl}
+              />
             </div>
           </div>
           <div className="flex flex-col w-full xl:w-8/12">
@@ -150,9 +102,19 @@ const Prompt = ({
       </div>
       <button
         onClick={onSubmit}
+        disabled={isUploading}
         className="btn btn-primary lowercase mt-4 self-end"
       >
-        Confirm
+
+        {isUploading ? (
+        <div className="flex gap-2 items-center">
+          <p className="text-sm">uploading</p>
+          <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+        </div>
+        ) : "confirm"
+      }
+
+
       </button>
     </BlockWrapper>
   );

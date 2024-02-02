@@ -1,17 +1,15 @@
 "use client"
 import useMe from "@/hooks/useMe";
 import { handleMutationError } from "@/lib/handleMutationError";
-import handleMediaUpload from "@/lib/mediaUpload";
 import { useSession } from "@/providers/SessionProvider";
 import { User } from "@/types/user";
 import { useRouter } from "next/navigation";
 import { useReducer, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { HiUser } from "react-icons/hi2";
 import { TbLoader2 } from "react-icons/tb";
 import useSWRMutation from "swr/mutation";
 import { z } from "zod";
-import UplinkImage from "@/lib/UplinkImage"
+import { AvatarUpload } from "@/ui/MediaUpload/AvatarUpload";
 
 const configurableUserSettings = z.object({
     profileAvatarUrl: z.string().min(1, { message: "profile picture is required" }),
@@ -25,84 +23,6 @@ type ZodSafeParseErrorFormat = {
 };
 
 type ConfigurableUserSettings = z.infer<typeof configurableUserSettings>;
-
-
-const PFP = ({
-    profileAvatarUrl,
-    profileAvatarBlob,
-    error,
-    dispatch,
-    setIsUploading,
-}: {
-    profileAvatarUrl: string;
-    profileAvatarBlob: string;
-    error: Array<string>;
-    dispatch: any;
-    setIsUploading: (val: boolean) => void;
-}) => {
-    const imageUploader = useRef<HTMLInputElement>(null);
-    return (
-        <div>
-            <label className="label">
-                <span className="label-text">Profile Picture</span>
-            </label>
-            <input
-                placeholder="Logo"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={async (event) => {
-                    setIsUploading(true);
-                    handleMediaUpload(
-                        event,
-                        ["image", "svg"],
-                        (mimeType) => { },
-                        (base64) => {
-                            dispatch({
-                                type: "SET_FIELD",
-                                payload: { field: "profileAvatarBlob", value: base64 },
-                            });
-                        },
-                        (ipfsUrl) => {
-                            setIsUploading(false);
-                            dispatch({
-                                type: "SET_FIELD",
-                                payload: { field: "profileAvatarUrl", value: ipfsUrl },
-                            });
-                        }
-                    ).catch((err) => {
-                        setIsUploading(false);
-                        return toast.error("couldn't upload your image");
-
-                    });
-                }}
-                ref={imageUploader}
-            />
-            <div className="avatar">
-                <div
-                    className="relative w-28 h-28 rounded-full cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all"
-                    onClick={() => imageUploader.current?.click()}
-                >
-                    {profileAvatarBlob && (
-                        <UplinkImage src={profileAvatarBlob} alt="space avatar" fill />
-                    )}
-                    {!profileAvatarBlob && (
-                        <div className="flex justify-center items-center w-full h-full">
-                            <HiUser className="w-8 h-8" />
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {error && (
-                <label className="label">
-                    <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{error.join(",")}</span>
-                </label>
-            )}
-        </div>
-    );
-};
-
 
 const BasicInput = ({ value, label, placeholder, onChange, error, inputType }) => {
     return (
@@ -332,12 +252,20 @@ const Settings = ({ accountAddress }: { accountAddress: string }) => {
             return (
                 <div className="flex flex-col gap-2">
                     <div className="flex flex-col gap-2 p-2">
-                        <PFP
-                            profileAvatarUrl={state.profileAvatarUrl}
-                            profileAvatarBlob={state.profileAvatarBlob}
-                            error={state.errors?.profileAvatarUrl?._errors}
-                            setIsUploading={setIsUploading}
-                            dispatch={dispatch}
+                        <AvatarUpload
+                            fieldLabel={"Profile Picture"}
+                            initialData={state.profileAvatarBlob}
+                            acceptedFormats={['image/png', 'image/jpeg', 'image/jpg']}
+                            uploadStatusCallback={(status) => setIsUploading(status)}
+                            ipfsImageCallback={(url) => {
+                                if(url){
+                                    dispatch({
+                                        type: "SET_FIELD",
+                                        payload: { field: "profileAvatarUrl", value: url },
+                                    });
+                                }
+                            }}
+                            error={state.errors?.profileAvatarUrl?._errors.join(",")}
                         />
                         <BasicInput
                             value={state.displayName}

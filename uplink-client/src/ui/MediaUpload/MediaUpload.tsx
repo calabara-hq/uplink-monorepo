@@ -4,38 +4,7 @@ import { useMediaUpload } from '@/hooks/useMediaUpload';
 import Image from "next/image";
 import { HiCamera, HiOutlineTrash } from 'react-icons/hi2';
 import { RenderStandardVideoWithLoader } from '@/ui/VideoPlayer';
-import toast from 'react-hot-toast';
 import { BiSolidCircle } from 'react-icons/bi';
-
-
-const FileInput = ({
-    acceptedFormats,
-    upload,
-    children,
-}: {
-    acceptedFormats: Array<string>;
-    upload: (event) => Promise<void>;
-    children: React.ReactNode;
-}) => {
-
-    const fileUploader = useRef<HTMLInputElement>(null);
-
-    return (
-        <div className="w-full h-full">
-            <input
-                placeholder="asset"
-                type="file"
-                accept={acceptedFormats.join(",")}
-                className="hidden"
-                onChange={async (event) =>
-                    await upload(event)
-                }
-                ref={fileUploader}
-            />
-            {children}
-        </div>
-    )
-}
 
 
 export const MediaUpload = ({ 
@@ -43,7 +12,7 @@ export const MediaUpload = ({
     uploadStatusCallback, 
     ipfsImageCallback, 
     ipfsAnimationCallback, 
-    maxVideoDuration 
+    maxVideoDuration,
 }: { 
     acceptedFormats: Array<string>, 
     uploadStatusCallback: (status: boolean) => void, 
