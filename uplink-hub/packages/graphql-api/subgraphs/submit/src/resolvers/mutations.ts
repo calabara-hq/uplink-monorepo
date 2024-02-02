@@ -7,6 +7,7 @@ import { createStandardSubmission, createTwitterSubmission } from "../utils/inse
 import createDrop from "../utils/createDrop.js";
 import { createMintBoardPost } from "../utils/mintBoard.js";
 import { registerMint } from "../utils/registerMint.js";
+import { deleteContestSubmission, deleteMintboardPost } from "../utils/delete.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL!);
@@ -99,7 +100,45 @@ const mutations = {
             })
 
             return registerMint(user, editionId, amount)
+        },
+
+        deleteContestSubmission: async (_: any, {
+            submissionId,
+            contestId
+        }: {
+            submissionId: string,
+            contestId: string
+        }, context: Context) => {
+            const user = await authController.getUser(context);
+
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
+            return deleteContestSubmission(user, submissionId, contestId)
+        },
+
+        deleteMintboardPost: async (_: any, {
+            postId,
+            spaceId
+        }: {
+            postId: string,
+            spaceId: string
+        }, context: Context) => {
+            const user = await authController.getUser(context);
+
+            if (!user) throw new GraphQLError('Unauthorized', {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+
+            return deleteMintboardPost(user, postId, spaceId)
         }
+
+
     }
 };
 

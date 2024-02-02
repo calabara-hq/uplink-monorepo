@@ -196,6 +196,12 @@ scalar Decimal
   @join__type(graph: SUBMIT)
   @join__type(graph: VOTE)
 
+type deletePostResponse
+  @join__type(graph: SUBMIT)
+{
+  success: Boolean!
+}
+
 input DropConfig
   @join__type(graph: SUBMIT)
 {
@@ -377,6 +383,8 @@ type Mutation
   createUserDrop(submissionId: ID!, contestId: ID!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createUserDropResponse! @join__field(graph: SUBMIT)
   createMintBoardPost(spaceName: String!, contractAddress: String!, chainId: Int!, dropConfig: DropConfig!): createMintBoardPostResponse! @join__field(graph: SUBMIT)
   registerMint(editionId: ID!, amount: Int!): registerMintResponse! @join__field(graph: SUBMIT)
+  deleteContestSubmission(submissionId: ID!, contestId: ID!): deletePostResponse @join__field(graph: SUBMIT)
+  deleteMintboardPost(postId: ID!, spaceId: ID!): deletePostResponse @join__field(graph: SUBMIT)
   updateUser(displayName: String!, profileAvatar: String!, visibleTwitter: Boolean!): UpdateUserResponse @join__field(graph: USER)
   castVotes(contestId: ID!, castVotePayload: [CastVotePayload!]!): CastVoteResponse! @join__field(graph: VOTE)
   removeSingleVote(submissionId: ID!, contestId: ID!): RemoveSingleVoteResponse! @join__field(graph: VOTE)
