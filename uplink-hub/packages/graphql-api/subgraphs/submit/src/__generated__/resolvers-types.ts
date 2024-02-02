@@ -90,6 +90,8 @@ export type Mutation = {
   createSubmission: CreateSubmissionResponse;
   createTwitterSubmission: CreateSubmissionResponse;
   createUserDrop: CreateUserDropResponse;
+  deleteContestSubmission?: Maybe<DeletePostResponse>;
+  deleteMintboardPost?: Maybe<DeletePostResponse>;
   registerMint: RegisterMintResponse;
 };
 
@@ -120,6 +122,18 @@ export type MutationCreateUserDropArgs = {
   contractAddress: Scalars['String']['input'];
   dropConfig: DropConfig;
   submissionId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteContestSubmissionArgs = {
+  contestId: Scalars['ID']['input'];
+  submissionId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMintboardPostArgs = {
+  postId: Scalars['ID']['input'];
+  spaceId: Scalars['ID']['input'];
 };
 
 
@@ -296,6 +310,11 @@ export type CreateUserDropResponse = {
   success: Scalars['Boolean']['output'];
 };
 
+export type DeletePostResponse = {
+  __typename?: 'deletePostResponse';
+  success: Scalars['Boolean']['output'];
+};
+
 export type RegisterMintResponse = {
   __typename?: 'registerMintResponse';
   success: Scalars['Boolean']['output'];
@@ -408,6 +427,7 @@ export type ResolversTypes = ResolversObject<{
   createMintBoardPostResponse: ResolverTypeWrapper<CreateMintBoardPostResponse>;
   createSubmissionResponse: ResolverTypeWrapper<CreateSubmissionResponse>;
   createUserDropResponse: ResolverTypeWrapper<CreateUserDropResponse>;
+  deletePostResponse: ResolverTypeWrapper<DeletePostResponse>;
   registerMintResponse: ResolverTypeWrapper<RegisterMintResponse>;
 }>;
 
@@ -448,6 +468,7 @@ export type ResolversParentTypes = ResolversObject<{
   createMintBoardPostResponse: CreateMintBoardPostResponse;
   createSubmissionResponse: CreateSubmissionResponse;
   createUserDropResponse: CreateUserDropResponse;
+  deletePostResponse: DeletePostResponse;
   registerMintResponse: RegisterMintResponse;
 }>;
 
@@ -518,6 +539,8 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateSubmissionArgs, 'contestId' | 'submission'>>;
   createTwitterSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateTwitterSubmissionArgs, 'contestId' | 'submission'>>;
   createUserDrop?: Resolver<ResolversTypes['createUserDropResponse'], ParentType, ContextType, RequireFields<MutationCreateUserDropArgs, 'chainId' | 'contestId' | 'contractAddress' | 'dropConfig' | 'submissionId'>>;
+  deleteContestSubmission?: Resolver<Maybe<ResolversTypes['deletePostResponse']>, ParentType, ContextType, RequireFields<MutationDeleteContestSubmissionArgs, 'contestId' | 'submissionId'>>;
+  deleteMintboardPost?: Resolver<Maybe<ResolversTypes['deletePostResponse']>, ParentType, ContextType, RequireFields<MutationDeleteMintboardPostArgs, 'postId' | 'spaceId'>>;
   registerMint?: Resolver<ResolversTypes['registerMintResponse'], ParentType, ContextType, RequireFields<MutationRegisterMintArgs, 'amount' | 'editionId'>>;
 }>;
 
@@ -652,6 +675,11 @@ export type CreateUserDropResponseResolvers<ContextType = any, ParentType extend
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type DeletePostResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['deletePostResponse'] = ResolversParentTypes['deletePostResponse']> = ResolversObject<{
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type RegisterMintResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['registerMintResponse'] = ResolversParentTypes['registerMintResponse']> = ResolversObject<{
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -684,6 +712,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   createMintBoardPostResponse?: CreateMintBoardPostResponseResolvers<ContextType>;
   createSubmissionResponse?: CreateSubmissionResponseResolvers<ContextType>;
   createUserDropResponse?: CreateUserDropResponseResolvers<ContextType>;
+  deletePostResponse?: DeletePostResponseResolvers<ContextType>;
   registerMintResponse?: RegisterMintResponseResolvers<ContextType>;
 }>;
 

@@ -1,6 +1,6 @@
 import { WritableStandardSubmission } from "../types/writeStandardSubmission";
 import { getCacheSubParams, setCacheSubParams } from "./cache.js";
-import { db, sqlOps } from "../utils/database.js";
+import { db, sqlOps } from "./database.js";
 import { schema, Decimal, EditorOutputData, TokenController } from "lib";
 import pinataSDK from '@pinata/sdk';
 import dotenv from 'dotenv';

@@ -215,6 +215,11 @@ type registerMintResponse {
   success: Boolean!
 }
 
+type deletePostResponse {
+  success: Boolean!
+}
+
+
 type Mutation {
   createSubmission(
     contestId: ID!
@@ -241,6 +246,14 @@ type Mutation {
     editionId: ID!
     amount: Int!
   ) : registerMintResponse!
+  deleteContestSubmission (
+    submissionId: ID!
+    contestId: ID!
+  ): deletePostResponse
+  deleteMintboardPost (
+    postId: ID!
+    spaceId: ID!
+  ): deletePostResponse
 }
 
 extend schema

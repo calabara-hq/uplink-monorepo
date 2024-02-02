@@ -20,6 +20,11 @@ import { useInView } from "react-intersection-observer";
 import UplinkImage from "@/lib/UplinkImage";
 import { uint64MaxSafe } from '@/utils/uint64';
 import { TokenContractApi } from "@/lib/contract";
+import { ManageModalContent } from "@/app/submission/[submissionId]/client"
+import { AdminWrapper } from "@/lib/AdminWrapper";
+import { MdOutlineSettings } from "react-icons/md";
+import {useDeleteMintboardPost} from "@/hooks/useDeleteMintboardPost";
+
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
 const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }) => {
@@ -133,7 +138,7 @@ export const ShareButton = ({ spaceName, post, onClick, styleOverride }: { space
     const handleShare = (event, baseLink) => {
         event.stopPropagation();
         event.preventDefault();
-        setShareText("Copied Link");
+        setShareText("Copied");
         navigator.clipboard.writeText(baseLink);
         setTimeout(() => {
             setShareText("Share");
@@ -225,24 +230,28 @@ export const useMintTimer = (post: MintBoardPost) => {
 
 }
 
-const PostFooter = ({ post, spaceName, handleMint, handleShare }) => {
+const PostFooter = ({ post, spaceName, handleMint, handleShare, handleManage, admins }) => {
     const remainingTime = useMintTimer(post);
     return (
         <div className="flex flex-col w-full">
             <div className="p-2 w-full" />
-            <div className="grid grid-cols-[auto_1fr_auto] w-full items-center">
-                <div className="w-[60px]">
+            <div className="flex w-full items-center gap-2">
+                    <AdminWrapper admins={admins}>
+                        <button onClick={(event) => handleManage(event, post)} className="btn btn-sm btn-ghost text-t2 w-fit" >
+                            <MdOutlineSettings className="h-6 w-6" />
+                        </button>
+                    </AdminWrapper>
+                <div className="mr-auto">
                     <ShareButton spaceName={spaceName} post={post} onClick={(event) => handleShare(event, post)} />
                 </div>
-                <div className="m-auto">
+                <div className="flex gap-2 items-center ml-auto ">
                     {remainingTime && <MintButton
-                        styleOverride="btn btn-sm w-full normal-case m-auto btn-ghost hover:bg-primary bg-gray-800 text-primary hover:text-black 
+                        styleOverride="btn btn-sm normal-case m-auto btn-ghost hover:bg-primary bg-gray-800 text-primary hover:text-black 
                                                                 hover:rounded-xl rounded-3xl transition-all duration-300"
                         onClick={(event) => handleMint(event, post)}
                     />
                     }
-                </div>
-                <div className="ml-auto w-[80px]">
+
                     {remainingTime && (
                         <div className="flex flex-row gap-2 items-center bg-t2 bg-opacity-5 text-t2 p-2 rounded-lg ">
                             <FaRegClock className="w-4 h-4 text-t2" />
@@ -352,11 +361,16 @@ export const RenderProgress = ({ spaceName }: { spaceName: string }) => {
 }
 
 export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPopular: boolean }) => {
-    const { liveBoard, isBoardLoading, optimisticMintUpdate } = useLiveMintBoard(spaceName);
+    const { liveBoard, isBoardLoading, optimisticMintUpdate, mutateLiveBoard } = useLiveMintBoard(spaceName);
     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isManageModalOpen, setIsManageModalOpen] = useState(false);
     const [focusedSubmission, setFocusedSubmission] = useState(null);
     const isMobileDevice = isMobile();
+    const {handleDeleteMintboardPost} = useDeleteMintboardPost(() => {
+        mutateLiveBoard();
+        handleModalClose();
+    })
 
     useEffect(() => {
         if (window) window.sessionStorage.setItem('nav', 'true')
@@ -385,6 +399,11 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
         setFocusedSubmission(submission)
     }
 
+    const openManageModal = (submission) => {
+        setIsManageModalOpen(true);
+        setFocusedSubmission(submission);
+      }
+
     const handleMint = (event, submission) => {
         event.stopPropagation();
         event.preventDefault();
@@ -397,9 +416,16 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
         openShareModal(submission);
     }
 
+    const handleManage = (event, submission) => {
+        event.stopPropagation();
+        event.preventDefault();
+        openManageModal(submission);
+      }
+
     const handleModalClose = () => {
         setIsMintModalOpen(false);
         setIsShareModalOpen(false);
+        setIsManageModalOpen(false);
         setFocusedSubmission(null);
     }
 
@@ -429,18 +455,23 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
                                     spaceName={spaceName}
                                     handleMint={handleMint}
                                     handleShare={handleShare}
+                                    handleManage={handleManage}
+                                    admins={liveBoard.space.admins}
                                 />
                             }
                         />
                     </div>
                 )
             })}
-            <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleModalClose} >
+            <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isManageModalOpen ? "manage" : "share"} handleClose={handleModalClose} >
                 {isMintModalOpen && focusedSubmission && (
                     <MintEdition edition={focusedSubmission.edition} author={focusedSubmission.author} setIsModalOpen={setIsMintModalOpen} referrer={liveBoard.referrer} onMintCallback={(editionId, mintAmount) => optimisticMintUpdate(editionId, mintAmount)} />
                 )}
                 {isShareModalOpen && focusedSubmission && (
                     <ShareModalContent spaceName={spaceName} post={focusedSubmission} handleClose={handleModalClose} />
+                )}
+                {isManageModalOpen && focusedSubmission && (
+                     <ManageModalContent onDelete={() => handleDeleteMintboardPost(focusedSubmission.id, liveBoard.space.id)} />
                 )}
             </SubmissionModal>
         </div>

@@ -19,9 +19,13 @@ const fetchMintBoard = async (spaceName: string): Promise<MintBoard> => {
           mintBoard(spaceName: $spaceName) {
               id
               space {
+                id
                 logoUrl
                 name
                 displayName
+                admins {
+                  address
+                }
               }
               enabled
               threshold

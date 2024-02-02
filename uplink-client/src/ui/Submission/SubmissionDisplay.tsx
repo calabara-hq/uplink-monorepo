@@ -12,11 +12,12 @@ import useMe from "@/hooks/useMe";
 import { useVote, VoteActionProps } from "@/hooks/useVote";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import { MdOutlineCancelPresentation } from "react-icons/md";
-import { MintButton, ShareButton, ShareModalContent, AddToCartButton } from "@/app/submission/[submissionId]/client";
+import { MintButton, ShareButton, ShareModalContent, AddToCartButton, AdminButton, ManageModalContent } from "@/app/submission/[submissionId]/client";
 import { useSession } from "@/providers/SessionProvider";
 import ExpandedSubmission from "./ExpandedSubmission";
 import { HiArrowNarrowLeft } from "react-icons/hi";
-
+import { AdminWrapper } from "@/lib/AdminWrapper";
+import { useDeleteContestSubmission } from "@/hooks/useDeleteContestSubmission";
 
 export const SubmissionDisplaySkeleton = () => {
   return (
@@ -100,7 +101,7 @@ export const RenderPopularSubmissions = ({ submissions }) => {
 
       <Swiper listSize={submissions.length - 1}>
         {submissions.map((submission: Submission, index: number) => (
-            <div className="snap-start snap-always w-full min-w-[250px] min-h-[300px] sm:min-w-[320px] sm:h-[500px]" key={index}>
+          <div className="snap-start snap-always w-full min-w-[250px] min-h-[300px] sm:min-w-[320px] sm:h-[500px]" key={index}>
             <CardSubmission
               key={index}
               interactive={true}
@@ -294,6 +295,8 @@ const HeaderButtons = ({ submission, referrer, context }: { submission: Submissi
 }
 
 
+
+
 export const LiveSubmissionDisplay = ({
   contestId,
 }: {
@@ -304,9 +307,11 @@ export const LiveSubmissionDisplay = ({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const [isExpandModalOpen, setIsExpandModalOpen] = useState(false);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const { handleDeleteContestSubmission } = useDeleteContestSubmission(contestId);
+
   const [submission, setSubmission] = useState<Submission | null>(null);
 
-  const router = useRouter();
   const openMintModal = (submission: Submission) => {
     setIsMintModalOpen(true)
     setSubmission(submission)
@@ -322,6 +327,11 @@ export const LiveSubmissionDisplay = ({
     setSubmission(submission)
   }
 
+  const openManageModal = (submission: Submission) => {
+    setIsManageModalOpen(true);
+    setSubmission(submission);
+  }
+
   const handleMint = (event, submission) => {
     event.stopPropagation();
     event.preventDefault();
@@ -334,11 +344,17 @@ export const LiveSubmissionDisplay = ({
     openShareModal(submission);
   }
 
+  const handleManage = (event, submission) => {
+    event.stopPropagation();
+    event.preventDefault();
+    openManageModal(submission);
+  }
 
   const handleClose = () => {
     setIsShareModalOpen(false)
     setIsMintModalOpen(false)
     setIsExpandModalOpen(false)
+    setIsManageModalOpen(false);
     setSubmission(null);
   }
 
@@ -365,14 +381,18 @@ export const LiveSubmissionDisplay = ({
                 footerChildren={
                   <div className="flex flex-col w-full">
                     <div className="p-2 w-full" />
-                    <div className="grid grid-cols-3 w-full items-center">
+                    <div className="grid grid-cols-4 w-full items-center">
+                      <div>
+                        <AdminButton contestId={contestId} submission={submission} onClick={(event) => handleManage(event, submission)} />
+                      </div>
+
                       <div>
                         <ShareButton submission={submission} onClick={(event) => handleShare(event, submission)} context={context} />
                       </div>
                       <div className="m-auto">
                         <MintButton
                           styleOverride="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
-                        hover:rounded-xl rounded-3xl transition-all duration-300"
+                          hover:rounded-xl rounded-3xl transition-all duration-300"
                           submission={submission}
                           onClick={(event) => handleMint(event, submission)}
                         />
@@ -389,7 +409,7 @@ export const LiveSubmissionDisplay = ({
           })}
         </div>
       </div>
-      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isExpandModalOpen} mode={isMintModalOpen ? "mint" : isExpandModalOpen ? "expand" : "share"} handleClose={handleClose} >
+      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isExpandModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isExpandModalOpen ? "expand" : isManageModalOpen ? "manage" : "share"} handleClose={handleClose} >
         {isShareModalOpen && submission && (
           <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
         )}
@@ -411,6 +431,10 @@ export const LiveSubmissionDisplay = ({
             } />
           </div>
         )}
+        {isManageModalOpen && submission && (
+          <ManageModalContent onDelete={() => handleDeleteContestSubmission(submission.id, () => handleClose())} />
+        )}
+
       </SubmissionModal>
     </div >
   );

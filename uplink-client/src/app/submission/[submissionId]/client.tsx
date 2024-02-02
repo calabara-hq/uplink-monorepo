@@ -1,5 +1,6 @@
 "use client"
 import { VoteActionProps } from "@/hooks/useVote";
+import { AdminWrapper } from "@/lib/AdminWrapper";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useSession } from "@/providers/SessionProvider";
 import { Submission, isNftSubmission } from "@/types/submission"
@@ -12,7 +13,8 @@ import { useEffect, useState } from "react";
 import { BiLayerPlus } from "react-icons/bi";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import { HiCheckBadge } from "react-icons/hi2";
-import { MdOutlineCancelPresentation } from "react-icons/md";
+import { MdOutlineCancelPresentation, MdOutlineSettings } from "react-icons/md";
+import { Boundary } from "@/ui/Boundary/Boundary"
 
 
 export const AddToCartButton = ({ submission, voteActions }: { submission: Submission, voteActions: VoteActionProps }) => {
@@ -61,6 +63,56 @@ export const AddToCartButton = ({ submission, voteActions }: { submission: Submi
 
     return null;
 };
+
+
+export const ManageModalContent = ({ onDelete }: { onDelete: () => void }) => {
+    const [confirmationText, setConfirmationText] = useState('');
+    const [isConfirmed, setIsConfirmed] = useState(false);
+
+
+    useEffect(() => {
+        if (confirmationText === 'delete') {
+            return setIsConfirmed(true)
+        }
+        setIsConfirmed(false)
+    }, [confirmationText])
+
+    return (
+        <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
+            <h2 className="text-t1 text-xl font-bold">Manage Post</h2>
+            <Boundary size="small">
+                <p>Once deleted, this post will be gone forever. Type <b>delete</b> if you understand</p>
+            </Boundary>
+            <div className="flex flex-row items-center">
+                <input
+                    className="input input-bordered w-1/3"
+                    type="text"
+                    autoComplete="off"
+                    spellCheck="false"
+                    value={confirmationText}
+                    onChange={(e) => { setConfirmationText(e.target.value) }}
+                />
+                <button onClick={onDelete} disabled={!isConfirmed} className="ml-auto btn btn-active text-error w-fit hover:bg-error bg-opacity-30 hover:bg-opacity-30 text-error border-none normal-case">delete post</button>
+            </div>
+        </div>
+    )
+}
+
+
+export const AdminButton = ({ contestId, submission, onClick }: { contestId: string, submission: Submission, onClick: (event?) => void }) => {
+    const { contestAdmins } = useContestState();
+
+    return (
+        <AdminWrapper admins={contestAdmins.map(admin => { return { address: admin } })}>
+            <button onClick={onClick} className="btn btn-ghost text-t2 w-fit" >
+                <MdOutlineSettings className="h-6 w-6" />
+            </button>
+        </AdminWrapper>
+    )
+}
+
+
+
 
 export const BackButton = ({ context }: { context: string | null }) => {
     const router = useRouter();
@@ -155,7 +207,7 @@ export const ShareModalContent = ({ submission, handleClose, context }: { submis
         }
     }, [status])
 
-    
+
     return (
         <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
             <div className="flex justify-between">
@@ -171,14 +223,14 @@ export const ShareModalContent = ({ submission, handleClose, context }: { submis
                     </div>
                 )}
             </WalletConnectButton>
-            {status !== 'authenticated' && 
-            <>
-                <div className="w-full h-0.5 bg-base-200"/>
-                <div className="flex flex-col gap-2">
-                    <p className="text-t2">Or just copy link</p>
-                    <button className="secondary-btn btn-sm" onClick={handleShare}>Copy Link</button>
-                </div>
-            </>
+            {status !== 'authenticated' &&
+                <>
+                    <div className="w-full h-0.5 bg-base-200" />
+                    <div className="flex flex-col gap-2">
+                        <p className="text-t2">Or just copy link</p>
+                        <button className="secondary-btn btn-sm" onClick={handleShare}>Copy Link</button>
+                    </div>
+                </>
             }
         </div>
     )
