@@ -46,7 +46,7 @@ const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }
                 )}
             </div>
             {animationURI ? (
-                <RenderInteractiveVideoWithLoader videoUrl={siteAnimationURI.gateway} posterUrl={siteAnimationURI.gateway} isActive={true} />
+                <RenderInteractiveVideoWithLoader videoUrl={siteAnimationURI.gateway} posterUrl={siteImageURI.gateway} isActive={true} />
             ) : (
                 <ImageWrapper>
                     <UplinkImage

@@ -8,6 +8,20 @@ import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { MintBoardPost } from "@/types/mintBoard";
 import UplinkImage from "@/lib/UplinkImage"
 import { Metadata } from "next";
+import { getChainId } from "viem/_types/actions/public/getChainId";
+import { getChainName } from "@/lib/chains/supportedChains";
+
+
+type NftMetadata = {
+    "eth:nft:contract_address": string,
+    "eth:nft:schema": string,
+    "eth:nft:chain_id": number, 
+    "eth:nft:chain": string,
+    "eth:nft:collection": string,
+    "eth:nft:creator_address": string,
+    "eth:nft:media_url": string,
+    "eth:nft:mint_count": string
+};
 
 export async function generateMetadata({
     params,
@@ -21,6 +35,17 @@ export async function generateMetadata({
     const post = mintboard.posts.find(el => el.id === params.postId)
     const author = post.author.displayName || post.author.address
     const referrer = searchParams?.referrer ?? null
+
+    const nftMetadata: NftMetadata = {
+        "eth:nft:contract_address": post.edition.contractAddress,
+        "eth:nft:schema": "ERC721",
+        "eth:nft:chain_id": post.edition.chainId,
+        "eth:nft:chain": getChainName(post.edition.chainId).toLowerCase(),
+        "eth:nft:collection": post.edition.name,
+        "eth:nft:creator_address": post.edition.defaultAdmin,
+        "eth:nft:media_url": parseIpfsUrl(post.edition.imageURI).gateway,
+        "eth:nft:mint_count": post.totalMints.toString()
+    }
 
     const fcMetadata: Record<string, string> = {
         // "fc:frame": "vNext",
@@ -47,7 +72,8 @@ export async function generateMetadata({
             type: "website",
         },
         other: {
-            ...fcMetadata
+            ...fcMetadata,
+            ...nftMetadata
         }
     };
 }

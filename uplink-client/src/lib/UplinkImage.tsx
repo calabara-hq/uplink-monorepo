@@ -7,16 +7,18 @@ const normalizeSrc = (src) => {
 
 
 const imageLoader = ({ src, width, quality }) => {
+    const isObjectURL = !src.startsWith('http')
     const qualitySetting = quality || 'auto:best'; // default to auto:good if not specified
     const modifiers = `w_${width},q_${qualitySetting},c_limit,f_auto`; // c_fill for Cloudinary fill mode
-    return `https://res.cloudinary.com/drrkx8iye/image/fetch/${modifiers}/${normalizeSrc(src)}`;
+    return isObjectURL ? src : `https://res.cloudinary.com/drrkx8iye/image/fetch/${modifiers}/${normalizeSrc(src)}`;
 };
 
 
 const blurLoader = ({ src, width, quality }) => {
+    const isObjectURL = !src.startsWith('http')
     const adjustedWidth = width > 200 ? 200 : width
     const modifiers = `w_${adjustedWidth},q_auto:low,e_blur:2000,c_limit,f_auto`; // c_fill for Cloudinary fill mode
-    return `https://res.cloudinary.com/drrkx8iye/image/fetch/${modifiers}/${normalizeSrc(src)}`;
+    return isObjectURL ? src : `https://res.cloudinary.com/drrkx8iye/image/fetch/${modifiers}/${normalizeSrc(src)}`;
 };
 
 export default function UplinkImage(props: { src: string | StaticImageData, alt: string, width?: number, height?: number, fill?: boolean, sizes?: string, className?: string, blur?: boolean, quality?: number, draggable?: boolean, priority?: boolean }) {
@@ -24,14 +26,14 @@ export default function UplinkImage(props: { src: string | StaticImageData, alt:
     const [isPlaceholderError, setIsPlaceholderError] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
 
-    if(process.env.NODE_ENV !== 'production') return (
-        <Image
-            src={src}
-            alt={alt}
-            sizes={sizes}
-            {...rest}
-        />
-    )
+    // if(process.env.NODE_ENV !== 'production') return (
+    //     <Image
+    //         src={src}
+    //         alt={alt}
+    //         sizes={sizes}
+    //         {...rest}
+    //     />
+    // )
 
     if (blur) {
         const blurredSrc = typeof src === 'string' ? blurLoader({ src, width: 200, quality: '1' }) : '';

@@ -9,32 +9,30 @@ const Editor = dynamic(() => import("@/ui/Editor/Editor"), {
 import type { OutputData } from "@editorjs/editorjs";
 import useSWRMutation from "swr/mutation";
 import {
-  HiCamera,
   HiCheckBadge,
   HiXCircle,
-  HiOutlineTrash,
   HiSparkles,
 } from "react-icons/hi2";
-import { useEffect, useRef, useState } from "react";
-import UplinkImage from "@/lib/UplinkImage"
+import { useEffect, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
-import { BiInfoCircle, BiPlusCircle, BiSolidCircle } from "react-icons/bi";
-import Modal, { ModalActions } from "@/ui/Modal/Modal";
+import { BiInfoCircle } from "react-icons/bi";
+import Modal from "@/ui/Modal/Modal";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { Decimal } from "decimal.js";
 import { UserSubmissionParams, useContestInteractionApi } from "@/hooks/useContestInteractionAPI";
 import {
   useStandardSubmissionCreator,
   SubmissionBuilderProps,
+  validateSubmission
 } from "@/hooks/useStandardSubmissionCreator";
 import { handleMutationError } from "@/lib/handleMutationError";
 import { HiBadgeCheck } from "react-icons/hi";
 import Link from "next/link";
-import { SimplePreview } from "@/ui/Submission/CardSubmission";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import LoadingDialog from "./loadingDialog";
-import { RenderInteractiveVideoWithLoader, RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import { useContestState } from "@/providers/ContestStateProvider";
+import { MediaUpload } from "@/ui/MediaUpload/MediaUpload";
+import { Boundary } from "@/ui/Boundary/Boundary";
 
 async function postSubmission(
   url,
@@ -141,155 +139,6 @@ const SubmissionTitle = ({
   );
 };
 
-const MediaUpload = ({
-  handleFileChange,
-  submission,
-  removeMedia,
-  setVideoThumbnailBlobIndex,
-}: {
-  handleFileChange: any;
-  submission: SubmissionBuilderProps;
-  removeMedia: () => void;
-  setVideoThumbnailBlobIndex: (val: number) => void;
-}) => {
-  const imageUploader = useRef<HTMLInputElement>(null);
-  const thumbnailUploader = useRef<HTMLInputElement>(null);
-
-  const Input = ({
-    mode,
-    children,
-  }: {
-    mode: "primary" | "thumbnail";
-    children: React.ReactNode;
-  }) => (
-    <div>
-      <input
-        placeholder="asset"
-        type="file"
-        accept={mode === "primary" ? "image/*, video/mp4" : "image/*"}
-        className="hidden"
-        onChange={(event) =>
-          handleFileChange({ event, isVideo: submission.isVideo, mode })
-        }
-        ref={mode === "primary" ? imageUploader : thumbnailUploader}
-      />
-      {children}
-    </div>
-  );
-
-  if (submission.isVideo) {
-    return (
-      <div className="relative w-full m-auto">
-        <label className="label">
-          <span className="label-text text-t2">Media</span>
-        </label>
-        <button
-          className="absolute top-5 -right-3 btn btn-error btn-sm btn-circle z-10 shadow-lg"
-          onClick={removeMedia}
-        >
-          <HiOutlineTrash className="w-5 h-5" />
-        </button>
-        <RenderStandardVideoWithLoader
-          videoUrl={submission.primaryAssetBlob}
-          posterUrl={
-            submission.videoThumbnailBlobIndex !== null
-              ? submission.videoThumbnailOptions[
-              submission.videoThumbnailBlobIndex
-              ]
-              : ""
-          }
-        />
-        {submission.videoThumbnailOptions?.length > 0 && (
-
-          <>
-            <label className="label">
-              <span className="label-text text-t2">Thumbnail</span>
-            </label>
-
-            <div className="flex flex-col sm:flex-row gap-2 items-center justify-center bg-base-100 border border-border p-2 w-full m-auto rounded">
-              <div className="flex flex-wrap w-full gap-2">
-                {submission.videoThumbnailOptions.map((thumbOp, thumbIdx) => {
-                  return (
-                    <div
-                      key={thumbIdx}
-                      className="relative cursor-pointer h-[100px] w-[100px]"
-                      onClick={() => setVideoThumbnailBlobIndex(thumbIdx)}
-                    >
-                      <UplinkImage
-                        src={thumbOp}
-                        alt="Media"
-                        width={64}
-                        height={64}
-                        className={`hover:opacity-50 rounded aspect-square h-full w-full object-cover ${submission.videoThumbnailBlobIndex === thumbIdx
-                          ? "border border-primary"
-                          : ""
-                          }`}
-                      />
-
-                      {submission.videoThumbnailBlobIndex === thumbIdx && (
-                        <BiSolidCircle className="absolute text-primary w-5 h-5 top-[-10px] right-[-10px]" />
-                      )}
-                    </div>
-                  );
-                })}
-                <Input mode="thumbnail">
-                  <div
-                    className="w-full h-full"
-                    onClick={() => thumbnailUploader.current?.click()}
-                  >
-                    <div className="w-[100px] h-[100px] bg-base-100 border border-border rounded opacity-50 hover:opacity-90 flex flex-col p-2 items-center justify-center cursor-pointer text-gray-500">
-                      <BiPlusCircle className="w-4 h-4" />
-                    </div>
-                  </div>
-                </Input>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    );
-  } else if (submission.primaryAssetBlob) {
-    return (
-      <div className="flex flex-col items-center">
-        <label className="label self-start">
-          <span className="label-text text-t2">Media</span>
-        </label>
-        <div className="relative">
-          <button
-            className="absolute top-0 right-0 mt-[-10px] mr-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg"
-            onClick={removeMedia}
-          >
-            <HiOutlineTrash className="w-5 h-5" />
-          </button>
-          <UplinkImage
-            src={submission.primaryAssetBlob}
-            alt="Media"
-            width={300}
-            height={300}
-            className="rounded-lg object-contain"
-          />
-        </div>
-      </div>
-    );
-  } else {
-    return (
-      <Input mode="primary">
-        <label className="label">
-          <span className="label-text text-t2">Media</span>
-        </label>
-        <div
-          className="w-full h-56 cursor-pointer flex justify-center items-center hover:bg-base-100 transition-all rounded-xl border-2 border-border border-dashed"
-          onClick={() => imageUploader.current?.click()}
-        >
-          <div className="flex justify-center items-center w-full h-full">
-            <HiCamera className="w-8 h-8" />
-          </div>
-        </div>
-      </Input>
-    );
-  }
-};
-
 const SubmissionBody = ({
   submissionBody,
   errors,
@@ -305,7 +154,7 @@ const SubmissionBody = ({
 
   return (
     <div className="flex flex-col w-full">
-      <label className="text-sm p-1 mb-2 text-t2">Body</label>
+      <label className="text-sm p-1 mb-2 text-t2">Body (optional)</label>
       <ErrorLabel error={errors?.submissionBody} />
       <Editor
         data={submissionBody ?? undefined}
@@ -318,27 +167,55 @@ const SubmissionBody = ({
 const StudioSidebar = ({
   state,
   contestId,
-  validateSubmission,
   setErrors,
   isUploading,
 }: {
   state: SubmissionBuilderProps;
   contestId: string;
-  validateSubmission: (state: SubmissionBuilderProps) => any;
   setErrors: (errors: any) => void;
   isUploading: boolean;
 }) => {
   const [isRestrictionModalOpen, setIsRestrictionModalOpen] = useState(false);
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const { userSubmitParams, areUserSubmitParamsLoading: isLoading } = useContestInteractionApi(contestId);
   const { stateRemainingTime } = useContestState();
 
-  const onSubmit = async () => {
-    const { isError } = await validateSubmission(state);
+  const { data: session, status } = useSession();
+  const { mutateLiveSubmissions } = useLiveSubmissions(contestId);
+  const { trigger, data, error, isMutating, reset } = useSWRMutation(
+    [`/api/userSubmitParams/${contestId}`, session?.user?.address],
+    postSubmission,
+    {
+      onError: (err) => {
+        console.log(err);
+        reset();
+      },
+    }
+  );
+
+  const handleSubmit = async () => {
+    const { payload, isError } = await validateSubmission(state, (data) => setErrors(data));
     if (isError) return;
-    setIsPreviewModalOpen(true);
+    try {
+      await trigger({
+        contestId,
+        submission: payload,
+        csrfToken: session.csrfToken,
+      });
+      mutateLiveSubmissions();
+      setIsSuccessModalOpen(true);
+    } catch (err) {
+      console.log(err);
+      reset();
+    }
   };
+
+  useEffect(() => {
+    () => {
+      return reset();
+    }
+  }, []);
 
   // userSubmitParams are undefined if the user is not logged in, if the contest is not in the submit window, or if the fetch hasn't finished yet
   // at this stage, we can assume that the contest is in the submit window.
@@ -390,12 +267,13 @@ const StudioSidebar = ({
           <WalletConnectButton styleOverride="w-full btn-primary">
             <div className="flex flex-row items-center justify-between bg-base-200 rounded-lg gap-2 h-fit w-full">
               <button
-                onClick={onSubmit}
+                onClick={handleSubmit}
                 className="btn btn-primary flex flex-1 normal-case"
                 disabled={
                   !userSubmitParams ||
                   parseInt(userSubmitParams.remainingSubPower) <= 0 ||
-                  isUploading
+                  isUploading ||
+                  isMutating
                 }
               >
                 {isUploading ? (
@@ -406,8 +284,16 @@ const StudioSidebar = ({
                       role="status"
                     />
                   </div>
+                ) : isMutating ? (
+                  <div className="flex gap-2 items-center">
+                    <p className="text-sm">Submitting</p>
+                    <div
+                      className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                      role="status"
+                    />
+                </div>
                 ) : (
-                  "Preview"
+                  "Submit"
                 )}
               </button>
               <p className="mx-2 p-2 text-center">{stateRemainingTime}</p>
@@ -419,144 +305,20 @@ const StudioSidebar = ({
           handleClose={() => setIsRestrictionModalOpen(false)}
           userSubmitParams={userSubmitParams}
         />
-        <SubmissionPreviewModal
-          submission={state}
-          validateSubmission={validateSubmission}
-          isModalOpen={isPreviewModalOpen}
-          handleClose={() => setIsPreviewModalOpen(false)}
-          contestId={contestId}
-        />
+        {isSuccessModalOpen && data && data.success && (
+          <SuccessModal contestId={contestId} submissionId={data.submissionId} isDroppable={Boolean(state.primaryAssetUrl)}/>
+        )}
       </div>
     );
   }
 };
 
-const SubmissionPreviewModal = ({
-  submission,
-  validateSubmission,
-  isModalOpen,
-  handleClose,
-  contestId,
-}: {
-  submission: SubmissionBuilderProps;
-  validateSubmission: (state: SubmissionBuilderProps) => any;
-  isModalOpen: boolean;
-  handleClose: () => void;
-  contestId: string;
-
-}) => {
-  const { data: session, status } = useSession();
-  const { mutateLiveSubmissions } = useLiveSubmissions(contestId);
-  const { trigger, data, error, isMutating, reset } = useSWRMutation(
-    [`/api/userSubmitParams/${contestId}`, session?.user?.address],
-    postSubmission,
-    {
-      onError: (err) => {
-        console.log(err);
-        onClose();
-      },
-    }
-  );
-
-  const submissionType = submission.isVideo
-    ? "video"
-    : submission.primaryAssetBlob
-      ? "image"
-      : "text";
-
-  const handleSubmit = async () => {
-    const { isError, payload } = await validateSubmission(submission);
-    if (isError) {
-      onClose();
-    }
-    try {
-      await trigger({
-        contestId,
-        submission: payload,
-        csrfToken: session.csrfToken,
-      });
-      mutateLiveSubmissions();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  useEffect(() => {
-    return reset();
-  }, []);
-
-  const onClose = () => {
-    handleClose();
-    reset();
-  };
-
-  if (isModalOpen && !data)
-    return (
-      <Modal isModalOpen={true} onClose={onClose}>
-        <div className="flex flex-col gap-4">
-          <h2 className="text-t1">Preview</h2>
-          <div className="alert">
-            <BiInfoCircle className="w-5 h-5 text-info" />
-            <span>
-              This is what users will see before they expand your full
-              submission.
-            </span>
-          </div>
-          <div className="flex flex-col gap-2 w-9/12 m-auto">
-            <SimplePreview
-              submission={{
-                id: "0",
-                contestId: "0",
-                created: "0",
-                url: "xyz",
-                version: "preview",
-                author: {
-                  id: session?.user?.id,
-                  address: session?.user?.address as `0x${string}`,
-                  userName: session?.user?.userName,
-                  displayName: session?.user?.displayName,
-                  profileAvatar: session?.user?.profileAvatar,
-                  twitterHandle: null,
-                  twitterAvatar: null,
-                  visibleTwitter: false,
-                  submissions: []
-                },
-                totalVotes: null,
-                rank: null,
-                type: "standard",
-                edition: null,
-                data: {
-                  type: submissionType,
-                  title: submission.title,
-                  previewAsset:
-                    submissionType === "video"
-                      ? submission.videoThumbnailOptions[
-                      submission.videoThumbnailBlobIndex
-                      ]
-                      : submission.primaryAssetBlob,
-                  videoAsset:
-                    submissionType === "video"
-                      ? submission.primaryAssetBlob
-                      : null,
-                  body: submission.submissionBody,
-                },
-              }}
-            />
-          </div>
-        </div>
-        <ModalActions
-          onCancel={onClose}
-          onConfirm={handleSubmit}
-          confirmLabel="Submit"
-          cancelLabel="Edit"
-          confirmDisabled={isMutating}
-          isLoading={isMutating}
-        />
-      </Modal>
-    );
-  if (isModalOpen && data && data.success)
-    return (
-      <Modal isModalOpen={true} onClose={onClose}>
+const SuccessModal = ({submissionId, isDroppable, contestId}) => {
+  return (
+    <div className="modal modal-open bg-black transition-colors duration-500 ease-in-out">
+      <div
+        className="modal-box bg-black border border-[#ffffff14] animate-springUp max-w-xl"
+      >
         <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 m-auto rounded-xl">
           <HiBadgeCheck className="w-32 h-32 text-success" />
           <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
@@ -568,8 +330,8 @@ const SubmissionPreviewModal = ({
             >
               Go to contest
             </Link>
-            {submissionType !== 'text' && <Link
-              href={`/contest/${contestId}/create-drop?sid=${data.submissionId}`}
+            {isDroppable && <Link
+              href={`/contest/${contestId}/create-drop?sid=${submissionId}`}
               draggable={false}
               className="btn btn-primary normal-case"
             >
@@ -581,9 +343,10 @@ const SubmissionPreviewModal = ({
             }
           </div>
         </div>
-      </Modal>
-    );
-};
+      </div>
+    </div>
+  );
+}
 
 const RestrictionModal = ({
   isModalOpen,
@@ -646,22 +409,6 @@ const RestrictionModal = ({
   );
 };
 
-const StudioSkeleton = () => {
-  return (
-    <div className="flex flex-col w-full xl:w-3/4 gap-4 mt-16">
-      <div className="grid grid-cols-1 md:grid-cols-[auto_33%] gap-4">
-        <div className="flex flex-col gap-4">
-          <div className="w-full bg-base-100 h-12 shimmer rounded-xl" />
-          <div className="w-full bg-base-100 h-96 shimmer rounded-xl" />
-        </div>
-        <div className="flex flex-col gap-4">
-          <div className="w-full bg-base-100 h-64 shimmer rounded-xl" />
-          <div className="w-full bg-base-100 h-24 shimmer rounded-xl" />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const StandardSubmit = ({
   params,
@@ -672,14 +419,13 @@ const StandardSubmit = ({
     submission,
     setSubmissionTitle,
     setSubmissionBody,
-    setVideoThumbnailBlobIndex,
-    handleFileChange,
-    removeMediaAsset,
-    validateSubmission,
+    setPrimaryAssetUrl,
+    setVideoThumbnailUrl,
     setErrors,
   } = useStandardSubmissionCreator();
   const { contestState } = useContestState();
-  const { title, submissionBody, errors, isUploading } = submission;
+  const { title, submissionBody, errors} = submission;
+  const [isUploading, setIsUploading] = useState(false);
 
   if (!contestState) {
     return <LoadingDialog />;
@@ -688,33 +434,39 @@ const StandardSubmit = ({
   } else {
     // contest in submit window
     return (
-      <div className="flex flex-col w-full md:w-8/12 lg:w-7/12 xl:w-5/12 gap-4">
-        <h1 className="text-3xl font-bold text-t1">Create Submission</h1>
+      <div className="flex flex-col xl:flex-row-reverse w-11/12 lg:w-9/12 w-9/12 gap-4">
+        <div className="max-w-none xl:max-w-[400px] w-full">
         <StudioSidebar
           state={submission}
           contestId={params.id}
-          validateSubmission={validateSubmission}
           setErrors={setErrors}
           isUploading={isUploading}
         />
-        <SubmissionTitle
-          title={title}
-          errors={errors}
-          setSubmissionTitle={setSubmissionTitle}
-        />
-        <MediaUpload
-          submission={submission}
-          handleFileChange={handleFileChange}
-          removeMedia={removeMediaAsset}
-          setVideoThumbnailBlobIndex={setVideoThumbnailBlobIndex}
-        />
-        <SubmissionBody
-          submissionBody={submissionBody}
-          errors={errors}
-          setSubmissionBody={setSubmissionBody}
-        />
-
-
+      </div>
+        <div className="w-full">
+          <Boundary size="small">
+            <div className="w-11/12 xl:w-9/12 m-auto flex flex-col gap-4">
+              <h1 className="text-3xl font-bold text-t1">Create Submission</h1>
+                <SubmissionTitle
+                  title={title}
+                  errors={errors}
+                  setSubmissionTitle={setSubmissionTitle}
+                />
+                <MediaUpload
+                  acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
+                  uploadStatusCallback={(status) => {setIsUploading(status)}}
+                  ipfsImageCallback={(url) => setPrimaryAssetUrl(url)}
+                  ipfsAnimationCallback={(url) => setVideoThumbnailUrl(url)}
+                  maxVideoDuration={140}
+                />
+                <SubmissionBody
+                  submissionBody={submissionBody}
+                  errors={errors}
+                  setSubmissionBody={setSubmissionBody}
+                />
+            </div>
+          </Boundary>
+        </div>
       </div>
     );
   }
