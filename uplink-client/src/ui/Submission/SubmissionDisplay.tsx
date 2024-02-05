@@ -381,23 +381,22 @@ export const LiveSubmissionDisplay = ({
                 footerChildren={
                   <div className="flex flex-col w-full">
                     <div className="p-2 w-full" />
-                    <div className="grid grid-cols-4 w-full items-center">
-                      <div>
+                    <div className="flex gap-2 w-full items-center">
+                      
                         <AdminButton contestId={contestId} submission={submission} onClick={(event) => handleManage(event, submission)} />
-                      </div>
+                      
 
                       <div>
                         <ShareButton submission={submission} onClick={(event) => handleShare(event, submission)} context={context} />
                       </div>
-                      <div className="m-auto">
+                      <div className="ml-auto flex items-center gap-2">
                         <MintButton
                           styleOverride="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
                           hover:rounded-xl rounded-3xl transition-all duration-300"
                           submission={submission}
                           onClick={(event) => handleMint(event, submission)}
                         />
-                      </div>
-                      <div className="ml-auto">
+
                         <AddToCartButton submission={submission} voteActions={voteActions} />
                       </div>
                     </div>

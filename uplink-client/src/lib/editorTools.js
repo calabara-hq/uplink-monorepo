@@ -3,7 +3,7 @@ import "@/styles/editor.css";
 import Paragraph from "@editorjs/paragraph";
 import List from "@editorjs/list";
 import Image from "@editorjs/image";
-import { IpfsUpload } from "@/lib/mediaUpload";
+import { IpfsUpload } from "@/hooks/useMediaUpload";
 
 const EDITOR_JS_TOOLS = {
     paragraph: {

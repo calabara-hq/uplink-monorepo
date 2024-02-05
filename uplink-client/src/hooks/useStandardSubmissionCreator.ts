@@ -5,14 +5,14 @@ import { toast } from "react-hot-toast";
 
 export type SubmissionBuilderProps = {
     title: string;
-    primaryAssetUrl: string | null;
-    videoThumbnailUrl: string | null;
+    videoAsset: string | null;
+    previewAsset: string | null;
     submissionBody: OutputData | null;
     errors: {
         type?: string;
         title?: string;
-        primaryAsset?: string;
-        videoThumbnail?: string;
+        previewAsset?: string;
+        videoAsset?: string;
         submissionBody?: string;
     };
 };
@@ -43,8 +43,8 @@ export const reducer = (state: SubmissionBuilderProps, action: any) => {
 export const useStandardSubmissionCreator = () => {
     const [state, dispatch] = useReducer(reducer, {
         title: "",
-        primaryAssetUrl: null,
-        videoThumbnailUrl: null,
+        previewAsset: null,
+        videoAsset: null,
         submissionBody: null,
         errors: {},
     });
@@ -64,17 +64,17 @@ export const useStandardSubmissionCreator = () => {
         });
     }
 
-    const setPrimaryAssetUrl = (value: string) => {
+    const setPreviewAsset = (value: string) => {
         dispatch({
             type: "SET_FIELD",
-            payload: { field: "primaryAssetUrl", value },
+            payload: { field: "previewAsset", value },
         });
     }
 
-    const setVideoThumbnailUrl = (value: string) => {
+    const setVideoAsset = (value: string) => {
         dispatch({
             type: "SET_FIELD",
-            payload: { field: "videoThumbnailUrl", value },
+            payload: { field: "videoAsset", value },
         });
     }
 
@@ -89,8 +89,8 @@ export const useStandardSubmissionCreator = () => {
         submission: state,
         setSubmissionTitle,
         setSubmissionBody,
-        setPrimaryAssetUrl,
-        setVideoThumbnailUrl,
+        setPreviewAsset,
+        setVideoAsset,
         setErrors
     }
 
@@ -99,12 +99,12 @@ export const useStandardSubmissionCreator = () => {
 export const validateSubmission = async (state: SubmissionBuilderProps, onError: (data: any) => void) => {
     const {
         title,
-        primaryAssetUrl,
-        videoThumbnailUrl,
+        previewAsset,
+        videoAsset,
         submissionBody,
     } = state;
 
-    const isVideo = Boolean(videoThumbnailUrl)
+    const isVideo = Boolean(videoAsset)
 
     if (!title) {
         toast.error("Please provide a title");
@@ -138,7 +138,7 @@ export const validateSubmission = async (state: SubmissionBuilderProps, onError:
 
     let type = null;
     if (isVideo) type = "video";
-    else if (primaryAssetUrl) type = "image";
+    else if (previewAsset) type = "image";
     else if (submissionBody) type = "text";
 
     if (!type) {
@@ -166,8 +166,8 @@ export const validateSubmission = async (state: SubmissionBuilderProps, onError:
         payload: {
             title,
             body: submissionBody,
-            previewAsset: isVideo ? videoThumbnailUrl : primaryAssetUrl,
-            videoAsset: isVideo ? primaryAssetUrl : null,
+            previewAsset: previewAsset ? previewAsset : null,
+            videoAsset :  videoAsset ? videoAsset : null
         }
     };
 

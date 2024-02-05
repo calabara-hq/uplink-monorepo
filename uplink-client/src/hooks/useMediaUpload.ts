@@ -130,7 +130,6 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
             else setImageObjectURL(objectURL);
 
             const response = await IpfsUpload(file);
-            console.log(response)
             if (!response) {
                 clearFields();
                 throw new MediaUploadError({ code: 5, message: 'Error uploading to IPFS' })

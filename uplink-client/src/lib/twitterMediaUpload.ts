@@ -111,7 +111,7 @@ const handleMediaUpload = async (
             videoThumbnailCallback(thumbnails);
         }
     } else {
-        if (fileSize > 15000000) throw new MediaUploadError({ code: 2, message: 'Images must be less than 15MB' });
+        if (fileSize > 5000000) throw new MediaUploadError({ code: 2, message: 'Images must be less than 5MB' });
     }
 
     if (!acceptedMimeTypes.includes(mimeType)) throw new MediaUploadError({ code: 3, message: 'Invalid file type.' });
