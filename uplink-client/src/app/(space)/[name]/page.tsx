@@ -67,6 +67,16 @@ const HeatMapSkeleton = () => {
   )
 }
 
+const SpaceStats = async ({ name }: { name: string }) => {
+  return (
+    <div className="flex flex-col gap-2">
+      <p>1 mints</p>
+      <p>2 NFTs</p>
+      <p>45 eth creator rewards</p>
+    </div>
+  )
+}
+
 const SpaceInfo = async ({ name }: { name: string }) => {
   const { displayName, logoUrl, twitter, website } = await fetchSingleSpace(
     name
@@ -135,6 +145,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
           </div>
         </div>
       </div>
+      <SpaceStats name={name} />
     </div>
   );
 };
@@ -255,7 +266,7 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
           </div>
         </div>
         <div className="flex flex-row flex-wrap gap-2">
-          {mintBoard.posts.map((post, idx) => {
+          {mintBoard.posts.slice(0, 50).map((post, idx) => {
             return (
               <div className="w-[40px]" key={idx}> {/* Adjust this class as needed for sizing */}
                 <ImageWrapper>
@@ -277,20 +288,20 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
 
 }
 
-const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string}) => {
+const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string }) => {
 
   if (contests.length < 1) {
-      return (
-        <div className="w-9/12 sm:w-full m-auto flex flex-col gap-2">
-          <div className="flex flex-col gap-2 items-center m-auto mt-10">
-            <p className="text-t1 text-lg font-bold">
-              This space has not yet hosted any contests.
-            </p>
-            <p className="text-t2">Check back later!</p>
-          </div>
+    return (
+      <div className="w-9/12 sm:w-full m-auto flex flex-col gap-2">
+        <div className="flex flex-col gap-2 items-center m-auto mt-10">
+          <p className="text-t1 text-lg font-bold">
+            This space has not yet hosted any contests.
+          </p>
+          <p className="text-t2">Check back later!</p>
         </div>
-      )
-    }
+      </div>
+    )
+  }
 
   else return (
     <div className="w-9/12 sm:w-full m-auto grid gap-4 contest-columns auto-rows-fr">
