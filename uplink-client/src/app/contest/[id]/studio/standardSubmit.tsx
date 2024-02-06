@@ -196,6 +196,7 @@ const StudioSidebar = ({
 
   const handleSubmit = async () => {
     const { payload, isError } = await validateSubmission(state, (data) => setErrors(data));
+
     if (isError) return;
     try {
       await trigger({
@@ -306,7 +307,7 @@ const StudioSidebar = ({
           userSubmitParams={userSubmitParams}
         />
         {isSuccessModalOpen && data && data.success && (
-          <SuccessModal contestId={contestId} submissionId={data.submissionId} isDroppable={Boolean(state.primaryAssetUrl)}/>
+          <SuccessModal contestId={contestId} submissionId={data.submissionId} isDroppable={Boolean(state.previewAsset)}/>
         )}
       </div>
     );
@@ -419,8 +420,8 @@ const StandardSubmit = ({
     submission,
     setSubmissionTitle,
     setSubmissionBody,
-    setPrimaryAssetUrl,
-    setVideoThumbnailUrl,
+    setPreviewAsset,
+    setVideoAsset,
     setErrors,
   } = useStandardSubmissionCreator();
   const { contestState } = useContestState();
@@ -455,8 +456,8 @@ const StandardSubmit = ({
                 <MediaUpload
                   acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
                   uploadStatusCallback={(status) => {setIsUploading(status)}}
-                  ipfsImageCallback={(url) => setPrimaryAssetUrl(url)}
-                  ipfsAnimationCallback={(url) => setVideoThumbnailUrl(url)}
+                  ipfsImageCallback={(url) => setPreviewAsset(url)}
+                  ipfsAnimationCallback={(url) => setVideoAsset(url)}
                   maxVideoDuration={140}
                 />
                 <SubmissionBody

@@ -16,19 +16,20 @@ import { AdminWrapper } from "@/lib/AdminWrapper";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
+const round_formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 2 })
 
-const SpaceInfoSekelton = () => {
-  return (
-    <div className="flex flex-row lg:flex-col gap-2 w-full">
-      <div className="w-28 h-28 lg:w-48 lg:h-48 bg-base-100 rounded-xl shimmer" />
-      <div className="flex flex-col gap-2">
-        <div className="w-28 h-4 bg-base-100 rounded-lg shimmer" />
-        <div className="w-12 h-4 bg-base-100 rounded-lg shimmer" />
-        <div className="w-12 h-4 bg-base-100 rounded-lg shimmer" />
-      </div>
-    </div>
-  );
-};
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/ui/Card/Card"
+import { Button } from "@/ui/Button/Button";
+import fetchSpaceStats from "@/lib/fetch/fetchSpaceStats";
 
 const SpaceContestsSkeleton = () => {
   return (
@@ -67,77 +68,166 @@ const HeatMapSkeleton = () => {
   )
 }
 
-const SpaceInfo = async ({ name }: { name: string }) => {
-  const { displayName, logoUrl, twitter, website } = await fetchSingleSpace(
-    name
-  );
+const SpaceInfoSkeleton = () => {
 
   return (
-    <div className="flex flex-row lg:flex-col gap-2 w-full lg:w-56  items-start">
-      <div className="avatar">
-        <div className="w-28 lg:w-48 rounded-full lg:rounded-xl">
-          <UplinkImage
-            src={logoUrl}
-            alt={"org avatar"}
-            fill
-            className="rounded-xl object-contain"
-          />
+    <div className="flex flex-col gap-2 w-full">
+      <Card className="bg-base border-border items-center w-full">
+        <div className="flex flex-row lg:flex-col items-center">
+          <div className="p-6 pb-0">
+            <div className="w-24 h-24 rounded-xl lg:rounded-full shimmer bg-base-100" />
+          </div>
+          <div className="flex flex-col gap-0.5 justify-end pt-4">
+            <CardContent className="p-1 lg:p-2">
+              <div className="flex flex-col gap-2 items-start lg:items-center">
+                <div className="w-28 h-4 bg-base-100 rounded-lg shimmer" />
+                <div className="w-16 h-4 bg-base-100 rounded-lg shimmer" />
+                <div className="w-16 h-4 bg-base-100 rounded-lg shimmer" />
+              </div>
+            </CardContent>
+          </div>
         </div>
-      </div>
-      <div className="flex flex-col items-start gap-1">
-        <div className="flex flex-row gap-2 items-center">
-          <h2 className="text-t1 font-semibold text-2xl break-words">
-            {displayName}
-          </h2>
-        </div>
+        <CardFooter className="p-6 pt-2">
+          <Button className="w-full shimmer bg-base-100" variant="outline" />
+        </CardFooter>
+      </Card >
+    </div >
+  )
+}
 
-        <div className="flex flex-col gap-0.5 text-t2">
-          <div className="flex flex-col gap-0.5 ">
-            {website && (
-              <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
-                <BiLink className="w-5 h-5" />
-                <a
-                  href={
-                    /^(http:\/\/|https:\/\/)/.test(website)
-                      ? website
-                      : `//${website}`
-                  }
-                  rel="noopener noreferrer"
-                  draggable={false}
-                  target="_blank"
-                  className="text-blue-500 hover:underline"
-                >
-                  {website.includes("http") ? website.split("//")[1] : website}
-                </a>
-              </div>
-            )}
-            {twitter && (
-              <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
-                <FaTwitter className="w-4 h-4" />
-                <Link
-                  href={`https://twitter.com/${twitter}`}
-                  rel="noopener noreferrer"
-                  draggable={false}
-                  target="_blank"
-                  className="text-blue-500 hover:underline"
-                  prefetch={false}
-                >
-                  {twitter}
-                </Link>
-              </div>
-            )}
+
+const SpaceInfo = async ({ name }: { name: string }) => {
+  const { displayName, logoUrl, twitter, website } = await fetchSingleSpace(name);
+
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      <Card className="bg-base border-border items-center w-full">
+        <div className="flex flex-row lg:flex-col items-center">
+          <div className="p-6 pb-0">
+            <div className="w-24 rounded-xl lg:rounded-full ">
+              <ImageWrapper>
+                <UplinkImage
+                  src={logoUrl}
+                  alt={"org avatar"}
+                  fill
+                  className="rounded-xl object-contain"
+                />
+              </ImageWrapper>
+            </div>
           </div>
-          <div className="flex flex-row gap-2 items-center hover:text-t1 w-fit">
-            <BiPencil className="w-5 h-5" />
-            <Link href={`/spacebuilder/edit/${name}`} draggable={false}>
-              edit
-            </Link>
+          <div className="flex flex-col gap-0.5 justify-end pt-4">
+            <CardHeader className="p-0 pt-2 lg:pt-2 text-left lg:text-center">
+              <CardTitle>{displayName}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-1 lg:p-2">
+              {website && (
+                <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
+                  <BiLink className="w-5 h-5 text-t2" />
+                  <a
+                    href={
+                      /^(http:\/\/|https:\/\/)/.test(website)
+                        ? website
+                        : `//${website}`
+                    }
+                    rel="noopener noreferrer"
+                    draggable={false}
+                    target="_blank"
+                    className="text-blue-500 hover:underline"
+                  >
+                    {website.includes("http") ? website.split("//")[1] : website}
+                  </a>
+                </div>
+              )}
+              {twitter && (
+                <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
+                  <FaTwitter className="w-4 h-4 text-t2" />
+                  <Link
+                    href={`https://twitter.com/${twitter}`}
+                    rel="noopener noreferrer"
+                    draggable={false}
+                    target="_blank"
+                    className="text-blue-500 hover:underline"
+                    prefetch={false}
+                  >
+                    {twitter}
+                  </Link>
+                </div>
+              )}
+            </CardContent>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
+        <CardFooter className="p-6 pt-2">
+          <Button asChild className="w-full" variant="outline">
+            <Link href={`/spacebuilder/edit/${name}`}>Edit</Link>
+          </Button>
+        </CardFooter>
+      </Card >
+    </div >
+  )
+}
+
+const SpaceStatsSkeleton = () => {
+  return (
+    <Card className="bg-base border-border items-center w-full">
+      <CardHeader className="p-4">
+        <CardTitle>
+          <div className="w-20 h-6 bg-base-100 rounded-lg shimmer" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-2 ">
+          <div className="flex flex-row justify-between items-center">
+            <div className="w-16 h-4 bg-base-100 rounded-lg shimmer" />
+            <div className="w-8 h-4 bg-base-100 rounded-lg shimmer" />
+          </div>
+          <div className="flex flex-row justify-between items-center">
+            <div className="w-16 h-4 bg-base-100 rounded-lg shimmer" />
+            <div className="w-8 h-4 bg-base-100 rounded-lg shimmer" />
+          </div>
+          <div className="flex flex-row justify-between items-center">
+            <div className="w-16 h-4 bg-base-100 rounded-lg shimmer" />
+            <div className="w-8 h-4 bg-base-100 rounded-lg shimmer" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+const SpaceStats = async ({ name }: { name: string }) => {
+  const spaceStats = await fetchSpaceStats(name)
+
+  return (
+    <Card className="bg-base border-border items-center w-full">
+      <CardHeader className="p-4">
+        <CardTitle className="text-lg">Stats</CardTitle>
+      </CardHeader>
+      <CardContent className="">
+        <div className="flex flex-row gap-2 items-center justify-between text-t2">
+          <p>Onchain Creations</p>
+          <p className="text-t1 font-bold">{compact_formatter.format(spaceStats.totalEditions)}</p>
+        </div>
+        <div className="flex flex-row gap-2 items-center justify-between text-t2">
+          <p>Mints</p>
+          <p className="text-t1 font-bold">{compact_formatter.format(spaceStats.totalMints)}</p>
+        </div>
+        <div className="flex flex-row gap-2 items-center justify-between text-t2">
+          <p>Rewards</p>
+          <p className="text-t1 font-bold">{round_formatter.format(spaceStats.totalMints * 0.000666)} ETH</p>
+        </div>
+        <div className="flex w-full justify-end pt-2">
+          <Link
+            href={`/${name}/stats`}
+            className="hover:underline text-blue-500 cursor-pointer"
+          >
+            + More
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 
 const ContestCard = ({
   contest,
@@ -255,7 +345,7 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
           </div>
         </div>
         <div className="flex flex-row flex-wrap gap-2">
-          {mintBoard.posts.map((post, idx) => {
+          {mintBoard.posts.slice(0, 50).map((post, idx) => {
             return (
               <div className="w-[40px]" key={idx}> {/* Adjust this class as needed for sizing */}
                 <ImageWrapper>
@@ -277,20 +367,20 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
 
 }
 
-const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string}) => {
+const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string }) => {
 
   if (contests.length < 1) {
-      return (
-        <div className="w-9/12 sm:w-full m-auto flex flex-col gap-2">
-          <div className="flex flex-col gap-2 items-center m-auto mt-10">
-            <p className="text-t1 text-lg font-bold">
-              This space has not yet hosted any contests.
-            </p>
-            <p className="text-t2">Check back later!</p>
-          </div>
+    return (
+      <div className="w-9/12 sm:w-full m-auto flex flex-col gap-2">
+        <div className="flex flex-col gap-2 items-center m-auto mt-10">
+          <p className="text-t1 text-lg font-bold">
+            This space has not yet hosted any contests.
+          </p>
+          <p className="text-t2">Check back later!</p>
         </div>
-      )
-    }
+      </div>
+    )
+  }
 
   else return (
     <div className="w-9/12 sm:w-full m-auto grid gap-4 contest-columns auto-rows-fr">
@@ -325,9 +415,14 @@ export default async function Page({ params }: { params: { name: string } }) {
     <div className="flex flex-col gap-2 w-full lg:w-11/12 m-auto py-6 px-4">
       <div className="grid grid-cols-1 lg:grid-cols-[25%_auto] w-full gap-8">
         <div className="lg:sticky lg:top-6 lg:left-0 w-full h-fit">
-          <Suspense fallback={<SpaceInfoSekelton />}>
-            <SpaceInfo name={spaceName} />
-          </Suspense>
+          <div className="flex flex-col md:flex-row lg:flex-col gap-2 w-full lg:max-w-[300px] ">
+            <Suspense fallback={<SpaceInfoSkeleton />}>
+              <SpaceInfo name={spaceName} />
+            </Suspense>
+            <Suspense fallback={<SpaceStatsSkeleton />}>
+              <SpaceStats name={spaceName} />
+            </Suspense>
+          </div>
         </div>
         <div className="w-full h-full flex flex-col gap-6">
           <Suspense>

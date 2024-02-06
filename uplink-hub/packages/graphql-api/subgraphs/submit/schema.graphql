@@ -20,6 +20,20 @@ extend type MintBoard @key(fields: "id") {
   posts: [MintBoardPost!]!
 }
 
+type StatEditions {
+  edition: ZoraEdition!
+  totalMints: Int!
+}
+
+type SpaceStats {
+  editions: [StatEditions!]!
+  totalEditions: Int!
+  totalMints: Int!
+  topMintsUser: SubmissionAuthor
+  topAppearanceUser: SubmissionAuthor
+}
+
+
 type MintBoardPost @key(fields: "id"){
   id: ID!
   spaceId: ID!
@@ -151,6 +165,7 @@ type Query {
   getUserSubmissionParams(
     contestId: ID!
   ): UserSubmissionParams!
+  spaceStatistics(spaceName: String!): SpaceStats!
 }
 
 type createSubmissionResponse {

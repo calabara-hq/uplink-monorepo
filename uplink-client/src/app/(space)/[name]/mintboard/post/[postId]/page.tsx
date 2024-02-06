@@ -30,11 +30,12 @@ export async function generateMetadata({
     params: { name: string, postId: string };
     searchParams: { [key: string]: string | undefined }
 }): Promise<Metadata> {
-
+    
     const mintboard = await fetchMintBoard(params.name);
     const post = mintboard.posts.find(el => el.id === params.postId)
     const author = post.author.displayName || post.author.address
     const referrer = searchParams?.referrer ?? null
+
 
     const nftMetadata: NftMetadata = {
         "eth:nft:contract_address": post.edition.contractAddress,
@@ -74,6 +75,9 @@ export async function generateMetadata({
         other: {
             ...fcMetadata,
             ...nftMetadata
+        },
+        alternates:{
+            canonical: `${process.env.NEXT_PUBLIC_CLIENT_URL}/${params.name}/mintboard/post/${params.postId}?referrer=${referrer}`
         }
     };
 }

@@ -29,8 +29,6 @@ const getController = (chainId: number) => {
     }
 }
 
-
-
 export const calculateTotalMints = async (posts: any) => {
     const withTotalMints = await Promise.all(posts.map( async (post: any) => {
         const controller = getController(post.edition.chainId)

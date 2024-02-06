@@ -4,6 +4,7 @@ import { AuthorizationController, schema, Decimal, Context } from "lib";
 import type { Contest, Submission, ZoraEdition } from "../__generated__/resolvers-types.js";
 import dotenv from 'dotenv'
 import { computeSubmissionParams } from "../utils/insert.js";
+import { spaceStatistics } from "../utils/stats.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL!);
@@ -11,7 +12,7 @@ const authController = new AuthorizationController(process.env.REDIS_URL!);
 type ProcessedSubmission = Omit<schema.dbSubmissionType, 'author'> & {
     totalVotes: Decimal | null,
     author: schema.dbUserType | null,
-    edition: any 
+    edition: any
 }
 
 const postProcessSubmission = (submission: schema.dbSubmissionType, withAuthor: boolean, withVotes: boolean): ProcessedSubmission => {
@@ -123,7 +124,7 @@ const queries = {
         async submission(_: any, { submissionId }: { submissionId: string }) {
             // determine if we need to filter out some of the hidden fields
             const data = await dbSingleSubmissionById(parseInt(submissionId));
-            if(!data) return null;
+            if (!data) return null;
             const { endTime, anonSubs, visibleVotes } = data.contest;
             const withAuthor = !anonSubs || endTime < new Date().toISOString();
             const withVotes = Boolean(visibleVotes) || endTime < new Date().toISOString();
@@ -133,6 +134,10 @@ const queries = {
         async popularSubmissions(_: any) {
             return dbGetPopularSubmissions();
         },
+
+        async spaceStatistics(_: any, { spaceName }: { spaceName: string }) {
+            return spaceStatistics(spaceName)
+        }
     },
 
     Contest: {
@@ -246,7 +251,9 @@ const queries = {
         async posts({ id }: { id: string }) {
             return dbGetMintBoardPostsByBoardId(parseInt(id));
         }
-    }
+    },
+
+
 
 };
 

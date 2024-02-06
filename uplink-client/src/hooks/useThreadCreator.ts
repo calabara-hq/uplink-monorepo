@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useState } from "react";
 import { nanoid } from 'nanoid';
-import handleMediaUpload, { IpfsUpload, MediaUploadError } from "@/lib/mediaUpload";
+import handleMediaUpload, { IpfsUpload, MediaUploadError } from "@/lib/twitterMediaUpload";
 import { toast } from "react-hot-toast";
 
 
