@@ -1,3 +1,4 @@
+import { Space } from "../__generated__/resolvers-types.js";
 import { sqlOps, db } from "../utils/database.js";
 
 const manySpaces = db.query.spaces.findMany({
@@ -50,10 +51,13 @@ const queries = {
     },
 
     Space: {
-        async __resolveReference(space) {
+        async __resolveReference(space: Space) {
             const data = await singleSpaceById.execute({ id: space.id });
             return data;
         },
+        async stats(space: Space) {
+            console.log(space)
+        }
     },
 
     SpaceStub: {

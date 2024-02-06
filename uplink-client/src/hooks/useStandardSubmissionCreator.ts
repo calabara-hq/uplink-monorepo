@@ -1,5 +1,4 @@
 import type { OutputData } from "@editorjs/editorjs";
-import handleMediaUpload, { IpfsUpload, MediaUploadError } from "@/lib/mediaUpload";
 import { useReducer } from "react";
 import { toast } from "react-hot-toast";
 

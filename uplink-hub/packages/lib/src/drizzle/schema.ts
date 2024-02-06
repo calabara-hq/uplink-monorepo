@@ -245,9 +245,7 @@ export const zoraEditions = mysqlTable('zoraEditions', {
     presaleStart: varchar('presaleStart', { length: 255 }).notNull(),
     presaleEnd: varchar('presaleEnd', { length: 255 }).notNull(),
     presaleMerkleRoot: varchar('presaleMerkleRoot', { length: 255 }).notNull(),
-}, (zoraEdition) => ({
-
-}));
+}, (zoraEdition) => ({}));
 
 export const editionMints = mysqlTable('editionMints', {
     id: serial('id').primaryKey(),

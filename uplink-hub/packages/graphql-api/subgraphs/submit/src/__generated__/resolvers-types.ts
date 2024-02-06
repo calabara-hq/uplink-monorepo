@@ -158,12 +158,18 @@ export type Query = {
   __typename?: 'Query';
   getUserSubmissionParams: UserSubmissionParams;
   popularSubmissions: Array<PopularSubmission>;
+  spaceStatistics: SpaceStats;
   submission?: Maybe<Submission>;
 };
 
 
 export type QueryGetUserSubmissionParamsArgs = {
   contestId: Scalars['ID']['input'];
+};
+
+
+export type QuerySpaceStatisticsArgs = {
+  spaceName: Scalars['String']['input'];
 };
 
 
@@ -190,6 +196,21 @@ export type SaleConfig = {
 export type Space = {
   __typename?: 'Space';
   id: Scalars['ID']['output'];
+};
+
+export type SpaceStats = {
+  __typename?: 'SpaceStats';
+  editions: Array<StatEditions>;
+  topAppearanceUser?: Maybe<SubmissionAuthor>;
+  topMintsUser?: Maybe<SubmissionAuthor>;
+  totalEditions: Scalars['Int']['output'];
+  totalMints: Scalars['Int']['output'];
+};
+
+export type StatEditions = {
+  __typename?: 'StatEditions';
+  edition: ZoraEdition;
+  totalMints: Scalars['Int']['output'];
 };
 
 export type Submission = {
@@ -411,6 +432,8 @@ export type ResolversTypes = ResolversObject<{
   RestrictionResult: ResolverTypeWrapper<RestrictionResult>;
   SaleConfig: SaleConfig;
   Space: ResolverTypeWrapper<Space>;
+  SpaceStats: ResolverTypeWrapper<SpaceStats>;
+  StatEditions: ResolverTypeWrapper<StatEditions>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Submission: ResolverTypeWrapper<Submission>;
   SubmissionAssetUrl: ResolverTypeWrapper<Scalars['SubmissionAssetUrl']['output']>;
@@ -452,6 +475,8 @@ export type ResolversParentTypes = ResolversObject<{
   RestrictionResult: RestrictionResult;
   SaleConfig: SaleConfig;
   Space: Space;
+  SpaceStats: SpaceStats;
+  StatEditions: StatEditions;
   String: Scalars['String']['output'];
   Submission: Submission;
   SubmissionAssetUrl: Scalars['SubmissionAssetUrl']['output'];
@@ -559,6 +584,7 @@ export type PopularSubmissionResolvers<ContextType = any, ParentType extends Res
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   getUserSubmissionParams?: Resolver<ResolversTypes['UserSubmissionParams'], ParentType, ContextType, RequireFields<QueryGetUserSubmissionParamsArgs, 'contestId'>>;
   popularSubmissions?: Resolver<Array<ResolversTypes['PopularSubmission']>, ParentType, ContextType>;
+  spaceStatistics?: Resolver<ResolversTypes['SpaceStats'], ParentType, ContextType, RequireFields<QuerySpaceStatisticsArgs, 'spaceName'>>;
   submission?: Resolver<Maybe<ResolversTypes['Submission']>, ParentType, ContextType, RequireFields<QuerySubmissionArgs, 'submissionId'>>;
 }>;
 
@@ -570,6 +596,21 @@ export type RestrictionResultResolvers<ContextType = any, ParentType extends Res
 
 export type SpaceResolvers<ContextType = any, ParentType extends ResolversParentTypes['Space'] = ResolversParentTypes['Space']> = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type SpaceStatsResolvers<ContextType = any, ParentType extends ResolversParentTypes['SpaceStats'] = ResolversParentTypes['SpaceStats']> = ResolversObject<{
+  editions?: Resolver<Array<ResolversTypes['StatEditions']>, ParentType, ContextType>;
+  topAppearanceUser?: Resolver<Maybe<ResolversTypes['SubmissionAuthor']>, ParentType, ContextType>;
+  topMintsUser?: Resolver<Maybe<ResolversTypes['SubmissionAuthor']>, ParentType, ContextType>;
+  totalEditions?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  totalMints?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type StatEditionsResolvers<ContextType = any, ParentType extends ResolversParentTypes['StatEditions'] = ResolversParentTypes['StatEditions']> = ResolversObject<{
+  edition?: Resolver<ResolversTypes['ZoraEdition'], ParentType, ContextType>;
+  totalMints?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -700,6 +741,8 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Query?: QueryResolvers<ContextType>;
   RestrictionResult?: RestrictionResultResolvers<ContextType>;
   Space?: SpaceResolvers<ContextType>;
+  SpaceStats?: SpaceStatsResolvers<ContextType>;
+  StatEditions?: StatEditionsResolvers<ContextType>;
   Submission?: SubmissionResolvers<ContextType>;
   SubmissionAssetUrl?: GraphQLScalarType;
   SubmissionAuthor?: SubmissionAuthorResolvers<ContextType>;

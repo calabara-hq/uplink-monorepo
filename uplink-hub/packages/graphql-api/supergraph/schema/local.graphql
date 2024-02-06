@@ -466,6 +466,7 @@ type Query
   submission(submissionId: ID!): Submission @join__field(graph: SUBMIT)
   popularSubmissions: [PopularSubmission!]! @join__field(graph: SUBMIT)
   getUserSubmissionParams(contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
+  spaceStatistics(spaceName: String!): SpaceStats! @join__field(graph: SUBMIT)
   me: User @join__field(graph: USER)
   user(userIdentifier: String!): User @join__field(graph: USER)
   getUserVotingParams(contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
@@ -581,6 +582,16 @@ type SpaceMutationResponse
   errors: SpaceBuilderErrors
 }
 
+type SpaceStats
+  @join__type(graph: SUBMIT)
+{
+  editions: [StatEditions!]!
+  totalEditions: Int!
+  totalMints: Int!
+  topMintsUser: SubmissionAuthor
+  topAppearanceUser: SubmissionAuthor
+}
+
 type SpaceStub
   @join__type(graph: CONTESTS, key: "id", extension: true)
   @join__type(graph: SPACES, key: "id")
@@ -615,6 +626,13 @@ type SpaceTokenMap
   spaceId: ID!
   tokenLink: Int!
   token: SpaceToken!
+}
+
+type StatEditions
+  @join__type(graph: SUBMIT)
+{
+  edition: ZoraEdition!
+  totalMints: Int!
 }
 
 type Submission

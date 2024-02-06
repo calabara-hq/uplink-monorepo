@@ -1,7 +1,7 @@
 import { DatabaseController, schema, TokenController } from "lib";
 import dotenv from 'dotenv';
-import { Submission } from "../__generated__/resolvers-types";
-import {calculateTotalMints} from "./totalMints.js"
+import { StatEditions, Submission, ZoraEdition } from "../__generated__/resolvers-types";
+import { calculateTotalMints } from "./totalMints.js"
 dotenv.config();
 
 const databaseController = new DatabaseController(process.env.DATABASE_HOST!, process.env.DATABASE_USERNAME!, process.env.DATABASE_PASSWORD!);
@@ -58,6 +58,13 @@ const prepared_getRewards = db.query.rewards.findMany({
 }).prepare();
 
 
+const prepared_userByAddress = db.query.users.findFirst({
+    where: (user: schema.dbUserType) => sqlOps.eq(user.address, sqlOps.placeholder('address')),
+}).prepare();
+
+
+
+
 export const dbSingleSubmissionById = async (submissionId: number): Promise<schema.dbSubmissionType> => {
     return prepared_singleSubmissionById.execute({ submissionId });
 }
@@ -68,6 +75,82 @@ export const dbSubmissionsByContestId = async (contestId: number): Promise<Array
 
 export const dbGetRewards = async (contestId: number): Promise<Array<schema.dbRewardType>> => {
     return prepared_getRewards.execute({ contestId });
+}
+
+export const dbUserByAddress = async (address: string): Promise<schema.dbUserType> => {
+    return prepared_userByAddress.execute({ address })
+}
+
+
+export const dbGetEditionsBySpaceName = async (spaceName: string): Promise<Array<StatEditions>> => {
+    return db.execute(sqlOps.sql`
+        SELECT 
+        JSON_OBJECT(
+            'id', edition.id,
+            'chainId', edition.chainId,
+            'contractAddress', edition.contractAddress,
+            'name', edition.name,
+            'symbol', edition.symbol,
+            'editionSize', edition.editionSize,
+            'royaltyBPS', edition.royaltyBPS,
+            'fundsRecipient', edition.fundsRecipient,
+            'defaultAdmin', edition.defaultAdmin,
+            'description', edition.description,
+            'animationURI', edition.animationURI,
+            'imageURI', edition.imageURI,
+            'referrer', edition.referrer,
+            'saleConfig', JSON_OBJECT(
+                'publicSalePrice', edition.publicSalePrice,
+                'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+                'publicSaleStart', edition.publicSaleStart,
+                'publicSaleEnd', edition.publicSaleEnd,
+                'presaleStart', edition.presaleStart,
+                'presaleEnd', edition.presaleEnd,
+                'presaleMerkleRoot', edition.presaleMerkleRoot
+            )
+        ) AS edition
+        FROM spaces s
+        JOIN contests c ON s.id = c.spaceId
+        JOIN submissions sb ON c.id = sb.contestId
+        JOIN submissionDrops sd ON sb.id = sd.submissionId
+        JOIN zoraEditions edition ON sd.editionId = edition.id
+        WHERE s.name = ${spaceName}
+
+        UNION
+
+        SELECT 
+            JSON_OBJECT(
+                'id', edition.id,
+                'chainId', edition.chainId,
+                'contractAddress', edition.contractAddress,
+                'name', edition.name,
+                'symbol', edition.symbol,
+                'editionSize', edition.editionSize,
+                'royaltyBPS', edition.royaltyBPS,
+                'fundsRecipient', edition.fundsRecipient,
+                'defaultAdmin', edition.defaultAdmin,
+                'description', edition.description,
+                'animationURI', edition.animationURI,
+                'imageURI', edition.imageURI,
+                'referrer', edition.referrer,
+                'saleConfig', JSON_OBJECT(
+                    'publicSalePrice', edition.publicSalePrice,
+                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+                    'publicSaleStart', edition.publicSaleStart,
+                    'publicSaleEnd', edition.publicSaleEnd,
+                    'presaleStart', edition.presaleStart,
+                    'presaleEnd', edition.presaleEnd,
+                    'presaleMerkleRoot', edition.presaleMerkleRoot
+                )
+            ) AS edition
+        FROM spaces s
+        JOIN mintBoards mb ON s.id = mb.spaceId
+        JOIN mintBoardPosts mbp ON mb.id = mbp.boardId
+        JOIN zoraEditions edition ON mbp.editionId = edition.id
+        WHERE s.name = ${spaceName}
+    `)
+        .then((data: any) => data.rows)
+        .then(calculateTotalMints)
 }
 
 export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Array<schema.dbMintBoardPostType>> => {
@@ -119,8 +202,8 @@ export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Arr
         GROUP BY mbp.id
         ORDER BY mbp.created DESC
     `)
-    .then((data: any) => data.rows)
-    .then(calculateTotalMints)
+        .then((data: any) => data.rows)
+        .then(calculateTotalMints)
 
 }
 
