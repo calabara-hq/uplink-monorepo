@@ -15,7 +15,7 @@ export const runtime = 'nodejs';
 
 const BannerSection = () => {
   return (
-    <div className="w-full h-screen min-h-[750px] flex-grow flex flex-col bg-base-100 relative">
+    <div className="w-full h-screen min-h-[750px] flex-grow flex flex-col relative">
       <div className="stars">
         <div className="small"></div>
         <div className="medium"></div>

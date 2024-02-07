@@ -9,7 +9,10 @@ const manySpaces = db.query.spaces.findMany({
                 token: true
             }
         }
-    }
+    },
+    //orderBy: (spaces, {asc: sqlOps.asc}) => [asc(spaces.name)]
+    orderBy: (spaces) => [sqlOps.asc(spaces.name)],
+
 }).prepare();
 
 const singleSpaceById = db.query.spaces.findFirst({

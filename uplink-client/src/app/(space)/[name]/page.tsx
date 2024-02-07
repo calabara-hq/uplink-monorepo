@@ -121,7 +121,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
             </CardHeader>
             <CardContent className="p-1 lg:p-2">
               {website && (
-                <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
+                <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit lg:m-auto">
                   <BiLink className="w-5 h-5 text-t2" />
                   <a
                     href={
@@ -139,7 +139,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
                 </div>
               )}
               {twitter && (
-                <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit">
+                <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit lg:m-auto">
                   <FaTwitter className="w-4 h-4 text-t2" />
                   <Link
                     href={`https://twitter.com/${twitter}`}
