@@ -23,7 +23,7 @@ import { TokenContractApi } from "@/lib/contract";
 import { ManageModalContent } from "@/app/submission/[submissionId]/client"
 import { AdminWrapper } from "@/lib/AdminWrapper";
 import { MdOutlineSettings } from "react-icons/md";
-import {useDeleteMintboardPost} from "@/hooks/useDeleteMintboardPost";
+import { useDeleteMintboardPost } from "@/hooks/useDeleteMintboardPost";
 
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
@@ -34,8 +34,27 @@ const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }
     const siteImageURI = parseIpfsUrl(imageURI);
     const siteAnimationURI = parseIpfsUrl(animationURI);
 
+    const isMobileDevice = isMobile();
+
+    const { ref, inView } = useInView({
+        threshold: 1,
+    });
+
+    const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        if (inView && isMobileDevice) {
+            setIsActive(true);
+        }
+    }, [inView, isMobileDevice]);
+
     return (
-        <div className="bg-base-100 relative flex flex-col gap-2 rounded-lg w-full p-2 ">
+        <div
+            className="bg-base-100 relative flex flex-col gap-2 rounded-lg w-full p-2"
+            ref={ref}
+            onMouseEnter={() => !isMobileDevice && setIsActive(true)}
+            onMouseLeave={() => !isMobileDevice && setIsActive(false)}
+        >
             <h2 className="text-lg font-semibold">{name}</h2>
             <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
                 <UserAvatar user={post.author} size={28} />
@@ -51,7 +70,7 @@ const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }
                 )}
             </div>
             {animationURI ? (
-                <RenderInteractiveVideoWithLoader videoUrl={siteAnimationURI.gateway} posterUrl={siteImageURI.gateway} isActive={true} />
+                <RenderInteractiveVideoWithLoader videoUrl={siteAnimationURI.gateway} posterUrl={siteImageURI.gateway} isActive={isActive} />
             ) : (
                 <ImageWrapper>
                     <UplinkImage
@@ -236,11 +255,11 @@ const PostFooter = ({ post, spaceName, handleMint, handleShare, handleManage, ad
         <div className="flex flex-col w-full">
             <div className="p-2 w-full" />
             <div className="flex w-full items-center gap-2">
-                    <AdminWrapper admins={admins}>
-                        <button onClick={(event) => handleManage(event, post)} className="btn btn-sm btn-ghost text-t2 w-fit" >
-                            <MdOutlineSettings className="h-6 w-6" />
-                        </button>
-                    </AdminWrapper>
+                <AdminWrapper admins={admins}>
+                    <button onClick={(event) => handleManage(event, post)} className="btn btn-sm btn-ghost text-t2 w-fit" >
+                        <MdOutlineSettings className="h-6 w-6" />
+                    </button>
+                </AdminWrapper>
                 <div className="mr-auto">
                     <ShareButton spaceName={spaceName} post={post} onClick={(event) => handleShare(event, post)} />
                 </div>
@@ -270,7 +289,7 @@ const useThresholdProgress = (spaceName: string) => {
     const [aggMints, setAggMints] = useState(0);
     const tokenApi = new TokenContractApi(liveBoard.chainId);
     const userPosts = liveBoard.posts.filter(post => post.author.address === session?.user?.address);
-    
+
     const getAggMints = async () => {
         const totalMints = userPosts.reduce((acc, post) => acc + Number(post.totalMints.toString()), 0);
         setAggMints(totalMints);
@@ -278,7 +297,7 @@ const useThresholdProgress = (spaceName: string) => {
 
     useEffect(() => {
         getAggMints();
-    },[userPosts])
+    }, [userPosts])
 
 
     return aggMints;
@@ -291,8 +310,8 @@ export const UserProgressSkeleton = () => {
     return (
         <div className="flex flex-col gap-2 w-full">
             <div className="flex flex-row gap-2 items-center">
-                <div className="w-28 h-4 rounded-xl bg-base-100 shimmer"/>
-                <div className="ml-auto w-16 h-8 rounded-xl bg-base-100 shimmer"/>
+                <div className="w-28 h-4 rounded-xl bg-base-100 shimmer" />
+                <div className="ml-auto w-16 h-8 rounded-xl bg-base-100 shimmer" />
             </div>
             <div className="flex flex-col gap-2 w-full">
                 <progress className="progress progress-primary w-full shimmer" value={0} max="100"></progress>
@@ -312,14 +331,14 @@ const ProgressBar = ({ spaceName }: { spaceName: string }) => {
     const threshold = liveBoard.threshold;
     const userMints = useThresholdProgress(spaceName)
 
-    if(status === 'loading') return <UserProgressSkeleton/>
+    if (status === 'loading') return <UserProgressSkeleton />
 
-    if(status !== 'authenticated'){
+    if (status !== 'authenticated') {
         return (
             <div className="flex flex-col gap-2 w-full">
                 <div className="flex flex-row gap-2 items-center">
                     <p className="text-t2 font-bold">sign in to check progress!</p>
-                    <div className="ml-auto"><WalletConnectButton styleOverride={"btn-sm"}/></div>
+                    <div className="ml-auto"><WalletConnectButton styleOverride={"btn-sm"} /></div>
                 </div>
                 <div className="flex flex-col gap-2 w-full">
                     <progress className="progress progress-primary w-full" value={0} max={threshold}></progress>
@@ -336,7 +355,7 @@ const ProgressBar = ({ spaceName }: { spaceName: string }) => {
         <div className="flex flex-col gap-2 w-full">
             <div className="flex flex-row gap-2 items-center">
                 <p className="font-bold text-t2">my progress</p>
-                <div className="ml-auto w-16 h-8"/>
+                <div className="ml-auto w-16 h-8" />
             </div>
             <div className="flex flex-col gap-2 w-full">
                 <progress className="progress progress-primary w-full" value={userMints} max={threshold}></progress>
@@ -366,8 +385,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isManageModalOpen, setIsManageModalOpen] = useState(false);
     const [focusedSubmission, setFocusedSubmission] = useState(null);
-    const isMobileDevice = isMobile();
-    const {handleDeleteMintboardPost} = useDeleteMintboardPost(() => {
+    const { handleDeleteMintboardPost } = useDeleteMintboardPost(() => {
         mutateLiveBoard();
         handleModalClose();
     })
@@ -375,18 +393,6 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
     useEffect(() => {
         if (window) window.sessionStorage.setItem('nav', 'true')
     }, [])
-
-    const { ref, inView } = useInView({
-        threshold: 1,
-    });
-
-    const [isActive, setIsActive] = useState(false);
-
-    useEffect(() => {
-        if (inView && isMobileDevice) {
-            setIsActive(true);
-        }
-    }, [inView, isMobileDevice]);
 
 
     const openMintModal = (submission) => {
@@ -402,7 +408,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
     const openManageModal = (submission) => {
         setIsManageModalOpen(true);
         setFocusedSubmission(submission);
-      }
+    }
 
     const handleMint = (event, submission) => {
         event.stopPropagation();
@@ -420,7 +426,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
         event.stopPropagation();
         event.preventDefault();
         openManageModal(submission);
-      }
+    }
 
     const handleModalClose = () => {
         setIsMintModalOpen(false);
@@ -432,7 +438,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
 
     if (isBoardLoading) return <PostSkeleton />
 
-    const boardPosts = isPopular ? liveBoard?.posts?.toSorted((a, b) => b.totalMints - a.totalMints) : [...liveBoard.posts];    
+    const boardPosts = isPopular ? liveBoard?.posts?.toSorted((a, b) => b.totalMints - a.totalMints) : [...liveBoard.posts];
 
 
     return (
@@ -442,9 +448,6 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
                 return (
                     <div className="cursor-pointer hover:shadow-lg hover:shadow-blue-600 rounded-lg "
                         key={post.id}
-                        ref={ref}
-                        onMouseEnter={() => !isMobileDevice && setIsActive(true)}
-                        onMouseLeave={() => !isMobileDevice && setIsActive(false)}
                         onClick={() => openMintModal(post)}
                     >
                         <Post
@@ -471,7 +474,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
                     <ShareModalContent spaceName={spaceName} post={focusedSubmission} handleClose={handleModalClose} />
                 )}
                 {isManageModalOpen && focusedSubmission && (
-                     <ManageModalContent onDelete={() => handleDeleteMintboardPost(focusedSubmission.id, liveBoard.space.id)} />
+                    <ManageModalContent onDelete={() => handleDeleteMintboardPost(focusedSubmission.id, liveBoard.space.id)} />
                 )}
             </SubmissionModal>
         </div>

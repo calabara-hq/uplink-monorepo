@@ -6,6 +6,7 @@ import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay"
 import { useDisconnect } from 'wagmi'
 import Link from "next/link";
 import { FaSignOutAlt, FaUser } from "react-icons/fa"
+import { Button } from "../Button/Button";
 
 function AccountModal({
   isModalOpen,
@@ -38,7 +39,7 @@ function AccountModal({
     };
   }, [modalRef]);
 
-   if(isModalOpen) return (
+  if (isModalOpen) return (
     <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-black bg-opacity-30 animate-fadeIn" >
       <div className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-lg animate-springUp shadow-none" ref={modalRef}>
         <div className="flex flex-col items-center gap-4">
@@ -49,32 +50,32 @@ function AccountModal({
           <div className="font-bold text-lg">
             <UsernameDisplay user={session?.user} />
           </div>
-          <div className="flex flex-row gap-4">
-            <div className="flex flex-col gap-0.5 bg-[#42454c] rounded-lg items-center p-1 pl-4 pr-4 cursor-pointer"
-              onClick={() => {
-                disconnect()
-              }}
-            >
-              
-                <FaSignOutAlt className="w-4 h-4"/>
+          <div className="flex flex-row gap-4 items-center">
+            <Button variant="destructive" onClick={() => { disconnect() }}>
+              <div className="flex gap-1 items-center p-2 text-black">
                 <p>Sign out</p>
-            </div>
-            <Link 
-              href={`/user/${session?.user?.address}`}
-              onClick={() => handleClose()}
-              className="flex flex-col gap-0.5 bg-[#42454c] rounded-lg items-center p-1 pl-4 pr-4 cursor-pointer"
+                <FaSignOutAlt className="w-4 h-4" />
+              </div>
+            </Button>
+            <Button asChild variant="default" className="p-4">
+              <Link
+                href={`/user/${session?.user?.address}`}
+                onClick={() => handleClose()}
+                className="flex flex-row gap-1 p-2"
+                draggable={false}
               >
-                <FaUser className="w-4 h-4"/>
+                <FaUser className="w-4 h-4" />
                 <p>Profile</p>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
     </div>
-    );
+  );
 
-    return null;
-  
+  return null;
+
 }
 
 
@@ -93,7 +94,7 @@ const NavMenu = () => {
           <UsernameDisplay user={session?.user} />
         </div>
       </div>
-      <AccountModal isModalOpen={isModalOpen} handleClose={() => setIsModalOpen(false)}/>
+      <AccountModal isModalOpen={isModalOpen} handleClose={() => setIsModalOpen(false)} />
     </div >
   );
 };

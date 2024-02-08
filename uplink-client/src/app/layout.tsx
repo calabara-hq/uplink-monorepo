@@ -50,7 +50,7 @@ export default function RootLayout({
               <div className="hidden md:flex h-full w-[64px] z-30 flex-col fixed inset-y-0">
                 <Sidebar />
               </div>
-              <div className="btm-nav z-20 md:hidden shadow-[0_35px_60px_15px_black]">
+              <div className="btm-nav z-20 md:hidden shadow-[0_35px_60px_15px_black] bg-base">
                 <MobileNav />
               </div>
               <main className="pb-20 md:pb-0 md:pl-[64px] h-full">

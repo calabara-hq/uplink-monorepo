@@ -50,7 +50,7 @@ const Swiper = ({ listSize, children }) => {
   return (
     <div className="mx-auto -px-2 -sm:px-8 w-full h-full flex gap-2 relative">
       {!isMobileDevice && !isStart && (
-        <div className="absolute -left-10 top-0 h-full rounded-lg bg-base-200 bg-opacity-30 cursor-pointer hover:bg-opacity-50 transition-all duration-200 flex flex-col items-center justify-center p-1 animate-fadeIn" onClick={() => handleScroll('prev')}>
+        <div className="absolute -left-10 top-0 bottom-0 h-[95%] mt-auto mb-auto rounded-lg bg-base-200 bg-opacity-30 cursor-pointer hover:bg-opacity-50 transition-all duration-200 flex flex-col items-center justify-center p-1 animate-fadeIn" onClick={() => handleScroll('prev')}>
           <MdKeyboardArrowLeft className="w-6 h-6"/>
         </div>
        )}
@@ -62,7 +62,7 @@ const Swiper = ({ listSize, children }) => {
         {children}
       </div>
       {!isMobileDevice && !isEnd && ( 
-        <div className="absolute -right-10 top-0 h-full rounded-lg bg-base-200 bg-opacity-30 cursor-pointer hover:bg-opacity-50 transition-all duration-200 flex flex-col items-center justify-center p-1 animate-fadeIn" onClick={() => handleScroll('next')}>
+        <div className="absolute -right-10 top-0 bottom-0 h-[95%] mt-auto mb-auto rounded-lg bg-base-200 bg-opacity-30 cursor-pointer hover:bg-opacity-50 transition-all duration-200 flex flex-col items-center justify-center p-1 animate-fadeIn" onClick={() => handleScroll('next')}>
           <MdKeyboardArrowRight className="w-6 h-6"/>
         </div>
       )}

@@ -11,6 +11,8 @@ import { Boundary } from "@/ui/Boundary/Boundary";
 // import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 // import { RenderPopularSubmissions } from "@/ui/Submission/SubmissionDisplay";
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   openGraph: {
     title: "Uplink",
@@ -64,7 +66,7 @@ const ContestCard = ({
   );
   return (
     <Link
-      className="card bg-base-100 animate-scrollInX
+      className="card animate-scrollInX
     cursor-pointer border border-border rounded-2xl p-4 h-full overflow-hidden w-[275px] transform 
     transition-transform duration-300 hoverCard will-change-transform no-select"
       href={linkTo}
@@ -130,7 +132,7 @@ const ListSpaces = async () => {
             key={index}
             draggable={false}
             href={`${space.name}`}
-            className="flex flex-col items-center justify-center gap-4 bg-base-100 
+            className="flex flex-col items-center justify-center gap-4 
               cursor-pointer border border-border rounded-2xl p-4 full overflow-hidden w-full transform 
               transition-transform duration-300 hoverCard will-change-transform no-select animate-fadeIn"
           >
