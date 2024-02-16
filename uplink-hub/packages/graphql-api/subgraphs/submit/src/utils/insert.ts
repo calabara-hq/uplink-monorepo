@@ -180,7 +180,6 @@ export const computeMaxSubmissionPower = async (
         if (submitterRestrictions.length === 0) return { maxSubPower: deadlineAdjustedSubmittingPower(maxSubPower, deadlines), restrictionResults: [] };
 
         const blockNum = await tokenController.calculateBlockFromTimestamp(deadlines.snapshot)
-        console.log(blockNum)
         const userRestrictionResult = await checkWalletRestrictions(user, blockNum, tokenController, submitterRestrictions);
         const restrictionAdjustedSubPower = userRestrictionResult.some((token) => token.result === true) ? maxSubPower : 0;
         await setCacheSubParams(user, contestId, restrictionAdjustedSubPower, userRestrictionResult);

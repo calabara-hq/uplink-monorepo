@@ -10,12 +10,13 @@ import UplinkImage from "@/lib/UplinkImage"
 import { Metadata } from "next";
 import { getChainId } from "viem/_types/actions/public/getChainId";
 import { getChainName } from "@/lib/chains/supportedChains";
+import { fetchSingleMintboardPost } from "@/lib/fetch/fetchMintBoardPosts";
 
 
 type NftMetadata = {
     "eth:nft:contract_address": string,
     "eth:nft:schema": string,
-    "eth:nft:chain_id": number, 
+    "eth:nft:chain_id": number,
     "eth:nft:chain": string,
     "eth:nft:collection": string,
     "eth:nft:creator_address": string,
@@ -30,11 +31,11 @@ export async function generateMetadata({
     params: { name: string, postId: string };
     searchParams: { [key: string]: string | undefined }
 }): Promise<Metadata> {
-    
-    const mintboard = await fetchMintBoard(params.name);
-    const post = mintboard.posts.find(el => el.id === params.postId)
+
+    const post = await fetchSingleMintboardPost(params.name, params.postId)
     const author = post.author.displayName || post.author.address
     const referrer = searchParams?.referrer ?? null
+    const warpable = post.edition.chainId === 8453 || post.edition.chainId === 7777777 ? true : false
 
 
     const nftMetadata: NftMetadata = {
@@ -49,11 +50,17 @@ export async function generateMetadata({
     }
 
     const fcMetadata: Record<string, string> = {
-        // "fc:frame": "vNext",
-        // "fc:frame:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${params.name}/mintboard/post/${params.postId}/farcaster_handler?referrer=${referrer}`,
-        "fc:frame:image": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${params.name}/mintboard/post/${params.postId}/post_metadata`,
-        // "fc:frame:button:1": "Mint"
+        "fc:frame": "vNext",
+        "fc:frame:image": parseIpfsUrl(post.edition.imageURI).gateway,
     };
+
+    const warpableMetadata: Record<string, string> = {
+        "fc:frame:button:1": "Mint",
+        "fc:frame:button:1:action": "mint",
+        "fc:frame:button:1:target": `eip155:${post.edition.chainId}:${post.edition.contractAddress}`,
+        "fc:frame:image:aspect_ratio": "1:1",
+        //eip155:8453:0x800243201fb33b86219315f5f44e1795dfb5d97a:19
+    }
 
     return {
         title: `${author}`,
@@ -74,9 +81,11 @@ export async function generateMetadata({
         },
         other: {
             ...fcMetadata,
-            ...nftMetadata
+            ...nftMetadata,
+            ...(warpable ? { ...warpableMetadata } : {})
         },
-        alternates:{
+
+        alternates: {
             canonical: `${process.env.NEXT_PUBLIC_CLIENT_URL}/${params.name}/mintboard/post/${params.postId}?referrer=${referrer}`
         }
     };
@@ -170,8 +179,10 @@ const ExpandedPost = ({
 
 // extract this out so we can suspend it
 const PageContent = async ({ spaceName, postId, referrer }: { spaceName: string, postId: string, referrer: string | null }) => {
-    const mintBoard = await fetchMintBoard(spaceName);
-    const post = mintBoard.posts.find((post) => post.id === postId);
+    const [mintBoard, post] = await Promise.all([
+        fetchMintBoard(spaceName),
+        fetchSingleMintboardPost(spaceName, postId)
+    ])
     return <ExpandedPost post={post} headerChildren={
         <HeaderButtons spaceName={spaceName} post={post} referrer={referrer ?? mintBoard.referrer} />
     } />;

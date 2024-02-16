@@ -30,6 +30,7 @@ import {
 } from "@/ui/Card/Card"
 import { Button } from "@/ui/Button/Button";
 import fetchSpaceStats from "@/lib/fetch/fetchSpaceStats";
+import { fetchPaginatedMintBoardPosts, fetchPopularMintBoardPosts } from "@/lib/fetch/fetchMintBoardPosts";
 
 const SpaceContestsSkeleton = () => {
   return (
@@ -326,7 +327,10 @@ const AdminButtons = async ({ spaceName }: { spaceName: string }) => {
 
 
 const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
-  const mintBoard = await fetchMintBoard(spaceName).catch(err => { return null })
+  const [firstPagePosts, mintBoard] = await Promise.all([
+    fetchPaginatedMintBoardPosts(spaceName, null, 50),
+    fetchMintBoard(spaceName)
+  ])
   if (!mintBoard || !mintBoard.enabled) return null;
   return (
     <Boundary size="small">
@@ -345,7 +349,7 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
           </div>
         </div>
         <div className="flex flex-row flex-wrap gap-2">
-          {mintBoard.posts.slice(0, 50).map((post, idx) => {
+          {firstPagePosts.posts.map((post, idx) => {
             return (
               <div className="w-[40px]" key={idx}> {/* Adjust this class as needed for sizing */}
                 <ImageWrapper>

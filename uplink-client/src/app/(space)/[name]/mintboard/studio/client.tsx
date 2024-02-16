@@ -17,7 +17,7 @@ import { nanoid } from "nanoid";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import Link from "next/link";
 import { TbLoader2 } from "react-icons/tb";
-import useLiveMintBoard from "@/hooks/useLiveMintBoard";
+//import useLiveMintBoard from "@/hooks/useLiveMintBoard";
 import { Boundary } from "@/ui/Boundary/Boundary";
 import { MediaUpload } from "@/ui/MediaUpload/MediaUpload";
 
@@ -44,12 +44,6 @@ export const CreateBoardPost = ({ spaceName, displayName, chainId, referrer, tem
     const ipfsAnimationCallback = (url: string) => {
         setField("animationURI", url)
     }
-
-
-    useEffect(() => {
-        console.log(contractArguments)
-    },[contractArguments])
-
 
     return (
         <Boundary>
@@ -120,7 +114,7 @@ const CreateEditionButton = ({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { creator_contract, explorer } = getContractFromChainId(chainId);
     const [editionSlot, setEditionSlot] = useState<number | null>(null);
-    const { mutateLiveBoard } = useLiveMintBoard(spaceName);
+    //const { mutateLiveBoard } = useLiveMintBoard(spaceName);
     const { config, error: prepareError, isError: isPrepareError } = usePrepareContractWrite({
         //chainId: chainId,
         address: creator_contract,
@@ -196,7 +190,7 @@ const CreateEditionButton = ({
                             reset();
                             resetReserve();
                         }
-                        mutateLiveBoard();
+                       // mutateLiveBoard();
                         return toast.success('Drop created!')
                     });
                 } catch (e) {

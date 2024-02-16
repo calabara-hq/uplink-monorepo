@@ -2,14 +2,14 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og"
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { parseIpfsUrl } from "@/lib/ipfs";
+import { fetchSingleMintboardPost } from "@/lib/fetch/fetchMintBoardPosts";
 
 export const runtime = 'edge'
 
 export async function GET(req: NextRequest) {
   const name = req.nextUrl.pathname.split("/")[3];
   const postId = req.nextUrl.pathname.split("/")[6];
-  const mintBoard = await fetchMintBoard(name);
-  const post = mintBoard.posts.find((post) => post.id === postId)
+  const post = await fetchSingleMintboardPost(name, postId);
   const previewImage = parseIpfsUrl(post.edition.imageURI).gateway;
 
   return new ImageResponse(

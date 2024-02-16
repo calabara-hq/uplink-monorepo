@@ -1,5 +1,5 @@
 "use client"
-import useLiveMintBoard from "@/hooks/useLiveMintBoard"
+import useMintBoardConfig from "@/hooks/useMintBoardConfig";
 import { useTicks } from "@/hooks/useTicks";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { isMobile } from "@/lib/isMobile";
@@ -12,7 +12,7 @@ import SubmissionModal from "@/ui/Submission/SubmissionModal";
 import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
 import MintEdition from "@/ui/Zora/MintEdition";
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from "date-fns";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaRegClock } from "react-icons/fa";
 import { HiCheckBadge } from "react-icons/hi2";
 import { MdOutlineCancelPresentation } from "react-icons/md";
@@ -24,6 +24,9 @@ import { ManageModalContent } from "@/app/submission/[submissionId]/client"
 import { AdminWrapper } from "@/lib/AdminWrapper";
 import { MdOutlineSettings } from "react-icons/md";
 import { useDeleteMintboardPost } from "@/hooks/useDeleteMintboardPost";
+import { usePaginatedMintBoardPosts, usePopularMintBoardPosts } from "@/hooks/useMintBoardPosts";
+import { useMintBoardUserStats } from "@/hooks/useMintBoardUserStats";
+
 
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
@@ -283,29 +286,6 @@ const PostFooter = ({ post, spaceName, handleMint, handleShare, handleManage, ad
     )
 }
 
-const useThresholdProgress = (spaceName: string) => {
-    const { status, data: session } = useSession();
-    const { liveBoard, isBoardLoading } = useLiveMintBoard(spaceName);
-    const [aggMints, setAggMints] = useState(0);
-    const tokenApi = new TokenContractApi(liveBoard.chainId);
-    const userPosts = liveBoard.posts.filter(post => post.author.address === session?.user?.address);
-
-    const getAggMints = async () => {
-        const totalMints = userPosts.reduce((acc, post) => acc + Number(post.totalMints.toString()), 0);
-        setAggMints(totalMints);
-    }
-
-    useEffect(() => {
-        getAggMints();
-    }, [userPosts])
-
-
-    return aggMints;
-
-}
-
-
-
 export const UserProgressSkeleton = () => {
     return (
         <div className="flex flex-col gap-2 w-full">
@@ -327,11 +307,12 @@ export const UserProgressSkeleton = () => {
 
 const ProgressBar = ({ spaceName }: { spaceName: string }) => {
     const { status, data: session } = useSession();
-    const { liveBoard, isBoardLoading } = useLiveMintBoard(spaceName);
-    const threshold = liveBoard.threshold;
-    const userMints = useThresholdProgress(spaceName)
+    const { mintBoardConfig, isBoardLoading } = useMintBoardConfig(spaceName);
+    const { data: userStats, isLoading: isStatsLoading, error } = useMintBoardUserStats(spaceName, mintBoardConfig?.id ?? null);
+    const threshold = mintBoardConfig.threshold;
 
-    if (status === 'loading') return <UserProgressSkeleton />
+
+    if (status === 'loading' || isBoardLoading || isStatsLoading) return <UserProgressSkeleton />
 
     if (status !== 'authenticated') {
         return (
@@ -358,10 +339,10 @@ const ProgressBar = ({ spaceName }: { spaceName: string }) => {
                 <div className="ml-auto w-16 h-8" />
             </div>
             <div className="flex flex-col gap-2 w-full">
-                <progress className="progress progress-primary w-full" value={userMints} max={threshold}></progress>
+                <progress className="progress progress-primary w-full" value={userStats.totalMints} max={threshold}></progress>
                 <div className="grid grid-cols-3 gap-2 items-center text-t2">
                     <p>0</p>
-                    <p className="m-auto">{userMints} mints</p>
+                    <p className="m-auto">{userStats.totalMints} mints</p>
                     <p className="ml-auto">{threshold}</p>
                 </div>
             </div>
@@ -373,20 +354,32 @@ const ProgressBar = ({ spaceName }: { spaceName: string }) => {
 
 
 export const RenderProgress = ({ spaceName }: { spaceName: string }) => {
-    const { liveBoard, isBoardLoading } = useLiveMintBoard(spaceName);
-    if (!liveBoard.threshold) return null;
+    const { mintBoardConfig, isBoardLoading } = useMintBoardConfig(spaceName);
+    if (!mintBoardConfig.threshold) return null;
     return <ProgressBar spaceName={spaceName} />
 
 }
 
 export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPopular: boolean }) => {
-    const { liveBoard, isBoardLoading, optimisticMintUpdate, mutateLiveBoard } = useLiveMintBoard(spaceName);
+    const { mintBoardConfig, isBoardLoading } = useMintBoardConfig(spaceName);
+    const { data: pages, error, size, setSize, mintPaginatedPost, deletePaginatedPost } = usePaginatedMintBoardPosts(spaceName);
+    const { data: popularPosts, error: popularError, mintPopularPost, deletePopularPost } = usePopularMintBoardPosts(spaceName);
+    const { ref: loadMoreRef, inView, entry } = useInView({ threshold: 0.1 })
+
+
+    useEffect(() => {
+        if (inView) {
+            setSize((prev) => prev + 1)
+        }
+    }, [inView, setSize])
+
     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isManageModalOpen, setIsManageModalOpen] = useState(false);
     const [focusedSubmission, setFocusedSubmission] = useState(null);
     const { handleDeleteMintboardPost } = useDeleteMintboardPost(() => {
-        mutateLiveBoard();
+        deletePaginatedPost(focusedSubmission.id);
+        deletePopularPost(focusedSubmission.id);
         handleModalClose();
     })
 
@@ -436,47 +429,82 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
     }
 
 
-    if (isBoardLoading) return <PostSkeleton />
 
-    const boardPosts = isPopular ? liveBoard?.posts?.toSorted((a, b) => b.totalMints - a.totalMints) : [...liveBoard.posts];
-
+    if (error) return <div>Error: {error.message}</div>;
+    if (!pages || !mintBoardConfig) return <PostSkeleton />
 
     return (
-        <div className="w-10/12 sm:w-full m-auto grid gap-4 xl:gap-8 submission-columns auto-rows-fr ">
+        <div className="flex flex-col gap-8">
+            <div className="w-10/12 sm:w-full m-auto grid gap-4 xl:gap-8 submission-columns auto-rows-fr ">
+                {isPopular ?
+                    (popularPosts.map((post) => (
+                        <div className="cursor-pointer hover:shadow-lg hover:shadow-blue-600 rounded-lg "
+                            key={post.id}
+                            onClick={() => openMintModal(post)}
+                        >
+                            <Post
+                                post={post}
+                                footer={
+                                    <PostFooter
+                                        post={post}
+                                        spaceName={spaceName}
+                                        handleMint={handleMint}
+                                        handleShare={handleShare}
+                                        handleManage={handleManage}
+                                        admins={mintBoardConfig.space.admins}
+                                    />
+                                }
+                            />
+                        </div>
+                    ))
+                    ) : (
+                        pages.map((page, i) => (
+                            <React.Fragment key={i}>
+                                {page.posts.map((post) => (
+                                    <div className="cursor-pointer hover:shadow-lg hover:shadow-blue-600 rounded-lg "
+                                        key={post.id}
+                                        onClick={() => openMintModal(post)}
+                                    >
+                                        <Post
+                                            post={post}
+                                            footer={
+                                                <PostFooter
+                                                    post={post}
+                                                    spaceName={spaceName}
+                                                    handleMint={handleMint}
+                                                    handleShare={handleShare}
+                                                    handleManage={handleManage}
+                                                    admins={mintBoardConfig.space.admins}
+                                                />
+                                            }
+                                        />
+                                    </div>
+                                ))}
+                            </React.Fragment>
+                        ))
+                    )}
 
-            {boardPosts.map((post) => {
-                return (
-                    <div className="cursor-pointer hover:shadow-lg hover:shadow-blue-600 rounded-lg "
-                        key={post.id}
-                        onClick={() => openMintModal(post)}
-                    >
-                        <Post
-                            post={post}
-                            footer={
-                                <PostFooter
-                                    post={post}
-                                    spaceName={spaceName}
-                                    handleMint={handleMint}
-                                    handleShare={handleShare}
-                                    handleManage={handleManage}
-                                    admins={liveBoard.space.admins}
-                                />
-                            }
-                        />
-                    </div>
-                )
-            })}
-            <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isManageModalOpen ? "manage" : "share"} handleClose={handleModalClose} >
-                {isMintModalOpen && focusedSubmission && (
-                    <MintEdition edition={focusedSubmission.edition} author={focusedSubmission.author} setIsModalOpen={setIsMintModalOpen} referrer={liveBoard.referrer} onMintCallback={(editionId, mintAmount) => optimisticMintUpdate(editionId, mintAmount)} />
-                )}
-                {isShareModalOpen && focusedSubmission && (
-                    <ShareModalContent spaceName={spaceName} post={focusedSubmission} handleClose={handleModalClose} />
-                )}
-                {isManageModalOpen && focusedSubmission && (
-                    <ManageModalContent onDelete={() => handleDeleteMintboardPost(focusedSubmission.id, liveBoard.space.id)} />
-                )}
-            </SubmissionModal>
+
+                <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isManageModalOpen ? "manage" : "share"} handleClose={handleModalClose} >
+                    {isMintModalOpen && focusedSubmission && (
+                        <MintEdition edition={focusedSubmission.edition} author={focusedSubmission.author} setIsModalOpen={setIsMintModalOpen} referrer={mintBoardConfig.referrer} onMintCallback={(editionId, mintAmount) => { mintPaginatedPost(editionId, mintAmount); mintPopularPost(editionId, mintAmount) }} />
+                    )}
+                    {isShareModalOpen && focusedSubmission && (
+                        <ShareModalContent spaceName={spaceName} post={focusedSubmission} handleClose={handleModalClose} />
+                    )}
+                    {isManageModalOpen && focusedSubmission && (
+                        <ManageModalContent onDelete={() => handleDeleteMintboardPost(focusedSubmission.id, mintBoardConfig.space.id)} />
+                    )}
+                </SubmissionModal>
+            </div>
+            <div ref={loadMoreRef} className="m-auto">
+                {size > 0 && pages && pages.at(-1).pageInfo.hasNextPage &&
+                    <div
+                        className="text-xs text-primary ml-1 inline-block h-10 w-10 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                    />
+                }
+            </div>
         </div>
     )
 }
