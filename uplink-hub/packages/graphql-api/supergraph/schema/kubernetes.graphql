@@ -366,6 +366,19 @@ type MintBoardPost
   totalMints: Int!
 }
 
+type MintBoardPostConnection
+  @join__type(graph: SUBMIT)
+{
+  posts: [MintBoardPost!]!
+  pageInfo: PageInfo!
+}
+
+type MintBoardUserStats
+  @join__type(graph: SUBMIT)
+{
+  totalMints: Int!
+}
+
 type Mutation
   @join__type(graph: CONTESTS)
   @join__type(graph: SPACES)
@@ -419,6 +432,13 @@ type NonFungibleReward
   tokenId: Int!
 }
 
+type PageInfo
+  @join__type(graph: SUBMIT)
+{
+  endCursor: Int!
+  hasNextPage: Boolean!
+}
+
 input PayoutInput
   @join__type(graph: CONTESTS)
 {
@@ -467,6 +487,9 @@ type Query
   popularSubmissions: [PopularSubmission!]! @join__field(graph: SUBMIT)
   getUserSubmissionParams(contestId: ID!): UserSubmissionParams! @join__field(graph: SUBMIT)
   spaceStatistics(spaceName: String!): SpaceStats! @join__field(graph: SUBMIT)
+  paginatedMintBoardPosts(spaceName: String!, lastCursor: String, limit: Int!): MintBoardPostConnection! @join__field(graph: SUBMIT)
+  popularMintBoardPosts(spaceName: String!): [MintBoardPost!]! @join__field(graph: SUBMIT)
+  mintBoardUserStats(boardId: ID!): MintBoardUserStats! @join__field(graph: SUBMIT)
   me: User @join__field(graph: USER)
   user(userIdentifier: String!): User @join__field(graph: USER)
   getUserVotingParams(contestId: ID!): UserVotingParams! @join__field(graph: VOTE)

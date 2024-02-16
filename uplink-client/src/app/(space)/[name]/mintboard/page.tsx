@@ -9,10 +9,11 @@ import {
   RenderProgress,
   UserProgressSkeleton,
 } from "./client";
-
+import { unstable_serialize } from "swr/infinite";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 
 import { Metadata } from "next";
+import { fetchPaginatedMintBoardPosts, fetchPopularMintBoardPosts } from "@/lib/fetch/fetchMintBoardPosts";
 
 export async function generateMetadata({
   params,
@@ -38,14 +39,15 @@ export async function generateMetadata({
       locale: "en_US",
       type: "website",
     },
-    other: {
-      "fc:frame": "vNext",
-      "fc:frame:image": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${name}/mintboard/mintboard_metadata`,
-      "fc:frame:button:1": "View Gallery",
-      "fc:frame:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${name}/mintboard/mintboard_metadata/farcaster_frame_handler`,
-    },
+    // other: {
+    //   "fc:frame": "vNext",
+    //   "fc:frame:image": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${name}/mintboard/mintboard_metadata`,
+    //   "fc:frame:button:1": "View Gallery",
+    //   "fc:frame:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/space/${name}/mintboard/mintboard_metadata/farcaster_frame_handler`,
+    // },
   };
 }
+
 
 const BoardInfoSkeleton = () => {
   return (
@@ -186,11 +188,15 @@ const Posts = async ({
   spaceName: string;
   isPopular: boolean;
 }) => {
-  const mintBoard = await fetchMintBoard(spaceName);
+  const [firstPagePosts, popularPosts] = await Promise.all([
+    fetchPaginatedMintBoardPosts(spaceName, null, 50),
+    fetchPopularMintBoardPosts(spaceName)
+  ])
 
   const fallback = {
-    [`/mintBoard/${spaceName}`]: mintBoard,
-  };
+    [unstable_serialize(() => ['mintBoard', spaceName, 'posts', null, 50])]: [firstPagePosts],
+    [`mintBoard/${spaceName}/popular`]: popularPosts
+  }
 
   return (
     <SwrProvider fallback={fallback}>
@@ -206,9 +212,6 @@ const Progress = async ({ spaceName }: { spaceName: string }) => {
     [`/mintBoard/${spaceName}`]: mintBoard,
   };
 
-  const threshold = 1000;
-
-  if (!threshold) return null;
   return (
     <SwrProvider fallback={fallback}>
       <RenderProgress spaceName={spaceName} />
@@ -216,9 +219,6 @@ const Progress = async ({ spaceName }: { spaceName: string }) => {
   );
 };
 
-// 1. get contracts by user account
-// 2. fetch # mints
-// 3. render over threshold
 
 export default async function Page({
   params,

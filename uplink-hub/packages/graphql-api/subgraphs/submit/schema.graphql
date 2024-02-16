@@ -33,6 +33,20 @@ type SpaceStats {
   topAppearanceUser: SubmissionAuthor
 }
 
+type MintBoardPostConnection {
+  posts: [MintBoardPost!]!
+  pageInfo: PageInfo!
+}
+
+type PageInfo {
+  endCursor: Int!
+  hasNextPage: Boolean!
+}
+
+type MintBoardUserStats {
+  totalMints: Int!
+}
+
 
 type MintBoardPost @key(fields: "id"){
   id: ID!
@@ -63,7 +77,7 @@ type ZoraEdition @key(fields: "id"){
 
 }
 
-type  ZoraSaleConfig {
+type ZoraSaleConfig {
   publicSalePrice: String!
   maxSalePurchasePerAddress: Int!
   publicSaleStart: String!
@@ -166,6 +180,9 @@ type Query {
     contestId: ID!
   ): UserSubmissionParams!
   spaceStatistics(spaceName: String!): SpaceStats!
+  paginatedMintBoardPosts(spaceName: String!, lastCursor: String, limit: Int!): MintBoardPostConnection!
+  popularMintBoardPosts(spaceName: String!): [MintBoardPost!]!
+  mintBoardUserStats(boardId: ID!): MintBoardUserStats!
 }
 
 type createSubmissionResponse {

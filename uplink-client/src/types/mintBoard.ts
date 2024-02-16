@@ -20,9 +20,15 @@ export type MintBoard = {
     publicSaleEnd: string;
     description: string;
     referrer: string;
-    posts: Array<MintBoardPost>;
 }
 
+export type PaginatedMintBoardPosts = {
+    posts: Array<MintBoardPost>;
+    pageInfo: {
+        endCursor: string;
+        hasNextPage: boolean
+    }
+}
 
 export type MintBoardPost = {
     id: string;

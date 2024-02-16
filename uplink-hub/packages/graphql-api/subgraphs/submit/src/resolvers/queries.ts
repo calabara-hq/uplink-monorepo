@@ -1,10 +1,11 @@
-import { sqlOps, db, dbSingleSubmissionById, dbGetPopularSubmissions, dbSubmissionsByContestId, dbGetRewards, dbGetMintBoardPostsByBoardId } from "../utils/database.js";
+import { sqlOps, db, dbSingleSubmissionById, dbGetPopularSubmissions, dbSubmissionsByContestId, dbGetRewards, dbGetPopularMintBoardPosts } from "../utils/database.js";
 import { GraphQLError } from "graphql";
 import { AuthorizationController, schema, Decimal, Context } from "lib";
 import type { Contest, Submission, ZoraEdition } from "../__generated__/resolvers-types.js";
 import dotenv from 'dotenv'
 import { computeSubmissionParams } from "../utils/insert.js";
 import { spaceStatistics } from "../utils/stats.js";
+import { mintBoardUserStats, paginatedMintBoardPosts } from "../utils/mintBoard.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL!);
@@ -137,6 +138,23 @@ const queries = {
 
         async spaceStatistics(_: any, { spaceName }: { spaceName: string }) {
             return spaceStatistics(spaceName)
+        },
+
+        async paginatedMintBoardPosts(_: any, { spaceName, lastCursor, limit }: { spaceName: string, lastCursor: string | null, limit: number }) {
+            return paginatedMintBoardPosts(spaceName, lastCursor, limit)
+        },
+
+        async popularMintBoardPosts(_: any, { spaceName }: { spaceName: string }) {
+            return dbGetPopularMintBoardPosts(spaceName)
+        },
+        async mintBoardUserStats(_: any, { boardId }: { boardId: string }, context: Context) {
+            const user = await authController.getUser(context);
+            if (!user || !user?.address) {
+                return {
+                    totalMints: 0,
+                }
+            }
+            return mintBoardUserStats(boardId, user.address)
         }
     },
 
@@ -246,14 +264,6 @@ const queries = {
             return csvContent;
         },
     },
-
-    MintBoard: {
-        async posts({ id }: { id: string }) {
-            return dbGetMintBoardPostsByBoardId(parseInt(id));
-        }
-    },
-
-
 
 };
 

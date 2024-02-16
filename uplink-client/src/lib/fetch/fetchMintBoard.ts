@@ -11,71 +11,35 @@ const fetchMintBoard = async (spaceName: string): Promise<MintBoard> => {
         },
         body: JSON.stringify({
             query: `
-          query mintBoard($spaceName: String!){
-            mintBoard(spaceName: $spaceName) {
-                id
-                space {
-                    id
-                    logoUrl
-                    name
-                    displayName
-                    admins {
-                        address
-                    }
-                  }
-                enabled
-                threshold
-                editionSize
-                description
-                chainId
-                created
-                boardTitle
-                boardDescription
-                name
-                publicSaleEnd
-                publicSalePrice
-                publicSaleStart
-                referrer
-                spaceId
-                symbol
-                posts {
-                    id
-                    created
-                    totalMints
-                    author {
+                query mintBoard($spaceName: String!){
+                    mintBoard(spaceName: $spaceName) {
                         id
-                        address
-                        userName
-                        displayName
-                        profileAvatar
-                    }
-                    edition {
-                        id
-                        chainId
-                        contractAddress
-                        name
-                        symbol
-                        editionSize
-                        royaltyBPS
-                        fundsRecipient
-                        defaultAdmin
-                        saleConfig {
-                          publicSalePrice
-                          maxSalePurchasePerAddress
-                          publicSaleStart
-                          publicSaleEnd
-                          presaleStart
-                          presaleEnd
-                          presaleMerkleRoot
+                        space {
+                            id
+                            logoUrl
+                            name
+                            displayName
+                            admins {
+                                address
+                            }
                         }
+                        enabled
+                        threshold
+                        editionSize
                         description
-                        animationURI
-                        imageURI
+                        chainId
+                        created
+                        boardTitle
+                        boardDescription
+                        name
+                        publicSaleEnd
+                        publicSalePrice
+                        publicSaleStart
                         referrer
-                      }
-                  }
-              }
-        }`,
+                        spaceId
+                        symbol
+                    }
+                }`,
             variables: {
                 spaceName,
             },

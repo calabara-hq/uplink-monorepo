@@ -84,6 +84,17 @@ export type MintBoardPost = {
   totalMints: Scalars['Int']['output'];
 };
 
+export type MintBoardPostConnection = {
+  __typename?: 'MintBoardPostConnection';
+  pageInfo: PageInfo;
+  posts: Array<MintBoardPost>;
+};
+
+export type MintBoardUserStats = {
+  __typename?: 'MintBoardUserStats';
+  totalMints: Scalars['Int']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createMintBoardPost: CreateMintBoardPostResponse;
@@ -142,6 +153,12 @@ export type MutationRegisterMintArgs = {
   editionId: Scalars['ID']['input'];
 };
 
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  endCursor: Scalars['Int']['output'];
+  hasNextPage: Scalars['Boolean']['output'];
+};
+
 export type PopularSubmission = {
   __typename?: 'PopularSubmission';
   author: SubmissionAuthor;
@@ -157,6 +174,9 @@ export type PopularSubmission = {
 export type Query = {
   __typename?: 'Query';
   getUserSubmissionParams: UserSubmissionParams;
+  mintBoardUserStats: MintBoardUserStats;
+  paginatedMintBoardPosts: MintBoardPostConnection;
+  popularMintBoardPosts: Array<MintBoardPost>;
   popularSubmissions: Array<PopularSubmission>;
   spaceStatistics: SpaceStats;
   submission?: Maybe<Submission>;
@@ -165,6 +185,23 @@ export type Query = {
 
 export type QueryGetUserSubmissionParamsArgs = {
   contestId: Scalars['ID']['input'];
+};
+
+
+export type QueryMintBoardUserStatsArgs = {
+  boardId: Scalars['ID']['input'];
+};
+
+
+export type QueryPaginatedMintBoardPostsArgs = {
+  lastCursor?: InputMaybe<Scalars['String']['input']>;
+  limit: Scalars['Int']['input'];
+  spaceName: Scalars['String']['input'];
+};
+
+
+export type QueryPopularMintBoardPostsArgs = {
+  spaceName: Scalars['String']['input'];
 };
 
 
@@ -426,7 +463,10 @@ export type ResolversTypes = ResolversObject<{
   MintBoard: ResolverTypeWrapper<MintBoard>;
   MintBoardAuthor: ResolverTypeWrapper<MintBoardAuthor>;
   MintBoardPost: ResolverTypeWrapper<MintBoardPost>;
+  MintBoardPostConnection: ResolverTypeWrapper<MintBoardPostConnection>;
+  MintBoardUserStats: ResolverTypeWrapper<MintBoardUserStats>;
   Mutation: ResolverTypeWrapper<{}>;
+  PageInfo: ResolverTypeWrapper<PageInfo>;
   PopularSubmission: ResolverTypeWrapper<PopularSubmission>;
   Query: ResolverTypeWrapper<{}>;
   RestrictionResult: ResolverTypeWrapper<RestrictionResult>;
@@ -469,7 +509,10 @@ export type ResolversParentTypes = ResolversObject<{
   MintBoard: MintBoard;
   MintBoardAuthor: MintBoardAuthor;
   MintBoardPost: MintBoardPost;
+  MintBoardPostConnection: MintBoardPostConnection;
+  MintBoardUserStats: MintBoardUserStats;
   Mutation: {};
+  PageInfo: PageInfo;
   PopularSubmission: PopularSubmission;
   Query: {};
   RestrictionResult: RestrictionResult;
@@ -559,6 +602,17 @@ export type MintBoardPostResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type MintBoardPostConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoardPostConnection'] = ResolversParentTypes['MintBoardPostConnection']> = ResolversObject<{
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  posts?: Resolver<Array<ResolversTypes['MintBoardPost']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type MintBoardUserStatsResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoardUserStats'] = ResolversParentTypes['MintBoardUserStats']> = ResolversObject<{
+  totalMints?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createMintBoardPost?: Resolver<ResolversTypes['createMintBoardPostResponse'], ParentType, ContextType, RequireFields<MutationCreateMintBoardPostArgs, 'chainId' | 'contractAddress' | 'dropConfig' | 'spaceName'>>;
   createSubmission?: Resolver<ResolversTypes['createSubmissionResponse'], ParentType, ContextType, RequireFields<MutationCreateSubmissionArgs, 'contestId' | 'submission'>>;
@@ -567,6 +621,12 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteContestSubmission?: Resolver<Maybe<ResolversTypes['deletePostResponse']>, ParentType, ContextType, RequireFields<MutationDeleteContestSubmissionArgs, 'contestId' | 'submissionId'>>;
   deleteMintboardPost?: Resolver<Maybe<ResolversTypes['deletePostResponse']>, ParentType, ContextType, RequireFields<MutationDeleteMintboardPostArgs, 'postId' | 'spaceId'>>;
   registerMint?: Resolver<ResolversTypes['registerMintResponse'], ParentType, ContextType, RequireFields<MutationRegisterMintArgs, 'amount' | 'editionId'>>;
+}>;
+
+export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
+  endCursor?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PopularSubmissionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PopularSubmission'] = ResolversParentTypes['PopularSubmission']> = ResolversObject<{
@@ -583,6 +643,9 @@ export type PopularSubmissionResolvers<ContextType = any, ParentType extends Res
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   getUserSubmissionParams?: Resolver<ResolversTypes['UserSubmissionParams'], ParentType, ContextType, RequireFields<QueryGetUserSubmissionParamsArgs, 'contestId'>>;
+  mintBoardUserStats?: Resolver<ResolversTypes['MintBoardUserStats'], ParentType, ContextType, RequireFields<QueryMintBoardUserStatsArgs, 'boardId'>>;
+  paginatedMintBoardPosts?: Resolver<ResolversTypes['MintBoardPostConnection'], ParentType, ContextType, RequireFields<QueryPaginatedMintBoardPostsArgs, 'limit' | 'spaceName'>>;
+  popularMintBoardPosts?: Resolver<Array<ResolversTypes['MintBoardPost']>, ParentType, ContextType, RequireFields<QueryPopularMintBoardPostsArgs, 'spaceName'>>;
   popularSubmissions?: Resolver<Array<ResolversTypes['PopularSubmission']>, ParentType, ContextType>;
   spaceStatistics?: Resolver<ResolversTypes['SpaceStats'], ParentType, ContextType, RequireFields<QuerySpaceStatisticsArgs, 'spaceName'>>;
   submission?: Resolver<Maybe<ResolversTypes['Submission']>, ParentType, ContextType, RequireFields<QuerySubmissionArgs, 'submissionId'>>;
@@ -736,7 +799,10 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   MintBoard?: MintBoardResolvers<ContextType>;
   MintBoardAuthor?: MintBoardAuthorResolvers<ContextType>;
   MintBoardPost?: MintBoardPostResolvers<ContextType>;
+  MintBoardPostConnection?: MintBoardPostConnectionResolvers<ContextType>;
+  MintBoardUserStats?: MintBoardUserStatsResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  PageInfo?: PageInfoResolvers<ContextType>;
   PopularSubmission?: PopularSubmissionResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RestrictionResult?: RestrictionResultResolvers<ContextType>;

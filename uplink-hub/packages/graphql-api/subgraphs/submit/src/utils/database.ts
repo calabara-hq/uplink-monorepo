@@ -1,6 +1,6 @@
 import { DatabaseController, schema, TokenController } from "lib";
 import dotenv from 'dotenv';
-import { StatEditions, Submission, ZoraEdition } from "../__generated__/resolvers-types";
+import { MintBoardPost, StatEditions, Submission, ZoraEdition } from "../__generated__/resolvers-types";
 import { calculateTotalMints } from "./totalMints.js"
 dotenv.config();
 
@@ -81,6 +81,56 @@ export const dbUserByAddress = async (address: string): Promise<schema.dbUserTyp
     return prepared_userByAddress.execute({ address })
 }
 
+export const dbMintboardUserStats = async (boardId: string, userAddress: string) => {
+    // get mb posts by userId / boardId
+    return db.execute(sqlOps.sql`
+        SELECT
+            mbp.*,
+            JSON_OBJECT(
+                'id', edition.id,
+                'chainId', edition.chainId,
+                'contractAddress', edition.contractAddress,
+                'name', edition.name,
+                'symbol', edition.symbol,
+                'editionSize', edition.editionSize,
+                'royaltyBPS', edition.royaltyBPS,
+                'fundsRecipient', edition.fundsRecipient,
+                'defaultAdmin', edition.defaultAdmin,
+                'description', edition.description,
+                'animationURI', edition.animationURI,
+                'imageURI', edition.imageURI,
+                'referrer', edition.referrer,
+                'saleConfig', JSON_OBJECT(
+                    'publicSalePrice', edition.publicSalePrice,
+                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+                    'publicSaleStart', edition.publicSaleStart,
+                    'publicSaleEnd', edition.publicSaleEnd,
+                    'presaleStart', edition.presaleStart,
+                    'presaleEnd', edition.presaleEnd,
+                    'presaleMerkleRoot', edition.presaleMerkleRoot
+                )
+            ) AS edition
+
+        FROM mintBoardPosts mbp
+        LEFT JOIN (
+            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
+            FROM users u
+        ) AS post_author ON mbp.userId = post_author.id
+        LEFT JOIN (
+            SELECT e.*
+            FROM zoraEditions e
+        ) AS edition ON mbp.editionId = edition.id
+        WHERE mbp.boardId = ${boardId} AND post_author.address = ${userAddress}
+    `)
+        .then((data: any) => data.rows)
+        .then(calculateTotalMints)
+        .then((data: Array<MintBoardPost>) => {
+
+            const totalMints = data.reduce((acc, curr) => acc + curr.totalMints, 0);
+            return { totalMints };
+        })
+}
+
 
 export const dbGetEditionsBySpaceName = async (spaceName: string): Promise<Array<StatEditions>> => {
     return db.execute(sqlOps.sql`
@@ -153,7 +203,7 @@ export const dbGetEditionsBySpaceName = async (spaceName: string): Promise<Array
         .then(calculateTotalMints)
 }
 
-export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Array<schema.dbMintBoardPostType>> => {
+export const dbGetPopularMintBoardPosts = async (spaceName: string): Promise<any> => {
     return db.execute(sqlOps.sql`
         SELECT
             mbp.*,
@@ -189,7 +239,9 @@ export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Arr
                 )
             ) AS edition
 
-        FROM mintBoardPosts mbp
+        FROM spaces s
+        LEFT JOIN mintBoards mb ON s.id = mb.spaceId
+        LEFT JOIN mintBoardPosts mbp on mb.id = mbp.boardId
         LEFT JOIN (
             SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
             FROM users u
@@ -198,14 +250,80 @@ export const dbGetMintBoardPostsByBoardId = async (boardId: number): Promise<Arr
             SELECT e.*
             FROM zoraEditions e
         ) AS edition ON mbp.editionId = edition.id
-        WHERE mbp.boardId = ${boardId}
+        WHERE s.name = ${spaceName}
         GROUP BY mbp.id
-        ORDER BY mbp.created DESC
     `)
         .then((data: any) => data.rows)
         .then(calculateTotalMints)
-
+        .then((data: Array<MintBoardPost>) => data.sort((a: MintBoardPost, b: MintBoardPost) => b.totalMints - a.totalMints))
+        .then((sorted: Array<MintBoardPost>) => sorted.slice(0, 20))
 }
+
+export const dbGetPaginatedLatestMintBoardPosts = async (spaceName: string, lastCursor: string | null, limit: number): Promise<any> => {
+    let query = sqlOps.sql`
+        SELECT
+            mbp.*,
+            JSON_OBJECT(
+                'id', post_author.id,
+                'address', post_author.address,
+                'userName', post_author.userName,
+                'displayName', post_author.displayName,
+                'profileAvatar', post_author.profileAvatar
+            ) AS author,
+            JSON_OBJECT(
+                'id', edition.id,
+                'chainId', edition.chainId,
+                'contractAddress', edition.contractAddress,
+                'name', edition.name,
+                'symbol', edition.symbol,
+                'editionSize', edition.editionSize,
+                'royaltyBPS', edition.royaltyBPS,
+                'fundsRecipient', edition.fundsRecipient,
+                'defaultAdmin', edition.defaultAdmin,
+                'description', edition.description,
+                'animationURI', edition.animationURI,
+                'imageURI', edition.imageURI,
+                'referrer', edition.referrer,
+                'saleConfig', JSON_OBJECT(
+                    'publicSalePrice', edition.publicSalePrice,
+                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+                    'publicSaleStart', edition.publicSaleStart,
+                    'publicSaleEnd', edition.publicSaleEnd,
+                    'presaleStart', edition.presaleStart,
+                    'presaleEnd', edition.presaleEnd,
+                    'presaleMerkleRoot', edition.presaleMerkleRoot
+                )
+            ) AS edition
+
+        FROM spaces s
+        LEFT JOIN mintBoards mb ON s.id = mb.spaceId
+        LEFT JOIN mintBoardPosts mbp on mb.id = mbp.boardId
+        LEFT JOIN (
+            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
+            FROM users u
+        ) AS post_author ON mbp.userId = post_author.id
+        LEFT JOIN (
+            SELECT e.*
+            FROM zoraEditions e
+        ) AS edition ON mbp.editionId = edition.id
+        WHERE s.name = ${spaceName}
+    `
+
+    if (lastCursor !== null) {
+        query = sqlOps.sql`${query} AND mbp.id < ${lastCursor}`;
+    }
+
+    query = sqlOps.sql`${query} GROUP BY mbp.id ORDER BY mbp.id DESC LIMIT ${limit}`;
+
+
+    // Add the ORDER BY and LIMIT clauses
+
+    // Execute the query
+    return db.execute(query)
+        .then((data: any) => data.rows)
+        .then(calculateTotalMints);
+}
+
 
 // get the last 3 contests that have ended, get submissions with more than 3 unique votes, and take a random sample of 20
 
