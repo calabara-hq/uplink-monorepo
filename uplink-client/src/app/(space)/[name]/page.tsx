@@ -30,7 +30,7 @@ import {
 } from "@/ui/Card/Card"
 import { Button } from "@/ui/Button/Button";
 import fetchSpaceStats from "@/lib/fetch/fetchSpaceStats";
-import { fetchPaginatedMintBoardPosts, fetchPopularMintBoardPosts } from "@/lib/fetch/fetchMintBoardPosts";
+import { fetchPaginatedMintBoardPosts } from "@/lib/fetch/fetchMintBoardPosts";
 
 const SpaceContestsSkeleton = () => {
   return (
@@ -331,6 +331,7 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
     fetchPaginatedMintBoardPosts(spaceName, null, 50),
     fetchMintBoard(spaceName)
   ])
+
   if (!mintBoard || !mintBoard.enabled) return null;
   return (
     <Boundary size="small">

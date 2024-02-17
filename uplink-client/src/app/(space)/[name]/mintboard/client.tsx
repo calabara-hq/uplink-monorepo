@@ -110,7 +110,7 @@ export const ShareModalContent = ({ spaceName, post, handleClose }: { spaceName:
     const [success, setSuccess] = useState(false);
 
     const handleShare = () => {
-        const referralLink = session?.user?.address ? `?refferrer=${session?.user?.address}` : ''
+        const referralLink = session?.user?.address ? `?referrer=${session?.user?.address}` : ''
         navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/post/${post.id}${referralLink}`);
         setSuccess(true)
         setTimeout(() => {
@@ -498,7 +498,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
                 </SubmissionModal>
             </div>
             <div ref={loadMoreRef} className="m-auto">
-                {size > 0 && pages && pages.at(-1).pageInfo.hasNextPage &&
+                {size > 0 && !isPopular && pages && pages.at(-1).pageInfo.hasNextPage &&
                     <div
                         className="text-xs text-primary ml-1 inline-block h-10 w-10 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                         role="status"

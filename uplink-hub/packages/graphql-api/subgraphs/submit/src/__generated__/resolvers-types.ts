@@ -57,12 +57,6 @@ export type DropConfig = {
   symbol: Scalars['String']['input'];
 };
 
-export type MintBoard = {
-  __typename?: 'MintBoard';
-  id: Scalars['ID']['output'];
-  posts: Array<MintBoardPost>;
-};
-
 export type MintBoardAuthor = {
   __typename?: 'MintBoardAuthor';
   address: Scalars['String']['output'];
@@ -460,7 +454,6 @@ export type ResolversTypes = ResolversObject<{
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   ISODateString: ResolverTypeWrapper<Scalars['ISODateString']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
-  MintBoard: ResolverTypeWrapper<MintBoard>;
   MintBoardAuthor: ResolverTypeWrapper<MintBoardAuthor>;
   MintBoardPost: ResolverTypeWrapper<MintBoardPost>;
   MintBoardPostConnection: ResolverTypeWrapper<MintBoardPostConnection>;
@@ -506,7 +499,6 @@ export type ResolversParentTypes = ResolversObject<{
   ID: Scalars['ID']['output'];
   ISODateString: Scalars['ISODateString']['output'];
   Int: Scalars['Int']['output'];
-  MintBoard: MintBoard;
   MintBoardAuthor: MintBoardAuthor;
   MintBoardPost: MintBoardPost;
   MintBoardPostConnection: MintBoardPostConnection;
@@ -574,12 +566,6 @@ export interface EditorDataScalarConfig extends GraphQLScalarTypeConfig<Resolver
 export interface IsoDateStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ISODateString'], any> {
   name: 'ISODateString';
 }
-
-export type MintBoardResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoard'] = ResolversParentTypes['MintBoard']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  posts?: Resolver<Array<ResolversTypes['MintBoardPost']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
 
 export type MintBoardAuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['MintBoardAuthor'] = ResolversParentTypes['MintBoardAuthor']> = ResolversObject<{
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -796,7 +782,6 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Decimal?: GraphQLScalarType;
   EditorData?: GraphQLScalarType;
   ISODateString?: GraphQLScalarType;
-  MintBoard?: MintBoardResolvers<ContextType>;
   MintBoardAuthor?: MintBoardAuthorResolvers<ContextType>;
   MintBoardPost?: MintBoardPostResolvers<ContextType>;
   MintBoardPostConnection?: MintBoardPostConnectionResolvers<ContextType>;

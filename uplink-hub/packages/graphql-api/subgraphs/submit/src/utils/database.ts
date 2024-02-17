@@ -240,13 +240,13 @@ export const dbGetPopularMintBoardPosts = async (spaceName: string): Promise<any
             ) AS edition
 
         FROM spaces s
-        LEFT JOIN mintBoards mb ON s.id = mb.spaceId
-        LEFT JOIN mintBoardPosts mbp on mb.id = mbp.boardId
-        LEFT JOIN (
+        JOIN mintBoards mb ON s.id = mb.spaceId
+        JOIN mintBoardPosts mbp on mb.id = mbp.boardId
+        JOIN (
             SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
             FROM users u
         ) AS post_author ON mbp.userId = post_author.id
-        LEFT JOIN (
+        JOIN (
             SELECT e.*
             FROM zoraEditions e
         ) AS edition ON mbp.editionId = edition.id
@@ -296,13 +296,13 @@ export const dbGetPaginatedLatestMintBoardPosts = async (spaceName: string, last
             ) AS edition
 
         FROM spaces s
-        LEFT JOIN mintBoards mb ON s.id = mb.spaceId
-        LEFT JOIN mintBoardPosts mbp on mb.id = mbp.boardId
-        LEFT JOIN (
+        JOIN mintBoards mb ON s.id = mb.spaceId
+        JOIN mintBoardPosts mbp on mb.id = mbp.boardId
+        JOIN (
             SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
             FROM users u
         ) AS post_author ON mbp.userId = post_author.id
-        LEFT JOIN (
+        JOIN (
             SELECT e.*
             FROM zoraEditions e
         ) AS edition ON mbp.editionId = edition.id

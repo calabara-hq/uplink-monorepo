@@ -1,5 +1,3 @@
-import { Space } from "@/types/space";
-import handleNotFound from "../handleNotFound";
 import { MintBoard } from "@/types/mintBoard";
 
 const fetchMintBoard = async (spaceName: string): Promise<MintBoard> => {
@@ -48,7 +46,6 @@ const fetchMintBoard = async (spaceName: string): Promise<MintBoard> => {
     })
         .then((res) => res.json())
         .then((res) => res.data.mintBoard)
-        .then(handleNotFound);
     return data;
 };
 
