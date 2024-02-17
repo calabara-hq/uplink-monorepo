@@ -124,12 +124,13 @@ export const fetchPopularMintBoardPosts = async (spaceName: string): Promise<Arr
     })
         .then((res) => res.json())
         .then((res) => res.data.popularMintBoardPosts)
-        .then(handleNotFound);
+        .then(handleNotFound)
     return data;
 }
 
 
 export const fetchSingleMintboardPost = async (spaceName: string, postId: string): Promise<MintBoardPost> => {
-    const offestPostId = postId + 1;
-    return fetchPaginatedMintBoardPosts(spaceName, offestPostId, 1).then(data => data.posts[0])
+    const offestPostId = parseInt(postId) + 1;
+    const post = await fetchPaginatedMintBoardPosts(spaceName, offestPostId.toString(), 1).then(data => data.posts[0]);
+    return post;
 }

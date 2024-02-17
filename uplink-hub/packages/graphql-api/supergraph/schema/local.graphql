@@ -303,26 +303,24 @@ input MetadataInput
 
 type MintBoard
   @join__type(graph: CONTESTS, key: "id")
-  @join__type(graph: SUBMIT, key: "id", extension: true)
 {
   id: ID!
-  spaceId: ID! @join__field(graph: CONTESTS)
-  space: SpaceStub! @join__field(graph: CONTESTS)
-  created: String! @join__field(graph: CONTESTS)
-  chainId: Int! @join__field(graph: CONTESTS)
-  enabled: Boolean! @join__field(graph: CONTESTS)
-  threshold: Int! @join__field(graph: CONTESTS)
-  boardTitle: String! @join__field(graph: CONTESTS)
-  boardDescription: String! @join__field(graph: CONTESTS)
-  name: String! @join__field(graph: CONTESTS)
-  symbol: String! @join__field(graph: CONTESTS)
-  editionSize: String! @join__field(graph: CONTESTS)
-  publicSalePrice: String! @join__field(graph: CONTESTS)
-  publicSaleStart: String! @join__field(graph: CONTESTS)
-  publicSaleEnd: String! @join__field(graph: CONTESTS)
-  description: String! @join__field(graph: CONTESTS)
-  referrer: String! @join__field(graph: CONTESTS)
-  posts: [MintBoardPost!]! @join__field(graph: SUBMIT)
+  spaceId: ID!
+  space: SpaceStub!
+  created: String!
+  chainId: Int!
+  enabled: Boolean!
+  threshold: Int!
+  boardTitle: String!
+  boardDescription: String!
+  name: String!
+  symbol: String!
+  editionSize: String!
+  publicSalePrice: String!
+  publicSaleStart: String!
+  publicSaleEnd: String!
+  description: String!
+  referrer: String!
 }
 
 type MintBoardAuthor

@@ -15,6 +15,7 @@ import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { Metadata } from "next";
 import { fetchPaginatedMintBoardPosts, fetchPopularMintBoardPosts } from "@/lib/fetch/fetchMintBoardPosts";
 
+
 export async function generateMetadata({
   params,
 }: {

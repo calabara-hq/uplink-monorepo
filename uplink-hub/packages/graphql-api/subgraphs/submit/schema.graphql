@@ -15,10 +15,6 @@ extend type Contest @key(fields: "id") {
   gnosisResults: String @requires(fields: "deadlines {endTime}")
 }
 
-extend type MintBoard @key(fields: "id") {
-  id: ID!
-  posts: [MintBoardPost!]!
-}
 
 type StatEditions {
   edition: ZoraEdition!

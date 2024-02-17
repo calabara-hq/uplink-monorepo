@@ -193,7 +193,7 @@ export const ShareModalContent = ({ submission, handleClose, context }: { submis
     const [success, setSuccess] = useState(false);
 
     const handleShare = () => {
-        const referralLink = session?.user?.address ? `&refferrer=${session?.user?.address}` : ''
+        const referralLink = session?.user?.address ? `&referrer=${session?.user?.address}` : ''
         navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_CLIENT_URL}/submission/${submission.id}?context=${context}${referralLink}`);
         setSuccess(true)
         setTimeout(() => {

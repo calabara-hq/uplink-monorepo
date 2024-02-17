@@ -24,6 +24,18 @@ type NftMetadata = {
     "eth:nft:mint_count": string
 };
 
+const calculateImageAspectRatio = async (url: string) => {
+    try {
+        const fileInfo = await fetch(`https://res.cloudinary.com/drrkx8iye/image/fetch/fl_getinfo/${url}`).then(res => res.json())
+        const { output } = fileInfo;
+        if (output.width / output.height > 1.45) return "1.91:1";
+        return "1:1"
+    } catch (e) {
+        return "1:1"
+    }
+}
+
+
 export async function generateMetadata({
     params,
     searchParams
@@ -37,6 +49,7 @@ export async function generateMetadata({
     const referrer = searchParams?.referrer ?? null
     const warpable = post.edition.chainId === 8453 || post.edition.chainId === 7777777 ? true : false
 
+    const aspect = await calculateImageAspectRatio(parseIpfsUrl(post.edition.imageURI).gateway)
 
     const nftMetadata: NftMetadata = {
         "eth:nft:contract_address": post.edition.contractAddress,
@@ -52,13 +65,13 @@ export async function generateMetadata({
     const fcMetadata: Record<string, string> = {
         "fc:frame": "vNext",
         "fc:frame:image": parseIpfsUrl(post.edition.imageURI).gateway,
+        "fc:frame:image:aspect_ratio": aspect,
     };
 
     const warpableMetadata: Record<string, string> = {
         "fc:frame:button:1": "Mint",
         "fc:frame:button:1:action": "mint",
         "fc:frame:button:1:target": `eip155:${post.edition.chainId}:${post.edition.contractAddress}`,
-        "fc:frame:image:aspect_ratio": "1:1",
         //eip155:8453:0x800243201fb33b86219315f5f44e1795dfb5d97a:19
     }
 

@@ -47,10 +47,6 @@ const fetchActiveContests = async (): Promise<Array<ActiveContest>> => {
     next: { revalidate: 60, tags: ["activeContests"] },
   })
     .then((res) => res.json())
-    .then(data => {
-      console.log(data)
-      return data
-    })
     .then((res) => res.data.activeContests)
     .then(async (contests) => {
       return Promise.all(
