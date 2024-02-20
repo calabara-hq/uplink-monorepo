@@ -292,7 +292,7 @@ const StudioSidebar = ({
                       className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"
                     />
-                </div>
+                  </div>
                 ) : (
                   "Submit"
                 )}
@@ -307,14 +307,14 @@ const StudioSidebar = ({
           userSubmitParams={userSubmitParams}
         />
         {isSuccessModalOpen && data && data.success && (
-          <SuccessModal contestId={contestId} submissionId={data.submissionId} isDroppable={Boolean(state.previewAsset)}/>
+          <SuccessModal contestId={contestId} submissionId={data.submissionId} isDroppable={Boolean(state.previewAsset)} />
         )}
       </div>
     );
   }
 };
 
-const SuccessModal = ({submissionId, isDroppable, contestId}) => {
+const SuccessModal = ({ submissionId, isDroppable, contestId }) => {
   return (
     <div className="modal modal-open bg-black transition-colors duration-500 ease-in-out">
       <div
@@ -425,7 +425,7 @@ const StandardSubmit = ({
     setErrors,
   } = useStandardSubmissionCreator();
   const { contestState } = useContestState();
-  const { title, submissionBody, errors} = submission;
+  const { title, submissionBody, errors } = submission;
   const [isUploading, setIsUploading] = useState(false);
 
   if (!contestState) {
@@ -435,36 +435,36 @@ const StandardSubmit = ({
   } else {
     // contest in submit window
     return (
-      <div className="flex flex-col xl:flex-row-reverse w-11/12 lg:w-9/12 w-9/12 gap-4">
+      <div className="flex flex-col xl:flex-row-reverse w-11/12 lg:w-9/12 gap-4">
         <div className="max-w-none xl:max-w-[400px] w-full">
-        <StudioSidebar
-          state={submission}
-          contestId={params.id}
-          setErrors={setErrors}
-          isUploading={isUploading}
-        />
-      </div>
+          <StudioSidebar
+            state={submission}
+            contestId={params.id}
+            setErrors={setErrors}
+            isUploading={isUploading}
+          />
+        </div>
         <div className="w-full">
           <Boundary size="small">
             <div className="w-11/12 xl:w-9/12 m-auto flex flex-col gap-4">
               <h1 className="text-3xl font-bold text-t1">Create Submission</h1>
-                <SubmissionTitle
-                  title={title}
-                  errors={errors}
-                  setSubmissionTitle={setSubmissionTitle}
-                />
-                <MediaUpload
-                  acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
-                  uploadStatusCallback={(status) => {setIsUploading(status)}}
-                  ipfsImageCallback={(url) => setPreviewAsset(url)}
-                  ipfsAnimationCallback={(url) => setVideoAsset(url)}
-                  maxVideoDuration={140}
-                />
-                <SubmissionBody
-                  submissionBody={submissionBody}
-                  errors={errors}
-                  setSubmissionBody={setSubmissionBody}
-                />
+              <SubmissionTitle
+                title={title}
+                errors={errors}
+                setSubmissionTitle={setSubmissionTitle}
+              />
+              <MediaUpload
+                acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
+                uploadStatusCallback={(status) => { setIsUploading(status) }}
+                ipfsImageCallback={(url) => setPreviewAsset(url)}
+                ipfsAnimationCallback={(url) => setVideoAsset(url)}
+                maxVideoDuration={140}
+              />
+              <SubmissionBody
+                submissionBody={submissionBody}
+                errors={errors}
+                setSubmissionBody={setSubmissionBody}
+              />
             </div>
           </Boundary>
         </div>
