@@ -92,7 +92,7 @@ const prepared_dbSingleContestById = db.query.contests.findFirst({
 // don't show contests that are waiting for announcement tweets
 const prepared_dbActiveContests = db.query.contests.findMany({
     where: (contest: schema.dbContestType) => sqlOps.and(
-        sqlOps.gt(contest.endTime, new Date().toISOString()),
+        sqlOps.gt(contest.endTime, sqlOps.placeholder('now')),
         sqlOps.or(
             sqlOps.and(
                 sqlOps.eq(contest.type, 'twitter'),
@@ -143,7 +143,8 @@ export const dbSingleContestById = async (contestId: number) => {
 }
 
 export const dbActiveContests = async () => {
-    return prepared_dbActiveContests.execute().then(async (contests: schema.dbContestType[]) => await Promise.all(contests.map(postProcessContest)))
+    const now = new Date().toISOString();
+    return prepared_dbActiveContests.execute({ now }).then(async (contests: schema.dbContestType[]) => await Promise.all(contests.map(postProcessContest)))
 }
 
 export const dbMultiContestsBySpaceId = async (spaceId: number) => {
