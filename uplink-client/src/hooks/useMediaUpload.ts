@@ -55,6 +55,7 @@ const isVideo = (mimeType: string) => {
 
 export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) => {
     const [isUploading, setIsUploading] = useState<boolean>(false);
+    const [isThumbnailUploading, setIsThumbnailUploading] = useState<boolean>(false)
     const [animationObjectURL, setAnimationObjectURL] = useState<string>("");
     const [imageObjectURL, setImageObjectURL] = useState<string>("");
     const [thumbnailOptions, setThumbnailOptions] = useState<Array<string>>([])
@@ -67,6 +68,7 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
     const clearFields = () => {
         console.log('clearing fields')
         setIsUploading(false);
+        setIsThumbnailUploading(false);
         URL.revokeObjectURL(animationObjectURL);
         URL.revokeObjectURL(imageObjectURL);
         setAnimationObjectURL("");
@@ -102,6 +104,7 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
             setFileSize(__fileSize);
 
             if (__isVideo) {
+                setIsThumbnailUploading(true);
                 const thumbnails = await generateVideoThumbnails(file, 3, 'jpeg');
                 setThumbnailOptions(thumbnails);
                 setThumbnailBlobIndex(0);
@@ -109,6 +112,7 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
                     .then(res => res.blob())
                 const thumbURI = await IpfsUpload(blob);
                 setImageURI(thumbURI);
+                setIsThumbnailUploading(false);
             }
             else {
                 if (fileSize > 15000000) {
@@ -120,7 +124,6 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
             const objectURL = URL.createObjectURL(file);
             if (__isVideo) {
                 const duration = await calculateDuration(objectURL);
-                console.log(duration)
                 if (duration > maxDuration) {
                     clearFields();
                     throw new MediaUploadError({ code: 2, message: `Videos must be less than ${maxDuration} seconds` });
@@ -149,13 +152,13 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
 
 
     const handleThumbnailChoice = async (index: number) => {
-        setIsUploading(true);
+        setIsThumbnailUploading(true);
         setThumbnailBlobIndex(index)
         const blob = await fetch(thumbnailOptions[index])
             .then(res => res.blob())
         const thumbURI = await IpfsUpload(blob);
         setImageURI(thumbURI);
-        setIsUploading(false);
+        setIsThumbnailUploading(false);
     }
 
 
@@ -163,7 +166,7 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
         upload,
         isVideo: Boolean(animationObjectURL),
         removeMedia: clearFields,
-        isUploading,
+        isUploading: isUploading || isThumbnailUploading,
         animationObjectURL,
         imageObjectURL,
         thumbnailOptions,
