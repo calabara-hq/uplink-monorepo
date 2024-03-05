@@ -43,7 +43,6 @@ type MintBoardUserStats {
   totalMints: Int!
 }
 
-
 type MintBoardPost @key(fields: "id"){
   id: ID!
   spaceId: ID!
@@ -179,6 +178,7 @@ type Query {
   paginatedMintBoardPosts(spaceName: String!, lastCursor: String, limit: Int!): MintBoardPostConnection!
   popularMintBoardPosts(spaceName: String!): [MintBoardPost!]!
   mintBoardUserStats(boardId: ID!): MintBoardUserStats!
+  mintBoardUserStatsByAddress(boardId: ID!, address: String!): MintBoardUserStats!
 }
 
 type createSubmissionResponse {
