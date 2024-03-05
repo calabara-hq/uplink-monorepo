@@ -155,6 +155,9 @@ const queries = {
                 }
             }
             return mintBoardUserStats(boardId, user.address)
+        },
+        async mintBoardUserStatsByAddress(_: any, { boardId, address }: { boardId: string, address: string }) {
+            return mintBoardUserStats(boardId, address)
         }
     },
 

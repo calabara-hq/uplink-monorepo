@@ -169,6 +169,7 @@ export type Query = {
   __typename?: 'Query';
   getUserSubmissionParams: UserSubmissionParams;
   mintBoardUserStats: MintBoardUserStats;
+  mintBoardUserStatsByAddress: MintBoardUserStats;
   paginatedMintBoardPosts: MintBoardPostConnection;
   popularMintBoardPosts: Array<MintBoardPost>;
   popularSubmissions: Array<PopularSubmission>;
@@ -183,6 +184,12 @@ export type QueryGetUserSubmissionParamsArgs = {
 
 
 export type QueryMintBoardUserStatsArgs = {
+  boardId: Scalars['ID']['input'];
+};
+
+
+export type QueryMintBoardUserStatsByAddressArgs = {
+  address: Scalars['String']['input'];
   boardId: Scalars['ID']['input'];
 };
 
@@ -630,6 +637,7 @@ export type PopularSubmissionResolvers<ContextType = any, ParentType extends Res
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   getUserSubmissionParams?: Resolver<ResolversTypes['UserSubmissionParams'], ParentType, ContextType, RequireFields<QueryGetUserSubmissionParamsArgs, 'contestId'>>;
   mintBoardUserStats?: Resolver<ResolversTypes['MintBoardUserStats'], ParentType, ContextType, RequireFields<QueryMintBoardUserStatsArgs, 'boardId'>>;
+  mintBoardUserStatsByAddress?: Resolver<ResolversTypes['MintBoardUserStats'], ParentType, ContextType, RequireFields<QueryMintBoardUserStatsByAddressArgs, 'address' | 'boardId'>>;
   paginatedMintBoardPosts?: Resolver<ResolversTypes['MintBoardPostConnection'], ParentType, ContextType, RequireFields<QueryPaginatedMintBoardPostsArgs, 'limit' | 'spaceName'>>;
   popularMintBoardPosts?: Resolver<Array<ResolversTypes['MintBoardPost']>, ParentType, ContextType, RequireFields<QueryPopularMintBoardPostsArgs, 'spaceName'>>;
   popularSubmissions?: Resolver<Array<ResolversTypes['PopularSubmission']>, ParentType, ContextType>;

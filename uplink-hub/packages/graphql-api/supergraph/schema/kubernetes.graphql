@@ -488,6 +488,7 @@ type Query
   paginatedMintBoardPosts(spaceName: String!, lastCursor: String, limit: Int!): MintBoardPostConnection! @join__field(graph: SUBMIT)
   popularMintBoardPosts(spaceName: String!): [MintBoardPost!]! @join__field(graph: SUBMIT)
   mintBoardUserStats(boardId: ID!): MintBoardUserStats! @join__field(graph: SUBMIT)
+  mintBoardUserStatsByAddress(boardId: ID!, address: String!): MintBoardUserStats! @join__field(graph: SUBMIT)
   me: User @join__field(graph: USER)
   user(userIdentifier: String!): User @join__field(graph: USER)
   getUserVotingParams(contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
