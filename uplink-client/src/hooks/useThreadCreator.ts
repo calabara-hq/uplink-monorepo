@@ -260,7 +260,7 @@ export const useThreadCreator = (initialThread?: ThreadItem[]) => {
                 },
                 (thumbnails) => {
                     setTweetVideoThumbnailOptions(id, thumbnails);
-                    setTweetVideoThumbnailBlobIndex(id, 0);
+                    setTweetVideoThumbnailBlobIndex(id, 1);
                 },
                 (size) => {
                     setTweetAssetSize(id, size)
@@ -384,7 +384,10 @@ export const useThreadCreator = (initialThread?: ThreadItem[]) => {
         setTweetVideoThumbnailBlobIndex,
         handleFileChange,
         validateThread,
-        resetThread: reset
+        resetThread: reset,
+        setTweetPrimaryAssetUrl,
+        setTweetVideoThumbnailUrl,
+        setTweetPrimaryAssetBlob,
     }
 
 };
