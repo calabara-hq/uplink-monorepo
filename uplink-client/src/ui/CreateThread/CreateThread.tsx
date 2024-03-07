@@ -76,7 +76,7 @@ const RenderMedia = ({
           </button>
         )}
         <RenderStandardVideoWithLoader
-          videoUrl={threadItem.primaryAssetBlob}
+          videoUrl={threadItem.primaryAssetBlob || ""}
           posterUrl={
             threadItem.videoThumbnailBlobIndex !== null
               ? threadItem.videoThumbnailOptions[
@@ -244,7 +244,7 @@ const TweetFooter = ({
       <div className="flex flex-col gap-5">
         <span className="loading loading-spinner text-primary"></span>
 
-        {tweet.isVideo && tweet?.videoThumbnailOptions?.length > 0 && (
+        {/* {tweet.isVideo && tweet?.videoThumbnailOptions?.length > 0 && (
           <div className="flex flex-col sm:flex-row gap-2 items-center justify-center bg-base-100 border border-border p-2 w-fit m-auto rounded">
             <p className="self-center text-xs">Thumbnail</p>
             <div className="grid grid-rows-2 sm:grid-rows-1 grid-cols-3 sm:grid-cols-5 gap-4 ">
@@ -263,8 +263,8 @@ const TweetFooter = ({
                       width={64}
                       height={64}
                       className={`hover:opacity-50 rounded aspect-video object-contain ${tweet.videoThumbnailBlobIndex === thumbIdx
-                          ? "opacity-50"
-                          : ""
+                        ? "opacity-50"
+                        : ""
                         }`}
                     />
 
@@ -286,7 +286,7 @@ const TweetFooter = ({
               </Input>
             </div>
           </div>
-        )}
+        )} */}
         <div className="w-full h-0.5 bg-border"></div>
         <div className="flex items-center justify-start w-full ml-auto">
           <Input
