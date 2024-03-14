@@ -60,7 +60,7 @@ export const CreateBoardPost = ({ spaceName, displayName, chainId, referrer, tem
                         uploadStatusCallback={uploadStatusCallback}
                         ipfsImageCallback={ipfsImageCallback}
                         ipfsAnimationCallback={ipfsAnimationCallback}
-                        maxVideoDuration={140}
+                        maxVideoDuration={210}
                     />
 
                 </div>
@@ -190,7 +190,7 @@ const CreateEditionButton = ({
                             reset();
                             resetReserve();
                         }
-                       // mutateLiveBoard();
+                        // mutateLiveBoard();
                         return toast.success('Drop created!')
                     });
                 } catch (e) {
