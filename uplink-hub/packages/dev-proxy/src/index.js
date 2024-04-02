@@ -40,8 +40,8 @@ app.all('*', (req, res) => {
     }
 });
 
-server.listen(8080, () => {
-    console.log('Dev proxy listening on port 8080')
+server.listen(process.env.DEV_PROXY_SERVICE_PORT, () => {
+    console.log('Dev proxy listening on port 5008')
 });
 
 proxy.on('error', function (err, req, res) {
