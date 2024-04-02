@@ -306,7 +306,7 @@ const BoardForm = ({ spaceName, initialConfig }: { spaceName: string, initialCon
                             } />
 
                         <Options label={"Mint Duration"} options={[{ value: "3 days", label: "3 days" }, { value: "week", label: "1 week" }, { value: "forever", label: "Forever" }]} selected={state.publicSaleEnd} onSelect={(option: Option) => setField("publicSaleEnd", option.value)} />
-                        <BasicInput inputType="text" label="Referral Reward Address" value={state.referrer} placeholder={"0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"} onChange={(e) => setField("referrer", e.target.value)} error={state.errors?.referrer?._errors} />
+                        <BasicInput inputType="text" label="Space Treasury Address" value={state.referrer} placeholder={"0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"} onChange={(e) => setField("referrer", e.target.value)} error={state.errors?.referrer?._errors} />
                     </div>
                     <div className="flex flex-col gap-2 bg-base-100 w-full p-6 rounded-lg">
                         <div className="flex flex-row gap-2">

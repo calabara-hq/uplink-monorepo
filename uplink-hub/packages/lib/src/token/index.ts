@@ -197,6 +197,9 @@ export class TokenController {
             this.provider.getBlock('finalized')
         ]);
 
+        console.log('dater block', daterBlock.block);
+        console.log('latest finalized block', latestFinalizedBlock.number);
+
         // if provided timestamp produces a non-finalized block, use the latest finalized block
         const finalBlock = Math.min(daterBlock.block, latestFinalizedBlock.number);
 

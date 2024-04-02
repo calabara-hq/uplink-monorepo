@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "env:test": "cp .env.test .env",
-    "env:dev": "cp .env.dev .env",
+    "env:dev": "cp .env.prod .env",
     "env:staging": "cp .env.staging .env",
     "env:prod": "cp .env.prod .env",
     "test:unit-vote": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace vote test",
@@ -21,7 +21,7 @@
     "patch-db": "yarn run env:dev && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib patch-db",
     "build:supergraph": "sh -c 'cd ./packages/graphql-api && make config compose'",
     "start:supergraph": "yarn run env:dev && cross-env ENV_PATH=./.env && dotenv -e .env -- sh -c 'cd ./packages/graphql-api && make config compose run-router-local'",
-    "dev": "yarn run env:dev && yarn workspace lib build && cross-env ENV_PATH=./.env dotenv -- concurrently --kill-others -p name -n router,dev-proxy,auth,spaces,contests,submit,vote,user \"yarn run start:supergraph\" \"yarn workspace dev-proxy dev\" \"yarn workspace auth dev\" \"yarn workspace spaces dev\" \"yarn workspace contests dev\" \"yarn workspace submit dev\" \"yarn workspace vote dev\" \"yarn workspace user dev\"",
+    "dev": "yarn run env:dev && yarn workspace lib build && cross-env ENV_PATH=./.env dotenv -- concurrently --kill-others -p name -n router,auth,spaces,contests,submit,vote,user,dev-proxy \"yarn run start:supergraph\" \"yarn workspace auth dev\" \"yarn workspace spaces dev\" \"yarn workspace contests dev\" \"yarn workspace submit dev\" \"yarn workspace vote dev\" \"yarn workspace user dev\" \"yarn workspace dev-proxy dev\"",
     "tweet": "yarn run env:dev && cross-env ENV_PATH=./.env dotenv -- yarn workspace tweet dev"
   },
   "workspaces": [
