@@ -175,6 +175,7 @@ export type Query = {
   popularSubmissions: Array<PopularSubmission>;
   spaceStatistics: SpaceStats;
   submission?: Maybe<Submission>;
+  trendingSpaces: Array<TrendingSpace>;
 };
 
 
@@ -213,6 +214,11 @@ export type QuerySpaceStatisticsArgs = {
 
 export type QuerySubmissionArgs = {
   submissionId: Scalars['ID']['input'];
+};
+
+
+export type QueryTrendingSpacesArgs = {
+  limit: Scalars['Int']['input'];
 };
 
 export type RestrictionResult = {
@@ -308,6 +314,14 @@ export type ThreadPayload = {
   previewAsset?: InputMaybe<Scalars['SubmissionAssetUrl']['input']>;
   text?: InputMaybe<Scalars['String']['input']>;
   videoAsset?: InputMaybe<Scalars['SubmissionAssetUrl']['input']>;
+};
+
+export type TrendingSpace = {
+  __typename?: 'TrendingSpace';
+  displayName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  logoUrl: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type TwitterSubmissionPayload = {
@@ -483,6 +497,7 @@ export type ResolversTypes = ResolversObject<{
   Submit_Token: ResolverTypeWrapper<Submit_Token>;
   Submit_TokenRestriction: ResolverTypeWrapper<Submit_TokenRestriction>;
   ThreadPayload: ThreadPayload;
+  TrendingSpace: ResolverTypeWrapper<TrendingSpace>;
   TwitterSubmissionPayload: TwitterSubmissionPayload;
   UserSubmissionParams: ResolverTypeWrapper<UserSubmissionParams>;
   ZoraEdition: ResolverTypeWrapper<ZoraEdition>;
@@ -528,6 +543,7 @@ export type ResolversParentTypes = ResolversObject<{
   Submit_Token: Submit_Token;
   Submit_TokenRestriction: Submit_TokenRestriction;
   ThreadPayload: ThreadPayload;
+  TrendingSpace: TrendingSpace;
   TwitterSubmissionPayload: TwitterSubmissionPayload;
   UserSubmissionParams: UserSubmissionParams;
   ZoraEdition: ZoraEdition;
@@ -643,6 +659,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   popularSubmissions?: Resolver<Array<ResolversTypes['PopularSubmission']>, ParentType, ContextType>;
   spaceStatistics?: Resolver<ResolversTypes['SpaceStats'], ParentType, ContextType, RequireFields<QuerySpaceStatisticsArgs, 'spaceName'>>;
   submission?: Resolver<Maybe<ResolversTypes['Submission']>, ParentType, ContextType, RequireFields<QuerySubmissionArgs, 'submissionId'>>;
+  trendingSpaces?: Resolver<Array<ResolversTypes['TrendingSpace']>, ParentType, ContextType, RequireFields<QueryTrendingSpacesArgs, 'limit'>>;
 }>;
 
 export type RestrictionResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RestrictionResult'] = ResolversParentTypes['RestrictionResult']> = ResolversObject<{
@@ -716,6 +733,14 @@ export type Submit_TokenResolvers<ContextType = any, ParentType extends Resolver
 export type Submit_TokenRestrictionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Submit_TokenRestriction'] = ResolversParentTypes['Submit_TokenRestriction']> = ResolversObject<{
   threshold?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
   token?: Resolver<ResolversTypes['Submit_Token'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TrendingSpaceResolvers<ContextType = any, ParentType extends ResolversParentTypes['TrendingSpace'] = ResolversParentTypes['TrendingSpace']> = ResolversObject<{
+  displayName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  logoUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -808,6 +833,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Submit_Restriction?: Submit_RestrictionResolvers<ContextType>;
   Submit_Token?: Submit_TokenResolvers<ContextType>;
   Submit_TokenRestriction?: Submit_TokenRestrictionResolvers<ContextType>;
+  TrendingSpace?: TrendingSpaceResolvers<ContextType>;
   UserSubmissionParams?: UserSubmissionParamsResolvers<ContextType>;
   ZoraEdition?: ZoraEditionResolvers<ContextType>;
   ZoraSaleConfig?: ZoraSaleConfigResolvers<ContextType>;

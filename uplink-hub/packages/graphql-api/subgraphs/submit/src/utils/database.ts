@@ -259,6 +259,22 @@ export const dbGetPopularMintBoardPosts = async (spaceName: string): Promise<any
         .then((sorted: Array<MintBoardPost>) => sorted.slice(0, 20))
 }
 
+export const dbTrendingSpaces = async(limit: number) => {
+    return db.execute(sqlOps.sql`
+        SELECT s.name, s.id, s.logoUrl, s.name, s.displayName, COUNT(DISTINCT mbp.id) AS totalPosts
+        FROM mintBoardPosts mbp
+        JOIN mintBoards mb ON mbp.boardId = mb.id
+        JOIN spaces s ON mb.spaceId = s.id
+        WHERE mbp.created > NOW() - INTERVAL 1 DAY
+        GROUP BY s.id
+        ORDER BY totalPosts DESC
+        LIMIT ${limit}
+    `)
+    .then((data: any) => data.rows);
+
+}
+
+
 export const dbGetPaginatedLatestMintBoardPosts = async (spaceName: string, lastCursor: string | null, limit: number): Promise<any> => {
     let query = sqlOps.sql`
         SELECT

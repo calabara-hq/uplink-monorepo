@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 import { computeSubmissionParams } from "../utils/insert.js";
 import { spaceStatistics } from "../utils/stats.js";
 import { mintBoardUserStats, paginatedMintBoardPosts } from "../utils/mintBoard.js";
+import { trendingSpaces } from "../utils/trendingSpaces.js";
 dotenv.config();
 
 const authController = new AuthorizationController(process.env.REDIS_URL!);
@@ -158,6 +159,9 @@ const queries = {
         },
         async mintBoardUserStatsByAddress(_: any, { boardId, address }: { boardId: string, address: string }) {
             return mintBoardUserStats(boardId, address)
+        },
+        async trendingSpaces(){
+            return trendingSpaces(12);
         }
     },
 
