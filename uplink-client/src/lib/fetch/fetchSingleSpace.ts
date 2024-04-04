@@ -39,6 +39,10 @@ const fetchSingleSpace = async (name: string): Promise<Space> => {
     }),
     next: { tags: [`space/${name}`], revalidate: 60 },
   })
+    // .then(data =>{
+    //   console.log(data);
+    //   return data;
+    // })
     .then((res) => res.json())
     .then((res) => res.data.space)
     .then(handleNotFound);

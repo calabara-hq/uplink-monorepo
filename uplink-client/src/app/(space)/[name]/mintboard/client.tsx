@@ -53,12 +53,28 @@ const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }
 
     return (
         <div
-            className="bg-base-100 relative flex flex-col gap-2 rounded-lg w-full p-2"
+            className="relative flex flex-col gap-2 rounded-lg w-full p-2"
             ref={ref}
             onMouseEnter={() => !isMobileDevice && setIsActive(true)}
             onMouseLeave={() => !isMobileDevice && setIsActive(false)}
         >
-            <h2 className="text-lg font-semibold">{name}</h2>
+
+            {animationURI ? (
+                <RenderInteractiveVideoWithLoader videoUrl={siteAnimationURI.gateway} posterUrl={siteImageURI.gateway} isActive={isActive} />
+            ) : (
+                <ImageWrapper>
+                    <UplinkImage
+                        src={siteImageURI.gateway}
+                        draggable={false}
+                        alt="submission image"
+                        fill
+                        sizes="30vw"
+                        className="object-contain w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
+                    />
+                </ImageWrapper>
+            )
+            }
+                        {/* <h2 className="text-lg font-semibold">{name}</h2> */}
             <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
                 <UserAvatar user={post.author} size={28} />
                 <h3 className="break-all italic text-sm">
@@ -72,21 +88,7 @@ const Post = ({ post, footer }: { post: MintBoardPost, footer: React.ReactNode }
                     <span />
                 )}
             </div>
-            {animationURI ? (
-                <RenderInteractiveVideoWithLoader videoUrl={siteAnimationURI.gateway} posterUrl={siteImageURI.gateway} isActive={isActive} />
-            ) : (
-                <ImageWrapper>
-                    <UplinkImage
-                        src={siteImageURI.gateway}
-                        draggable={false}
-                        alt="submission image"
-                        fill
-                        sizes="30vw"
-                        className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
-                    />
-                </ImageWrapper>
-            )
-            }
+            <div className="bg-base-100 w-full h-0.5" />
             {footer}
         </div >
     )
@@ -194,26 +196,10 @@ export const PostSkeleton = () => {
         <div className="flex flex-col gap-4 w-full">
             <div className="flex w-full justify-evenly items-center">
                 <div className="w-10/12 sm:w-full m-auto grid gap-4 submission-columns auto-rows-fr">
-                    <div className="space-y-2 border-border border p-2 rounded-xl h-[318px] shimmer">
-                        <div className="h-5 w-2/3 rounded-lg bg-base-100" />
-                        <div className="h-3 w-1/3 rounded-lg bg-base-100" />
-                        <div className="h-4 w-3/4 rounded-lg bg-base-100" />
-                    </div>
-                    <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer">
-                        <div className="h-5 w-2/3 rounded-lg bg-base-100" />
-                        <div className="h-3 w-1/3 rounded-lg bg-base-100" />
-                        <div className="h-4 w-3/4 rounded-lg bg-base-100" />
-                    </div>
-                    <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer">
-                        <div className="h-5 w-2/3 rounded-lg bg-base-100" />
-                        <div className="h-3 w-1/3 rounded-lg bg-base-100" />
-                        <div className="h-4 w-3/4 rounded-lg bg-base-100" />
-                    </div>
-                    <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer">
-                        <div className="h-5 w-2/3 rounded-lg bg-base-100" />
-                        <div className="h-3 w-1/3 rounded-lg bg-base-100" />
-                        <div className="h-4 w-3/4 rounded-lg bg-base-100" />
-                    </div>
+                    <div className="space-y-2 border-border border p-2 rounded-xl h-[318px] shimmer"/>
+                    <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer"/>
+                    <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer"/>
+                    <div className="space-y-2 lg:col-span-1 border-border border p-2 rounded-xl h-[318px] shimmer"/>
                 </div>
             </div>
         </div>
@@ -256,7 +242,7 @@ const PostFooter = ({ post, spaceName, handleMint, handleShare, handleManage, ad
     const remainingTime = useMintTimer(post);
     return (
         <div className="flex flex-col w-full">
-            <div className="p-2 w-full" />
+            {/* <div className="p-2 w-full" /> */}
             <div className="flex w-full items-center gap-2">
                 <AdminWrapper admins={admins}>
                     <button onClick={(event) => handleManage(event, post)} className="btn btn-sm btn-ghost text-t2 w-fit" >
@@ -267,12 +253,6 @@ const PostFooter = ({ post, spaceName, handleMint, handleShare, handleManage, ad
                     <ShareButton spaceName={spaceName} post={post} onClick={(event) => handleShare(event, post)} />
                 </div>
                 <div className="flex gap-2 items-center ml-auto ">
-                    {remainingTime && <MintButton
-                        styleOverride="btn btn-sm normal-case m-auto btn-ghost hover:bg-primary bg-gray-800 text-primary hover:text-black 
-                                                                hover:rounded-xl rounded-3xl transition-all duration-300"
-                        onClick={(event) => handleMint(event, post)}
-                    />
-                    }
 
                     {remainingTime && (
                         <div className="flex flex-row gap-2 items-center bg-t2 bg-opacity-5 text-t2 p-2 rounded-lg ">
@@ -280,6 +260,12 @@ const PostFooter = ({ post, spaceName, handleMint, handleShare, handleManage, ad
                             <p className="text-sm">{remainingTime}</p>
                         </div>
                     )}
+                    {remainingTime && <MintButton
+                        styleOverride="btn btn-sm normal-case m-auto btn-ghost hover:bg-primary bg-gray-800 text-primary hover:text-black 
+                                                                hover:rounded-xl rounded-3xl transition-all duration-300"
+                        onClick={(event) => handleMint(event, post)}
+                    />
+                    }
                 </div>
             </div>
         </div>
@@ -438,7 +424,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
             <div className="w-10/12 sm:w-full m-auto grid gap-4 xl:gap-8 submission-columns auto-rows-fr ">
                 {isPopular ?
                     (popularPosts.map((post) => (
-                        <div className="cursor-pointer hover:shadow-lg hover:shadow-blue-600 rounded-lg "
+                        <div className="cursor-pointer shadow-lg shadow-black hover:shadow-[#262626] no-select rounded-lg"
                             key={post.id}
                             onClick={() => openMintModal(post)}
                         >
@@ -461,7 +447,7 @@ export const RenderPosts = ({ spaceName, isPopular }: { spaceName: string, isPop
                         pages.map((page, i) => (
                             <React.Fragment key={i}>
                                 {page.posts.map((post) => (
-                                    <div className="cursor-pointer hover:shadow-lg hover:shadow-blue-600 rounded-lg "
+                                    <div className="cursor-pointer shadow-lg shadow-black hover:shadow-[#262626] no-select rounded-lg"
                                         key={post.id}
                                         onClick={() => openMintModal(post)}
                                     >
