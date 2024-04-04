@@ -8,6 +8,10 @@ import Swiper from "@/ui/Swiper/Swiper";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import { CategoryLabel, RemainingTimeLabel, StatusLabel } from "@/ui/ContestLabels/ContestLabels";
 import { Boundary } from "@/ui/Boundary/Boundary";
+import fetchTrendingSpaces from "@/lib/fetch/fetchTrendingSpaces";
+import { SearchSpaces } from "./client";
+import { HiTrendingUp } from "react-icons/hi";
+
 // import fetchPopularSubmissions from "@/lib/fetch/fetchPopularSubmissions";
 // import { RenderPopularSubmissions } from "@/ui/Submission/SubmissionDisplay";
 
@@ -122,8 +126,72 @@ const ActiveContests = async () => {
   return null;
 };
 
-const ListSpaces = async () => {
-  const spaces = await fetchSpaces();
+const TrendingSpaces = async () => {
+  const trendingSpaces = await fetchTrendingSpaces();
+  return (
+    <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
+      {trendingSpaces.map((space: any, index: number) => {
+        return (
+          <Link
+            key={index}
+            draggable={false}
+            href={`${space.name}`}
+            className="relative flex flex-col items-center justify-center gap-4 
+              cursor-pointer border border-border rounded-2xl p-4 full overflow-hidden w-full transform 
+              transition-transform duration-300 hoverCard will-change-transform no-select animate-fadeIn"
+          >
+            <div className="relative w-28 h-28">
+              <UplinkImage
+                src={space.logoUrl}
+                fill
+                alt="spaceLogo"
+                className="object-cover mask mask-circle"
+                sizes={"10vw"}
+              />
+            </div>
+            <div className="flex items-center justify-center gap-1 truncate">
+              <h1 className="overflow-hidden text-xl font-semibold">
+                {space.displayName.length > 15
+                  ? space.displayName.slice(0, 15) + "..."
+                  : space.displayName}
+              </h1>
+            </div>
+            <span className="absolute top-2 right-3"><HiTrendingUp className="w-6 h-6 text-success"/></span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+const isFuzzyMatch = (str1: string, str2: string, maxEdits: number = 2) => {
+  let edits = 0;
+  const len = Math.min(str1.length, str2.length);
+  for (let i = 0; i < len; i++) {
+    if (str1[i] !== str2[i]) {
+      edits++;
+      if (edits > maxEdits) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+const normalizeString = (str: string) => {
+  return str.trim().replace(/\s+/g, '').toLowerCase();
+}
+
+const AllSpaces = async ({searchTerm}: {searchTerm: string | null}) => {
+  let spaces = await fetchSpaces();
+
+  if(searchTerm){
+    const decodedSearchTerm = decodeURIComponent(searchTerm);
+    spaces = spaces.filter((space) => {
+      return isFuzzyMatch(normalizeString(space.displayName), normalizeString(decodedSearchTerm));
+    });
+  }
+
   return (
     <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
       {spaces.map((space: any, index: number) => {
@@ -188,33 +256,73 @@ const ActiveContestsSkeleton = () => {
   )
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+  const isAll = searchParams?.all === "true";
+  const isTrending = !isAll;
+  const searchTerm = searchParams?.query as string || null;
   return (
     <div className="flex flex-col w-11/12 lg:w-9/12 m-auto justify-center py-12 gap-4">
       {/* <PopularSubmissions /> */}
       <Suspense fallback={<ActiveContestsSkeleton />}>
         <ActiveContests />
       </Suspense>
-      <div className="flex flex-col gap-4">
-        <Boundary size="small">
-          <div className="flex flex-row gap-2 items-center">
-            <h1 className="font-bold text-xl text-t1">Spaces</h1>
-            <div className="ml-auto">
-              <Link
-                className="primary-btn"
-                href="/spacebuilder/create"
-                draggable={false}
-              >
-                New Space
-              </Link>
+      <div className="flex flex-col gap-4 w-full">
+        <div className="rounded-lg border border-dashed p-3 lg:p-5 border-gray-700 ">
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row gap-2 items-center">
+              <h1 className="font-bold text-xl text-t1">Spaces</h1>
+              <div className="ml-auto">
+                <Link
+                  className="primary-btn"
+                  href="/spacebuilder/create"
+                  draggable={false}
+                >
+                  New Space
+                </Link>
+              </div>
             </div>
-          </div>
-        </Boundary>
+            <div className="flex flex-row gap-2 items-center">
+              <div className="flex flex-col gap-1">
+                <Link
+                  href={`/explore`}
+                  className={`hover:text-t1 ${isTrending ? "text-t1" : "text-t2"}`}
+                  scroll={false}
+                  draggable={false}
+                >
+                  Trending
+                </Link>
+                <div className={`${isTrending ? "bg-t1" : "bg-transparent"} w-full h-0.5 animate-scrollInX`} />
+              </div>
+              <div className="flex flex-col gap-1 w-fit">
+                <Link
+                  href={`/explore?all=true`}
+                  className={`hover:text-t1 ${isAll ? "text-t1" : "text-t2"}`}
+                  scroll={false}
+                  draggable={false}
+                >
+                  All
+                </Link>
+                <div className={`${isAll ? "bg-t1" : "bg-transparent"} w-full h-0.5 animate-scrollInX`} />
+              </div>
+              <div className="ml-auto hidden md:flex">
+                <SearchSpaces/>
+              </div>  
+            </div>
+            <div className="p-2"/>
+            <Suspense fallback={<SpaceListSkeleton />}>
+              {isTrending && 
+                <TrendingSpaces/>
+              }  
+            </Suspense>
         <div className="w-full h-0.5 bg-base-100 rounded-lg" />
           <Suspense fallback={<SpaceListSkeleton />}>
-            <ListSpaces />
+            {isAll && 
+              <AllSpaces searchTerm={searchTerm}/>
+            }
           </Suspense>
-      </div>
+        </div>
+        </div>
+      </div> 
     </div>
   );
 }

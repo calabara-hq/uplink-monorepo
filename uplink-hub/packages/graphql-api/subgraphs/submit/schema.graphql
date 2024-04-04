@@ -3,7 +3,6 @@ scalar EditorData
 scalar SubmissionAssetUrl
 scalar ISODateString
 
-
 extend type Contest @key(fields: "id") {
   id: ID!
   deadlines: Deadlines! @external
@@ -14,7 +13,6 @@ extend type Contest @key(fields: "id") {
     )
   gnosisResults: String @requires(fields: "deadlines {endTime}")
 }
-
 
 type StatEditions {
   edition: ZoraEdition!
@@ -43,7 +41,7 @@ type MintBoardUserStats {
   totalMints: Int!
 }
 
-type MintBoardPost @key(fields: "id"){
+type MintBoardPost @key(fields: "id") {
   id: ID!
   spaceId: ID!
   created: String!
@@ -54,7 +52,7 @@ type MintBoardPost @key(fields: "id"){
   totalMints: Int!
 }
 
-type ZoraEdition @key(fields: "id"){
+type ZoraEdition @key(fields: "id") {
   id: ID!
   chainId: Int!
   contractAddress: String!
@@ -69,7 +67,6 @@ type ZoraEdition @key(fields: "id"){
   animationURI: String!
   imageURI: String!
   referrer: String!
-
 }
 
 type ZoraSaleConfig {
@@ -82,7 +79,7 @@ type ZoraSaleConfig {
   presaleMerkleRoot: String!
 }
 
-type MintBoardAuthor @key(fields: "id"){
+type MintBoardAuthor @key(fields: "id") {
   id: ID!
   address: String!
   userName: String
@@ -168,17 +165,30 @@ type UserSubmissionParams {
   userSubmissions: [Submission!]!
 }
 
+type TrendingSpace {
+  id: ID!
+  name: String!
+  displayName: String!
+  logoUrl: String!
+}
+
 type Query {
   submission(submissionId: ID!): Submission
   popularSubmissions: [PopularSubmission!]!
-  getUserSubmissionParams(
-    contestId: ID!
-  ): UserSubmissionParams!
+  getUserSubmissionParams(contestId: ID!): UserSubmissionParams!
   spaceStatistics(spaceName: String!): SpaceStats!
-  paginatedMintBoardPosts(spaceName: String!, lastCursor: String, limit: Int!): MintBoardPostConnection!
+  paginatedMintBoardPosts(
+    spaceName: String!
+    lastCursor: String
+    limit: Int!
+  ): MintBoardPostConnection!
   popularMintBoardPosts(spaceName: String!): [MintBoardPost!]!
   mintBoardUserStats(boardId: ID!): MintBoardUserStats!
-  mintBoardUserStatsByAddress(boardId: ID!, address: String!): MintBoardUserStats!
+  mintBoardUserStatsByAddress(
+    boardId: ID!
+    address: String!
+  ): MintBoardUserStats!
+  trendingSpaces(limit: Int!): [TrendingSpace!]!
 }
 
 type createSubmissionResponse {
@@ -247,7 +257,6 @@ type deletePostResponse {
   success: Boolean!
 }
 
-
 type Mutation {
   createSubmission(
     contestId: ID!
@@ -264,24 +273,15 @@ type Mutation {
     chainId: Int!
     dropConfig: DropConfig!
   ): createUserDropResponse!
-  createMintBoardPost (
+  createMintBoardPost(
     spaceName: String!
     contractAddress: String!
     chainId: Int!
     dropConfig: DropConfig!
   ): createMintBoardPostResponse!
-  registerMint (
-    editionId: ID!
-    amount: Int!
-  ) : registerMintResponse!
-  deleteContestSubmission (
-    submissionId: ID!
-    contestId: ID!
-  ): deletePostResponse
-  deleteMintboardPost (
-    postId: ID!
-    spaceId: ID!
-  ): deletePostResponse
+  registerMint(editionId: ID!, amount: Int!): registerMintResponse!
+  deleteContestSubmission(submissionId: ID!, contestId: ID!): deletePostResponse
+  deleteMintboardPost(postId: ID!, spaceId: ID!): deletePostResponse
 }
 
 extend schema

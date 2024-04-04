@@ -489,6 +489,7 @@ type Query
   popularMintBoardPosts(spaceName: String!): [MintBoardPost!]! @join__field(graph: SUBMIT)
   mintBoardUserStats(boardId: ID!): MintBoardUserStats! @join__field(graph: SUBMIT)
   mintBoardUserStatsByAddress(boardId: ID!, address: String!): MintBoardUserStats! @join__field(graph: SUBMIT)
+  trendingSpaces(limit: Int!): [TrendingSpace!]! @join__field(graph: SUBMIT)
   me: User @join__field(graph: USER)
   user(userIdentifier: String!): User @join__field(graph: USER)
   getUserVotingParams(contestId: ID!): UserVotingParams! @join__field(graph: VOTE)
@@ -817,6 +818,15 @@ enum TokenStandard
   ERC20 @join__enumValue(graph: SPACES)
   ERC721 @join__enumValue(graph: SPACES)
   ERC1155 @join__enumValue(graph: SPACES)
+}
+
+type TrendingSpace
+  @join__type(graph: SUBMIT)
+{
+  id: ID!
+  name: String!
+  displayName: String!
+  logoUrl: String!
 }
 
 input TwitterSubmissionPayload
