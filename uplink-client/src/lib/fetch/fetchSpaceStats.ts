@@ -42,7 +42,7 @@ const fetchSpaceStats = async (spaceName: string): Promise<SpaceStats> => {
                 spaceName,
             },
         }),
-        next: { tags: [`spaceStats/${spaceName}`], revalidate: 86400 },
+        next: { tags: [`spaceStats/${spaceName}`], revalidate: 3600 },
     })
         .then((res) => res.json())
         .then((res) => res.data.spaceStatistics)
