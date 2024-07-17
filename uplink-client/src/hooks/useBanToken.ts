@@ -5,8 +5,7 @@ import { ChannelToken, ChannelTokenIntent, ContractID, isTokenIntent } from "@/t
 import { useCallback } from "react"
 import toast from "react-hot-toast";
 import useSWRMutation from "swr/mutation";
-import { usePaginatedMintBoardPosts } from "./useMintBoardPosts";
-import { usePaginatedMintBoardIntents } from "./useTokens";
+
 
 
 const banTokenV2 = async (url, { arg }: {

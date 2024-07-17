@@ -12,6 +12,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@tx-kit/sdk": "^0.1.0-alpha.0",
     "axios": "^1.4.0",
     "busboy": "^1.6.0",
     "dotenv": "^16.0.3",
