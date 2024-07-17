@@ -3,8 +3,9 @@ import { Request } from "express";
 import { Address } from "viem";
 import { DeferredTokenIntentWithSignature, IToken } from "@tx-kit/sdk";
 
-export interface ContexedRequest extends Request {
+export interface ContexedRequest<T = any> extends Request {
     context: Context;
+    body: T;
 }
 
 export type ContractID = `0x${string}-${number}`;

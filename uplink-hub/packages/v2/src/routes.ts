@@ -2,13 +2,10 @@ import express, { Request, Response, NextFunction } from 'express';
 import * as channelController from './controllers/channel.js'
 import * as tokenController from './controllers/token.js'
 const v2 = express();
-import bodyParser from 'body-parser';
 import cookie from 'cookie';
 import { Context, xor_compare } from 'lib';
 import { AuthorizationError, InvalidArgumentError } from './errors.js';
 import { ContexedRequest } from './types.js';
-
-v2.use(bodyParser.json())
 
 
 const parseHeader = (headerArray: string[] | string) => {
