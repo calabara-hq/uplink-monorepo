@@ -106,70 +106,16 @@ export const ChainLabel = ({ chainId, px }: { chainId: number, px: number }) => 
     )
   }
 
-  if (chainId === 10) {
+  if (chainId === 84532) {
     return (
       <div
-        className="tooltip tooltip-top cursor-pointer"
-        data-tip="Optimism"
-      >
-        <OpChainLogo px={px} />
-
-      </div>
-    )
-  }
-
-  if (chainId === 7777777) {
-    return (
-      <div
-        className="tooltip tooltip-top cursor-pointer"
-        data-tip="Zora"
-      >
-        <ZoraChainLogo px={px} />
-
-      </div>
-    )
-  }
-
-
-  if (chainId === 84531) {
-    return (
-      <div
-        className="tooltip tooltip-top cursor-pointer"
-        data-tip="Base Testnet"
+        className="flex items-center gap-2 tooltip tooltip-top cursor-pointer"
+        data-tip="Base Sepolia"
       >
         <BaseChainLogo px={px} />
-
       </div>
     )
   }
-
-
-  if (chainId === 420) {
-    return (
-      <div
-        className="tooltip tooltip-top cursor-pointer"
-        data-tip="Optimism Goerli"
-      >
-        <OpChainLogo px={px} />
-
-      </div>
-    )
-  }
-
-  if (chainId === 999) {
-    return (
-      <div
-        className="tooltip tooltip-top cursor-pointer"
-        data-tip="Zora Goerli"
-      >
-        <ZoraChainLogo px={px} />
-
-      </div>
-    )
-  }
-
-
-
 
   return null;
 }

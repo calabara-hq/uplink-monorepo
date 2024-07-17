@@ -173,7 +173,8 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
         thumbnailBlobIndex,
         handleThumbnailChoice,
         imageURI,
-        animationURI
+        animationURI,
+        mimeType
     }
 
 }

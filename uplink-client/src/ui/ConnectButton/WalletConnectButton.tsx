@@ -17,12 +17,8 @@ function AccountModal({
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
-  const { disconnect } = useDisconnect({
-    onSuccess(data) {
-      console.log(data)
-      console.log('success!')
-    }
-  });
+  const { disconnect } = useDisconnect();
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -102,10 +98,13 @@ const NavMenu = () => {
 export default function WalletConnectButton({
   children,
   styleOverride,
+  disabled = false
 }: {
   children?: React.ReactNode;
   styleOverride?: string;
+  disabled?: boolean;
 }) {
+
   const { data: session, status } = useSession();
   if (!status || status === "loading")
     return <div className="h-12 w-full rounded-full shimmer"></div>;

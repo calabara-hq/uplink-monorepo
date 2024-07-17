@@ -83,183 +83,190 @@ export const dbUserByAddress = async (address: string): Promise<schema.dbUserTyp
 
 export const dbMintboardUserStats = async (boardId: string, userAddress: string) => {
     // get mb posts by userId / boardId
-    return db.execute(sqlOps.sql`
-        SELECT
-            mbp.*,
-            JSON_OBJECT(
-                'id', edition.id,
-                'chainId', edition.chainId,
-                'contractAddress', edition.contractAddress,
-                'name', edition.name,
-                'symbol', edition.symbol,
-                'editionSize', edition.editionSize,
-                'royaltyBPS', edition.royaltyBPS,
-                'fundsRecipient', edition.fundsRecipient,
-                'defaultAdmin', edition.defaultAdmin,
-                'description', edition.description,
-                'animationURI', edition.animationURI,
-                'imageURI', edition.imageURI,
-                'referrer', edition.referrer,
-                'saleConfig', JSON_OBJECT(
-                    'publicSalePrice', edition.publicSalePrice,
-                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
-                    'publicSaleStart', edition.publicSaleStart,
-                    'publicSaleEnd', edition.publicSaleEnd,
-                    'presaleStart', edition.presaleStart,
-                    'presaleEnd', edition.presaleEnd,
-                    'presaleMerkleRoot', edition.presaleMerkleRoot
-                )
-            ) AS edition
+    return []
 
-        FROM mintBoardPosts mbp
-        LEFT JOIN (
-            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
-            FROM users u
-        ) AS post_author ON mbp.userId = post_author.id
-        LEFT JOIN (
-            SELECT e.*
-            FROM zoraEditions e
-        ) AS edition ON mbp.editionId = edition.id
-        WHERE mbp.boardId = ${boardId} AND post_author.address = ${userAddress}
-    `)
-        .then((data: any) => data.rows)
-        .then(calculateTotalMints)
-        .then((data: Array<MintBoardPost>) => {
+    // return db.execute(sqlOps.sql`
+    //     SELECT
+    //         mbp.*,
+    //         JSON_OBJECT(
+    //             'id', edition.id,
+    //             'chainId', edition.chainId,
+    //             'contractAddress', edition.contractAddress,
+    //             'name', edition.name,
+    //             'symbol', edition.symbol,
+    //             'editionSize', edition.editionSize,
+    //             'royaltyBPS', edition.royaltyBPS,
+    //             'fundsRecipient', edition.fundsRecipient,
+    //             'defaultAdmin', edition.defaultAdmin,
+    //             'description', edition.description,
+    //             'animationURI', edition.animationURI,
+    //             'imageURI', edition.imageURI,
+    //             'referrer', edition.referrer,
+    //             'saleConfig', JSON_OBJECT(
+    //                 'publicSalePrice', edition.publicSalePrice,
+    //                 'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+    //                 'publicSaleStart', edition.publicSaleStart,
+    //                 'publicSaleEnd', edition.publicSaleEnd,
+    //                 'presaleStart', edition.presaleStart,
+    //                 'presaleEnd', edition.presaleEnd,
+    //                 'presaleMerkleRoot', edition.presaleMerkleRoot
+    //             )
+    //         ) AS edition
 
-            const totalMints = data.reduce((acc, curr) => acc + curr.totalMints, 0);
-            return { totalMints };
-        })
+    //     FROM mintBoardPosts mbp
+    //     LEFT JOIN (
+    //         SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
+    //         FROM users u
+    //     ) AS post_author ON mbp.userId = post_author.id
+    //     LEFT JOIN (
+    //         SELECT e.*
+    //         FROM zoraEditions e
+    //     ) AS edition ON mbp.editionId = edition.id
+    //     WHERE mbp.boardId = ${boardId} AND post_author.address = ${userAddress}
+    // `)
+    //     .then((data: any) => data.rows)
+    //     .then(calculateTotalMints)
+    //     .then((data: Array<MintBoardPost>) => {
+
+    //         const totalMints = data.reduce((acc, curr) => acc + curr.totalMints, 0);
+    //         return { totalMints };
+    //     })
 }
 
 
 export const dbGetEditionsBySpaceName = async (spaceName: string): Promise<Array<StatEditions>> => {
-    return db.execute(sqlOps.sql`
-        SELECT 
-        JSON_OBJECT(
-            'id', edition.id,
-            'chainId', edition.chainId,
-            'contractAddress', edition.contractAddress,
-            'name', edition.name,
-            'symbol', edition.symbol,
-            'editionSize', edition.editionSize,
-            'royaltyBPS', edition.royaltyBPS,
-            'fundsRecipient', edition.fundsRecipient,
-            'defaultAdmin', edition.defaultAdmin,
-            'description', edition.description,
-            'animationURI', edition.animationURI,
-            'imageURI', edition.imageURI,
-            'referrer', edition.referrer,
-            'saleConfig', JSON_OBJECT(
-                'publicSalePrice', edition.publicSalePrice,
-                'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
-                'publicSaleStart', edition.publicSaleStart,
-                'publicSaleEnd', edition.publicSaleEnd,
-                'presaleStart', edition.presaleStart,
-                'presaleEnd', edition.presaleEnd,
-                'presaleMerkleRoot', edition.presaleMerkleRoot
-            )
-        ) AS edition
-        FROM spaces s
-        JOIN contests c ON s.id = c.spaceId
-        JOIN submissions sb ON c.id = sb.contestId
-        JOIN submissionDrops sd ON sb.id = sd.submissionId
-        JOIN zoraEditions edition ON sd.editionId = edition.id
-        WHERE s.name = ${spaceName}
 
-        UNION
+    return []
 
-        SELECT 
-            JSON_OBJECT(
-                'id', edition.id,
-                'chainId', edition.chainId,
-                'contractAddress', edition.contractAddress,
-                'name', edition.name,
-                'symbol', edition.symbol,
-                'editionSize', edition.editionSize,
-                'royaltyBPS', edition.royaltyBPS,
-                'fundsRecipient', edition.fundsRecipient,
-                'defaultAdmin', edition.defaultAdmin,
-                'description', edition.description,
-                'animationURI', edition.animationURI,
-                'imageURI', edition.imageURI,
-                'referrer', edition.referrer,
-                'saleConfig', JSON_OBJECT(
-                    'publicSalePrice', edition.publicSalePrice,
-                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
-                    'publicSaleStart', edition.publicSaleStart,
-                    'publicSaleEnd', edition.publicSaleEnd,
-                    'presaleStart', edition.presaleStart,
-                    'presaleEnd', edition.presaleEnd,
-                    'presaleMerkleRoot', edition.presaleMerkleRoot
-                )
-            ) AS edition
-        FROM spaces s
-        JOIN mintBoards mb ON s.id = mb.spaceId
-        JOIN mintBoardPosts mbp ON mb.id = mbp.boardId
-        JOIN zoraEditions edition ON mbp.editionId = edition.id
-        WHERE s.name = ${spaceName}
-    `)
-        .then((data: any) => data.rows)
-        .then(calculateTotalMints)
+    // return db.execute(sqlOps.sql`
+    //     SELECT 
+    //     JSON_OBJECT(
+    //         'id', edition.id,
+    //         'chainId', edition.chainId,
+    //         'contractAddress', edition.contractAddress,
+    //         'name', edition.name,
+    //         'symbol', edition.symbol,
+    //         'editionSize', edition.editionSize,
+    //         'royaltyBPS', edition.royaltyBPS,
+    //         'fundsRecipient', edition.fundsRecipient,
+    //         'defaultAdmin', edition.defaultAdmin,
+    //         'description', edition.description,
+    //         'animationURI', edition.animationURI,
+    //         'imageURI', edition.imageURI,
+    //         'referrer', edition.referrer,
+    //         'saleConfig', JSON_OBJECT(
+    //             'publicSalePrice', edition.publicSalePrice,
+    //             'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+    //             'publicSaleStart', edition.publicSaleStart,
+    //             'publicSaleEnd', edition.publicSaleEnd,
+    //             'presaleStart', edition.presaleStart,
+    //             'presaleEnd', edition.presaleEnd,
+    //             'presaleMerkleRoot', edition.presaleMerkleRoot
+    //         )
+    //     ) AS edition
+    //     FROM spaces s
+    //     JOIN contests c ON s.id = c.spaceId
+    //     JOIN submissions sb ON c.id = sb.contestId
+    //     JOIN submissionDrops sd ON sb.id = sd.submissionId
+    //     JOIN zoraEditions edition ON sd.editionId = edition.id
+    //     WHERE s.name = ${spaceName}
+
+    //     UNION
+
+    //     SELECT 
+    //         JSON_OBJECT(
+    //             'id', edition.id,
+    //             'chainId', edition.chainId,
+    //             'contractAddress', edition.contractAddress,
+    //             'name', edition.name,
+    //             'symbol', edition.symbol,
+    //             'editionSize', edition.editionSize,
+    //             'royaltyBPS', edition.royaltyBPS,
+    //             'fundsRecipient', edition.fundsRecipient,
+    //             'defaultAdmin', edition.defaultAdmin,
+    //             'description', edition.description,
+    //             'animationURI', edition.animationURI,
+    //             'imageURI', edition.imageURI,
+    //             'referrer', edition.referrer,
+    //             'saleConfig', JSON_OBJECT(
+    //                 'publicSalePrice', edition.publicSalePrice,
+    //                 'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+    //                 'publicSaleStart', edition.publicSaleStart,
+    //                 'publicSaleEnd', edition.publicSaleEnd,
+    //                 'presaleStart', edition.presaleStart,
+    //                 'presaleEnd', edition.presaleEnd,
+    //                 'presaleMerkleRoot', edition.presaleMerkleRoot
+    //             )
+    //         ) AS edition
+    //     FROM spaces s
+    //     JOIN mintBoards mb ON s.id = mb.spaceId
+    //     JOIN mintBoardPosts mbp ON mb.id = mbp.boardId
+    //     JOIN zoraEditions edition ON mbp.editionId = edition.id
+    //     WHERE s.name = ${spaceName}
+    // `)
+    //     .then((data: any) => data.rows)
+    //     .then(calculateTotalMints)
 }
 
 export const dbGetPopularMintBoardPosts = async (spaceName: string): Promise<any> => {
-    return db.execute(sqlOps.sql`
-        SELECT
-            mbp.*,
-            JSON_OBJECT(
-                'id', post_author.id,
-                'address', post_author.address,
-                'userName', post_author.userName,
-                'displayName', post_author.displayName,
-                'profileAvatar', post_author.profileAvatar
-            ) AS author,
-            JSON_OBJECT(
-                'id', edition.id,
-                'chainId', edition.chainId,
-                'contractAddress', edition.contractAddress,
-                'name', edition.name,
-                'symbol', edition.symbol,
-                'editionSize', edition.editionSize,
-                'royaltyBPS', edition.royaltyBPS,
-                'fundsRecipient', edition.fundsRecipient,
-                'defaultAdmin', edition.defaultAdmin,
-                'description', edition.description,
-                'animationURI', edition.animationURI,
-                'imageURI', edition.imageURI,
-                'referrer', edition.referrer,
-                'saleConfig', JSON_OBJECT(
-                    'publicSalePrice', edition.publicSalePrice,
-                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
-                    'publicSaleStart', edition.publicSaleStart,
-                    'publicSaleEnd', edition.publicSaleEnd,
-                    'presaleStart', edition.presaleStart,
-                    'presaleEnd', edition.presaleEnd,
-                    'presaleMerkleRoot', edition.presaleMerkleRoot
-                )
-            ) AS edition
+    return []
 
-        FROM spaces s
-        JOIN mintBoards mb ON s.id = mb.spaceId
-        JOIN mintBoardPosts mbp on mb.id = mbp.boardId
-        JOIN (
-            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
-            FROM users u
-        ) AS post_author ON mbp.userId = post_author.id
-        JOIN (
-            SELECT e.*
-            FROM zoraEditions e
-        ) AS edition ON mbp.editionId = edition.id
-        WHERE s.name = ${spaceName}
-        GROUP BY mbp.id
-    `)
-        .then((data: any) => data.rows)
-        .then(calculateTotalMints)
-        .then((data: Array<MintBoardPost>) => data.sort((a: MintBoardPost, b: MintBoardPost) => b.totalMints - a.totalMints))
-        .then((sorted: Array<MintBoardPost>) => sorted.slice(0, 20))
+    // return db.execute(sqlOps.sql`
+    //     SELECT
+    //         mbp.*,
+    //         JSON_OBJECT(
+    //             'id', post_author.id,
+    //             'address', post_author.address,
+    //             'userName', post_author.userName,
+    //             'displayName', post_author.displayName,
+    //             'profileAvatar', post_author.profileAvatar
+    //         ) AS author,
+    //         JSON_OBJECT(
+    //             'id', edition.id,
+    //             'chainId', edition.chainId,
+    //             'contractAddress', edition.contractAddress,
+    //             'name', edition.name,
+    //             'symbol', edition.symbol,
+    //             'editionSize', edition.editionSize,
+    //             'royaltyBPS', edition.royaltyBPS,
+    //             'fundsRecipient', edition.fundsRecipient,
+    //             'defaultAdmin', edition.defaultAdmin,
+    //             'description', edition.description,
+    //             'animationURI', edition.animationURI,
+    //             'imageURI', edition.imageURI,
+    //             'referrer', edition.referrer,
+    //             'saleConfig', JSON_OBJECT(
+    //                 'publicSalePrice', edition.publicSalePrice,
+    //                 'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+    //                 'publicSaleStart', edition.publicSaleStart,
+    //                 'publicSaleEnd', edition.publicSaleEnd,
+    //                 'presaleStart', edition.presaleStart,
+    //                 'presaleEnd', edition.presaleEnd,
+    //                 'presaleMerkleRoot', edition.presaleMerkleRoot
+    //             )
+    //         ) AS edition
+
+    //     FROM spaces s
+    //     JOIN mintBoards mb ON s.id = mb.spaceId
+    //     JOIN mintBoardPosts mbp on mb.id = mbp.boardId
+    //     JOIN (
+    //         SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
+    //         FROM users u
+    //     ) AS post_author ON mbp.userId = post_author.id
+    //     JOIN (
+    //         SELECT e.*
+    //         FROM zoraEditions e
+    //     ) AS edition ON mbp.editionId = edition.id
+    //     WHERE s.name = ${spaceName}
+    //     GROUP BY mbp.id
+    // `)
+    //     .then((data: any) => data.rows)
+    //     .then(calculateTotalMints)
+    //     .then((data: Array<MintBoardPost>) => data.sort((a: MintBoardPost, b: MintBoardPost) => b.totalMints - a.totalMints))
+    //     .then((sorted: Array<MintBoardPost>) => sorted.slice(0, 20))
 }
 
-export const dbTrendingSpaces = async(limit: number) => {
+export const dbTrendingSpaces = async (limit: number) => {
     return db.execute(sqlOps.sql`
         SELECT s.name, s.id, s.logoUrl, s.name, s.displayName, COUNT(DISTINCT mbp.id) AS totalPosts
         FROM mintBoardPosts mbp
@@ -270,74 +277,76 @@ export const dbTrendingSpaces = async(limit: number) => {
         ORDER BY totalPosts DESC
         LIMIT ${limit}
     `)
-    .then((data: any) => data.rows);
+        .then((data: any) => data.rows);
 
 }
 
 
 export const dbGetPaginatedLatestMintBoardPosts = async (spaceName: string, lastCursor: string | null, limit: number): Promise<any> => {
-    let query = sqlOps.sql`
-        SELECT
-            mbp.*,
-            JSON_OBJECT(
-                'id', post_author.id,
-                'address', post_author.address,
-                'userName', post_author.userName,
-                'displayName', post_author.displayName,
-                'profileAvatar', post_author.profileAvatar
-            ) AS author,
-            JSON_OBJECT(
-                'id', edition.id,
-                'chainId', edition.chainId,
-                'contractAddress', edition.contractAddress,
-                'name', edition.name,
-                'symbol', edition.symbol,
-                'editionSize', edition.editionSize,
-                'royaltyBPS', edition.royaltyBPS,
-                'fundsRecipient', edition.fundsRecipient,
-                'defaultAdmin', edition.defaultAdmin,
-                'description', edition.description,
-                'animationURI', edition.animationURI,
-                'imageURI', edition.imageURI,
-                'referrer', edition.referrer,
-                'saleConfig', JSON_OBJECT(
-                    'publicSalePrice', edition.publicSalePrice,
-                    'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
-                    'publicSaleStart', edition.publicSaleStart,
-                    'publicSaleEnd', edition.publicSaleEnd,
-                    'presaleStart', edition.presaleStart,
-                    'presaleEnd', edition.presaleEnd,
-                    'presaleMerkleRoot', edition.presaleMerkleRoot
-                )
-            ) AS edition
+    return []
 
-        FROM spaces s
-        JOIN mintBoards mb ON s.id = mb.spaceId
-        JOIN mintBoardPosts mbp on mb.id = mbp.boardId
-        JOIN (
-            SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
-            FROM users u
-        ) AS post_author ON mbp.userId = post_author.id
-        JOIN (
-            SELECT e.*
-            FROM zoraEditions e
-        ) AS edition ON mbp.editionId = edition.id
-        WHERE s.name = ${spaceName}
-    `
+    // let query = sqlOps.sql`
+    //     SELECT
+    //         mbp.*,
+    //         JSON_OBJECT(
+    //             'id', post_author.id,
+    //             'address', post_author.address,
+    //             'userName', post_author.userName,
+    //             'displayName', post_author.displayName,
+    //             'profileAvatar', post_author.profileAvatar
+    //         ) AS author,
+    //         JSON_OBJECT(
+    //             'id', edition.id,
+    //             'chainId', edition.chainId,
+    //             'contractAddress', edition.contractAddress,
+    //             'name', edition.name,
+    //             'symbol', edition.symbol,
+    //             'editionSize', edition.editionSize,
+    //             'royaltyBPS', edition.royaltyBPS,
+    //             'fundsRecipient', edition.fundsRecipient,
+    //             'defaultAdmin', edition.defaultAdmin,
+    //             'description', edition.description,
+    //             'animationURI', edition.animationURI,
+    //             'imageURI', edition.imageURI,
+    //             'referrer', edition.referrer,
+    //             'saleConfig', JSON_OBJECT(
+    //                 'publicSalePrice', edition.publicSalePrice,
+    //                 'maxSalePurchasePerAddress', edition.maxSalePurchasePerAddress,
+    //                 'publicSaleStart', edition.publicSaleStart,
+    //                 'publicSaleEnd', edition.publicSaleEnd,
+    //                 'presaleStart', edition.presaleStart,
+    //                 'presaleEnd', edition.presaleEnd,
+    //                 'presaleMerkleRoot', edition.presaleMerkleRoot
+    //             )
+    //         ) AS edition
 
-    if (lastCursor !== null) {
-        query = sqlOps.sql`${query} AND mbp.id < ${lastCursor}`;
-    }
+    //     FROM spaces s
+    //     JOIN mintBoards mb ON s.id = mb.spaceId
+    //     JOIN mintBoardPosts mbp on mb.id = mbp.boardId
+    //     JOIN (
+    //         SELECT u.id, u.address, u.userName, u.displayName, u.profileAvatar
+    //         FROM users u
+    //     ) AS post_author ON mbp.userId = post_author.id
+    //     JOIN (
+    //         SELECT e.*
+    //         FROM zoraEditions e
+    //     ) AS edition ON mbp.editionId = edition.id
+    //     WHERE s.name = ${spaceName}
+    // `
 
-    query = sqlOps.sql`${query} GROUP BY mbp.id ORDER BY mbp.id DESC LIMIT ${limit}`;
+    // if (lastCursor !== null) {
+    //     query = sqlOps.sql`${query} AND mbp.id < ${lastCursor}`;
+    // }
+
+    // query = sqlOps.sql`${query} GROUP BY mbp.id ORDER BY mbp.id DESC LIMIT ${limit}`;
 
 
-    // Add the ORDER BY and LIMIT clauses
+    // // Add the ORDER BY and LIMIT clauses
 
-    // Execute the query
-    return db.execute(query)
-        .then((data: any) => data.rows)
-        .then(calculateTotalMints);
+    // // Execute the query
+    // return db.execute(query)
+    //     .then((data: any) => data.rows)
+    //     .then(calculateTotalMints);
 }
 
 
@@ -373,7 +382,6 @@ export const dbGetPopularSubmissions = async (): Promise<Array<schema.dbSubmissi
                         'publicSaleEnd', edition.publicSaleEnd,
                         'presaleStart', edition.presaleStart,
                         'presaleEnd', edition.presaleEnd,
-                        'presaleMerkleRoot', edition.presaleMerkleRoot
                     )
                 ) END AS edition,
             JSON_OBJECT(

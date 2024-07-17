@@ -28,7 +28,13 @@ spec:
             name: auth
             port:
               number: 8080
-
+      - path: /api/v2/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: v2
+            port:
+              number: 8080
       - path: /api/graphql
         pathType: Prefix
         backend:

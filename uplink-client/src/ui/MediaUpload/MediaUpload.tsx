@@ -7,32 +7,37 @@ import { RenderStandardVideoWithLoader } from '@/ui/VideoPlayer';
 import { BiSolidCircle } from 'react-icons/bi';
 
 
-export const MediaUpload = ({ 
-    acceptedFormats, 
-    uploadStatusCallback, 
-    ipfsImageCallback, 
-    ipfsAnimationCallback, 
+export const MediaUpload = ({
+    acceptedFormats,
+    uploadStatusCallback,
+    ipfsImageCallback,
+    ipfsAnimationCallback,
+    mimeTypeCallback,
     maxVideoDuration,
-}: { 
-    acceptedFormats: Array<string>, 
-    uploadStatusCallback: (status: boolean) => void, 
+    label = "Media",
+}: {
+    acceptedFormats: Array<string>,
+    uploadStatusCallback: (status: boolean) => void,
     ipfsImageCallback: (url: string) => void,
     ipfsAnimationCallback: (url: string) => void,
-    maxVideoDuration?: number 
+    mimeTypeCallback?: (mimeType: string) => void,
+    maxVideoDuration?: number
+    label?: string
 }) => {
     const imageUploader = useRef<HTMLInputElement>(null);
-    const { 
-        upload, 
-        removeMedia, 
-        isUploading, 
-        imageObjectURL, 
-        animationObjectURL, 
-        isVideo, 
+    const {
+        upload,
+        removeMedia,
+        isUploading,
+        imageObjectURL,
+        animationObjectURL,
+        isVideo,
         thumbnailBlobIndex,
         thumbnailOptions,
         handleThumbnailChoice,
         imageURI,
-        animationURI
+        animationURI,
+        mimeType,
     } = useMediaUpload(acceptedFormats, maxVideoDuration);
 
     useEffect(() => {
@@ -41,17 +46,23 @@ export const MediaUpload = ({
 
     useEffect(() => {
         ipfsImageCallback(imageURI)
-    },[imageURI])
+    }, [imageURI])
 
     useEffect(() => {
         ipfsAnimationCallback(animationURI)
-    },[animationURI])
+    }, [animationURI])
+
+    useEffect(() => {
+        if (mimeTypeCallback) {
+            mimeTypeCallback(mimeType)
+        }
+    }, [mimeType])
 
     if (isVideo) {
         return (
             <div className="relative w-full m-auto">
                 <label className="label">
-                    <span className="label-text text-t2">Media</span>
+                    <span className="label-text text-t1">{label}</span>
                 </label>
                 <button
                     className="absolute top-5 -right-3 btn btn-error btn-sm btn-circle z-10 shadow-lg"
@@ -70,7 +81,7 @@ export const MediaUpload = ({
                 {thumbnailOptions?.length > 0 && (
                     <>
                         <label className="label">
-                            <span className="label-text text-t2">Thumbnail</span>
+                            <span className="label-text text-t1">Thumbnail</span>
                         </label>
 
                         <div className="flex flex-col sm:flex-row gap-2 items-center justify-center bg-base-100 border border-border p-2 w-full m-auto rounded">
@@ -110,7 +121,7 @@ export const MediaUpload = ({
         return (
             <div className="flex flex-col items-center">
                 <label className="label self-start">
-                    <span className="label-text text-t2">Media</span>
+                    <span className="label-text text-t1">{label}</span>
                 </label>
                 <div className="relative">
                     <button
@@ -143,7 +154,7 @@ export const MediaUpload = ({
                     ref={imageUploader}
                 />
                 <label className="label">
-                    <span className="label-text text-t2">Media</span>
+                    <span className="label-text text-t1">{label}</span>
                 </label>
                 <div
                     className="w-full h-56 cursor-pointer flex justify-center items-center hover:bg-base-100 transition-all rounded-xl border-2 border-border border-dashed"

@@ -55,3 +55,10 @@ services:
       context: .
       dockerfile: ./packages/tweet/Dockerfile
     image: nickdodson/tweet-service:${GITHUB_VERSION_TAG}
+    
+  v2:
+    container_name: v2
+    build:
+      context: .
+      dockerfile: ./packages/v2/Dockerfile
+    image: nickdodson/v2-service:${GITHUB_VERSION_TAG}

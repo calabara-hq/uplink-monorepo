@@ -111,6 +111,17 @@ ol {
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 }
 
+.virtual-grid-container {
+  /* > div {
+      height: unset !important;
+  } */
+
+  .ReactVirtualized__Grid__innerScrollContainer {
+     margin: auto
+  }
+}
+
+
 .primary-btn {
   @apply btn btn-md normal-case btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black hover:rounded-xl rounded-3xl transition-all duration-300;
 }

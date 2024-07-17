@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+spec:
+  replicas: {{ .Values.auth.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  selector:
+    matchLabels:
+      app: v2
+  template:
+    metadata:
+      labels:
+        app: v2
+    spec:
+      containers:
+      - name: v2
+        image: "{{ .Values.v2.image.repository }}:{{ .Values.image_version_tag }}"
+        
+        readinessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 2
+          successThreshold: 2
+          failureThreshold: 2
+          httpGet:
+            path: /health
+            port: 8080
+            httpHeaders:
+            - name: apollo-require-preflight
+              value: "true"
+
+        resources:
+          requests:
+            cpu: "20m"
+        env:
+          - name: V2_SERVICE_PORT
+            value: "8080"
+        envFrom:
+          - secretRef:
+              name: {{ .Values.sealedSecretName }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: v2
+spec:
+  type: ClusterIP
+  selector:
+    app: v2
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: v2-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: v2
+  minReplicas: {{ .Values.v2.hpa.minReplicas }}
+  maxReplicas: {{ .Values.v2.hpa.maxReplicas }}
+  targetCPUUtilizationPercentage: {{ .Values.v2.hpa.targetCpuPercentage }}

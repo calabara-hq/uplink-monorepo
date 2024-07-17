@@ -5,12 +5,12 @@ import Noggles from "../Noggles/Noggles";
 import useEnsName from "@/hooks/useEnsName";
 import { Session } from "@/providers/SessionProvider";
 import UplinkImage from "@/lib/UplinkImage";
-import {ImageWrapper} from "@/ui/Submission/MediaWrapper"
-// returns one of the following:
-// "anonymous" if address is null | undefined
-// "0x..." if address is a string and doesn't have an ens name
-// ens name if address is a string and has an ens name
-// optional avatar if address is a string and has an ens name
+import { ImageWrapper } from "@/ui/Submission/MediaWrapper"
+import { Address } from "viem";
+import { useWalletDisplayText } from "@/hooks/useWalletDisplay";
+import { useEffect } from "react";
+// import { Avatar } from "@coinbase/onchainkit/identity";
+
 
 const formatAddress = (address: string) => {
   return `${address.substring(0, 4)}\u2026${address.substring(
@@ -84,16 +84,28 @@ export const NoggleAvatar = ({
 
 
 
-export const AddressOrEns = ({
+export const AddressOrEns = ({ address }: { address: null | undefined | string; }) => {
+  const { displayText, getDisplayText } = useWalletDisplayText(address);
+
+  useEffect(() => {
+    getDisplayText(address);
+  }, [address, getDisplayText]);
+
+  return <span>{displayText}</span>;
+};
+
+
+export const Avatar = ({
   address,
+  size,
+  styleOverride,
 }: {
-  address: null | undefined | string;
+  address: string | null | undefined;
+  size: number;
+  styleOverride?: string;
 }) => {
-  const { ensName, error, loading } = useEnsName(address ?? "");
-  if (!address) return <span>anonymous</span>;
-  const shortAddress = formatAddress(address);
-  if (ensName) return <span>{ensName}</span>;
-  return <span>{shortAddress}</span>;
+  const dispAddr = address ?? "0x123456";
+  return <NoggleAvatar address={dispAddr} size={size} styleOverride={styleOverride} />;
 };
 
 
@@ -109,7 +121,7 @@ export const UserAvatar = ({
   if (user?.profileAvatar) return (
     <div style={{ width: `${size}px` }}>
       <ImageWrapper>
-        <UplinkImage src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} fill blur sizes="5vw"/>
+        <UplinkImage src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} fill blur sizes="5vw" />
       </ImageWrapper>
     </div>
   )

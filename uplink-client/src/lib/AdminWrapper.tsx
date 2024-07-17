@@ -7,6 +7,7 @@ export const AdminWrapper = ({ admins, children }: { admins: Array<Admin>, child
 
     if (status !== 'authenticated') return null;
     if (status === "authenticated" && session?.user?.address) {
+
         const isAdmin = admins.some((admin) => admin.address === session?.user?.address);
         if (isAdmin) return <>{children}</>;
         return null;

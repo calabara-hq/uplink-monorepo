@@ -4,7 +4,6 @@ import CardSubmission from "./CardSubmission";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import SubmissionModal from "./SubmissionModal";
 import { Submission } from "@/types/submission";
-import MintEdition from "../Zora/MintEdition";
 import Swiper from "../Swiper/Swiper";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
@@ -139,10 +138,6 @@ export const RenderPopularSubmissions = ({ submissions }) => {
             </WalletConnectButton>
           </div>
         )}
-
-        {isMintModalOpen && submission && (
-          <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} />
-        )}
       </SubmissionModal>
     </div>
   )
@@ -188,9 +183,6 @@ export const UserSubmissionDisplay = ({ user }: { user: User }) => {
     setIsMintModalOpen(false)
     setSubmission(null);
   }
-
-
-
 
   const isAnonSubmission = (submission: Submission) => {
     // we can't expose the submission author on backwards nav (i.e. authorized user shared their own stuff)
@@ -257,9 +249,6 @@ export const UserSubmissionDisplay = ({ user }: { user: User }) => {
           </div>
         )}
 
-        {isMintModalOpen && submission && (
-          <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} />
-        )}
       </SubmissionModal>
     </div >
   );
@@ -286,9 +275,6 @@ const HeaderButtons = ({ submission, referrer, context }: { submission: Submissi
           <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
         )}
 
-        {isMintModalOpen && (
-          <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} referrer={referrer} />
-        )}
       </SubmissionModal>
     </div>
   )
@@ -382,9 +368,9 @@ export const LiveSubmissionDisplay = ({
                   <div className="flex flex-col w-full">
                     <div className="p-2 w-full" />
                     <div className="flex gap-2 w-full items-center">
-                      
-                        <AdminButton contestId={contestId} submission={submission} onClick={(event) => handleManage(event, submission)} />
-                      
+
+                      <AdminButton contestId={contestId} submission={submission} onClick={(event) => handleManage(event, submission)} />
+
 
                       <div>
                         <ShareButton submission={submission} onClick={(event) => handleShare(event, submission)} context={context} />
@@ -411,10 +397,6 @@ export const LiveSubmissionDisplay = ({
       <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isExpandModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isExpandModalOpen ? "expand" : isManageModalOpen ? "manage" : "share"} handleClose={handleClose} >
         {isShareModalOpen && submission && (
           <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
-        )}
-
-        {isMintModalOpen && submission && (
-          <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} />
         )}
 
         {isExpandModalOpen && submission && (
