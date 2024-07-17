@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth
+  name: v2
 spec:
-  replicas: {{ .Values.auth.replicaCount }}
+  replicas: {{ .Values.v2.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
