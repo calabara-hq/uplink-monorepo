@@ -14,7 +14,7 @@ import { BiCategoryAlt, BiTime } from "react-icons/bi";
 import { LuCoins, LuSettings2, LuVote } from "react-icons/lu";
 import { HiOutlineDocument } from "react-icons/hi2";
 import { HiOutlineLockClosed, HiOutlineTrash } from "react-icons/hi2";
-import {  RenderMintMedia } from "@/ui/Zora/common";
+import { RenderMintMedia } from '@/ui/Token/MintUtils';
 import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
 import { PiInfinity } from "react-icons/pi";
 import { TbLoader2 } from "react-icons/tb";

@@ -20,7 +20,7 @@ const InteractiveVideoPlayer = ({ videoUrl, posterUrl, isActive }) => {
       console.log('error loading video, switching to unoptimized url')
       vidRef.current.src = videoUrl
     })
-  },[])
+  }, [])
 
   useEffect(() => {
     if (isActive && vidRef.current) vidRef.current.play();

@@ -6,7 +6,6 @@ import { useSession } from "@/providers/SessionProvider";
 import { Submission, isNftSubmission } from "@/types/submission"
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import SubmissionModal from "@/ui/Submission/SubmissionModal";
-import MintEdition from "@/ui/Zora/MintEdition";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -169,9 +168,6 @@ export const HeaderButtons = ({ submission, referrer, context }: { submission: S
                     <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
                 )}
 
-                {isMintModalOpen && (
-                    <MintEdition edition={submission.edition} author={submission.author} setIsModalOpen={setIsMintModalOpen} referrer={referrer} />
-                )}
             </SubmissionModal>
         </div>
     )

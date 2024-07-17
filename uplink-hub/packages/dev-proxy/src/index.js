@@ -22,6 +22,7 @@ app.options('*', cors());
 const server = http.createServer(app);
 
 app.all('*', (req, res) => {
+
     if (req.url.startsWith('/api/graphql')) {
         req.headers.host = `localhost:${process.env.SUPERGRAPH_SERVICE_PORT}`;
         req.url = req.url.replace('/api/graphql', ''); // remove the '/api/graphql' from the path.
@@ -34,7 +35,13 @@ app.all('*', (req, res) => {
         req.headers.host = `localhost:${process.env.MEDIA_SERVICE_PORT}`;
         req.url = req.url.replace('/api/media', ''); // remove the '/api/media' from the path.
         proxy.web(req, res, { target: `http://localhost:${process.env.MEDIA_SERVICE_PORT}/` });
-    } else {
+    }
+    else if (req.url.startsWith('/api/v2')) {
+        req.headers.host = `localhost:${process.env.V2_SERVICE_PORT}`;
+        req.url = req.url.replace('/api/v2', ''); // remove the '/api/auth' from the path.
+        proxy.web(req, res, { target: `http://localhost:${process.env.V2_SERVICE_PORT}/` });
+    }
+    else {
         res.write('Invalid route');
         res.end();
     }

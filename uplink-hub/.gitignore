@@ -14,4 +14,4 @@ dist/
 coverage
 drizzle.config.ts
 packages/lib/src/drizzle/migrate.ts
-
+packages/lib/mintboardsWithContractAddress.json

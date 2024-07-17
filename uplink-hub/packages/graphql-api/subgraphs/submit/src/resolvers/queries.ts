@@ -34,7 +34,6 @@ const postProcessSubmission = (submission: schema.dbSubmissionType, withAuthor: 
                 publicSaleEnd: submission.nftDrop.edition.publicSaleEnd,
                 presaleStart: submission.nftDrop.edition.presaleStart,
                 presaleEnd: submission.nftDrop.edition.presaleEnd,
-                presaleMerkleRoot: submission.nftDrop.edition.presaleMerkleRoot,
             }
         } : null,
     }
@@ -160,7 +159,7 @@ const queries = {
         async mintBoardUserStatsByAddress(_: any, { boardId, address }: { boardId: string, address: string }) {
             return mintBoardUserStats(boardId, address)
         },
-        async trendingSpaces(){
+        async trendingSpaces() {
             return trendingSpaces(12);
         }
     },

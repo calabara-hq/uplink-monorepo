@@ -1,6 +1,9 @@
 import { Edition } from "./edition";
 import { Space } from "./space";
 import { User } from "./user";
+import { z } from "zod";
+import { zeroAddress } from "viem";
+
 
 export type MintBoard = {
     id: string;
@@ -37,4 +40,3 @@ export type MintBoardPost = {
     author: User;
     totalMints: number;
 }
-

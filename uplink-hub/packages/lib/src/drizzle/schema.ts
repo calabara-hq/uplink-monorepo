@@ -1,5 +1,6 @@
 import { mysqlTable, index, serial, tinyint, json, varchar, int, text, uniqueIndex } from 'drizzle-orm/mysql-core';
 import { InferModel, relations } from 'drizzle-orm';
+import { hex } from '@planetscale/database';
 
 export const spaces = mysqlTable('spaces', {
     id: serial('id').primaryKey(),
@@ -291,6 +292,73 @@ export const mintBoardPosts = mysqlTable('mintBoardPosts', {
     mintBoardPostEditionIdIndex: index("mintBoardPost_edition_id_idx").on(mintBoardPost.editionId),
 }))
 
+export const channels = mysqlTable('channels', {
+    id: serial('id').primaryKey(),
+    spaceId: int('spaceId').notNull(),
+    channelAddress: varchar('channelAddress', { length: 255 }).notNull(),
+    channelType: varchar('channelType', { length: 255 }).notNull(),
+    chainId: int('chainId').notNull(),
+    createdAt: varchar('createdAt', { length: 255 }).notNull(),
+}, (channel) => ({
+    channelSpaceIdIndex: index("channel_space_id_idx").on(channel.spaceId),
+    channelAddressIndex: uniqueIndex("channel_address_idx").on(channel.channelAddress),
+    channelTypeIndex: index("channel_type_idx").on(channel.channelType),
+}))
+
+export const tokenIntents = mysqlTable('tokenIntents', {
+    id: serial('id').primaryKey(),
+    spaceId: int('spaceId').notNull(),
+    channelId: int('channelId').notNull(),
+    chainId: int('chainId').notNull(),
+    channelAddress: varchar('channelAddress', { length: 255 }).notNull(),
+    author: varchar('author', { length: 255 }).notNull(),
+    tokenIntent: varchar('tokenIntent', { length: 1024 }).notNull(),
+    deadline: varchar('deadline', { length: 255 }).notNull(),
+    createdAt: varchar('createdAt', { length: 255 }).notNull(),
+    tokenId: varchar('tokenId', { length: 255 }).notNull().default("0"),
+    banned: tinyint('banned').notNull().default(0),
+}, (tokenIntent) => ({
+    tokenIntentChannelAddressIndex: index("tokenIntent_channel_address_idx").on(tokenIntent.channelAddress),
+    tokenIntentSpaceIdIndex: index("tokenIntent_space_id_idx").on(tokenIntent.spaceId),
+    tokenIntentChannelIdIndex: index("tokenIntent_channel_id_idx").on(tokenIntent.channelId),
+    tokenIntentAuthorIndex: index("tokenIntent_user_id_idx").on(tokenIntent.author),
+    tokenIntentTokenIdInded: index("tokenIntent_token_id_idx").on(tokenIntent.tokenId),
+}));
+
+
+export const zoraTokens = mysqlTable('zoraTokens', {
+    id: serial('id').primaryKey(),
+    chainId: int('chainId').notNull(),
+    channelAddress: varchar('channelAddress', { length: 255 }).notNull(),
+    contractAddress: varchar('contractAddress', { length: 255 }).notNull(),
+    author: varchar('author', { length: 255 }).notNull(),
+    name: varchar('name', { length: 255 }).notNull(),
+    description: text('description').notNull(),
+    animationURI: varchar('animationURI', { length: 255 }).notNull(),
+    imageURI: varchar('imageURI', { length: 255 }).notNull(),
+    maxSupply: varchar('maxSupply', { length: 255 }).notNull(),
+    totalMinted: int('totalMinted').notNull(),
+    publicSalePrice: varchar('publicSalePrice', { length: 255 }).notNull(),
+    publicSaleStart: varchar('publicSaleStart', { length: 255 }).notNull(),
+    publicSaleEnd: varchar('publicSaleEnd', { length: 255 }).notNull(),
+}, (zoraToken) => ({
+    tokenChannelAddressIndex: index("token_channel_address_idx").on(zoraToken.channelAddress),
+    tokenAuthorInded: index("token_author_idx").on(zoraToken.author),
+    tokenChainIdIndex: index("token_chain_id_idx").on(zoraToken.chainId),
+}));
+
+
+export const bannedOnchainTokens = mysqlTable('bannedOnchainTokens', {
+    id: serial('id').primaryKey(),
+    chainId: int('chainId').notNull(),
+    channelAddress: varchar('channelAddress', { length: 255 }).notNull(),
+    tokenId: varchar('tokenId', { length: 255 }).notNull(),
+}, (bannedOnchainToken) => ({
+    bannedOnchainTokenChannelAddressIndex: index("bannedOnchainToken_channel_address_idx").on(bannedOnchainToken.channelAddress),
+    bannedOnchainTokenTokenIdIndex: index("bannedOnchainToken_token_id_idx").on(bannedOnchainToken.tokenId),
+}));
+
+
 export const spacesRelations = relations(spaces, ({ one, many }) => ({
     admins: many(admins),
     spaceTokens: many(spaceTokens),
@@ -298,6 +366,7 @@ export const spacesRelations = relations(spaces, ({ one, many }) => ({
         fields: [spaces.id],
         references: [mintBoards.spaceId],
     }),
+    channels: many(channels),
 }));
 
 export const adminsRelations = relations(admins, ({ one }) => ({
@@ -489,13 +558,31 @@ export const userRelations = relations(users, ({ one, many }) => ({
     submissions: many(submissions)
 }));
 
+export const channelRelations = relations(channels, ({ one, many }) => ({
+    tokenIntents: many(tokenIntents),
+    space: one(spaces, {
+        fields: [channels.spaceId],
+        references: [spaces.id],
+    }),
+}));
 
+export const tokenIntentRelations = relations(tokenIntents, ({ one }) => ({
+    space: one(spaces, {
+        fields: [tokenIntents.spaceId],
+        references: [spaces.id],
+    }),
+    channel: one(channels, {
+        fields: [tokenIntents.channelId],
+        references: [channels.id],
+    })
+}));
 
 
 export type dbSpaceType = InferModel<typeof spaces> & {
     admins: dbAdminType[],
     spaceTokens: dbSpaceToTokenType[],
     mintBoard: dbMintBoardType,
+    channels: dbChannelType[],
 }
 export type dbNewSpaceType = InferModel<typeof spaces, 'insert'>
 
@@ -602,6 +689,11 @@ export type dbSubmissionDropType = InferModel<typeof submissionDrops> & {
     edition: dbZoraEditionType,
 }
 
+export type dbChannelType = InferModel<typeof channels>
+export type dbTokenIntentType = InferModel<typeof tokenIntents>
+export type dbZoraTokenType = InferModel<typeof zoraTokens>
+export type dbBannedOnchainTokenType = InferModel<typeof bannedOnchainTokens>
+
 export type dbNewContestType = InferModel<typeof contests, 'insert'>
 export type dbNewRewardType = InferModel<typeof rewards, 'insert'>
 export type dbNewSubmitterRestrictionType = InferModel<typeof submitterRestrictions, 'insert'>
@@ -622,3 +714,7 @@ export type dbNewMintBoardPostType = InferModel<typeof mintBoardPosts, 'insert'>
 export type dbNewZoraEditionType = InferModel<typeof zoraEditions, 'insert'>
 export type dbNewSubmissionDropType = InferModel<typeof submissionDrops, 'insert'>
 export type dbNewEditionMintType = InferModel<typeof editionMints, 'insert'>
+export type dbNewChannelType = InferModel<typeof channels, 'insert'>
+export type dbNewTokenIntentType = InferModel<typeof tokenIntents, 'insert'>
+export type dbNewZoraTokenType = InferModel<typeof zoraTokens, 'insert'>
+export type dbNewBannedOnchainTokenType = InferModel<typeof bannedOnchainTokens, 'insert'>

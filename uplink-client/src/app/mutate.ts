@@ -1,5 +1,6 @@
 import { startTransition } from "react";
 import { revalidateDataCache } from "./actions";
+import { ContractID } from "@/types/channel";
 
 export const mutateSpaceContests = (spaceName: string) => {
     startTransition(() => {
@@ -25,8 +26,8 @@ export const mutateUser = (identifier: string) => {
     });
 }
 
-export const mutateMintBoard = (name: string) => {
+export const mutateChannel = (contractId: ContractID) => {
     startTransition(() => {
-        revalidateDataCache([`mintBoard/${name}`]); // reval server cache
+        revalidateDataCache([`channel/${contractId}`]); // reval server cache
     });
 }

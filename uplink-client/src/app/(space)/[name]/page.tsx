@@ -16,6 +16,8 @@ import { AdminWrapper } from "@/lib/AdminWrapper";
 import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+import { TransmissionsClient } from "@tx-kit/sdk";
+
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 const round_formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 2 })
 
@@ -31,6 +33,9 @@ import {
 import { Button } from "@/ui/Button/Button";
 import fetchSpaceStats from "@/lib/fetch/fetchSpaceStats";
 import { fetchPaginatedMintBoardPosts } from "@/lib/fetch/fetchMintBoardPosts";
+import fetchSpaceChannels from "@/lib/fetch/fetchSpaceChannels";
+import { Channel, concatContractID, isInfiniteChannel } from "@/types/channel";
+import { fetchPopularTokens, fetchTokensV2 } from "@/lib/fetch/fetchTokensV2";
 
 const SpaceContestsSkeleton = () => {
   return (
@@ -249,7 +254,7 @@ const ContestCard = ({
 
   return (
     <Link
-      href={`/contest/${contestId}`} draggable={false} className="cursor-pointer hover:shadow-lg hover:shadow-blue-600 rounded-lg "
+      href={`/contest/${contestId}`} draggable={false} className="cursor-pointer rounded-lg "
     >
       <div className="bg-base-100 relative flex flex-col gap-2 rounded-lg w-full p-2 h-full">
         <h3 className="text-t1 text-lg font-bold line-clamp-2">{promptData.title}</h3>
@@ -299,10 +304,11 @@ const AdminButtons = async ({ spaceName }: { spaceName: string }) => {
               <p className="text-t2">Earn protocol rewards with your users by allowing them to mint under a template config.</p>
             </div>
             <Link
-              href={`${spaceName}/mintboard/settings`}
+              href={`${spaceName}/mintboard/new`}
               className="btn btn-ghost btn-active btn-sm text-t1 normal-case ml-auto hover:text-primary"
             >
-              <span>Configure</span>
+              <span>New</span>
+              <HiSparkles className="h-5 w-5 pl-0.5" />
             </Link>
           </div>
           <div className="flex flex-row gap-2 items-end">
@@ -349,7 +355,7 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
             </Link>
           </div>
         </div>
-        <div className="flex flex-row flex-wrap gap-2">
+        <div className="flex flex-row flex-wrap gap-2 ">
           {firstPagePosts.posts.map((post, idx) => {
             return (
               <div className="w-[40px]" key={idx}> {/* Adjust this class as needed for sizing */}
@@ -370,6 +376,66 @@ const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
     </Boundary>
   )
 
+}
+
+const MintboardPostsPreview = async ({ channel }: { channel: Channel }) => {
+  const contractID = concatContractID({ contractAddress: channel.id, chainId: channel.chainId });
+
+  const tokens = await fetchPopularTokens(contractID, 10, 0).then(tokens => tokens.data);
+
+  return (
+    <div className="flex flex-row -space-x-2 p-2">
+      {tokens.map((token) => {
+        return (
+          <div key={token.id} className="w-[30px]">
+            <ImageWrapper>
+              <UplinkImage
+                src={parseIpfsUrl(token.metadata.image).gateway}
+                fill
+                alt="post"
+                sizes="10vw"
+                className="rounded-full object-cover cursor-pointer aspect-square border-[0.5px] border-[#121212] bg-[#121212]"
+              />
+            </ImageWrapper>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+const MintboardDisplay = async ({ spaceName }: { spaceName: string }) => {
+  const channels = await fetchSpaceChannels(spaceName);
+
+  const mintboards = channels.filter(channel => isInfiniteChannel(channel));
+
+  if (mintboards.length > 0) {
+
+    return (
+      <div className="flex flex-col gap-2 ">
+        <h2 className="text-t1 font-semibold text-2xl break-words">
+          Mintboards
+        </h2>
+
+        <div className="w-9/12 sm:w-full flex flex-row gap-2 flex-wrap">
+          {channels.map(channel => {
+            return (
+              <Link
+                key={channel.id}
+                className="flex flex-col gap-2 w-[350px] overflow-hidden bg-transparent border-base-100 border-2 rounded-lg p-2 hover:bg-base-200"
+                href={`${spaceName}/mintboard/${concatContractID({ contractAddress: channel.id, chainId: channel.chainId })}`}
+              >
+                <h2 className="text-lg text-t1 font-bold">{channel.name}</h2>
+                <Suspense fallback={<div>Loading...</div>}>
+                  <MintboardPostsPreview channel={channel} />
+                </Suspense>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
 }
 
 const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string }) => {
@@ -434,7 +500,8 @@ export default async function Page({ params }: { params: { name: string } }) {
             <AdminButtons spaceName={spaceName} />
           </Suspense>
           <Suspense fallback={<HeatMapSkeleton />}>
-            <MintboardHeatMap spaceName={spaceName} />
+            {/* <MintboardHeatMap spaceName={spaceName} /> */}
+            <MintboardDisplay spaceName={spaceName} />
           </Suspense>
           <Suspense fallback={<SpaceContestsSkeleton />}>
             <ContestDisplay spaceName={spaceName} />

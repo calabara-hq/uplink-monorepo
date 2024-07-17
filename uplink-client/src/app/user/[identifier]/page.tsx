@@ -5,7 +5,7 @@ import { SubmissionDisplaySkeleton, UserSubmissionDisplay } from "@/ui/Submissio
 import Image from "next/image";
 import Link from "next/link";
 import { FaTwitter } from "react-icons/fa6";
-import { ClaimableUserRewards, ClientUserProfile, RewardsSkeleton, UserSubmissions } from "./client";
+// import { ClaimableUserRewards, ClientUserProfile, RewardsSkeleton, UserSubmissions } from "./client";
 import SwrProvider from "@/providers/SwrProvider";
 import { Suspense } from "react";
 import { useSession } from "@/providers/SessionProvider";
@@ -20,7 +20,8 @@ const SuspendableUserCard = async ({ userPromise, accountAddress }: { userPromis
     };
     return (
         <SwrProvider fallback={fallback}>
-            <ClientUserProfile accountAddress={accountAddress} />
+            <p>loading</p>
+            {/* <ClientUserProfile accountAddress={accountAddress} /> */}
         </SwrProvider>
     )
 }
@@ -61,7 +62,7 @@ const SuspendableUserSubmissions = async ({ userPromise, isMintableOnly }: { use
                     </div>
                 </div>
                 }
-                <UserSubmissions accountAddress={user.address} isMintableOnly={isMintableOnly} />
+                {/* <UserSubmissions accountAddress={user.address} isMintableOnly={isMintableOnly} /> */}
             </div>
         </SwrProvider>
     )
@@ -103,7 +104,7 @@ const UserCardSkeleton = () => {
                 </div>
             </div>
             {/* <ClaimableUserRewards accountAddress={user.address} /> */}
-            <RewardsSkeleton />
+            {/* <RewardsSkeleton /> */}
         </div>
     )
 }

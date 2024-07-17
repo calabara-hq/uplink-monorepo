@@ -11,12 +11,12 @@ export const transformVideoAsset = (url: string, mode: 'image' | 'video', width:
 }
 
 
-const InteractivePlayer = dynamic(() => import("./InteractiveVideoPlayer"), {
+export const InteractivePlayer = dynamic(() => import("./InteractiveVideoPlayer"), {
   ssr: false,
   loading: () => <SquareSpinLoader />,
 });
 
-const StandardPlayer = dynamic(() => import("./StandardVideoPlayer"), {
+export const StandardPlayer = dynamic(() => import("./StandardVideoPlayer"), {
   ssr: false,
   loading: () => <RectSpinLoader />,
 });

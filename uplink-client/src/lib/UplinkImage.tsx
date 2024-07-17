@@ -22,18 +22,11 @@ const blurLoader = ({ src, width, quality }) => {
 };
 
 export default function UplinkImage(props: { src: string | StaticImageData, alt: string, width?: number, height?: number, fill?: boolean, sizes?: string, className?: string, blur?: boolean, quality?: number, draggable?: boolean, priority?: boolean }) {
-    const { src, sizes, alt, blur = true, ...rest } = props;
+    const { src, sizes, alt, blur = true, className, ...rest } = props;
     const [isPlaceholderError, setIsPlaceholderError] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
 
-    // if(process.env.NODE_ENV !== 'production') return (
-    //     <Image
-    //         src={src}
-    //         alt={alt}
-    //         sizes={sizes}
-    //         {...rest}
-    //     />
-    // )
+
 
     if (blur) {
         const blurredSrc = typeof src === 'string' ? blurLoader({ src, width: 200, quality: '1' }) : '';
@@ -45,6 +38,7 @@ export default function UplinkImage(props: { src: string | StaticImageData, alt:
                     onError={() => setIsPlaceholderError(true)}
                     alt={alt}
                     sizes={sizes}
+                    className={className}
                     {...rest}
                     unoptimized={true}
 
@@ -56,6 +50,7 @@ export default function UplinkImage(props: { src: string | StaticImageData, alt:
                     src={src}
                     alt={alt}
                     sizes={sizes}
+                    className={`${className} ${hasLoaded ? 'opacity-100' : 'opacity-0'}`}
                     {...rest}
                 />
             </>
