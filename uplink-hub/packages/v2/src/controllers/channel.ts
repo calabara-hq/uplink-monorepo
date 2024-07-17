@@ -9,7 +9,7 @@ import { splitContractID } from "../utils/utils.js";
 import { Request, Response, NextFunction } from 'express'
 import { ContexedRequest } from "../types.js";
 
-const authorizationController = new AuthorizationController(process.env.REDIS_URL);
+const authorizationController = new AuthorizationController(process.env.REDIS_URL!);
 
 /// query db for channels associated with space
 export const getSpaceChannels = async (req: Request, res: Response, next: NextFunction) => {
@@ -32,6 +32,8 @@ export const getSpaceChannels = async (req: Request, res: Response, next: NextFu
             if (channelIds.length === 0) return []
 
             const client = clientByChainId(chainId)
+            if (!client) return []
+
             let chainChannels = await client.getAllChannels({ filters: { where: { id_in: channelIds } } })
             return chainChannels.map(channel => { return { ...channel, chainId } })
 
