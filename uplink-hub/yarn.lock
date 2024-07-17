@@ -4593,6 +4593,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tx-kit/sdk@npm:^0.1.0-alpha.0":
+  version: 0.1.0-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.1.0-alpha.0"
+  dependencies:
+    "@urql/core": ^4.3.0
+    base-64: ^1.0.0
+    graphql: ^16.8.1
+    lodash: ^4.17.21
+  peerDependenciesMeta:
+    viem:
+      optional: true
+  checksum: 19866b8e3f286da22f18661eeaf59321e4962914d9904491f6953f77636d36ccfe95260b03ef4e247939589d65c61f3f48e506cc786c70f2faf71ea5e3dc9664
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.1.14":
   version: 7.20.1
   resolution: "@types/babel__core@npm:7.20.1"
@@ -5009,6 +5024,16 @@ __metadata:
     "@0no-co/graphql.web": ^1.0.1
     wonka: ^6.3.2
   checksum: 9e8411434b61e544f71056f6ed0f76c01ab0aa0197771e3b7ffdd9d7a7e8ac4bcda5f62693c2fb66fafc29de2de9d25e0627cfc3e14be7f757915f61b4a31a94
+  languageName: node
+  linkType: hard
+
+"@urql/core@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "@urql/core@npm:4.3.0"
+  dependencies:
+    "@0no-co/graphql.web": ^1.0.1
+    wonka: ^6.3.2
+  checksum: 706e4f28390a1ee441588bfb2ab1517e620c2b63ed26756e8e5dd808acb6c871b1d0d760d569b162af773bff05df3d90fed753963ce70806fa8ca1f7a37bb7e9
   languageName: node
   linkType: hard
 
@@ -5651,6 +5676,13 @@ __metadata:
   version: 1.0.2
   resolution: "balanced-match@npm:1.0.2"
   checksum: 9706c088a283058a8a99e0bf91b0a2f75497f185980d9ffa8b304de1d9e58ebda7c72c07ebf01dadedaac5b2907b2c6f566f660d62bd336c3468e960403b9d65
+  languageName: node
+  linkType: hard
+
+"base-64@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "base-64@npm:1.0.0"
+  checksum: d10b64a1fc9b2c5a5f39f1ce1e6c9d1c5b249222bbfa3a0604c592d90623caf74419983feadd8a170f27dc0c3389704f72faafa3e645aeb56bfc030c93ff074a
   languageName: node
   linkType: hard
 
@@ -8640,6 +8672,13 @@ __metadata:
   version: 16.6.0
   resolution: "graphql@npm:16.6.0"
   checksum: bf1d9e3c1938ce3c1a81e909bd3ead1ae4707c577f91cff1ca2eca474bfbc7873d5d7b942e1e9777ff5a8304421dba57a4b76d7a29eb19de8711cb70e3c2415e
+  languageName: node
+  linkType: hard
+
+"graphql@npm:^16.8.1":
+  version: 16.9.0
+  resolution: "graphql@npm:16.9.0"
+  checksum: 8cb3d54100e9227310383ce7f791ca48d12f15ed9f2021f23f8735f1121aafe4e5e611a853081dd935ce221724ea1ae4638faef5d2921fb1ad7c26b5f46611e9
   languageName: node
   linkType: hard
 
@@ -13823,6 +13862,7 @@ __metadata:
   resolution: "v2@workspace:packages/v2"
   dependencies:
     "@jest/globals": ^29.5.0
+    "@tx-kit/sdk": ^0.1.0-alpha.0
     "@types/busboy": ^1.5.0
     "@types/node": ^18.11.19
     axios: ^1.4.0
