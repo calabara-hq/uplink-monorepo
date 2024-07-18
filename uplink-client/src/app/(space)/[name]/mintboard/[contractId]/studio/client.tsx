@@ -388,7 +388,7 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName, cha
                         <h2 className="font-bold text-t1 text-xl">Successfully created your post.</h2>
                         <div className="flex gap-2 items-center">
                             {!isIntent && <a className="btn btn-ghost normal-case text-t2" href={`${chain.blockExplorers.default.url}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>}
-                            <Link className="btn normal-case btn-primary" href={`/${spaceSystemName}/mintboard/${contractId}${isIntent && '?intent=true'}`}>Go to MintBoard</Link>
+                            <Link className="btn normal-case btn-primary" href={`/${spaceSystemName}/mintboard/${contractId}${isIntent ? '?intent=true' : ''}`}>Go to MintBoard</Link>
                         </div>
                     </div>
 

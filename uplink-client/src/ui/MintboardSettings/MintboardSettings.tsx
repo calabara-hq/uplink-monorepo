@@ -357,7 +357,7 @@ export const MintboardSettings = ({
                                         error={state.errors?.sponsorPercentage?._errors} />
                                     <FeeRow
                                         value={state.uplinkPercentage}
-                                        label={"Uplink Percentage"}
+                                        label={"Protocol Percentage"}
                                         placeholder={"10%"}
                                         onChange={(e) => setField("uplinkPercentage", asPositiveFloat(e.target.value, 2))}
                                         error={state.errors?.uplinkPercentage?._errors} />

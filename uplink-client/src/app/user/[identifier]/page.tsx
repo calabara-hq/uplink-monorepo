@@ -112,18 +112,28 @@ const UserCardSkeleton = () => {
 
 
 export default async function Page({ params, searchParams }: { params: { identifier: UserIdentifier }, searchParams: { [key: string]: string | string[] | undefined } }) {
-    const userPromise = fetchUser(params.identifier)
-    const isMintableOnly = searchParams?.drops === 'true'
+    // const userPromise = fetchUser(params.identifier)
+    // const isMintableOnly = searchParams?.drops === 'true'
+    // return (
+    //     <div className="w-full lg:w-9/12 m-auto mt-4 mb-16 p-4">
+    //         <div className="flex flex-col gap-4 items-center ">
+    //             <Suspense fallback={<UserCardSkeleton />}>
+    //                 <SuspendableUserCard userPromise={userPromise} accountAddress={params.identifier} />
+    //             </Suspense>
+    //             <Suspense fallback={<UserSubmissionSkeleton />}>
+    //                 <SuspendableUserSubmissions userPromise={userPromise} isMintableOnly={isMintableOnly} />
+    //             </Suspense>
+    //         </div>
+    //     </div >
+    // )
+
     return (
-        <div className="w-full lg:w-9/12 m-auto mt-4 mb-16 p-4">
-            <div className="flex flex-col gap-4 items-center ">
-                <Suspense fallback={<UserCardSkeleton />}>
-                    <SuspendableUserCard userPromise={userPromise} accountAddress={params.identifier} />
-                </Suspense>
-                <Suspense fallback={<UserSubmissionSkeleton />}>
-                    <SuspendableUserSubmissions userPromise={userPromise} isMintableOnly={isMintableOnly} />
-                </Suspense>
-            </div>
-        </div >
+        <div className="w-full flex flex-col items-center gap-4 lg:w-9/12 m-auto mt-4 mb-16 p-4">
+            <h2 className="text-t1 text-2xl">Under Construction</h2>
+            <Image src="/uplink-loading.gif" width={400} height={400} alt="construction" />
+            <h2 className="text-t1 text-xl">Profiles will be back soon!</h2>
+        </div>
     )
+
+
 }

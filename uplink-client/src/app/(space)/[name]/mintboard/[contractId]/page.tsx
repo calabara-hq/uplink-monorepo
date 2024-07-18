@@ -13,7 +13,10 @@ import { Address } from 'viem'
 import { PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents } from './client';
 import { ContractID, splitContractID } from '@/types/channel';
 import { notFound } from 'next/navigation';
-import { MdCircle, MdNewReleases } from 'react-icons/md';
+import { MdCircle, MdNewReleases, MdOutlineSettings } from 'react-icons/md';
+import { AdminWrapper } from '@/lib/AdminWrapper';
+import { LuSettings2 } from 'react-icons/lu';
+import { HiCog } from 'react-icons/hi2';
 
 // const { downlinkClient } = new TransmissionsClient({
 //     chainId: 84532,
@@ -92,6 +95,11 @@ const BoardInfo = async ({ spaceName, contractId }: { spaceName: string, contrac
                     >
                         {space.displayName}
                     </Link>
+                    <AdminWrapper admins={space.admins}>
+                        <Link href={`/${spaceName}/mintboard/${contractId}/edit`} className="text-t2 hover:text-t1">
+                            <MdOutlineSettings className="w-6 h-6 text-t2 hover:text-t1" />
+                        </Link>
+                    </AdminWrapper>
                 </div>
                 <p className="text-t2 whitespace-pre-line">
                     {ipfsData.description}

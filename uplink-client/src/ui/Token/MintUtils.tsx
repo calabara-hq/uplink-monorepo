@@ -35,7 +35,7 @@ export type FeeStructure = {
 export const formatFeeKey = (key, value) => {
     switch (key) {
         case "uplinkPercentage":
-            return "Uplink Reward";
+            return "Protocol Reward";
         case "creatorPercentage":
             return "Creator Reward";
         case "channelPercentage":

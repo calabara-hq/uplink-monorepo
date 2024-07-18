@@ -9,7 +9,6 @@ import { ImageWrapper } from "@/ui/Submission/MediaWrapper"
 import { Address } from "viem";
 import { useWalletDisplayText } from "@/hooks/useWalletDisplay";
 import { useEffect } from "react";
-// import { Avatar } from "@coinbase/onchainkit/identity";
 
 
 const formatAddress = (address: string) => {
