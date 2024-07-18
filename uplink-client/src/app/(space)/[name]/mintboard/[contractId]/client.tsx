@@ -10,6 +10,7 @@ import { ManageModalContent, ShareModalContent } from "@/ui/Token/MintUtils";
 import { useChannel } from "@/hooks/useChannel";
 
 import RenderIfVisible from "@/ui/VIrtualization/RenderIfVisible";
+import { Admin } from "@/types/space";
 
 
 export const PostSkeleton = () => {

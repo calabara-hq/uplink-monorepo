@@ -64,6 +64,8 @@ export const getSingleTokenV1 = async (req: Request, res: Response, next: NextFu
     const contractId = req.query.contractId as string
     const postId = req.query.postId as string
 
+    console.log("post ID", postId)
+
     try {
         const { chainId, contractAddress } = splitContractID(contractId)
 
@@ -71,11 +73,12 @@ export const getSingleTokenV1 = async (req: Request, res: Response, next: NextFu
             channelAddress: contractAddress,
             chainId,
             orderByMints: false,
-        }).then(data => data.filter(data => data.id === Number(postId))).then(data => data[0]).then(parseV1Metadata)
+        }).then(data => data.filter(data => data.id.toString() === postId)).then(data => data[0]).then(parseV1Metadata)
 
         res.send(token).status(200)
 
     } catch (err) {
+        console.log(err)
         next(err)
     }
 }

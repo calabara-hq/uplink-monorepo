@@ -3,8 +3,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { SessionProvider } from "./SessionProvider";
 import { AuthenticationProvider } from "./AuthenticationProvider";
 import { Session } from "./SessionProvider";
-
-import { UserAvatar } from "@/ui/AddressDisplay/AddressDisplay";
+import { TransmissionsProvider } from "@tx-kit/hooks";
 
 import "@rainbow-me/rainbowkit/styles.css";
 import { WagmiProvider } from "wagmi";
@@ -49,7 +48,9 @@ export default function WalletProvider({
               theme={darkTheme()}
             // avatar={(user) => <UserAvatar user={user} size={160} styleOverride="flex items-center rounded-full overflow-hidden p-2.5" />}
             >
-              {children}
+              <TransmissionsProvider>
+                {children}
+              </TransmissionsProvider>
             </RainbowKitProvider>
           </AuthenticationProvider>
         </SessionProvider>

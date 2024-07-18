@@ -301,7 +301,7 @@ const AdminButtons = async ({ spaceName }: { spaceName: string }) => {
           <div className="flex flex-row gap-2 items-end">
             <div className="flex flex-col gap-1">
               <p className="text-lg font-bold text-t1">Mintboard</p>
-              <p className="text-t2">Earn protocol rewards with your users by allowing them to mint under a template config.</p>
+              {/* <p className="text-t2">Earn protocol rewards with your users by allowing them to mint under a template config.</p> */}
             </div>
             <Link
               href={`${spaceName}/mintboard/new`}
@@ -313,8 +313,8 @@ const AdminButtons = async ({ spaceName }: { spaceName: string }) => {
           </div>
           <div className="flex flex-row gap-2 items-end">
             <div className="flex flex-col gap-1">
-              <p className="text-lg font-bold text-t1">Contests</p>
-              <p className="text-t2">Create a contest</p>
+              <p className="text-lg font-bold text-t1">Contest</p>
+              {/* <p className="text-t2">Create a contest</p> */}
             </div>
             <Link
               href={`${spaceName}/create-contest`}
@@ -486,19 +486,19 @@ export default async function Page({ params }: { params: { name: string } }) {
     <div className="flex flex-col gap-2 w-full lg:w-11/12 m-auto py-6 px-4">
       <div className="grid grid-cols-1 lg:grid-cols-[25%_auto] w-full gap-8">
         <div className="lg:sticky lg:top-6 lg:left-0 w-full h-fit">
-          <div className="flex flex-col md:flex-row lg:flex-col gap-2 w-full lg:max-w-[300px] ">
+          <div className="flex flex-col md:flex-row lg:flex-col gap-6 w-full lg:max-w-[300px] ">
             <Suspense fallback={<SpaceInfoSkeleton />}>
               <SpaceInfo name={spaceName} />
             </Suspense>
-            <Suspense fallback={<SpaceStatsSkeleton />}>
-              <SpaceStats name={spaceName} />
+            <Suspense>
+              <AdminButtons spaceName={spaceName} />
             </Suspense>
+            {/* <Suspense fallback={<SpaceStatsSkeleton />}>
+              <SpaceStats name={spaceName} />
+            </Suspense> */}
           </div>
         </div>
         <div className="w-full h-full flex flex-col gap-6">
-          <Suspense>
-            <AdminButtons spaceName={spaceName} />
-          </Suspense>
           <Suspense fallback={<HeatMapSkeleton />}>
             {/* <MintboardHeatMap spaceName={spaceName} /> */}
             <MintboardDisplay spaceName={spaceName} />

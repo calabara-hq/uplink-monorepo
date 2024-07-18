@@ -5,6 +5,7 @@ import fetchUser from "@/lib/fetch/fetchUser";
 import { UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 const Chart = dynamic(
     () => import("./client"),
@@ -278,11 +279,17 @@ export default async function Page({ params }: { params: { name: string } }) {
     const spaceName = params.name;
 
     return (
-        <div className="flex flex-col gap-6 w-full lg:w-11/12 xl:w-9/12 m-auto py-6 px-4">
-            <h2 className="text-3xl font-bold">Onchain Stats</h2>
-            <Suspense fallback={<PageContentSkeleton />}>
-                <PageContent name={spaceName} />
-            </Suspense>
+        // <div className="flex flex-col gap-6 w-full lg:w-11/12 xl:w-9/12 m-auto py-6 px-4">
+        //     <h2 className="text-3xl font-bold">Onchain Stats</h2>
+        //     <Suspense fallback={<PageContentSkeleton />}>
+        //         <PageContent name={spaceName} />
+        //     </Suspense>
+        // </div>
+        <div className="w-full flex flex-col items-center gap-4 lg:w-9/12 m-auto mt-4 mb-16 p-4">
+            <h2 className="text-t1 text-2xl">Under Construction</h2>
+            <Image src="/uplink-loading.gif" width={400} height={400} alt="construction" />
+            <h2 className="text-t1 text-xl">Stats will be back soon!</h2>
         </div>
     )
+
 }

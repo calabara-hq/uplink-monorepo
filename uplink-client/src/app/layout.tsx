@@ -7,7 +7,6 @@ import MobileNav from "@/ui/MobileNav/MobileNav";
 import type { Metadata } from "next";
 import { Analytics } from '@vercel/analytics/react';
 import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
-import { TxProvider } from "@/providers/TransmissionsProvider";
 import { PolyfillContext } from "@/providers/PolyfillContext";
 
 // export const runtime = "edge";
@@ -139,27 +138,25 @@ export default function RootLayout({
       <head />
       <body>
         <WalletProvider refetchInterval={60} session={undefined}>
-          <TxProvider>
-            <ToastProvider>
-              <PolyfillContext>
-                <div className="h-full">
-                  <div className="hidden md:flex h-full w-[64px] z-30 flex-col fixed inset-y-0">
-                    <Sidebar />
-                  </div>
-                  <div className="btm-nav z-20 md:hidden shadow-[0_35px_60px_15px_black] bg-base">
-                    <MobileNav />
-                  </div>
-                  <main className="pb-20 md:pb-0 md:pl-[64px]">
-                    <Nav />
-                    <div className="min-h-[100vh]">
-                      {children}
-                    </div>
-                    <Footer />
-                  </main>
+          <ToastProvider>
+            <PolyfillContext>
+              <div className="h-full">
+                <div className="hidden md:flex h-full w-[64px] z-30 flex-col fixed inset-y-0">
+                  <Sidebar />
                 </div>
-              </PolyfillContext>
-            </ToastProvider>
-          </TxProvider>
+                <div className="btm-nav z-20 md:hidden shadow-[0_35px_60px_15px_black] bg-base">
+                  <MobileNav />
+                </div>
+                <main className="pb-20 md:pb-0 md:pl-[64px]">
+                  <Nav />
+                  <div className="min-h-[100vh]">
+                    {children}
+                  </div>
+                  <Footer />
+                </main>
+              </div>
+            </PolyfillContext>
+          </ToastProvider>
         </WalletProvider>
         <Analytics />
       </body>

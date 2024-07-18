@@ -1,7 +1,8 @@
 import { getFrameMessage } from "@/lib/farcaster/utils";
 import { FrameRequest } from "@/lib/farcaster/types"; import { NextRequest, NextResponse } from "next/server";
 import { Abi, isAddress, PublicClient } from "viem";
-import { TransmissionsClient, infiniteChannelAbi, finiteChannelAbi } from "@tx-kit/sdk";
+import { infiniteChannelAbi, finiteChannelAbi } from "@tx-kit/sdk/abi";
+import { TransmissionsClient } from "@tx-kit/sdk";
 import { fetchSingleTokenIntent, fetchSingleTokenV2 } from "@/lib/fetch/fetchTokensV2";
 import { ChannelToken, ChannelTokenIntent, ContractID, doesChannelHaveFees, isTokenV2Onchain, splitContractID } from "@/types/channel";
 import { createWeb3Client } from "@/lib/viem";
