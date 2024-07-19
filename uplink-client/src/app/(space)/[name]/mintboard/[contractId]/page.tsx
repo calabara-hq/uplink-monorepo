@@ -85,9 +85,8 @@ const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, 
     const space = await fetchSingleSpace(spaceName)
 
     return (
-        <Boundary size="small">
-            <div className="flex flex-col gap-4 h-full justify-between">
-                <ol className="text-t2 list-disc space-y-2">
+        <div className="flex flex-col gap-4 h-full justify-between">
+            {/* <ol className="text-t2 list-disc space-y-2">
                     <li className="text-sm text-t2">
                         Share posts to earn referral rewards.
                     </li>
@@ -98,15 +97,14 @@ const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, 
                         0.000111 ETH from every mint goes to the{" "}
                         {space.displayName} treasury.
                     </li>
-                </ol>
-                <Link
-                    href={`/${spaceName}/mintboard/${contractId}/studio`}
-                    className="btn btn-primary normal-case"
-                >
-                    Post
-                </Link>
-            </div>
-        </Boundary>
+                </ol> */}
+            <Link
+                href={`/${spaceName}/mintboard/${contractId}/studio`}
+                className="btn btn-primary text-lg normal-case w-full md:w-56 h-full ml-auto"
+            >
+                Post
+            </Link>
+        </div>
     );
 };
 
@@ -192,8 +190,6 @@ const Posts = async ({
     tab: "default" | "popular" | "intent";
 }) => {
 
-
-
     const [
         firstPageV2Tokens,
         firstPageV1Tokens,
@@ -248,7 +244,7 @@ export default async function Page({
 
     return (
         <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-[auto_35%] gap-8 w-full p-4">
+            <div className="grid grid-cols-1 md:grid-cols-[auto_35%] gap-8 w-full">
                 <div className="flex flex-col gap-2">
                     <Suspense fallback={<BoardInfoSkeleton />}>
                         <BoardInfo spaceName={spaceName} contractId={contractId} />
