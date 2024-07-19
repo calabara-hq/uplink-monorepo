@@ -1,13 +1,7 @@
 import { CreateToken } from "./client";
 import { Suspense } from "react";
-import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
-import { MintBoard } from "@/types/mintBoard";
-import SwrProvider from "@/providers/SwrProvider";
-import { Address } from "viem";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-import fetchChannel from "@/lib/fetch/fetchChannel";
 import { ContractID } from "@/types/channel";
-
 
 const LoadingDialog = () => {
     return (
@@ -25,25 +19,15 @@ const LoadingDialog = () => {
 
 
 const PageContent = async ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
-    //    const mintBoard = await fetchMintBoard(spaceName);
-    //    const { dropConfig, chainId, referrer } = createDropTemplate(mintBoard);
-    const channel = await fetchChannel(contractId);
     const space = await fetchSingleSpace(spaceName);
 
-    // const fallback = {
-    //     [`/mintBoard/${spaceName}`]: mintBoard,
-    // };
-
     return (
-        // <SwrProvider fallback={fallback}>
-        <CreateToken contractId={contractId} spaceDisplayName={space.displayName} spaceSystemName={spaceName} channel={channel} />
-        // </SwrProvider>
+        <CreateToken contractId={contractId} spaceDisplayName={space.displayName} spaceSystemName={spaceName} />
     )
 }
 
 
 export default async function Page({ params }: { params: { name: string, contractId: ContractID } }) {
-
     return (
         <div className=" flex flex-col gap-6 w-full md:w-10/12 m-auto mt-4 mb-16 p-4">
             <Suspense fallback={<LoadingDialog />}>

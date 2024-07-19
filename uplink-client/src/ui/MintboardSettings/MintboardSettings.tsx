@@ -301,7 +301,7 @@ export const MintboardSettings = ({
                 </div>
 
                 <div className="flex flex-col gap-2 bg-base-100 w-full p-6 rounded-lg">
-                    <h1 className="text-xl font-bold text-t1">Token Template</h1>
+                    <h1 className="text-xl font-bold text-t1">Sale Configuration</h1>
                     <OptionOrCustom
                         value={state.ethMintPrice}
                         label={"Mint Price"}

@@ -3,45 +3,16 @@ import fetchSingleSpace from '@/lib/fetch/fetchSingleSpace';
 import { fetchPopularTokens, fetchTokenIntents, fetchTokensV1, fetchTokensV2 } from '@/lib/fetch/fetchTokensV2';
 import { parseIpfsUrl } from '@/lib/ipfs';
 import UplinkImage from '@/lib/UplinkImage';
-import { createWeb3Client } from '@/lib/viem'
 import SwrProvider from '@/providers/SwrProvider';
 import { Boundary } from '@/ui/Boundary/Boundary';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { unstable_serialize } from 'swr';
-import { Address } from 'viem'
-import { PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents } from './client';
+import { PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents, WhatsNew } from './client';
 import { ContractID, splitContractID } from '@/types/channel';
 import { notFound } from 'next/navigation';
-import { MdCircle, MdNewReleases, MdOutlineSettings } from 'react-icons/md';
+import { MdNewReleases, MdOutlineSettings } from 'react-icons/md';
 import { AdminWrapper } from '@/lib/AdminWrapper';
-import { LuSettings2 } from 'react-icons/lu';
-import { HiCog } from 'react-icons/hi2';
-
-// const { downlinkClient } = new TransmissionsClient({
-//     chainId: 84532,
-//     apiConfig: {
-//         serverUrl: "https://api.goldsky.com/api/public/project_clx10qkniqc3w01ypaz560vm1/subgraphs/transmissions/1.0.0/gn"
-//     },
-//     // publicClient: createWeb3Client(84532),
-// })
-
-
-/// need to extract pieces of data
-/// 1. paginated posts
-/// 2. popular posts
-/// 3. v2 posts
-
-/// v2 has priority over everything else
-
-// export default async function Page({ params }: { params: { name: string, contract: string } }) {
-//     const channel = await fetchChannel(params.contract as Address)
-
-
-//     return (
-//         <pre>{JSON.stringify(channel, null, 2)}</pre>
-//     )
-// }
 
 
 const BoardInfoSkeleton = () => {
@@ -250,7 +221,12 @@ const Posts = async ({
         <SwrProvider fallback={fallback}>
             {tab === "default" && <RenderDefaultTokens spaceName={spaceName} contractId={contractId} />}
             {tab === "popular" && <RenderPopularTokens spaceName={spaceName} contractId={contractId} />}
-            {tab === "intent" && <RenderTokenIntents spaceName={spaceName} contractId={contractId} />}
+            {tab === "intent" && (
+                <React.Fragment>
+                    <WhatsNew />
+                    <RenderTokenIntents spaceName={spaceName} contractId={contractId} />
+                </React.Fragment>
+            )}
         </SwrProvider>
     );
 };

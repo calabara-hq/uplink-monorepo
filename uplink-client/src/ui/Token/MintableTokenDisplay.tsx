@@ -14,8 +14,6 @@ import { TbLoader2 } from "react-icons/tb";
 import { CounterInput, FeeStructure, getETHMintPrice, RenderFees, RenderMaxSupply, RenderMintMedia, RenderTotalMints } from "./MintUtils";
 import { Boundary } from "../Boundary/Boundary";
 import { AddressOrEns, Avatar } from "../AddressDisplay/AddressDisplay";
-import { usePathname, useRouter } from "next/navigation";
-import { HiArrowNarrowLeft } from "react-icons/hi";
 
 
 export type DisplayMode = "modal" | "expanded"
@@ -203,7 +201,7 @@ export const MintModalDisplay = ({
                     <HiCheckBadge className="h-48 w-48 text-success" />
                     <h2 className="font-bold text-t1 text-xl">Got it.</h2>
                     <div className="flex gap-2 items-center">
-                        <a className="btn btn-ghost normal-case text-t2" href={`${chain.blockExplorers.default.url}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
+                        <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
                         <button className="btn normal-case btn-primary" onClick={() => setIsModalOpen(false)}>Close</button>
                     </div>
                 </div>
@@ -327,7 +325,7 @@ export const MintExpandedDisplay = ({
                     <HiCheckBadge className="h-48 w-48 text-success" />
                     <h2 className="font-bold text-t1 text-xl">Got it.</h2>
                     <div className="flex gap-2 items-center">
-                        <a className="btn btn-ghost normal-case text-t2" href={`${chain.blockExplorers.default.url}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
+                        <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
                         <button className="btn normal-case btn-primary" onClick={() => setIsModalOpen(false)}>Close</button>
                     </div>
                 </div>

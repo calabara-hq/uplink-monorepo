@@ -15,6 +15,9 @@ class FrameError extends Error {
 export async function POST(request: NextRequest) {
 
     try {
+
+        const queryParams = request.nextUrl.searchParams;
+        const spaceName = queryParams.get('spaceName');
         const requestData: FrameRequest = await request.json();
         const contractId = request.nextUrl.pathname.split("/")[3] as ContractID;
         const { contractAddress, chainId } = splitContractID(contractId);
@@ -23,6 +26,9 @@ export async function POST(request: NextRequest) {
         if (!isValid) {
             throw new FrameError('Invalid frame request');
         }
+
+
+        const explorer = chainId === 8453 ? 'https://basescan.org' : 'https://sepolia.basescan.org';
 
         const txHash = message.transaction.hash as Hash;
 
@@ -36,13 +42,13 @@ export async function POST(request: NextRequest) {
                     buttons: [
                         {
                             action: 'link',
-                            label: 'View on uplink',
-                            target: `https://uplink.io/${contractId}/token/${txHash}` // todo fix this
+                            label: 'Go to mintboard',
+                            target: `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}` // todo fix this
                         },
                         {
                             action: 'link',
                             label: 'View transaction',
-                            target: `https://basescan.org/tx/${txHash}` // todo fix this
+                            target: `${explorer}/tx/${txHash}` // todo fix this
                         }
 
                     ],

@@ -41,7 +41,7 @@ export async function generateMetadata({
         "fc:frame:button:1": "Mint",
         "fc:frame:button:1:action": "tx",
         "fc:frame:button:1:target": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/frames/${contractId}/v2/mint?postId=${postId}&intent=${isIntent ? 'true' : 'false'}&referrer=${referral}`,
-        "fc:frame:button1:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/frames/${contractId}/v2/after-mint&chainId=${channel.chainId}`,
+        "fc:frame:button:1:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/frames/${contractId}/v2/after-mint?spaceName=${spaceName}`,
     }
 
     return {
