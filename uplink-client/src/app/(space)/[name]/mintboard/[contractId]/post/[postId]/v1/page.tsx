@@ -1,10 +1,69 @@
+import { calculateImageAspectRatio } from "@/lib/farcaster/utils";
 import fetchChannel from "@/lib/fetch/fetchChannel";
 import { fetchSingleTokenV1, fetchTokenIntents } from "@/lib/fetch/fetchTokensV2";
+import { parseIpfsUrl } from "@/lib/ipfs";
 import { ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, isTokenIntent, isTokenV1Onchain, isTokenV2Onchain, splitContractID } from "@/types/channel";
 import { MintTokenSwitch, MintV1Onchain } from "@/ui/Token/MintToken";
+import { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { HiArrowNarrowLeft } from "react-icons/hi";
+
+
+export async function generateMetadata({
+    params,
+    searchParams
+}: {
+    params: { name: string, contractId: ContractID, postId: string };
+    searchParams: { [key: string]: string | undefined }
+}): Promise<Metadata> {
+
+    const { name: spaceName, contractId, postId } = params
+
+    const referral = searchParams?.referrer ?? ""
+    const token = await fetchSingleTokenV1(contractId, postId)
+    const author = token.author
+    const aspect = await calculateImageAspectRatio(parseIpfsUrl(token.metadata.image).gateway)
+
+    const fcMetadata: Record<string, string> = {
+        "fc:frame": "vNext",
+        "fc:frame:image": parseIpfsUrl(token.metadata.image).gateway,
+        "fc:frame:image:aspect_ratio": aspect, // todo is this necc???
+    };
+
+    const linkableMetadata: Record<string, string> = {
+        "fc:frame:button:1": "Mint on uplink",
+        "fc:frame:button:1:action": "link",
+        "fc:frame:button:1:target": `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${postId}/v1${referral ? `?referrer=${referral}` : ''}`,
+    }
+
+    return {
+        title: `${author}`,
+        description: `Mint ${token.metadata.name} on uplink`,
+        openGraph: {
+            title: `${author}`,
+            description: `Mint ${token.metadata.name} on uplink`,
+            images: [
+                {
+                    url: parseIpfsUrl(token.metadata.image).gateway,
+                    width: 600,
+                    height: 600,
+                    alt: `${params.postId} media`,
+                },
+            ],
+            locale: "en_US",
+            type: "website",
+        },
+        other: {
+            ...fcMetadata,
+            ...linkableMetadata
+        },
+    };
+}
+
+
+
+
 
 const ExpandedPostSkeleton = () => {
     return (

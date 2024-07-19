@@ -340,7 +340,7 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName }: {
                 <div className="bg-base-100 h-0.5 w-full" />
                 <OnchainButton
                     chainId={chainId}
-                    title={"Save"}
+                    title={"Post"}
                     onClick={handleSubmit}
                     isLoading={txStatus === 'pendingApproval' || txStatus === 'txInProgress' || isUploading}
                     loadingChild={

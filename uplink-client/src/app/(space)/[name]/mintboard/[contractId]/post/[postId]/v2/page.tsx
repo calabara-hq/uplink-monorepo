@@ -46,10 +46,10 @@ export async function generateMetadata({
 
     return {
         title: `${author}`,
-        description: `Mint ${token.metadata.name} on Uplink`,
+        description: `Mint ${token.metadata.name} on uplink`,
         openGraph: {
             title: `${author}`,
-            description: `Mint ${token.metadata.name} on Uplink`,
+            description: `Mint ${token.metadata.name} on uplink`,
             images: [
                 {
                     url: parseIpfsUrl(token.metadata.image).gateway,
