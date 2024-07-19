@@ -170,7 +170,7 @@ export const WhatsNew = () => {
                 <div className="flex flex-col bg-base gap-2 rounded-md p-2">
                     <p className="text-lg">Intents are posts awaiting onchain sponsorship.</p>
                     <p className="text-lg">Be the first to mint any of these posts to bring them onchain.</p>
-                    <p className="text-lg">In exchange, you'll receive a small reward on every future mint.</p>
+                    <p className="text-lg">{"In exchange, you'll receive a small reward on every future mint."}</p>
                 </div>
                 <button className="btn btn-primary normal-case ml-auto w-fit" onClick={() => setIsModalOpen(false)}>Got it</button>
             </div>

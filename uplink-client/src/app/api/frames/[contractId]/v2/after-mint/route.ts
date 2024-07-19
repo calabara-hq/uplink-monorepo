@@ -43,12 +43,12 @@ export async function POST(request: NextRequest) {
                         {
                             action: 'link',
                             label: 'Go to mintboard',
-                            target: `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}` // todo fix this
+                            target: `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}`
                         },
                         {
                             action: 'link',
                             label: 'View transaction',
-                            target: `${explorer}/tx/${txHash}` // todo fix this
+                            target: `${explorer}/tx/${txHash}`
                         }
 
                     ],
