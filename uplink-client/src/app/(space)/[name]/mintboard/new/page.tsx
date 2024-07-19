@@ -26,7 +26,7 @@ const PageContent = async ({ spaceName }: { spaceName: string }) => {
 export default async function Page({ params }: { params: { name: string } }) {
 
     return (
-        <div className=" w-full md:w-[50vw] lg:w-[35vw] m-auto mt-4 mb-16 bg-base">
+        <div className=" w-full md:w-10/12 lg:w-8/12 xl:w-5/12 m-auto mt-4 mb-16 bg-base">
             <div className="flex flex-col w-full px-2 pt-2 pb-6 rounded-lg justify-center items-center">
                 <Suspense fallback={<LoadingDialog />}>
                     <PageContent spaceName={params.name} />

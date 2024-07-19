@@ -38,8 +38,6 @@ const PageContent = async ({ spaceName, contractId }: { spaceName: string, contr
 
     const token_zero = await fetch(parseIpfsUrl(channel.uri).gateway).then(res => res.json())
 
-    console.log(token_zero)
-
     const priorState: MintBoardSettingsInput = {
         title: token_zero.name,
         description: token_zero.description,
@@ -62,7 +60,7 @@ const PageContent = async ({ spaceName, contractId }: { spaceName: string, contr
 export default async function Page({ params }: { params: { name: string, contractId: ContractID } }) {
 
     return (
-        <div className=" w-full md:w-[50vw] lg:w-[35vw] m-auto mt-4 mb-16 bg-base">
+        <div className=" w-full md:w-10/12 lg:w-8/12 xl:w-5/12 m-auto mt-4 mb-16 bg-base">
             <div className="flex flex-col w-full px-2 pt-2 pb-6 rounded-lg justify-center items-center">
                 <Suspense fallback={<LoadingDialog />}>
                     <PageContent spaceName={params.name} contractId={params.contractId} />

@@ -205,15 +205,10 @@ export const RenderTotalMints = ({ totalMinted }: { totalMinted: string }) => {
     //}
 }
 export const RenderMaxSupply = ({ maxSupply }: { maxSupply: string }) => {
-    if (maxSupply >= maxUint40.toString()) {
-        return (
-            <PiInfinity className="w-6 h-6 text-t1" />
-        )
+    if (parseInt(maxSupply) >= Number(maxUint40)) {
+        return <PiInfinity className="w-6 h-6 text-t1" />
     }
-    else
-        return (
-            <p className="text-t1 font-bold">{maxSupply}</p>
-        )
+    else return <p className="text-t1 font-bold">{maxSupply}</p>
 }
 
 export const ShareModalContent = ({ spaceName, contractId, token, handleClose }: { spaceName: string, contractId: ContractID, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, handleClose: () => void }) => {

@@ -30,7 +30,6 @@ export const useWalletDisplayText = (address: string | null | undefined) => {
                 return;
             }
 
-            console.log("Fetching ENS name for address:", address);
             try {
                 const ensName = await client.getEnsName({ address: address as Address });
                 if (ensName) {

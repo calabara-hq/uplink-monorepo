@@ -26,7 +26,6 @@ const WaitForNewChannel = ({ spaceData, contractId }: { spaceData: Space, contra
 
     useEffect(() => {
         if (channel) {
-            console.log(channel)
             mutateChannel(contractId)
             router.push(`/${spaceData.name}/mintboard/${contractId}`, { scroll: false })
             router.refresh();
@@ -55,11 +54,6 @@ const BoardForm = ({ spaceData, priorState }: { spaceId: string, priorState: Min
     const contractId = concatContractID({ chainId: state.chainId, contractAddress: channelAddress })
 
     useTransmissionsErrorHandler(txError);
-
-
-    useEffect(() => {
-        console.log(state.chainId)
-    }, [state])
 
 
     const { trigger, data: swrData, error: swrError, isMutating: isSwrMutating, reset: resetSwr } = useSWRMutation(

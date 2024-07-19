@@ -208,7 +208,7 @@ export const NewMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asyn
             creatorPercentage: data.creatorPercentage,
             mintReferralPercentage: data.mintReferralPercentage,
             sponsorPercentage: data.sponsorPercentage,
-            ethMintPrice: BigInt(data.ethMintPrice),
+            ethMintPrice: parseEther(data.ethMintPrice),
             erc20MintPrice: BigInt(data.erc20MintPrice),
             erc20Contract: data.erc20Contract
         }
@@ -230,9 +230,35 @@ export const NewMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asyn
     try {
         validateInfiniteChannelInputs(config);
     } catch (e) {
+
+        if (e.message.startsWith("Invalid eth mint price")) {
+            ctx.addIssue({
+                path: ["ethMintPrice"],
+                code: z.ZodIssueCode.custom,
+                "message": e.message
+            })
+        }
+
+        if (e.message.startsWith("Invalid address")) {
+            ctx.addIssue({
+                path: ["channelTreasury"],
+                code: z.ZodIssueCode.custom,
+                message: "Invalid space treasury address"
+            })
+        }
+
+
+        if (e.message.startsWith("Fee percentages must add up to 100")) {
+            ctx.addIssue({
+                path: ["feePercentages"],
+                code: z.ZodIssueCode.custom,
+                message: e.message
+            })
+        }
+
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            "message": e.message
+            message: e.message
         })
     }
 

@@ -120,7 +120,9 @@ const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, cu
     };
 
     const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onOptionSelect({ value: "100", label: "custom" });
         setIsCustom(e.target.checked);
+
     };
 
     return (
@@ -161,7 +163,7 @@ const asPositiveInt = (value: string) => {
     return value.trim() === "" ? "" : Math.abs(Math.round(Number(value))).toString();
 }
 
-export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName, channel }: { contractId: ContractID, spaceDisplayName: string, spaceSystemName: string, channel: Channel }) => {
+export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName }: { contractId: ContractID, spaceDisplayName: string, spaceSystemName: string }) => {
 
     const { contractAddress, chainId } = splitContractID(contractId);
 
@@ -186,8 +188,6 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName, cha
     useTransmissionsErrorHandler(txError);
 
 
-    useEffect(() => { console.log(txError) }, [txError])
-
     const { trigger, data: swrData, error: swrError, isMutating: isSwrMutating, reset: resetSwr } = useSWRMutation(
         `/api/insertIntent/${contractId}`,
         insertIntent,
@@ -199,14 +199,8 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName, cha
         }
     );
 
-    useEffect(() => {
-        console.log(chain.blockExplorers)
-    }, [chain])
-
-
 
     useEffect(() => {
-        console.log(isIntent)
         if (txStatus === "txInProgress") {
             setIsModalOpen(true);
         }
@@ -268,7 +262,7 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName, cha
         }
     }
     return (
-        <div className="grid grid-cols-1 md:grid-cols-[60%_40%] md:w-10/12 m-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] md:w-10/12 m-auto">
             <div className="flex flex-col gap-6 w-full m-auto mt-4 p-4 md:max-w-[600px]">
                 <Boundary>
 
@@ -308,7 +302,7 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName, cha
                                 <OptionOrCustom
                                     value={state.maxSupply.toString()}
                                     label={"Token Supply"}
-                                    options={[{ value: "one", label: "1" }, { value: "100", label: "100" }, { value: maxUint256.toString(), label: "unlimited" }]}
+                                    options={[{ value: "1", label: "1" }, { value: "100", label: "100" }, { value: maxUint256.toString(), label: "unlimited" }]}
                                     onOptionSelect={(option: Option) => setField("maxSupply", option.value)}
                                     customLabel={"custom"}
                                     customChild={
@@ -353,7 +347,7 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName, cha
                         <button className="btn btn-disabled normal-case w-auto">
                             <div className="flex gap-2 items-center">
                                 <p className="text-sm">{
-                                    isUploading ? <p>Uploading</p> :
+                                    isUploading ? <span>Uploading</span> :
                                         txStatus === 'pendingApproval' ?
                                             <span>Awaiting Signature</span>
                                             :
@@ -387,7 +381,7 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName, cha
                         <HiCheckBadge className="h-48 w-48 text-success" />
                         <h2 className="font-bold text-t1 text-xl">Successfully created your post.</h2>
                         <div className="flex gap-2 items-center">
-                            {!isIntent && <a className="btn btn-ghost normal-case text-t2" href={`${chain.blockExplorers.default.url}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>}
+                            {!isIntent && <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>}
                             <Link className="btn normal-case btn-primary" href={`/${spaceSystemName}/mintboard/${contractId}${isIntent ? '?intent=true' : ''}`}>Go to MintBoard</Link>
                         </div>
                     </div>

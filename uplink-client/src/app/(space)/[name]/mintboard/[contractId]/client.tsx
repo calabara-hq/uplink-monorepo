@@ -11,6 +11,8 @@ import { useChannel } from "@/hooks/useChannel";
 
 import RenderIfVisible from "@/ui/VIrtualization/RenderIfVisible";
 import { Admin } from "@/types/space";
+import Modal from "@/ui/Modal/Modal";
+import Image from "next/image";
 
 
 export const PostSkeleton = () => {
@@ -135,6 +137,45 @@ const useTokenModalControls = (contractId: ContractID) => {
         handleModalClose
 
     }
+}
+
+
+export const WhatsNew = () => {
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        const hasVisited = localStorage.getItem("mintboard-whatsnew");
+        if (hasVisited) return;
+        else {
+            setIsModalOpen(true)
+            localStorage.setItem("mintboard-whatsnew", "true")
+        }
+    }, [])
+
+
+
+    if (isModalOpen) return (
+        <Modal
+            isModalOpen={true}
+            onClose={() => { setIsModalOpen(false) }}
+            title={"What's New"}
+            disableClickOutside={false}
+        >
+
+            <div className="flex flex-col gap-4">
+                <h2 className="text-3xl text-t1 font-bold">
+                    Intents
+                </h2>
+                <div className="flex flex-col bg-base gap-2 rounded-md p-2">
+                    <p className="text-lg">Intents are posts awaiting onchain sponsorship.</p>
+                    <p className="text-lg">Be the first to mint any of these posts to bring them onchain.</p>
+                    <p className="text-lg">{"In exchange, you'll receive a small reward on every future mint."}</p>
+                </div>
+                <button className="btn btn-primary normal-case ml-auto w-fit" onClick={() => setIsModalOpen(false)}>Got it</button>
+            </div>
+        </Modal >
+    )
 }
 
 
@@ -438,141 +479,3 @@ export const TokenModal = ({
     )
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// export const RenderTokens = ({ spaceName, contractId, tab }: { spaceName: string, contractId: ContractID, tab: "default" | "popular" | "intent" }) => {
-//     console.log("re rendering")
-//     const { data: onchainPages, setSize: setOnchainSize } = usePaginatedMintBoardPosts(contractId);
-//     const { data: onchainPagesV1, setSize: setOnchainSizeV1 } = usePaginatedMintBoardPostsV1(contractId);
-//     const { data: intentPages, setSize: setIntentSize } = usePaginatedMintBoardIntents(contractId);
-//     const { data: popularPages, setSize: setPopularSize } = usePaginatedPopularTokens(contractId)
-//     const { channel } = useChannel(contractId)
-
-//     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
-//     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-//     const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-//     const [focusedToken, setFocusedToken] = useState(null);
-//     const { ref: loadMoreRef, inView, entry } = useInView({ threshold: 0.1 })
-
-//     const { contractAddress, chainId } = useMemo(() => splitContractID(contractId), [contractId]);
-
-//     useEffect(() => {
-//         if (inView) {
-//             if (tab === "default") {
-//                 const v2HasNextPage = onchainPages && onchainPages.at(-1).pageInfo.hasNextPage
-//                 if (v2HasNextPage) {
-//                     setOnchainSize((prev) => prev + 1)
-//                 } else {
-//                     setOnchainSizeV1((prev) => prev + 1)
-//                 }
-//             }
-//             if (tab === "intent") {
-//                 setIntentSize((prev) => prev + 1)
-//             }
-//         }
-//     }, [inView, setOnchainSize, setIntentSize, tab])
-
-
-// const handleMint = useCallback((event, token) => {
-//     event.stopPropagation();
-//     event.preventDefault();
-//     setIsMintModalOpen(true);
-//     setFocusedToken(token);
-// }, []);
-
-// const handleManage = useCallback((event, token) => {
-//     event.stopPropagation();
-//     event.preventDefault();
-//     setIsManageModalOpen(true);
-//     setFocusedToken(token);
-// }, []);
-
-// const handleShare = useCallback((event, token) => {
-//     event.stopPropagation();
-//     event.preventDefault();
-//     setIsShareModalOpen(true);
-//     setFocusedToken(token);
-// }, []);
-
-// const handleModalClose = useCallback(() => {
-//     setIsMintModalOpen(false);
-//     setIsShareModalOpen(false);
-//     setIsManageModalOpen(false);
-//     setFocusedToken(null);
-// }, []);
-
-//     if (tab === "default" && !onchainPages || !onchainPagesV1) return <PostSkeleton />
-//     if (tab === "intent" && !intentPages) return <PostSkeleton />
-//     if (tab === "popular" && !popularPages) return <PostSkeleton />
-
-//     return (
-//         <div className="flex flex-col gap-8">
-//             <div className="w-10/12 sm:w-full m-auto grid gap-4 xl:gap-8 submission-columns auto-rows-fr ">
-
-//                 {tab === "default" &&
-//                     <React.Fragment>
-//                         <MapPages pages={onchainPages} spaceName={spaceName} contractId={contractId} handleMint={handleMint} handleShare={handleShare} handleManage={handleManage} />
-//                         <MapPages pages={onchainPagesV1} spaceName={spaceName} contractId={contractId} handleMint={handleMint} handleShare={handleShare} handleManage={handleManage} />
-//                     </React.Fragment>
-//                 }
-
-//                 {tab === "intent" && (intentPages[0].data.length > 0
-//                     ? <MapPages pages={intentPages} spaceName={spaceName} contractId={contractId} handleMint={handleMint} handleShare={handleShare} handleManage={handleManage} />
-//                     : <React.Fragment>
-//                         <div className="bg-base-100 rounded-lg h-[250px] flex flex-col gap-6 w-full justify-center items-center">
-//                             <h1 className="text-t1 text-2xl">Introducing intents</h1>
-//                         </div>
-//                         <div className="flex w-full justify-center items-center">
-//                             <h1 className="text-t1 text-2xl">Intents allow users to post on the mintboard completely free, without gas.</h1>
-//                         </div>
-//                         <div className="bg-base-100 rounded-lg h-[250px] flex flex-col gap-6 w-full justify-center items-center">
-//                             <h1 className="text-t1 text-2xl">Intents will show up here. </h1>
-//                         </div>
-//                         <div className="flex w-full justify-center items-center">
-//                             <h1 className="text-t1 text-2xl">Sponsor them onchain to earn a reward on each mint</h1>
-//                         </div>
-//                     </React.Fragment>
-//                 )}
-
-//                 {tab === "popular" && <MapPages pages={popularPages} spaceName={spaceName} contractId={contractId} handleMint={handleMint} handleShare={handleShare} handleManage={handleManage} />}
-
-//                 <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isManageModalOpen ? "manage" : "share"} handleClose={handleModalClose} >
-//                     {isMintModalOpen && focusedToken && (
-//                         <MintTokenSwitch
-//                             contractAddress={contractAddress}
-//                             channel={channel}
-//                             token={focusedToken}
-//                             setIsModalOpen={setIsMintModalOpen}
-//                             referral=""
-//                             display="modal"
-//                         />
-//                     )}
-//                     {isShareModalOpen && focusedToken && (
-//                         <ShareModalContent spaceName={spaceName} contractId={contractId} token={focusedToken} handleClose={handleModalClose} />
-//                     )}
-
-//                     {isManageModalOpen && focusedToken && !isTokenV1Onchain(focusedToken) && (
-//                         <ManageModalContent
-//                             token={focusedToken}
-//                             contractId={contractId}
-//                             handleClose={handleModalClose}
-//                         />
-//                     )}
-//                 </SubmissionModal>
-//             </div>
-//             <div ref={loadMoreRef} className="m-auto" />
-//         </div>
-//     )
-// }

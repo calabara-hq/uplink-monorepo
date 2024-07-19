@@ -143,7 +143,6 @@ export default function useCreateMintBoardTemplate(templateConfig?: MintBoardTem
 
     const validate = async () => {
         const { errors, ...rest } = state;
-        console.log(rest)
         const result = await MintBoardTemplateSchema.safeParseAsync(rest);
         if (!result.success) {
             const formattedErrors = (result as z.SafeParseError<typeof MintBoardTemplateSchema>).error.format();

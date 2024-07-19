@@ -145,7 +145,6 @@ export function VirtualizedGrid({
     }
 
     function calculateItemDimensions(width: number, height: number, columnCount: number) {
-        console.log(width, height, columnCount)
         // const itemWidth = Math.min((width - (columnCount - 1) * 12) / columnCount, 480); // Adjust for 12px gap
         // const itemHeight = Math.min(itemWidth / aspectRatio, 570); // Calculate height based on aspect ratio
         // return { itemWidth, itemHeight };
