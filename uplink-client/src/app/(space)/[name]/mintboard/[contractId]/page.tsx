@@ -100,7 +100,7 @@ const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, 
                 </ol> */}
             <Link
                 href={`/${spaceName}/mintboard/${contractId}/studio`}
-                className="btn btn-primary text-lg normal-case w-full md:w-56 h-full ml-auto"
+                className="btn btn-primary normal-case w-full md:w-56 ml-auto"
             >
                 Post
             </Link>

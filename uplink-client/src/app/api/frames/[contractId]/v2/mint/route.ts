@@ -119,7 +119,8 @@ export async function POST(request: NextRequest) {
             params: {
                 abi: [...finiteChannelAbi, ...infiniteChannelAbi],
                 to: calldata.address,
-                data: calldata.data
+                data: calldata.data,
+                value: mintPrice.toString()
             }
         }
 

@@ -18,7 +18,7 @@
     "test:e2e": "yarn run env:test && docker compose up -d && cross-env ENV_PATH=./.env dotenv -- yarn workspace e2e test --runInBand",
     "clean": "yarn workspaces foreach 'echo $(pwd)/node_modules' | xargs rm -rf",
     "push-dev-db": "yarn run env:dev && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib push-db",
-    "patch-db": "yarn run env:staging && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib patch-db",
+    "patch-db": "yarn run env:dev && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib patch-db",
     "build:supergraph": "sh -c 'cd ./packages/graphql-api && make config compose'",
     "start:supergraph": "yarn run env:dev && cross-env ENV_PATH=./.env && dotenv -e .env -- sh -c 'cd ./packages/graphql-api && make config compose run-router-local'",
     "dev": "yarn run env:dev && yarn workspace lib build && cross-env ENV_PATH=./.env dotenv -- concurrently --kill-others -p name -n router,auth,spaces,contests,submit,vote,user,dev-proxy,v2 \"yarn run start:supergraph\" \"yarn workspace auth dev\" \"yarn workspace spaces dev\" \"yarn workspace contests dev\" \"yarn workspace submit dev\" \"yarn workspace vote dev\" \"yarn workspace user dev\" \"yarn workspace dev-proxy dev\" \"yarn workspace v2 dev\"",

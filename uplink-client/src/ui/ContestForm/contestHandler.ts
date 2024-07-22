@@ -446,9 +446,9 @@ export const initializeContestReducer = (spaceTokens: IToken[]) => {
     }
 
     const initialState: ContestBuilderProps = {
-        chainId: 1,
+        chainId: 8453,
         metadata: {
-            type: null,
+            type: "standard",
             category: null,
         },
         deadlines: {

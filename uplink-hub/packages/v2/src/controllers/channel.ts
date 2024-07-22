@@ -31,10 +31,10 @@ export const getSpaceChannels = async (req: Request, res: Response, next: NextFu
 
             if (channelIds.length === 0) return []
 
-            const client = clientByChainId(chainId)
-            if (!client) return []
+            const { downlinkClient } = clientByChainId(chainId)
+            if (!downlinkClient) return []
 
-            let chainChannels = await client.getAllChannels({ filters: { where: { id_in: channelIds } } })
+            let chainChannels = await downlinkClient.getAllChannels({ filters: { where: { id_in: channelIds } } })
             return chainChannels.map(channel => { return { ...channel, chainId } })
 
         })).then(data => data.flat())
@@ -51,14 +51,12 @@ export const getChannel = async (req: Request, res: Response, next: NextFunction
 
     try {
         const { contractAddress, chainId } = splitContractID(contractId)
-        const txClient = clientByChainId(chainId)
+        const { downlinkClient } = clientByChainId(chainId)
 
         const [dbChannel, txChannel] = await Promise.all([
             dbGetChannel(contractAddress, chainId),
-            txClient.getChannel({ channelAddress: contractAddress })
+            downlinkClient.getChannel({ channelAddress: contractAddress })
         ])
-
-        console.log("db channel for contractid", contractId, "is", dbChannel)
 
         if (!dbChannel) throw new NotFoundError('Channel not found')
 

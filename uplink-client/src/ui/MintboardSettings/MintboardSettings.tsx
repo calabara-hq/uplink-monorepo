@@ -175,6 +175,9 @@ const FeeRow = ({ value, label, placeholder, onChange, error }) => {
     )
 }
 
+/*
+    Todo, fix this for dev / staging mode
+*/
 
 const ChainSelector = ({
     value,
@@ -289,7 +292,7 @@ export const MintboardSettings = ({
                     label={"Network"}
                     options={chainOptions}
                     onSelect={(option: Option) => setField("chainId", parseInt(option.value))}
-                    staticChainId={isNew ? null : state.chainId}
+                    staticChainId={state.chainId}
                 />
             </div>
             <div className="flex flex-col gap-4">

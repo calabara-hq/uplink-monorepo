@@ -12,6 +12,7 @@ import { useMintTokenV1 } from "@/hooks/useMintTokenV1";
 import { calculateSaleEnd, FeeStructure, isMintPeriodOver } from "./MintUtils";
 import { DisplayMode, RenderDisplayWithProps } from "./MintableTokenDisplay";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
+import { handleV2MutationError } from "@/lib/fetch/handleV2MutationError";
 
 
 export type MintTokenSwitchProps = {
@@ -160,16 +161,6 @@ export const MintV2Intent = ({
     const isTxPending = txStatus === "pendingApproval" || txStatus === "txInProgress";
     const isTxSuccessful = txStatus === "complete";
 
-
-
-    useEffect(() => {
-        if (isTxSuccessful && tokenId) {
-            updateServerIntent(tokenId.toString())
-        }
-    }, [isTxSuccessful, tokenId])
-
-
-
     const saleEnd = calculateSaleEnd(channel, _token)
 
     const fees: FeeStructure = doesChannelHaveFees(channel) ? {
@@ -182,20 +173,15 @@ export const MintV2Intent = ({
     } : null;
 
 
-
-    const parseV2Response = async (response) => {
-        if (!response.ok) {
-            const { message } = await response.json()
-            if (message === "UNAUTHORIZED") {
-                return toast.error("You are not authorized to perform this action")
-            }
+    useEffect(() => {
+        if (isTxSuccessful && txHash) {
+            updateServerIntent()
         }
-        else {
-            return response.json()
-        }
-    }
+    }, [txHash, isTxSuccessful])
 
-    const updateServerIntent = async (sponsoredTokenId: string) => {
+
+
+    const updateServerIntent = async () => {
         try {
             await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/fulfill_tokenIntent`, {
                 method: "POST",
@@ -203,14 +189,13 @@ export const MintV2Intent = ({
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": session?.csrfToken || "",
                 },
-                credentials: "include",
                 body: JSON.stringify({
                     contractId: contractId,
-                    tokenIntentId: _token.id,
-                    tokenId: sponsoredTokenId,
+                    txHash: txHash,
+                    tokenIntentId: _token.id
                 })
             })
-                .then(parseV2Response)
+                .then(handleV2MutationError)
                 .then(res => {
                     if (res.success) {
                         return toast.success('Token Minted')
@@ -234,7 +219,6 @@ export const MintV2Intent = ({
             ...(fees ? { transactionOverrides: { value: fees.ethMintPrice * BigInt(quantity) } } : {})
         }).then(async (response) => {
             if (response) {
-                await updateServerIntent(response.tokenId.toString())
                 triggerIntentSponsorship(_token.id, quantity.toString())
                 receiveSponsorship()
             }

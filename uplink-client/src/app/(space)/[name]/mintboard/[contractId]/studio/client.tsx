@@ -130,7 +130,7 @@ const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, cu
             <label className="label">
                 <span className="label-text">{label}</span>
             </label>
-            <div className="flex flex-col gap-2 p-2 rounded-xl ">
+            <div className="flex flex-col gap-2 p-2 rounded-xl w-full">
                 <div className="btn-group">
                     {options.map((option, idx) => (
                         <input
