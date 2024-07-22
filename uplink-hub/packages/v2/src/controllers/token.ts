@@ -1,4 +1,4 @@
-import { AuthorizationError, NotFoundError } from "../errors.js";
+import { AuthorizationError, NotFoundError, TransactionRevertedError } from "../errors.js";
 import {
     dbBanTokenIntent,
     dbBanTokenV2,
@@ -15,6 +15,9 @@ import { Request, Response, NextFunction } from 'express'
 import { clientByChainId } from "../utils/transmissions.js";
 import { parseIntentMetadata, parseV1Metadata, parseV2Metadata, splitContractID } from "../utils/utils.js";
 import { ContexedRequest, IntentTokenPage, V1TokenPage, V1TokenWithMetadata, V2TokenPage, V2TokenWithMetadata } from "../types.js";
+import { decodeEventLog, Hash, Hex, Log } from "viem";
+import { finiteChannelAbi, infiniteChannelAbi } from "@tx-kit/sdk/abi";
+import { createWeb3Client } from "../utils/viem.js";
 
 const authorizationController = new AuthorizationController(process.env.REDIS_URL);
 
@@ -97,14 +100,14 @@ export const getChannelTokensV2 = async (req: Request, res: Response, next: Next
 
         const { chainId, contractAddress } = splitContractID(contractId)
 
-        const txClient = clientByChainId(chainId)
+        const { downlinkClient } = clientByChainId(chainId)
 
         const bannedTokens = await prepared_bannedTokensV2
             .execute({ channelAddress: contractAddress, chainId: chainId })
             .then(data => data.map(data => data.tokenId))
 
 
-        const onchainTokens = await txClient.getChannelTokenPage({
+        const onchainTokens = await downlinkClient.getChannelTokenPage({
             channelAddress: contractAddress,
             filters: {
                 pageSize: parseInt(pageSize) + 1,
@@ -143,9 +146,9 @@ export const getSingleTokenV2 = async (req: Request, res: Response, next: NextFu
 
         const { chainId, contractAddress } = splitContractID(contractId)
 
-        const txClient = clientByChainId(chainId)
+        const { downlinkClient } = clientByChainId(chainId)
 
-        const onchainToken = await txClient.getChannelTokenPage({
+        const onchainToken = await downlinkClient.getChannelTokenPage({
             channelAddress: contractAddress,
             filters: {
                 pageSize: 1,
@@ -176,13 +179,13 @@ export const getChannelPopularTokens = async (req: Request, res: Response, next:
 
         const { chainId, contractAddress } = splitContractID(contractId)
 
-        const txClient = clientByChainId(chainId)
+        const { downlinkClient } = clientByChainId(chainId)
 
         const bannedTokens = await prepared_bannedTokensV2
             .execute({ channelAddress: contractAddress, chainId: chainId })
             .then(data => data.map(data => data.tokenId))
 
-        const onchainTokensV2_promise = txClient.getChannelTokenPage({
+        const onchainTokensV2_promise = downlinkClient.getChannelTokenPage({
             channelAddress: contractAddress,
             filters: {
                 pageSize: parseInt(pageSize) + 1,
@@ -334,8 +337,8 @@ export const getSingleTokenIntent = async (req: Request, res: Response, next: Ne
 
         if (tokenIntent && tokenIntent.tokenId !== "0") {
             /// this is already onchain. get the token and send it back
-            const txClient = clientByChainId(chainId)
-            const onchainToken = await txClient.getChannelTokenPage({
+            const { downlinkClient } = clientByChainId(chainId)
+            const onchainToken = await downlinkClient.getChannelTokenPage({
                 channelAddress: contractAddress,
                 filters: {
                     pageSize: 1,
@@ -395,15 +398,48 @@ export const fulfillChannelTokenIntent = async (req: ContexedRequest, res: Respo
 
     const contractId = req.body.contractId as string
     const tokenIntentId = req.body.tokenIntentId as string
-    const tokenId = req.body.tokenId as string
-
-    /// todo use tokenId to check if token was actually sponsored
+    const txHash = req.body.txHash as Hash
 
     try {
         const { chainId, contractAddress } = splitContractID(contractId)
 
-        const user = await authorizationController.getUser(req.context)
-        if (!user) throw new AuthorizationError('UNAUTHORIZED')
+        // get the logs from the txHash
+
+        const { uplinkClient } = clientByChainId(chainId)
+        const publicClient = createWeb3Client(chainId)
+
+        const events = await uplinkClient.getTransactionEvents({
+            txHash,
+            eventTopics: uplinkClient.eventTopics.tokenMinted,
+        })
+
+
+        const event = events?.[0] as Log | undefined
+
+        const block = await publicClient.getBlock({ blockHash: event.blockHash })
+
+        /// revert if the event is older than 2 minutes
+        if (Math.floor(Date.now() / 1000) - Number(block.timestamp) > 120) throw new TransactionRevertedError('Transaction failed')
+
+        const decodedLog = event
+            ? decodeEventLog({
+                abi: [...infiniteChannelAbi, ...finiteChannelAbi],
+                data: event.data,
+                // @ts-expect-error
+                topics: event.topics,
+            })
+            : undefined
+
+
+        const tokenId: string | undefined =
+            // @ts-expect-error
+            decodedLog?.eventName === 'TokenMinted'
+                // @ts-expect-error
+                ? decodedLog.args.tokenIds[0].toString()
+                : undefined
+
+
+        if (!tokenId) throw new TransactionRevertedError('Transaction failed')
 
         await dbFulfillTokenIntent({ channelAddress: contractAddress, chainId, tokenIntentId, tokenId })
         res.send({ success: true }).status(200)

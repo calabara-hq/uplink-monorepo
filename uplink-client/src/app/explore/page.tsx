@@ -156,7 +156,7 @@ const TrendingSpaces = async () => {
                   : space.displayName}
               </h1>
             </div>
-            <span className="absolute top-2 right-3"><HiTrendingUp className="w-6 h-6 text-success"/></span>
+            <span className="absolute top-2 right-3"><HiTrendingUp className="w-6 h-6 text-success" /></span>
           </Link>
         );
       })}
@@ -182,10 +182,10 @@ const normalizeString = (str: string) => {
   return str.trim().replace(/\s+/g, '').toLowerCase();
 }
 
-const AllSpaces = async ({searchTerm}: {searchTerm: string | null}) => {
+const AllSpaces = async ({ searchTerm }: { searchTerm: string | null }) => {
   let spaces = await fetchSpaces();
 
-  if(searchTerm){
+  if (searchTerm) {
     const decodedSearchTerm = decodeURIComponent(searchTerm);
     spaces = spaces.filter((space) => {
       return isFuzzyMatch(normalizeString(space.displayName), normalizeString(decodedSearchTerm));
@@ -257,7 +257,7 @@ const ActiveContestsSkeleton = () => {
 }
 
 export default async function Page({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
-  const isAll = searchParams?.all === "true";
+  const isAll = true;//searchParams?.all === "true";
   const isTrending = !isAll;
   const searchTerm = searchParams?.query as string || null;
   return (
@@ -282,7 +282,7 @@ export default async function Page({ searchParams }: { searchParams: { [key: str
               </div>
             </div>
             <div className="flex flex-row gap-2 items-center">
-              <div className="flex flex-col gap-1">
+              {/* <div className="flex flex-col gap-1">
                 <Link
                   href={`/explore`}
                   className={`hover:text-t1 ${isTrending ? "text-t1" : "text-t2"}`}
@@ -292,8 +292,8 @@ export default async function Page({ searchParams }: { searchParams: { [key: str
                   Trending
                 </Link>
                 <div className={`${isTrending ? "bg-t1" : "bg-transparent"} w-full h-0.5 animate-scrollInX`} />
-              </div>
-              <div className="flex flex-col gap-1 w-fit">
+              </div> */}
+              {/* <div className="flex flex-col gap-1 w-fit">
                 <Link
                   href={`/explore?all=true`}
                   className={`hover:text-t1 ${isAll ? "text-t1" : "text-t2"}`}
@@ -303,26 +303,26 @@ export default async function Page({ searchParams }: { searchParams: { [key: str
                   All
                 </Link>
                 <div className={`${isAll ? "bg-t1" : "bg-transparent"} w-full h-0.5 animate-scrollInX`} />
-              </div>
+              </div> */}
               <div className="ml-auto hidden md:flex">
-                <SearchSpaces/>
-              </div>  
+                <SearchSpaces />
+              </div>
             </div>
-            <div className="p-2"/>
+            <div className="p-2" />
             <Suspense fallback={<SpaceListSkeleton />}>
-              {isTrending && 
-                <TrendingSpaces/>
-              }  
+              {isTrending &&
+                <TrendingSpaces />
+              }
             </Suspense>
-        <div className="w-full h-0.5 bg-base-100 rounded-lg" />
-          <Suspense fallback={<SpaceListSkeleton />}>
-            {isAll && 
-              <AllSpaces searchTerm={searchTerm}/>
-            }
-          </Suspense>
+            <div className="w-full h-0.5 bg-base-100 rounded-lg" />
+            <Suspense fallback={<SpaceListSkeleton />}>
+              {isAll &&
+                <AllSpaces searchTerm={searchTerm} />
+              }
+            </Suspense>
+          </div>
         </div>
-        </div>
-      </div> 
+      </div>
     </div>
   );
 }

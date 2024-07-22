@@ -29,7 +29,7 @@ const PageContent = async ({ spaceName, contractId }: { spaceName: string, contr
 
 export default async function Page({ params }: { params: { name: string, contractId: ContractID } }) {
     return (
-        <div className=" flex flex-col gap-6 w-full md:w-10/12 m-auto mt-4 mb-16 p-4">
+        <div className=" flex flex-col gap-6 w-full md:w-10/12 m-auto mt-4 mb-16 p-2">
             <Suspense fallback={<LoadingDialog />}>
                 <PageContent spaceName={params.name} contractId={params.contractId} />
             </Suspense>

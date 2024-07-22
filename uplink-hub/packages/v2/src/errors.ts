@@ -26,3 +26,12 @@ export class NotFoundError extends Error {
         Object.setPrototypeOf(this, NotFoundError.prototype);
     }
 }
+
+export class TransactionRevertedError extends Error {
+    name = 'TransactionRevertedError';
+
+    constructor(m?: string) {
+        super(m);
+        Object.setPrototypeOf(this, TransactionRevertedError.prototype);
+    }
+}

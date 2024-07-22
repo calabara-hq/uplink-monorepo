@@ -3,7 +3,7 @@ import { createWeb3Client } from './viem.js';
 
 
 
-export const { downlinkClient: baseSepoliaDownlinkClient } = new TransmissionsClient({
+const { downlinkClient: baseSepoliaDownlinkClient, uplinkClient: baseSepoliaUplinkClient } = new TransmissionsClient({
     chainId: 84532,
     apiConfig: {
         serverUrl: getSubgraphUrl(84532)
@@ -11,7 +11,7 @@ export const { downlinkClient: baseSepoliaDownlinkClient } = new TransmissionsCl
     publicClient: createWeb3Client(84532),
 })
 
-export const { downlinkClient: baseDownlinkClient } = new TransmissionsClient({
+const { downlinkClient: baseDownlinkClient, uplinkClient: baseUplinkClient } = new TransmissionsClient({
     chainId: 8453,
     apiConfig: {
         serverUrl: getSubgraphUrl(8453)
@@ -22,8 +22,8 @@ export const { downlinkClient: baseDownlinkClient } = new TransmissionsClient({
 
 export const clientByChainId = (chainId: number) => {
     if (chainId === 84532) {
-        return baseSepoliaDownlinkClient
+        return { downlinkClient: baseSepoliaDownlinkClient, uplinkClient: baseSepoliaUplinkClient }
     } else if (chainId === 8453) {
-        return baseDownlinkClient
+        return { downlinkClient: baseDownlinkClient, uplinkClient: baseUplinkClient }
     }
 }

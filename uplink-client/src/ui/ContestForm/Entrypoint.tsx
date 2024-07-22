@@ -220,8 +220,8 @@ const ChainSelect = ({ contestData, setField, spaceTokens }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [desiredChain, setDesiredChain] = useState<Option | null>(null)
 
-  const chainOptions = supportedChains.map(chain => { return { value: String(chain.id), label: chain.name } });
-  const currentChain = chainOptions.find(chain => chain.value === String(contestData.chainId));
+  const chainOptions = supportedChains.map(chain => { return { value: chain.id.toString(), label: chain.name } });
+  const currentChain = chainOptions.find(chain => chain.value === contestData.chainId.toString());
 
   const handleChainToggle = (option: { value: string, label: string }) => {
     if (option.value !== currentChain.value) {
@@ -317,7 +317,7 @@ const ContestForm = ({
   };
 
   const setTotalState = (data) => {
-    setContestState({ type: "SET_TOTAL_STATE", value: {...data, spaceTokens: contestState.spaceTokens} });
+    setContestState({ type: "SET_TOTAL_STATE", value: { ...data, spaceTokens: contestState.spaceTokens } });
   };
 
   const handleBack = () => {

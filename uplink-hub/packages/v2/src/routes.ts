@@ -4,7 +4,7 @@ import * as tokenController from './controllers/token.js'
 const v2 = express();
 import cookie from 'cookie';
 import { Context, xor_compare } from 'lib';
-import { AuthorizationError, InvalidArgumentError } from './errors.js';
+import { AuthorizationError, InvalidArgumentError, TransactionRevertedError } from './errors.js';
 import { ContexedRequest } from './types.js';
 
 
@@ -28,10 +28,11 @@ const sessionMiddleware = async (req: Request, res: Response, next: NextFunction
 
 
 const handleApiErrors = (err: Error, req: Request, res: Response, next: NextFunction) => {
-
     if (err instanceof AuthorizationError) {
         return res.status(401).json({ message: err.message });
     } else if (err instanceof InvalidArgumentError) {
+        return res.status(400).json({ message: err.message });
+    } else if (err instanceof TransactionRevertedError) {
         return res.status(400).json({ message: err.message });
     } else {
         return res.status(500).json({ message: 'Internal server error' });

@@ -71,7 +71,7 @@ export const useMintTokenV1 = (contractAddress: string) => {
                 reset()
             }
 
-        }, [contractAddress]
+        }, [contractAddress, walletClient]
     )
 
     return { mintTokenV1, status, txHash, error }
