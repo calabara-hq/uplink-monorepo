@@ -71,7 +71,7 @@ export const parseV2Metadata = async (token: IToken): Promise<V2TokenWithMetadat
             const metadataFn: () => Promise<TokenMetadata> = () => {
                 return fetch(uri)
                     .then((res) => res.json())
-                    .then(data => {
+                    .then((data: any) => {
                         return {
                             id: token.uri.split("ipfs://")[1],
                             name: data.name,
@@ -111,7 +111,7 @@ export const parseIntentMetadata = async (intentResponse: schema.dbTokenIntentTy
     const metadataFn: () => Promise<TokenMetadata> = () => {
         return fetch(uri)
             .then((res) => res.json())
-            .then(data => {
+            .then((data: any) => {
                 return {
                     id: parsedIntent.intent.message.uri.split("ipfs://")[1],
                     name: data.name,
