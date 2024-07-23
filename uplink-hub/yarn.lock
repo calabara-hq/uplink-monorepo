@@ -4593,6 +4593,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tx-kit/sdk@npm:0.2.0-alpha.0":
+  version: 0.2.0-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.2.0-alpha.0"
+  dependencies:
+    "@urql/core": ^4.3.0
+    base-64: ^1.0.0
+    graphql: ^16.8.1
+    lodash: ^4.17.21
+  peerDependenciesMeta:
+    viem:
+      optional: true
+  checksum: f7f40d657fa772d305bae3ce3e8ef4cc0dcea3836023d8b1c70e9f431ceb0960e53a8530d567437440f7d2f324606a6d0dbb1f8a30d822df57909122645d822a
+  languageName: node
+  linkType: hard
+
 "@tx-kit/sdk@npm:0.3.0-alpha.0":
   version: 0.3.0-alpha.0
   resolution: "@tx-kit/sdk@npm:0.3.0-alpha.0"
@@ -4605,21 +4620,6 @@ __metadata:
     viem:
       optional: true
   checksum: b9c28d9716b8e5ff3036ea21299b3f28184f9825591ea813ebdbb05f68dfde0b67235872df2ad1e6fa7b46d64d5c6429d6dedf2bb66b8ccabf5a941bb0dfa92b
-  languageName: node
-  linkType: hard
-
-"@tx-kit/sdk@npm:^0.1.0-alpha.0":
-  version: 0.1.0-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.1.0-alpha.0"
-  dependencies:
-    "@urql/core": ^4.3.0
-    base-64: ^1.0.0
-    graphql: ^16.8.1
-    lodash: ^4.17.21
-  peerDependenciesMeta:
-    viem:
-      optional: true
-  checksum: 19866b8e3f286da22f18661eeaf59321e4962914d9904491f6953f77636d36ccfe95260b03ef4e247939589d65c61f3f48e506cc786c70f2faf71ea5e3dc9664
   languageName: node
   linkType: hard
 
@@ -13941,7 +13941,7 @@ __metadata:
   resolution: "v2@workspace:packages/v2"
   dependencies:
     "@jest/globals": ^29.5.0
-    "@tx-kit/sdk": ^0.1.0-alpha.0
+    "@tx-kit/sdk": 0.2.0-alpha.0
     "@types/busboy": ^1.5.0
     "@types/node": ^18.11.19
     axios: ^1.4.0
