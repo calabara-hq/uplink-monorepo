@@ -8,6 +8,8 @@ import { SettingsStateType } from "@/hooks/useMintboardSettings";
 import { ChainLabel } from "../ContestLabels/ContestLabels";
 import { zeroAddress } from "viem";
 import { getChainName, supportedChains } from "@/lib/chains/supportedChains";
+import TokenModal from "../TokenModal/TokenModal";
+import { useErc20TokenInfo } from "@/hooks/useErc20TokenInfo";
 
 const Options = ({ label, options, selected, onSelect }: { label: string, options: Option[], selected: string, onSelect: (option: Option) => void }) => {
     return (
@@ -146,6 +148,7 @@ const BasicInput = ({ value, label, placeholder, onChange, error, inputType, sty
     )
 }
 
+
 const FeeRow = ({ value, label, placeholder, onChange, error }) => {
     return (
         <div className="flex flex-row items-center justify-between">
@@ -226,6 +229,72 @@ const FeesTable = ({ children }: { children: React.ReactNode }) => {
     return (
         <div className="flex flex-col bg-base rounded-md p-2">
             {children}
+        </div>
+    )
+}
+
+const ERC20MintPriceInput = ({ state, setField }) => {
+    const { symbol, decimals } = useErc20TokenInfo(state.erc20Contract, state.chainId)
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const onConfigureTokenCallback = (token) => {
+        if (token) {
+            setField("erc20Contract", token.address)
+            setField("erc20MintPrice", "")
+        }
+    }
+
+    return (
+        <div className="flex flex-col w-full">
+            <label className="label">
+                <span className="label-text">{`Mint Price (${symbol})`}</span>
+            </label>
+            {state.erc20Contract === zeroAddress ?
+                <button onClick={() => setIsModalOpen(true)} className="btn btn-ghost btn-active normal-case w-fit">Enable</button>
+                : (
+                    <>
+                        <div className="flex flex-col md:flex-row gap-2 w-full">
+                            <input
+                                type="text"
+                                autoComplete="off"
+                                onWheel={(e) => e.currentTarget.blur()}
+                                spellCheck="false"
+                                value={state.erc20MintPrice}
+                                onChange={(e) => { setField("erc20MintPrice", e.target.value) }}
+                                placeholder={"100"}
+                                className={`input input-bordered rounded-lg w-full max-w-xs ${state.errors?.erc20MintPrice?._errors ? "input-error" : "input"
+                                    }`}
+                            />
+                            <div className="grid grid-cols-2 gap-1 w-full">
+                                <button onClick={() => setIsModalOpen(true)} className="btn btn-ghost btn-active normal-case w-full">{"Swap Token"}</button>
+                                <button
+                                    onClick={() => { setField("erc20Contract", zeroAddress); setField("erc20MintPrice", "0") }}
+                                    className="btn btn-ghost btn-active normal-case w-full">
+                                    Disable
+                                </button>
+                            </div>
+                        </div>
+                        {state.errors?.erc20MintPrice?._errors && (
+                            <label className="label">
+                                <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{state.errors?.erc20MintPrice?._errors.join(",")}</span>
+                            </label>
+                        )}
+                    </>
+                )
+            }
+            <TokenModal
+                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen}
+                saveCallback={onConfigureTokenCallback}
+                chainId={state.chainId}
+                existingTokens={[]}
+                quickAddTokens={[]}
+                continuous={false}
+                uniqueStandard={false}
+                strictTypes={["ERC20"]}
+
+            //strictTypes
+            />
         </div>
     )
 }
@@ -326,10 +395,8 @@ export const MintboardSettings = ({
                                 <FeesTable>
 
                                     <BasicInput label="Space Treasury" styleOverrides={'max-w-xl'} inputType="text" value={state.channelTreasury} placeholder={"0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"} onChange={(e) => setField("channelTreasury", e.target.value)} error={state.errors?.channelTreasury?._errors} />
-
-                                    <div className="">
-                                        <BasicInput label="Mint Price (ETH)" inputType="number" styleOverrides={'max-w-xs ml-auto'} value={state.ethMintPrice} placeholder={"0.01"} onChange={(e) => setField("ethMintPrice", asPositiveFloat(e.target.value, 8))} error={state.errors?.ethMintPrice?._errors} />
-                                    </div>
+                                    <BasicInput label="Mint Price (ETH)" inputType="number" styleOverrides={'max-w-xs ml-auto'} value={state.ethMintPrice} placeholder={"0.01"} onChange={(e) => setField("ethMintPrice", asPositiveFloat(e.target.value, 8))} error={state.errors?.ethMintPrice?._errors} />
+                                    <ERC20MintPriceInput state={state} setField={setField} />
 
                                     <div className="w-full h-3" />
                                     <div className="w-full bg-gray-700 h-0.5" />

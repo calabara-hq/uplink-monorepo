@@ -8,12 +8,14 @@ import { HiCheckBadge } from "react-icons/hi2";
 import { useAccount } from "wagmi";
 import { getChainName } from "@/lib/chains/supportedChains";
 import OnchainButton from "../OnchainButton/OnchainButton";
-import { maxUint40 } from "viem";
+import { Address, maxUint40 } from "viem";
 import { format } from "date-fns";
 import { TbLoader2 } from "react-icons/tb";
 import { CounterInput, FeeStructure, getETHMintPrice, RenderFees, RenderMaxSupply, RenderMintMedia, RenderTotalMints } from "./MintUtils";
 import { Boundary } from "../Boundary/Boundary";
 import { AddressOrEns, Avatar } from "../AddressDisplay/AddressDisplay";
+import { NATIVE_TOKEN } from "@tx-kit/sdk";
+import { isErc20Mintable } from "./MintUtils";
 
 
 export type DisplayMode = "modal" | "expanded"
@@ -27,7 +29,7 @@ export type DisplayProps = {
     saleEnd: number,
     totalMinted: string,
     maxSupply: string,
-    handleSubmit: (quantity: number) => void,
+    handleSubmit: (quantity: number, mintToken: Address) => void,
     isTxPending: boolean,
     isTxSuccessful: boolean,
     txHash: string,
@@ -36,46 +38,10 @@ export type DisplayProps = {
 }
 
 
-export const RenderDisplayWithProps = ({
-    displayMode,
-    chainId,
-    creator,
-    metadata,
-    fees,
-    isMintPeriodOver,
-    saleEnd,
-    totalMinted,
-    maxSupply,
-    handleSubmit,
-    isTxPending,
-    isTxSuccessful,
-    txHash,
-    txStatus,
-    setIsModalOpen
-}: DisplayProps & { displayMode: DisplayMode }) => {
-
-
-    const displayProps = {
-        chainId,
-        creator,
-        metadata,
-        fees,
-        isMintPeriodOver,
-        saleEnd,
-        totalMinted,
-        maxSupply,
-        handleSubmit,
-        isTxPending,
-        isTxSuccessful,
-        txHash,
-        txStatus,
-        setIsModalOpen
-    }
-
-    if (displayMode === "modal") return <MintModalDisplay {...displayProps} />
-    else if (displayMode === "expanded") return <MintExpandedDisplay {...displayProps} />
+export const RenderDisplayWithProps = (props: DisplayProps & { displayMode: DisplayMode }) => {
+    if (props.displayMode === "modal") return <MintModalDisplay {...props} />
+    else if (props.displayMode === "expanded") return <MintExpandedDisplay {...props} />
     return null
-
 }
 
 
@@ -97,10 +63,12 @@ export const MintModalDisplay = ({
 }: DisplayProps) => {
 
     const [mintQuantity, setMintQuantity] = useState<string>('1');
+    const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN);
     const debouncedMintQuantity = useDebounce(mintQuantity);
     const { chain } = useAccount();
     const availableEditions = BigInt(maxSupply) - BigInt(totalMinted);
     const areEditionsSoldOut = availableEditions <= 0;
+
 
 
     return (
@@ -150,18 +118,31 @@ export const MintModalDisplay = ({
                                             <RenderMaxSupply maxSupply={maxSupply} />
                                         </div>
                                     </div>
+                                    <div className="col-span-2 ">
+                                        {!areEditionsSoldOut && !isMintPeriodOver &&
+                                            <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
+                                        }
+                                    </div>
 
                                 </div>
                                 <div className="p-1" />
                                 <div className="w-full bg-base-100 h-[1px]" />
 
                                 {!areEditionsSoldOut && !isMintPeriodOver && <div className="flex flex-col w-full md:max-w-[250px] ml-auto gap-2">
-                                    <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
+                                    {/* <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} /> */}
                                     <RenderFees fees={fees} quantity={debouncedMintQuantity} />
+                                    {isErc20Mintable(fees) && <div className="flex flex-col gap-2">
+                                        <p className="text-t2">Token</p>
+                                        <select className="w-full h-10 bg-base rounded-lg p-2 text-t1" onChange={(e) => setMintToken(e.target.value as Address)}>
+                                            <option value={NATIVE_TOKEN}>ETH</option>
+                                            <option value={fees.erc20Contract}>{"WETH"}</option>
+                                        </select>
+                                    </div>}
+
                                     <OnchainButton
                                         chainId={chainId}
                                         title={"Mint"}
-                                        onClick={() => handleSubmit(parseInt(debouncedMintQuantity))}
+                                        onClick={() => handleSubmit(parseInt(debouncedMintQuantity), mintToken)}
                                         isLoading={isTxPending}
                                         loadingChild={
                                             <button className="btn btn-disabled normal-case w-auto">
@@ -228,6 +209,7 @@ export const MintExpandedDisplay = ({
 }: DisplayProps) => {
 
     const [mintQuantity, setMintQuantity] = useState<string>('1');
+    const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN);
     const debouncedMintQuantity = useDebounce(mintQuantity);
     const { chain } = useAccount();
     const availableEditions = BigInt(maxSupply) - BigInt(totalMinted);
@@ -285,7 +267,7 @@ export const MintExpandedDisplay = ({
                                             chainId={chainId}
                                             disabled={parseInt(mintQuantity) <= 0 || mintQuantity === "" || parseInt(mintQuantity) > availableEditions}
                                             title={"Mint"}
-                                            onClick={() => handleSubmit(parseInt(debouncedMintQuantity))}
+                                            onClick={() => handleSubmit(parseInt(debouncedMintQuantity), mintToken)}
                                             isLoading={isTxPending}
                                             loadingChild={
                                                 <button className="btn btn-disabled normal-case w-auto">

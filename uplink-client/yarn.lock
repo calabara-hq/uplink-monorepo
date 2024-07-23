@@ -5479,24 +5479,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/hooks@npm:0.3.0-alpha.0":
-  version: 0.3.0-alpha.0
-  resolution: "@tx-kit/hooks@npm:0.3.0-alpha.0"
+"@tx-kit/hooks@npm:^0.5.2-alpha.0":
+  version: 0.5.2-alpha.0
+  resolution: "@tx-kit/hooks@npm:0.5.2-alpha.0"
   dependencies:
-    "@tx-kit/sdk": "npm:0.3.0-alpha.0"
+    "@tx-kit/sdk": "npm:0.4.1-alpha.0"
   peerDependencies:
     react: 17.x.x || 18.x.x
     viem: ^1.0.0 || ^2.0.0
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/f65c6e8c3aabcb6dc1d7e4fcbb9f5f074f07024e61079c37cde4416bde4a839fa86703c4aa5a739a071d08643aef03fad10859683e96fe68e0253ef21537e61d
+  checksum: 10c0/ba3c090ed7d2e90cd7ed6770984ea95b465584728ebec1b6d200cc9bc567fcd508fd0bf9d3fd2300d320486348ab8c780e9c166a6d25aacd3895e830e01ba4e9
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:0.3.0-alpha.0":
-  version: 0.3.0-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.3.0-alpha.0"
+"@tx-kit/sdk@npm:0.4.1-alpha.0, @tx-kit/sdk@npm:^0.4.1-alpha.0":
+  version: 0.4.1-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.4.1-alpha.0"
   dependencies:
     "@urql/core": "npm:^4.3.0"
     base-64: "npm:^1.0.0"
@@ -5505,7 +5505,7 @@ __metadata:
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/4e3b43fb6badd482847b3e154ebaf4a6cb34e9c4d3e9f3ae5d881e959c10ff2d290a31e7cd3a33b0db4484d1822f5394a7456dad9d5020fb2947bfae26b55e58
+  checksum: 10c0/dc4aa66b00d14b7a76008ff69fcaffbc7a52a7c4ec056f23c41b9434af3de65213df97445644a00dc3746f38d03c6f96d5d46277b0e220812cb7ccbfd0e7f53f
   languageName: node
   linkType: hard
 
@@ -20529,8 +20529,8 @@ __metadata:
     "@storybook/react": "npm:^7.4.5"
     "@storybook/testing-library": "npm:^0.2.1"
     "@tanstack/react-query": "npm:^5.48.0"
-    "@tx-kit/hooks": "npm:0.3.0-alpha.0"
-    "@tx-kit/sdk": "npm:0.3.0-alpha.0"
+    "@tx-kit/hooks": "npm:^0.5.2-alpha.0"
+    "@tx-kit/sdk": "npm:^0.4.1-alpha.0"
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"

@@ -34,6 +34,16 @@ const MenuSelect = ({
     };
   }, []);
 
+
+  if (options.length === 1) {
+    return (
+      <div className="flex items-center justify-between bg-base-100 rounded-lg p-3 cursor-pointer hover:bg-base-200">
+        <p className="text-sm">{options[0].label}</p>
+      </div>
+    )
+  }
+
+
   return (
     <div className="relative" ref={dropdownRef}>
       <div
@@ -54,8 +64,8 @@ const MenuSelect = ({
                 setIsOpen(false);
               }}
               className={`rounded-lg w-full ${selected.value === option.value
-                  ? "bg-primary disabled:pointer-events-none text-black"
-                  : ""
+                ? "bg-primary disabled:pointer-events-none text-black"
+                : ""
                 }`}
             >
               <p className="">{option.label}</p>

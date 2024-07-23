@@ -3,16 +3,19 @@
 import { useSession } from "@/providers/SessionProvider";
 import React, { useEffect } from "react";
 import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContractID, doesChannelHaveFees, isTokenIntent, isTokenV2Onchain } from "@/types/channel";
-import { useAccount } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import toast from "react-hot-toast";
-import { Address, maxUint40, parseEther } from "viem";
-import { IInfiniteTransportConfig } from "@tx-kit/sdk";
-import { useSponsorTokenWithETH, useMintTokenBatchWithETH } from "@tx-kit/hooks";
+import { Address, Chain, erc20Abi, maxUint40, parseEther, zeroAddress } from "viem";
+import { IInfiniteTransportConfig, NATIVE_TOKEN } from "@tx-kit/sdk";
+import { useSponsorTokenWithETH, useMintTokenBatchWithETH, useApproveERC20 } from "@tx-kit/hooks";
 import { useMintTokenV1 } from "@/hooks/useMintTokenV1";
 import { calculateSaleEnd, FeeStructure, isMintPeriodOver } from "./MintUtils";
 import { DisplayMode, RenderDisplayWithProps } from "./MintableTokenDisplay";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
 import { handleV2MutationError } from "@/lib/fetch/handleV2MutationError";
+import { useMintTokenBatchWithERC20 } from "@tx-kit/hooks/dist/token";
+import { baseSepolia } from "viem/chains";
+import { useCombinedMinter } from "@/hooks/useCombinedMinter";
 
 
 export type MintTokenSwitchProps = {
@@ -48,10 +51,12 @@ export const MintV1Onchain = ({
         referralPercentage: 14.25,
         sponsorPercentage: 14.25,
         uplinkPercentage: 14.25,
-        ethMintPrice: _token.publicSalePrice === "0" ? parseEther("0.000777") : BigInt(_token.publicSalePrice)
+        ethMintPrice: _token.publicSalePrice === "0" ? parseEther("0.000777") : BigInt(_token.publicSalePrice),
+        erc20MintPrice: BigInt(0),
+        erc20Contract: zeroAddress
     }
 
-    const handleSubmit = (quantity: number) => {
+    const handleSubmit = (quantity: number, mintToken: Address) => {
         mintTokenV1({
             referral: mintReferral as Address,
             value: fees.ethMintPrice * BigInt(quantity),
@@ -93,32 +98,18 @@ export const MintV2Onchain = ({
     const { data: session, status } = useSession();
     const mintReferral = referral && referral.startsWith('0x') && referral.length === 42 ? referral : "";
     const { mintPaginatedPost } = usePaginatedMintBoardPosts(concatContractID({ chainId: channel.chainId, contractAddress }))
-    const { mintTokenBatchWithETH, status: txStatus, txHash: txHash, error: txError } = useMintTokenBatchWithETH()
-    const isTxPending = txStatus === "pendingApproval" || txStatus === "txInProgress";
-    const isTxSuccessful = txStatus === "complete";
+    const combinedMinterResponse = useCombinedMinter({ contractAddress, channel, token, mintReferral })
+
+    // const txStatus = ethTxStatus || erc20TxStatus || approveErc20TxStatus
+    // const isTxPending = txStatus === "pendingApproval" || txStatus === "txInProgress";
+    // const isTxSuccessful = txStatus === "complete";
+
     const saleEnd = calculateSaleEnd(channel, _token)
 
-    const fees: FeeStructure = doesChannelHaveFees(channel) ? {
-        creatorPercentage: channel.fees.fees.creatorPercentage,
-        channelPercentage: channel.fees.fees.channelPercentage,
-        referralPercentage: channel.fees.fees.mintReferralPercentage,
-        sponsorPercentage: channel.fees.fees.sponsorPercentage,
-        uplinkPercentage: channel.fees.fees.uplinkPercentage,
-        ethMintPrice: BigInt(channel.fees.fees.ethMintPrice)
-    } : null;
-
-    const handleSubmit = async (quantity: number) => {
-        await mintTokenBatchWithETH({
-            channelAddress: contractAddress,
-            to: session?.user?.address,
-            tokenIds: [BigInt(_token.tokenId)],
-            amounts: [quantity],
-            mintReferral: mintReferral,
-            data: "",
-            ...(fees ? { transactionOverrides: { value: fees.ethMintPrice * BigInt(quantity) } } : {})
+    const handleSubmit = async (quantity: number, mintToken: Address) => {
+        combinedMinterResponse.mint(quantity, mintToken).then(() => {
+            mintPaginatedPost(_token.tokenId, quantity.toString())
         })
-
-        mintPaginatedPost(_token.tokenId, quantity.toString())
     }
 
     return <RenderDisplayWithProps
@@ -126,16 +117,16 @@ export const MintV2Onchain = ({
         chainId={channel.chainId}
         creator={token.author}
         metadata={token.metadata}
-        fees={fees}
+        fees={combinedMinterResponse.fees}
         isMintPeriodOver={isMintPeriodOver(saleEnd)}
         saleEnd={saleEnd}
         totalMinted={token.totalMinted}
         maxSupply={_token.maxSupply}
         handleSubmit={handleSubmit}
-        isTxPending={isTxPending}
-        isTxSuccessful={isTxSuccessful}
-        txStatus={txStatus}
-        txHash={txHash}
+        isTxPending={combinedMinterResponse.isTxPending}
+        isTxSuccessful={combinedMinterResponse.isTxSuccessful}
+        txStatus={combinedMinterResponse.txStatus}
+        txHash={combinedMinterResponse.txHash}
         setIsModalOpen={setIsModalOpen}
     />
 }
@@ -169,7 +160,9 @@ export const MintV2Intent = ({
         referralPercentage: channel.fees.fees.mintReferralPercentage,
         sponsorPercentage: channel.fees.fees.sponsorPercentage,
         uplinkPercentage: channel.fees.fees.uplinkPercentage,
-        ethMintPrice: BigInt(channel.fees.fees.ethMintPrice)
+        ethMintPrice: BigInt(channel.fees.fees.ethMintPrice),
+        erc20MintPrice: BigInt(channel.fees.fees.erc20MintPrice),
+        erc20Contract: channel.fees.fees.erc20Contract
     } : null;
 
 
@@ -207,7 +200,7 @@ export const MintV2Intent = ({
         }
     }
 
-    const handleSubmit = async (quantity: number) => {
+    const handleSubmit = async (quantity: number, mintToken: Address) => {
 
         await sponsorTokenWithETH({
             channelAddress: contractAddress,
