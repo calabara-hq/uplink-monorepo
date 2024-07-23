@@ -3,21 +3,23 @@ import { mainnet, base, baseSepolia } from 'viem/chains'
 import dotenv from 'dotenv'
 dotenv.config()
 
-export const createWeb3Client = (chainId?: number) => {
+const baseSepoliaClient = createPublicClient({
+    chain: baseSepolia as Chain,
+    transport: http(`https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`),
+    batch: {
+        multicall: true
+    }
+});
 
-    if (chainId === 84532) return createPublicClient({
-        chain: baseSepolia as Chain,
-        transport: http(`https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`),
-        batch: {
-            multicall: true
-        }
-    }) as PublicClient<Transport, Chain>;
+const baseClient = createPublicClient({
+    chain: base as Chain,
+    transport: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`),
+    batch: {
+        multicall: true
+    }
+});
 
-    return createPublicClient({
-        chain: base as Chain,
-        transport: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`),
-        batch: {
-            multicall: true
-        }
-    }) as PublicClient<Transport, Chain>;
-}
+export const createWeb3Client = (chainId?: number): PublicClient<Transport, Chain> => {
+    if (chainId === 84532) return baseSepoliaClient;
+    return baseClient;
+};

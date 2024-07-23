@@ -500,11 +500,11 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 ) => TResult | Promise<TResult>;
 
 /** Mapping of union types */
-export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = ResolversObject<{
+export type ResolversUnionTypes<RefType extends Record<string, unknown>> = ResolversObject<{
   SubmitterRestriction: ( TokenRestrictionOption );
-  SubmitterRewardOption: ( Omit<SubmitterTokenReward, 'tokenReward'> & { tokenReward: _RefType['SubmitterTokenRewardOption'] } );
+  SubmitterRewardOption: ( Omit<SubmitterTokenReward, 'tokenReward'> & { tokenReward: RefType['SubmitterTokenRewardOption'] } );
   SubmitterTokenRewardOption: ( FungibleReward ) | ( NonFungibleReward );
-  VoterRewardOption: ( Omit<VoterTokenReward, 'tokenReward'> & { tokenReward: _RefType['VoterTokenRewardOption'] } );
+  VoterRewardOption: ( Omit<VoterTokenReward, 'tokenReward'> & { tokenReward: RefType['VoterTokenRewardOption'] } );
   VoterTokenRewardOption: ( FungibleReward );
   VotingStrategy: ( ArcadeVotingStrategyOption ) | ( WeightedVotingStrategyOption );
 }>;
@@ -519,7 +519,7 @@ export type ResolversTypes = ResolversObject<{
   ArcadeVotingStrategyOption: ResolverTypeWrapper<ArcadeVotingStrategyOption>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ConfigureMintBoardResponse: ResolverTypeWrapper<ConfigureMintBoardResponse>;
-  Contest: ResolverTypeWrapper<Omit<Contest, 'submitterRestrictions' | 'submitterRewards' | 'voterRewards' | 'votingPolicy'> & { submitterRestrictions: Array<ResolversTypes['SubmitterRestriction']>, submitterRewards: Array<ResolversTypes['SubmitterReward']>, voterRewards: Array<ResolversTypes['VoterReward']>, votingPolicy: Array<ResolversTypes['VotingStrategy']> }>;
+  Contest: ResolverTypeWrapper<Omit<Contest, 'submitterRestrictions' | 'votingPolicy'> & { submitterRestrictions: Array<ResolversTypes['SubmitterRestriction']>, votingPolicy: Array<ResolversTypes['VotingStrategy']> }>;
   ContestCategoryEnum: ContestCategoryEnum;
   ContestMutationResponse: ResolverTypeWrapper<ContestMutationResponse>;
   ContestTweetResponse: ResolverTypeWrapper<ContestTweetResponse>;
@@ -552,7 +552,7 @@ export type ResolversTypes = ResolversObject<{
   RestrictionTokenInput: RestrictionTokenInput;
   RestrictionTokenTypeEnum: RestrictionTokenTypeEnum;
   RestrictionType: RestrictionType;
-  Space: ResolverTypeWrapper<Omit<Space, 'contests'> & { contests: Array<ResolversTypes['Contest']> }>;
+  Space: ResolverTypeWrapper<Space>;
   SpaceStub: ResolverTypeWrapper<SpaceStub>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   SubmitterRestriction: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['SubmitterRestriction']>;
@@ -588,7 +588,7 @@ export type ResolversParentTypes = ResolversObject<{
   ArcadeVotingStrategyOption: ArcadeVotingStrategyOption;
   Boolean: Scalars['Boolean']['output'];
   ConfigureMintBoardResponse: ConfigureMintBoardResponse;
-  Contest: Omit<Contest, 'submitterRestrictions' | 'submitterRewards' | 'voterRewards' | 'votingPolicy'> & { submitterRestrictions: Array<ResolversParentTypes['SubmitterRestriction']>, submitterRewards: Array<ResolversParentTypes['SubmitterReward']>, voterRewards: Array<ResolversParentTypes['VoterReward']>, votingPolicy: Array<ResolversParentTypes['VotingStrategy']> };
+  Contest: Omit<Contest, 'submitterRestrictions' | 'votingPolicy'> & { submitterRestrictions: Array<ResolversParentTypes['SubmitterRestriction']>, votingPolicy: Array<ResolversParentTypes['VotingStrategy']> };
   ContestMutationResponse: ContestMutationResponse;
   ContestTweetResponse: ContestTweetResponse;
   CreateContestData: CreateContestData;
@@ -615,7 +615,7 @@ export type ResolversParentTypes = ResolversObject<{
   PromptInput: PromptInput;
   Query: {};
   RestrictionTokenInput: RestrictionTokenInput;
-  Space: Omit<Space, 'contests'> & { contests: Array<ResolversParentTypes['Contest']> };
+  Space: Space;
   SpaceStub: SpaceStub;
   String: Scalars['String']['output'];
   SubmitterRestriction: ResolversUnionTypes<ResolversParentTypes>['SubmitterRestriction'];
