@@ -37,23 +37,17 @@ const PageContent = async ({ spaceName, contractId }: { spaceName: string, contr
 
     const [space, channel] = await Promise.all([space_promise, channel_promise])
 
-    const [
-        token_zero,
-        initialErc20Price
-    ] = await Promise.all([
-        fetch(parseIpfsUrl(channel.uri).gateway).then(res => res.json()),
-        channel.fees ? parseErc20MintPrice(
-            channel.fees.fees.erc20Contract,
-            BigInt(channel.fees.fees.erc20MintPrice),
-            chainId
-        ).then(res => res.humanReadable) : "0"
-    ])
+    const initialErc20Price = channel.fees ? await parseErc20MintPrice(
+        channel.fees.fees.erc20Contract,
+        BigInt(channel.fees.fees.erc20MintPrice),
+        chainId
+    ).then(res => res.humanReadable) : "0"
 
 
     const priorState: MintBoardSettingsInput = {
-        title: token_zero.name,
-        description: token_zero.description,
-        imageURI: token_zero.image,
+        title: channel.tokens[0].metadata.name,
+        description: channel.tokens[0].metadata.description,
+        imageURI: channel.tokens[0].metadata.image,
         chainId: chainId as MintBoardSettingsInput["chainId"],
         saleDuration: parseSaleDurationToReadableString(Number((channel.transportLayer.transportConfig as IInfiniteTransportConfig).saleDuration)),
         feeContract: channel.fees ? "CUSTOM_FEES_ADDRESS" : zeroAddress,

@@ -102,11 +102,15 @@ export const EditMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asy
         })
     }
 
-    console.log("ERC20 price before", data.erc20MintPrice)
+    if (data.erc20Contract !== zeroAddress && data.erc20MintPrice === "0") {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["erc20MintPrice"],
+            "message": "Invalid ERC20 mint price"
+        })
+    }
 
     const { humanReadable, contractReadable: contractERC20Price } = await parseErc20MintPrice(data.erc20Contract, data.erc20MintPrice, data.chainId);
-
-    console.log("ERC20 price after", humanReadable, contractERC20Price)
 
     const updatedFees: ChannelFeeArguments = data.feeContract === zeroAddress ? {
         feeContract: zeroAddress,
@@ -197,6 +201,14 @@ export const NewMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asyn
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             "message": "Failed to upload metadata to ipfs"
+        })
+    }
+
+    if (data.erc20Contract !== zeroAddress && data.erc20MintPrice === "0") {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["erc20MintPrice"],
+            "message": "Invalid ERC20 mint price"
         })
     }
 
