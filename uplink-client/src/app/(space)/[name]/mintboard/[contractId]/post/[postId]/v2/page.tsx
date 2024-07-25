@@ -1,14 +1,12 @@
 import fetchChannel from "@/lib/fetch/fetchChannel";
-import { fetchSingleTokenIntent, fetchSingleTokenV2, fetchTokenIntents } from "@/lib/fetch/fetchTokensV2";
-import { ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, isTokenIntent, isTokenV1Onchain, isTokenV2Onchain, splitContractID } from "@/types/channel";
-import { Suspense } from "react";
+import { fetchSingleTokenIntent, fetchSingleTokenV2 } from "@/lib/fetch/fetchTokensV2";
+import { ContractID } from "@/types/channel";
+import React, { Suspense } from "react";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
 import { calculateImageAspectRatio } from "@/lib/farcaster/utils";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import { getChainName } from "@/lib/chains/supportedChains";
 import { Metadata } from "next";
-import { HiArrowNarrowLeft } from "react-icons/hi";
-import Link from "next/link";
+import { Boundary } from "@/ui/Boundary/Boundary";
 
 
 export async function generateMetadata({
@@ -71,33 +69,38 @@ export async function generateMetadata({
 
 const ExpandedPostSkeleton = () => {
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-                <div className="w-64 h-8 bg-base-100 shimmer rounded-lg" />
-                <div className="flex flex-row items-center h-8">
-                    <div className="flex gap-2 items-center">
-                        <div className="w-6 h-6 bg-base-100 shimmer rounded-xl" />
-                        <div className="w-16 h-4 bg-base-100 shimmer rounded-lg" />
+        <React.Fragment>
+            <div className="mt-14" />
+            <Boundary >
+                <div className="grid grid-cols-1 lg:grid-cols-[45%_50%] gap-2 md:gap-12 w-full">
+                    <div className="flex flex-col gap-4 items-center justify-center flex-grow-0">
+                        <div className="w-full h-96 m-auto bg-base-100 shimmer rounded-lg" />
+                    </div>
+                    <div className="flex flex-col gap-8 justify-start ">
+                        <div className="flex flex-col gap-4 w-full">
+                            <div className="flex flex-col gap-2">
+                                <div className="w-16 h-4 bg-base-100 shimmer rounded-lg" />
+                                <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1">
+                                    <div className="w-8 h-8 bg-base-100 shimmer rounded-lg" />
+                                    <div className="w-16 h-2 bg-base-100 shimmer rounded-lg" />
+                                </div>
+                            </div>
+                            <div className="w-full h-4 bg-base-100 shimmer rounded-lg" />
+                            <div className="w-full h-4 bg-base-100 shimmer rounded-lg" />
+                        </div>
+                        <div className="w-full h-16 bg-base-100 shimmer rounded-lg" />
+                        <div className="w-full h-16 bg-base-100 shimmer rounded-lg" />
                     </div>
                 </div>
-            </div>
-            <div className="w-full h-0.5 bg-base-200" />
-            <div className="w-96 m-auto h-96 bg-base-100 shimmer rounded-lg" />
-        </div>
+            </Boundary>
+        </React.Fragment>
     );
 };
 
-const BackButton = ({ to, label }: { to: string, label: string }) => {
-    return (
-        <Link href={to} className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0"
-        >
-            <HiArrowNarrowLeft className="w-6 h-6" />
-            <p>{label}</p>
-        </Link>
-    )
-}
 
 const PageContent = async ({ spaceName, contractId, postId, searchParams }: { spaceName: string, contractId: ContractID, postId: string, searchParams: { [key: string]: string | undefined } }) => {
+
+    await new Promise(r => setTimeout(r, 2000));
 
     const isIntent = searchParams?.intent ? true : false
 
@@ -116,6 +119,7 @@ const PageContent = async ({ spaceName, contractId, postId, searchParams }: { sp
         channel={channel}
         token={token}
         display="expanded"
+        backwardsNavUrl={`/${spaceName}/mintboard/${contractId}`}
     />
 }
 
@@ -132,7 +136,8 @@ export default function Page({ params, searchParams }: { params: { name: string,
 
     return (
         <div className="grid grid-cols-1 gap-6 w-9/12 m-auto h-full mt-4 p-4">
-            <BackButton to={`/${params.name}/mintboard/${params.contractId}`} label="Mintboard" />
+            {/* <ExpandedPostSkeleton />
+            <PageContent spaceName={params.name} contractId={params.contractId} postId={params.postId} searchParams={searchParams} /> */}
             <Suspense fallback={<ExpandedPostSkeleton />}>
                 <PageContent spaceName={params.name} contractId={params.contractId} postId={params.postId} searchParams={searchParams} />
             </Suspense>

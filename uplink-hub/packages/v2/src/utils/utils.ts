@@ -12,7 +12,6 @@ export const concatContractID = ({ chainId, contractAddress }: { chainId: number
 }
 
 export const splitContractID = (contractID: string): { chainId: number, contractAddress: `0x${string}` } => {
-    console.log("splitting contractID", contractID)
     const [contractAddress, chainId] = contractID.split("-");
 
     if (!getSupportedChains().includes(parseInt(chainId))) {

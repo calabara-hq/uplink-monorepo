@@ -9,7 +9,7 @@ import { RenderStandardVideoWithLoader } from "../VideoPlayer";
 import { ImageWrapper } from "../Submission/MediaWrapper";
 import UplinkImage from "@/lib/UplinkImage";
 import { LuMinusSquare, LuPlusSquare } from "react-icons/lu";
-import { formatEther, maxUint40 } from "viem";
+import { Address, formatEther, maxUint40 } from "viem";
 import { PiInfinity } from "react-icons/pi";
 import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, isTokenIntent, isTokenV1Onchain, isTokenV2Onchain } from "@/types/channel";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
@@ -29,8 +29,13 @@ export type FeeStructure = {
     sponsorPercentage: number
     uplinkPercentage: number
     ethMintPrice: bigint
+    erc20MintPrice: bigint
+    erc20Contract: Address
 }
 
+export const isErc20Mintable = (fees: FeeStructure) => {
+    return fees.erc20MintPrice > BigInt(0)
+}
 
 export const formatFeeKey = (key, value) => {
     switch (key) {

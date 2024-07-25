@@ -4608,9 +4608,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:^0.1.0-alpha.0":
-  version: 0.1.0-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.1.0-alpha.0"
+"@tx-kit/sdk@npm:^0.4.2-alpha.0":
+  version: 0.4.2-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.4.2-alpha.0"
   dependencies:
     "@urql/core": ^4.3.0
     base-64: ^1.0.0
@@ -4619,7 +4619,7 @@ __metadata:
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 19866b8e3f286da22f18661eeaf59321e4962914d9904491f6953f77636d36ccfe95260b03ef4e247939589d65c61f3f48e506cc786c70f2faf71ea5e3dc9664
+  checksum: 7a919ebbe2d5a547d3fc8a8ae56a7cb2c80aa5a63539cd998adf88059808a71ca5091dbc21437983fa09dd8fcbf4142af5ef16137ec7e6a05ddd922ab494f1fd
   languageName: node
   linkType: hard
 
@@ -13941,7 +13941,7 @@ __metadata:
   resolution: "v2@workspace:packages/v2"
   dependencies:
     "@jest/globals": ^29.5.0
-    "@tx-kit/sdk": ^0.1.0-alpha.0
+    "@tx-kit/sdk": ^0.4.2-alpha.0
     "@types/busboy": ^1.5.0
     "@types/node": ^18.11.19
     axios: ^1.4.0
