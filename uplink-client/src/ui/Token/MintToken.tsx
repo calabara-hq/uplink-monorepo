@@ -1,7 +1,7 @@
 "use client"
 
 import { useSession } from "@/providers/SessionProvider";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContractID, doesChannelHaveFees, isTokenIntent, isTokenV2Onchain } from "@/types/channel";
 import { useAccount, useWalletClient } from "wagmi";
 import toast from "react-hot-toast";
@@ -13,9 +13,8 @@ import { calculateSaleEnd, FeeStructure, isMintPeriodOver } from "./MintUtils";
 import { DisplayMode, RenderDisplayWithProps } from "./MintableTokenDisplay";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
 import { handleV2MutationError } from "@/lib/fetch/handleV2MutationError";
-import { useMintTokenBatchWithERC20 } from "@tx-kit/hooks/dist/token";
-import { baseSepolia } from "viem/chains";
-import { useCombinedMinter } from "@/hooks/useCombinedMinter";
+import { useMintTokenBatchWithERC20TwoStep } from "@/hooks/useMintWithERC20";
+import { useSponsorTokenWithERC20TwoStep } from "@/hooks/useSponsorWithERC20";
 
 
 export type MintTokenSwitchProps = {
@@ -25,6 +24,7 @@ export type MintTokenSwitchProps = {
     referral: string,
     display: DisplayMode,
     setIsModalOpen?: (open: boolean) => void,
+    backwardsNavUrl?: string
 }
 
 
@@ -34,7 +34,8 @@ export const MintV1Onchain = ({
     token,
     referral,
     setIsModalOpen,
-    display
+    display,
+    backwardsNavUrl
 }: MintTokenSwitchProps) => {
 
     const _token = token as ChannelTokenV1
@@ -70,6 +71,8 @@ export const MintV1Onchain = ({
         creator={token.author}
         metadata={token.metadata}
         fees={fees}
+        mintToken={NATIVE_TOKEN}
+        setMintToken={() => { }}
         isMintPeriodOver={isMintPeriodOver(saleEnd)}
         saleEnd={saleEnd}
         totalMinted={token.totalMinted}
@@ -80,6 +83,7 @@ export const MintV1Onchain = ({
         txStatus={txStatus}
         txHash={txHash}
         setIsModalOpen={setIsModalOpen}
+        backwardsNavUrl={backwardsNavUrl}
     />
 }
 
@@ -90,26 +94,65 @@ export const MintV2Onchain = ({
     token,
     referral,
     setIsModalOpen,
-    display
+    display,
+    backwardsNavUrl
 }: MintTokenSwitchProps) => {
 
     const _token = token as ChannelToken
 
-    const { data: session, status } = useSession();
+    const { data: walletClient } = useWalletClient();
     const mintReferral = referral && referral.startsWith('0x') && referral.length === 42 ? referral : "";
     const { mintPaginatedPost } = usePaginatedMintBoardPosts(concatContractID({ chainId: channel.chainId, contractAddress }))
-    const combinedMinterResponse = useCombinedMinter({ contractAddress, channel, token, mintReferral })
+    const { mintTokenBatchWithETH, status: ethTxStatus, txHash: ethTxHash, error: ethTxError } = useMintTokenBatchWithETH()
+    const { mintTokenBatchWithERC20, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useMintTokenBatchWithERC20TwoStep()
 
-    // const txStatus = ethTxStatus || erc20TxStatus || approveErc20TxStatus
-    // const isTxPending = txStatus === "pendingApproval" || txStatus === "txInProgress";
-    // const isTxSuccessful = txStatus === "complete";
+    const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN)
+    const isCurrencyEth = mintToken === NATIVE_TOKEN
+
+    const txStatus = isCurrencyEth ? ethTxStatus : erc20TxStatus
+    const isTxPending = txStatus === "pendingApproval" || txStatus === "txInProgress" || txStatus === "erc20ApprovalInProgress";
+    const isTxSuccessful = txStatus === "complete";
+    const txHash = isCurrencyEth ? ethTxHash : erc20TxHash
+
+    const fees: FeeStructure = doesChannelHaveFees(channel) ? {
+        creatorPercentage: channel.fees.fees.creatorPercentage,
+        channelPercentage: channel.fees.fees.channelPercentage,
+        referralPercentage: channel.fees.fees.mintReferralPercentage,
+        sponsorPercentage: channel.fees.fees.sponsorPercentage,
+        uplinkPercentage: channel.fees.fees.uplinkPercentage,
+        ethMintPrice: BigInt(channel.fees.fees.ethMintPrice),
+        erc20MintPrice: BigInt(channel.fees.fees.erc20MintPrice),
+        erc20Contract: channel.fees.fees.erc20Contract
+    } : null;
 
     const saleEnd = calculateSaleEnd(channel, _token)
 
     const handleSubmit = async (quantity: number, mintToken: Address) => {
-        combinedMinterResponse.mint(quantity, mintToken).then(() => {
-            mintPaginatedPost(_token.tokenId, quantity.toString())
-        })
+        if (mintToken === NATIVE_TOKEN) {
+            await mintTokenBatchWithETH({
+                channelAddress: contractAddress,
+                to: walletClient.account.address,
+                tokenIds: [BigInt(_token.tokenId)],
+                amounts: [quantity],
+                mintReferral: mintReferral,
+                data: "",
+                ...(fees ? { transactionOverrides: { value: fees.ethMintPrice * BigInt(quantity) } } : {})
+            })
+        } else {
+            await mintTokenBatchWithERC20({
+                channelAddress: contractAddress,
+                to: walletClient.account.address,
+                tokenIds: [BigInt(_token.tokenId)],
+                amounts: [quantity],
+                mintReferral: mintReferral,
+                data: "",
+            },
+                mintToken,
+                fees.erc20MintPrice * BigInt(quantity)
+            )
+        }
+
+        mintPaginatedPost(_token.tokenId, quantity.toString())
     }
 
     return <RenderDisplayWithProps
@@ -117,17 +160,20 @@ export const MintV2Onchain = ({
         chainId={channel.chainId}
         creator={token.author}
         metadata={token.metadata}
-        fees={combinedMinterResponse.fees}
+        fees={fees}
+        mintToken={mintToken}
+        setMintToken={setMintToken}
         isMintPeriodOver={isMintPeriodOver(saleEnd)}
         saleEnd={saleEnd}
         totalMinted={token.totalMinted}
         maxSupply={_token.maxSupply}
         handleSubmit={handleSubmit}
-        isTxPending={combinedMinterResponse.isTxPending}
-        isTxSuccessful={combinedMinterResponse.isTxSuccessful}
-        txStatus={combinedMinterResponse.txStatus}
-        txHash={combinedMinterResponse.txHash}
+        isTxPending={isTxPending}
+        isTxSuccessful={isTxSuccessful}
+        txStatus={txStatus}
+        txHash={txHash}
         setIsModalOpen={setIsModalOpen}
+        backwardsNavUrl={backwardsNavUrl}
     />
 }
 
@@ -138,19 +184,26 @@ export const MintV2Intent = ({
     token,
     referral,
     setIsModalOpen,
-    display
+    display,
+    backwardsNavUrl
 }: MintTokenSwitchProps) => {
 
     const _token = token as ChannelTokenIntent
-
     const { data: session, status } = useSession();
     const mintReferral = referral && referral.startsWith('0x') && referral.length === 42 ? referral : "";
     const contractId = concatContractID({ chainId: channel.chainId, contractAddress })
     const { triggerIntentSponsorship } = usePaginatedMintBoardIntents(contractId)
     const { receiveSponsorship } = usePaginatedMintBoardPosts(contractId)
-    const { sponsorTokenWithETH, tokenId, status: txStatus, txHash: txHash, error: txError } = useSponsorTokenWithETH()
-    const isTxPending = txStatus === "pendingApproval" || txStatus === "txInProgress";
+    const { sponsorTokenWithETH, status: ethTxStatus, txHash: ethTxHash, error: ethTxError } = useSponsorTokenWithETH()
+    const { sponsorTokenWithERC20, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useSponsorTokenWithERC20TwoStep()
+
+    const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN)
+    const isCurrencyEth = mintToken === NATIVE_TOKEN
+
+    const txStatus = isCurrencyEth ? ethTxStatus : erc20TxStatus
+    const isTxPending = txStatus === "pendingApproval" || txStatus === "txInProgress" || txStatus === "erc20ApprovalInProgress";
     const isTxSuccessful = txStatus === "complete";
+    const txHash = isCurrencyEth ? ethTxHash : erc20TxHash
 
     const saleEnd = calculateSaleEnd(channel, _token)
 
@@ -201,21 +254,44 @@ export const MintV2Intent = ({
     }
 
     const handleSubmit = async (quantity: number, mintToken: Address) => {
+        if (mintToken === NATIVE_TOKEN) {
 
-        await sponsorTokenWithETH({
-            channelAddress: contractAddress,
-            sponsoredToken: _token,
-            to: session?.user?.address as Address,
-            amount: quantity,
-            mintReferral: mintReferral,
-            data: "",
-            ...(fees ? { transactionOverrides: { value: fees.ethMintPrice * BigInt(quantity) } } : {})
-        }).then(async (response) => {
-            if (response) {
-                triggerIntentSponsorship(_token.id, quantity.toString())
-                receiveSponsorship()
-            }
-        })
+            await sponsorTokenWithETH({
+                channelAddress: contractAddress,
+                sponsoredToken: _token,
+                to: session?.user?.address,
+                amount: quantity,
+                mintReferral: mintReferral,
+                data: "",
+                ...(fees ? { transactionOverrides: { value: fees.ethMintPrice * BigInt(quantity) } } : {})
+            }).then(async (response) => {
+                if (response) {
+                    triggerIntentSponsorship(_token.id, quantity.toString())
+                    receiveSponsorship()
+                }
+            })
+
+        } else {
+
+            await sponsorTokenWithERC20({
+                channelAddress: contractAddress,
+                sponsoredToken: _token,
+                to: session?.user?.address,
+                amount: quantity,
+                mintReferral: mintReferral,
+                data: "",
+            },
+                mintToken,
+                fees.erc20MintPrice * BigInt(quantity)
+            ).then(async (response) => {
+                if (response) {
+                    triggerIntentSponsorship(_token.id, quantity.toString())
+                    receiveSponsorship()
+                }
+            })
+
+
+        }
 
     }
 
@@ -225,6 +301,8 @@ export const MintV2Intent = ({
         creator={token.author}
         metadata={token.metadata}
         fees={fees}
+        mintToken={mintToken}
+        setMintToken={setMintToken}
         isMintPeriodOver={isMintPeriodOver(saleEnd)}
         saleEnd={saleEnd}
         totalMinted={token.totalMinted}
@@ -235,6 +313,7 @@ export const MintV2Intent = ({
         txStatus={txStatus}
         txHash={txHash}
         setIsModalOpen={setIsModalOpen}
+        backwardsNavUrl={backwardsNavUrl}
     />
 }
 
@@ -246,7 +325,8 @@ export const MintTokenSwitch = ({
     contractAddress,
     referral,
     setIsModalOpen,
-    display
+    display,
+    backwardsNavUrl
 }: MintTokenSwitchProps) => {
 
     if (isTokenIntent(token)) {
@@ -257,6 +337,7 @@ export const MintTokenSwitch = ({
             referral={referral}
             setIsModalOpen={setIsModalOpen}
             display={display}
+            backwardsNavUrl={backwardsNavUrl}
         />
     }
 
@@ -268,6 +349,7 @@ export const MintTokenSwitch = ({
             referral={referral}
             setIsModalOpen={setIsModalOpen}
             display={display}
+            backwardsNavUrl={backwardsNavUrl}
         />
     }
 
@@ -278,6 +360,7 @@ export const MintTokenSwitch = ({
         referral={referral}
         setIsModalOpen={setIsModalOpen}
         display={display}
+        backwardsNavUrl={backwardsNavUrl}
     />
 
 }

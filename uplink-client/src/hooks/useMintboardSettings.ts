@@ -102,7 +102,11 @@ export const EditMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asy
         })
     }
 
+    console.log("ERC20 price before", data.erc20MintPrice)
+
     const { humanReadable, contractReadable: contractERC20Price } = await parseErc20MintPrice(data.erc20Contract, data.erc20MintPrice, data.chainId);
+
+    console.log("ERC20 price after", humanReadable, contractERC20Price)
 
     const updatedFees: ChannelFeeArguments = data.feeContract === zeroAddress ? {
         feeContract: zeroAddress,
@@ -184,12 +188,12 @@ export const EditMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asy
 export const NewMintBoardSettingsSchema = MintBoardSettingsSchema.transform(async (data, ctx) => {
     const ipfsData = constructTokenMetadata(data);
 
-    const [channelTreasury, ipfsUrls] = await Promise.all([
+    const [channelTreasury, ipfsUrl] = await Promise.all([
         convertEns(data.channelTreasury),
         pinJSONToIpfs(ipfsData)
     ]);
 
-    if (!ipfsUrls) {
+    if (!ipfsUrl) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             "message": "Failed to upload metadata to ipfs"
@@ -216,7 +220,7 @@ export const NewMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asyn
 
 
     const config: CreateInfiniteChannelConfig = {
-        uri: ipfsUrls.raw,
+        uri: ipfsUrl.raw,
         name: data.title,
         defaultAdmin: data.defaultAdmin,
         managers: data.managers,

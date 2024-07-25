@@ -16,6 +16,8 @@ import { ContractID, splitContractID } from "@/types/channel";
 import { useSWRConfig } from "swr";
 import { useChannel } from "@/hooks/useChannel";
 
+
+
 const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, priorState: MintBoardSettingsInput | null, spaceData: Space, contractId: ContractID }) => {
     const { state, setField, validateEditMintboardSettings } = useMintBoardSettings(priorState, spaceData);
     const { mutateSwrChannel } = useChannel(contractId)

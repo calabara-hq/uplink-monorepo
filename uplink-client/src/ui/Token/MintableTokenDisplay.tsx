@@ -1,22 +1,24 @@
 "use client"
 
 import { useDebounce } from "@/hooks/useDebounce";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import { ChainLabel } from "../ContestLabels/ContestLabels";
-import { HiCheckBadge } from "react-icons/hi2";
+import { HiCheck, HiCheckBadge } from "react-icons/hi2";
 import { useAccount } from "wagmi";
 import { getChainName } from "@/lib/chains/supportedChains";
 import OnchainButton from "../OnchainButton/OnchainButton";
-import { Address, maxUint40 } from "viem";
+import { Address, Chain, formatEther, formatUnits, maxUint40, parseEther, zeroAddress } from "viem";
 import { format } from "date-fns";
 import { TbLoader2 } from "react-icons/tb";
 import { CounterInput, FeeStructure, getETHMintPrice, RenderFees, RenderMaxSupply, RenderMintMedia, RenderTotalMints } from "./MintUtils";
 import { Boundary } from "../Boundary/Boundary";
 import { AddressOrEns, Avatar } from "../AddressDisplay/AddressDisplay";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
-import { isErc20Mintable } from "./MintUtils";
-
+import { useErc20TokenInfo } from "@/hooks/useErc20TokenInfo";
+import { useEthBalance, useErc20Balance } from "@/hooks/useTokenBalance";
+import { HiArrowNarrowLeft } from "react-icons/hi";
+import Link from "next/link";
 
 export type DisplayMode = "modal" | "expanded"
 
@@ -25,6 +27,8 @@ export type DisplayProps = {
     creator: string,
     metadata: any, // todo type this
     fees: FeeStructure | null,
+    mintToken: Address,
+    setMintToken: (currency: Address) => void,
     isMintPeriodOver: boolean,
     saleEnd: number,
     totalMinted: string,
@@ -35,6 +39,7 @@ export type DisplayProps = {
     txHash: string,
     txStatus: string,
     setIsModalOpen?: (open: boolean) => void
+    backwardsNavUrl?: string
 }
 
 
@@ -50,6 +55,8 @@ export const MintModalDisplay = ({
     creator,
     metadata,
     fees,
+    mintToken,
+    setMintToken,
     isMintPeriodOver,
     saleEnd,
     totalMinted,
@@ -63,17 +70,41 @@ export const MintModalDisplay = ({
 }: DisplayProps) => {
 
     const [mintQuantity, setMintQuantity] = useState<string>('1');
-    const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN);
     const debouncedMintQuantity = useDebounce(mintQuantity);
-    const { chain } = useAccount();
+    const { symbol, decimals } = useErc20TokenInfo(fees.erc20Contract, chainId);
     const availableEditions = BigInt(maxSupply) - BigInt(totalMinted);
     const areEditionsSoldOut = availableEditions <= 0;
+    const [isMintFlowModalOpen, setIsMintFlowModalOpen] = useState(false);
 
+    const erc20AmountRequired = fees.erc20MintPrice * BigInt(debouncedMintQuantity);
+    const ethAmountRequired = fees.ethMintPrice * BigInt(debouncedMintQuantity);
+
+    const { balance: erc20Balance, isBalanceLoading: isErc20BalanceLoading } = useErc20Balance(mintToken, chainId);
+    const { balance: ethBalance, isBalanceLoading: isEthBalanceLoading } = useEthBalance(chainId);
+
+    const isInsufficientErc20Balance = isErc20BalanceLoading ? false : erc20Balance < erc20AmountRequired
+    const isInsufficientEthBalance = isEthBalanceLoading ? false : ethBalance < ethAmountRequired
+
+    const mintButtonTitle = mintToken === NATIVE_TOKEN
+        ? isInsufficientEthBalance ? `Insufficient balance` : "Mint"
+        : isInsufficientErc20Balance ? `Insufficient ${symbol} balance` : "Approve & Mint"
+
+
+
+    const handleButtonClick = () => {
+        if (fees.erc20Contract === zeroAddress) {
+            handleSubmit(parseInt(debouncedMintQuantity), mintToken)
+            setIsMintFlowModalOpen(true)
+        }
+        else {
+            setIsMintFlowModalOpen(true)
+        }
+    }
 
 
     return (
         <React.Fragment>
-            {!isTxPending && !isTxSuccessful && (
+            {!isMintFlowModalOpen && (
                 <div className="flex flex-col gap-2 relative">
                     <div className="flex">
                         <h2 className="text-t1 text-xl font-bold">Post</h2>
@@ -81,7 +112,7 @@ export const MintModalDisplay = ({
                     </div>
                     <div className="p-2" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-black ">
-                        <div className="items-center justify-center">
+                        <div className="flex items-center justify-center rounded-lg p-1 ">
                             <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
                         </div>
                         <div className="bg-black-200 items-start flex flex-col gap-8 relative">
@@ -118,48 +149,24 @@ export const MintModalDisplay = ({
                                             <RenderMaxSupply maxSupply={maxSupply} />
                                         </div>
                                     </div>
-                                    <div className="col-span-2 ">
-                                        {!areEditionsSoldOut && !isMintPeriodOver &&
-                                            <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
-                                        }
-                                    </div>
-
                                 </div>
                                 <div className="p-1" />
                                 <div className="w-full bg-base-100 h-[1px]" />
 
-                                {!areEditionsSoldOut && !isMintPeriodOver && <div className="flex flex-col w-full md:max-w-[250px] ml-auto gap-2">
-                                    {/* <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} /> */}
-                                    <RenderFees fees={fees} quantity={debouncedMintQuantity} />
-                                    {isErc20Mintable(fees) && <div className="flex flex-col gap-2">
-                                        <p className="text-t2">Token</p>
-                                        <select className="w-full h-10 bg-base rounded-lg p-2 text-t1" onChange={(e) => setMintToken(e.target.value as Address)}>
-                                            <option value={NATIVE_TOKEN}>ETH</option>
-                                            <option value={fees.erc20Contract}>{"WETH"}</option>
-                                        </select>
-                                    </div>}
-
-                                    <OnchainButton
-                                        chainId={chainId}
-                                        title={"Mint"}
-                                        onClick={() => handleSubmit(parseInt(debouncedMintQuantity), mintToken)}
-                                        isLoading={isTxPending}
-                                        loadingChild={
-                                            <button className="btn btn-disabled normal-case w-auto">
-                                                <div className="flex gap-2 items-center">
-                                                    <p className="text-sm">{
-                                                        txStatus === 'pendingApproval' ?
-                                                            <span>Awaiting Signature</span>
-                                                            :
-                                                            <span>Processing</span>
-                                                    }
-                                                    </p>
-                                                    <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
-                                                </div>
-                                            </button>
-                                        }
-                                    />
-                                </div>
+                                {!areEditionsSoldOut && !isMintPeriodOver &&
+                                    <div className="flex flex-col gap-2">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 w-full  ml-auto gap-2">
+                                            <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
+                                            <OnchainButton
+                                                chainId={chainId}
+                                                title={"Mint"}
+                                                onClick={handleButtonClick}
+                                                isLoading={false}
+                                                loadingChild={<></>}
+                                            />
+                                        </div>
+                                        <RenderFees fees={fees} quantity={debouncedMintQuantity} />
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -167,35 +174,44 @@ export const MintModalDisplay = ({
 
                 </div >
             )}
+            <MintFlowModal
+                isModalOpen={isMintFlowModalOpen}
+                handleClose={() => setIsMintFlowModalOpen(false)}
+                flowProps={
+                    {
+                        mintToken,
+                        setMintToken,
+                        ethAmountRequired,
+                        erc20AmountRequired,
+                        erc20Contract: fees.erc20Contract,
+                        erc20Symbol: symbol,
+                        erc20Decimals: decimals,
+                        isInsufficientEthBalance,
+                        isInsufficientErc20Balance,
+                        debouncedMintQuantity,
+                        handleSubmit,
+                        chainId,
+                        isTxPending,
+                        isTxSuccessful,
+                        mintButtonTitle,
+                        txStatus,
+                        txHash
+                    }
+                }
+            />
 
-            <div className="p-2" />
-            {isTxPending && (
-                <div className="animate-springUp flex flex-col gap-2 w-full h-[50vh] items-center justify-center">
-                    <p className="text-lg text-t1 font-semibold text-center">Minting your NFT</p>
-                    <div className="text-xs text-primary ml-1 inline-block h-10 w-10 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                        role="status"
-                    />
-                </div>
-            )}
-            {isTxSuccessful && (
-                <div className="animate-springUp flex flex-col gap-3 w-full h-[50vh] items-center justify-center">
-                    <HiCheckBadge className="h-48 w-48 text-success" />
-                    <h2 className="font-bold text-t1 text-xl">Got it.</h2>
-                    <div className="flex gap-2 items-center">
-                        <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
-                        <button className="btn normal-case btn-primary" onClick={() => setIsModalOpen(false)}>Close</button>
-                    </div>
-                </div>
-            )}
         </React.Fragment>
     )
 }
+
 
 export const MintExpandedDisplay = ({
     chainId,
     creator,
     metadata,
     fees,
+    mintToken,
+    setMintToken,
     isMintPeriodOver,
     saleEnd,
     totalMinted,
@@ -205,113 +221,259 @@ export const MintExpandedDisplay = ({
     isTxSuccessful,
     txHash,
     txStatus,
-    setIsModalOpen
+    backwardsNavUrl
 }: DisplayProps) => {
 
     const [mintQuantity, setMintQuantity] = useState<string>('1');
-    const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN);
     const debouncedMintQuantity = useDebounce(mintQuantity);
-    const { chain } = useAccount();
+    const { symbol, decimals } = useErc20TokenInfo(fees.erc20Contract, chainId);
     const availableEditions = BigInt(maxSupply) - BigInt(totalMinted);
     const areEditionsSoldOut = availableEditions <= 0;
+    const [isMintFlowModalOpen, setIsMintFlowModalOpen] = useState(false);
+
+    const erc20AmountRequired = fees.erc20MintPrice * BigInt(debouncedMintQuantity);
+    const ethAmountRequired = fees.ethMintPrice * BigInt(debouncedMintQuantity);
+
+    const { balance: erc20Balance, isBalanceLoading: isErc20BalanceLoading } = useErc20Balance(mintToken, chainId);
+    const { balance: ethBalance, isBalanceLoading: isEthBalanceLoading } = useEthBalance(chainId);
+
+    const isInsufficientErc20Balance = isErc20BalanceLoading ? false : erc20Balance < erc20AmountRequired
+    const isInsufficientEthBalance = isEthBalanceLoading ? false : ethBalance < ethAmountRequired
+
+    const mintButtonTitle = mintToken === NATIVE_TOKEN
+        ? isInsufficientEthBalance ? `Insufficient balance` : "Mint"
+        : isInsufficientErc20Balance ? `Insufficient ${symbol} balance` : "Approve & Mint"
+
+    const handleButtonClick = () => {
+        if (fees.erc20Contract === zeroAddress) {
+            handleSubmit(parseInt(debouncedMintQuantity), mintToken)
+            setIsMintFlowModalOpen(true)
+        }
+        else {
+            setIsMintFlowModalOpen(true)
+        }
+    }
 
     return (
         <React.Fragment>
-            {!isTxPending && !isTxSuccessful && (
-                <Boundary>
-                    <div className="grid grid-cols-1 lg:grid-cols-[45%_50%] gap-2 md:gap-12 w-full">
-                        <div className="flex flex-col gap-4 items-start justify-start">
-                            <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} styleOverrides="shadow-lg shadow-black" />
-                        </div>
-                        <div className="flex flex-col gap-8 justify-start ">
-                            <div className="flex flex-col gap-4 w-full">
-                                <div className="flex flex-col gap-2">
-                                    <p className="line-clamp-3 font-bold text-xl break-all">{metadata.name}</p>
-                                    <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1">
-                                        <Avatar address={creator} size={32} />
-                                        <AddressOrEns address={creator} />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div className="flex flex-col justify-start">
-                                        <p className="text-t2">Network</p>
-                                        <div className="flex gap-2 items-center">
-                                            <p className="text-t1 font-bold">{getChainName(chainId)}</p>
-                                            <ChainLabel chainId={chainId} px={16} />
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <p className="text-t2">{isMintPeriodOver ? "Ended" : "Until"}</p>
-                                        <p className="font-bold text-t1">{saleEnd == Number(maxUint40) ? "Forever" : format(new Date(Number(saleEnd) * 1000), "MMM d, h:mm aa")}</p>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <p className="text-t2">Price</p>
-                                        <p className="font-bold text-t1">{getETHMintPrice(fees ? fees.ethMintPrice : null)}</p>
-                                    </div>
-                                    <div className="flex flex-col justify-start">
-                                        <p className="text-t2">Collected</p>
-                                        <div className="flex gap-1">
-                                            <RenderTotalMints totalMinted={totalMinted} />
-                                            <p className="text-t1">/</p>
-                                            <RenderMaxSupply maxSupply={maxSupply} />
-                                        </div>
-                                    </div>
-                                </div>
-                                {!areEditionsSoldOut && !isMintPeriodOver && <div className="flex flex-col gap-2 w-full">
-                                    <div className="p-1" />
-                                    <div className="w-full bg-base-100 h-[1px]" />
-                                    <RenderFees fees={fees} quantity={debouncedMintQuantity} />
-                                    <div className="grid grid-cols-1 xl:grid-cols-[50%_50%] gap-2 xl:gap-4 w-full">
-                                        <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
-                                        <OnchainButton
-                                            chainId={chainId}
-                                            disabled={parseInt(mintQuantity) <= 0 || mintQuantity === "" || parseInt(mintQuantity) > availableEditions}
-                                            title={"Mint"}
-                                            onClick={() => handleSubmit(parseInt(debouncedMintQuantity), mintToken)}
-                                            isLoading={isTxPending}
-                                            loadingChild={
-                                                <button className="btn btn-disabled normal-case w-auto">
-                                                    <div className="flex gap-2 items-center">
-                                                        <p className="text-sm">{
-                                                            txStatus === 'pendingApproval' ?
-                                                                <span>Awaiting Signature</span>
-                                                                :
-                                                                <span>Processing</span>
-                                                        }
-                                                        </p>
-                                                        <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
-                                                    </div>
-                                                </button>
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                                }
+            {!isMintFlowModalOpen && (
+                <React.Fragment>
+                    <Link href={backwardsNavUrl} className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0"
+                    >
+                        <HiArrowNarrowLeft className="w-6 h-6" />
+                        <p>Back</p>
+                    </Link>
+                    <Boundary>
+                        <div className="grid grid-cols-1 lg:grid-cols-[45%_50%] gap-2 md:gap-12 w-full">
+                            <div className="flex flex-col gap-4 items-center justify-center flex-grow-0">
+                                <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} styleOverrides="shadow-lg shadow-black" />
                             </div>
-                        </div>
-                    </div >
-                </Boundary>
+                            <div className="flex flex-col gap-8 justify-start ">
+                                <div className="flex flex-col gap-4 w-full">
+                                    <div className="flex flex-col gap-2">
+                                        <p className="line-clamp-3 font-bold text-xl break-all">{metadata.name}</p>
+                                        <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1">
+                                            <Avatar address={creator} size={32} />
+                                            <AddressOrEns address={creator} />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div className="flex flex-col justify-start">
+                                            <p className="text-t2">Network</p>
+                                            <div className="flex gap-2 items-center">
+                                                <p className="text-t1 font-bold">{getChainName(chainId)}</p>
+                                                <ChainLabel chainId={chainId} px={16} />
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <p className="text-t2">{isMintPeriodOver ? "Ended" : "Until"}</p>
+                                            <p className="font-bold text-t1">{saleEnd == Number(maxUint40) ? "Forever" : format(new Date(Number(saleEnd) * 1000), "MMM d, h:mm aa")}</p>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <p className="text-t2">Price</p>
+                                            <p className="font-bold text-t1">{getETHMintPrice(fees ? fees.ethMintPrice : null)}</p>
+                                        </div>
+                                        <div className="flex flex-col justify-start">
+                                            <p className="text-t2">Collected</p>
+                                            <div className="flex gap-1">
+                                                <RenderTotalMints totalMinted={totalMinted} />
+                                                <p className="text-t1">/</p>
+                                                <RenderMaxSupply maxSupply={maxSupply} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {!areEditionsSoldOut && !isMintPeriodOver && <div className="flex flex-col gap-2 w-full">
+                                        <div className="p-1" />
+                                        <div className="w-full bg-base-100 h-[1px]" />
+                                        <div className="grid grid-cols-1 xl:grid-cols-[50%_50%] gap-2 xl:gap-4 w-full">
+                                            <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
+                                            <OnchainButton
+                                                chainId={chainId}
+                                                disabled={parseInt(mintQuantity) <= 0 || mintQuantity === "" || parseInt(mintQuantity) > availableEditions}
+                                                title={"Mint"}
+                                                onClick={handleButtonClick}
+                                                isLoading={isTxPending}
+                                                loadingChild={
+                                                    <button className="btn btn-disabled normal-case w-auto">
+                                                        <div className="flex gap-2 items-center">
+                                                            <p className="text-sm">{
+                                                                txStatus === 'pendingApproval' ?
+                                                                    <span>Awaiting Signature</span>
+                                                                    :
+                                                                    <span>Processing</span>
+                                                            }
+                                                            </p>
+                                                            <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                                        </div>
+                                                    </button>
+                                                }
+                                            />
+                                        </div>
+                                        <RenderFees fees={fees} quantity={debouncedMintQuantity} />
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        </div >
+                    </Boundary>
+                </React.Fragment>
             )}
 
-            <div className="p-2" />
-            {isTxPending && (
+            {isMintFlowModalOpen && <div className="modal modal-open bg-black  transition-colors duration-500 ease-in-out w-[100vw]">
+                <div
+                    className="modal-box bg-black border border-border animate-springUp w-11/12 md:w-3/4 lg:w-1/2 max-w-full  overflow-y-scroll"
+                >
+                    <MintFlowModal
+                        isModalOpen={isMintFlowModalOpen}
+                        handleClose={() => setIsMintFlowModalOpen(false)}
+                        flowProps={
+                            {
+                                mintToken,
+                                setMintToken,
+                                ethAmountRequired,
+                                erc20AmountRequired,
+                                erc20Contract: fees.erc20Contract,
+                                erc20Symbol: symbol,
+                                erc20Decimals: decimals,
+                                isInsufficientEthBalance,
+                                isInsufficientErc20Balance,
+                                debouncedMintQuantity,
+                                handleSubmit,
+                                chainId,
+                                isTxPending,
+                                isTxSuccessful,
+                                mintButtonTitle,
+                                txStatus,
+                                txHash
+                            }
+                        }
+                    />
+
+                </div>
+            </div>
+            }
+        </React.Fragment >
+    )
+}
+
+
+type FlowModalProps = {
+    mintToken: Address
+    setMintToken: (token: Address) => void
+    ethAmountRequired: bigint
+    erc20AmountRequired: bigint
+    erc20Contract: Address
+    erc20Symbol: string
+    erc20Decimals: number
+    isInsufficientEthBalance: boolean
+    isInsufficientErc20Balance: boolean
+    debouncedMintQuantity: string
+    handleSubmit: (quantity: number, mintToken: Address) => void
+    chainId: number
+    isTxPending: boolean
+    isTxSuccessful: boolean
+    mintButtonTitle: string
+    txStatus: string
+    txHash: string
+}
+
+const MintCurrencyOptions = ({ props, handleClose }: { props: FlowModalProps, handleClose: () => void }) => {
+
+    return (
+        <div className="animate-springUp flex flex-col gap-6 relative">
+            <button className="btn btn-ghost btn-sm flex gap-2 normal-case mr-auto" onClick={handleClose}><HiArrowNarrowLeft className="w-6 h-6 text-t2" />Go Back</button>
+
+            <div className="flex flex-col w-full sm:w-3/4 m-auto gap-8 h-[50vh] justify-center">
+                <div className="flex flex-col sm:flex-row">
+                    <div
+                        className={`text-lg relative btn btn-ghost border-2 border-border ${props.mintToken === NATIVE_TOKEN && "border-purple-600 hover:border-purple-600"} normal-case rounded-box grid h-36 flex-grow place-items-center`}
+                        onClick={() => props.setMintToken(NATIVE_TOKEN)}
+                    >
+                        Mint with <br />{formatEther(props.ethAmountRequired)} ETH
+                        <HiCheckBadge className={` absolute -top-3 -right-3 h-10 w-10 text-purple-600 ${props.mintToken === NATIVE_TOKEN ? "visible" : "invisible"}`} />
+
+                    </div>
+                    <div className="divider divider-vertical sm:divider-horizontal">OR</div>
+                    <div
+                        className={`text-lg relative btn btn-ghost border-2 border-border ${props.mintToken !== NATIVE_TOKEN && "border-primary hover:border-primary"} normal-case rounded-box grid h-36 flex-grow place-items-center`}
+                        onClick={() => props.setMintToken(props.erc20Contract)}
+                    >
+                        Mint with <br /> {formatUnits(props.erc20AmountRequired, props.erc20Decimals)} {props.erc20Symbol}
+                        <HiCheckBadge className={` absolute -top-3 -right-3 h-10 w-10 text-primary ${props.mintToken !== NATIVE_TOKEN ? "visible" : "invisible"}`} />
+                    </div>
+                </div>
+                <OnchainButton
+                    chainId={props.chainId}
+                    title={props.mintButtonTitle}
+                    disabled={props.mintToken === NATIVE_TOKEN ? props.isInsufficientEthBalance : props.isInsufficientErc20Balance}
+                    onClick={() => props.handleSubmit(parseInt(props.debouncedMintQuantity), props.mintToken)}
+                    isLoading={false}
+                    loadingChild={<></>}
+                />
+            </div>
+        </div>
+    )
+}
+
+const MintFlowModal = ({
+    isModalOpen,
+    handleClose,
+    flowProps
+
+}: { isModalOpen: boolean, handleClose: () => void, flowProps: FlowModalProps }) => {
+
+    const { chain } = useAccount();
+
+    useEffect(() => {
+        // a hacky way to close the modal when mint with eth fails and we don't want to show the currency options (since erc20 is not an option)
+        if (flowProps.txStatus === "error" && isModalOpen && flowProps.erc20AmountRequired === BigInt(0)) {
+            handleClose()
+        }
+    }, [flowProps.txStatus])
+
+    if (isModalOpen) return (
+        <div className="animate-springUp flex flex-col gap-2 relative">
+            {!flowProps.isTxPending && !flowProps.isTxSuccessful && <MintCurrencyOptions props={flowProps} handleClose={handleClose} />}
+            {flowProps.isTxPending && (
                 <div className="animate-springUp flex flex-col gap-2 w-full h-[50vh] items-center justify-center">
-                    <p className="text-lg text-t1 font-semibold text-center">Minting your NFT</p>
+                    <p className="text-lg text-t1 font-semibold text-center">
+                        {flowProps.txStatus === "erc20ApprovalInProgress" ? `Approving use of ${flowProps.erc20Symbol}` : "Minting your NFT"}
+                    </p>
                     <div className="text-xs text-primary ml-1 inline-block h-10 w-10 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                         role="status"
                     />
                 </div>
             )}
-            {isTxSuccessful && (
+            {flowProps.isTxSuccessful && (
                 <div className="animate-springUp flex flex-col gap-3 w-full h-[50vh] items-center justify-center">
                     <HiCheckBadge className="h-48 w-48 text-success" />
                     <h2 className="font-bold text-t1 text-xl">Got it.</h2>
                     <div className="flex gap-2 items-center">
-                        <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
-                        <button className="btn normal-case btn-primary" onClick={() => setIsModalOpen(false)}>Close</button>
+                        <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${flowProps.txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
+                        <button className="btn normal-case btn-primary" onClick={handleClose}>Close</button>
                     </div>
                 </div>
             )}
-        </React.Fragment >
+        </div>
     )
 }

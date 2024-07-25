@@ -44,10 +44,11 @@ const PageContent = async ({ spaceName, contractId }: { spaceName: string, contr
         fetch(parseIpfsUrl(channel.uri).gateway).then(res => res.json()),
         channel.fees ? parseErc20MintPrice(
             channel.fees.fees.erc20Contract,
-            channel.fees.fees.erc20MintPrice,
+            BigInt(channel.fees.fees.erc20MintPrice),
             chainId
         ).then(res => res.humanReadable) : "0"
     ])
+
 
     const priorState: MintBoardSettingsInput = {
         title: token_zero.name,

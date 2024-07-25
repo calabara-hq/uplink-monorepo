@@ -19,7 +19,7 @@ const baseClient = createPublicClient({
     }
 });
 
-export const createWeb3Client = (chainId?: number): PublicClient<Transport, Chain> => {
-    if (chainId === 84532) return baseSepoliaClient;
-    return baseClient;
+export const createWeb3Client = (chainId?: number) => {
+    if (chainId === 84532) return baseSepoliaClient as PublicClient<Transport, Chain>;
+    return baseClient as PublicClient<Transport, Chain>;
 };

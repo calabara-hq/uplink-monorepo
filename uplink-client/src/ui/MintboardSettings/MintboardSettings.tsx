@@ -255,12 +255,12 @@ const ERC20MintPriceInput = ({ state, setField }) => {
                     <>
                         <div className="flex flex-col md:flex-row gap-2 w-full">
                             <input
-                                type="text"
+                                type="number"
                                 autoComplete="off"
                                 onWheel={(e) => e.currentTarget.blur()}
                                 spellCheck="false"
                                 value={state.erc20MintPrice}
-                                onChange={(e) => { setField("erc20MintPrice", e.target.value) }}
+                                onChange={(e) => { setField("erc20MintPrice", asPositiveFloat(e.target.value, 8)) }}
                                 placeholder={"100"}
                                 className={`input input-bordered rounded-lg w-full max-w-xs ${state.errors?.erc20MintPrice?._errors ? "input-error" : "input"
                                     }`}
