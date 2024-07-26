@@ -22,7 +22,7 @@
     "lib": "workspace:*",
     "redis": "^4.6.6",
     "twitter-api-v2": "^1.14.2",
-    "viem": "^1.11.0"
+    "viem": "2.x"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",

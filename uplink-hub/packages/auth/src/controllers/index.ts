@@ -3,7 +3,7 @@ import { TwitterApi } from 'twitter-api-v2';
 import dotenv from 'dotenv';
 import { CipherController, schema } from 'lib'
 import { createPublicClient, http, verifyMessage } from 'viem';
-import { mainnet } from 'viem/chains';
+import { base, mainnet, baseSepolia } from 'viem/chains';
 import Redis, { Redis as RedisType } from 'ioredis';
 
 dotenv.config();
@@ -14,6 +14,8 @@ const cipherController = new CipherController(process.env.APP_SECRET)
 const twitterClient = new TwitterApi({ clientId: process.env.TWITTER_OAUTH_CLIENT_ID, clientSecret: process.env.TWITTER_OAUTH_CLIENT_SECRET })
 const redisClient = new Redis(process.env.REDIS_URL);
 
+const SUPPORTED_CHAIN_IDS = [8453, 84532]
+
 export const publicClient = createPublicClient({
     chain: mainnet,
     transport: http(`https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`),
@@ -23,6 +25,20 @@ const successful_redirect = '<script>window.close()</script><link rel="styleshee
 const failed_redirect = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu"><html style="width: 100vw; height: 100vh; background-color: rgb(20, 20, 22); font-family: Ubuntu,sans,sans-serif"><body><div style="display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center;"><p style="font-size: 4.5em; color: rgb(211, 211, 211);">There was a problem linking your account 😕</p><p style="font-size: 2em; color: grey;">Please close this window and try again</p></div></html></body>'
 
 const twitterRedirect = process.env.TWITTER_CALLBACK_URL
+
+const getChainById = (chainId: number) => {
+    if (!SUPPORTED_CHAIN_IDS.includes(chainId)) return null;
+    if (chainId === 8453) return base;
+    if (chainId === 84532) return baseSepolia;
+}
+
+const createSigVerifyPubClient = (chainId: number) => {
+    return createPublicClient({
+        chain: getChainById(chainId),
+        transport: http()
+    })
+}
+
 
 interface SiweMessage {
     nonce: string;
@@ -122,7 +138,13 @@ export const verifySignature = async (req, res) => {
         const { message, signature } = req.body;
         const parsedMessage = JSON.parse(message)
         const siweMessage = prepareMessage(parsedMessage)
-        const isValid = await verifyMessage({
+
+        console.log(parsedMessage)
+        console.log('///////')
+        console.log(siweMessage)
+        console.log(signature)
+
+        const isValid = await createSigVerifyPubClient(parsedMessage.chainId).verifyMessage({
             address: parsedMessage.address,
             message: siweMessage,
             signature

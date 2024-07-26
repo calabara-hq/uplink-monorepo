@@ -9,10 +9,10 @@ import uplinkLogo from "../../../public/uplink-logo.svg";
 
 export default function Sidebar() {
   return (
-    <div className="h-full w-full  shadow-xl hidden md:flex md:flex-col py-2">
+    <div className="h-full w-full shadow-xl hidden sm:flex sm:flex-col py-2">
       <SideBarIcon
         icon={
-          <Image src={uplinkLogo} alt="uplink logo" height={28} width={28}/>
+          <Image src={uplinkLogo} alt="uplink logo" height={28} width={28} />
         }
         text="Home"
         path={"/"}
