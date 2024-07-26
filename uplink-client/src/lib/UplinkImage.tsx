@@ -28,34 +28,47 @@ export default function UplinkImage(props: { src: string | StaticImageData, alt:
 
 
 
-    if (blur) {
-        const blurredSrc = typeof src === 'string' ? blurLoader({ src, width: 200, quality: '1' }) : '';
+    // if (blur) {
+    //     const blurredSrc = typeof src === 'string' ? blurLoader({ src, width: 200, quality: '1' }) : '';
 
-        return (
-            <>
-                {!isPlaceholderError && !hasLoaded && <Image
-                    src={blurredSrc}
-                    onError={() => setIsPlaceholderError(true)}
-                    alt={alt}
-                    sizes={sizes}
-                    className={className}
-                    {...rest}
-                    unoptimized={true}
+    //     return (
+    //         <>
+    //             {/* {!isPlaceholderError && !hasLoaded && <Image
+    //                 src={blurredSrc}
+    //                 onError={() => setIsPlaceholderError(true)}
+    //                 alt={alt}
+    //                 sizes={sizes}
+    //                 className={`${className}`}
+    //                 {...rest}
+    //                 unoptimized={true}
 
-                />
-                }
-                <Image
-                    loader={isPlaceholderError ? undefined : imageLoader}
-                    onLoad={() => setHasLoaded(true)}
-                    src={src}
-                    alt={alt}
-                    sizes={sizes}
-                    className={`${className} ${hasLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    {...rest}
-                />
-            </>
-        );
-    }
+    //             />
+    //             }
+    //              */}
+
+    //             {!isPlaceholderError && !hasLoaded && <Image
+    //                 src={blurredSrc}
+    //                 onError={() => setIsPlaceholderError(true)}
+    //                 alt={alt}
+    //                 sizes={sizes}
+    //                 className={className}
+    //                 {...rest}
+    //                 unoptimized={true}
+
+    //             />
+    //             }
+    //             <Image
+    //                 loader={isPlaceholderError ? undefined : imageLoader}
+    //                 onLoad={() => setHasLoaded(true)}
+    //                 src={src}
+    //                 alt={alt}
+    //                 sizes={sizes}
+    //                 className={`${className} ${hasLoaded ? 'opacity-100' : 'opacity-0'}`}
+    //                 {...rest}
+    //             />
+    //         </>
+    //     );
+    // }
 
 
     return (
@@ -64,6 +77,7 @@ export default function UplinkImage(props: { src: string | StaticImageData, alt:
             src={src}
             alt={alt}
             sizes={sizes}
+            className={className}
             {...rest}
         />
     )

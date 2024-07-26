@@ -4,7 +4,7 @@ import { AuthorizationController } from "lib";
 
 import { clientByChainId } from "../utils/transmissions.js";
 import { getSupportedChains } from "../utils/constants.js";
-import { splitContractID } from "../utils/utils.js";
+import { parseV2Metadata, splitContractID } from "../utils/utils.js";
 
 import { Request, Response, NextFunction } from 'express'
 import { ContexedRequest } from "../types.js";
@@ -55,7 +55,10 @@ export const getChannel = async (req: Request, res: Response, next: NextFunction
 
         const [dbChannel, txChannel] = await Promise.all([
             dbGetChannel(contractAddress, chainId),
-            downlinkClient.getChannel({ channelAddress: contractAddress })
+            downlinkClient.getChannel({
+                channelAddress: contractAddress,
+                includeTokens: true,
+            }).then(async channel => { return { ...channel, tokens: ([await parseV2Metadata(channel.tokens[0])]) } }) // todo move this to the subgraph api
         ])
 
         if (!dbChannel) throw new NotFoundError('Channel not found')

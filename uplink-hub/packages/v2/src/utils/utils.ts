@@ -3,7 +3,7 @@ import { getSupportedChains } from "./constants.js";
 import { isAddress } from "viem"
 import { ContractID, TokenIntentWithMetadata, TokenMetadata, V1TokenWithMetadata, V2TokenWithMetadata } from "../types.js";
 import { schema } from "lib";
-import { IToken } from "@tx-kit/sdk";
+import { IChannel, IToken } from "@tx-kit/sdk";
 import { cachedFetch } from "./cachedFetch.js";
 import { Address } from "viem";
 
@@ -12,7 +12,6 @@ export const concatContractID = ({ chainId, contractAddress }: { chainId: number
 }
 
 export const splitContractID = (contractID: string): { chainId: number, contractAddress: `0x${string}` } => {
-    console.log("splitting contractID", contractID)
     const [contractAddress, chainId] = contractID.split("-");
 
     if (!getSupportedChains().includes(parseInt(chainId))) {
@@ -46,6 +45,7 @@ export const parseIpfsUrl = (url: string) => {
         gateway: url,
     }
 }
+
 
 export const parseV1Metadata = (v1Response: schema.dbZoraTokenType): V1TokenWithMetadata => {
     return {

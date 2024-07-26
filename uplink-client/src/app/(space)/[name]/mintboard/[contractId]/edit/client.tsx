@@ -16,10 +16,35 @@ import { ContractID, splitContractID } from "@/types/channel";
 import { useSWRConfig } from "swr";
 import { useChannel } from "@/hooks/useChannel";
 
+const WaitForEditChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
+    const { mutateSwrChannel } = useChannel(contractId)
+
+    const router = useRouter();
+
+    useEffect(() => {
+        // wait for 15 seconds and then refresh the channel
+        setTimeout(() => {
+            mutateChannel(contractId)
+            mutateSwrChannel()
+            router.push(`/${spaceData.name}/mintboard/${contractId}`, { scroll: false })
+            router.refresh();
+            toast.success('Mintboard Configured!')
+        }, 15000)
+    }, [])
+
+
+    return (
+        <div className="flex flex-col gap-4 justify-center items-center h-96">
+            <h2 className="text-xl text-t1 font-bold">Updating Mintboard...</h2>
+            <TbLoader2 className="w-12 h-12 text-primary animate-spin" />
+        </div>
+    )
+
+}
+
 const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, priorState: MintBoardSettingsInput | null, spaceData: Space, contractId: ContractID }) => {
     const { state, setField, validateEditMintboardSettings } = useMintBoardSettings(priorState, spaceData);
-    const { mutateSwrChannel } = useChannel(contractId)
-    const router = useRouter();
+    const [waitForEditChannel, setWaitForEditChannel] = useState(false);
     const { multicall, txHash, status: txStatus, error: txError } = useMulticall();
     const publicClient = usePublicClient();
     const { data: walletClient } = useWalletClient();
@@ -34,11 +59,6 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
         publicClient: publicClient,
     })
 
-    useEffect(() => {
-        if (txStatus == "complete") {
-            handleChannelUpdated()
-        }
-    }, [txStatus]);
 
     const handleSubmit = async () => {
 
@@ -62,18 +82,13 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
             })
         ])
 
-        multicall({ channelAddress: contractAddress, calls: [cd_0, cd_1, cd_2] })
-
+        await multicall({ channelAddress: contractAddress, calls: [cd_0, cd_1, cd_2] }).then((events) => {
+            if (events) setWaitForEditChannel(true)
+        })
     }
 
-    const handleChannelUpdated = () => {
 
-        mutateChannel(contractId)
-        mutateSwrChannel()
-        router.push(`/${spaceData.name}/mintboard/${contractId}`, { scroll: false })
-        router.refresh();
-        return toast.success('Mintboard Configured!')
-    }
+    if (waitForEditChannel) return <WaitForEditChannel spaceData={spaceData} contractId={contractId} />
 
     return (
         <MintboardSettings
