@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import fetchChannel from "@/lib/fetch/fetchChannel";
 import { Address, formatEther, zeroAddress } from "viem";
 import { MintBoardSettingsInput } from "@/hooks/useMintboardSettings";
+import { parseErc20MintPrice } from "@/lib/tokenHelpers";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { IInfiniteTransportConfig } from "@tx-kit/sdk"
 import { ContractID, splitContractID } from "@/types/channel";
@@ -36,12 +37,17 @@ const PageContent = async ({ spaceName, contractId }: { spaceName: string, contr
 
     const [space, channel] = await Promise.all([space_promise, channel_promise])
 
-    const token_zero = await fetch(parseIpfsUrl(channel.uri).gateway).then(res => res.json())
+    const initialErc20Price = channel.fees ? await parseErc20MintPrice(
+        channel.fees.fees.erc20Contract,
+        BigInt(channel.fees.fees.erc20MintPrice),
+        chainId
+    ).then(res => res.humanReadable) : "0"
+
 
     const priorState: MintBoardSettingsInput = {
-        title: token_zero.name,
-        description: token_zero.description,
-        imageURI: token_zero.image,
+        title: channel.tokens[0].metadata.name,
+        description: channel.tokens[0].metadata.description,
+        imageURI: channel.tokens[0].metadata.image,
         chainId: chainId as MintBoardSettingsInput["chainId"],
         saleDuration: parseSaleDurationToReadableString(Number((channel.transportLayer.transportConfig as IInfiniteTransportConfig).saleDuration)),
         feeContract: channel.fees ? "CUSTOM_FEES_ADDRESS" : zeroAddress,
@@ -52,6 +58,8 @@ const PageContent = async ({ spaceName, contractId }: { spaceName: string, contr
         mintReferralPercentage: channel.fees ? channel.fees.fees.mintReferralPercentage.toString() : "",
         sponsorPercentage: channel.fees ? channel.fees.fees.sponsorPercentage.toString() : "",
         ethMintPrice: channel.fees ? formatEther(channel.fees.fees.ethMintPrice) : "0",
+        erc20Contract: channel.fees ? channel.fees.fees.erc20Contract : zeroAddress,
+        erc20MintPrice: initialErc20Price,
     }
 
     return <BoardForm spaceId={space.id} priorState={priorState} spaceData={space} contractId={contractId} />

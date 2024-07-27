@@ -1,8 +1,8 @@
 "use client";
-import { useReducer, useState } from "react";
+import { useReducer } from "react";
 import { z } from "zod";
-import { parseEther, zeroAddress } from "viem";
-import { TransmissionsClient, CreateInfiniteChannelConfig, validateInfiniteTransportLayer, validateSetFeeInputs } from '@tx-kit/sdk';
+import { formatUnits, parseEther, parseUnits, zeroAddress } from "viem";
+import { CreateInfiniteChannelConfig, validateInfiniteTransportLayer, validateSetFeeInputs } from '@tx-kit/sdk';
 import { validateInfiniteChannelInputs, ChannelFeeArguments } from '@tx-kit/sdk';
 import { getCustomFeesAddress } from '@tx-kit/sdk/constants';
 import { createWeb3Client } from "@/lib/viem";
@@ -10,11 +10,10 @@ import { Address, maxUint40 } from "viem";
 import { normalize } from "viem/ens"
 import { parseIpfsUrl, pinJSONToIpfs } from "@/lib/ipfs";
 import { useSession } from "@/providers/SessionProvider";
-import _ from "lodash";
 import { Space } from "@/types/space";
 import { CreateTokenInputs } from "./useCreateTokenReducer";
-import { TokenMetadata, UploadToIpfsTokenMetadata } from "@/types/channel";
-
+import { UploadToIpfsTokenMetadata } from "@/types/channel";
+import { parseErc20MintPrice } from "@/lib/tokenHelpers";
 const mainnetClient = createWeb3Client(1);
 
 const convertEns = async (value: string | Address) => {
@@ -51,13 +50,11 @@ const constructTokenMetadata = (input: CreateTokenInputs): UploadToIpfsTokenMeta
     return metadata;
 }
 
-
 const parseSaleDuration = (value: string): number => {
     if (value === "3 days") return 259200;
     if (value === "week") return 604800;
     else return Number(maxUint40);
 }
-
 
 export const MintBoardSettingsSchema = z.object({
 
@@ -105,6 +102,15 @@ export const EditMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asy
         })
     }
 
+    if (data.erc20Contract !== zeroAddress && data.erc20MintPrice === "0") {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["erc20MintPrice"],
+            "message": "Invalid ERC20 mint price"
+        })
+    }
+
+    const { humanReadable, contractReadable: contractERC20Price } = await parseErc20MintPrice(data.erc20Contract, data.erc20MintPrice, data.chainId);
 
     const updatedFees: ChannelFeeArguments = data.feeContract === zeroAddress ? {
         feeContract: zeroAddress,
@@ -119,7 +125,7 @@ export const EditMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asy
             mintReferralPercentage: data.mintReferralPercentage,
             sponsorPercentage: data.sponsorPercentage,
             ethMintPrice: parseEther(data.ethMintPrice),
-            erc20MintPrice: BigInt(0),
+            erc20MintPrice: contractERC20Price,
             erc20Contract: data.erc20Contract
         }
     }
@@ -186,17 +192,27 @@ export const EditMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asy
 export const NewMintBoardSettingsSchema = MintBoardSettingsSchema.transform(async (data, ctx) => {
     const ipfsData = constructTokenMetadata(data);
 
-    const [channelTreasury, ipfsUrls] = await Promise.all([
+    const [channelTreasury, ipfsUrl] = await Promise.all([
         convertEns(data.channelTreasury),
         pinJSONToIpfs(ipfsData)
     ]);
 
-    if (!ipfsUrls) {
+    if (!ipfsUrl) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             "message": "Failed to upload metadata to ipfs"
         })
     }
+
+    if (data.erc20Contract !== zeroAddress && data.erc20MintPrice === "0") {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["erc20MintPrice"],
+            "message": "Invalid ERC20 mint price"
+        })
+    }
+
+    const { humanReadable, contractReadable: contractERC20Price } = await parseErc20MintPrice(data.erc20Contract, data.erc20MintPrice, data.chainId);
 
 
     const setupActions = data.feeContract === zeroAddress ? [] : [{
@@ -209,14 +225,14 @@ export const NewMintBoardSettingsSchema = MintBoardSettingsSchema.transform(asyn
             mintReferralPercentage: data.mintReferralPercentage,
             sponsorPercentage: data.sponsorPercentage,
             ethMintPrice: parseEther(data.ethMintPrice),
-            erc20MintPrice: BigInt(data.erc20MintPrice),
+            erc20MintPrice: contractERC20Price,
             erc20Contract: data.erc20Contract
         }
     }]
 
 
     const config: CreateInfiniteChannelConfig = {
-        uri: ipfsUrls.raw,
+        uri: ipfsUrl.raw,
         name: data.title,
         defaultAdmin: data.defaultAdmin,
         managers: data.managers,

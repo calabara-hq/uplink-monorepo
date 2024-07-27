@@ -95,7 +95,7 @@ export const TokenManager = ({
     strictTypes: strictTypes,
   });
 
-  if (progress === 0)
+  if (progress === 0 && quickAddTokens.length > 0)
     return (
       <>
         <QuickAddToken
@@ -115,7 +115,7 @@ export const TokenManager = ({
       </>
     );
 
-  if (progress === 1)
+  if (progress === 1 || quickAddTokens.length === 0)
     return (
       <>
         <ManualAddToken

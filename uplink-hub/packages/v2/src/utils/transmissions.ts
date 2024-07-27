@@ -1,8 +1,6 @@
 import { TransmissionsClient, getSubgraphUrl } from '@tx-kit/sdk';
 import { createWeb3Client } from './viem.js';
 
-
-
 const { downlinkClient: baseSepoliaDownlinkClient, uplinkClient: baseSepoliaUplinkClient } = new TransmissionsClient({
     chainId: 84532,
     apiConfig: {
