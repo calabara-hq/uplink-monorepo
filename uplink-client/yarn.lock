@@ -5480,24 +5480,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/hooks@npm:^0.5.7-alpha.0":
-  version: 0.5.7-alpha.0
-  resolution: "@tx-kit/hooks@npm:0.5.7-alpha.0"
+"@tx-kit/hooks@npm:^0.5.13-alpha.0":
+  version: 0.5.13-alpha.0
+  resolution: "@tx-kit/hooks@npm:0.5.13-alpha.0"
   dependencies:
-    "@tx-kit/sdk": "npm:0.4.5-alpha.0"
+    "@tx-kit/sdk": "npm:0.4.10-alpha.0"
   peerDependencies:
     react: 17.x.x || 18.x.x
     viem: ^1.0.0 || ^2.0.0
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/fce034c423c44759c7ba7e971873353d756d99273410535e517e28730cd69b46995cd746e1e7c73603aa1960b416e00ba1042e99deacaaacfa0a42c54ef8251e
+  checksum: 10c0/daa5f3175842f61c1d7abd7820c6a6e037ddfdddc76c7b78a57ed8212e2eabc929a7339e0bfaa959b7d65c1cd5e1f8abdac9eb71812bf61fba8ecaa80842fd06
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:0.4.5-alpha.0, @tx-kit/sdk@npm:^0.4.5-alpha.0":
-  version: 0.4.5-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.4.5-alpha.0"
+"@tx-kit/sdk@npm:0.4.10-alpha.0, @tx-kit/sdk@npm:^0.4.10-alpha.0":
+  version: 0.4.10-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.4.10-alpha.0"
   dependencies:
     "@urql/core": "npm:^4.3.0"
     base-64: "npm:^1.0.0"
@@ -5506,7 +5506,7 @@ __metadata:
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/847dad86585fe9a3bff727228f6d42c638e9b309d227f3d4ba6af11c3f95fd5ec1c7af675cd02242a3d8603749c0ce59ee53ceccc8854345f9cb960ccf8cacb1
+  checksum: 10c0/e3268a9b0bb887988eae78f6cf4094fefd8e14b99b6fe0bf57a6134effd7fb9203db5c1f4811ad1aa4b92f66c07e93e8e7b331d1d77377651c63e6e01bbaf16e
   languageName: node
   linkType: hard
 
@@ -20530,8 +20530,8 @@ __metadata:
     "@storybook/react": "npm:^7.4.5"
     "@storybook/testing-library": "npm:^0.2.1"
     "@tanstack/react-query": "npm:^5.48.0"
-    "@tx-kit/hooks": "npm:^0.5.7-alpha.0"
-    "@tx-kit/sdk": "npm:^0.4.5-alpha.0"
+    "@tx-kit/hooks": "npm:^0.5.13-alpha.0"
+    "@tx-kit/sdk": "npm:^0.4.10-alpha.0"
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"

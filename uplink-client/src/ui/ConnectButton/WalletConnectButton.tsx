@@ -49,7 +49,9 @@ function AccountModal({
             <UsernameDisplay user={session?.user} />
           </div>
           <div className="flex flex-row gap-4 items-center">
-            <Button variant="destructive" onClick={() => { disconnect() }}>
+            <Button variant="destructive" onClick={() => {
+              disconnect()
+            }}>
               <div className="flex gap-1 items-center p-2 text-black">
                 <p>Sign out</p>
                 <FaSignOutAlt className="w-4 h-4" />
@@ -71,13 +73,16 @@ const ConnectedAccountDisplay = () => {
   const { data: session, status } = useSession();
 
   return (
-    <div className="flex items-center lg:gap-2">
-      <div tabIndex={0} role="button" onClick={() => setIsModalOpen(!isModalOpen)} className="flex md:gap-2 items-center no-select justify-start text-sm font-bold md:pl-0 btn btn-ghost normal-case rounded-xl hover:bg-base-200 transition-all duration-200 ease-linear h-fit min-h-fit text-t2 hover:text-t1 ">
+    <div className="flex items-center justify-center lg:gap-2 w-full">
+      {/* <div tabIndex={0} role="button" onClick={() => setIsModalOpen(!isModalOpen)} className="flex md:gap-2 items-center no-select justify-start text-sm font-bold md:pl-0 btn btn-ghost normal-case rounded-xl hover:bg-base-200 transition-all duration-200 ease-linear h-fit min-h-fit text-t2 hover:text-t1 "> */}
+      <div tabIndex={0} role="button" onClick={() => setIsModalOpen(!isModalOpen)} className="flex gap-2 bg-black/10 hover:bg-base-100 w-fit rounded-xl items-center justify-start pr-2 font-bold  no-select text-t2">
+
         <NoggleAvatar
           address={session?.user?.address}
           size={40}
+          styleOverride="flex h-full items-center overflow-hidden p-1 rounded-xl transition-all duration-300 ease-linear"
         />
-        <div className="hidden md:block">
+        <div className="">
           <UsernameDisplay user={session?.user} />
         </div>
       </div>
@@ -136,11 +141,11 @@ export default function WalletConnectButton({
   const { data: session, status } = useSession();
   if (!status || status === "loading")
     return (
-      <div className="flex items-center gap-2">
-        <div className={`btn normal-case btn-ghost btn-active rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear ${styleOverride}`}>
+      <div className="grid grid-cols-2 items-center gap-2 max-w-full">
+        <div className={`btn normal-case shimmer btn-ghost rounded-3xl text-transparent ${styleOverride}`}>
           Create Wallet
         </div>
-        <div className={`btn normal-case btn-ghost btn-active rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear ${styleOverride}`}>
+        <div className={`btn normal-case shimmer btn-ghost rounded-3xl text-transparent ${styleOverride}`}>
           Sign in
         </div>
       </div>

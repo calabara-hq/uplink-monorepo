@@ -1,5 +1,5 @@
 "use client"
-import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, isTokenV1Onchain, splitContractID } from "@/types/channel";
+import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ChannelUpgradePath, ContractID, isTokenV1Onchain, splitContractID } from "@/types/channel";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts, usePaginatedMintBoardPostsV1, usePaginatedPopularTokens } from "@/hooks/useTokens";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardFooter } from "@/ui/Token/Card";
@@ -13,6 +13,15 @@ import RenderIfVisible from "@/ui/VIrtualization/RenderIfVisible";
 import { Admin } from "@/types/space";
 import Modal from "@/ui/Modal/Modal";
 import Image from "next/image";
+import OnchainButton from "@/ui/OnchainButton/OnchainButton";
+import { TbLoader2 } from "react-icons/tb";
+import { useUpgradeChannel } from "@tx-kit/hooks";
+import toast from "react-hot-toast";
+import useSWR from "swr";
+import { Address } from "viem";
+import { HiCheckBadge } from "react-icons/hi2";
+import { handleV2Error } from "@/lib/fetch/handleV2Errors";
+import { useMonitorChannelUpgrades } from "@/hooks/useMonitorChannelUpgrades";
 
 
 export const PostSkeleton = () => {
@@ -28,6 +37,120 @@ export const PostSkeleton = () => {
             </div>
         </div>
     );
+}
+
+
+
+
+export const ChannelUpgrades = ({ contractId }: { contractId: ContractID }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { upgradeChannel, txHash, status, error } = useUpgradeChannel();
+    const { chainId, contractAddress } = splitContractID(contractId)
+    const { upgradePath, isLoading, mutate } = useMonitorChannelUpgrades(contractId);
+
+    useEffect(() => {
+        if (status === "complete") {
+            toast.success("Upgrade successful")
+            setIsModalOpen(false)
+            mutate()
+        }
+    }, [status])
+
+    useEffect(() => {
+        console.log(error)
+    }, [error])
+
+    const handleSubmit = async () => {
+        await upgradeChannel({
+            channelAddress: contractAddress as Address,
+            newImplementation: upgradePath.upgradeImpl as Address
+        });
+
+    }
+
+
+    const UpgradeStatus = ({ isLoading, upgradePath }) => {
+
+        if (isLoading) return (
+            <div className="flex justify-between items-center">
+                <p className="text-t1">Checking for contract upgrades</p>
+                <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+            </div>
+        )
+
+        else if (!upgradePath && !isLoading) return (
+            <div className="flex justify-between items-center">
+                <p className="text-t1">Upgrade status</p>
+                <span className="flex gap-1 items-center"><p>up to date</p><HiCheckBadge className="text-success h-5 w-5" /></span>
+            </div>
+        )
+
+        else if (upgradePath && !isLoading) return (
+            <div className="flex justify-between items-center">
+                <p className="text-t1">An upgrade is available!</p>
+                <button className="btn btn-primary btn-sm normal-case" onClick={() => setIsModalOpen(true)}>Upgrade</button>
+            </div>
+        )
+
+        return null;
+    }
+
+
+
+    return (
+        <div className="">
+            <UpgradeStatus isLoading={isLoading} upgradePath={upgradePath} />
+            {isModalOpen && (
+                <Modal
+                    isModalOpen={true}
+                    onClose={() => { setIsModalOpen(false) }}
+                    title={"What's New"}
+                    disableClickOutside={false}
+                >
+
+                    <div className="flex flex-col gap-4">
+                        <h2 className="text-3xl text-t1 font-bold">
+                            {"What's new?"}
+                        </h2>
+                        <div className="flex flex-col bg-base gap-2 rounded-md p-2">
+                            <p className="">An upgrade is available for improved coinbase smart wallet support.</p>
+                            <p className="">Upgrading will make it easier and cheaper for your users to interact with the mintboard.</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <button className="btn btn-ghost btn-active normal-case w-fit" onClick={() => setIsModalOpen(false)}>Ignore</button>
+                            {/* <button className="btn btn-primary normal-case w-fit ml-auto" onClick={() => setIsModalOpen(false)}>Upgrade</button> */}
+
+
+                            <div className="ml-auto">
+                                <OnchainButton
+                                    chainId={chainId}
+                                    title={"Upgrade"}
+                                    onClick={handleSubmit}
+                                    isLoading={status === 'pendingApproval' || status === 'txInProgress'}
+                                    loadingChild={
+                                        <button className="btn btn-disabled normal-case w-auto">
+                                            <div className="flex gap-2 items-center">
+                                                <p className="text-sm">{
+                                                    status === 'pendingApproval' ?
+                                                        <span>Awaiting Signature</span>
+                                                        :
+                                                        <span>Processing</span>
+                                                }
+                                                </p>
+                                                <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                            </div>
+                                        </button>
+                                    }
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </Modal >
+            )}
+        </div>
+    )
+
+
 }
 
 

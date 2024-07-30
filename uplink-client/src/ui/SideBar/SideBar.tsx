@@ -6,6 +6,7 @@ import {
   HiPlus,
 } from "react-icons/hi2";
 import uplinkLogo from "../../../public/uplink-logo.svg";
+import { IoFlameOutline } from "react-icons/io5";
 
 export default function Sidebar() {
   return (
@@ -20,7 +21,7 @@ export default function Sidebar() {
       <div className="py-1"></div>
       <Divider />
       <SideBarIcon
-        icon={<HiOutlineRectangleGroup className="h-6 w-6" />}
+        icon={<IoFlameOutline className="h-6 w-6" />}
         text="Explore"
         path={"/explore"}
       />

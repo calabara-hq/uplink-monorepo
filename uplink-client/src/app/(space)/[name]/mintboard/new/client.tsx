@@ -95,6 +95,7 @@ const BoardForm = ({ spaceData, priorState }: { spaceId: string, priorState: Min
         }
     }, [txStatus]);
 
+
     const handleSubmit = async () => {
         const { success, data } = await validateNewMintboardSettings();
         if (!success) {

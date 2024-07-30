@@ -1,4 +1,4 @@
-import fetchChannel from '@/lib/fetch/fetchChannel'
+import fetchChannel, { fetchChannelUpgradePath } from '@/lib/fetch/fetchChannel'
 import fetchSingleSpace from '@/lib/fetch/fetchSingleSpace';
 import { fetchPopularTokens, fetchTokenIntents, fetchTokensV1, fetchTokensV2 } from '@/lib/fetch/fetchTokensV2';
 import { parseIpfsUrl } from '@/lib/ipfs';
@@ -8,7 +8,7 @@ import { Boundary } from '@/ui/Boundary/Boundary';
 import Link from 'next/link';
 import React, { Suspense } from 'react';
 import { unstable_serialize } from 'swr';
-import { PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents, WhatsNew } from './client';
+import { ChannelUpgrades, PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents, WhatsNew } from './client';
 import { ContractID, splitContractID } from '@/types/channel';
 import { notFound } from 'next/navigation';
 import { MdNewReleases, MdOutlineSettings } from 'react-icons/md';
@@ -66,11 +66,6 @@ const BoardInfo = async ({ spaceName, contractId }: { spaceName: string, contrac
                     >
                         {space.displayName}
                     </Link>
-                    <AdminWrapper admins={space.admins}>
-                        <Link href={`/${spaceName}/mintboard/${contractId}/edit`} className="text-t2 hover:text-t1">
-                            <MdOutlineSettings className="w-6 h-6 text-t2 hover:text-t1" />
-                        </Link>
-                    </AdminWrapper>
                 </div>
                 <p className="text-t2 whitespace-pre-line">
                     {ipfsData.description}
@@ -82,25 +77,26 @@ const BoardInfo = async ({ spaceName, contractId }: { spaceName: string, contrac
 
 const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
 
-    const space = await fetchSingleSpace(spaceName)
+    const space = await fetchSingleSpace(spaceName);
 
     return (
-        <div className="flex flex-col gap-4 h-full justify-between">
-            {/* <ol className="text-t2 list-disc space-y-2">
-                    <li className="text-sm text-t2">
-                        Share posts to earn referral rewards.
-                    </li>
-                    <li className="text-sm text-t2">
-                        Earn 0.000333 ETH for every mint your post receives!
-                    </li>
-                    <li className="text-sm text-t2">
-                        0.000111 ETH from every mint goes to the{" "}
-                        {space.displayName} treasury.
-                    </li>
-                </ol> */}
+        <div className="flex flex-col gap-4 h-full w-full md:w-80 ml-auto">
+            <AdminWrapper admins={space.admins}>
+                <Boundary size="small" labels={["Admin"]}>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-row justify-between items-center text-t1">
+                            Manage settings
+                            <Link href={`/${spaceName}/mintboard/${contractId}/edit`} className="btn btn-ghost btn-active btn-sm normal-case">
+                                Edit
+                            </Link>
+                        </div>
+                        <ChannelUpgrades contractId={contractId} />
+                    </div>
+                </Boundary>
+            </AdminWrapper>
             <Link
                 href={`/${spaceName}/mintboard/${contractId}/studio`}
-                className="btn btn-primary normal-case w-full md:w-56 ml-auto"
+                className="btn btn-primary normal-case w-full ml-auto"
             >
                 Post
             </Link>

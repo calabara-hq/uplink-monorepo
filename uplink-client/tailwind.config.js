@@ -28,8 +28,6 @@ const colors = {
   info: '#5D9CEC',
 }
 
-
-
 module.exports = {
   experimental: {
     optimizeUniversalDefaults: true
