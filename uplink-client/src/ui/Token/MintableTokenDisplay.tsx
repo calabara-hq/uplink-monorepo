@@ -19,6 +19,8 @@ import { useErc20TokenInfo } from "@/hooks/useErc20TokenInfo";
 import { useEthBalance, useErc20Balance } from "@/hooks/useTokenBalance";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import Link from "next/link";
+import { useCapabilities } from 'wagmi/experimental'
+import { useRouter } from "next/navigation";
 
 export type DisplayMode = "modal" | "expanded"
 
@@ -71,28 +73,13 @@ export const MintModalDisplay = ({
 
     const [mintQuantity, setMintQuantity] = useState<string>('1');
     const debouncedMintQuantity = useDebounce(mintQuantity);
-    const { symbol, decimals } = useErc20TokenInfo(fees.erc20Contract, chainId);
+
     const availableEditions = BigInt(maxSupply) - BigInt(totalMinted);
     const areEditionsSoldOut = availableEditions <= 0;
     const [isMintFlowModalOpen, setIsMintFlowModalOpen] = useState(false);
 
-    const erc20AmountRequired = fees.erc20MintPrice * BigInt(debouncedMintQuantity);
-    const ethAmountRequired = fees.ethMintPrice * BigInt(debouncedMintQuantity);
-
-    const { balance: erc20Balance, isBalanceLoading: isErc20BalanceLoading } = useErc20Balance(mintToken, chainId);
-    const { balance: ethBalance, isBalanceLoading: isEthBalanceLoading } = useEthBalance(chainId);
-
-    const isInsufficientErc20Balance = isErc20BalanceLoading ? false : erc20Balance < erc20AmountRequired
-    const isInsufficientEthBalance = isEthBalanceLoading ? false : ethBalance < ethAmountRequired
-
-    const mintButtonTitle = mintToken === NATIVE_TOKEN
-        ? isInsufficientEthBalance ? `Insufficient balance` : "Mint"
-        : isInsufficientErc20Balance ? `Insufficient ${symbol} balance` : "Approve & Mint"
-
-
-
     const handleButtonClick = () => {
-        if (fees.erc20Contract === zeroAddress) {
+        if (fees?.erc20Contract ?? zeroAddress === zeroAddress) {
             handleSubmit(parseInt(debouncedMintQuantity), mintToken)
             setIsMintFlowModalOpen(true)
         }
@@ -118,7 +105,7 @@ export const MintModalDisplay = ({
                         <div className="bg-black-200 items-start flex flex-col gap-8 relative">
                             <div className="flex flex-col gap-2">
                                 <p className="line-clamp-3 font-bold text-lg break-all">{metadata.name}</p>
-                                <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1">
+                                <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
                                     <Avatar address={creator} size={28} />
                                     <AddressOrEns address={creator} />
                                 </div>
@@ -155,7 +142,7 @@ export const MintModalDisplay = ({
 
                                 {!areEditionsSoldOut && !isMintPeriodOver &&
                                     <div className="flex flex-col gap-2">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 w-full  ml-auto gap-2">
+                                        <div className="grid grid-cols-1  w-full  ml-auto gap-2">
                                             <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
                                             <OnchainButton
                                                 chainId={chainId}
@@ -177,23 +164,18 @@ export const MintModalDisplay = ({
             <MintFlowModal
                 isModalOpen={isMintFlowModalOpen}
                 handleClose={() => setIsMintFlowModalOpen(false)}
+                handleExitMint={() => setIsModalOpen(false)}
                 flowProps={
                     {
+                        fees: fees,
                         mintToken,
                         setMintToken,
-                        ethAmountRequired,
-                        erc20AmountRequired,
-                        erc20Contract: fees.erc20Contract,
-                        erc20Symbol: symbol,
-                        erc20Decimals: decimals,
-                        isInsufficientEthBalance,
-                        isInsufficientErc20Balance,
+                        erc20Contract: fees?.erc20Contract ?? zeroAddress,
                         debouncedMintQuantity,
                         handleSubmit,
                         chainId,
                         isTxPending,
                         isTxSuccessful,
-                        mintButtonTitle,
                         txStatus,
                         txHash
                     }
@@ -226,26 +208,13 @@ export const MintExpandedDisplay = ({
 
     const [mintQuantity, setMintQuantity] = useState<string>('1');
     const debouncedMintQuantity = useDebounce(mintQuantity);
-    const { symbol, decimals } = useErc20TokenInfo(fees.erc20Contract, chainId);
+    const router = useRouter();
     const availableEditions = BigInt(maxSupply) - BigInt(totalMinted);
     const areEditionsSoldOut = availableEditions <= 0;
     const [isMintFlowModalOpen, setIsMintFlowModalOpen] = useState(false);
 
-    const erc20AmountRequired = fees.erc20MintPrice * BigInt(debouncedMintQuantity);
-    const ethAmountRequired = fees.ethMintPrice * BigInt(debouncedMintQuantity);
-
-    const { balance: erc20Balance, isBalanceLoading: isErc20BalanceLoading } = useErc20Balance(mintToken, chainId);
-    const { balance: ethBalance, isBalanceLoading: isEthBalanceLoading } = useEthBalance(chainId);
-
-    const isInsufficientErc20Balance = isErc20BalanceLoading ? false : erc20Balance < erc20AmountRequired
-    const isInsufficientEthBalance = isEthBalanceLoading ? false : ethBalance < ethAmountRequired
-
-    const mintButtonTitle = mintToken === NATIVE_TOKEN
-        ? isInsufficientEthBalance ? `Insufficient balance` : "Mint"
-        : isInsufficientErc20Balance ? `Insufficient ${symbol} balance` : "Approve & Mint"
-
     const handleButtonClick = () => {
-        if (fees.erc20Contract === zeroAddress) {
+        if (fees?.erc20Contract ?? zeroAddress === zeroAddress) {
             handleSubmit(parseInt(debouncedMintQuantity), mintToken)
             setIsMintFlowModalOpen(true)
         }
@@ -253,6 +222,8 @@ export const MintExpandedDisplay = ({
             setIsMintFlowModalOpen(true)
         }
     }
+
+
 
     return (
         <React.Fragment>
@@ -272,7 +243,7 @@ export const MintExpandedDisplay = ({
                                 <div className="flex flex-col gap-4 w-full">
                                     <div className="flex flex-col gap-2">
                                         <p className="line-clamp-3 font-bold text-xl break-all">{metadata.name}</p>
-                                        <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1">
+                                        <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
                                             <Avatar address={creator} size={32} />
                                             <AddressOrEns address={creator} />
                                         </div>
@@ -346,23 +317,18 @@ export const MintExpandedDisplay = ({
                     <MintFlowModal
                         isModalOpen={isMintFlowModalOpen}
                         handleClose={() => setIsMintFlowModalOpen(false)}
+                        handleExitMint={() => router.push(backwardsNavUrl)}
                         flowProps={
                             {
+                                fees: fees,
                                 mintToken,
                                 setMintToken,
-                                ethAmountRequired,
-                                erc20AmountRequired,
-                                erc20Contract: fees.erc20Contract,
-                                erc20Symbol: symbol,
-                                erc20Decimals: decimals,
-                                isInsufficientEthBalance,
-                                isInsufficientErc20Balance,
+                                erc20Contract: fees?.erc20Contract ?? zeroAddress,
                                 debouncedMintQuantity,
                                 handleSubmit,
                                 chainId,
                                 isTxPending,
                                 isTxSuccessful,
-                                mintButtonTitle,
                                 txStatus,
                                 txHash
                             }
@@ -378,26 +344,44 @@ export const MintExpandedDisplay = ({
 
 
 type FlowModalProps = {
+    fees: FeeStructure | null
     mintToken: Address
     setMintToken: (token: Address) => void
-    ethAmountRequired: bigint
-    erc20AmountRequired: bigint
     erc20Contract: Address
-    erc20Symbol: string
-    erc20Decimals: number
-    isInsufficientEthBalance: boolean
-    isInsufficientErc20Balance: boolean
     debouncedMintQuantity: string
     handleSubmit: (quantity: number, mintToken: Address) => void
     chainId: number
     isTxPending: boolean
     isTxSuccessful: boolean
-    mintButtonTitle: string
     txStatus: string
     txHash: string
 }
 
-const MintCurrencyOptions = ({ props, handleClose }: { props: FlowModalProps, handleClose: () => void }) => {
+type CurrencyOptionProps = {
+    erc20Symbol: string
+    erc20Decimals: number
+} & FlowModalProps
+
+
+const MintCurrencyOptions = ({ props, handleClose }: { props: CurrencyOptionProps, handleClose: () => void }) => {
+
+    const erc20AmountRequired = props.fees ? props.fees.erc20MintPrice * BigInt(props.debouncedMintQuantity) : BigInt(0);
+    const ethAmountRequired = props.fees ? props.fees.ethMintPrice * BigInt(props.debouncedMintQuantity) : BigInt(0);
+
+    const { balance: erc20Balance, isBalanceLoading: isErc20BalanceLoading } = useErc20Balance(props.mintToken, props.chainId);
+    const { balance: ethBalance, isBalanceLoading: isEthBalanceLoading } = useEthBalance(props.chainId);
+
+    const { data: capabilities } = useCapabilities()
+
+    const areAuxiliaryFundsSupported = capabilities ? capabilities[props.chainId]?.auxiliaryFunds?.supported ?? false : false
+
+    const isInsufficientErc20Balance = areAuxiliaryFundsSupported ? false : isErc20BalanceLoading ? false : erc20Balance < erc20AmountRequired
+    const isInsufficientEthBalance = areAuxiliaryFundsSupported ? false : isEthBalanceLoading ? false : ethBalance < ethAmountRequired
+
+    const mintButtonTitle = props.mintToken === NATIVE_TOKEN
+        ? isInsufficientEthBalance ? `Insufficient balance` : "Mint"
+        : isInsufficientErc20Balance ? `Insufficient ${props.erc20Symbol} balance` : "Approve & Mint"
+
 
     return (
         <div className="animate-springUp flex flex-col gap-6 relative">
@@ -409,7 +393,7 @@ const MintCurrencyOptions = ({ props, handleClose }: { props: FlowModalProps, ha
                         className={`text-lg relative btn btn-ghost border-2 border-border ${props.mintToken === NATIVE_TOKEN && "border-purple-600 hover:border-purple-600"} normal-case rounded-box grid h-36 flex-grow place-items-center`}
                         onClick={() => props.setMintToken(NATIVE_TOKEN)}
                     >
-                        Mint with <br />{formatEther(props.ethAmountRequired)} ETH
+                        Mint with <br />{formatEther(ethAmountRequired)} ETH
                         <HiCheckBadge className={` absolute -top-3 -right-3 h-10 w-10 text-purple-600 ${props.mintToken === NATIVE_TOKEN ? "visible" : "invisible"}`} />
 
                     </div>
@@ -418,14 +402,14 @@ const MintCurrencyOptions = ({ props, handleClose }: { props: FlowModalProps, ha
                         className={`text-lg relative btn btn-ghost border-2 border-border ${props.mintToken !== NATIVE_TOKEN && "border-primary hover:border-primary"} normal-case rounded-box grid h-36 flex-grow place-items-center`}
                         onClick={() => props.setMintToken(props.erc20Contract)}
                     >
-                        Mint with <br /> {formatUnits(props.erc20AmountRequired, props.erc20Decimals)} {props.erc20Symbol}
+                        Mint with <br /> {formatUnits(erc20AmountRequired, props.erc20Decimals)} {props.erc20Symbol}
                         <HiCheckBadge className={` absolute -top-3 -right-3 h-10 w-10 text-primary ${props.mintToken !== NATIVE_TOKEN ? "visible" : "invisible"}`} />
                     </div>
                 </div>
                 <OnchainButton
                     chainId={props.chainId}
-                    title={props.mintButtonTitle}
-                    disabled={props.mintToken === NATIVE_TOKEN ? props.isInsufficientEthBalance : props.isInsufficientErc20Balance}
+                    title={mintButtonTitle}
+                    disabled={props.mintToken === NATIVE_TOKEN ? isInsufficientEthBalance : isInsufficientErc20Balance}
                     onClick={() => props.handleSubmit(parseInt(props.debouncedMintQuantity), props.mintToken)}
                     isLoading={false}
                     loadingChild={<></>}
@@ -438,26 +422,29 @@ const MintCurrencyOptions = ({ props, handleClose }: { props: FlowModalProps, ha
 const MintFlowModal = ({
     isModalOpen,
     handleClose,
+    handleExitMint,
     flowProps
 
-}: { isModalOpen: boolean, handleClose: () => void, flowProps: FlowModalProps }) => {
+}: { isModalOpen: boolean, handleClose: () => void, handleExitMint: () => void, flowProps: FlowModalProps }) => {
 
     const { chain } = useAccount();
+    const { symbol, decimals } = useErc20TokenInfo(flowProps.erc20Contract, flowProps.chainId);
+
 
     useEffect(() => {
         // a hacky way to close the modal when mint with eth fails and we don't want to show the currency options (since erc20 is not an option)
-        if (flowProps.txStatus === "error" && isModalOpen && flowProps.erc20AmountRequired === BigInt(0)) {
+        if (flowProps.txStatus === "error" && isModalOpen && flowProps.erc20Contract === zeroAddress) {
             handleClose()
         }
     }, [flowProps.txStatus])
 
     if (isModalOpen) return (
         <div className="animate-springUp flex flex-col gap-2 relative">
-            {!flowProps.isTxPending && !flowProps.isTxSuccessful && <MintCurrencyOptions props={flowProps} handleClose={handleClose} />}
+            {!flowProps.isTxPending && !flowProps.isTxSuccessful && <MintCurrencyOptions props={{ ...flowProps, erc20Decimals: decimals, erc20Symbol: symbol }} handleClose={handleClose} />}
             {flowProps.isTxPending && (
                 <div className="animate-springUp flex flex-col gap-2 w-full h-[50vh] items-center justify-center">
                     <p className="text-lg text-t1 font-semibold text-center">
-                        {flowProps.txStatus === "erc20ApprovalInProgress" ? `Approving use of ${flowProps.erc20Symbol}` : "Minting your NFT"}
+                        {flowProps.txStatus === "erc20ApprovalInProgress" ? `Approving use of ${symbol}` : "Minting your NFT"}
                     </p>
                     <div className="text-xs text-primary ml-1 inline-block h-10 w-10 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                         role="status"
@@ -470,7 +457,7 @@ const MintFlowModal = ({
                     <h2 className="font-bold text-t1 text-xl">Got it.</h2>
                     <div className="flex gap-2 items-center">
                         <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${flowProps.txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
-                        <button className="btn normal-case btn-primary" onClick={handleClose}>Close</button>
+                        <button className="btn normal-case btn-primary" onClick={handleExitMint}>Close</button>
                     </div>
                 </div>
             )}

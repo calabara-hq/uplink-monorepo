@@ -51,6 +51,7 @@ v2.get('/health', (req, res) => {
 
 v2.get('/space_channels', channelController.getSpaceChannels)
 v2.get('/channel', channelController.getChannel)
+v2.get('/channel_upgradePath', channelController.getChannelUpgradePath)
 v2.get('/channel_tokensV1', tokenController.getChannelTokensV1)
 v2.get('/channel_tokensV2', tokenController.getChannelTokensV2)
 v2.get('/channel_tokenIntents', tokenController.getChannelTokenIntents)

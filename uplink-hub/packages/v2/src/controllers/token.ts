@@ -388,6 +388,7 @@ export const insertChannelTokenIntent = async (req: ContexedRequest, res: Respon
         })
         res.send({ success: true }).status(200)
     } catch (err) {
+        console.log(err)
         next(err)
     }
 

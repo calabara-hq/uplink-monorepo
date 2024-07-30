@@ -9,18 +9,18 @@ import {
 } from '@tx-kit/sdk/abi'
 
 import { useTransmissionsClient } from '@tx-kit/hooks'
-import { useChainId, usePublicClient, useWalletClient } from 'wagmi'
+import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 
 export type TwoStepExecutionStatus = "pendingApproval" | "erc20ApprovalInProgress" | "txInProgress" | "complete" | "error"
 
 export const useSponsorTokenWithERC20TwoStep = () => {
 
-    const chainId = useChainId();
+    const { chain } = useAccount();
     const { data: walletClient } = useWalletClient();
     const publicClient = usePublicClient();
 
     const transmissionsClient = useTransmissionsClient({
-        chainId: chainId,
+        chainId: chain?.id ?? 8453,
         walletClient: walletClient,
         publicClient: publicClient,
     }).uplinkClient

@@ -312,7 +312,7 @@ export const tokenIntents = mysqlTable('tokenIntents', {
     chainId: int('chainId').notNull(),
     channelAddress: varchar('channelAddress', { length: 255 }).notNull(),
     author: varchar('author', { length: 255 }).notNull(),
-    tokenIntent: varchar('tokenIntent', { length: 1024 }).notNull(),
+    tokenIntent: text('tokenIntent').notNull(),
     deadline: varchar('deadline', { length: 255 }).notNull(),
     createdAt: varchar('createdAt', { length: 255 }).notNull(),
     tokenId: varchar('tokenId', { length: 255 }).notNull().default("0"),

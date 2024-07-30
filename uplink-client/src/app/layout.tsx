@@ -3,7 +3,7 @@ import "@/styles/globals.css";
 import WalletProvider from "@/providers/WalletProvider";
 import Sidebar from "@/ui/SideBar/SideBar";
 import ToastProvider from "@/providers/ToastProvider";
-import MobileNav from "@/ui/MobileNav/MobileNav";
+import MobileNav from "@/ui/Nav/MobileNav";
 import type { Metadata } from "next";
 import { Analytics } from '@vercel/analytics/react';
 import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 const Footer = () => {
 
   return (
-    <div className="flex flex-col w-[90vw] m-auto mt-16 mb-10 h-fit bg-base justify-center text-white gap-2">
+    <div className="flex flex-col w-[90vw] max-w-full m-auto mt-16 mb-10 h-fit bg-base justify-center text-white gap-2">
 
       <div className="flex flex-row gap-2">
         <a className="text-t1" href="https://docs.uplink.wtf" target="_blank">Documentation</a>
@@ -66,10 +66,10 @@ const Footer = () => {
           </svg>
         </a>
       </div>
-      <div className="flex flex-col items-center md:flex-row">
+      <div className="flex flex-col items-start sm:items-center sm:flex-row">
         <p className="text-t2">2024 &#169; Calabara, Inc.</p>
 
-        <span className="flex items-center gap-1 md:ml-auto">
+        <span className="flex items-center gap-1 sm:ml-auto">
           <p className=" text-t2">A public good from</p>
           <a className="flex items-center gap-1" target="_blank" href="https://nouns.wtf">
             <div className="w-8 h-8">
@@ -141,13 +141,11 @@ export default function RootLayout({
           <ToastProvider>
             <PolyfillContext>
               <div className="h-full">
-                <div className="hidden md:flex h-full w-[64px] z-30 flex-col fixed inset-y-0">
+                <div className="hidden sm:flex h-full w-[64px] z-30 flex-col fixed inset-y-0">
                   <Sidebar />
                 </div>
-                <div className="btm-nav z-20 md:hidden shadow-[0_35px_60px_15px_black] bg-base">
-                  <MobileNav />
-                </div>
-                <main className="pb-20 md:pb-0 md:pl-[64px]">
+                <MobileNav />
+                <main className="pb-20 sm:pb-0 sm:pl-[64px]">
                   <Nav />
                   <div className="min-h-[100vh]">
                     {children}

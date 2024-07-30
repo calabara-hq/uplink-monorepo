@@ -6,7 +6,7 @@ import { Session } from "./SessionProvider";
 import { TransmissionsProvider } from "@tx-kit/hooks";
 
 import "@rainbow-me/rainbowkit/styles.css";
-import { WagmiProvider } from "wagmi";
+import { createConfig, http, WagmiProvider } from "wagmi";
 import {
   darkTheme,
   getDefaultConfig,
@@ -14,6 +14,9 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { base, baseSepolia, Chain } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { coinbaseWallet, walletConnectWallet, rainbowWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
+
+coinbaseWallet.preference = 'smartWalletOnly';
 
 export interface IWalletProviderProps {
   children: React.ReactNode;
@@ -28,8 +31,27 @@ const config = getDefaultConfig({
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
   chains: [base as Chain, baseSepolia as Chain],
   ssr: true,
+  wallets: [{
+    groupName: "Popular",
+    wallets: [coinbaseWallet, metaMaskWallet]
+  },
+  {
+    groupName: "More",
+    wallets: [walletConnectWallet, rainbowWallet]
+  }
+  ],
 })
 
+
+// const config = createConfig({
+//   chains: [base as Chain, baseSepolia as Chain],
+//   transports: {
+//     [base.id]: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
+//     [baseSepolia.id]: http(`https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
+//   },
+
+//   ssr: true,
+// })
 export default function WalletProvider({
   children,
   session,
@@ -46,6 +68,7 @@ export default function WalletProvider({
           <AuthenticationProvider>
             <RainbowKitProvider
               theme={darkTheme()}
+              modalSize="compact"
             // avatar={(user) => <UserAvatar user={user} size={160} styleOverride="flex items-center rounded-full overflow-hidden p-2.5" />}
             >
               <TransmissionsProvider>

@@ -1,5 +1,5 @@
 import { Address, Hex } from "viem";
-import { IChannel, DeferredTokenIntentWithSignature } from "@tx-kit/sdk"
+import { IChannel, DeferredTokenIntentWithSignature, IUpgradePath } from "@tx-kit/sdk"
 
 
 
@@ -13,6 +13,8 @@ export const splitContractID = (contractID: string) => {
     const [contractAddress, chainId] = contractID.split("-");
     return { chainId: parseInt(chainId), contractAddress };
 }
+
+export type ChannelUpgradePath = IUpgradePath
 
 export type Channel = IChannel & {
     chainId: number;

@@ -113,7 +113,7 @@ const PageContent = async ({ spaceName, contractId, postId }: { spaceName: strin
 export default function Page({ params, searchParams }: { params: { name: string, contractId: ContractID, postId: string }, searchParams: { [key: string]: string | undefined } }) {
 
     return (
-        <div className="grid grid-cols-1 gap-6 w-11/12 m-auto h-full mt-4 p-4">
+        <div className="grid grid-cols-1 gap-6 w-full sm:w-9/12 m-auto h-full mt-4 p-4">
             <Suspense fallback={<ExpandedPostSkeleton />}>
                 <PageContent spaceName={params.name} contractId={params.contractId} postId={params.postId} />
             </Suspense>
