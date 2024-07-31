@@ -130,6 +130,6 @@ export const UserAvatar = ({
 };
 
 export const UsernameDisplay = ({ user }: { user: Session['user'] | User }) => {
-  if (user?.displayName) return <span>{user.displayName}</span>;
+  // if (user?.displayName) return <span>{user.displayName}</span>;
   return AddressOrEns({ address: user?.address });
 }

@@ -1,12 +1,14 @@
 "use client";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useSession } from "@/providers/SessionProvider";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { NoggleAvatar, UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
-import { useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi'
+import { UserRejectedRequestError } from 'viem';
 import Link from "next/link";
 import { FaSignOutAlt, FaUser } from "react-icons/fa"
 import { Button } from "../Button/Button";
+import { TbLoader2 } from "react-icons/tb";
 
 function AccountModal({
   isModalOpen,
@@ -47,23 +49,14 @@ function AccountModal({
             <UsernameDisplay user={session?.user} />
           </div>
           <div className="flex flex-row gap-4 items-center">
-            <Button variant="destructive" onClick={() => { disconnect() }}>
+            <Button variant="destructive" onClick={() => {
+              disconnect()
+            }}>
               <div className="flex gap-1 items-center p-2 text-black">
                 <p>Sign out</p>
                 <FaSignOutAlt className="w-4 h-4" />
               </div>
             </Button>
-            {/* <Button asChild variant="default" className="p-4">
-              <Link
-                href={`/user/${session?.user?.address}`}
-                onClick={() => handleClose()}
-                className="flex flex-row gap-1 p-2"
-                draggable={false}
-              >
-                <FaUser className="w-4 h-4" />
-                <p>Profile</p>
-              </Link>
-            </Button> */}
           </div>
         </div>
       </div>
@@ -75,18 +68,21 @@ function AccountModal({
 }
 
 
-const NavMenu = () => {
+const ConnectedAccountDisplay = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: session, status } = useSession();
 
   return (
-    <div className="flex items-center lg:gap-2">
-      <div tabIndex={0} role="button" onClick={() => setIsModalOpen(!isModalOpen)} className="flex md:gap-2 items-center no-select justify-start text-sm font-bold md:pl-0 btn btn-ghost normal-case rounded-xl hover:bg-base-200 transition-all duration-200 ease-linear h-fit min-h-fit text-t2 hover:text-t1 ">
+    <div className="flex items-center justify-center lg:gap-2 w-full">
+      {/* <div tabIndex={0} role="button" onClick={() => setIsModalOpen(!isModalOpen)} className="flex md:gap-2 items-center no-select justify-start text-sm font-bold md:pl-0 btn btn-ghost normal-case rounded-xl hover:bg-base-200 transition-all duration-200 ease-linear h-fit min-h-fit text-t2 hover:text-t1 "> */}
+      <div tabIndex={0} role="button" onClick={() => setIsModalOpen(!isModalOpen)} className="flex gap-2 bg-black/10 hover:bg-base-100 w-fit rounded-xl items-center justify-start pr-2 font-bold  no-select text-t2">
+
         <NoggleAvatar
           address={session?.user?.address}
           size={40}
+          styleOverride="flex h-full items-center overflow-hidden p-1 rounded-xl transition-all duration-300 ease-linear"
         />
-        <div className="hidden md:block">
+        <div className="">
           <UsernameDisplay user={session?.user} />
         </div>
       </div>
@@ -94,6 +90,43 @@ const NavMenu = () => {
     </div >
   );
 };
+
+export function CreateSmartWalletButton({ openConnectModal }: { openConnectModal: () => void }) {
+  const { connectors, connect, data } = useConnect();
+  const [isCreating, setIsCreating] = useState(false);
+
+  const createWallet = useCallback(() => {
+    setIsCreating(true);
+    const coinbaseWalletConnector = connectors.find(
+      (connector) => connector.id === 'coinbaseWalletSDK'
+    );
+    if (coinbaseWalletConnector) {
+      connect({ connector: coinbaseWalletConnector }, {
+        onSuccess: () => {
+          setIsCreating(false);
+          openConnectModal()
+        },
+        onSettled: () => {
+          setIsCreating(false);
+        }
+      });
+    }
+  }, [connectors, connect, setIsCreating]);
+
+
+  return (
+    <button
+      className={`btn normal-case btn-ghost btn-active rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear`}
+      onClick={createWallet}
+    >
+      {isCreating ?
+        <span className="flex items-center gap-2">Creating<TbLoader2 className="w-4 h-4 text-t2 animate-spin" /></span>
+        : "Create Wallet"
+      }
+    </button>
+
+  );
+}
 
 export default function WalletConnectButton({
   children,
@@ -107,25 +140,38 @@ export default function WalletConnectButton({
 
   const { data: session, status } = useSession();
   if (!status || status === "loading")
-    return <div className="h-12 w-full rounded-full shimmer"></div>;
+    return (
+      <div className="grid grid-cols-2 items-center gap-2 max-w-full">
+        <div className={`btn normal-case shimmer btn-ghost rounded-3xl text-transparent ${styleOverride}`}>
+          Create Wallet
+        </div>
+        <div className={`btn normal-case shimmer btn-ghost rounded-3xl text-transparent ${styleOverride}`}>
+          Sign in
+        </div>
+      </div>
+    )
   else
     return (
-      <ConnectButton.Custom>
-        {({ account, openAccountModal, openConnectModal }) => {
-          if (status === "authenticated") {
-            if (children) return children;
-            else return <NavMenu />
-          }
-
-          return (
-            <button
-              className={`btn normal-case btn-ghost btn-active rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear ${styleOverride}`}
-              onClick={openConnectModal}
-            >
-              Sign in
-            </button>
-          );
-        }}
-      </ConnectButton.Custom>
+      <>
+        <ConnectButton.Custom>
+          {({ account, openAccountModal, openConnectModal }) => {
+            if (status === "authenticated") {
+              if (children) return children;
+              else return <ConnectedAccountDisplay />
+            }
+            return (
+              <div className="grid grid-cols-2 items-center gap-2 max-w-full">
+                <CreateSmartWalletButton openConnectModal={openConnectModal} />
+                <button
+                  className={`btn normal-case btn-ghost btn-active rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear ${styleOverride}`}
+                  onClick={openConnectModal}
+                >
+                  Sign in
+                </button>
+              </div>
+            );
+          }}
+        </ConnectButton.Custom>
+      </>
     );
 }

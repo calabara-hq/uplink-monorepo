@@ -46,6 +46,21 @@ export const getSpaceChannels = async (req: Request, res: Response, next: NextFu
     }
 }
 
+export const getChannelUpgradePath = async (req: Request, res: Response, next: NextFunction) => {
+    const contractId = req.query.contractId as string
+
+    try {
+        const { contractAddress, chainId } = splitContractID(contractId)
+        const { downlinkClient } = clientByChainId(chainId)
+
+        const channelUpgradePath = await downlinkClient.getOptimalUpgradePath({ address: contractAddress })
+
+        res.send({ channelUpgradePath }).status(200)
+    } catch (err) {
+        next(err)
+    }
+}
+
 export const getChannel = async (req: Request, res: Response, next: NextFunction) => {
     const contractId = req.query.contractId as string
 
@@ -53,19 +68,21 @@ export const getChannel = async (req: Request, res: Response, next: NextFunction
         const { contractAddress, chainId } = splitContractID(contractId)
         const { downlinkClient } = clientByChainId(chainId)
 
-        const [dbChannel, txChannel] = await Promise.all([
+        const [dbChannel, txChannel, channelUpgradePath] = await Promise.all([
             dbGetChannel(contractAddress, chainId),
             downlinkClient.getChannel({
                 channelAddress: contractAddress,
                 includeTokens: true,
-            }).then(async channel => { return { ...channel, tokens: ([await parseV2Metadata(channel.tokens[0])]) } }) // todo move this to the subgraph api
+            }).then(async channel => { return { ...channel, tokens: ([await parseV2Metadata(channel.tokens[0])]) } }), // todo move this to the subgraph api
+            downlinkClient.getOptimalUpgradePath({ address: contractAddress })
         ])
 
         if (!dbChannel) throw new NotFoundError('Channel not found')
 
         const response = {
             ...txChannel,
-            chainId
+            chainId,
+            upgradePath: channelUpgradePath
         }
 
         res.send(response).status(200)

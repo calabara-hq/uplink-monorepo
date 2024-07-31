@@ -207,6 +207,8 @@ export const MintV2Intent = ({
 
     const saleEnd = calculateSaleEnd(channel, _token)
 
+    console.log(session?.user?.address)
+
     const fees: FeeStructure = doesChannelHaveFees(channel) ? {
         creatorPercentage: channel.fees.fees.creatorPercentage,
         channelPercentage: channel.fees.fees.channelPercentage,
@@ -226,6 +228,9 @@ export const MintV2Intent = ({
     }, [txHash, isTxSuccessful])
 
 
+    useEffect(() => {
+        console.log(ethTxError, erc20TxError)
+    }, [ethTxError, erc20TxError])
 
     const updateServerIntent = async () => {
         try {
@@ -255,6 +260,8 @@ export const MintV2Intent = ({
 
     const handleSubmit = async (quantity: number, mintToken: Address) => {
         if (mintToken === NATIVE_TOKEN) {
+            console.log("MINTING WITH NATIVE TOKEN")
+            console.log(_token)
 
             await sponsorTokenWithETH({
                 channelAddress: contractAddress,
