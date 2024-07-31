@@ -26,10 +26,15 @@ export interface IWalletProviderProps {
 
 const queryClient = new QueryClient()
 
+
 const config = getDefaultConfig({
   appName: "Uplink.wtf",
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
   chains: [base as Chain, baseSepolia as Chain],
+  transports: {
+    [base.id]: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
+    [baseSepolia.id]: http(`https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
+  },
   ssr: true,
   wallets: [{
     groupName: "Popular",
@@ -43,15 +48,17 @@ const config = getDefaultConfig({
 })
 
 
-// const config = createConfig({
-//   chains: [base as Chain, baseSepolia as Chain],
-//   transports: {
-//     [base.id]: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
-//     [baseSepolia.id]: http(`https://base-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
-//   },
 
-//   ssr: true,
-// })
+const TxProvider = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <TransmissionsProvider>
+      {children}
+    </TransmissionsProvider>
+  )
+}
+
+
+
 export default function WalletProvider({
   children,
   session,
@@ -71,9 +78,9 @@ export default function WalletProvider({
               modalSize="compact"
             // avatar={(user) => <UserAvatar user={user} size={160} styleOverride="flex items-center rounded-full overflow-hidden p-2.5" />}
             >
-              <TransmissionsProvider>
+              <TxProvider>
                 {children}
-              </TransmissionsProvider>
+              </TxProvider>
             </RainbowKitProvider>
           </AuthenticationProvider>
         </SessionProvider>

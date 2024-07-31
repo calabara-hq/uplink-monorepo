@@ -4,12 +4,77 @@ import { getChainName } from "@/lib/chains/supportedChains";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import { useTransmissionsClient } from "@tx-kit/hooks";
 
+import { createSmartAccountClient, ENTRYPOINT_ADDRESS_V06 } from "permissionless";
+import { base, baseSepolia, Chain, mainnet, sepolia } from "viem/chains";
+import { http, createClient, createWalletClient, Client, Transport, HttpTransport } from "viem";
+import { Eip7677RpcSchema, paymasterActionsEip7677 } from "permissionless/experimental";
+import { walletClientToSmartAccountSigner } from "permissionless"
+import { useEffect, useMemo } from "react";
+import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico";
+
 
 
 export const TransmissionsClientProvider = ({ children }: { children: React.ReactNode }) => {
     const chainId = useChainId();
     const { data: walletClient, status } = useWalletClient();
     const publicClient = usePublicClient();
+
+    const paymasterService = "https://api.developer.coinbase.com/rpc/v1/base-sepolia/64vYtCS67rJdaMnO5BjNzXrgsjL8t-yR";
+
+
+    const cloudPaymaster = createPimlicoPaymasterClient({
+        chain: baseSepolia as Chain,
+        transport: http(paymasterService),
+        entryPoint: ENTRYPOINT_ADDRESS_V06,
+    })
+
+    const smartAccountClient = createSmartAccountClient({
+        account: walletClientToSmartAccountSigner(walletClient),
+        chain: baseSepolia as Chain,
+        entryPoint: ENTRYPOINT_ADDRESS_V06,
+        middleware: {
+            sponsorUserOperation: cloudPaymaster.sponsorUserOperation,
+        }
+    })
+
+
+    // type PaymasterClient = Client<Transport, Chain, undefined, Eip7677RpcSchema<typeof ENTRYPOINT_ADDRESS_V06>>;
+
+    // const paymasterClient = useMemo(() => {
+    //     return createClient({
+    //         account: walletClient?.account,
+    //         chain: baseSepolia as Chain,
+    //         transport: http(paymasterService),
+
+    //     }).extend(paymasterActionsEip7677(ENTRYPOINT_ADDRESS_V06) as PaymasterClient);
+
+    // }, [walletClient])
+
+
+    //const smartAccountSigner = walletClientToSmartAccountSigner(walletClient)
+
+
+    //paymasterClient.extend(paymasterActionsEip7677(ENTRYPOINT_ADDRESS_V06))
+
+    // const smartAccountClient = createSmartAccountClient({
+    //     account: smartAccountSigner,
+    //     entryPoint: ENTRYPOINT_ADDRESS_V06,
+    //     chain: baseSepolia as Chain,
+    //     // bundlerTransport: http(bundlerUrl, {
+    //     //     timeout: 30_000 // Wait 30 seconds for user operation to be included
+    //     // }),
+
+    //     middleware: {
+    //         // gasPrice: async () => {
+    //         //     return (await bundlerClient.getUserOperationGasPrice()).fast
+    //         // },
+    //         sponsorUserOperation: paymasterClient.sponsorUserOperation,
+    //     },
+    // })
+
+    useEffect(() => {
+        console.log(walletClient)
+    }, [walletClient])
 
     useTransmissionsClient({
         chainId: chainId,

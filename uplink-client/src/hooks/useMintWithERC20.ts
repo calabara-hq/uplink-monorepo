@@ -10,7 +10,7 @@ import {
 
 import { useTransmissionsClient } from '@tx-kit/hooks'
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
-import { useCapabilities, useWriteContracts } from 'wagmi/experimental'
+import { useCapabilities } from 'wagmi/experimental'
 import { walletActionsEip5792 } from 'viem/experimental'
 
 export type TwoStepExecutionStatus = "pendingApproval" | "erc20ApprovalInProgress" | "txInProgress" | "complete" | "error"
@@ -21,7 +21,6 @@ export const useMintTokenBatchWithERC20TwoStep = () => {
     const { data: walletClient } = useWalletClient();
     const publicClient = usePublicClient();
     const { data: capabilities } = useCapabilities();
-    const { writeContracts } = useWriteContracts();
 
     const isAtomicBatchSupported = capabilities?.[chain.id]?.atomicBatch?.supported ?? false
 

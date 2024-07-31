@@ -16457,6 +16457,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"permissionless@npm:^0.1.43":
+  version: 0.1.43
+  resolution: "permissionless@npm:0.1.43"
+  peerDependencies:
+    viem: ^2.14.1
+  checksum: 10c0/84b023b1d62fbfd461c0a8bb0216a441f7ab2f417cbe0638313749b58ba226ea9c7aaee1ebd25dd1e5d9a7389586791abfe0c777723a2be905c4f1bf7ace2750
+  languageName: node
+  linkType: hard
+
 "picocolors@npm:1.0.0":
   version: 1.0.0
   resolution: "picocolors@npm:1.0.0"
@@ -20566,6 +20575,7 @@ __metadata:
     nanoid: "npm:^4.0.1"
     next: "npm:14.1.0"
     node-gyp: "npm:^10.0.1"
+    permissionless: "npm:^0.1.43"
     pino-pretty: "npm:^9.2.0"
     popmotion: "npm:^11.0.5"
     postcss: "npm:^8"

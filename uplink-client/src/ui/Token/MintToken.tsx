@@ -114,6 +114,10 @@ export const MintV2Onchain = ({
     const isTxSuccessful = txStatus === "complete";
     const txHash = isCurrencyEth ? ethTxHash : erc20TxHash
 
+    useEffect(() => {
+        console.log("TXHASH", txHash)
+    }, [txHash])
+
     const fees: FeeStructure = doesChannelHaveFees(channel) ? {
         creatorPercentage: channel.fees.fees.creatorPercentage,
         channelPercentage: channel.fees.fees.channelPercentage,
