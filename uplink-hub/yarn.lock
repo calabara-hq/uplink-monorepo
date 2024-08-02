@@ -3881,21 +3881,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:^0.4.10-alpha.0":
-  version: 0.4.10-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.4.10-alpha.0"
-  dependencies:
-    "@urql/core": ^4.3.0
-    base-64: ^1.0.0
-    graphql: ^16.8.1
-    lodash: ^4.17.21
-  peerDependenciesMeta:
-    viem:
-      optional: true
-  checksum: 21c42bcd7ddb380c28da4e3088dcfd7bb2528150122078bf89be4ed2cc4455baff3297f345c90ac8b9390d3a667649eba4ce06e2783f54cb83419fc053e60579
-  languageName: node
-  linkType: hard
-
 "@tx-kit/sdk@npm:^0.4.11-alpha.0":
   version: 0.4.11-alpha.0
   resolution: "@tx-kit/sdk@npm:0.4.11-alpha.0"
@@ -13365,7 +13350,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "uplink-hub@workspace:."
   dependencies:
-    "@tx-kit/sdk": ^0.4.10-alpha.0
+    "@tx-kit/sdk": ^0.4.11-alpha.0
     concurrently: ^8.2.0
     cross-env: ^7.0.3
     dotenv-cli: ^7.2.1
