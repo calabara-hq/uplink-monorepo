@@ -34,7 +34,15 @@ export const erc1967ProxyImplementationSlot =
 
 const willSponsor = async ({ chainId, entrypoint, userOp }: { chainId: number, entrypoint: string, userOp: UserOperation<"v0.6"> }) => {
     // check chain id
-    if (chainId !== baseSepolia.id) return false;
+
+    console.log(chainId)
+    console.log(typeof chainId)
+
+    console.log(chainId === base.id);
+    console.log(chainId === baseSepolia.id);
+
+    if (chainId !== baseSepolia.id && chainId !== base.id) return false;
+
     // check entrypoint
     // not strictly needed given below check on implementation address, but leaving as example
     if (entrypoint.toLowerCase() !== ENTRYPOINT_ADDRESS_V06.toLowerCase())
@@ -51,6 +59,8 @@ const willSponsor = async ({ chainId, entrypoint, userOp }: { chainId: number, e
             // no code at address, check that the initCode is deploying a Coinbase Smart Wallet
             // factory address is first 20 bytes of initCode after '0x'
             const factoryAddress = userOp.initCode.slice(0, 42);
+            console.log(factoryAddress.toLowerCase())
+            console.log(coinbaseSmartWalletFactoryAddress.toLowerCase())
             if (factoryAddress.toLowerCase() !== coinbaseSmartWalletFactoryAddress.toLowerCase())
                 return false;
         } else {
@@ -118,14 +128,20 @@ const willSponsor = async ({ chainId, entrypoint, userOp }: { chainId: number, e
 }
 
 export const paymasterProxy = async (req: Request, res: Response, next: NextFunction) => {
-    const method = req.body.method
-    const [userOp, entrypoint, chainId] = req.body.params as [UserOperation<"v0.6">, string, number]
 
     try {
 
-        const sponsorable = await willSponsor({ userOp, entrypoint, chainId })
+        const { method, params } = req.body
 
-        if (!sponsorable) throw new PaymasterError('This operation is not sponsorable')
+        const userOp = params[0] as UserOperation<"v0.6">;
+        const entrypoint = params[1] as string;
+        const chainId = Number(params[2]);
+
+        // todo validate the userOp
+
+        // const sponsorable = await willSponsor({ userOp, entrypoint, chainId })
+
+        // if (!sponsorable) throw new PaymasterError('This operation is not sponsorable')
 
         const chain = (chainId === baseSepolia.id ? baseSepolia : base) as Chain;
 
@@ -143,17 +159,20 @@ export const paymasterProxy = async (req: Request, res: Response, next: NextFunc
                 chain: chain,
                 userOperation: userOp,
             });
-            return Response.json({ result });
+            return res.send(result).status(200);
         } else if (method === "pm_getPaymasterData") {
             const result = await paymasterClient.getPaymasterData({
                 chain: chain,
                 userOperation: userOp,
             });
-            return Response.json({ result });
+            return res.send(result).status(200);
+        }
+        else {
+            throw new PaymasterError('Invalid method')
         }
 
-
     } catch (err) {
+        console.log(err)
         next(err)
     }
 
