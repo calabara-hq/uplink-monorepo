@@ -14,7 +14,8 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { base, baseSepolia, Chain } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { coinbaseWallet, walletConnectWallet, rainbowWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
+import { coinbaseWallet, walletConnectWallet, rainbowWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
+import TxProvider from "./TransmissionsProvider";
 
 coinbaseWallet.preference = 'smartWalletOnly';
 
@@ -29,6 +30,7 @@ const queryClient = new QueryClient()
 
 const config = getDefaultConfig({
   appName: "Uplink.wtf",
+  appUrl: process.env.NEXT_PUBLIC_CLIENT_URL,
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
   chains: [base as Chain, baseSepolia as Chain],
   transports: {
@@ -46,18 +48,6 @@ const config = getDefaultConfig({
   }
   ],
 })
-
-
-
-const TxProvider = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <TransmissionsProvider>
-      {children}
-    </TransmissionsProvider>
-  )
-}
-
-
 
 export default function WalletProvider({
   children,

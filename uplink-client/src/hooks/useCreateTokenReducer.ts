@@ -7,8 +7,6 @@ import { useEffect, useReducer, useState } from 'react';
 import { useCreateToken, useCreateTokenIntent } from "@tx-kit/hooks"
 import { UploadToIpfsTokenMetadata } from '@/types/channel';
 import { useConnect, useConnectors, useWalletClient } from 'wagmi';
-import { ENTRYPOINT_ADDRESS_V06 } from "permissionless";
-import { paymasterActionsEip7677 } from "permissionless/experimental";
 
 
 

@@ -1,4 +1,4 @@
-import { Address, decodeEventLog, erc20Abi, Hex, MulticallContracts, zeroAddress } from 'viem'
+import { Address, decodeEventLog, erc20Abi, Hash, Hex, MulticallContracts, zeroAddress } from 'viem'
 import { useCallback, useContext, useState } from 'react'
 import {
     MintTokenBatchConfig
@@ -8,11 +8,10 @@ import {
     finiteChannelAbi,
 } from '@tx-kit/sdk/abi'
 
-import { useTransmissionsClient } from '@tx-kit/hooks'
+import { useTransmissionsClient, TransmissionsContext } from '@tx-kit/hooks'
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
 import { useCapabilities } from 'wagmi/experimental'
 import { walletActionsEip5792 } from 'viem/experimental'
-
 export type TwoStepExecutionStatus = "pendingApproval" | "erc20ApprovalInProgress" | "txInProgress" | "complete" | "error"
 
 export const useMintTokenBatchWithERC20TwoStep = () => {
@@ -24,113 +23,19 @@ export const useMintTokenBatchWithERC20TwoStep = () => {
 
     const isAtomicBatchSupported = capabilities?.[chain.id]?.atomicBatch?.supported ?? false
 
-    console.log("isAtomicBatchSupported", isAtomicBatchSupported)
-
-    const transmissionsClient = useTransmissionsClient({
-        chainId: chain?.id ?? 8453,
-        walletClient: walletClient,
-        publicClient: publicClient,
-    }).uplinkClient
-
+    const { uplinkClient } = useContext(TransmissionsContext).transmissionsClient
 
     const [status, setStatus] = useState<TwoStepExecutionStatus>()
     const [txHash, setTxHash] = useState<string>()
     const [error, setError] = useState<any>()
 
-    const mintTokenBatchWithERC20TwoStep = useCallback(
-        async (args: MintTokenBatchConfig, erc20Contract: Address, erc20AmountRequired: bigint) => {
-            if (!transmissionsClient) throw new Error('Invalid transmissions client')
-            try {
-                setStatus('pendingApproval')
-                setError(undefined)
-                setTxHash(undefined)
-
-                // read the users current allowance for the token
-
-                const allowance = await publicClient.readContract({
-                    address: erc20Contract,
-                    abi: erc20Abi,
-                    functionName: 'allowance',
-                    args: [args.to as Address, args.channelAddress as Address],
-                })
-
-
-                // if the allowance is less than the mint price, send an approval request
-
-                if (allowance < erc20AmountRequired) {
-                    setStatus('erc20ApprovalInProgress')
-                    const { txHash: hash } =
-                        await transmissionsClient.submitApproveERC20Transaction({
-                            erc20Contract,
-                            spender: args.channelAddress as Address,
-                            amount: erc20AmountRequired * BigInt(20), // 20x the amount required for better UX on future mints
-                        })
-
-
-                    const events = await transmissionsClient.getTransactionEvents({
-                        txHash: hash,
-                        eventTopics: transmissionsClient.eventTopics.erc20Approved
-                    })
-
-
-                    const event = events?.[0]
-                    const decodedLog = event
-                        ? decodeEventLog({
-                            abi: erc20Abi,
-                            data: event.data,
-                            // @ts-ignore
-                            topics: event.topics,
-                        })
-                        : undefined
-
-                    // @ts-ignore
-                    if (decodedLog?.eventName !== 'Approval') {
-                        setStatus('error')
-                        throw new Error('Approval failed')
-                    }
-                }
-
-                // mint the token
-
-                setStatus('txInProgress')
-
-                const { txHash: hash } = await transmissionsClient.submitMintTokenBatchWithERC20Transaction(args)
-
-                setTxHash(hash)
-
-                const events = await transmissionsClient.getTransactionEvents({
-                    txHash: hash,
-                    eventTopics: transmissionsClient.eventTopics.tokenMinted,
-                })
-
-                const event = events?.[0]
-                const decodedLog = event
-                    ? decodeEventLog({
-                        abi: [...infiniteChannelAbi, ...finiteChannelAbi],
-                        data: event.data,
-                        // @ts-ignore
-                        topics: event.topics,
-                    })
-                    : undefined
-
-                // @ts-ignore
-                if (decodedLog?.eventName === 'TokenMinted') {
-                    setStatus('complete')
-                }
-
-                return events
-            } catch (e) {
-                setStatus('error')
-                setError(e)
-            }
-        },
-        [transmissionsClient],
-    )
 
     const mintTokenBatchWithERC20AtomicBatch = useCallback(
+
         async (args: MintTokenBatchConfig, erc20Contract: Address, erc20AmountRequired: bigint) => {
 
-            if (!transmissionsClient) throw new Error('Invalid transmissions client')
+            if (!uplinkClient) throw new Error('Invalid transmissions client')
+
             try {
                 setStatus('pendingApproval')
                 setError(undefined)
@@ -178,10 +83,37 @@ export const useMintTokenBatchWithERC20TwoStep = () => {
                                 ]
                             }
 
-                        ]
+                        ],
+
+                        capabilities: {
+                            paymasterService: {
+                                paymasterUrl: `${process.env.NEXT_PUBLIC_HUB_URL}/v2/paymaster_proxy`
+                            }
+                        }
                     })
 
-                    const { status, receipts } = await eip5792WalletClient.getCallsStatus({ id })
+                    const events = await uplinkClient.getTransactionEvents({
+                        txHash: id as Hash,
+                        eventTopics: uplinkClient.eventTopics.tokenMinted,
+                    })
+
+                    const event = events?.[0]
+
+                    setTxHash(event.transactionHash)
+
+                    const decodedLog = event
+                        ? decodeEventLog({
+                            abi: [...infiniteChannelAbi, ...finiteChannelAbi],
+                            data: event.data,
+                            // @ts-ignore
+                            topics: event.topics,
+                        })
+                        : undefined
+
+                    // @ts-ignore
+                    if (decodedLog?.eventName === 'TokenMinted') {
+                        setStatus('complete')
+                    }
 
                     setStatus("complete")
 
@@ -193,16 +125,17 @@ export const useMintTokenBatchWithERC20TwoStep = () => {
 
                     setStatus('txInProgress')
 
-                    const { txHash: hash } = await transmissionsClient.submitMintTokenBatchWithERC20Transaction(args)
+                    const { txHash: hash } = await uplinkClient.submitMintTokenBatchWithERC20Transaction(args)
 
-                    setTxHash(hash)
-
-                    const events = await transmissionsClient.getTransactionEvents({
+                    const events = await uplinkClient.getTransactionEvents({
                         txHash: hash,
-                        eventTopics: transmissionsClient.eventTopics.tokenMinted,
+                        eventTopics: uplinkClient.eventTopics.tokenMinted,
                     })
 
                     const event = events?.[0]
+
+                    setTxHash(event.transactionHash)
+
                     const decodedLog = event
                         ? decodeEventLog({
                             abi: [...infiniteChannelAbi, ...finiteChannelAbi],
@@ -221,13 +154,103 @@ export const useMintTokenBatchWithERC20TwoStep = () => {
             } catch (e) {
                 setStatus('error')
                 setError(e)
-                throw new Error(e)
-
             }
         },
-        [transmissionsClient],
+        [uplinkClient],
     )
 
+
+
+
+    const mintTokenBatchWithERC20TwoStep = useCallback(
+        async (args: MintTokenBatchConfig, erc20Contract: Address, erc20AmountRequired: bigint) => {
+            if (!uplinkClient) throw new Error('Invalid transmissions client')
+            try {
+                setStatus('pendingApproval')
+                setError(undefined)
+                setTxHash(undefined)
+
+                // read the users current allowance for the token
+
+                const allowance = await publicClient.readContract({
+                    address: erc20Contract,
+                    abi: erc20Abi,
+                    functionName: 'allowance',
+                    args: [args.to as Address, args.channelAddress as Address],
+                })
+
+
+                // if the allowance is less than the mint price, send an approval request
+
+                if (allowance < erc20AmountRequired) {
+                    setStatus('erc20ApprovalInProgress')
+                    const { txHash: hash } =
+                        await uplinkClient.submitApproveERC20Transaction({
+                            erc20Contract,
+                            spender: args.channelAddress as Address,
+                            amount: erc20AmountRequired * BigInt(20), // 20x the amount required for better UX on future mints
+                        })
+
+
+                    const events = await uplinkClient.getTransactionEvents({
+                        txHash: hash,
+                        eventTopics: uplinkClient.eventTopics.erc20Approved
+                    })
+
+
+                    const event = events?.[0]
+                    const decodedLog = event
+                        ? decodeEventLog({
+                            abi: erc20Abi,
+                            data: event.data,
+                            // @ts-ignore
+                            topics: event.topics,
+                        })
+                        : undefined
+
+                    // @ts-ignore
+                    if (decodedLog?.eventName !== 'Approval') {
+                        setStatus('error')
+                        throw new Error('Approval failed')
+                    }
+                }
+
+                // mint the token
+
+                setStatus('txInProgress')
+
+                const { txHash: hash } = await uplinkClient.submitMintTokenBatchWithERC20Transaction(args)
+
+                setTxHash(hash)
+
+                const events = await uplinkClient.getTransactionEvents({
+                    txHash: hash,
+                    eventTopics: uplinkClient.eventTopics.tokenMinted,
+                })
+
+                const event = events?.[0]
+                const decodedLog = event
+                    ? decodeEventLog({
+                        abi: [...infiniteChannelAbi, ...finiteChannelAbi],
+                        data: event.data,
+                        // @ts-ignore
+                        topics: event.topics,
+                    })
+                    : undefined
+
+                // @ts-ignore
+                if (decodedLog?.eventName === 'TokenMinted') {
+                    setStatus('complete')
+                }
+
+                return events
+            } catch (e) {
+                setStatus('error')
+                setError(e)
+            }
+        },
+        [uplinkClient],
+    )
 
     return {
         mintTokenBatchWithERC20: isAtomicBatchSupported ? mintTokenBatchWithERC20AtomicBatch : mintTokenBatchWithERC20TwoStep,

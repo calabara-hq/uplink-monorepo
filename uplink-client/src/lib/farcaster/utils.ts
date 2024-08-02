@@ -64,7 +64,7 @@ export const getFrameMessage = async (
 /**
  * Returns an HTML string containing metadata for a new valid frame.
  */
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO Refactor this component
+
 export function getFrameHtmlResponse({
     accepts = {},
     buttons,

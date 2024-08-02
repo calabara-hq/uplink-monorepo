@@ -114,10 +114,6 @@ export const MintV2Onchain = ({
     const isTxSuccessful = txStatus === "complete";
     const txHash = isCurrencyEth ? ethTxHash : erc20TxHash
 
-    useEffect(() => {
-        console.log("TXHASH", txHash)
-    }, [txHash])
-
     const fees: FeeStructure = doesChannelHaveFees(channel) ? {
         creatorPercentage: channel.fees.fees.creatorPercentage,
         channelPercentage: channel.fees.fees.channelPercentage,
@@ -143,6 +139,7 @@ export const MintV2Onchain = ({
                 ...(fees ? { transactionOverrides: { value: fees.ethMintPrice * BigInt(quantity) } } : {})
             })
         } else {
+
             await mintTokenBatchWithERC20({
                 channelAddress: contractAddress,
                 to: walletClient.account.address,
@@ -211,8 +208,6 @@ export const MintV2Intent = ({
 
     const saleEnd = calculateSaleEnd(channel, _token)
 
-    console.log(session?.user?.address)
-
     const fees: FeeStructure = doesChannelHaveFees(channel) ? {
         creatorPercentage: channel.fees.fees.creatorPercentage,
         channelPercentage: channel.fees.fees.channelPercentage,
@@ -264,8 +259,6 @@ export const MintV2Intent = ({
 
     const handleSubmit = async (quantity: number, mintToken: Address) => {
         if (mintToken === NATIVE_TOKEN) {
-            console.log("MINTING WITH NATIVE TOKEN")
-            console.log(_token)
 
             await sponsorTokenWithETH({
                 channelAddress: contractAddress,
@@ -283,7 +276,6 @@ export const MintV2Intent = ({
             })
 
         } else {
-
             await sponsorTokenWithERC20({
                 channelAddress: contractAddress,
                 sponsoredToken: _token,
@@ -300,7 +292,6 @@ export const MintV2Intent = ({
                     receiveSponsorship()
                 }
             })
-
 
         }
 
