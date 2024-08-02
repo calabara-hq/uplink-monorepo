@@ -35,6 +35,6 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
-    "typescript": "5.3.x"
+    "typescript": "5.2.2"
   }
 }

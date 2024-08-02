@@ -1,17 +1,14 @@
 import { Request, Response, NextFunction } from 'express'
 import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils";
-import { EntryPoint, UserOperation } from "permissionless/types";
-import { Eip7677RpcSchema, paymasterActionsEip7677 } from 'permissionless/experimental';
+import { UserOperation } from "permissionless/types";
+import { paymasterActionsEip7677 } from 'permissionless/experimental';
 
 import {
     Address,
     BlockTag,
     Chain,
-    Client,
     Hex,
-    Transport,
     createClient,
-    createPublicClient,
     decodeAbiParameters,
     http,
 } from "viem";
