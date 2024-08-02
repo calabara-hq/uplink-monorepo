@@ -79,7 +79,7 @@ export const MintModalDisplay = ({
     const [isMintFlowModalOpen, setIsMintFlowModalOpen] = useState(false);
 
     const handleButtonClick = () => {
-        if (fees?.erc20Contract ?? zeroAddress === zeroAddress) {
+        if ((fees?.erc20Contract ?? zeroAddress) === zeroAddress) {
             handleSubmit(parseInt(debouncedMintQuantity), mintToken)
             setIsMintFlowModalOpen(true)
         }
@@ -214,7 +214,7 @@ export const MintExpandedDisplay = ({
     const [isMintFlowModalOpen, setIsMintFlowModalOpen] = useState(false);
 
     const handleButtonClick = () => {
-        if (fees?.erc20Contract ?? zeroAddress === zeroAddress) {
+        if ((fees?.erc20Contract ?? zeroAddress) === zeroAddress) {
             handleSubmit(parseInt(debouncedMintQuantity), mintToken)
             setIsMintFlowModalOpen(true)
         }
@@ -222,8 +222,6 @@ export const MintExpandedDisplay = ({
             setIsMintFlowModalOpen(true)
         }
     }
-
-
 
     return (
         <React.Fragment>

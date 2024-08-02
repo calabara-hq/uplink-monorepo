@@ -1,5 +1,9 @@
 import { TransmissionsClient, getSubgraphUrl } from '@tx-kit/sdk';
 import { createWeb3Client } from './viem.js';
+import { createWalletClient, http } from 'viem';
+import { base, baseSepolia } from 'viem/chains';
+import dotenv from 'dotenv'
+dotenv.config()
 
 const { downlinkClient: baseSepoliaDownlinkClient, uplinkClient: baseSepoliaUplinkClient } = new TransmissionsClient({
     chainId: 84532,
@@ -7,6 +11,10 @@ const { downlinkClient: baseSepoliaDownlinkClient, uplinkClient: baseSepoliaUpli
         serverUrl: getSubgraphUrl(84532)
     },
     publicClient: createWeb3Client(84532),
+    walletClient: createWalletClient({
+        chain: baseSepolia,
+        transport: http(`https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`)
+    })
 })
 
 const { downlinkClient: baseDownlinkClient, uplinkClient: baseUplinkClient } = new TransmissionsClient({
@@ -15,6 +23,10 @@ const { downlinkClient: baseDownlinkClient, uplinkClient: baseUplinkClient } = n
         serverUrl: getSubgraphUrl(8453)
     },
     publicClient: createWeb3Client(8453),
+    walletClient: createWalletClient({
+        chain: base,
+        transport: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`)
+    })
 })
 
 

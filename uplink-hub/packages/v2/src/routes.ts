@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import * as channelController from './controllers/channel.js'
 import * as tokenController from './controllers/token.js'
+import * as utilitiesController from './controllers/utilities.js'
 const v2 = express();
 import cookie from 'cookie';
 import { Context, xor_compare } from 'lib';
@@ -64,6 +65,7 @@ v2.get('/singleTokenIntent', tokenController.getSingleTokenIntent)
 /*                                   POST                                     */
 /* -------------------------------------------------------------------------- */
 
+v2.post('/paymaster_proxy', utilitiesController.paymasterProxy)
 v2.post('/insert_channel', sessionMiddleware, channelController.insertSpaceChannel)
 v2.post('/insert_tokenIntent', sessionMiddleware, tokenController.insertChannelTokenIntent)
 v2.post('/fulfill_tokenIntent', sessionMiddleware, tokenController.fulfillChannelTokenIntent)

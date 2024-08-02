@@ -256,7 +256,6 @@ export const CreateToken = ({ contractId, spaceDisplayName, spaceSystemName }: {
         if (!success) {
             return toast.error("Some of your fields are invalid")
         }
-
         tx(data);
     }
 

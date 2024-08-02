@@ -80,7 +80,7 @@ const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, 
     const space = await fetchSingleSpace(spaceName);
 
     return (
-        <div className="flex flex-col gap-4 h-full w-full md:w-80 ml-auto">
+        <div className="flex flex-col gap-4 h-full w-full md:max-w-[320px] ml-auto">
             <AdminWrapper admins={space.admins}>
                 <Boundary size="small" labels={["Admin"]}>
                     <div className="flex flex-col gap-4">

@@ -1,16 +1,20 @@
 {
   "compilerOptions": {
-    "module": "es2022",
     "target": "es2022",
-    "outDir": "dist",
-    "rootDir": "src",
-    //"strict": true,
-    "esModuleInterop": true,
-    "declaration": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true
+    "strict": false,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+
   },
-  "include": ["src/**/*.ts"],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules", "test"]
 }

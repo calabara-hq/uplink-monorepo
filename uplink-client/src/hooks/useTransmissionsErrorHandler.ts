@@ -12,6 +12,10 @@ export const useTransmissionsErrorHandler = (error: any) => {
                 toast.error("You are not authorized to perform this action")
             }
 
+            if (err.includes("executing this transaction exceeds the balance")) {
+                toast.error("Insufficient funds")
+            }
+
         }
     }, [error])
 

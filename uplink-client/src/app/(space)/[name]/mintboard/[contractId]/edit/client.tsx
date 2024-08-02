@@ -2,10 +2,10 @@
 import { useMintBoardSettings, MintBoardSettingsInput } from "@/hooks/useMintboardSettings";
 import { useSession } from "@/providers/SessionProvider";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { TbLoader2 } from "react-icons/tb";
-import { useMulticall, useTransmissionsClient } from "@tx-kit/hooks";
+import { TransmissionsContext, useMulticall, useTransmissionsClient } from "@tx-kit/hooks";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import OnchainButton from "@/ui/OnchainButton/OnchainButton";
 import { Space } from "@/types/space";
@@ -48,16 +48,13 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
     const { multicall, txHash, status: txStatus, error: txError } = useMulticall();
     const publicClient = usePublicClient();
     const { data: walletClient } = useWalletClient();
+    const { chain } = useAccount();
 
     const { contractAddress, chainId } = splitContractID(contractId)
 
     useTransmissionsErrorHandler(txError);
 
-    const transmissionsClient = useTransmissionsClient({
-        chainId: chainId,
-        walletClient: walletClient,
-        publicClient: publicClient,
-    })
+    const { uplinkClient } = useContext(TransmissionsContext).transmissionsClient
 
 
     const handleSubmit = async () => {
@@ -68,15 +65,15 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
         }
 
         const [cd_0, cd_1, cd_2] = await Promise.all([
-            transmissionsClient.uplinkClient.callData.updateChannelMetadata({
+            uplinkClient.callData.updateChannelMetadata({
                 channelAddress: contractAddress,
                 ...result.data.updatedMetadata
             }),
-            transmissionsClient.uplinkClient.callData.updateChannelFees({
+            uplinkClient.callData.updateChannelFees({
                 channelAddress: contractAddress,
                 ...result.data.updatedFees
             }),
-            transmissionsClient.uplinkClient.callData.updateInfiniteChannelTransportLayer({
+            uplinkClient.callData.updateInfiniteChannelTransportLayer({
                 channelAddress: contractAddress,
                 ...result.data.updatedTransportLayer
             })
