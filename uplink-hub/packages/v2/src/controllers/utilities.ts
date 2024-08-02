@@ -156,13 +156,13 @@ export const paymasterProxy = async (req: Request, res: Response, next: NextFunc
                 chain: chain,
                 userOperation: userOp,
             });
-            return res.send(result).status(200);
+            return res.send({ result }).status(200);
         } else if (method === "pm_getPaymasterData") {
             const result = await paymasterClient.getPaymasterData({
                 chain: chain,
                 userOperation: userOp,
             });
-            return res.send(result).status(200);
+            return res.send({ result }).status(200);
         }
         else {
             throw new PaymasterError('Invalid method')
