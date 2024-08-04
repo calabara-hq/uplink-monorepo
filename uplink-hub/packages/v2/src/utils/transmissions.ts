@@ -5,6 +5,7 @@ import { base, baseSepolia } from 'viem/chains';
 import dotenv from 'dotenv'
 dotenv.config()
 
+
 const { downlinkClient: baseSepoliaDownlinkClient, uplinkClient: baseSepoliaUplinkClient } = new TransmissionsClient({
     chainId: 84532,
     apiConfig: {

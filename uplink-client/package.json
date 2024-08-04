@@ -27,7 +27,7 @@
     "@rajesh896/video-thumbnails-generator": "^2.3.9",
     "@react-icons/all-files": "^4.1.0",
     "@tanstack/react-query": "^5.48.0",
-    "@tx-kit/hooks": "^0.5.14-alpha.0",
+    "@tx-kit/hooks": "^0.5.15-alpha.0",
     "@tx-kit/sdk": "^0.4.11-alpha.0",
     "@urql/core": "^5.0.4",
     "@vercel/analytics": "^1.1.1",

@@ -183,7 +183,7 @@ export const useMintTokenBatchWithERC20TwoStep = () => {
                 // if the allowance is less than the mint price, send an approval request
 
                 if (allowance < erc20AmountRequired) {
-                    setStatus('erc20ApprovalInProgress')
+
                     const { txHash: hash } =
                         await uplinkClient.submitApproveERC20Transaction({
                             erc20Contract,
@@ -221,14 +221,15 @@ export const useMintTokenBatchWithERC20TwoStep = () => {
 
                 const { txHash: hash } = await uplinkClient.submitMintTokenBatchWithERC20Transaction(args)
 
-                setTxHash(hash)
-
                 const events = await uplinkClient.getTransactionEvents({
                     txHash: hash,
                     eventTopics: uplinkClient.eventTopics.tokenMinted,
                 })
 
                 const event = events?.[0]
+
+                setTxHash(event.transactionHash)
+
                 const decodedLog = event
                     ? decodeEventLog({
                         abi: [...infiniteChannelAbi, ...finiteChannelAbi],

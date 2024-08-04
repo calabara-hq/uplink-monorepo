@@ -17,7 +17,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { coinbaseWallet, walletConnectWallet, rainbowWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
 import TxProvider from "./TransmissionsProvider";
 
-coinbaseWallet.preference = 'smartWalletOnly';
+coinbaseWallet.preference = 'all';
 
 export interface IWalletProviderProps {
   children: React.ReactNode;
