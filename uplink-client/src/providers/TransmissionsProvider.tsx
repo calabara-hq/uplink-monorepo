@@ -28,7 +28,7 @@ const TransmissionsClientProvider = ({ children }: { children: React.ReactNode }
         walletClient: walletClient,
         publicClient: publicClient,
         paymasterConfig: {
-            paymasterUrl: `${process.env.NEXT_PUBLIC_HUB_URL}/v2/paymaster_proxy`,
+            paymasterUrl: process.env.NODE_ENV === "production" ? `${process.env.NEXT_PUBLIC_HUB_URL}/v2/paymaster_proxy` : 'https://paymaster.base.org',
         }
     }), [chainId, walletClient, publicClient]);
 
