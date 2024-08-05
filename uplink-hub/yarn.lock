@@ -3896,6 +3896,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tx-kit/sdk@npm:^0.4.12-alpha.0":
+  version: 0.4.12-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.4.12-alpha.0"
+  dependencies:
+    "@urql/core": ^4.3.0
+    base-64: ^1.0.0
+    graphql: ^16.8.1
+    lodash: ^4.17.21
+  peerDependenciesMeta:
+    viem:
+      optional: true
+  checksum: 6a1ccfa52a30b0ae7d3544215cd7b697ff95b1b01091e0163684f97f0d7faf3d5e605310c286113480ceb3b51f3719f1563b12d6738c3bdfab789028160bb4b1
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.1.14":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
@@ -13516,7 +13531,7 @@ __metadata:
   resolution: "v2@workspace:packages/v2"
   dependencies:
     "@jest/globals": ^29.5.0
-    "@tx-kit/sdk": ^0.4.11-alpha.0
+    "@tx-kit/sdk": ^0.4.12-alpha.0
     "@types/busboy": ^1.5.0
     "@types/express": ^4.17.21
     "@types/node": ^18.11.19

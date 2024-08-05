@@ -7,14 +7,13 @@ import { useAccount, useWalletClient } from "wagmi";
 import toast from "react-hot-toast";
 import { Address, Chain, erc20Abi, maxUint40, parseEther, zeroAddress } from "viem";
 import { IInfiniteTransportConfig, NATIVE_TOKEN } from "@tx-kit/sdk";
-import { useSponsorTokenWithETH, useMintTokenBatchWithETH, useApproveERC20 } from "@tx-kit/hooks";
+import { useSponsorTokenWithETH, useMintTokenBatchWithETH, useApproveERC20, useMintTokenBatchWithERC20, useSponsorTokenWithERC20 } from "@tx-kit/hooks";
 import { useMintTokenV1 } from "@/hooks/useMintTokenV1";
 import { calculateSaleEnd, FeeStructure, isMintPeriodOver } from "./MintUtils";
 import { DisplayMode, RenderDisplayWithProps } from "./MintableTokenDisplay";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
 import { handleV2MutationError } from "@/lib/fetch/handleV2MutationError";
-import { useMintTokenBatchWithERC20TwoStep } from "@/hooks/useMintWithERC20";
-import { useSponsorTokenWithERC20TwoStep } from "@/hooks/useSponsorWithERC20";
+
 
 
 export type MintTokenSwitchProps = {
@@ -104,7 +103,7 @@ export const MintV2Onchain = ({
     const mintReferral = referral && referral.startsWith('0x') && referral.length === 42 ? referral : "";
     const { mintPaginatedPost } = usePaginatedMintBoardPosts(concatContractID({ chainId: channel.chainId, contractAddress }))
     const { mintTokenBatchWithETH, status: ethTxStatus, txHash: ethTxHash, error: ethTxError } = useMintTokenBatchWithETH()
-    const { mintTokenBatchWithERC20, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useMintTokenBatchWithERC20TwoStep()
+    const { mintTokenBatchWithERC20, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useMintTokenBatchWithERC20()
 
     const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN)
     const isCurrencyEth = mintToken === NATIVE_TOKEN
@@ -196,7 +195,7 @@ export const MintV2Intent = ({
     const { triggerIntentSponsorship } = usePaginatedMintBoardIntents(contractId)
     const { receiveSponsorship } = usePaginatedMintBoardPosts(contractId)
     const { sponsorTokenWithETH, status: ethTxStatus, txHash: ethTxHash, error: ethTxError } = useSponsorTokenWithETH()
-    const { sponsorTokenWithERC20, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useSponsorTokenWithERC20TwoStep()
+    const { sponsorTokenWithERC20, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useSponsorTokenWithERC20()
 
     const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN)
     const isCurrencyEth = mintToken === NATIVE_TOKEN
@@ -225,11 +224,6 @@ export const MintV2Intent = ({
             updateServerIntent()
         }
     }, [txHash, isTxSuccessful])
-
-
-    useEffect(() => {
-        console.log(ethTxError, erc20TxError)
-    }, [ethTxError, erc20TxError])
 
     const updateServerIntent = async () => {
         try {
