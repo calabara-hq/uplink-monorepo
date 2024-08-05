@@ -16,8 +16,6 @@ const TxProvider = ({ children }: { children: React.ReactNode }) => {
     )
 }
 
-
-
 const TransmissionsClientProvider = ({ children }: { children: React.ReactNode }) => {
     const chainId = useChainId();
     const { data: walletClient, status } = useWalletClient();
