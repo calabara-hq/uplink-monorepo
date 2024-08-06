@@ -1832,7 +1832,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@editorjs/editorjs@npm:^2.26.5":
+"@editorjs/editorjs@npm:^2.30.2":
   version: 2.30.3
   resolution: "@editorjs/editorjs@npm:2.30.3"
   checksum: 4cad89ba56abda96a00c74a3efe5d02d6cbbd44fda82793ad7b115ed0580d721100e98c972c9dcb0f15508064d8932f11a3b8dd6aa1ed60a28dc41b90ae847be
@@ -3883,9 +3883,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:^0.4.10-alpha.0":
-  version: 0.4.10-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.4.10-alpha.0"
+"@tx-kit/sdk@npm:^0.4.11-alpha.0":
+  version: 0.4.11-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.4.11-alpha.0"
   dependencies:
     "@urql/core": ^4.3.0
     base-64: ^1.0.0
@@ -3894,7 +3894,22 @@ __metadata:
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 21c42bcd7ddb380c28da4e3088dcfd7bb2528150122078bf89be4ed2cc4455baff3297f345c90ac8b9390d3a667649eba4ce06e2783f54cb83419fc053e60579
+  checksum: fe0e27a3b26dbb37cfd0e7c2c17ee157128c50a18b31a13b4e56b28beae65b355beb57ac5ec8e14b31a39266bb22d36e03aa1840c1b7bd914f8d01d6f03cef51
+  languageName: node
+  linkType: hard
+
+"@tx-kit/sdk@npm:^0.4.12-alpha.0":
+  version: 0.4.12-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.4.12-alpha.0"
+  dependencies:
+    "@urql/core": ^4.3.0
+    base-64: ^1.0.0
+    graphql: ^16.8.1
+    lodash: ^4.17.21
+  peerDependenciesMeta:
+    viem:
+      optional: true
+  checksum: 6a1ccfa52a30b0ae7d3544215cd7b697ff95b1b01091e0163684f97f0d7faf3d5e605310c286113480ceb3b51f3719f1563b12d6738c3bdfab789028160bb4b1
   languageName: node
   linkType: hard
 
@@ -4025,7 +4040,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^4.17.13":
+"@types/express@npm:^4.17.13, @types/express@npm:^4.17.21":
   version: 4.17.21
   resolution: "@types/express@npm:4.17.21"
   dependencies:
@@ -9683,7 +9698,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "lib@workspace:packages/lib"
   dependencies:
-    "@editorjs/editorjs": ^2.26.5
+    "@editorjs/editorjs": ^2.30.2
     "@jest/globals": ^29.5.0
     "@planetscale/database": ^1.7.0
     "@types/ethereum-block-by-date": ^1.4.1
@@ -11178,6 +11193,15 @@ __metadata:
   version: 2.1.0
   resolution: "performance-now@npm:2.1.0"
   checksum: 534e641aa8f7cba160f0afec0599b6cecefbb516a2e837b512be0adbe6c1da5550e89c78059c7fabc5c9ffdf6627edabe23eb7c518c4500067a898fa65c2b550
+  languageName: node
+  linkType: hard
+
+"permissionless@npm:0.1.43":
+  version: 0.1.43
+  resolution: "permissionless@npm:0.1.43"
+  peerDependencies:
+    viem: ^2.14.1
+  checksum: cecdfcf4fc7bcf4fca0b34db54a32344791ad9d5ea9ad51e9fcd3379af41b6b43294066ad24c6149aaef346da95bc3bc3abe907b24018e0dcda1084a9261c926
   languageName: node
   linkType: hard
 
@@ -13342,7 +13366,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "uplink-hub@workspace:."
   dependencies:
-    "@tx-kit/sdk": ^0.4.10-alpha.0
+    "@tx-kit/sdk": ^0.4.11-alpha.0
     concurrently: ^8.2.0
     cross-env: ^7.0.3
     dotenv-cli: ^7.2.1
@@ -13508,8 +13532,9 @@ __metadata:
   resolution: "v2@workspace:packages/v2"
   dependencies:
     "@jest/globals": ^29.5.0
-    "@tx-kit/sdk": ^0.4.10-alpha.0
+    "@tx-kit/sdk": ^0.4.12-alpha.0
     "@types/busboy": ^1.5.0
+    "@types/express": ^4.17.21
     "@types/node": ^18.11.19
     axios: ^1.4.0
     body-parser: ^1.20.2
@@ -13522,11 +13547,12 @@ __metadata:
     jest: ^29.5.0
     lib: "workspace:*"
     nodemon: ^2.0.20
+    permissionless: 0.1.43
     supertest: ^6.3.3
     ts-jest: ^29.0.5
     ts-node: ^10.9.1
     typescript: 5.2.2
-    viem: latest
+    viem: 2.18.7
   languageName: unknown
   linkType: soft
 
@@ -13591,6 +13617,28 @@ __metadata:
     core-util-is: 1.0.2
     extsprintf: ^1.2.0
   checksum: c431df0bedf2088b227a4e051e0ff4ca54df2c114096b0c01e1cbaadb021c30a04d7dd5b41ab277bcd51246ca135bf931d4c4c796ecae7a4fef6d744ecef36ea
+  languageName: node
+  linkType: hard
+
+"viem@npm:2.18.7":
+  version: 2.18.7
+  resolution: "viem@npm:2.18.7"
+  dependencies:
+    "@adraffy/ens-normalize": 1.10.0
+    "@noble/curves": 1.4.0
+    "@noble/hashes": 1.4.0
+    "@scure/bip32": 1.4.0
+    "@scure/bip39": 1.3.0
+    abitype: 1.0.5
+    isows: 1.0.4
+    webauthn-p256: 0.0.5
+    ws: 8.17.1
+  peerDependencies:
+    typescript: ">=5.0.4"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 1456607fd1c38c663fc60dfbfd7fa689b875d44eac45b8c504f4fa188ecdb7c90f682b6a88af681f2e220aea328e3600a640298da0ac6b5128be4373b7705817
   languageName: node
   linkType: hard
 

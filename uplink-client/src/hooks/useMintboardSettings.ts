@@ -293,7 +293,7 @@ type ZodSafeParseErrorFormat = {
 };
 
 export const baseConfig: MintBoardSettingsInput & { errors: ZodSafeParseErrorFormat } = {
-    chainId: 8453, // TODO CHANGE THIS BACK TO 8453
+    chainId: 8453,
     defaultAdmin: "",
     managers: [],
     title: "",

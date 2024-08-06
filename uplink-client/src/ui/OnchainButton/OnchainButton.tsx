@@ -2,25 +2,6 @@
 import { useChainId, usePublicClient, useSwitchChain, useWalletClient } from "wagmi";
 import { getChainName } from "@/lib/chains/supportedChains";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
-import { useTransmissionsClient } from "@tx-kit/hooks";
-
-
-
-export const TransmissionsClientProvider = ({ children }: { children: React.ReactNode }) => {
-    const chainId = useChainId();
-    const { data: walletClient, status } = useWalletClient();
-    const publicClient = usePublicClient();
-
-    useTransmissionsClient({
-        chainId: chainId,
-        walletClient: walletClient,
-        publicClient: publicClient,
-    })
-
-    return <>{children}</>
-
-}
-
 
 export const SwitchNetworkButton = ({ children, desiredChainId, currentChainId }: { children: React.ReactNode; desiredChainId: number, currentChainId: number }) => {
     const { status, reset, switchChain } = useSwitchChain()
@@ -50,11 +31,7 @@ export const SwitchNetworkButton = ({ children, desiredChainId, currentChainId }
 
     }
 
-    return (
-        <TransmissionsClientProvider>
-            {children}
-        </TransmissionsClientProvider>
-    )
+    return children
 }
 
 export default function OnchainButton({ chainId, title, onClick, isLoading, loadingChild, disabled = false }: { chainId: number, title: string, onClick: () => void, isLoading: boolean, disabled?: boolean, loadingChild: React.ReactNode }) {

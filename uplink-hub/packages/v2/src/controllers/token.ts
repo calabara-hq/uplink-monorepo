@@ -414,7 +414,6 @@ export const fulfillChannelTokenIntent = async (req: ContexedRequest, res: Respo
             eventTopics: uplinkClient.eventTopics.tokenMinted,
         })
 
-
         const event = events?.[0] as Log | undefined
 
         const block = await publicClient.getBlock({ blockHash: event.blockHash })
@@ -431,7 +430,6 @@ export const fulfillChannelTokenIntent = async (req: ContexedRequest, res: Respo
             })
             : undefined
 
-
         const tokenId: string | undefined =
             // @ts-expect-error
             decodedLog?.eventName === 'TokenMinted'
@@ -439,12 +437,12 @@ export const fulfillChannelTokenIntent = async (req: ContexedRequest, res: Respo
                 ? decodedLog.args.tokenIds[0].toString()
                 : undefined
 
-
         if (!tokenId) throw new TransactionRevertedError('Transaction failed')
 
         await dbFulfillTokenIntent({ channelAddress: contractAddress, chainId, tokenIntentId, tokenId })
         res.send({ success: true }).status(200)
     } catch (err) {
+        console.log(err)
         next(err)
     }
 }

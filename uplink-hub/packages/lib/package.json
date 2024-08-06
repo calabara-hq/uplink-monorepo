@@ -15,7 +15,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@editorjs/editorjs": "^2.26.5",
+    "@editorjs/editorjs": "^2.30.2",
     "@planetscale/database": "^1.7.0",
     "axios": "^1.4.0",
     "decimal.js": "^10.4.3",

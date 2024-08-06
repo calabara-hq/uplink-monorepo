@@ -35,3 +35,12 @@ export class TransactionRevertedError extends Error {
         Object.setPrototypeOf(this, TransactionRevertedError.prototype);
     }
 }
+
+export class PaymasterError extends Error {
+    name = 'PaymasterError';
+
+    constructor(m?: string) {
+        super(m);
+        Object.setPrototypeOf(this, PaymasterError.prototype);
+    }
+}

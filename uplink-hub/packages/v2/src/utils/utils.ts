@@ -48,6 +48,7 @@ export const parseIpfsUrl = (url: string) => {
 
 
 export const parseV1Metadata = (v1Response: schema.dbZoraTokenType): V1TokenWithMetadata => {
+    // @ts-ignore
     return {
         ...v1Response,
         id: v1Response.id.toString(),
@@ -71,7 +72,7 @@ export const parseV2Metadata = async (token: IToken): Promise<V2TokenWithMetadat
             const metadataFn: () => Promise<TokenMetadata> = () => {
                 return fetch(uri)
                     .then((res) => res.json())
-                    .then(data => {
+                    .then((data: any) => {
                         return {
                             id: token.uri.split("ipfs://")[1],
                             name: data.name,
@@ -111,7 +112,7 @@ export const parseIntentMetadata = async (intentResponse: schema.dbTokenIntentTy
     const metadataFn: () => Promise<TokenMetadata> = () => {
         return fetch(uri)
             .then((res) => res.json())
-            .then(data => {
+            .then((data: any) => {
                 return {
                     id: parsedIntent.intent.message.uri.split("ipfs://")[1],
                     name: data.name,

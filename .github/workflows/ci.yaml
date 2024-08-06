@@ -58,8 +58,8 @@ jobs:
         - name: Build and push docker images
           run: |
             export GITHUB_VERSION_TAG=${{ steps.bump_tag.outputs.new_tag }}
-            docker-compose -f uplink-hub/docker-compose.yaml build
-            docker-compose -f uplink-hub/docker-compose.yaml push
+            docker compose -f uplink-hub/docker-compose.yaml build
+            docker compose -f uplink-hub/docker-compose.yaml push
 
 
   deploy-staging:
