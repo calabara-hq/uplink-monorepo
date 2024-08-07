@@ -331,17 +331,6 @@ const SuccessModal = ({ submissionId, isDroppable, contestId }) => {
             >
               Go to contest
             </Link>
-            {isDroppable && <Link
-              href={`/contest/${contestId}/create-drop?sid=${submissionId}`}
-              draggable={false}
-              className="btn btn-primary normal-case"
-            >
-              <div className="flex gap-2 items-center">
-                <p>Create Drop</p>
-                <HiSparkles className="w-5 h-5" />
-              </div>
-            </Link>
-            }
           </div>
         </div>
       </div>

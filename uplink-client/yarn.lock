@@ -5875,9 +5875,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/hooks@npm:^0.5.20-alpha.0":
-  version: 0.5.20-alpha.0
-  resolution: "@tx-kit/hooks@npm:0.5.20-alpha.0"
+"@tx-kit/hooks@npm:^0.5.23-alpha.0":
+  version: 0.5.23-alpha.0
+  resolution: "@tx-kit/hooks@npm:0.5.23-alpha.0"
   dependencies:
     "@tx-kit/sdk": "npm:0.4.13-alpha.0"
   peerDependencies:
@@ -5886,7 +5886,7 @@ __metadata:
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/766f1a1f1e79b83a3cf9f2c28393f7676c9b801520b167e328cf39d9c228c862f7f43a77571a862adcbc542252aaff17f4722a1b2aad4baeea95f7f4be9e2053
+  checksum: 10c0/e10f467cd7832ee968f2aec65875475615ac8f450dae7264701e2bb0165de6cb2040bc8da73a3ef2102769ad03a479de1f38a4d063886f014e448537871148ff
   languageName: node
   linkType: hard
 
@@ -20974,7 +20974,7 @@ __metadata:
     "@storybook/react": "npm:^7.4.5"
     "@storybook/testing-library": "npm:^0.2.1"
     "@tanstack/react-query": "npm:^5.48.0"
-    "@tx-kit/hooks": "npm:^0.5.20-alpha.0"
+    "@tx-kit/hooks": "npm:^0.5.23-alpha.0"
     "@tx-kit/sdk": "npm:^0.4.13-alpha.0"
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
