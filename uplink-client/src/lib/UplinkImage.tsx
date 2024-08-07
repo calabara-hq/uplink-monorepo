@@ -6,7 +6,7 @@ const normalizeSrc = (src) => {
 };
 
 
-const imageLoader = ({ src, width, quality }) => {
+export const imageLoader = ({ src, width, quality }) => {
     const isObjectURL = !src.startsWith('http')
     const qualitySetting = quality || 'auto:best'; // default to auto:good if not specified
     const modifiers = `w_${width},q_${qualitySetting},c_limit,f_auto`; // c_fill for Cloudinary fill mode
@@ -14,7 +14,7 @@ const imageLoader = ({ src, width, quality }) => {
 };
 
 
-const blurLoader = ({ src, width, quality }) => {
+export const blurLoader = ({ src, width, quality }) => {
     const isObjectURL = !src.startsWith('http')
     const adjustedWidth = width > 200 ? 200 : width
     const modifiers = `w_${adjustedWidth},q_auto:low,e_blur:2000,c_limit,f_auto`; // c_fill for Cloudinary fill mode

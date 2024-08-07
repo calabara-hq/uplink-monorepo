@@ -1,4 +1,5 @@
-import { ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID } from "@/types/channel";
+import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID } from "@/types/channel";
+import { Space } from "@/types/space";
 
 export type PageInfo = {
     endCursor: number;
@@ -22,6 +23,11 @@ export type FetchTokensV2Response = {
 
 export type FetchPopularTokensResponse = {
     data: Array<ChannelToken | ChannelTokenV1>
+    pageInfo: PageInfo
+}
+
+export type FetchFeaturedTokensResponse = {
+    data: Array<{ token: ChannelToken, channel: Channel, space: Space }>
     pageInfo: PageInfo
 }
 
@@ -118,4 +124,19 @@ export const fetchSingleTokenIntent = async (contractId: ContractID, postId: str
         next: { revalidate: 60, tags: [`singleTokenIntent/${contractId}/post/${postId}`] },
 
     }).then(res => res.json())
+}
+
+export const fetchFeaturedTokens = async (chainId: number, pageSize: number, skip: number): Promise<FetchFeaturedTokensResponse> => {
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/featured_mints?chainId=${chainId}&pageSize=${pageSize}&skip=${skip}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "X-API-TOKEN": process.env.API_SECRET!,
+        },
+
+        next: { revalidate: 60, tags: [`featuredTokens/${chainId}`] },
+
+    }).then(res => res.json())
+
+
 }

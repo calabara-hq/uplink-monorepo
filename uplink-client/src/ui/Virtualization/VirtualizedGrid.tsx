@@ -78,7 +78,7 @@ export function TestGridItem({
                             spaceName={spaceName}
                             contractId={contractId}
                             handleMint={handleMint}
-                            handleShare={handleShare}
+                            // handleShare={handleShare}
                             handleManage={handleManage}
                         />
                     }

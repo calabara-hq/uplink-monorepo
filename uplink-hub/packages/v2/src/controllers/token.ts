@@ -8,7 +8,8 @@ import {
     dbInsertTokenIntent,
     dbIsUserSpaceAdmin,
     prepared_bannedTokensV2,
-    dbGetChannel
+    dbGetChannel,
+    dbGetSpaceByChannelAddress
 } from "../utils/database.js";
 import { AuthorizationController, schema } from "lib";
 import { Request, Response, NextFunction } from 'express'
@@ -18,6 +19,8 @@ import { ContexedRequest, IntentTokenPage, V1TokenPage, V1TokenWithMetadata, V2T
 import { decodeEventLog, Hash, Hex, Log } from "viem";
 import { finiteChannelAbi, infiniteChannelAbi } from "@tx-kit/sdk/abi";
 import { createWeb3Client } from "../utils/viem.js";
+import { gql } from '@urql/core'
+import { formatGqlTransportLayer, formatGqlCustomFees, CHANNEL_FRAGMENT, TRANSPORT_LAYER_FRAGMENT, FEE_CONFIG_FRAGMENT, TOKEN_FRAGMENT, formatGqlTokens, formatGqlChannel } from "@tx-kit/sdk"
 
 const authorizationController = new AuthorizationController(process.env.REDIS_URL);
 
@@ -132,6 +135,80 @@ export const getChannelTokensV2 = async (req: Request, res: Response, next: Next
         res.send(response).status(200)
 
     } catch (err) {
+        next(err)
+    }
+}
+
+export const getFeaturedMints = async (req: Request, res: Response, next: NextFunction) => {
+
+    const chainId = Number(req.query.chainId)
+    const pageSize = Number(req.query.pageSize)
+    const skip = Number(req.query.skip)
+
+    try {
+
+        const { downlinkClient } = clientByChainId(chainId)
+
+        const data = await downlinkClient.customQuery(
+            gql`
+                query($pageSize: Int!, $skip: Int!) {
+                    tokens(
+                        orderBy: totalMinted,
+                        orderDirection:desc, 
+                        first: $pageSize, skip: $skip
+                        where: {channel_: {id_not_in:  ["0xa4bc695f857239a0f26c289fee4c936689a0ddad", "0x00c58936afb2b89d6dd8b918c5a44aa1b0a4fdf8"]}}
+                        ) {
+                        ...TokenFragment
+                        channel {
+                            ...ChannelFragment
+                            transportLayer {
+                                ...TransportLayerFragment
+                            }
+                            fees { 
+                                ...FeeConfigFragment 
+                            }
+                        }
+                    }
+                }
+                ${CHANNEL_FRAGMENT}
+                ${TRANSPORT_LAYER_FRAGMENT}
+                ${FEE_CONFIG_FRAGMENT}
+                ${TOKEN_FRAGMENT}
+                `,
+
+            { pageSize: pageSize + 20, skip }) // account for banned / empty channels
+
+        const sliced = data.tokens.slice(0, pageSize)
+
+        const formatted = await Promise.all(sliced.map(async (token: any) => {
+            const { channel } = token
+
+            const [parsedToken, space] = await Promise.all([
+                parseV2Metadata(formatGqlTokens([token])[0]),
+                dbGetSpaceByChannelAddress(channel.id)
+            ])
+
+
+            return {
+                token: parsedToken,
+                channel: formatGqlChannel(channel),
+                space
+            }
+        }))
+
+
+        const response: V2TokenPage = {
+            data: formatted.filter(data => data.space),
+            pageInfo: {
+                endCursor: sliced.length,
+                hasNextPage: data.length > pageSize
+            }
+        }
+
+        res.send(response).status(200)
+
+    } catch (err) {
+        console.log(err)
         next(err)
     }
 }

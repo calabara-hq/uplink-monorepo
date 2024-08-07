@@ -1,7 +1,7 @@
 "use client"
 
 import { useSession } from "@/providers/SessionProvider";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import { HiCheckBadge } from "react-icons/hi2";
 import { parseIpfsUrl } from "@/lib/ipfs";
@@ -17,9 +17,10 @@ import { Boundary } from "../Boundary/Boundary";
 import { useBanToken } from "@/hooks/useBanToken";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
 import { IInfiniteTransportConfig } from "@tx-kit/sdk";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import toast from "react-hot-toast";
+import { DisplayMode } from "./MintableTokenDisplay";
 
 
 export type FeeStructure = {
@@ -61,14 +62,32 @@ export const getETHMintPrice = (price: bigint | null) => {
     return `${formatEther(price)} ETH`
 }
 
-const constructTokenUrl = ({ spaceName, contractId, referral, token }: { spaceName: string, contractId: ContractID, referral: string, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent }) => {
-    if ((isTokenV1Onchain(token))) {
-        return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${token.id}/v1${referral ? `?${referral}` : ''}`
-    } else if (isTokenV2Onchain(token)) {
-        return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${(token as ChannelToken).tokenId}/v2${referral ? `?${referral}` : ''}`
-    } else if (isTokenIntent(token)) {
-        return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${token.id}/v2?intent=true&${referral}`
+const constructTokenUrl = ({ displayMode, pathname, referral, token }: { displayMode: DisplayMode, pathname: string, referral: string, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent }) => {
+
+
+    // 2 possibilites (right now). either we're on the modal view or the expanded view
+
+    // if modal view, we need to append the post route to the current route
+    // if expanded view, we only need to append (or swap) the referral link
+
+    if (displayMode === 'modal') {
+        if (isTokenV1Onchain(token)) return `${process.env.NEXT_PUBLIC_CLIENT_URL}${pathname}/post/${token.id}/v1${referral ? `?${referral}` : ''}`
+        else if (isTokenV2Onchain(token)) return `${process.env.NEXT_PUBLIC_CLIENT_URL}${pathname}/post/${(token as ChannelToken).tokenId}/v2${referral ? `?${referral}` : ''}`
+        else if (isTokenIntent(token)) return `${process.env.NEXT_PUBLIC_CLIENT_URL}${pathname}/post/${token.id}/v2?intent=true${referral ? `&${referral}` : ''}`
+    } else {
+        if (isTokenV1Onchain(token)) return `${process.env.NEXT_PUBLIC_CLIENT_URL}${pathname}${referral ? `?${referral}` : ''}`
+        else if (isTokenV2Onchain(token)) return `${process.env.NEXT_PUBLIC_CLIENT_URL}${pathname}${referral ? `?${referral}` : ''}`
+        else if (isTokenIntent(token)) return `${process.env.NEXT_PUBLIC_CLIENT_URL}${pathname}?intent=true${referral ? `&${referral}` : ''}`
     }
+
+
+    // if ((isTokenV1Onchain(token))) {
+    //     return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${token.id}/v1${referral ? `?${referral}` : ''}`
+    // } else if (isTokenV2Onchain(token)) {
+    //     return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${(token as ChannelToken).tokenId}/v2${referral ? `?${referral}` : ''}`
+    // } else if (isTokenIntent(token)) {
+    //     return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${token.id}/v2?intent=true&${referral}`
+    // }
 }
 
 export const calculateSaleEnd = (channel: Channel, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent): number => {
@@ -216,13 +235,14 @@ export const RenderMaxSupply = ({ maxSupply }: { maxSupply: string }) => {
     else return <p className="text-t1 font-bold">{maxSupply}</p>
 }
 
-export const ShareModalContent = ({ spaceName, contractId, token, handleClose }: { spaceName: string, contractId: ContractID, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, handleClose: () => void }) => {
+export const ShareModalContent = ({ displayMode, token, handleClose }: { displayMode: DisplayMode, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, handleClose: () => void }) => {
     const { status, data: session } = useSession();
+    const pathname = usePathname();
     const [success, setSuccess] = useState(false);
 
     const handleShare = () => {
         const referralLink = session?.user?.address ? `referrer=${session?.user?.address}` : ''
-        const shareUrl = constructTokenUrl({ spaceName, contractId, referral: referralLink, token })
+        const shareUrl = constructTokenUrl({ displayMode, pathname, referral: referralLink, token })
         navigator.clipboard.writeText(shareUrl);
         setSuccess(true)
         toast.success("Link Copied")
@@ -265,9 +285,10 @@ export const ShareModalContent = ({ spaceName, contractId, token, handleClose }:
 }
 
 
-export const ShareButton = ({ spaceName, contractId, token, onClick, styleOverride }: { spaceName: string, contractId: ContractID, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, onClick: (event?) => void, styleOverride?: string }) => {
+export const ShareButton = ({ displayMode, token, onClick, className }: { displayMode: DisplayMode, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, onClick: (event?) => void, className?: string }) => {
     const { data: session, status } = useSession();
     const [shareText, setShareText] = useState("Share");
+    const pathname = usePathname();
 
     const handleShare = (event, link) => {
         event.stopPropagation();
@@ -282,7 +303,7 @@ export const ShareButton = ({ spaceName, contractId, token, onClick, styleOverri
 
         if (status === 'authenticated') {
             const referralLink = session?.user?.address ? `referrer=${session?.user?.address}` : ''
-            handleShare(event, constructTokenUrl({ spaceName, contractId, referral: referralLink, token }))
+            handleShare(event, constructTokenUrl({ displayMode, pathname, referral: referralLink, token }))
         }
         else {
             onClick(event);
@@ -291,7 +312,7 @@ export const ShareButton = ({ spaceName, contractId, token, onClick, styleOverri
 
     return (
         <button
-            className={styleOverride ?? "btn normal-case bg-t2 bg-opacity-5 border-none btn-sm hover:bg-opacity-20 text-t2 hover:text-t1"}
+            className={`btn bg-base btn-active normal-case h-full  border-none btn-sm font-normal  text-t2 hover:text-t1 ${className}`}
             onClick={handleShareClick}
         >
             {shareText}

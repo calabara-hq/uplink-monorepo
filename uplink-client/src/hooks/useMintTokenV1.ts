@@ -67,6 +67,7 @@ export const useMintTokenV1 = (contractAddress: string) => {
 
             } catch (e) {
                 console.error(e)
+                setStatus('error')
                 setError(e)
                 reset()
             }
