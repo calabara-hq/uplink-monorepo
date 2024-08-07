@@ -1,9 +1,9 @@
 "use client"
 
 import { useSession } from "@/providers/SessionProvider";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContractID, doesChannelHaveFees, isTokenIntent, isTokenV2Onchain } from "@/types/channel";
-import { useAccount, useWalletClient } from "wagmi";
+import { useAccount, useChainId, useWalletClient } from "wagmi";
 import toast from "react-hot-toast";
 import { Address, Chain, erc20Abi, maxUint40, parseEther, zeroAddress } from "viem";
 import { IInfiniteTransportConfig, NATIVE_TOKEN } from "@tx-kit/sdk";
@@ -14,6 +14,7 @@ import { DisplayMode, RenderDisplayWithProps } from "./MintableTokenDisplay";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
 import { handleV2MutationError } from "@/lib/fetch/handleV2MutationError";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
+import { useCapabilities } from "wagmi/experimental";
 
 
 
@@ -110,12 +111,16 @@ export const MintV2Onchain = ({
 }: MintTokenSwitchProps) => {
 
     const _token = token as ChannelToken
-
+    const chainId = useChainId()
     const { data: walletClient } = useWalletClient();
     const mintReferral = referral && referral.startsWith('0x') && referral.length === 42 ? referral : "";
     const { mintPaginatedPost } = usePaginatedMintBoardPosts(concatContractID({ chainId: channel.chainId, contractAddress }))
     const { mintTokenBatchWithETH, status: ethTxStatus, txHash: ethTxHash, error: ethTxError } = useMintTokenBatchWithETH()
-    const { mintTokenBatchWithERC20, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useMintTokenBatchWithERC20()
+    const { mintTokenBatchWithERC20, mintTokenBatchWithERC20_smartWallet, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useMintTokenBatchWithERC20()
+
+    const capabilities = useCapabilities()
+    const isSmartWallet = capabilities?.[chainId]?.atomicBatch?.supported ?? false
+    const erc20Minter = isSmartWallet ? mintTokenBatchWithERC20_smartWallet : mintTokenBatchWithERC20
 
     const [isShareModalOpen, setIsShareModalOpen] = useState(false)
 
@@ -157,7 +162,7 @@ export const MintV2Onchain = ({
             })
         } else {
 
-            await mintTokenBatchWithERC20({
+            await erc20Minter({
                 channelAddress: contractAddress,
                 to: walletClient.account.address,
                 tokenIds: [BigInt(_token.tokenId)],
@@ -214,15 +219,19 @@ export const MintV2Intent = ({
 }: MintTokenSwitchProps) => {
 
     const _token = token as ChannelTokenIntent
+    const chainId = useChainId()
     const { data: session, status } = useSession();
     const mintReferral = referral && referral.startsWith('0x') && referral.length === 42 ? referral : "";
     const contractId = concatContractID({ chainId: channel.chainId, contractAddress })
     const { triggerIntentSponsorship } = usePaginatedMintBoardIntents(contractId)
     const { receiveSponsorship } = usePaginatedMintBoardPosts(contractId)
     const { sponsorTokenWithETH, status: ethTxStatus, txHash: ethTxHash, error: ethTxError } = useSponsorTokenWithETH()
-    const { sponsorTokenWithERC20, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useSponsorTokenWithERC20()
+    const { sponsorTokenWithERC20, sponsorTokenWithERC20_smartWallet, status: erc20TxStatus, txHash: erc20TxHash, error: erc20TxError } = useSponsorTokenWithERC20()
     const [isShareModalOpen, setIsShareModalOpen] = useState(false)
 
+    const capabilities = useCapabilities()
+    const isSmartWallet = capabilities?.[chainId]?.atomicBatch?.supported ?? false
+    const erc20Minter = isSmartWallet ? sponsorTokenWithERC20_smartWallet : sponsorTokenWithERC20
 
     const [mintToken, setMintToken] = useState<Address>(NATIVE_TOKEN)
     const isCurrencyEth = mintToken === NATIVE_TOKEN
@@ -306,7 +315,7 @@ export const MintV2Intent = ({
             })
 
         } else {
-            await sponsorTokenWithERC20({
+            await erc20Minter({
                 channelAddress: contractAddress,
                 sponsoredToken: _token,
                 to: session?.user?.address,
