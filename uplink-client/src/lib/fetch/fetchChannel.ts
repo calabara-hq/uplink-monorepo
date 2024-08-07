@@ -1,4 +1,5 @@
 import { Channel, ChannelUpgradePath, ContractID } from "@/types/channel";
+import { Space } from "@/types/space";
 
 
 export const fetchChannelUpgradePath = async (contractId: ContractID): Promise<ChannelUpgradePath | null> => {
@@ -14,6 +15,18 @@ export const fetchChannelUpgradePath = async (contractId: ContractID): Promise<C
     return data;
 }
 
+export const fetchTrendingChannels = async (chainId: number): Promise<Array<Channel & { space: Space }>> => {
+    const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/explore_trending?chainId=${chainId}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "X-API-TOKEN": process.env.API_SECRET!,
+        },
+        next: { revalidate: 60, tags: [`explore_trending/${chainId}`] },
+    }).then(res => res.json())
+
+    return data;
+}
 
 const fetchChannel = async (contractId: ContractID): Promise<Channel> => {
     const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/channel?contractId=${contractId}`, {
@@ -27,5 +40,6 @@ const fetchChannel = async (contractId: ContractID): Promise<Channel> => {
 
     return data;
 }
+
 
 export default fetchChannel;

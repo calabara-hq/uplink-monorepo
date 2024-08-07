@@ -11,7 +11,7 @@ import OnchainButton from "../OnchainButton/OnchainButton";
 import { Address, Chain, formatEther, formatUnits, maxUint40, parseEther, zeroAddress } from "viem";
 import { format } from "date-fns";
 import { TbLoader2 } from "react-icons/tb";
-import { CounterInput, FeeStructure, getETHMintPrice, RenderFees, RenderMaxSupply, RenderMintMedia, RenderTotalMints } from "./MintUtils";
+import { CounterInput, FeeStructure, getETHMintPrice, RenderFees, RenderMaxSupply, RenderMintMedia, RenderTotalMints, ShareButton } from "./MintUtils";
 import { Boundary } from "../Boundary/Boundary";
 import { AddressOrEns, Avatar } from "../AddressDisplay/AddressDisplay";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
@@ -21,10 +21,12 @@ import { HiArrowNarrowLeft } from "react-icons/hi";
 import Link from "next/link";
 import { useCapabilities } from 'wagmi/experimental'
 import { useRouter } from "next/navigation";
+import { ChannelToken, ChannelTokenIntent, ChannelTokenV1 } from "@/types/channel";
 
 export type DisplayMode = "modal" | "expanded"
 
 export type DisplayProps = {
+    token: ChannelTokenV1 | ChannelToken | ChannelTokenIntent,
     chainId: number,
     creator: string,
     metadata: any, // todo type this
@@ -41,6 +43,7 @@ export type DisplayProps = {
     txHash: string,
     txStatus: string,
     setIsModalOpen?: (open: boolean) => void
+    handleShare: () => void
     backwardsNavUrl?: string
 }
 
@@ -53,6 +56,7 @@ export const RenderDisplayWithProps = (props: DisplayProps & { displayMode: Disp
 
 
 export const MintModalDisplay = ({
+    token,
     chainId,
     creator,
     metadata,
@@ -68,7 +72,8 @@ export const MintModalDisplay = ({
     isTxSuccessful,
     txHash,
     txStatus,
-    setIsModalOpen
+    setIsModalOpen,
+    handleShare
 }: DisplayProps) => {
 
     const [mintQuantity, setMintQuantity] = useState<string>('1');
@@ -105,9 +110,13 @@ export const MintModalDisplay = ({
                         <div className="bg-black-200 items-start flex flex-col gap-8 relative">
                             <div className="flex flex-col gap-2">
                                 <p className="line-clamp-3 font-bold text-lg break-all">{metadata.name}</p>
-                                <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
-                                    <Avatar address={creator} size={28} />
-                                    <AddressOrEns address={creator} />
+                                <div className="flex gap-2 items-center">
+                                    <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
+                                        <Avatar address={creator} size={28} />
+                                        <AddressOrEns address={creator} />
+                                    </div>
+
+                                    <ShareButton displayMode="modal" token={token} onClick={handleShare} />
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2 w-full">
@@ -188,6 +197,7 @@ export const MintModalDisplay = ({
 
 
 export const MintExpandedDisplay = ({
+    token,
     chainId,
     creator,
     metadata,
@@ -203,7 +213,8 @@ export const MintExpandedDisplay = ({
     isTxSuccessful,
     txHash,
     txStatus,
-    backwardsNavUrl
+    backwardsNavUrl,
+    handleShare
 }: DisplayProps) => {
 
     const [mintQuantity, setMintQuantity] = useState<string>('1');
@@ -212,6 +223,8 @@ export const MintExpandedDisplay = ({
     const availableEditions = BigInt(maxSupply) - BigInt(totalMinted);
     const areEditionsSoldOut = availableEditions <= 0;
     const [isMintFlowModalOpen, setIsMintFlowModalOpen] = useState(false);
+
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     const handleButtonClick = () => {
         if ((fees?.erc20Contract ?? zeroAddress) === zeroAddress) {
@@ -241,9 +254,12 @@ export const MintExpandedDisplay = ({
                                 <div className="flex flex-col gap-4 w-full">
                                     <div className="flex flex-col gap-2">
                                         <p className="line-clamp-3 font-bold text-xl break-all">{metadata.name}</p>
-                                        <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
-                                            <Avatar address={creator} size={32} />
-                                            <AddressOrEns address={creator} />
+                                        <div className="flex gap-2 items-center">
+                                            <div className="flex gap-2 items-center text-sm text-t2 bg-base-100 rounded-lg p-1 w-fit">
+                                                <Avatar address={creator} size={32} />
+                                                <AddressOrEns address={creator} />
+                                            </div>
+                                            <ShareButton displayMode="expanded" token={token} onClick={handleShare} className="bg-base-100" />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-3 gap-2">
@@ -430,8 +446,9 @@ const MintFlowModal = ({
 
 
     useEffect(() => {
+
         // a hacky way to close the modal when mint with eth fails and we don't want to show the currency options (since erc20 is not an option)
-        if (flowProps.txStatus === "error" && isModalOpen && flowProps.erc20Contract === zeroAddress) {
+        if ((flowProps.txStatus === "error" || flowProps.txStatus === undefined) && isModalOpen && flowProps.erc20Contract === zeroAddress) {
             handleClose()
         }
     }, [flowProps.txStatus])

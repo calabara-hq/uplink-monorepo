@@ -1,3 +1,5 @@
+"use client"
+
 import { ChannelToken, isTokenIntent, ChannelTokenIntent, TokenMetadata, ChannelTokenV1, isTokenV2Onchain, Channel, ContractID } from "@/types/channel"
 import React, { useEffect, useState } from "react";
 import { RenderInteractiveVideoWithLoader } from "../VideoPlayer";
@@ -43,17 +45,7 @@ const CardRenderer = ({ cardProps }: { cardProps: CardProps }) => {
 
             )}
 
-            <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
-                <Avatar address={cardProps.author} size={28} />
-                <AddressOrEns address={cardProps.author} />
-                {parseInt(cardProps.totalMinted) > 0 ? (
-                    <span className="ml-auto text-t2 text-sm font-medium">
-                        {compact_formatter.format(parseInt(cardProps.totalMinted))} mints
-                    </span>
-                ) : (
-                    <span />
-                )}
-            </div>
+            <p className="font-bold text-t1 line-clamp-1">{cardProps.metadata.name}</p>
         </React.Fragment>
     )
 
@@ -75,7 +67,7 @@ export const CardFooter = ({
     spaceName,
     contractId,
     handleMint,
-    handleShare,
+    //handleShare,
     handleManage
 }: {
     token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent,
@@ -83,7 +75,7 @@ export const CardFooter = ({
     spaceName: string,
     contractId: ContractID,
     handleMint: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
-    handleShare: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
+    //handleShare: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
     handleManage: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
 
 }) => {
@@ -92,16 +84,10 @@ export const CardFooter = ({
     return (
         <div className="flex flex-col w-full">
             <div className="flex w-full items-center gap-2">
-                <AdminWrapper admins={channel.managers.map(manager => { return { address: manager } })}>
-                    <button onClick={(event) => handleManage(event, token)} className="btn btn-sm btn-ghost text-t2 w-fit" >
-                        <MdOutlineSettings className="h-6 w-6" />
-                    </button>
-                </AdminWrapper>
-
-                <div className="mr-auto">
+                {/* <div className="mr-auto">
                     <ShareButton spaceName={spaceName} contractId={contractId} token={token} onClick={(event) => handleShare(event, token)} />
-                </div>
-                <div className="flex gap-2 items-center ml-auto ">
+                </div> */}
+                {/* <div className="flex gap-2 items-center ml-auto ">
 
                     {!isMintingOver && <MintButton
                         styleOverride="btn btn-sm normal-case m-auto btn-ghost hover:bg-primary bg-gray-800 text-primary hover:text-black 
@@ -110,14 +96,34 @@ export const CardFooter = ({
                     />
                     }
 
+                </div> */}
+
+                <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
+                    <Avatar address={token.author} size={28} />
+                    <AddressOrEns address={token.author} />
+                    {parseInt(token.totalMinted) > 0 ? (
+                        <span className="ml-auto text-t2 text-sm font-medium">
+                            {compact_formatter.format(parseInt(token.totalMinted))} mints
+                        </span>
+                    ) : (
+                        <span />
+                    )}
                 </div>
+
+                <AdminWrapper admins={channel.managers.map(manager => { return { address: manager } })}>
+                    <button onClick={(event) => handleManage(event, token)} className="btn btn-sm btn-ghost text-t2 w-fit ml-auto" >
+                        <MdOutlineSettings className="h-6 w-6" />
+                    </button>
+                </AdminWrapper>
+
+
             </div>
         </div>
     )
 }
 
 
-export const Card = ({ token, footer }: { token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, footer: React.ReactNode }) => {
+export const Card = ({ token, footer, showTotalMints = true }: { token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, footer: React.ReactNode, showTotalMints?: boolean }) => {
     const [isActive, setIsActive] = useState(false);
     const isMobileDevice = isMobile();
 
@@ -132,17 +138,17 @@ export const Card = ({ token, footer }: { token: ChannelToken | ChannelTokenV1 |
     }, [inView, isMobileDevice]);
 
     return (
-        <div className="relative flex flex-col gap-2 rounded-lg w-full p-2"
+        <div ref={ref} className="relative flex flex-col gap-2 rounded-lg w-full p-2"
             onMouseEnter={() => !isMobileDevice && setIsActive(true)}
             onMouseLeave={() => !isMobileDevice && setIsActive(false)}
         >
             <CardRenderer cardProps={{
                 author: token.author,
-                totalMinted: token.totalMinted,
+                totalMinted: showTotalMints ? token.totalMinted : '0',
                 metadata: token.metadata,
                 isActive: isActive
             }} />
-            <div className="bg-base-100 w-full h-0.5" />
+            <div className="bg-base w-full h-0.5" />
             {footer}
         </div>
 

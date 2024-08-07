@@ -12,7 +12,7 @@ const MintSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen: 
           {children}
         </div>
       </div>
-      );
+    );
   }
   return null;
 }
@@ -30,7 +30,7 @@ const ExpandSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen
           {children}
         </div>
       </div>
-      );
+    );
   }
   return null;
 }
@@ -45,7 +45,7 @@ const ShareSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen:
           {children}
         </div>
       </div>
-      );
+    );
   }
   return null;
 }
@@ -80,7 +80,7 @@ const ManageSubmissionModal = ({ isModalOpen, onClose, children }: { isModalOpen
           {children}
         </div>
       </div>
-      );
+    );
   }
   return null;
 }

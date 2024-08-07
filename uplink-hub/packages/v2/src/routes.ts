@@ -60,6 +60,8 @@ v2.get('/channel_popularTokens', tokenController.getChannelPopularTokens)
 v2.get('/singleTokenV1', tokenController.getSingleTokenV1)
 v2.get('/singleTokenV2', tokenController.getSingleTokenV2)
 v2.get('/singleTokenIntent', tokenController.getSingleTokenIntent)
+v2.get('/explore_trending', channelController.getTrendingChannels)
+v2.get('/featured_mints', tokenController.getFeaturedMints)
 
 /* -------------------------------------------------------------------------- */
 /*                                   POST                                     */

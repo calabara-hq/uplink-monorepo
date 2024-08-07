@@ -42,6 +42,11 @@ export const dbGetChannelsBySpaceName = async (spaceName: string): Promise<Array
 }
 
 
+export const dbGetSpaceByChannelAddress = async (channelAddress: string): Promise<schema.dbSpaceType> => {
+    return db.execute(sqlOps.sql`
+        SELECT spaces.* from channels LEFT JOIN spaces ON spaces.id = channels.spaceId WHERE LOWER(channelAddress) = LOWER(${channelAddress})
+    `).then(data => data.rows[0])
+}
 
 export const dbIsUserSpaceAdmin = async (user: any, spaceId: number) => {
     const isAdmin = await prepared_dbUserSpaceAdmin.execute({ address: user.address, spaceId: spaceId })

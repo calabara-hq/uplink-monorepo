@@ -9,7 +9,7 @@ import { useInView } from "react-intersection-observer";
 import { ManageModalContent, ShareModalContent } from "@/ui/Token/MintUtils";
 import { useChannel } from "@/hooks/useChannel";
 
-import RenderIfVisible from "@/ui/VIrtualization/RenderIfVisible";
+import RenderIfVisible from "@/ui/Virtualization/RenderIfVisible";
 import { Admin } from "@/types/space";
 import Modal from "@/ui/Modal/Modal";
 import Image from "next/image";
@@ -22,6 +22,8 @@ import { Address } from "viem";
 import { HiCheckBadge } from "react-icons/hi2";
 import { handleV2Error } from "@/lib/fetch/handleV2Errors";
 import { useMonitorChannelUpgrades } from "@/hooks/useMonitorChannelUpgrades";
+import { ColorCards } from "@/ui/DesignKit/ColorCards";
+import { parseIpfsUrl } from "@/lib/ipfs";
 
 
 export const PostSkeleton = () => {
@@ -160,7 +162,7 @@ const MapTokens = React.memo(({
     spaceName,
     contractId,
     handleMint,
-    handleShare,
+    //handleShare,
     handleManage
 }: {
     tokens: Array<ChannelToken | ChannelTokenV1 | ChannelTokenIntent>,
@@ -168,7 +170,7 @@ const MapTokens = React.memo(({
     spaceName: string,
     contractId: ContractID,
     handleMint: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
-    handleShare: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
+    // handleShare: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
     handleManage: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void
 }) => {
 
@@ -185,21 +187,23 @@ const MapTokens = React.memo(({
                     className="cursor-pointer shadow-lg shadow-black hover:shadow-[#262626] no-select rounded-lg"
                     onClick={(event) => handleMint(event, token)}
                 >
-                    <Card
-                        key={index}
-                        token={token}
-                        footer={
-                            <CardFooter
-                                token={token}
-                                channel={channel}
-                                spaceName={spaceName}
-                                contractId={contractId}
-                                handleMint={handleMint}
-                                handleShare={handleShare}
-                                handleManage={handleManage}
-                            />
-                        }
-                    />
+                    <ColorCards imageUrl={parseIpfsUrl(token.metadata.image).gateway}>
+                        <Card
+                            key={index}
+                            token={token}
+                            footer={
+                                <CardFooter
+                                    token={token}
+                                    channel={channel}
+                                    spaceName={spaceName}
+                                    contractId={contractId}
+                                    handleMint={handleMint}
+                                    //handleShare={handleShare}
+                                    handleManage={handleManage}
+                                />
+                            }
+                        />
+                    </ColorCards>
                 </div>
             </RenderIfVisible>
         )
@@ -357,7 +361,7 @@ export const RenderDefaultTokens = ({ spaceName, contractId }: { spaceName: stri
                     spaceName={spaceName}
                     contractId={contractId}
                     handleMint={handleMint}
-                    handleShare={handleShare}
+                    //  handleShare={handleShare}
                     handleManage={handleManage}
                 />
 
@@ -440,7 +444,7 @@ export const RenderTokenIntents = ({ spaceName, contractId }: { spaceName: strin
                     spaceName={spaceName}
                     contractId={contractId}
                     handleMint={handleMint}
-                    handleShare={handleShare}
+                    // handleShare={handleShare}
                     handleManage={handleManage}
                 />
             </div>
@@ -520,7 +524,7 @@ export const RenderPopularTokens = ({ spaceName, contractId }: { spaceName: stri
                     spaceName={spaceName}
                     contractId={contractId}
                     handleMint={handleMint}
-                    handleShare={handleShare}
+                    // handleShare={handleShare}
                     handleManage={handleManage}
                 />
             </div>
@@ -587,9 +591,9 @@ export const TokenModal = ({
                     display="modal"
                 />
             )}
-            {isShareModalOpen && focusedToken && (
+            {/* {isShareModalOpen && focusedToken && (
                 <ShareModalContent spaceName={spaceName} contractId={contractId} token={focusedToken} handleClose={handleModalClose} />
-            )}
+            )} */}
 
             {isManageModalOpen && focusedToken && !isTokenV1Onchain(focusedToken) && (
                 <ManageModalContent
