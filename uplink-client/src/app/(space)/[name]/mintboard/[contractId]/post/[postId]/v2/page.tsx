@@ -100,8 +100,6 @@ const ExpandedPostSkeleton = () => {
 
 const PageContent = async ({ spaceName, contractId, postId, searchParams }: { spaceName: string, contractId: ContractID, postId: string, searchParams: { [key: string]: string | undefined } }) => {
 
-    await new Promise(r => setTimeout(r, 2000));
-
     const isIntent = searchParams?.intent ? true : false
 
     const [
