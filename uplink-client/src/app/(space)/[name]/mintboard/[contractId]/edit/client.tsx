@@ -15,6 +15,7 @@ import { mutateChannel } from "@/app/mutate";
 import { ContractID, splitContractID } from "@/types/channel";
 import { useSWRConfig } from "swr";
 import { useChannel } from "@/hooks/useChannel";
+import { UplinkClient } from "@tx-kit/sdk";
 
 const WaitForEditChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
     const { mutateSwrChannel } = useChannel(contractId)
@@ -42,6 +43,9 @@ const WaitForEditChannel = ({ spaceData, contractId }: { spaceData: Space, contr
 
 }
 
+
+
+
 const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, priorState: MintBoardSettingsInput | null, spaceData: Space, contractId: ContractID }) => {
     const { state, setField, validateEditMintboardSettings } = useMintBoardSettings(priorState, spaceData);
     const [waitForEditChannel, setWaitForEditChannel] = useState(false);
@@ -52,10 +56,11 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
 
     const { contractAddress, chainId } = splitContractID(contractId)
 
+    const calldataClient = new UplinkClient({ chainId, publicClient, walletClient });
+
+
+
     useTransmissionsErrorHandler(txError);
-
-    const { uplinkClient } = useContext(TransmissionsContext).transmissionsClient
-
 
     const handleSubmit = async () => {
 
@@ -65,15 +70,15 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
         }
 
         const [cd_0, cd_1, cd_2] = await Promise.all([
-            uplinkClient.callData.updateChannelMetadata({
+            calldataClient.callData.updateChannelMetadata({
                 channelAddress: contractAddress,
                 ...result.data.updatedMetadata
             }),
-            uplinkClient.callData.updateChannelFees({
+            calldataClient.callData.updateChannelFees({
                 channelAddress: contractAddress,
                 ...result.data.updatedFees
             }),
-            uplinkClient.callData.updateInfiniteChannelTransportLayer({
+            calldataClient.callData.updateInfiniteChannelTransportLayer({
                 channelAddress: contractAddress,
                 ...result.data.updatedTransportLayer
             })

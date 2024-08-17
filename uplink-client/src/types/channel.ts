@@ -1,6 +1,6 @@
 import { Address, Hex } from "viem";
-import { IChannel, DeferredTokenIntentWithSignature, IUpgradePath } from "@tx-kit/sdk"
-
+import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk"
+import { IChannel, IUpgradePath } from "@tx-kit/sdk/subgraph"
 
 
 export type ContractID = `0x${string}-${number}`;
