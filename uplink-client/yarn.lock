@@ -5875,33 +5875,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/hooks@npm:^0.5.23-alpha.0":
-  version: 0.5.23-alpha.0
-  resolution: "@tx-kit/hooks@npm:0.5.23-alpha.0"
+"@tx-kit/hooks@npm:^0.6.2-alpha.0":
+  version: 0.6.2-alpha.0
+  resolution: "@tx-kit/hooks@npm:0.6.2-alpha.0"
   dependencies:
-    "@tx-kit/sdk": "npm:0.4.13-alpha.0"
+    "@tx-kit/sdk": "npm:0.5.1-alpha.0"
   peerDependencies:
     react: 17.x.x || 18.x.x
     viem: ^1.0.0 || ^2.0.0
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/e10f467cd7832ee968f2aec65875475615ac8f450dae7264701e2bb0165de6cb2040bc8da73a3ef2102769ad03a479de1f38a4d063886f014e448537871148ff
+  checksum: 10c0/d96a8a32357e4475bd2eca455618a81c2cf2b9a7ff9921399222f2cc0ce36b1de245189807653d6dcd1d1056f9585ec24ee1336a6ea0bb5d1b49cbefa09f1f24
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:0.4.13-alpha.0, @tx-kit/sdk@npm:^0.4.13-alpha.0":
-  version: 0.4.13-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.4.13-alpha.0"
+"@tx-kit/sdk@npm:0.5.1-alpha.0, @tx-kit/sdk@npm:^0.5.1-alpha.0":
+  version: 0.5.1-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.5.1-alpha.0"
   dependencies:
     "@urql/core": "npm:^4.3.0"
     base-64: "npm:^1.0.0"
     graphql: "npm:^16.8.1"
-    lodash: "npm:^4.17.21"
+    nanoid: "npm:^5.0.7"
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/4a548697dca25f17fb2ee810b14693519308fd9e706b03ba8ddebcb5fb1e7facc0a79d727066f92b1daf0aa42a183a4a5833b20e79386441d797735aefb07346
+  checksum: 10c0/e408f9989bb74539531aa31122cff219145228e4098c4807591af892cc4ad6fa7c07f55edfe7d26fdfa669829c2ce0a65d336667e72743d50ed39aca4f83244e
   languageName: node
   linkType: hard
 
@@ -15822,6 +15822,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nanoid@npm:^5.0.7":
+  version: 5.0.7
+  resolution: "nanoid@npm:5.0.7"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: 10c0/a3fb1c157e3e35378f44e5a7130c70f80c9037f66c9a37285e5e3d8298e8405fcb2399baaa420980b0fe5fd9c2e4186a6a31c3526f21de03cf34c1b459871401
+  languageName: node
+  linkType: hard
+
 "napi-build-utils@npm:^1.0.1":
   version: 1.0.2
   resolution: "napi-build-utils@npm:1.0.2"
@@ -20974,8 +20983,8 @@ __metadata:
     "@storybook/react": "npm:^7.4.5"
     "@storybook/testing-library": "npm:^0.2.1"
     "@tanstack/react-query": "npm:^5.48.0"
-    "@tx-kit/hooks": "npm:^0.5.23-alpha.0"
-    "@tx-kit/sdk": "npm:^0.4.13-alpha.0"
+    "@tx-kit/hooks": "npm:^0.6.2-alpha.0"
+    "@tx-kit/sdk": "npm:^0.5.1-alpha.0"
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
