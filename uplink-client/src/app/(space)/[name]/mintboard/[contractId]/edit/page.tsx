@@ -6,7 +6,7 @@ import { Address, formatEther, zeroAddress } from "viem";
 import { MintBoardSettingsInput } from "@/hooks/useMintboardSettings";
 import { parseErc20MintPrice } from "@/lib/tokenHelpers";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import { IInfiniteTransportConfig } from "@tx-kit/sdk"
+import { IInfiniteTransportConfig } from "@tx-kit/sdk/subgraph"
 import { ContractID, splitContractID } from "@/types/channel";
 
 const LoadingDialog = () => {

@@ -10,7 +10,7 @@ import { Request, Response, NextFunction } from 'express'
 import { ContexedRequest } from "../types.js";
 import { gql } from '@urql/core'
 import { timeStamp } from "console";
-import { formatGqlTokens, TOKEN_FRAGMENT } from "@tx-kit/sdk";
+import { formatGqlTokens, TOKEN_FRAGMENT } from "@tx-kit/sdk/subgraph";
 
 const authorizationController = new AuthorizationController(process.env.REDIS_URL!);
 
@@ -80,7 +80,7 @@ export const getChannel = async (req: Request, res: Response, next: NextFunction
             downlinkClient.getOptimalUpgradePath({ address: contractAddress })
         ])
 
-        if (!dbChannel) throw new NotFoundError('Channel not found')
+        //if (!dbChannel) throw new NotFoundError('Channel not found') TODO add this back in
 
         const response = {
             ...txChannel,

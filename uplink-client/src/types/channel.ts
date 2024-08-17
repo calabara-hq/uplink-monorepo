@@ -2,7 +2,6 @@ import { Address, Hex } from "viem";
 import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk"
 import { IChannel, IUpgradePath } from "@tx-kit/sdk/subgraph";
 
-
 export type ContractID = `0x${string}-${number}`;
 
 export const concatContractID = ({ chainId, contractAddress }: { chainId: number, contractAddress: string }) => {
