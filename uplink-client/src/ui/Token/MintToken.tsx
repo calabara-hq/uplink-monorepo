@@ -244,11 +244,6 @@ export const MintV2Intent = ({
 
     useTransmissionsErrorHandler(txError)
 
-    useEffect(() => {
-        console.log(ethTxError, erc20TxError)
-    }, [ethTxError, erc20TxError])
-
-
     const saleEnd = calculateSaleEnd(channel, _token)
 
     const fees: FeeStructure = doesChannelHaveFees(channel) ? {

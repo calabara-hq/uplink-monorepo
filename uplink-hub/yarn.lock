@@ -3898,18 +3898,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:^0.4.13-alpha.0":
-  version: 0.4.13-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.4.13-alpha.0"
+"@tx-kit/sdk@npm:^0.5.2-alpha.0":
+  version: 0.5.2-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.5.2-alpha.0"
   dependencies:
     "@urql/core": ^4.3.0
     base-64: ^1.0.0
     graphql: ^16.8.1
-    lodash: ^4.17.21
+    nanoid: ^5.0.7
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: e376f7a3dee61993bdfd8d91680d6837a174b1ad6f410d8325f1be3ff92c3ead85ac59dadd77e17a424cd8322c7b92fc027cfc206f886bed53dfe5b06a99338a
+  checksum: 0a8d8a24bcf928b173768cf0dabe2784f2a89dbca091cfb9085d3c6c6d18990a11718385baae54e4a09c0338c140655b1b71a34d8e3272169321f4750894dfc6
   languageName: node
   linkType: hard
 
@@ -13542,7 +13542,7 @@ __metadata:
   resolution: "v2@workspace:packages/v2"
   dependencies:
     "@jest/globals": ^29.5.0
-    "@tx-kit/sdk": ^0.4.13-alpha.0
+    "@tx-kit/sdk": ^0.5.2-alpha.0
     "@types/busboy": ^1.5.0
     "@types/express": ^4.17.21
     "@types/node": ^18.11.19
