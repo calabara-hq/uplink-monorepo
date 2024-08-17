@@ -1,7 +1,8 @@
 import { Context, schema } from "lib";
 import { Request } from "express";
 import { Address } from "viem";
-import { DeferredTokenIntentWithSignature, IToken } from "@tx-kit/sdk";
+import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk";
+import { IToken } from "@tx-kit/sdk/subgraph";
 
 export interface ContexedRequest<T = any> extends Request {
     context: Context;

@@ -1,7 +1,8 @@
 "use client";
 import { parseIpfsUrl, pinJSONToIpfs } from '@/lib/ipfs';
 import { z } from 'zod';
-import { validateCreateTokenInputs, CreateTokenConfig } from "@tx-kit/sdk";
+import { CreateTokenConfig } from "@tx-kit/sdk";
+import { validateCreateTokenInputs } from '@tx-kit/sdk/utils';
 import { Address, http, maxUint256 } from 'viem';
 import { useEffect, useReducer, useState } from 'react';
 import { useCreateToken, useCreateTokenIntent } from "@tx-kit/hooks"

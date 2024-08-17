@@ -2,8 +2,8 @@
 import { useReducer } from "react";
 import { z } from "zod";
 import { formatUnits, parseEther, parseUnits, zeroAddress } from "viem";
-import { CreateInfiniteChannelConfig, validateInfiniteTransportLayer, validateSetFeeInputs } from '@tx-kit/sdk';
-import { validateInfiniteChannelInputs, ChannelFeeArguments } from '@tx-kit/sdk';
+import { CreateInfiniteChannelConfig, ChannelFeeArguments } from '@tx-kit/sdk';
+import { validateInfiniteChannelInputs, validateInfiniteTransportLayer, validateSetFeeInputs } from '@tx-kit/sdk/utils';
 import { getCustomFeesAddress } from '@tx-kit/sdk/constants';
 import { createWeb3Client } from "@/lib/viem";
 import { Address, maxUint40 } from "viem";

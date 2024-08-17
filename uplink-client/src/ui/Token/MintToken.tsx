@@ -6,7 +6,7 @@ import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContra
 import { useAccount, useChainId, useWalletClient } from "wagmi";
 import toast from "react-hot-toast";
 import { Address, Chain, erc20Abi, maxUint40, parseEther, zeroAddress } from "viem";
-import { IInfiniteTransportConfig, NATIVE_TOKEN } from "@tx-kit/sdk";
+import { NATIVE_TOKEN } from "@tx-kit/sdk";
 import { useSponsorTokenWithETH, useMintTokenBatchWithETH, useApproveERC20, useMintTokenBatchWithERC20, useSponsorTokenWithERC20 } from "@tx-kit/hooks";
 import { useMintTokenV1 } from "@/hooks/useMintTokenV1";
 import { calculateSaleEnd, FeeStructure, isMintPeriodOver, ShareModalContent } from "./MintUtils";

@@ -16,7 +16,7 @@ import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import { Boundary } from "../Boundary/Boundary";
 import { useBanToken } from "@/hooks/useBanToken";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
-import { IInfiniteTransportConfig } from "@tx-kit/sdk";
+import { IInfiniteTransportConfig } from "@tx-kit/sdk/subgraph";
 import { usePathname, useRouter } from "next/navigation";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import toast from "react-hot-toast";
