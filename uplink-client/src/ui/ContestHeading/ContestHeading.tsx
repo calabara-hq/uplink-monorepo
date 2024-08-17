@@ -23,6 +23,8 @@ import ContestDetails from "../ContestDetails/ContestDetails";
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
 import fetchContest from "@/lib/fetch/fetchContest";
 import ExpandableTextSection from "../ExpandableTextSection/ExpandableTextSection";
+import { TokenMetadata } from "@/types/channel";
+import { parseIpfsUrl } from "@/lib/ipfs";
 
 const ContestHeading = async ({
   contestId,
@@ -105,6 +107,85 @@ const ContestHeading = async ({
     </div>
   );
 };
+
+export const ContestHeadingV2 = ({
+  contestMetadata
+}: {
+  contestMetadata: TokenMetadata;
+}) => {
+
+  return (
+    <div className="grid grid-cols-1 w-full gap-2">
+      <div className="w-full ml-auto ">
+        <div className="grid grid-cols-1 sm:grid-cols-[auto_25%] gap-6 w-full p-4">
+          <div className="flex flex-col gap-2 break-word">
+            <h2 className="lg:text-3xl text-xl font-[600] text-t1">
+              {contestMetadata.name}
+            </h2>
+            <div className="flex flex-row gap-2 items-center">
+              {/* <Link
+                className="relative w-8 h-8 flex flex-col"
+                href={`/${space.name}`}
+                draggable={false}
+              >
+                <UplinkImage
+                  src={space.logoUrl}
+                  alt="Org Avatar"
+                  fill
+                  className="rounded-full object-cover"
+                />
+              </Link> */}
+              {/* <Link
+                className="card-title text-sm text-t2 hover:underline hover:text-t1"
+                href={`/${space.name}`}
+                draggable={false}
+              >
+                {space.displayName}
+              </Link> */}
+
+              {/* <LiveContestState /> */}
+
+              {/* render a details button when the screen gets smaller */}
+              {/* <div className="hidden lg:block xl:hidden">
+                <DetailsMenuDrawer
+                  detailChildren={
+                    <ContestDetails contestId={contestId} />
+                  }
+                  ui={{
+                    classNames:
+                      "text-sm font-[600] text-t2 hover:underline hover:text-t1 ",
+                    label: <p>details</p>,
+                  }}
+                />
+              </div> */}
+            </div>
+            <div className="grid grid-cols-1">
+              <ExpandableTextSection>
+                {/* <ParseBlocks data={prompt.body} omitImages={false} /> */}
+                <p>{contestMetadata.description}</p>
+              </ExpandableTextSection>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 items-start  w-full gap-2">
+            {contestMetadata.image && (
+              <ImageWrapper>
+                <UplinkImage
+                  src={parseIpfsUrl(contestMetadata.image).gateway}
+                  alt="contest image"
+                  sizes="20vw"
+                  fill
+                  className="object-contain rounded-xl"
+                />
+              </ImageWrapper>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="w-full h-0.5 bg-base-100" />
+    </div>
+  );
+
+}
 
 export const ContestHeadingSkeleton = () => {
   return (

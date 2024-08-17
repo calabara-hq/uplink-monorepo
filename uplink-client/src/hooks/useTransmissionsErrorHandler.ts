@@ -16,6 +16,15 @@ export const useTransmissionsErrorHandler = (error: any) => {
                 toast.error("Insufficient funds")
             }
 
+            if (err.includes("NotAcceptingMints()")) {
+                toast.error("This channel is not accepting mints")
+            }
+
+            if (err.includes("NotAcceptingCreations()")) {
+                toast.error("This channel is not accepting new posts")
+            }
+
+
         }
     }, [error])
 

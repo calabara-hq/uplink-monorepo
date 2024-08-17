@@ -21,9 +21,11 @@ import { HiArrowNarrowLeft } from "react-icons/hi";
 import Link from "next/link";
 import { useCapabilities } from 'wagmi/experimental'
 import { useRouter } from "next/navigation";
-import { ChannelToken, ChannelTokenIntent, ChannelTokenV1 } from "@/types/channel";
+import { ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContractID, ContractID } from "@/types/channel";
+import Markdown from "react-markdown";
+import { useVoteCart } from "@/hooks/useVoteCart";
 
-export type DisplayMode = "modal" | "expanded"
+export type DisplayMode = "modal" | "expanded" | "contest-modal" | "contest-expanded"
 
 export type DisplayProps = {
     token: ChannelTokenV1 | ChannelToken | ChannelTokenIntent,
@@ -51,8 +53,142 @@ export type DisplayProps = {
 export const RenderDisplayWithProps = (props: DisplayProps & { displayMode: DisplayMode }) => {
     if (props.displayMode === "modal") return <MintModalDisplay {...props} />
     else if (props.displayMode === "expanded") return <MintExpandedDisplay {...props} />
+    else if (props.displayMode === "contest-modal") return <MintContestDisplay {...props} />
+    else if (props.displayMode === "contest-expanded") return <ContestExpandedDisplay {...props} />
+
     return null
 }
+
+
+const LinkRenderer = (props: any) => {
+    return (
+        <a href={props.href} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+            {props.children}
+        </a>
+    )
+}
+
+
+export const MintContestDisplay = ({ token,
+    chainId,
+    creator,
+    metadata,
+    fees,
+    mintToken,
+    setMintToken,
+    isMintPeriodOver,
+    saleEnd,
+    totalMinted,
+    maxSupply,
+    handleSubmit,
+    isTxPending,
+    isTxSuccessful,
+    txHash,
+    txStatus,
+    setIsModalOpen,
+    handleShare
+}: DisplayProps) => {
+
+    return (
+        <React.Fragment>
+            <div className="flex flex-col gap-2 relative">
+                <div className="grid grid-cols-[85%_15%] items-start">
+                    <p className="line-clamp-3 font-bold text-lg break-word ">{metadata.name}</p>
+                    <button className="btn btn-ghost btn-sm ml-auto" onClick={() => setIsModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
+                </div>
+                <div className="flex flex-col gap-4 bg-black ">
+                    <div className="flex gap-2 items-center">
+                        <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
+                            <Avatar address={creator} size={28} />
+                            <AddressOrEns address={creator} />
+                        </div>
+                        <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Share</button>
+                        <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Add to list</button>
+                    </div>
+                    <div className="flex items-center justify-center rounded-lg p-1 relative w-full  m-auto">
+                        <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
+                    </div>
+
+                    <div className="prose">
+                        <Markdown components={{ a: LinkRenderer }}>{metadata.description}</Markdown>
+                    </div>
+                </div>
+            </div>
+
+            {/* <div className="absolute w-[400px] h-[400px] right-0 top-0 bg-green-200">hey</div> */}
+        </React.Fragment>
+    )
+}
+
+
+const AddToListButton = ({ contractId, token }: { contractId: ContractID, token: ChannelToken }) => {
+    const { proposedVotes, addProposedVote, isTokenAlreadyProposed } = useVoteCart(contractId);
+
+    const handleAddToList = () => {
+        addProposedVote(token)
+    }
+
+    return (<button onClick={handleAddToList} className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Add to list</button>)
+}
+
+
+export const ContestExpandedDisplay = ({
+    token,
+    chainId,
+    creator,
+    metadata,
+    fees,
+    mintToken,
+    setMintToken,
+    isMintPeriodOver,
+    saleEnd,
+    totalMinted,
+    maxSupply,
+    handleSubmit,
+    isTxPending,
+    isTxSuccessful,
+    txHash,
+    txStatus,
+    backwardsNavUrl,
+    handleShare
+}: DisplayProps) => {
+
+    return (
+        <div className="flex flex-col gap-4">
+            <Link href={backwardsNavUrl} className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0">
+                <HiArrowNarrowLeft className="w-6 h-6" />
+                <p>Back</p>
+            </Link>
+
+            <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-[85%_15%] items-start">
+                    <p className="line-clamp-3 font-bold text-lg break-word ">{metadata.name}</p>
+                </div>
+                <div className="flex flex-col gap-4 ">
+                    <div className="flex gap-2 items-center">
+                        <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
+                            <Avatar address={creator} size={28} />
+                            <AddressOrEns address={creator} />
+                        </div>
+                        <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Share</button>
+                        <AddToListButton contractId={concatContractID({ contractAddress: token.channelAddress, chainId })} token={token as ChannelToken} />
+                    </div>
+                    <div className="flex items-center justify-center rounded-lg p-1 w-full  m-auto">
+                        <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
+                    </div>
+
+                    <div className="prose">
+                        <Markdown components={{ a: LinkRenderer }}>{metadata.description}</Markdown>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    )
+
+
+}
+
 
 
 export const MintModalDisplay = ({

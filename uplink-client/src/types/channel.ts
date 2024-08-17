@@ -1,6 +1,6 @@
 import { Address, Hex } from "viem";
-import { IChannel, DeferredTokenIntentWithSignature, IUpgradePath } from "@tx-kit/sdk"
-
+import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk"
+import { IChannel, IUpgradePath } from "@tx-kit/sdk/subgraph";
 
 
 export type ContractID = `0x${string}-${number}`;
@@ -93,6 +93,10 @@ export type ChannelTokenIntent = {
 
 } & DeferredTokenIntentWithSignature;
 
+
+export type ChannelTokenWithUserBalance = ChannelToken & {
+    balance: string;
+}
 
 export const isTokenIntent = (arg: ChannelToken | ChannelTokenIntent | ChannelTokenV1): arg is ChannelTokenIntent => {
     return (arg as ChannelTokenIntent).tokenIntent !== undefined;

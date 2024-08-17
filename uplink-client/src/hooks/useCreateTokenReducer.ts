@@ -1,14 +1,13 @@
 "use client";
 import { parseIpfsUrl, pinJSONToIpfs } from '@/lib/ipfs';
 import { z } from 'zod';
-import { validateCreateTokenInputs, CreateTokenConfig } from "@tx-kit/sdk";
+import { CreateTokenConfig } from "@tx-kit/sdk";
+import { validateCreateTokenInputs } from "@tx-kit/sdk/utils";
 import { Address, http, maxUint256 } from 'viem';
 import { useEffect, useReducer, useState } from 'react';
 import { useCreateToken, useCreateTokenIntent } from "@tx-kit/hooks"
 import { UploadToIpfsTokenMetadata } from '@/types/channel';
 import { useConnect, useConnectors, useWalletClient } from 'wagmi';
-
-
 
 const constructTokenMetadata = (input: CreateTokenInputs): UploadToIpfsTokenMetadata => {
 
@@ -109,8 +108,6 @@ export const stateReducer = (state: CreateTokenInputs & { errors?: ZodSafeParseE
 }
 
 export const useCreateTokenReducer = (channelAddress: string) => {
-    const { connectors } = useConnect();
-    const { data: walletClient } = useWalletClient();
 
     const { status: createIntentStatus, createTokenIntent, signedIntent, error: createIntentError } = useCreateTokenIntent()
     const { status: createTokenStatus, createToken, tokenId, txHash: createTokenHash, error: createTokenError } = useCreateToken()
@@ -131,8 +128,14 @@ export const useCreateTokenReducer = (channelAddress: string) => {
         })
     }
 
-    const validate = async () => {
-        const { errors, ...rest } = state;
+
+    const validate = async (markdown: string) => {
+
+        // markdown is scraped from the editor when the user clicks submit.
+        // we need to inject it into the state so that we can validate it
+
+        const { errors, ...rest } = { ...state, description: markdown };
+
         const result = await CreateTokenSchema.safeParseAsync(rest);
 
         if (!result.success) {

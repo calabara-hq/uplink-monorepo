@@ -2,7 +2,7 @@
 import { useRef, useEffect } from 'react';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
 import Image from "next/image";
-import { HiCamera, HiOutlineTrash } from 'react-icons/hi2';
+import { HiCamera, HiOutlineTrash, HiPhoto } from 'react-icons/hi2';
 import { RenderStandardVideoWithLoader } from '@/ui/VideoPlayer';
 import { BiSolidCircle } from 'react-icons/bi';
 
@@ -161,7 +161,7 @@ export const MediaUpload = ({
                     onClick={() => imageUploader.current?.click()}
                 >
                     <div className="flex justify-center items-center w-full h-full">
-                        <HiCamera className="w-8 h-8" />
+                        <HiPhoto className="w-8 h-8" />
                     </div>
                 </div>
             </div>

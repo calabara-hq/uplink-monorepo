@@ -1,7 +1,9 @@
+"use client";
+
 import { FaRegCircleQuestion } from "react-icons/fa6";
 import formatDecimal from "@/lib/formatDecimal";
-import { ExpandSection, RenderStateSpecificDialog } from "./client";
-import { Fragment } from "react";
+import { ExpandSection, RenderStateSpecificDialog } from "../ContestDetails/client";
+import { Fragment, useMemo } from "react";
 import formatOrdinals from "@/lib/formatOrdinals";
 import Link from "next/link";
 import { ChainLabel, StatusLabel } from "../ContestLabels/ContestLabels";
@@ -26,8 +28,14 @@ import {
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
 import { getChainName } from "@/lib/chains/supportedChains";
 import fetchContest from "@/lib/fetch/fetchContest";
-
-
+import { Channel, ContractID, splitContractID } from "@/types/channel";
+import { IFiniteTransportConfig, ILogicConfig } from "@tx-kit/sdk/subgraph";
+import { useErc20TokenInfo } from "@/hooks/useErc20TokenInfo";
+import { NATIVE_TOKEN } from "@tx-kit/sdk";
+import { Address, decodeAbiParameters, formatUnits, Hex, parseEther, parseUnits } from "viem";
+import { useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
+import { TbLoader2 } from "react-icons/tb";
+import { RenderStatefulChildAndRemainingTime } from "./SidebarUtils";
 
 const normalizeSubmitterRewards = (
     subRewards: FetchSingleContestResponse["submitterRewards"]
@@ -114,30 +122,124 @@ const DetailSectionWrapper = ({
     );
 };
 
-const SubmitterRestrictionsSection = ({ submitterRestrictions }: { submitterRestrictions: FetchSingleContestResponse['submitterRestrictions'] }) => {
+
+
+const ERC1155_LogicRule = ({
+    chainId,
+    target,
+    operator,
+    literalOperand,
+}: {
+    chainId,
+    target: Address,
+    operator: string,
+    literalOperand: string,
+}) => {
+
+    // TODO
+    // 0x00fdd58e
+    return null
+}
+
+
+const ERC20_ERC721_LogicRule = ({
+    chainId,
+    target,
+    operator,
+    literalOperand,
+}: {
+    chainId,
+    target: Address,
+    operator: string,
+    literalOperand: string,
+}) => {
+    // 0x70a08231
+
+    const { symbol, decimals, isLoading } = useErc20TokenInfo(target, chainId)
+
+
+    const formattedLiteralOperand = useMemo(() => {
+        const decoded = decodeAbiParameters([{ name: 'x', type: 'uint256' }], literalOperand as Hex)[0]
+        return formatUnits(decoded, decimals)
+
+    }, [literalOperand, decimals])
+
+    const operatorSpecificText = useMemo(() => {
+        switch (operator) {
+            case "0": return "Hold exactly"
+            case "1": return "Hold more than"
+            case "2": return "Hold less than"
+        }
+
+    }, [operator, decimals])
+
+    if (isLoading) return <p>Loading...</p>
+    return <p>{`${operatorSpecificText} ${formattedLiteralOperand} ${symbol}`}</p>
+
+}
+
+
+const DisplayLogicRule = ({
+    chainId,
+    target,
+    signature,
+    data,
+    operator,
+    literalOperand,
+}: {
+    chainId,
+    target: Address,
+    signature: string,
+    data: string,
+    operator: string,
+    literalOperand: string,
+}) => {
+
+    if (signature === '0x70a08231') return <ERC20_ERC721_LogicRule chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
+    else if (signature === '0x00fdd58e') return <ERC1155_LogicRule chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
+    else return null
+
+}
+
+const DisplayCredits = ({ interactionPower, interactionPowerType, creditContextLabel }: { interactionPower: string, interactionPowerType: string, creditContextLabel: string }) => {
+
+    const readableInteractionPowerType = interactionPowerType === "0" ? "Uniform" : "Weighted"
+    const readableInteractionPower = readableInteractionPowerType === "Weighted" ? `Weighted ${creditContextLabel}` : `${interactionPower} ${creditContextLabel}`
+
+    return <div className="badge badge-success bg-opacity-10 text-success border border-gray-800 badge-sm font-medium">{readableInteractionPower}</div>;
+
+}
+
+const LogicDisplay = ({ chainId, logicObject, creditContextLabel }: { chainId: number, logicObject: ILogicConfig | null, creditContextLabel: string }) => {
+
     return (
-        <DetailSectionWrapper
-            title="Entry Requirements"
-            tooltipContent={
-                <p className="font-semibold">
-                    {`Users satisfying at least one restriction (if present) are elgible to submit.`}
-                </p>
-            }
-        >
-            {submitterRestrictions.length > 0 ? (
-                <div className="flex flex-col gap-1 p-2 text-t2 text-sm">
-                    {submitterRestrictions
-                        .slice(0, 3)
-                        .map((restriction: any, idx: number) => {
-                            return (
-                                <p key={idx}>
-                                    {`Hold ${formatDecimal(restriction.tokenRestriction.threshold).short
-                                        } or more ${restriction.tokenRestriction.token.symbol} `}{" "}
-                                </p>
-                            );
-                        })}
-                    {/* modal content */}
-                    <ExpandSection
+
+        logicObject && logicObject.logic.targets.length > 0 ? (
+            <div className="flex flex-col gap-1 p-2 text-t2 text-sm">
+                {logicObject.logic.targets
+                    .slice(0, 3)
+                    .map((_, idx: number) => {
+                        const target = logicObject.logic.targets[idx]
+                        const signature = logicObject.logic.signatures[idx]
+                        const data = logicObject.logic.datas[idx]
+                        const operator = logicObject.logic.operators[idx]
+                        const literalOperand = logicObject.logic.literalOperands[idx]
+                        const interactionPowerType = logicObject.logic.interactionPowerTypes[idx]
+                        const interactionPower = logicObject.logic.interactionPowers[idx]
+
+                        return (
+                            <div key={idx} className="flex gap-2 items-center">
+                                <DisplayLogicRule chainId={chainId} target={target} signature={signature} data={data} operator={operator} literalOperand={literalOperand} />
+                                <DisplayCredits interactionPowerType={interactionPowerType} interactionPower={interactionPower} creditContextLabel={creditContextLabel} />
+                            </div>
+                        )
+
+                        // if (logicObject.logic.signatures[idx] === '0x00fdd58e') return null
+                        // else if (logicObject.logic.signatures[idx] === '0x70a08231') return <ERC20_ERC721_LogicRule key={idx} chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
+                        // else return null
+                    })}
+                {/* modal content */}
+                {/* <ExpandSection
                         data={submitterRestrictions}
                         label={`+ ${submitterRestrictions.length - 3} requirements`}
                     >
@@ -160,23 +262,31 @@ const SubmitterRestrictionsSection = ({ submitterRestrictions }: { submitterRest
                                 })}
                             </div>
                         </div>
-                    </ExpandSection>
-                </div>
-            ) : (
-                <p className="text-t2 p-2 text-sm">Anyone can submit!</p>
-            )}
-        </DetailSectionWrapper>
+                    </ExpandSection> */}
+            </div>
+        ) : (
+            <p className="text-t2 p-2 text-sm">Anyone can submit!</p>
+        )
+
     );
 };
 
-const SubmitterRewardsSection = ({
-    submitterRewards,
+
+
+const RewardsSection = ({
+    chainId,
+    transportConfig,
 }: {
-    submitterRewards: FetchSingleContestResponse["submitterRewards"];
+    chainId: number;
+    transportConfig: IFiniteTransportConfig
 }) => {
-    const normalizedRewards: {
-        [rank: number]: SubmitterTokenRewardOption[];
-    } = normalizeSubmitterRewards(submitterRewards);
+
+    const isNativeToken = transportConfig.token === NATIVE_TOKEN;
+
+    const { symbol: erc20Symbol, decimals: erc20Decimals } = useErc20TokenInfo(transportConfig.token, chainId);
+
+    const symbol = isNativeToken ? "ETH" : erc20Symbol;
+    const decimals = isNativeToken ? 18 : erc20Decimals;
 
     return (
         <DetailSectionWrapper
@@ -188,39 +298,29 @@ const SubmitterRewardsSection = ({
                 </p>
             }
         >
-            {Object.keys(normalizedRewards).length > 0 ? (
+            {transportConfig.ranks.length > 0 ? (
                 <div className="flex flex-col gap-1 p-2 text-t2">
                     <h2 className="text-sm font-semibold">Rank</h2>
-                    {Object.entries(normalizedRewards)
+                    {transportConfig.ranks
                         .slice(0, 3)
-                        .map(([rank, rewards], idx) => {
+                        .map((rank, idx) => {
                             return (
                                 <div
                                     key={idx}
                                     className="flex flex-row gap-2 items-center justify-start text-sm"
                                 >
-                                    <p>{formatOrdinals(parseInt(rank))}:</p>
+                                    <p>{formatOrdinals(rank)}:</p>
                                     <div className="flex flex-row ml-4 items-center gap-2">
-                                        {rewards.map((reward, idx) => {
-                                            return (
-                                                <p key={idx}>
-                                                    {isFungibleReward(reward)
-                                                        ? formatDecimal(reward.amount).short
-                                                        : "0"}
-                                                    {" "}
-                                                    {reward.token.symbol}
-                                                    {idx !== rewards.length - 1 && ","}
-                                                </p>
-                                            );
-                                        })}
+                                        <p>{formatUnits(transportConfig.allocations[idx], decimals)}</p>
+                                        <p>{symbol}</p>
                                     </div>
                                 </div>
                             );
                         })}
                     {/* modal content */}
-                    <ExpandSection
-                        data={Object.keys(normalizedRewards)}
-                        label={`+ ${Object.keys(normalizedRewards).length - 3} rewards`}
+                    {/* <ExpandSection
+                        data={[]}
+                        label={`+ ${transportConfig.ranks.length - 3} rewards`}
                     >
                         <div className="w-full flex flex-col gap-4 text-t1">
                             <h1 className="text-lg font-bold">Submitter Rewards</h1>
@@ -241,7 +341,6 @@ const SubmitterRewardsSection = ({
                                                                     {isFungibleReward(reward)
                                                                         ? formatDecimal(reward.amount).short
                                                                         : 1}{" "}
-                                                                    {/* just show token count (1) for NF reward for now */}
                                                                     {reward.token.symbol}
                                                                 </p>
                                                             );
@@ -255,7 +354,7 @@ const SubmitterRewardsSection = ({
                                 )}
                             </div>
                         </div>
-                    </ExpandSection>
+                    </ExpandSection> */}
                 </div>
             ) : (
                 <p className="text-t2 p-2 text-sm">None</p>
@@ -263,70 +362,6 @@ const SubmitterRewardsSection = ({
         </DetailSectionWrapper>
     );
 };
-
-const VoterRewardsSection = ({
-    voterRewards,
-}: {
-    voterRewards: FetchSingleContestResponse["voterRewards"];
-}) => {
-    if (voterRewards.length > 0) {
-        return (
-            <DetailSectionWrapper
-                title="Voter Rewards"
-                tooltipContent={
-                    <p className="font-semibold">
-                        At the end of the voting period, these rewards are split amongst
-                        voters that accurately choose the submissions that fall in the
-                        pre-defined ranks.
-                    </p>
-                }
-            >
-                <div className="flex flex-col gap-1 p-2 text-t2">
-                    <h2 className="text-sm font-semibold">Rank</h2>
-                    {voterRewards.slice(0, 3).map((el, idx: number) => {
-                        const { rank, reward } = el;
-                        if (!isVoterTokenReward(reward)) return null;
-                        return (
-                            <div key={idx} className="grid grid-cols-5 text-sm">
-                                <p>{formatOrdinals(rank)}:</p>
-                                <p>{`${formatDecimal(reward.tokenReward.amount).short} ${reward.tokenReward.token.symbol
-                                    }`}</p>
-                            </div>
-                        );
-                    })}
-                    {/* modal content */}
-                    <ExpandSection
-                        data={voterRewards}
-                        label={`+ ${voterRewards.length - 3} rewards`}
-                    >
-                        <div className="w-full flex flex-col gap-4 text-t1">
-                            <h1 className="text-lg font-bold">Voter Rewards</h1>
-
-                            <div className="flex flex-col gap-1 p-2 ">
-                                {voterRewards.map((el, idx: number) => {
-                                    const { rank, reward } = el;
-                                    if (!isVoterTokenReward(reward)) return null;
-                                    return (
-                                        <Fragment key={idx}>
-                                            <div className="flex flex-row items-center gap-2">
-                                                <p>{formatOrdinals(rank)} place:</p>
-                                                <p className="ml-4">{`${formatDecimal(reward.tokenReward.amount).short
-                                                    } ${reward.tokenReward.token.symbol}`}</p>
-                                            </div>
-                                            <div className="w-full h-0.5 bg-base-200" />
-                                        </Fragment>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </ExpandSection>
-                </div>
-            </DetailSectionWrapper>
-        );
-    }
-    return null;
-};
-
 const VotingPolicySection = ({
     votingPolicy,
 }: {
@@ -433,51 +468,79 @@ const VotingPolicySection = ({
 
 
 
-const ContestDetails = async ({
-    contestId,
+// thinking ...
+// contractID
+// creatorLogic (need types)
+// minterLogic (need types)
+// rewards (need types)
+
+const ContestDetailsV2 = ({
+    contractId,
+    transportConfig,
+    creatorLogic,
+    minterLogic
 }: {
-    contestId: string;
+    contractId: ContractID;
+    transportConfig: IFiniteTransportConfig;
+    creatorLogic: ILogicConfig | null;
+    minterLogic: ILogicConfig | null;
 }) => {
-    const contestData = await fetchContest(contestId).then(async (res) => {
-        const promptData = await fetch(res.promptUrl).then((res) => res.json());
-        return { ...res, promptData };
-    });
-    const {
-        chainId,
-        deadlines,
-        space,
-        submitterRewards,
-        voterRewards,
-        votingPolicy,
-        submitterRestrictions,
-        promptData,
-    } = contestData;
+
+    const { chainId, contractAddress } = splitContractID(contractId);
+    const { channelState, stateRemainingTime } = useFiniteTransportLayerState(contractId);
+
+    // const contestData = await fetchContest(contestId).then(async (res) => {
+    //     const promptData = await fetch(res.promptUrl).then((res) => res.json());
+    //     return { ...res, promptData };
+    // });
+    // const {
+    //     chainId,
+    //     deadlines,
+    //     space,
+    //     submitterRewards,
+    //     voterRewards,
+    //     votingPolicy,
+    //     submitterRestrictions,
+    //     promptData,
+    // } = contestData;
 
     return (
         <div className="w-full flex flex-col gap-4 p-4">
             <div className="flex flex-col gap-4">
-                {chainId !== 1 && (
-                    <DetailSectionWrapper title={"Network"}>
-                        <div className="flex gap-2 items-center pl-2">
-                            <p>{getChainName(chainId)}</p>
-                            <ChainLabel chainId={chainId} px={16} />
-                        </div>
-                    </DetailSectionWrapper>
-                )}
-                <SubmitterRestrictionsSection submitterRestrictions={submitterRestrictions} />
-                <SubmitterRewardsSection submitterRewards={submitterRewards} />
-                <VoterRewardsSection voterRewards={voterRewards} />
-                <VotingPolicySection votingPolicy={votingPolicy} chainId={chainId} />
+                {/* <DetailSectionWrapper title={"Network"}>
+                    <div className="flex gap-2 items-center pl-2">
+                        <p>{getChainName(chainId)}</p>
+                        <ChainLabel chainId={chainId} px={16} />
+                    </div>
+                </DetailSectionWrapper> */}
+                <RewardsSection transportConfig={transportConfig} chainId={chainId} />
+                <DetailSectionWrapper
+                    title="Entry Requirements"
+                    tooltipContent={<p className="font-semibold">{`Users satisfying at least one requirement are elgible to submit.`}</p>}
+                >
+                    <LogicDisplay logicObject={creatorLogic} chainId={chainId} creditContextLabel="entries" />
+                </DetailSectionWrapper>
+                <DetailSectionWrapper
+                    title="Voting Requirements"
+                    tooltipContent={<p className="font-semibold">{`Users satisfying at least one requirement are elgible to vote.`}</p>}
+                >
+                    <LogicDisplay logicObject={minterLogic} chainId={chainId} creditContextLabel="votes" />
+                </DetailSectionWrapper>
             </div>
-            <RenderStateSpecificDialog
+            {/* <RenderStateSpecificDialog
                 contestId={contestId}
                 startTime={deadlines.startTime}
                 spaceId={space.id}
                 prompt={promptData}
-            />
+            /> */}
+
+            <RenderStatefulChildAndRemainingTime contractId={contractId} childStateWindow={"submitting"} >
+                <Link href={`${contractId}/studio`} className="btn btn-primary normal-case">Submit</Link>
+            </RenderStatefulChildAndRemainingTime>
+
         </div>
     );
 };
 
 
-export default ContestDetails;
+export default ContestDetailsV2;

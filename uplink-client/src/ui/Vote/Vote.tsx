@@ -17,6 +17,7 @@ import { UserVote } from "@/hooks/useContestInteractionAPI";
 import { useVote } from "@/hooks/useVote";
 import { VotableSubmission } from "@/hooks/useVote";
 import UplinkImage from "@/lib/UplinkImage"
+
 const SubmissionVoteInput = ({
   submission,
   mode,

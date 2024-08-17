@@ -116,7 +116,7 @@ export function CreateSmartWalletButton({ openConnectModal }: { openConnectModal
 
   return (
     <button
-      className={`btn normal-case btn-ghost btn-active rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear`}
+      className={`btn normal-case btn-ghost btn-active rounded-xl transition-all duration-200 ease-linear`}
       onClick={createWallet}
     >
       {isCreating ?
@@ -142,10 +142,10 @@ export default function WalletConnectButton({
   if (!status || status === "loading")
     return (
       <div className="grid grid-cols-2 items-center gap-2 max-w-full">
-        <div className={`btn normal-case shimmer btn-ghost rounded-3xl text-transparent ${styleOverride}`}>
+        <div className={`btn normal-case shimmer btn-ghost rounded-xl text-transparent ${styleOverride}`}>
           Create Wallet
         </div>
-        <div className={`btn normal-case shimmer btn-ghost rounded-3xl text-transparent ${styleOverride}`}>
+        <div className={`btn normal-case shimmer btn-ghost rounded-xl text-transparent ${styleOverride}`}>
           Sign in
         </div>
       </div>
@@ -163,7 +163,7 @@ export default function WalletConnectButton({
               <div className="grid grid-cols-2 items-center gap-2 max-w-full">
                 <CreateSmartWalletButton openConnectModal={openConnectModal} />
                 <button
-                  className={`btn normal-case btn-ghost btn-active rounded-3xl hover:rounded-xl transition-all duration-200 ease-linear ${styleOverride}`}
+                  className={`btn normal-case btn-ghost btn-active rounded-xl transition-all duration-200 ease-linear ${styleOverride}`}
                   onClick={openConnectModal}
                 >
                   Sign in
