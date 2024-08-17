@@ -20,7 +20,7 @@ import { decodeEventLog, Hash, Hex, Log } from "viem";
 import { finiteChannelAbi, infiniteChannelAbi } from "@tx-kit/sdk/abi";
 import { createWeb3Client } from "../utils/viem.js";
 import { gql } from '@urql/core'
-import { formatGqlTransportLayer, formatGqlCustomFees, CHANNEL_FRAGMENT, TRANSPORT_LAYER_FRAGMENT, FEE_CONFIG_FRAGMENT, TOKEN_FRAGMENT, formatGqlTokens, formatGqlChannel } from "@tx-kit/sdk"
+import { CHANNEL_FRAGMENT, TRANSPORT_LAYER_FRAGMENT, FEE_CONFIG_FRAGMENT, TOKEN_FRAGMENT, formatGqlTokens, formatGqlChannel } from "@tx-kit/sdk/subgraph"
 
 const authorizationController = new AuthorizationController(process.env.REDIS_URL);
 

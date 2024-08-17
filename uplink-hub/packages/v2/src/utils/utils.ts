@@ -3,7 +3,7 @@ import { getSupportedChains } from "./constants.js";
 import { isAddress } from "viem"
 import { ContractID, TokenIntentWithMetadata, TokenMetadata, V1TokenWithMetadata, V2TokenWithMetadata } from "../types.js";
 import { schema } from "lib";
-import { IChannel, IToken } from "@tx-kit/sdk";
+import { IChannel, IToken } from "@tx-kit/sdk/subgraph";
 import { cachedFetch } from "./cachedFetch.js";
 import { Address } from "viem";
 

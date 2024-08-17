@@ -2,6 +2,8 @@ import express, { Request, Response, NextFunction } from 'express';
 import * as channelController from './controllers/channel.js'
 import * as tokenController from './controllers/token.js'
 import * as utilitiesController from './controllers/utilities.js'
+import * as userController from './controllers/user.js'
+
 const v2 = express();
 import cookie from 'cookie';
 import { Context, xor_compare } from 'lib';
@@ -57,11 +59,14 @@ v2.get('/channel_tokensV1', tokenController.getChannelTokensV1)
 v2.get('/channel_tokensV2', tokenController.getChannelTokensV2)
 v2.get('/channel_tokenIntents', tokenController.getChannelTokenIntents)
 v2.get('/channel_popularTokens', tokenController.getChannelPopularTokens)
+
 v2.get('/singleTokenV1', tokenController.getSingleTokenV1)
 v2.get('/singleTokenV2', tokenController.getSingleTokenV2)
 v2.get('/singleTokenIntent', tokenController.getSingleTokenIntent)
 v2.get('/explore_trending', channelController.getTrendingChannels)
 v2.get('/featured_mints', tokenController.getFeaturedMints)
+
+v2.get('/userOwnedTokens', userController.getUserOwnedTokens)
 
 /* -------------------------------------------------------------------------- */
 /*                                   POST                                     */
