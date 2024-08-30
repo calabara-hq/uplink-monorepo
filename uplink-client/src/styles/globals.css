@@ -46,6 +46,63 @@
                                   supported by Chrome and Opera */
 }
 
+/* .btm-nav {
+  @apply fixed bottom-0 left-0 right-0 flex w-full flex-row items-center justify-around;
+  padding-bottom: env(safe-area-inset-bottom);
+  & > * {
+    @apply relative flex h-full basis-full cursor-pointer flex-col items-center justify-center gap-1;
+  }
+} */
+
+.btm-nav {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom);
+  height: 4rem;
+}
+
+.modal {
+  /* @apply pointer-events-none invisible fixed inset-0 flex justify-center opacity-0; */
+  @apply pointer-events-none fixed inset-0 m-0 grid h-full max-h-none w-full max-w-none justify-items-center p-0 opacity-0;
+  overscroll-behavior: contain;
+  z-index: 999;
+}
+.modal-scroll {
+  overscroll-behavior: auto;
+}
+:where(.modal) {
+  @apply items-center;
+}
+.modal-box {
+  max-height: calc(100vh - 5em);
+
+  @apply p-4 rounded-lg w-full max-w-[500px];
+}
+.modal-open,
+.modal:target,
+.modal-toggle:checked + .modal,
+.modal[open] {
+  @apply pointer-events-auto visible opacity-100;
+}
+.modal-action {
+  @apply flex;
+}
+.modal-toggle {
+  @apply fixed h-0 w-0 appearance-none opacity-0;
+}
+:root:has(:is(.modal-open, .modal:target, .modal-toggle:checked + .modal, .modal[open])) {
+  @apply overflow-hidden;
+  scrollbar-gutter: stable;
+}
+
+
 ol {
   list-style-type: decimal;
   margin-left: 2rem !important;
@@ -88,7 +145,7 @@ ol {
 } */
 
 .shimmer {
-  @apply relative overflow-hidden bg-base
+  @apply relative overflow-hidden bg-base-100;
 }
 
 .shimmer::before {
@@ -146,15 +203,6 @@ ol {
   .ReactVirtualized__Grid__innerScrollContainer {
      margin: auto
   }
-}
-
-
-.primary-btn {
-  @apply btn btn-md normal-case btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black hover:rounded-xl rounded-3xl transition-all duration-300;
-}
-
-.secondary-btn {
-  @apply btn btn-md normal-case btn-ghost w-fit bg-secondary bg-opacity-20 hover:bg-secondary text-secondary hover:text-black hover:rounded-xl rounded-3xl transition-all duration-300;
 }
 
 
@@ -259,7 +307,7 @@ ol {
 
 
 .mdxeditor {
-  @apply border-border border rounded-lg bg-base 
+  @apply border-border border rounded-lg bg-base-100
 }
 
 /* .mdxeditor-root-contenteditable, .mdxeditor-root-contenteditable > .editable {
@@ -267,18 +315,21 @@ ol {
 } */
 
 .mdxeditor a {
-  @apply text-blue-500 hover:text-blue-600
+  @apply text-primary12 hover:text-primary12/90
 }
 
 .mdxeditor-popup-container > #data-radix-popper-content-wrapper {
-  @apply !bg-red-300
+  @apply !bg-base-100
 }
 
 .dark-editor {
-  --basePageBg: var(--b2) !important;
-  --accentSolid: #57bad7 !important;
-  --accentSolidBg: #57bad7 !important;
-  --accentSolidHover: #57bad7 !important;
+  --baseBg: #3a3a3a !important;
+  --basePageBg: #232225 !important;
+  --accentSolid: #b0436e !important;
+  --accentSolidBg: #b0436e !important;
+  --accentSolidHover: #b0436e !important;
+  --accentBorder: #b0436e !important;
+  --baseBase: #2b292d !important;
 }
 
 .dark-editor btn {

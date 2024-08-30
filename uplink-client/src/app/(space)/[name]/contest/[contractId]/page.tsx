@@ -11,7 +11,8 @@ import SwrProvider from '@/providers/SwrProvider';
 import { PostSkeleton } from '../../mintboard/[contractId]/client';
 import { RenderV2Tokens } from './client';
 import { VoteCart } from '@/ui/ChannelSidebar/VoteCart';
-import ContestSidebar from '@/ui/ContestSidebar/ContestSidebarV2';
+import ContestSidebar from '@/ui/ChannelSidebar/ContestSidebarV2';
+import fetchSingleSpace from '@/lib/fetch/fetchSingleSpace';
 
 // const ContestSidebar = dynamic(
 //     () => import("@/ui/ContestSidebar/ContestSidebarV2"),
@@ -92,12 +93,15 @@ export default async function Page({
     params: { name: string, contractId: ContractID }
 }) {
 
-    const channel = await fetchChannel(params.contractId);
+    const [channel, space] = await Promise.all([
+        fetchChannel(params.contractId),
+        fetchSingleSpace(params.name)
+    ])
 
     return (
         <div className="flex gap-6 m-auto w-full lg:w-[90vw]">
             <div className="flex flex-col w-full gap-4 transition-all duration-200 ease-in-out">
-                <ContestHeadingV2 contestMetadata={{ ...channel.tokens[0].metadata, type: 'uplink-v2' }} />
+                <ContestHeadingV2 space={space} contestMetadata={{ ...channel.tokens[0].metadata, type: 'uplink-v2' }} />
                 {/* submission display */}
                 <Suspense fallback={<PostSkeleton />}>
                     <Posts spaceName={params.name} contractId={params.contractId} />

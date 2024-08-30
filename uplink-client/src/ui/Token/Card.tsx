@@ -14,6 +14,7 @@ import { MdOutlineSettings } from "react-icons/md";
 import { Admin } from "@/types/space";
 import { isMobile } from "@/lib/isMobile";
 import { useInView } from "react-intersection-observer";
+import { Button } from "../DesignKit/Button";
 
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
@@ -64,46 +65,24 @@ export const MintButton = ({ onClick, styleOverride }: { onClick: (event?) => vo
 export const CardFooter = ({
     token,
     channel,
-    spaceName,
-    contractId,
-    handleMint,
-    //handleShare,
-    handleManage
+    handleManage,
+    mintLabel = "mints",
 }: {
     token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent,
     channel: Channel,
-    spaceName: string,
-    contractId: ContractID,
-    handleMint: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
-    //handleShare: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
     handleManage: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
-
+    mintLabel?: string
 }) => {
-    const saleEnd = calculateSaleEnd(channel, token);
-    const isMintingOver = isMintPeriodOver(saleEnd)
+
     return (
         <div className="flex flex-col w-full">
             <div className="flex w-full items-center gap-2">
-                {/* <div className="mr-auto">
-                    <ShareButton spaceName={spaceName} contractId={contractId} token={token} onClick={(event) => handleShare(event, token)} />
-                </div> */}
-                {/* <div className="flex gap-2 items-center ml-auto ">
-
-                    {!isMintingOver && <MintButton
-                        styleOverride="btn btn-sm normal-case m-auto btn-ghost hover:bg-primary bg-gray-800 text-primary hover:text-black 
-                                                                hover:rounded-xl rounded-3xl transition-all duration-300"
-                        onClick={(event) => handleMint(event, token)}
-                    />
-                    }
-
-                </div> */}
-
                 <div className="w-full gap-2 flex flex-wrap items-center font-semibold text-sm text-t2">
                     <Avatar address={token.author} size={28} />
                     <AddressOrEns address={token.author} />
                     {parseInt(token.totalMinted) > 0 ? (
                         <span className="ml-auto text-t2 text-sm font-medium">
-                            {compact_formatter.format(parseInt(token.totalMinted))} mints
+                            {compact_formatter.format(parseInt(token.totalMinted))} {mintLabel}
                         </span>
                     ) : (
                         <span />
@@ -111,9 +90,11 @@ export const CardFooter = ({
                 </div>
 
                 <AdminWrapper admins={channel.managers.map(manager => { return { address: manager } })}>
-                    <button onClick={(event) => handleManage(event, token)} className="btn btn-sm btn-ghost text-t2 w-fit ml-auto" >
+                    {/* <button onClick={(event) => handleManage(event, token)} className="btn btn-sm btn-ghost text-t2 w-fit ml-auto" > */}
+                    <Button variant="ghost" size="sm" className="text-t2" onClick={(event) => handleManage(event, token)}>
                         <MdOutlineSettings className="h-6 w-6" />
-                    </button>
+                    </Button>
+                    {/* </button> */}
                 </AdminWrapper>
 
 

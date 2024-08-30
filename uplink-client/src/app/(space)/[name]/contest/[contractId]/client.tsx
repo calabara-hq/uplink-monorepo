@@ -81,11 +81,8 @@ const MapTokens = React.memo(({
                             footer={
                                 <CardFooter
                                     token={token}
-                                    channel={channel}
-                                    spaceName={spaceName}
-                                    contractId={contractId}
-                                    handleMint={handleMint}
-                                    //handleShare={handleShare}
+                                    channel={{ ...channel, managers: [...channel.managers, channel.admin] }}
+                                    mintLabel="votes"
                                     handleManage={handleManage}
                                 />
                             }

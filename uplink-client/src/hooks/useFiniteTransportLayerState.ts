@@ -4,7 +4,6 @@ import { useTicks } from "./useTicks";
 import { ContractID } from "@/types/channel";
 import { useChannel } from "./useChannel";
 
-
 export type ChannelState = 'pre-submit' | 'submitting' | 'voting' | 'complete' | 'settled'
 export type StateRemainingTime = string | null;
 
@@ -14,8 +13,8 @@ const calculateChannelState = (createStart: string, mintStart: string, mintEnd: 
     const vote = Number(mintStart);
     const end = Number(mintEnd);
 
-    let channelState = null;
-    let remainingTime = null;
+    let channelState: ChannelState = null;
+    let remainingTime: StateRemainingTime = null;
 
     let nextDeadline = end;
 
@@ -63,7 +62,6 @@ export const useFiniteTransportLayerState = (contractId: ContractID) => {
 
     const { channel } = useChannel(contractId);
 
-
     const [channelState, setChannelState] = useState<ChannelState>(undefined);
     const [stateRemainingTime, setStateRemainingTime] = useState<string | null>(null);
 
@@ -82,6 +80,4 @@ export const useFiniteTransportLayerState = (contractId: ContractID) => {
         channelState,
         stateRemainingTime,
     }
-
-
 }

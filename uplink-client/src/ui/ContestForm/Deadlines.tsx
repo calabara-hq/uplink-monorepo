@@ -1,4 +1,4 @@
-import DateTimeSelector from "../DateTime/DateTime";
+// import DateTimeSelector from "../DateTime/DateTime";
 import { BlockWrapper } from "./Entrypoint";
 import { useState } from "react";
 import {
@@ -18,6 +18,9 @@ const Deadlines = ({
   errors: DeadlineError;
   setErrors: (errors: DeadlineError) => void;
 }) => {
+
+  return <p>fix me!!</p>
+
   const [deadlines, setDeadlines] = useState(initialDeadlines);
 
   const { startTime, voteTime, endTime, snapshot } = deadlines;

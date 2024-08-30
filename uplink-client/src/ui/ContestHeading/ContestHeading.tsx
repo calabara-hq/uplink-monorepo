@@ -25,6 +25,9 @@ import fetchContest from "@/lib/fetch/fetchContest";
 import ExpandableTextSection from "../ExpandableTextSection/ExpandableTextSection";
 import { TokenMetadata } from "@/types/channel";
 import { parseIpfsUrl } from "@/lib/ipfs";
+import { RenderMarkdown } from "../Markdown/RenderMarkdown";
+import { Space } from "@/types/space";
+import { Button } from "../DesignKit/Button";
 
 const ContestHeading = async ({
   contestId,
@@ -109,8 +112,10 @@ const ContestHeading = async ({
 };
 
 export const ContestHeadingV2 = ({
+  space,
   contestMetadata
 }: {
+  space: Space;
   contestMetadata: TokenMetadata;
 }) => {
 
@@ -123,7 +128,7 @@ export const ContestHeadingV2 = ({
               {contestMetadata.name}
             </h2>
             <div className="flex flex-row gap-2 items-center">
-              {/* <Link
+              <Link
                 className="relative w-8 h-8 flex flex-col"
                 href={`/${space.name}`}
                 draggable={false}
@@ -134,14 +139,16 @@ export const ContestHeadingV2 = ({
                   fill
                   className="rounded-full object-cover"
                 />
-              </Link> */}
-              {/* <Link
-                className="card-title text-sm text-t2 hover:underline hover:text-t1"
+              </Link>
+              <Link
                 href={`/${space.name}`}
                 draggable={false}
+                passHref
               >
-                {space.displayName}
-              </Link> */}
+                <Button variant="link" className="pl-0 ml-0">
+                  {space.displayName}
+                </Button>
+              </Link>
 
               {/* <LiveContestState /> */}
 
@@ -159,10 +166,9 @@ export const ContestHeadingV2 = ({
                 />
               </div> */}
             </div>
-            <div className="grid grid-cols-1">
+            <div className="grid grid-cols-1 text-t2 prose max-w-full">
               <ExpandableTextSection>
-                {/* <ParseBlocks data={prompt.body} omitImages={false} /> */}
-                <p>{contestMetadata.description}</p>
+                <RenderMarkdown content={contestMetadata.description} />
               </ExpandableTextSection>
             </div>
           </div>

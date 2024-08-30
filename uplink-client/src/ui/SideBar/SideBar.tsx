@@ -47,12 +47,12 @@ const SideBarIcon = ({
     href={path}
     draggable={false}
     className="relative flex items-center justify-center h-12 w-12 mt-2 mb-2 mx-auto
-  hover:bg-primary bg-gray-800 text-primary hover:text-black 
+  hover:bg-base-300 bg-base-100 text-primary 
   hover:rounded-xl rounded-3xl transition-all duration-300 ease-linear cursor-pointer shadow-lg group"
   >
     {icon}
     <span
-      className="absolute flex items-center justify-center z-10 bg-black w-auto p-2 m-2 min-w-max left-14 normal-case
+      className="absolute flex items-center justify-center z-10 bg-base-300 border border-border w-auto p-2 m-2 min-w-max left-14 normal-case
     text-t1 text-sm font-bold
     rounded-md shadow-md transition-all duration-300 scale-0 origin-left group-hover:scale-100"
     >

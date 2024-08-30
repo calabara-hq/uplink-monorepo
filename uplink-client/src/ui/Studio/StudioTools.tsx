@@ -4,19 +4,18 @@ import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { Option } from "../MenuSelect/MenuSelect";
-import dynamic from 'next/dynamic';
 import { forwardRef } from 'react';
 import {
     type MDXEditorMethods,
     type MDXEditorProps
 } from '@mdxeditor/editor'
+import { Label } from "../DesignKit/Label";
+import dynamic from 'next/dynamic';
 
 const Editor = dynamic(() => import('@/lib/markdownEditor/InitializedMDXEditor'), {
     // Make sure we turn SSR off
     loading: () => (
-        <div className="h-[90px] w-full shimmer bg-base-100 rounded-lg">
-
-        </div>
+        <div className="h-[90px] w-full shimmer bg-base-100 rounded-lg" />
     ),
     ssr: false
 })
@@ -34,11 +33,9 @@ interface MarkdownEditorProps extends MDXEditorProps {
 export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
     ({ label, error, ...editorProps }, ref) => {
         return (
-            <div>
-                <label className="label">
-                    <span className="label-text">{label}</span>
-                </label>
-                <Editor {...editorProps} editorRef={ref} />
+            <div className="flex flex-col gap-2">
+                <Label>{label}</Label>
+                <Editor {...editorProps} editorRef={ref} placeholder="Start typing here ..." />
                 {error && (
                     <label className="label">
                         <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{error.join(",")}</span>
@@ -62,9 +59,7 @@ export const TextArea = ({
     useAutosizeTextArea({ textAreaRef, value });
     return (
         <div>
-            <label className="label">
-                <span className="label-text">{label}</span>
-            </label>
+            <Label>{label}</Label>
             <div className="flex flex-col">
                 <textarea
                     ref={textAreaRef}
@@ -87,9 +82,7 @@ export const TextArea = ({
 export const BasicInput = ({ value, label, placeholder, onChange, error, inputType }) => {
     return (
         <div>
-            <label className="label">
-                <span className="label-text">{label}</span>
-            </label>
+            <Label>{label}</Label>
             <input
                 type={inputType}
                 autoComplete="off"
@@ -149,9 +142,7 @@ export const OptionOrCustom = ({ value, label, options, onOptionSelect, customLa
 
     return (
         <div>
-            <label className="label">
-                <span className="label-text">{label}</span>
-            </label>
+            <Label>{label}</Label>
             <div className="flex flex-col gap-2 p-2 rounded-xl w-full">
                 <div className="btn-group">
                     {options.map((option, idx) => (

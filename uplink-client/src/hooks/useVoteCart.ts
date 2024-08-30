@@ -1,12 +1,11 @@
-
-import { ChannelTokenWithUserBalance, ContractID, splitContractID } from "@/types/channel";
+"use client";
+import { Channel, ChannelTokenWithUserBalance, ContractID, splitContractID } from "@/types/channel";
 import { useWalletClient } from "wagmi";
-import { useSessionStorage } from "./useSessionStorage";
 import { ChannelToken } from "@/types/channel";
 import { useCallback, useEffect } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 import useSWR from "swr";
-import { Address } from "viem";
+import { Address, maxUint256, zeroAddress } from "viem";
 import { handleV2Error } from "@/lib/fetch/handleV2Errors";
 import { useMintTokenBatchWithETH } from "@tx-kit/hooks";
 import { useChannel } from "./useChannel";
@@ -71,15 +70,44 @@ const useUserChannelTokenHoldings = (userAddress: Address | undefined, contractI
     }
 }
 
+export const useVotingPower = (contractId: ContractID) => {
+    // const { data: walletClient } = useWalletClient();
+
+    const { channel } = useChannel(contractId);
+
+    if (!channel) {
+        return {
+            votingPower: maxUint256,
+            votesCast: maxUint256,
+            votesRemaining: maxUint256
+        }
+    }
+
+    if (!channel.minterLogic || channel.minterLogic.logicContract === zeroAddress) {
+        return {
+            votingPower: maxUint256,
+            votesCast: BigInt(1),
+            votesRemaining: maxUint256
+        }
+    }
+
+
+    return {
+        votingPower: BigInt(1),
+        votesCast: BigInt(1),
+        votesRemaining: BigInt(1)
+    }
+}
+
 export const useVoteCart = (contractId: ContractID) => {
     const { data: walletClient } = useWalletClient();
 
     const [proposedVotes, setProposedVotes] = useLocalStorage<Array<ChannelTokenWithUserBalance>>(`proposedVotes-${contractId.toLowerCase()}`, []);
     const { currentHoldings, isLoading, mutate: mutateCurrentHoldings } = useUserChannelTokenHoldings(walletClient?.account.address, contractId);
     const { mintTokenBatchWithETH, status: ethTxStatus, txHash: ethTxHash, error: ethTxError } = useMintTokenBatchWithETH()
-
     const { contractAddress, chainId } = splitContractID(contractId);
     const { channel } = useChannel(contractId);
+    const { votingPower, votesCast, votesRemaining } = useVotingPower(contractId);
 
     useTransmissionsErrorHandler(ethTxError);
 
@@ -150,7 +178,10 @@ export const useVoteCart = (contractId: ContractID) => {
         updateProposedVote,
         submitVotes,
         submitVotesTransactionStatus: ethTxStatus,
-        isTokenAlreadyProposed
+        isTokenAlreadyProposed,
+        votingPower,
+        votesCast,
+        votesRemaining
     }
 
 }

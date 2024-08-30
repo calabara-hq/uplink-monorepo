@@ -24,6 +24,13 @@ export const useTransmissionsErrorHandler = (error: any) => {
                 toast.error("This channel is not accepting new posts")
             }
 
+            if (err.includes("InvalidRewards()")) {
+                toast.error("Invalid rewards")
+            }
+
+            if (err.includes("InvalidAmountSent()")) {
+                toast.error("Invalid amount sent")
+            }
 
         }
     }, [error])

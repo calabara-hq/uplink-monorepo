@@ -98,6 +98,7 @@ export class TokenContractApi {
         return { symbol, decimals };
     }
 
+
     public async tokenGetTotalSupply({ contractAddress }: { contractAddress: string }) {
         let totalSupply: string = '0';
         try {

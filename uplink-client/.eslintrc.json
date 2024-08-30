@@ -1,8 +1,24 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "plugin:storybook/recommended",
-    "plugin:storybook/recommended"
-  ]
+    "eslint:recommended",
+    "plugin:tailwindcss/recommended"
+  ],
+  "plugins": [
+    "unused-imports", 
+    "tailwindcss"
+  ],
+  "rules": {
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "tailwindcss/no-custom-classname": "error"
+  }
 }
-

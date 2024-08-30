@@ -26,12 +26,14 @@ const Skeleton = () => {
 }
 
 export default async function Page({ params }: { params: { name: string } }) {
+
+  const space = await fetchSingleSpace(params.name);
+
+
   return (
-    <div className="w-11/12 h-full lg:w-9/12 m-auto">
-      {/* <Suspense fallback={<Skeleton />}>
-        <PageContent params={params} />
-      </Suspense> */}
-      <TempCreateContestV2 />
+    <div className="flex gap-6 m-auto w-full lg:w-[90vw]">
+      <TempCreateContestV2 space={space} />
     </div>
-  );
+  )
+
 }

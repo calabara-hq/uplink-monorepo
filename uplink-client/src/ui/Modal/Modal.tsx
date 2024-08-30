@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Button } from "../DesignKit/Button";
 
 const Modal = ({
   isModalOpen,
@@ -36,7 +37,7 @@ const Modal = ({
       <div className="modal modal-open bg-[#00000080] transition-colors duration-300 ease-in-out">
         <div
           ref={modalRef}
-          className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] animate-springUp"
+          className="modal-box bg-base-100 border border-border animate-springUp"
         >
           {children}
         </div>
@@ -63,16 +64,16 @@ export const ModalActions = ({
 }) => {
   return (
     <div className="modal-action mt-8">
-      <button
+      <Button
+        variant="ghost"
         onClick={onCancel}
-        className="btn btn-md btn-ghost normal-case mr-auto"
+        className="mr-auto"
       >
         {cancelLabel}
-      </button>
-      <button
+      </Button>
+      <Button
         disabled={confirmDisabled}
         onClick={onConfirm}
-        className="btn btn-primary btn-md normal-case"
       >
         {confirmLabel}
         {isLoading && (
@@ -81,7 +82,7 @@ export const ModalActions = ({
             role="status"
           />
         )}
-      </button>
+      </Button>
     </div>
   );
 };

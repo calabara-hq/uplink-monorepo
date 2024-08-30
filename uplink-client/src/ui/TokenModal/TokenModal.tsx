@@ -14,6 +14,8 @@ import {
 } from "@/hooks/useTokenManager";
 import TokenBadge from "../TokenBadge/TokenBadge";
 import { ChainLabel } from "../ContestLabels/ContestLabels";
+import { Label } from "../DesignKit/Label";
+import { Input } from "../DesignKit/Input";
 
 const TokenModal = ({
   isModalOpen,
@@ -322,10 +324,11 @@ const InputField = ({
   error?: string | null;
   onChange: (value: string) => void;
 }) => (
-  <div className={`flex flex-col ${className}`}>
-    <label className="text-sm p-1">{label}</label>
-    <input
-      className={`input ${error ? "input-error" : "input"}`}
+  <div className={`flex flex-col ${className} gap-2`}>
+
+    <Label>{label}</Label>
+    <Input
+      variant={`${error ? "error" : "default"}`}
       type={type}
       placeholder={placeholder}
       value={value}
@@ -333,9 +336,7 @@ const InputField = ({
       onChange={(e) => onChange(e.target.value)}
     />
     {error && (
-      <label className="label">
-        <span className="label-text-alt text-error">{error}</span>
-      </label>
+      <Label className="text-error">{error}</Label>
     )}
   </div>
 );

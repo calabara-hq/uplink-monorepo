@@ -9,9 +9,9 @@ import { ChainLabel } from "../ContestLabels/ContestLabels";
 import { zeroAddress } from "viem";
 import { getChainName, supportedChains } from "@/lib/chains/supportedChains";
 import TokenModal from "../TokenModal/TokenModal";
-import { useErc20TokenInfo } from "@/hooks/useErc20TokenInfo";
+import { useErc20TokenInfo } from "@/hooks/useTokenInfo";
 
-const Options = ({ label, options, selected, onSelect }: { label: string, options: Option[], selected: string, onSelect: (option: Option) => void }) => {
+export const Options = ({ label, options, selected, onSelect }: { label: string, options: Option[], selected: string, onSelect: (option: Option) => void }) => {
     return (
         <div>
             <label className="label">
@@ -37,7 +37,7 @@ const Options = ({ label, options, selected, onSelect }: { label: string, option
 
 }
 
-const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, customChild, onCustomSelect }: { value: string, label: string, options: Option[], onOptionSelect: (option: Option) => void; customLabel: string; customChild: React.ReactNode, onCustomSelect: () => void }) => {
+export const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, customChild, onCustomSelect }: { value: string, label: string, options: Option[], onOptionSelect: (option: Option) => void; customLabel: string; customChild: React.ReactNode, onCustomSelect: () => void }) => {
 
     const [isCustom, setIsCustom] = useState(value !== "0");
 
@@ -122,7 +122,7 @@ const TextArea = ({
     );
 };
 
-const BasicInput = ({ value, label, placeholder, onChange, error, inputType, styleOverrides = {} }) => {
+export const BasicInput = ({ value, label, placeholder, onChange, error, inputType, styleOverrides = {} }) => {
     return (
         <div className="w-full">
             <label className="label">
@@ -149,7 +149,7 @@ const BasicInput = ({ value, label, placeholder, onChange, error, inputType, sty
 }
 
 
-const FeeRow = ({ value, label, placeholder, onChange, error }) => {
+export const FeeRow = ({ value, label, placeholder, onChange, error }) => {
     return (
         <div className="flex flex-row items-center justify-between">
             <label className="label">
@@ -225,7 +225,7 @@ const ChainSelector = ({
 }
 
 
-const FeesTable = ({ children }: { children: React.ReactNode }) => {
+export const FeesTable = ({ children }: { children: React.ReactNode }) => {
     return (
         <div className="flex flex-col bg-base rounded-md p-2">
             {children}
@@ -233,7 +233,7 @@ const FeesTable = ({ children }: { children: React.ReactNode }) => {
     )
 }
 
-const ERC20MintPriceInput = ({ state, setField }) => {
+export const ERC20MintPriceInput = ({ state, setField }) => {
     const { symbol, decimals } = useErc20TokenInfo(state.erc20Contract, state.chainId)
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -324,7 +324,7 @@ const asPositiveInt = (value: string) => {
     return value.trim() === "" ? "" : Math.abs(Math.round(Number(value))).toString();
 }
 
-const asPositiveFloat = (value: string, maxMantissaLen: number, maxWhole?: number) => {
+export const asPositiveFloat = (value: string, maxMantissaLen: number, maxWhole?: number) => {
     const [whole, fractional] = value.split(".");
     if (!whole) return "";
     const wholeNum = Math.abs(Number(whole)).toString();

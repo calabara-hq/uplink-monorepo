@@ -15,7 +15,7 @@ import { CounterInput, FeeStructure, getETHMintPrice, RenderFees, RenderMaxSuppl
 import { Boundary } from "../Boundary/Boundary";
 import { AddressOrEns, Avatar } from "../AddressDisplay/AddressDisplay";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
-import { useErc20TokenInfo } from "@/hooks/useErc20TokenInfo";
+import { useErc20TokenInfo } from "@/hooks/useTokenInfo";
 import { useEthBalance, useErc20Balance } from "@/hooks/useTokenBalance";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import Link from "next/link";
@@ -24,6 +24,8 @@ import { useRouter } from "next/navigation";
 import { ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContractID, ContractID } from "@/types/channel";
 import Markdown from "react-markdown";
 import { useVoteCart } from "@/hooks/useVoteCart";
+import { Button } from "../DesignKit/Button";
+import { RenderMarkdown } from "../Markdown/RenderMarkdown";
 
 export type DisplayMode = "modal" | "expanded" | "contest-modal" | "contest-expanded"
 
@@ -62,7 +64,7 @@ export const RenderDisplayWithProps = (props: DisplayProps & { displayMode: Disp
 
 const LinkRenderer = (props: any) => {
     return (
-        <a href={props.href} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+        <a href={props.href} target="_blank" rel="noopener noreferrer" className="no-underline text-primary12 hover:underline">
             {props.children}
         </a>
     )
@@ -103,14 +105,14 @@ export const MintContestDisplay = ({ token,
                             <AddressOrEns address={creator} />
                         </div>
                         <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Share</button>
-                        <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Add to list</button>
+                        <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Vote</button>
                     </div>
                     <div className="flex items-center justify-center rounded-lg p-1 relative w-full  m-auto">
                         <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
                     </div>
 
                     <div className="prose">
-                        <Markdown components={{ a: LinkRenderer }}>{metadata.description}</Markdown>
+                        <RenderMarkdown content={metadata.description} />
                     </div>
                 </div>
             </div>
@@ -128,7 +130,7 @@ const AddToListButton = ({ contractId, token }: { contractId: ContractID, token:
         addProposedVote(token)
     }
 
-    return (<button onClick={handleAddToList} className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Add to list</button>)
+    return <Button variant="secondary" onClick={handleAddToList}>Vote</Button>
 }
 
 
@@ -155,30 +157,30 @@ export const ContestExpandedDisplay = ({
 
     return (
         <div className="flex flex-col gap-4">
-            <Link href={backwardsNavUrl} className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0">
+            {/* <Link href={backwardsNavUrl} className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0">
                 <HiArrowNarrowLeft className="w-6 h-6" />
                 <p>Back</p>
-            </Link>
+            </Link> */}
 
             <div className="flex flex-col gap-2">
                 <div className="grid grid-cols-[85%_15%] items-start">
                     <p className="line-clamp-3 font-bold text-lg break-word ">{metadata.name}</p>
                 </div>
-                <div className="flex flex-col gap-4 ">
+                <div className="flex flex-col prose">
                     <div className="flex gap-2 items-center">
-                        <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
+                        <div className="flex gap-2 items-center text-sm text-t2 bg-base-100 rounded-lg p-1 w-fit">
                             <Avatar address={creator} size={28} />
                             <AddressOrEns address={creator} />
                         </div>
-                        <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Share</button>
+                        <Button variant="outline" className="ml-auto" onClick={handleShare}>Share</Button>
                         <AddToListButton contractId={concatContractID({ contractAddress: token.channelAddress, chainId })} token={token as ChannelToken} />
                     </div>
                     <div className="flex items-center justify-center rounded-lg p-1 w-full  m-auto">
                         <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
                     </div>
 
-                    <div className="prose">
-                        <Markdown components={{ a: LinkRenderer }}>{metadata.description}</Markdown>
+                    <div className="text-t2">
+                        <Markdown components={{ a: LinkRenderer }}>{metadata.description.replace('\n\n', '\n')}</Markdown>
                     </div>
                 </div>
             </div>

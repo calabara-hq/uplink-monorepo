@@ -1,41 +1,26 @@
 "use client";
 
 import { FaRegCircleQuestion } from "react-icons/fa6";
-import formatDecimal from "@/lib/formatDecimal";
-import { ExpandSection, RenderStateSpecificDialog } from "../ContestDetails/client";
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 import formatOrdinals from "@/lib/formatOrdinals";
 import Link from "next/link";
-import { ChainLabel, StatusLabel } from "../ContestLabels/ContestLabels";
-import {
-    HiInformationCircle,
-    HiOutlineLockClosed,
-    HiPlusCircle,
-} from "react-icons/hi2";
-import { BiTime } from "react-icons/bi";
-import type { OutputData } from "@editorjs/editorjs";
-import { IoWarningOutline } from "react-icons/io5";
 import {
     FungibleReward,
     NonFungibleReward,
     SubmitterTokenRewardOption,
-    isArcadeVotingStrategy,
-    isFungibleReward,
     isSubmitterTokenReward,
-    isVoterTokenReward,
-    isWeightedVotingStrategy,
 } from "@/types/contest";
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
-import { getChainName } from "@/lib/chains/supportedChains";
-import fetchContest from "@/lib/fetch/fetchContest";
-import { Channel, ContractID, splitContractID } from "@/types/channel";
+import { ContractID, splitContractID } from "@/types/channel";
 import { IFiniteTransportConfig, ILogicConfig } from "@tx-kit/sdk/subgraph";
-import { useErc20TokenInfo } from "@/hooks/useErc20TokenInfo";
+import { useErc20TokenInfo, useTokenInfo } from "@/hooks/useTokenInfo";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
 import { Address, decodeAbiParameters, formatUnits, Hex, parseEther, parseUnits } from "viem";
 import { useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
-import { TbLoader2 } from "react-icons/tb";
 import { RenderStatefulChildAndRemainingTime } from "./SidebarUtils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../DesignKit/Tooltip";
+import { Info } from "../DesignKit/Info";
+import { Button } from "../DesignKit/Button";
 
 const normalizeSubmitterRewards = (
     subRewards: FetchSingleContestResponse["submitterRewards"]
@@ -101,30 +86,28 @@ const DetailSectionWrapper = ({
             <div className="flex gap-2 items-center">
                 <h2 className="font-semibold text-t1 text-[16px]">{title}</h2>
                 {tooltipContent && (
-                    <div className="dropdown dropdown-left dropdown-hover">
-                        <label tabIndex={0} className="cursor-pointer">
-                            <FaRegCircleQuestion className="w-4 h-4 text-t2" />
-                        </label>
-                        <div
-                            tabIndex={0}
-                            className="dropdown-content z-[1] card card-compact w-64 p-2 bg-primary text-primary-content shadow-black shadow-lg"
-                        >
-                            <div className="card-body">{tooltipContent}</div>
-                        </div>
-                    </div>
+                    <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <FaRegCircleQuestion className="w-4 h-4 text-t2" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[250px]">
+                                <Info className="bg-base-200 border border-border text-t2 text-sm font-normal">{tooltipContent}</Info>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 )}
             </div>
             <div className="flex flex-col gap-1 w-full text-t2 text-sm">
                 {children}
             </div>
-            <div className="bg-base-100 h-0.5 w-full" />
+            <div className="bg-base-200 h-0.5 w-full" />
         </div>
     );
 };
 
 
-
-const ERC1155_LogicRule = ({
+const TokenLogicRule = ({
     chainId,
     target,
     operator,
@@ -136,27 +119,7 @@ const ERC1155_LogicRule = ({
     literalOperand: string,
 }) => {
 
-    // TODO
-    // 0x00fdd58e
-    return null
-}
-
-
-const ERC20_ERC721_LogicRule = ({
-    chainId,
-    target,
-    operator,
-    literalOperand,
-}: {
-    chainId,
-    target: Address,
-    operator: string,
-    literalOperand: string,
-}) => {
-    // 0x70a08231
-
-    const { symbol, decimals, isLoading } = useErc20TokenInfo(target, chainId)
-
+    const { symbol, decimals, isLoading } = useTokenInfo(target, chainId)
 
     const formattedLiteralOperand = useMemo(() => {
         const decoded = decodeAbiParameters([{ name: 'x', type: 'uint256' }], literalOperand as Hex)[0]
@@ -195,10 +158,8 @@ const DisplayLogicRule = ({
     literalOperand: string,
 }) => {
 
-    if (signature === '0x70a08231') return <ERC20_ERC721_LogicRule chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
-    else if (signature === '0x00fdd58e') return <ERC1155_LogicRule chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
+    if (signature === '0x70a08231' || signature === '0x00fdd58e') return <TokenLogicRule chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
     else return null
-
 }
 
 const DisplayCredits = ({ interactionPower, interactionPowerType, creditContextLabel }: { interactionPower: string, interactionPowerType: string, creditContextLabel: string }) => {
@@ -206,7 +167,7 @@ const DisplayCredits = ({ interactionPower, interactionPowerType, creditContextL
     const readableInteractionPowerType = interactionPowerType === "0" ? "Uniform" : "Weighted"
     const readableInteractionPower = readableInteractionPowerType === "Weighted" ? `Weighted ${creditContextLabel}` : `${interactionPower} ${creditContextLabel}`
 
-    return <div className="badge badge-success bg-opacity-10 text-success border border-gray-800 badge-sm font-medium">{readableInteractionPower}</div>;
+    return <div className="rounded-xl pl-2 pr-2 bg-success font-normal bg-opacity-10 text-success text-sm">{readableInteractionPower}</div>;
 
 }
 
@@ -235,7 +196,7 @@ const LogicDisplay = ({ chainId, logicObject, creditContextLabel }: { chainId: n
                         )
 
                         // if (logicObject.logic.signatures[idx] === '0x00fdd58e') return null
-                        // else if (logicObject.logic.signatures[idx] === '0x70a08231') return <ERC20_ERC721_LogicRule key={idx} chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
+                        // else if (logicObject.logic.signatures[idx] === '0x70a08231') return <TokenLogicRule key={idx} chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
                         // else return null
                     })}
                 {/* modal content */}
@@ -292,7 +253,7 @@ const RewardsSection = ({
         <DetailSectionWrapper
             title="Submitter Rewards"
             tooltipContent={
-                <p className="font-semibold">
+                <p className="font-normal">
                     At the end of the voting period, these rewards are allocated to
                     submissions that finish in the pre-defined ranks.
                 </p>
@@ -362,111 +323,6 @@ const RewardsSection = ({
         </DetailSectionWrapper>
     );
 };
-const VotingPolicySection = ({
-    votingPolicy,
-}: {
-    votingPolicy: FetchSingleContestResponse["votingPolicy"];
-    chainId: FetchSingleContestResponse["chainId"];
-}) => {
-    return (
-        <DetailSectionWrapper
-            title="Voting Strategies"
-            tooltipContent={
-                <>
-                    <p className="font-semibold">
-                        {`Eligible voters must meet at least one requirement. Credits determine voting power.`}
-                    </p>
-
-                    <p className="font-extrabold">
-                        {`Weighted: Credits = token balance.`}
-                    </p>
-                    <p className="font-extrabold">
-                        {`Arcade: All users that hold a specific token get a uniform # of credits.`}
-                    </p>
-
-                    <p className="font-semibold">
-                        {`If a user meets multiple requirements, the highest # of credits are used.`}
-                    </p>
-                </>
-            }
-        >
-            {votingPolicy.length > 0 ? (
-                <div className="flex flex-col gap-1 p-2 text-t2 text-sm">
-                    <div className="flex flex-col gap-1">
-                        {votingPolicy.slice(0, 3).map((strategy, idx: number) => {
-                            if (isArcadeVotingStrategy(strategy)) {
-                                return (
-                                    <p key={idx}>
-                                        {`Arcade ${strategy.arcadeVotingStrategy.token.symbol} (${formatDecimal(strategy.arcadeVotingStrategy.votingPower)
-                                            .short
-                                            } credits) `}
-                                    </p>
-                                );
-                            } else if (isWeightedVotingStrategy(strategy)) {
-                                return (
-                                    <p key={idx}>
-                                        {" "}
-                                        Weighted {strategy.weightedVotingStrategy.token.symbol}
-                                    </p>
-                                );
-                            }
-                        })}
-                        {/* modal content */}
-                        <ExpandSection
-                            data={votingPolicy}
-                            label={`+ ${votingPolicy.length - 3} strategies`}
-                        >
-                            <div className="w-full flex flex-col gap-4 text-t1">
-                                <h1 className="text-lg font-bold">Voting Strategies</h1>
-                                <div className="flex flex-col gap-1 p-2 ">
-                                    <div className="grid grid-cols-3">
-                                        <p className="font-bold">Token</p>
-                                        <p className="font-bold">Type</p>
-                                        <p className="font-bold">Credits</p>
-                                        {votingPolicy.map((strategy: any, idx: number) => {
-                                            return (
-                                                <Fragment key={idx}>
-                                                    {strategy.strategyType === "arcade" && (
-                                                        <>
-                                                            <p>
-                                                                {strategy.arcadeVotingStrategy.token.symbol}
-                                                            </p>
-                                                            <p>Arcade</p>
-                                                            <p>
-                                                                {
-                                                                    formatDecimal(
-                                                                        strategy.arcadeVotingStrategy.votingPower
-                                                                    ).short
-                                                                }
-                                                            </p>
-                                                        </>
-                                                    )}
-                                                    {strategy.strategyType === "weighted" && (
-                                                        <>
-                                                            <p>
-                                                                {strategy.weightedVotingStrategy.token.symbol}
-                                                            </p>
-                                                            <p>Weighted</p>
-                                                            <p>Weighted</p>
-                                                        </>
-                                                    )}
-                                                </Fragment>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </div>
-                        </ExpandSection>
-                    </div>
-                </div>
-            ) : (
-                <p className="text-t2 p-2 text-sm">Anyone can vote!</p>
-            )}
-        </DetailSectionWrapper>
-    );
-};
-
-
 
 // thinking ...
 // contractID
@@ -516,13 +372,13 @@ const ContestDetailsV2 = ({
                 <RewardsSection transportConfig={transportConfig} chainId={chainId} />
                 <DetailSectionWrapper
                     title="Entry Requirements"
-                    tooltipContent={<p className="font-semibold">{`Users satisfying at least one requirement are elgible to submit.`}</p>}
+                    tooltipContent={<p className="font-normal">{`Users satisfying at least one requirement are elgible to submit.`}</p>}
                 >
                     <LogicDisplay logicObject={creatorLogic} chainId={chainId} creditContextLabel="entries" />
                 </DetailSectionWrapper>
                 <DetailSectionWrapper
                     title="Voting Requirements"
-                    tooltipContent={<p className="font-semibold">{`Users satisfying at least one requirement are elgible to vote.`}</p>}
+                    tooltipContent={<p className="font-normal">{`Users satisfying at least one requirement are elgible to vote.`}</p>}
                 >
                     <LogicDisplay logicObject={minterLogic} chainId={chainId} creditContextLabel="votes" />
                 </DetailSectionWrapper>
@@ -535,12 +391,13 @@ const ContestDetailsV2 = ({
             /> */}
 
             <RenderStatefulChildAndRemainingTime contractId={contractId} childStateWindow={"submitting"} >
-                <Link href={`${contractId}/studio`} className="btn btn-primary normal-case">Submit</Link>
+                <Link href={`${contractId}/studio`} passHref>
+                    <Button>Submit</Button>
+                </Link>
             </RenderStatefulChildAndRemainingTime>
 
         </div>
     );
 };
-
 
 export default ContestDetailsV2;

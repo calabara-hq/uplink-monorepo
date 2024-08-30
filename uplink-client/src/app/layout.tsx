@@ -134,7 +134,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-theme="uplinkDark" className="bg-base stars small">
+    <html lang="en" className="bg-base">
       <head />
       <body>
         <WalletProvider refetchInterval={60} session={undefined}>

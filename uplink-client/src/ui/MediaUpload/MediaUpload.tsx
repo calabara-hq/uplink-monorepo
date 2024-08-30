@@ -5,6 +5,8 @@ import Image from "next/image";
 import { HiCamera, HiOutlineTrash, HiPhoto } from 'react-icons/hi2';
 import { RenderStandardVideoWithLoader } from '@/ui/VideoPlayer';
 import { BiSolidCircle } from 'react-icons/bi';
+import { Label } from '../DesignKit/Label';
+import { Button } from '../DesignKit/Button';
 
 
 export const MediaUpload = ({
@@ -61,9 +63,7 @@ export const MediaUpload = ({
     if (isVideo) {
         return (
             <div className="relative w-full m-auto">
-                <label className="label">
-                    <span className="label-text text-t1">{label}</span>
-                </label>
+                <Label>{label}</Label>
                 <button
                     className="absolute top-5 -right-3 btn btn-error btn-sm btn-circle z-10 shadow-lg"
                     onClick={removeMedia}
@@ -80,9 +80,7 @@ export const MediaUpload = ({
                 />
                 {thumbnailOptions?.length > 0 && (
                     <>
-                        <label className="label">
-                            <span className="label-text text-t1">Thumbnail</span>
-                        </label>
+                        <Label>Thumbnail</Label>
 
                         <div className="flex flex-col sm:flex-row gap-2 items-center justify-center bg-base-100 border border-border p-2 w-full m-auto rounded">
                             <div className="flex flex-wrap w-full gap-2">
@@ -119,17 +117,16 @@ export const MediaUpload = ({
 
     else if (imageObjectURL) {
         return (
-            <div className="flex flex-col items-center">
-                <label className="label self-start">
-                    <span className="label-text text-t1">{label}</span>
-                </label>
+            <div className="flex flex-col gap-2">
+                <Label>{label}</Label>
                 <div className="relative">
-                    <button
-                        className="absolute top-0 right-0 mt-[-10px] mr-[-10px] btn btn-error btn-sm btn-circle z-10 shadow-lg"
+                    <Button
+                        variant="destructive"
+                        className="absolute top-0 right-0 mt-[-10px] mr-[-8px] p-2 bg-base-100 rounded-full z-10 shadow-lg"
                         onClick={removeMedia}
                     >
                         <HiOutlineTrash className="w-5 h-5" />
-                    </button>
+                    </Button>
                     <Image
                         src={imageObjectURL}
                         alt="Media"
@@ -142,7 +139,7 @@ export const MediaUpload = ({
         )
     } else {
         return (
-            <div className="w-full h-full">
+            <div className="w-full h-full flex flex-col gap-2">
                 <input
                     placeholder="asset"
                     type="file"
@@ -153,11 +150,9 @@ export const MediaUpload = ({
                     }
                     ref={imageUploader}
                 />
-                <label className="label">
-                    <span className="label-text text-t1">{label}</span>
-                </label>
+                <Label>{label}</Label>
                 <div
-                    className="w-full h-56 cursor-pointer flex justify-center items-center hover:bg-base-100 transition-all rounded-xl border-2 border-border border-dashed"
+                    className="w-full h-56 cursor-pointer flex justify-center items-center hover:bg-accent transition-all rounded-xl border-2 border-border border-dashed"
                     onClick={() => imageUploader.current?.click()}
                 >
                     <div className="flex justify-center items-center w-full h-full">

@@ -1,70 +1,192 @@
 "use client";
 
 import { useCreateFiniteChannel } from "@tx-kit/hooks";
-import { CreateFiniteChannelConfig, NATIVE_TOKEN } from "@tx-kit/sdk";
-import { encodeAbiParameters, parseEther, zeroAddress } from "viem";
+import { CreateFiniteChannelConfig } from "@tx-kit/sdk";
 import { useWalletClient } from "wagmi";
-import { UniformInteractionPower } from "@tx-kit/sdk/utils";
-import { useEffect } from "react";
-import { DYNAMIC_LOGIC_BASE_SEPOLIA } from "@tx-kit/sdk";
+import React, { useEffect, useState } from "react";
+import { Space } from "@/types/space";
+import toast from "react-hot-toast";
+import { Metadata, useMetadataSettings } from "@/ui/ChannelSettings/Metadata";
+import { Rewards, useRewardsSettings } from "@/ui/ChannelSettings/Rewards";
+import { Deadlines, useDeadlineSettings } from "@/ui/ChannelSettings/Deadlines";
+import { InteractionLogic, useInteractionLogicSettings } from "@/ui/ChannelSettings/InteractionLogic";
+import { concatContractID, ContractID } from "@/types/channel";
+import useSWRMutation from "swr/mutation";
+import { insertChannel } from "@/lib/fetch/insertChannel";
+import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
+import { useSession } from "@/providers/SessionProvider";
+import OnchainButton from "@/ui/OnchainButton/OnchainButton";
+import { TbLoader2 } from "react-icons/tb";
+import { useChannel } from "@/hooks/useChannel";
+import { useRouter } from "next/navigation";
+import { mutateChannel } from "@/app/mutate";
+import { Button } from "@/ui/DesignKit/Button";
 
-// known errors
-// InvalidRewards()
-// InvalidAmountSent()
 
-
-export const TempCreateContestV2 = () => {
-    const { createFiniteChannel, status, txHash, error, channelAddress } = useCreateFiniteChannel();
-    const { data: walletClient } = useWalletClient();
-
-    const erc20BalanceOfData = encodeAbiParameters([{ type: "address", name: "address" }], [zeroAddress])
-
+const WaitForNewChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
+    const { channel } = useChannel(contractId, 5000);
+    const router = useRouter();
 
     useEffect(() => {
-        console.log(error)
-        console.log(status)
-    }, [error, status])
+        if (channel) {
+            mutateChannel(contractId)
+            router.push(`/${spaceData.name}/contest/${contractId}`, { scroll: false })
+            router.refresh();
+            toast.success('Contest Configured!')
+        }
+    }, [channel])
 
-    const setupActions = [
+
+    return (
+        <div className="flex flex-col gap-4 justify-center items-center h-96 m-auto">
+            <h2 className="text-xl text-t1 font-bold">Creating Contest...</h2>
+            <TbLoader2 className="w-12 h-12 text-primary animate-spin" />
+        </div>
+    )
+
+}
+
+export const TempCreateContestV2 = ({ space }: { space: Space }) => {
+    const { createFiniteChannel, status, txHash, error, channelAddress } = useCreateFiniteChannel();
+    const { data: walletClient } = useWalletClient();
+    const { data: session } = useSession();
+    const { metadata, setMetadata, validateMetadata } = useMetadataSettings();
+    const { rewards, setRewards, validateRewards } = useRewardsSettings();
+    const { deadlines, setDeadlines, validateDeadlines } = useDeadlineSettings();
+    const { interactionLogic: submitterRules, setInteractionLogic: setSubmitterRules, validateInteractionLogic: validateSubmitterRules } = useInteractionLogicSettings()
+    const { interactionLogic: voterRules, setInteractionLogic: setVoterRules, validateInteractionLogic: validateVoterRules } = useInteractionLogicSettings()
+
+    const [chainId, setChainId] = useState(8453);
+    const [waitForNewChannel, setWaitForNewChannel] = useState(false);
+
+
+    useTransmissionsErrorHandler(error);
+
+    const contractId = concatContractID({ chainId: chainId, contractAddress: channelAddress })
+
+    const { trigger, data: swrData, error: swrError, isMutating: isSwrMutating, reset: resetSwr } = useSWRMutation(
+        `/api/insertChannel/${contractId}`,
+        insertChannel,
         {
-            logicContract: DYNAMIC_LOGIC_BASE_SEPOLIA,
-            creatorLogic: [new UniformInteractionPower(BigInt(10)).ifResultOf('0x24fe7807089e321395172633aA9c4bBa4Ac4a357', '0x70a08231', erc20BalanceOfData).gt(parseEther('0.0000000001'))],
-            minterLogic: [new UniformInteractionPower(BigInt(10)).ifResultOf('0x24fe7807089e321395172633aA9c4bBa4Ac4a357', '0x70a08231', erc20BalanceOfData).gt(parseEther('0.0000000001'))]
+            onError: (err) => {
+                console.log(err);
+                resetSwr();
+            },
         }
-    ]
+    );
+
+    const handleChannelCreated = async () => {
+        try {
+            await trigger({
+                csrfToken: session.csrfToken,
+                spaceId: space.id,
+                contractId: contractId,
+                channelType: "finite",
+
+            }).then((response) => {
+                if (!response.success) {
+                    toast.error('Something went wrong')
+                    return resetSwr();
+                }
+                setWaitForNewChannel(true);
+            });
+        } catch (e) {
+            console.log(e)
+            resetSwr();
+        }
+    }
+
+    useEffect(() => {
+        if (status == "complete") {
+            handleChannelCreated();
+        }
+    }, [status]);
 
 
-    const args: CreateFiniteChannelConfig = {
-        uri: 'ipfs://Qmcn5RgybtgUQYhqJoncrkABqYXwbCFgcvRdF5dMQgvEYN',
-        name: 'voting test',
-        defaultAdmin: "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C",
-        managers: [],
-        setupActions,
-        transportLayer: {
-            createStartInSeconds: Math.floor(Date.now() / 1000),
-            mintStartInSeconds: Math.floor(Date.now() / 1000) + 60 * 10, // 10 minutes
-            mintEndInSeconds: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 14, // 2 weeks
-            rewards: {
-                ranks: [1],
-                allocations: [parseEther('0.0000001')],
-                totalAllocation: parseEther('0.0000001'),
-                token: NATIVE_TOKEN
+    const handleSubmit = async () => {
+
+        try {
+            const [{ data: metadataOutput }, { data: rewardsOutput }, { data: submitterLogicOutput }, { data: voterLogicOutput }] = await Promise.all([
+                validateMetadata(),
+                validateRewards(),
+                validateSubmitterRules(),
+                validateVoterRules()
+            ])
+
+            const { data: deadlinesOutput } = validateDeadlines()
+
+            // write to the blockchain TODO: just eth rewards for now
+
+            const data: CreateFiniteChannelConfig = {
+                uri: metadataOutput.uri,
+                name: metadata.title,
+                defaultAdmin: walletClient.account.address,
+                managers: [], // todo space admins
+                setupActions: submitterLogicOutput.logicContract || voterLogicOutput.logicContract ?
+                    [{
+                        logicContract: submitterLogicOutput.logicContract || voterLogicOutput.logicContract,
+                        creatorLogic: submitterLogicOutput.logic,
+                        minterLogic: voterLogicOutput.logic
+                    }]
+                    : [],
+                transportLayer: {
+                    createStartInSeconds: deadlinesOutput.createStart,
+                    mintStartInSeconds: deadlinesOutput.mintStart,
+                    mintEndInSeconds: deadlinesOutput.mintEnd,
+                    rewards: {
+                        ...rewardsOutput
+                    }
+                },
+                transactionOverrides: {
+                    value: rewardsOutput.totalAllocation
+                }
             }
-        },
-        transactionOverrides: {
-            value: parseEther('0.0000001')
+
+            await createFiniteChannel(data)
+
+        } catch (e) {
+            toast.error("Please fill out all required fields")
         }
+
     }
 
 
+    if (waitForNewChannel) return <WaitForNewChannel spaceData={space} contractId={contractId} />
 
 
+    return (
+        <React.Fragment>
+            <div className="flex flex-col gap-4 transition-all duration-200 ease-in-out w-full max-w-[850px] m-auto">
+                <div className="flex flex-col gap-6 w-full">
 
-    const handleClick = async () => {
-        await createFiniteChannel(args)
-    }
+                    <Metadata metadata={metadata} setMetadata={setMetadata} />
+                    <Rewards rewards={rewards} setRewards={setRewards} />
+                    <Deadlines deadlines={deadlines} setDeadlines={setDeadlines} />
+                    <InteractionLogic mode="submit" interactionLogic={submitterRules} setInteractionLogic={setSubmitterRules} />
+                    <InteractionLogic mode="vote" interactionLogic={voterRules} setInteractionLogic={setVoterRules} />
 
-
-    return <button className="btn" onClick={handleClick}>Create Contest</button>
-
+                    <OnchainButton
+                        chainId={chainId}
+                        title={"Save"}
+                        onClick={handleSubmit}
+                        isLoading={status === 'pendingApproval' || status === 'txInProgress'}
+                        loadingChild={
+                            <Button disabled>
+                                <div className="flex gap-2 items-center">
+                                    <p className="text-sm">{
+                                        status === 'pendingApproval' ?
+                                            <span>Awaiting Signature</span>
+                                            :
+                                            <span>processing</span>
+                                    }
+                                    </p>
+                                    <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                </div>
+                            </Button>
+                        }
+                    />
+                </div>
+            </div>
+        </React.Fragment>
+    )
 }

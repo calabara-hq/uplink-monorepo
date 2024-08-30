@@ -7,7 +7,7 @@ import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi'
 import { UserRejectedRequestError } from 'viem';
 import Link from "next/link";
 import { FaSignOutAlt, FaUser } from "react-icons/fa"
-import { Button } from "../Button/Button";
+import { Button } from "@/ui/DesignKit/Button";
 import { TbLoader2 } from "react-icons/tb";
 
 function AccountModal({
@@ -115,16 +115,12 @@ export function CreateSmartWalletButton({ openConnectModal }: { openConnectModal
 
 
   return (
-    <button
-      className={`btn normal-case btn-ghost btn-active rounded-xl transition-all duration-200 ease-linear`}
-      onClick={createWallet}
-    >
+    <Button variant="outline" onClick={createWallet}>
       {isCreating ?
         <span className="flex items-center gap-2">Creating<TbLoader2 className="w-4 h-4 text-t2 animate-spin" /></span>
         : "Create Wallet"
       }
-    </button>
-
+    </Button>
   );
 }
 
@@ -142,12 +138,10 @@ export default function WalletConnectButton({
   if (!status || status === "loading")
     return (
       <div className="grid grid-cols-2 items-center gap-2 max-w-full">
-        <div className={`btn normal-case shimmer btn-ghost rounded-xl text-transparent ${styleOverride}`}>
-          Create Wallet
-        </div>
-        <div className={`btn normal-case shimmer btn-ghost rounded-xl text-transparent ${styleOverride}`}>
-          Sign in
-        </div>
+
+        <Button variant="outline" className="shimmer text-transparent">Placeholder</Button>
+        <Button variant="outline" className="shimmer text-transparent">Placeholder</Button>
+
       </div>
     )
   else
@@ -162,12 +156,10 @@ export default function WalletConnectButton({
             return (
               <div className="grid grid-cols-2 items-center gap-2 max-w-full">
                 <CreateSmartWalletButton openConnectModal={openConnectModal} />
-                <button
-                  className={`btn normal-case btn-ghost btn-active rounded-xl transition-all duration-200 ease-linear ${styleOverride}`}
-                  onClick={openConnectModal}
-                >
+                <Button variant="default" onClick={openConnectModal}>
                   Sign in
-                </button>
+                </Button>
+
               </div>
             );
           }}
