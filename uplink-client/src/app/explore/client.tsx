@@ -1,11 +1,9 @@
-"use client";
-
-import { useRouter } from "next/navigation"
-import { Popover, PopoverTrigger, PopoverContent } from "@/ui/DesignKit/Popover";
+"use client";;
 import { Space } from "@/types/space";
 import { useEffect, useRef, useState } from "react";
 import UplinkImage from "@/lib/UplinkImage";
 import Link from "next/link";
+import { Input } from "@/ui/DesignKit/Input";
 
 
 const isFuzzyMatch = (str1: string, str2: string, maxEdits: number = 1) => {
@@ -94,9 +92,9 @@ export const SearchSpaces = ({ allSpaces }: { allSpaces: Array<Space> }) => {
         <div className="flex flex-col w-full" ref={ref}>
             {/* Popover trigger with search input */}
 
-            <input
+            <Input
                 type="text"
-                className="input input-bordered w-full"
+                variant="outline"
                 onChange={handleInput}
                 placeholder="Search"
                 value={searchTerm}
@@ -115,7 +113,7 @@ export const SearchSpaces = ({ allSpaces }: { allSpaces: Array<Space> }) => {
                                         <UplinkImage
                                             src={space.logoUrl}
                                             alt={space.name}
-                                            className="w-full mask mask-circle"
+                                            className="w-full rounded-full"
                                             fill
                                         />
                                     </div>

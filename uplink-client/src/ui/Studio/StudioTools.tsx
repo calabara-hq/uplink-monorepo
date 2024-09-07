@@ -1,8 +1,6 @@
-"use client";
-
+"use client";;
 import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
-import { useEffect, useRef, useState } from "react";
-import { nanoid } from "nanoid";
+import { useRef, useState } from "react";
 import { Option } from "../MenuSelect/MenuSelect";
 import { forwardRef } from 'react';
 import {
@@ -11,6 +9,8 @@ import {
 } from '@mdxeditor/editor'
 import { Label } from "../DesignKit/Label";
 import dynamic from 'next/dynamic';
+import { Input } from "../DesignKit/Input";
+import { Button } from "../DesignKit/Button";
 
 const Editor = dynamic(() => import('@/lib/markdownEditor/InitializedMDXEditor'), {
     // Make sure we turn SSR off
@@ -83,7 +83,8 @@ export const BasicInput = ({ value, label, placeholder, onChange, error, inputTy
     return (
         <div>
             <Label>{label}</Label>
-            <input
+            <Input
+                variant={error ? "error" : "default"}
                 type={inputType}
                 autoComplete="off"
                 onWheel={(e) => e.currentTarget.blur()}
@@ -91,8 +92,6 @@ export const BasicInput = ({ value, label, placeholder, onChange, error, inputTy
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className={`input input-bordered w-full ${error ? "input-error" : "input"
-                    }`}
             />
             {error && (
                 <label className="label">
@@ -103,71 +102,49 @@ export const BasicInput = ({ value, label, placeholder, onChange, error, inputTy
     )
 }
 
-export const Toggle = ({
-    defaultState,
-    onSelectCallback,
-}: {
-    defaultState: boolean;
-    onSelectCallback: (isSelected: boolean) => void;
-}) => {
-    const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onSelectCallback(e.target.checked);
-    };
-    return (
-        <input
-            type="checkbox"
-            className="toggle toggle-success border-2"
-            defaultChecked={defaultState}
-            onChange={handleToggle}
-        />
-    );
-};
-
 export const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, customChild }: { value: string, label: string, options: Option[], onOptionSelect: (option: Option) => void; customLabel: string; customChild: React.ReactNode }) => {
     const [isCustom, setIsCustom] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedOption = options.find((option) => option.label === e.target.dataset.title);
+    const handleChange = (value: string) => {
+        const selectedOption = options.find((option) => option.value === value);
         if (selectedOption) {
             onOptionSelect(selectedOption);
             setIsCustom(false);
         }
     };
 
-    const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCustomChange = () => {
         onOptionSelect({ value: "100", label: "custom" });
-        setIsCustom(e.target.checked);
-
+        setIsCustom(true);
     };
 
     return (
-        <div>
+        <div className="flex flex-col gap-2">
             <Label>{label}</Label>
-            <div className="flex flex-col gap-2 p-2 rounded-xl w-full">
-                <div className="btn-group">
-                    {options.map((option, idx) => (
-                        <input
-                            key={idx}
-                            type="radio"
-                            name={`option-${nanoid()}`}
-                            className="btn normal-case bg-base"
-                            data-title={option.label}
-                            checked={option.value === value && !isCustom}
-                            onChange={handleChange}
-
-                        />
-                    ))}
-                    <input
-                        type="radio"
-                        name={`custom-${nanoid()}`}
-                        className="btn normal-case bg-base"
-                        data-title={customLabel}
-                        checked={isCustom}
-                        onChange={handleCustomChange}
-                    />
+            <div className="flex flex-row gap-2">
+                {options.map((option, idx) => (
+                    <div className="flex items-center space-x-2">
+                        <Button
+                            variant={option.value === value && !isCustom ? "secondary" : "ghost"}
+                            size="sm"
+                            onClick={() => handleChange(option.value)}
+                        >
+                            {option.label}
+                        </Button>
+                    </div>
+                ))}
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant={isCustom ? "secondary" : "ghost"}
+                        size="sm"
+                        onClick={handleCustomChange}
+                    >
+                        {customLabel}
+                    </Button>
                 </div>
-                {isCustom && customChild}
             </div>
+            {isCustom && customChild}
         </div>
-    );
+    )
+
 }

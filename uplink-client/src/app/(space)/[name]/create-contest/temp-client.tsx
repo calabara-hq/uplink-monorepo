@@ -21,6 +21,9 @@ import { useChannel } from "@/hooks/useChannel";
 import { useRouter } from "next/navigation";
 import { mutateChannel } from "@/app/mutate";
 import { Button } from "@/ui/DesignKit/Button";
+import { DevModeOnly } from "@/utils/DevModeOnly";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/ui/DesignKit/Select";
+import { ChainSelect } from "@/ui/ChannelSettings/ChainSelect";
 
 
 const WaitForNewChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
@@ -50,13 +53,13 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
     const { createFiniteChannel, status, txHash, error, channelAddress } = useCreateFiniteChannel();
     const { data: walletClient } = useWalletClient();
     const { data: session } = useSession();
+    const [chainId, setChainId] = useState<8453 | 84532>(8453);
     const { metadata, setMetadata, validateMetadata } = useMetadataSettings();
-    const { rewards, setRewards, validateRewards } = useRewardsSettings();
+    const { rewards, setRewards, validateRewards } = useRewardsSettings({ chainId });
     const { deadlines, setDeadlines, validateDeadlines } = useDeadlineSettings();
-    const { interactionLogic: submitterRules, setInteractionLogic: setSubmitterRules, validateInteractionLogic: validateSubmitterRules } = useInteractionLogicSettings()
-    const { interactionLogic: voterRules, setInteractionLogic: setVoterRules, validateInteractionLogic: validateVoterRules } = useInteractionLogicSettings()
+    const { interactionLogic: submitterRules, setInteractionLogic: setSubmitterRules, validateInteractionLogic: validateSubmitterRules } = useInteractionLogicSettings({ chainId })
+    const { interactionLogic: voterRules, setInteractionLogic: setVoterRules, validateInteractionLogic: validateVoterRules } = useInteractionLogicSettings({ chainId })
 
-    const [chainId, setChainId] = useState(8453);
     const [waitForNewChannel, setWaitForNewChannel] = useState(false);
 
 
@@ -159,11 +162,14 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
             <div className="flex flex-col gap-4 transition-all duration-200 ease-in-out w-full max-w-[850px] m-auto">
                 <div className="flex flex-col gap-6 w-full">
 
+                    <DevModeOnly>
+                        <ChainSelect chainId={chainId} setChainId={setChainId} />
+                    </DevModeOnly>
                     <Metadata metadata={metadata} setMetadata={setMetadata} />
-                    <Rewards rewards={rewards} setRewards={setRewards} />
+                    <Rewards rewards={{ ...rewards, chainId }} setRewards={setRewards} />
                     <Deadlines deadlines={deadlines} setDeadlines={setDeadlines} />
-                    <InteractionLogic mode="submit" interactionLogic={submitterRules} setInteractionLogic={setSubmitterRules} />
-                    <InteractionLogic mode="vote" interactionLogic={voterRules} setInteractionLogic={setVoterRules} />
+                    <InteractionLogic mode="submit" interactionLogic={{ ...submitterRules, chainId }} setInteractionLogic={setSubmitterRules} />
+                    <InteractionLogic mode="vote" interactionLogic={{ ...voterRules, chainId }} setInteractionLogic={setVoterRules} />
 
                     <OnchainButton
                         chainId={chainId}
@@ -190,3 +196,4 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
         </React.Fragment>
     )
 }
+

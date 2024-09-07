@@ -120,3 +120,7 @@ export const doesChannelHaveFees = (channel: Channel) => {
 export const isInfiniteChannel = (channel: Channel) => {
     return channel.transportLayer.type === "infinite";
 }
+
+export const isFiniteChannel = (channel: Channel) => {
+    return channel.transportLayer.type === "finite";
+}

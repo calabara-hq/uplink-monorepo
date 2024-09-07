@@ -28,7 +28,7 @@ const ExpandableTextSection = ({ children }) => {
 
     return (
         <div className="relative ">
-            <div className={`relative h-full ${!isOpen && 'max-h-[30vh] overflow-hidden'}`} ref={textRef}>
+            <div className={`relative h-full ${!isOpen && 'max-h-[50vh] overflow-hidden'}`} ref={textRef}>
                 {children}
                 {isOpen && (
                     <div className="flex items-end gap-2 justify-center w-full">

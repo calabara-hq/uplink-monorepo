@@ -22,7 +22,7 @@ export const ColorCards = ({ children, imageUrl, className }: { children: React.
                 transition: 'all 0.3s ease',
 
             }}
-            className={`w-full h-full  overflow-hidden border-none shadow-[inset_0_-200px_300px_-25px_rgb(38,38,38,0.7)] hover:shadow-[inset_0_-50px_300px_-25px_rgb(38,38,38,0.7)] no-select ${className}`}
+            className={`w-full h-full overflow-hidden border-none shadow-[inset_0_-200px_300px_-25px_rgb(38,38,38,0.7)] hover:shadow-[inset_0_-50px_300px_-25px_rgb(38,38,38,0.7)] no-select ${className}`}
         >
             {children}
         </Card >

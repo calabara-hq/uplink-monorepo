@@ -1,14 +1,12 @@
-"use client";
+"use client";;
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useSession } from "@/providers/SessionProvider";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { NoggleAvatar, UserAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
-import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi'
-import { UserRejectedRequestError } from 'viem';
-import Link from "next/link";
-import { FaSignOutAlt, FaUser } from "react-icons/fa"
+import { NoggleAvatar, UsernameDisplay } from "@/ui/AddressDisplay/AddressDisplay";
+import { useConnect, useDisconnect } from 'wagmi';
 import { Button } from "@/ui/DesignKit/Button";
 import { TbLoader2 } from "react-icons/tb";
+import { IoMdPower } from "react-icons/io";
 
 function AccountModal({
   isModalOpen,
@@ -52,9 +50,9 @@ function AccountModal({
             <Button variant="destructive" onClick={() => {
               disconnect()
             }}>
-              <div className="flex gap-1 items-center p-2 text-black">
+              <div className="flex gap-1 items-center p-2">
                 <p>Sign out</p>
-                <FaSignOutAlt className="w-4 h-4" />
+                <IoMdPower className="w-4 h-4" />
               </div>
             </Button>
           </div>

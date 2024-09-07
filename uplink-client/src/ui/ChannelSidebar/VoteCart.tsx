@@ -10,11 +10,12 @@ import { useEffect, useMemo } from "react";
 import { TbLoader2 } from "react-icons/tb";
 import { useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
 import { useChannel } from "@/hooks/useChannel";
-import { RenderStatefulChildAndRemainingTime } from "./SidebarUtils";
+import { RenderTransportLayerState } from "./SidebarUtils";
 import { Button } from "../DesignKit/Button";
 import { maxUint64 } from "viem";
 import { PiInfinity, PiInfinityBold } from "react-icons/pi";
-import { BiInfinite } from "react-icons/bi";
+import { BiInfinite, BiSolidChevronsRight } from "react-icons/bi";
+import { Drawer } from "vaul";
 
 const CartMedia = ({ token }: { token: ChannelTokenWithUserBalance }) => {
     return (
@@ -67,8 +68,8 @@ const ProposedVoteCard = ({ proposedVote, updateProposedVote, removeProposedVote
                         {proposedVote.metadata.name}
                     </p>
                 </div>
-                <div className="w-full ">
-                    <div className="w-10/12 h-full ">
+                <div className="w-full">
+                    <div className="w-10/12 h-full">
                         <CartMedia token={proposedVote} />
                     </div>
                 </div>
@@ -98,14 +99,16 @@ const VoteButton = ({
     votesRemaining,
     contractId,
     submitVotes,
-    transactionStatus
+    transactionStatus,
+    proposedVotes
 }: {
     votingPower: bigint,
     votesCast: bigint,
     votesRemaining: bigint,
     contractId,
     submitVotes: () => void,
-    transactionStatus: string
+    transactionStatus: string,
+    proposedVotes: Array<ChannelTokenWithUserBalance>
 }) => {
 
     const isTxPending = transactionStatus === "pendingApproval" || transactionStatus === "txInProgress";
@@ -114,12 +117,12 @@ const VoteButton = ({
         <div className="w-full p-2 flex flex-col gap-2">
 
             <div className="grid grid-cols-2 gap-2 text-sm font-bold">
-                <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-base-200 rounded-lg text-center">
+                <div className="flex flex-col items-center gap-2 p-2 bg-base-200 rounded-lg text-center">
                     <p className="">Votes Cast</p>
                     <p className="text-t2">{votesCast.toString()}</p>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-base-200 rounded-lg text-center">
+                <div className="flex flex-col items-center gap-2 p-2 bg-base-200 rounded-lg text-center">
                     <p className="">Votes Remaining</p>
                     {
                         votesRemaining > maxUint64 ?
@@ -129,10 +132,20 @@ const VoteButton = ({
                 </div>
             </div>
 
+            <div className="grid grid-cols-[14.5%_1%_84.5%]">
+                <RenderTransportLayerState contractId={contractId}>
+                    {({ isLoading, stateRemainingTime }) => {
+                        return (
+                            <div className="bg-base-200 rounded-lg flex items-center justify-center text-t2 w-full h-full">
+                                {isLoading ? <TbLoader2 className="w-5 h-5 animate-spin" /> : stateRemainingTime}
+                            </div>
+                        )
 
-            <WalletConnectButton>
-                <RenderStatefulChildAndRemainingTime contractId={contractId} childStateWindow="voting">
-                    <Button size="lg" disabled={isTxPending} onClick={submitVotes}>
+                    }}
+                </RenderTransportLayerState>
+                <div />
+                <WalletConnectButton>
+                    <Button size="lg" variant="secondary" disabled={isTxPending || proposedVotes.length === 0} onClick={submitVotes}>
                         {isTxPending ? (
                             <div className="flex gap-2 items-center">
                                 {transactionStatus === "pendingApproval" && "Pending approval"}
@@ -143,8 +156,8 @@ const VoteButton = ({
                             : "Cast votes"
                         }
                     </Button>
-                </RenderStatefulChildAndRemainingTime>
-            </WalletConnectButton >
+                </WalletConnectButton >
+            </div>
         </div >
     );
 };
@@ -208,10 +221,56 @@ const ProposedVotes = ({ proposedVotes, updateProposedVote, removeProposedVote }
     )
 }
 
+export const VoteOrOpenDrawer = ({ contractId, children }: { contractId: ContractID, children: React.ReactNode }) => {
+
+    return (
+        <RenderTransportLayerState contractId={contractId}>
+            {({ isLoading, channelState, stateRemainingTime }) => {
+                if (channelState === "voting") return (
+                    <>
+                        <div className="hidden lg:block">
+                            {/* <Button variant="secondary" onClick={handleAddToList}>Vote</Button> */}
+                            {children}
+                        </div>
+                        <div className="lg:hidden">
+                            {/* <Button variant="secondary" onClick={() => handleAddToList(true)}>Vote</Button> */}
+                            <Drawer.Root direction="right">
+                                <Drawer.Trigger asChild>
+                                    {/* <Button variant="secondary" onClick={handleAddToList}>Vote</Button> */}
+                                    {children}
+                                </Drawer.Trigger>
+                                <Drawer.Portal>
+                                    <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+                                    <Drawer.Title>Vote</Drawer.Title>
+                                    <Drawer.Content className="bg-base-100 flex flex-col h-full w-full mt-24 fixed bottom-0 right-0 z-40 p-2">
+                                        <div className="flex flex-col gap-2 mt-4">
+                                            <h1 className="text-2xl font-bold">Vote</h1>
+                                            <div className="border border-border rounded-lg p-2">
+                                                <VoteCart contractId={contractId} />
+                                            </div>
+                                            <div className="flex flex-row gap-2 items-center text-t2 ml-auto">
+                                                <p>swipe to close</p>
+                                                <div className="flex flex-row -space-x-1 items-center">
+                                                    <BiSolidChevronsRight className="w-6 h-6" />
+                                                    <BiSolidChevronsRight className="w-6 h-6" />
+                                                    <BiSolidChevronsRight className="w-6 h-6" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Drawer.Content>
+                                </Drawer.Portal>
+                            </Drawer.Root>
+                        </div>
+                    </>
+                )
+                else return null;
+            }}
+        </RenderTransportLayerState>
+    )
+}
 
 
-
-export const VoteCart = ({ contractId }: { contractId: ContractID }) => {
+const VoteCart = ({ contractId }: { contractId: ContractID }) => {
     const {
         proposedVotes,
         currentHoldings,
@@ -226,6 +285,8 @@ export const VoteCart = ({ contractId }: { contractId: ContractID }) => {
         votesRemaining
     } = useVoteCart(contractId);
 
+
+
     if (currentHoldings.length === 0 && proposedVotes.length === 0) return (
         <div className="flex flex-col gap-2 p-2">
             <div className="p-10"></div>
@@ -233,11 +294,21 @@ export const VoteCart = ({ contractId }: { contractId: ContractID }) => {
                 <div className="w-1/4 ml-auto">
                     <HiSparkles className="w-6 h-6 text-primary" />
                 </div>
-                <h1 className="text-center text-t2">No entries selected.</h1>
+                {/* <h1 className="text-center text-t2">No entries selected.</h1>
                 <p className="text-center text-t2 px-8">
-                    Select entries by hovering a submission and clicking the plus sign
-                    in the bottom right corner.
+                    Add entries by selecting a post and clicking the
                 </p>
+                <Button className="secondary">Vote</Button>
+                <p className="text-center text-t2 px-8">button</p> */}
+
+
+                <div className="flex flex-col gap-2 items-center">
+                    <h1 className="text-center text-t2">No entries selected.</h1>
+                    <p className="text-center text-t2 px-8">
+                        Add entries by selecting a post and clicking the <b>vote</b> button.
+                    </p>
+                </div>
+
                 <div className="p-4"></div>
                 <div className="w-1/4 mr-auto flex justify-end">
                     <HiSparkles className="w-6 h-6 text-primary" />
@@ -246,6 +317,7 @@ export const VoteCart = ({ contractId }: { contractId: ContractID }) => {
             </div>
         </div>
     )
+
     return (
         <div className="flex flex-col gap-2 animate-fadeIn">
             <LockedVotes currentHoldings={currentHoldings} isLoading={areCurrentHoldingsLoading} />
@@ -257,6 +329,7 @@ export const VoteCart = ({ contractId }: { contractId: ContractID }) => {
                 votesRemaining={votesRemaining}
                 contractId={contractId}
                 submitVotes={submitVotes}
+                proposedVotes={proposedVotes}
                 transactionStatus={submitVotesTransactionStatus}
             />
         </div>
@@ -264,29 +337,4 @@ export const VoteCart = ({ contractId }: { contractId: ContractID }) => {
 
 }
 
-const SidebarVote = ({ contractId }: { contractId: ContractID }) => {
-    // const { contestState } = useContestState();
-    // const voteActions = useVote(contestId)
-
-    return (
-        <div className="hidden w-1/3 xl:w-1/4 flex-shrink-0 lg:flex lg:flex-col items-center gap-4 overflow-hidden">
-            <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
-                <div className="flex flex-row items-center gap-2">
-                    <h2 className="text-t1 text-lg font-semibold">My Selections </h2>
-                    {/* {voteActions.proposedVotes.length > 0 && (
-                        <span className="badge badge-sm text-sm badge-warning font-bold">
-                        {voteActions.proposedVotes.length}
-                        </span>
-                    )} */}
-                </div>
-                <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
-                    <VoteCart contractId={contractId} />
-                </div>
-            </div>
-        </div>
-    );
-
-
-};
-
-export default SidebarVote;
+export default VoteCart;

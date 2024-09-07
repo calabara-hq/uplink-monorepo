@@ -38,6 +38,7 @@ const TokenModal = ({
   uniqueStandard: boolean;
   strictTypes?: ERCOptions[];
 }) => {
+
   if (isModalOpen)
     return (
       <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>

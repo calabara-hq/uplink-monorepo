@@ -15,12 +15,12 @@ import { AuthorizationController, schema } from "lib";
 import { Request, Response, NextFunction } from 'express'
 import { clientByChainId } from "../utils/transmissions.js";
 import { parseIntentMetadata, parseV1Metadata, parseV2Metadata, splitContractID } from "../utils/utils.js";
-import { ContexedRequest, IntentTokenPage, V1TokenPage, V1TokenWithMetadata, V2TokenPage, V2TokenWithMetadata } from "../types.js";
+import { ContexedRequest, FiniteTokenPage, IntentTokenPage, V1TokenPage, V1TokenWithMetadata, V2TokenPage, V2TokenWithMetadata } from "../types.js";
 import { decodeEventLog, Hash, Hex, Log } from "viem";
 import { finiteChannelAbi, infiniteChannelAbi } from "@tx-kit/sdk/abi";
 import { createWeb3Client } from "../utils/viem.js";
 import { gql } from '@urql/core'
-import { CHANNEL_FRAGMENT, TRANSPORT_LAYER_FRAGMENT, FEE_CONFIG_FRAGMENT, TOKEN_FRAGMENT, formatGqlTokens, formatGqlChannel } from "@tx-kit/sdk/subgraph"
+import { CHANNEL_FRAGMENT, TRANSPORT_LAYER_FRAGMENT, FEE_CONFIG_FRAGMENT, TOKEN_FRAGMENT, formatGqlTokens, formatGqlChannel, IFiniteTransportConfig } from "@tx-kit/sdk/subgraph"
 
 const authorizationController = new AuthorizationController(process.env.REDIS_URL);
 
@@ -92,6 +92,95 @@ export const getSingleTokenV1 = async (req: Request, res: Response, next: NextFu
 /* -------------------------------------------------------------------------- */
 /*                                  TOKENS V2                                 */
 /* -------------------------------------------------------------------------- */
+
+export const getFiniteChannelTokensV2 = async (req: Request, res: Response, next: NextFunction) => {
+
+    const contractId = req.query.contractId as string
+    const pageSize = Number(req.query.pageSize)
+    const skip = Number(req.query.skip)
+
+    // in finite mode, we order by totalMinted and add a field 'isWinner' to the response
+
+    try {
+
+        const { chainId, contractAddress } = splitContractID(contractId)
+        const { downlinkClient } = clientByChainId(chainId)
+
+        const bannedTokens = await prepared_bannedTokensV2
+            .execute({ channelAddress: contractAddress, chainId: chainId })
+            .then(data => data.map(data => data.tokenId))
+
+        const ignoredTokens = ["0", ...bannedTokens]
+
+        const data = await downlinkClient.customQuery(
+            gql`
+                query($channelAddress: String!, $ignoredTokens: [String!]! $pageSize: Int!, $skip: Int!) {
+                    channel(id: $channelAddress) {
+                        ...ChannelFragment
+                            transportLayer {
+                                ...TransportLayerFragment
+                            }
+                        tokens(
+                            where: { tokenId_not_in: $ignoredTokens }
+                            orderBy: totalMinted,
+                            orderDirection:desc, 
+                            first: $pageSize, skip: $skip
+                            
+                        ) {
+                        ...TokenFragment
+                    }
+                    }
+                }
+                ${CHANNEL_FRAGMENT}
+                ${TRANSPORT_LAYER_FRAGMENT}
+                ${TOKEN_FRAGMENT}
+            `,
+            { channelAddress: contractAddress.toLowerCase(), ignoredTokens, pageSize: pageSize + 1, skip })
+
+
+        const channel = formatGqlChannel(data.channel)
+
+        const pageData = channel.tokens.slice(0, pageSize)
+        const resolvedTokens = await Promise.all(pageData.map(parseV2Metadata))
+        const transportConfig = channel.transportLayer.transportConfig as IFiniteTransportConfig
+
+
+        const ranks = transportConfig.ranks
+        const rankedTokens = resolvedTokens.map(token => ({ ...token, isWinner: false }))
+
+        const now = Math.floor(Date.now() / 1000);
+
+        // only set winners if the minting period has ended
+        if (Number(transportConfig.mintEnd) < now) {
+            for (let i = 0; i < ranks.length; i++) {
+                let rank = ranks[i];
+
+                // Adjust the rank to match the current page's context
+                const adjustedRank = rank - skip - 1;
+
+                // Ensure the adjusted rank falls within the current page's range
+                if (adjustedRank >= 0 && adjustedRank < pageSize && rankedTokens[adjustedRank]) {
+                    rankedTokens[adjustedRank].isWinner = true;
+                }
+            }
+
+        }
+
+        const response: FiniteTokenPage = {
+            data: rankedTokens,
+            pageInfo: {
+                endCursor: pageData.length,
+                hasNextPage: data.channel.tokens.length > pageSize
+            }
+        }
+
+        res.send(response).status(200)
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 
 export const getChannelTokensV2 = async (req: Request, res: Response, next: NextFunction) => {
 

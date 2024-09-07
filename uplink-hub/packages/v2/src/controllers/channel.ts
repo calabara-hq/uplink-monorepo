@@ -80,7 +80,7 @@ export const getChannel = async (req: Request, res: Response, next: NextFunction
             downlinkClient.getOptimalUpgradePath({ address: contractAddress })
         ])
 
-        //if (!dbChannel) throw new NotFoundError('Channel not found') TODO add this back in
+        if (!dbChannel) throw new NotFoundError('Channel not found')
 
         const response = {
             ...txChannel,

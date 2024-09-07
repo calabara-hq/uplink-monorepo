@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useReducer, useState } from "react";
 import { z } from "zod";
 import { FieldError, SectionWrapper } from "./Utils";
 import { MediaUpload } from "../MediaUpload/MediaUpload";
-import { BasicInput, MarkdownEditor, TextArea } from "../Studio/StudioTools";
-import { parseIpfsUrl, pinJSONToIpfs } from "@/lib/ipfs";
+import { MarkdownEditor } from "../Studio/StudioTools";
+import { parseIpfsUrl, pinJSONToIpfs, replaceGatewayLinksInString } from "@/lib/ipfs";
 import { CreateTokenInputs } from "@/hooks/useCreateTokenReducer";
 import { UploadToIpfsTokenMetadata } from "@/types/channel";
 import { Label } from "../DesignKit/Label";
@@ -18,7 +18,7 @@ const constructTokenMetadata = (input: CreateTokenInputs): UploadToIpfsTokenMeta
 
     const metadata: UploadToIpfsTokenMetadata = {
         name: input.title,
-        description: input.description,
+        description: replaceGatewayLinksInString(input.description),
         image: imageUri,
         type: input.type,
         content: {
@@ -34,6 +34,7 @@ const constructTokenMetadata = (input: CreateTokenInputs): UploadToIpfsTokenMeta
     }
 
     return metadata;
+
 }
 
 const metadataSchema = z.object({
@@ -145,7 +146,7 @@ export const Metadata = ({ metadata, setMetadata }: { metadata: MetadataState, s
         <SectionWrapper title="Details">
             <div className="flex flex-col max-w-xs">
                 <MediaUpload
-                    acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
+                    acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'image/webp']}
                     uploadStatusCallback={uploadStatusCallback}
                     ipfsImageCallback={ipfsImageCallback}
                     ipfsAnimationCallback={ipfsAnimationCallback}

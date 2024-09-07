@@ -1,5 +1,5 @@
 "use client";
-import { parseIpfsUrl, pinJSONToIpfs } from '@/lib/ipfs';
+import { parseIpfsUrl, pinJSONToIpfs, replaceGatewayLinksInString } from '@/lib/ipfs';
 import { z } from 'zod';
 import { CreateTokenConfig } from "@tx-kit/sdk";
 import { validateCreateTokenInputs } from "@tx-kit/sdk/utils";
@@ -15,7 +15,7 @@ const constructTokenMetadata = (input: CreateTokenInputs): UploadToIpfsTokenMeta
 
     const metadata: UploadToIpfsTokenMetadata = {
         name: input.title,
-        description: input.description,
+        description: replaceGatewayLinksInString(input.description),
         image: imageUri,
         type: input.type,
         content: {
@@ -112,7 +112,7 @@ export const useCreateTokenReducer = (channelAddress: string) => {
     const { status: createIntentStatus, createTokenIntent, signedIntent, error: createIntentError } = useCreateTokenIntent()
     const { status: createTokenStatus, createToken, tokenId, txHash: createTokenHash, error: createTokenError } = useCreateToken()
 
-    const [isIntent, setIsIntent] = useState<boolean>(true)
+    const [isIntent, setIsIntent] = useState<boolean>(false)
     const [state, dispatch] = useReducer(stateReducer, {
         ...baseConfig,
         channelAddress

@@ -59,6 +59,7 @@ v2.get('/channel_tokensV1', tokenController.getChannelTokensV1)
 v2.get('/channel_tokensV2', tokenController.getChannelTokensV2)
 v2.get('/channel_tokenIntents', tokenController.getChannelTokenIntents)
 v2.get('/channel_popularTokens', tokenController.getChannelPopularTokens)
+v2.get('/channel_finiteTokensV2', tokenController.getFiniteChannelTokensV2)
 
 v2.get('/singleTokenV1', tokenController.getSingleTokenV1)
 v2.get('/singleTokenV2', tokenController.getSingleTokenV2)

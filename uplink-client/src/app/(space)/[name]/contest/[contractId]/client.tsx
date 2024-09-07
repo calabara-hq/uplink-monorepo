@@ -1,29 +1,19 @@
 "use client"
-import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ChannelUpgradePath, ContractID, isTokenV1Onchain, splitContractID } from "@/types/channel";
-import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts, usePaginatedMintBoardPostsV1, usePaginatedPopularTokens } from "@/hooks/useTokens";
+import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, isTokenV1Onchain, splitContractID } from "@/types/channel";
+import { usePaginatedFinitePosts } from "@/hooks/useTokens";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardFooter } from "@/ui/Token/Card";
 import SubmissionModal from "@/ui/Submission/SubmissionModal";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
 import { useInView } from "react-intersection-observer";
-import { ManageModalContent, ShareModalContent } from "@/ui/Token/MintUtils";
+import { ManageModalContent } from "@/ui/Token/MintUtils";
 import { useChannel } from "@/hooks/useChannel";
 
 import RenderIfVisible from "@/ui/Virtualization/RenderIfVisible";
-import { Admin } from "@/types/space";
-import Modal from "@/ui/Modal/Modal";
-import Image from "next/image";
-import OnchainButton from "@/ui/OnchainButton/OnchainButton";
-import { TbLoader2 } from "react-icons/tb";
-import { useUpgradeChannel } from "@tx-kit/hooks";
-import toast from "react-hot-toast";
-import useSWR from "swr";
-import { Address } from "viem";
-import { HiCheckBadge } from "react-icons/hi2";
-import { handleV2Error } from "@/lib/fetch/handleV2Errors";
-import { useMonitorChannelUpgrades } from "@/hooks/useMonitorChannelUpgrades";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { parseIpfsUrl } from "@/lib/ipfs";
+import Link from "next/link";
+import { FaCrown } from "react-icons/fa";
 
 
 export const PostSkeleton = () => {
@@ -41,6 +31,18 @@ export const PostSkeleton = () => {
     );
 }
 
+const WinnerWrapper = ({ token, children }: { token: ChannelToken & { isWinner: boolean }, children: React.ReactNode }) => {
+    return (
+        <div className="relative">
+            {token.isWinner && (
+                <div className="absolute top-0 -right-0 z-10">
+                    <FaCrown className="text-yellow-500 w-8 h-8" />
+                </div>
+            )}
+            {children}
+        </div>
+    )
+}
 
 
 const MapTokens = React.memo(({
@@ -52,13 +54,13 @@ const MapTokens = React.memo(({
     //handleShare,
     handleManage
 }: {
-    tokens: Array<ChannelToken | ChannelTokenV1 | ChannelTokenIntent>,
+    tokens: Array<ChannelToken & { isWinner: boolean }>,
     channel: Channel,
     spaceName: string,
     contractId: ContractID,
-    handleMint: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
+    handleMint: (event: any, token: ChannelToken) => void,
     // handleShare: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
-    handleManage: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void
+    handleManage: (event: any, token: ChannelToken) => void
 }) => {
 
     return tokens.map((token, index) => {
@@ -70,25 +72,26 @@ const MapTokens = React.memo(({
                 stayRendered={false}
 
             >
-                <div
+                <Link href={`/${spaceName}/contest/${contractId}/post/${token.tokenId}`}
                     className="cursor-pointer shadow-lg shadow-black hover:shadow-[#262626] no-select rounded-lg"
-                    onClick={(event) => handleMint(event, token)}
                 >
                     <ColorCards imageUrl={parseIpfsUrl(token.metadata.image).gateway}>
-                        <Card
-                            key={index}
-                            token={token}
-                            footer={
-                                <CardFooter
-                                    token={token}
-                                    channel={{ ...channel, managers: [...channel.managers, channel.admin] }}
-                                    mintLabel="votes"
-                                    handleManage={handleManage}
-                                />
-                            }
-                        />
+                        <WinnerWrapper token={token}>
+                            <Card
+                                key={index}
+                                token={token}
+                                footer={
+                                    <CardFooter
+                                        token={token}
+                                        channel={{ ...channel, managers: [...channel.managers, channel.admin] }}
+                                        mintLabel="votes"
+                                        handleManage={handleManage}
+                                    />
+                                }
+                            />
+                        </WinnerWrapper>
                     </ColorCards>
-                </div>
+                </Link>
             </RenderIfVisible>
         )
     })
@@ -152,8 +155,7 @@ const useTokenModalControls = (contractId: ContractID) => {
 
 
 export const RenderV2Tokens = ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
-    const { data: onchainPages, setSize: setOnchainSize } = usePaginatedMintBoardPosts(contractId);
-    const { data: onchainPagesV1, setSize: setOnchainSizeV1 } = usePaginatedMintBoardPostsV1(contractId);
+    const { data: onchainPages, setSize: setOnchainSize } = usePaginatedFinitePosts(contractId);
     const { channel } = useChannel(contractId);
     const { ref: loadMoreRef, inView } = useInView({ threshold: 0.1 });
 
@@ -173,28 +175,22 @@ export const RenderV2Tokens = ({ spaceName, contractId }: { spaceName: string, c
 
     // Flatten the token lists and memoize the result
     const flatTokens = useMemo(() => {
-        const flatTokensV2 = onchainPages?.flatMap(page => page.data) || [];
-        const flatTokensV1 = onchainPagesV1?.flatMap(page => page.data) || [];
-        return [...flatTokensV2, ...flatTokensV1];
-    }, [onchainPages, onchainPagesV1]);
+        return onchainPages?.flatMap(page => page.data) || [];
+    }, [onchainPages]);
 
-    const v2HasNextPage = onchainPages && onchainPages.at(-1).pageInfo.hasNextPage
-    const v1HasNextPage = onchainPagesV1 && onchainPagesV1.at(-1).pageInfo.hasNextPage
-    const hasNextPage = v2HasNextPage || v1HasNextPage
+    const hasNextPage = onchainPages && onchainPages.at(-1).pageInfo.hasNextPage
 
     useEffect(() => {
         if (inView) {
-            if (v2HasNextPage) {
+            if (hasNextPage) {
                 setOnchainSize((prev) => prev + 1)
-            } else {
-                setOnchainSizeV1((prev) => prev + 1)
             }
-
         }
-    }, [inView, setOnchainSize, v2HasNextPage, setOnchainSizeV1])
+    }, [inView, setOnchainSize, hasNextPage])
 
 
-    if (!onchainPages || !onchainPagesV1) return <PostSkeleton />
+    if (!onchainPages) return <PostSkeleton />
+
 
     return (
 

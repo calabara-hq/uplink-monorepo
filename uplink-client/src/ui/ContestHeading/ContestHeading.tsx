@@ -23,11 +23,13 @@ import ContestDetails from "../ContestDetails/ContestDetails";
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
 import fetchContest from "@/lib/fetch/fetchContest";
 import ExpandableTextSection from "../ExpandableTextSection/ExpandableTextSection";
-import { TokenMetadata } from "@/types/channel";
+import { ContractID, TokenMetadata } from "@/types/channel";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { RenderMarkdown } from "../Markdown/RenderMarkdown";
 import { Space } from "@/types/space";
 import { Button } from "../DesignKit/Button";
+import { RenderTransportLayerState } from "../ChannelSidebar/SidebarUtils";
+import { SmallScreenToolbar } from "./ClientUtils";
 
 const ContestHeading = async ({
   contestId,
@@ -91,7 +93,7 @@ const ContestHeading = async ({
               </ExpandableTextSection>
             </div>
           </div>
-          <div className="grid grid-cols-1 items-start  w-full gap-2">
+          <div className="grid grid-cols-1 items-start w-full gap-2">
             {prompt.coverUrl && (
               <ImageWrapper>
                 <UplinkImage
@@ -113,72 +115,55 @@ const ContestHeading = async ({
 
 export const ContestHeadingV2 = ({
   space,
-  contestMetadata
+  contestMetadata,
+  contractId,
 }: {
   space: Space;
   contestMetadata: TokenMetadata;
+  contractId: ContractID;
 }) => {
 
   return (
     <div className="grid grid-cols-1 w-full gap-2">
-      <div className="w-full ml-auto ">
-        <div className="grid grid-cols-1 sm:grid-cols-[auto_25%] gap-6 w-full p-4">
-          <div className="flex flex-col gap-2 break-word">
-            <h2 className="lg:text-3xl text-xl font-[600] text-t1">
-              {contestMetadata.name}
-            </h2>
-            <div className="flex flex-row gap-2 items-center">
-              <Link
-                className="relative w-8 h-8 flex flex-col"
-                href={`/${space.name}`}
-                draggable={false}
-              >
-                <UplinkImage
-                  src={space.logoUrl}
-                  alt="Org Avatar"
-                  fill
-                  className="rounded-full object-cover"
-                />
-              </Link>
-              <Link
-                href={`/${space.name}`}
-                draggable={false}
-                passHref
-              >
-                <Button variant="link" className="pl-0 ml-0">
-                  {space.displayName}
-                </Button>
-              </Link>
-
-              {/* <LiveContestState /> */}
-
-              {/* render a details button when the screen gets smaller */}
-              {/* <div className="hidden lg:block xl:hidden">
-                <DetailsMenuDrawer
-                  detailChildren={
-                    <ContestDetails contestId={contestId} />
-                  }
-                  ui={{
-                    classNames:
-                      "text-sm font-[600] text-t2 hover:underline hover:text-t1 ",
-                    label: <p>details</p>,
-                  }}
-                />
-              </div> */}
-            </div>
-            <div className="grid grid-cols-1 text-t2 prose max-w-full">
-              <ExpandableTextSection>
-                <RenderMarkdown content={contestMetadata.description} />
-              </ExpandableTextSection>
-            </div>
+      <div className="w-full ml-auto p-4">
+        <h2 className="text-4xl font-[600] text-t1">
+          {contestMetadata.name}
+        </h2>
+        <div className="flex flex-row gap-2 items-center">
+          <Link
+            className="relative w-8 h-8 flex flex-col"
+            href={`/${space.name}`}
+            draggable={false}
+          >
+            <UplinkImage
+              src={space.logoUrl}
+              alt="Org Avatar"
+              fill
+              className="rounded-full object-cover"
+            />
+          </Link>
+          <Link
+            href={`/${space.name}`}
+            draggable={false}
+            passHref
+          >
+            <Button variant="link" className="pl-0 ml-0">
+              {space.displayName}
+            </Button>
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[auto_25%] gap-6 w-full">
+          <div className="grid grid-cols-1 order-2 sm:order-1 text-t2 prose prose-neutral prose-invert max-w-full">
+            <ExpandableTextSection>
+              <RenderMarkdown content={contestMetadata.description} />
+            </ExpandableTextSection>
           </div>
-          <div className="grid grid-cols-1 items-start  w-full gap-2">
+          <div className="grid grid-cols-1 items-start order-1 sm:order-2 w-full gap-2">
             {contestMetadata.image && (
               <ImageWrapper>
                 <UplinkImage
                   src={parseIpfsUrl(contestMetadata.image).gateway}
                   alt="contest image"
-                  sizes="20vw"
                   fill
                   className="object-contain rounded-xl"
                 />
@@ -188,6 +173,9 @@ export const ContestHeadingV2 = ({
         </div>
       </div>
       <div className="w-full h-0.5 bg-base-100" />
+      <div className="p-4 lg:hidden">
+        <SmallScreenToolbar contractId={contractId} />
+      </div>
     </div>
   );
 

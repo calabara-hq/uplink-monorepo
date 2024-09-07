@@ -1,7 +1,7 @@
 "use client";
 
 import { TransmissionsProvider, useTransmissionsClient } from '@tx-kit/hooks';
-import { SUPPORTED_CHAIN_IDS } from '@tx-kit/sdk';
+import { getSubgraphUrl, SUPPORTED_CHAIN_IDS } from '@tx-kit/sdk';
 import { useMemo } from 'react';
 import { useChainId, usePublicClient, useWalletClient } from 'wagmi';
 
@@ -25,6 +25,9 @@ const TransmissionsClientProvider = ({ children }: { children: React.ReactNode }
         chainId: SUPPORTED_CHAIN_IDS.includes(chainId) ? chainId : 8453,
         walletClient: walletClient,
         publicClient: publicClient,
+        apiConfig: {
+            serverUrl: getSubgraphUrl(chainId),
+        },
         paymasterConfig: {
             paymasterUrl: process.env.NODE_ENV === "production" ? `${process.env.NEXT_PUBLIC_HUB_URL}/v2/paymaster_proxy` : 'https://paymaster.base.org',
         }

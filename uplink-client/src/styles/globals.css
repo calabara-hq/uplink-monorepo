@@ -103,10 +103,10 @@
 }
 
 
-ol {
+/* ol {
   list-style-type: decimal;
   margin-left: 2rem !important;
-}
+} */
 
 .no-scrollbar {
   scrollbar-width: none;
@@ -320,6 +320,10 @@ ol {
 
 .mdxeditor-popup-container > #data-radix-popper-content-wrapper {
   @apply !bg-base-100
+}
+
+.mdxeditor-root-contenteditable > div {
+  @apply prose prose-neutral prose-invert
 }
 
 .dark-editor {

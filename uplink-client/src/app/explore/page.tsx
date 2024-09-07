@@ -3,16 +3,12 @@ import { Metadata } from "next";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
 import UplinkImage from "@/lib/UplinkImage"
-import fetchActiveContests, { ActiveContest } from "@/lib/fetch/fetchActiveContests";
-import Swiper from "@/ui/Swiper/Swiper";
+import { ActiveContest } from "@/lib/fetch/fetchActiveContests";
 import { calculateContestStatus } from "@/utils/staticContestState";
 import { CategoryLabel, RemainingTimeLabel, StatusLabel } from "@/ui/ContestLabels/ContestLabels";
-import { Boundary } from "@/ui/Boundary/Boundary";
-import fetchTrendingSpaces from "@/lib/fetch/fetchTrendingSpaces";
 import { SearchSpaces } from "./client";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
-import { HiTrendingUp } from "react-icons/hi";
-import { Card, CardFooter } from "@/ui/DesignKit/Card";
+import { CardFooter } from "@/ui/DesignKit/Card";
 import { CardTitle } from "@/ui/Card/Card";
 import { fetchTrendingChannels } from "@/lib/fetch/fetchChannel";
 import { Channel, concatContractID } from "@/types/channel";
@@ -21,6 +17,7 @@ import { Space } from "@/types/space";
 import { fetchFeaturedTokens } from "@/lib/fetch/fetchTokensV2";
 import { AddressOrEns, Avatar } from "@/ui/AddressDisplay/AddressDisplay";
 import { Card as TokenCard } from "@/ui/Token/Card";
+import { Button } from "@/ui/DesignKit/Button";
 
 export const metadata: Metadata = {
   openGraph: {
@@ -50,51 +47,51 @@ const PromptSummary = async ({ contest }: { contest: ActiveContest }) => {
 };
 
 
-const ContestCard = ({
-  linkTo,
-  contest,
-}: {
-  contest: ActiveContest;
-  linkTo: string;
-}) => {
-  const { contestState, stateRemainingTime } = calculateContestStatus(
-    contest.deadlines,
-    contest.metadata.type,
-    contest.tweetId
-  );
-  return (
-    <Link
-      className="card animate-scrollInX
-    cursor-pointer border border-border rounded-2xl p-4 h-full overflow-hidden w-[275px] transform 
-    transition-transform duration-300 hoverCard will-change-transform no-select"
-      href={linkTo}
-      draggable={false}
-    >
-      <div className="card-body items-center p-0">
-        <div className="flex flex-col gap-2 items-center">
-          <div className="relative w-20 h-20 avatar online">
-            <UplinkImage
-              src={contest.space.logoUrl}
-              alt="spaceLogo"
-              fill
-              className="mask mask-squircle object-cover"
-              sizes="10vw"
-            />
-          </div>
-          <h1 className="font-semibold text-xl line-clamp-1 overflow-ellipsis">
-            {contest.space.displayName}
-          </h1>
-        </div>
-        <PromptSummary contest={contest} />
-        <div className="flex flex-row gap-2">
-          <CategoryLabel category={contest.metadata.category} />
-          <StatusLabel status={contestState} />
-        </div>
-        <RemainingTimeLabel remainingTime={stateRemainingTime} />
-      </div>
-    </Link>
-  );
-};
+// const ContestCard = ({
+//   linkTo,
+//   contest,
+// }: {
+//   contest: ActiveContest;
+//   linkTo: string;
+// }) => {
+//   const { contestState, stateRemainingTime } = calculateContestStatus(
+//     contest.deadlines,
+//     contest.metadata.type,
+//     contest.tweetId
+//   );
+//   return (
+//     <Link
+//       className="animate-scrollInX
+//     cursor-pointer border border-border rounded-2xl p-4 h-full overflow-hidden w-[275px] transform 
+//     transition-transform duration-300 hoverCard will-change-transform no-select"
+//       href={linkTo}
+//       draggable={false}
+//     >
+//       <div className="items-center p-0">
+//         <div className="flex flex-col gap-2 items-center">
+//           <div className="relative w-20 h-20 avatar online">
+//             <UplinkImage
+//               src={contest.space.logoUrl}
+//               alt="spaceLogo"
+//               fill
+//               className="rounded-xl object-cover"
+//               sizes="10vw"
+//             />
+//           </div>
+//           <h1 className="font-semibold text-xl line-clamp-1 overflow-ellipsis">
+//             {contest.space.displayName}
+//           </h1>
+//         </div>
+//         <PromptSummary contest={contest} />
+//         <div className="flex flex-row gap-2">
+//           <CategoryLabel category={contest.metadata.category} />
+//           <StatusLabel status={contestState} />
+//         </div>
+//         <RemainingTimeLabel remainingTime={stateRemainingTime} />
+//       </div>
+//     </Link>
+//   );
+// };
 
 // const ActiveContests = async () => {
 //   const activeContests = await fetchActiveContests();
@@ -214,11 +211,14 @@ const ExploreHeader = async () => {
         <SearchSpaces allSpaces={allSpaces} />
       </div>
       <Link
-        className="primary-btn h-full !w-full sm:!w-auto"
+        passHref
+        className="ml-auto"
         href="/spacebuilder/create"
         draggable={false}
       >
-        New Space
+        <Button>
+          New Space
+        </Button>
       </Link>
     </div>
   )

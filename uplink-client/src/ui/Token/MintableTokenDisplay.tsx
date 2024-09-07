@@ -1,14 +1,13 @@
-"use client"
-
+"use client";
 import { useDebounce } from "@/hooks/useDebounce";
 import React, { useEffect, useState } from "react";
 import { MdOutlineCancelPresentation } from "react-icons/md";
 import { ChainLabel } from "../ContestLabels/ContestLabels";
-import { HiCheck, HiCheckBadge } from "react-icons/hi2";
+import { HiCheckBadge } from "react-icons/hi2";
 import { useAccount } from "wagmi";
 import { getChainName } from "@/lib/chains/supportedChains";
 import OnchainButton from "../OnchainButton/OnchainButton";
-import { Address, Chain, formatEther, formatUnits, maxUint40, parseEther, zeroAddress } from "viem";
+import { Address, formatEther, formatUnits, maxUint40, zeroAddress } from "viem";
 import { format } from "date-fns";
 import { TbLoader2 } from "react-icons/tb";
 import { CounterInput, FeeStructure, getETHMintPrice, RenderFees, RenderMaxSupply, RenderMintMedia, RenderTotalMints, ShareButton } from "./MintUtils";
@@ -21,11 +20,11 @@ import { HiArrowNarrowLeft } from "react-icons/hi";
 import Link from "next/link";
 import { useCapabilities } from 'wagmi/experimental'
 import { useRouter } from "next/navigation";
-import { ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContractID, ContractID } from "@/types/channel";
-import Markdown from "react-markdown";
+import { ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContractID } from "@/types/channel";
 import { useVoteCart } from "@/hooks/useVoteCart";
 import { Button } from "../DesignKit/Button";
 import { RenderMarkdown } from "../Markdown/RenderMarkdown";
+import { VoteOrOpenDrawer } from "../ChannelSidebar/VoteCart";
 
 export type DisplayMode = "modal" | "expanded" | "contest-modal" | "contest-expanded"
 
@@ -123,16 +122,6 @@ export const MintContestDisplay = ({ token,
 }
 
 
-const AddToListButton = ({ contractId, token }: { contractId: ContractID, token: ChannelToken }) => {
-    const { proposedVotes, addProposedVote, isTokenAlreadyProposed } = useVoteCart(contractId);
-
-    const handleAddToList = () => {
-        addProposedVote(token)
-    }
-
-    return <Button variant="secondary" onClick={handleAddToList}>Vote</Button>
-}
-
 
 export const ContestExpandedDisplay = ({
     token,
@@ -155,43 +144,42 @@ export const ContestExpandedDisplay = ({
     handleShare
 }: DisplayProps) => {
 
-    return (
-        <div className="flex flex-col gap-4">
-            {/* <Link href={backwardsNavUrl} className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0">
-                <HiArrowNarrowLeft className="w-6 h-6" />
-                <p>Back</p>
-            </Link> */}
+    const contractId = concatContractID({ contractAddress: token.channelAddress, chainId })
+    const { proposedVotes, addProposedVote, isTokenAlreadyProposed } = useVoteCart(contractId)
 
+    const handleAddToList = () => {
+        addProposedVote(token as ChannelToken)
+    }
+
+    return (
+        <div className="flex flex-col gap-4 w-full max-w-[65ch]">
             <div className="flex flex-col gap-2">
-                <div className="grid grid-cols-[85%_15%] items-start">
-                    <p className="line-clamp-3 font-bold text-lg break-word ">{metadata.name}</p>
-                </div>
-                <div className="flex flex-col prose">
+                <div className="flex flex-col w-full gap-2">
+                    <p className="font-bold text-4xl break-word">{metadata.name}</p>
                     <div className="flex gap-2 items-center">
                         <div className="flex gap-2 items-center text-sm text-t2 bg-base-100 rounded-lg p-1 w-fit">
                             <Avatar address={creator} size={28} />
                             <AddressOrEns address={creator} />
                         </div>
                         <Button variant="outline" className="ml-auto" onClick={handleShare}>Share</Button>
-                        <AddToListButton contractId={concatContractID({ contractAddress: token.channelAddress, chainId })} token={token as ChannelToken} />
+                        <VoteOrOpenDrawer contractId={contractId}>
+                            <Button variant="secondary" onClick={handleAddToList}>Vote</Button>
+                        </VoteOrOpenDrawer>
                     </div>
-                    <div className="flex items-center justify-center rounded-lg p-1 w-full  m-auto">
+                    <div className="w-full h-0.5 bg-base-100 rounded-lg" />
+                    <div className="flex items-center justify-center rounded-lg p-1 w-full m-auto">
                         <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
                     </div>
 
-                    <div className="text-t2">
-                        <Markdown components={{ a: LinkRenderer }}>{metadata.description.replace('\n\n', '\n')}</Markdown>
+                    <div className="text-t2 prose prose-neutral prose-invert">
+                        <RenderMarkdown content={metadata.description} />
                     </div>
                 </div>
             </div>
 
         </div>
     )
-
-
 }
-
-
 
 export const MintModalDisplay = ({
     token,

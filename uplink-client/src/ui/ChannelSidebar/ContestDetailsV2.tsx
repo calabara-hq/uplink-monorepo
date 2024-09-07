@@ -1,7 +1,7 @@
 "use client";
 
 import { FaRegCircleQuestion } from "react-icons/fa6";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import formatOrdinals from "@/lib/formatOrdinals";
 import Link from "next/link";
 import {
@@ -17,10 +17,15 @@ import { useErc20TokenInfo, useTokenInfo } from "@/hooks/useTokenInfo";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
 import { Address, decodeAbiParameters, formatUnits, Hex, parseEther, parseUnits } from "viem";
 import { useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
-import { RenderStatefulChildAndRemainingTime } from "./SidebarUtils";
+import { ChannelStateLabel, RemainingTimeLabel, RenderTransportLayerState } from "./SidebarUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../DesignKit/Tooltip";
 import { Info } from "../DesignKit/Info";
 import { Button } from "../DesignKit/Button";
+import { useSettleFiniteChannel } from "@tx-kit/hooks";
+import { useChannel } from "@/hooks/useChannel";
+import { TbLoader2 } from "react-icons/tb";
+import toast from "react-hot-toast";
+import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 
 const normalizeSubmitterRewards = (
     subRewards: FetchSingleContestResponse["submitterRewards"]
@@ -72,7 +77,7 @@ export const SectionSkeleton = () => {
     );
 };
 
-const DetailSectionWrapper = ({
+export const DetailSectionWrapper = ({
     title,
     children,
     tooltipContent,
@@ -167,11 +172,11 @@ const DisplayCredits = ({ interactionPower, interactionPowerType, creditContextL
     const readableInteractionPowerType = interactionPowerType === "0" ? "Uniform" : "Weighted"
     const readableInteractionPower = readableInteractionPowerType === "Weighted" ? `Weighted ${creditContextLabel}` : `${interactionPower} ${creditContextLabel}`
 
-    return <div className="rounded-xl pl-2 pr-2 bg-success font-normal bg-opacity-10 text-success text-sm">{readableInteractionPower}</div>;
+    return <div className="rounded-xl pl-2 pr-2 bg-success font-normal text-center bg-opacity-10 text-success text-sm">{readableInteractionPower}</div>;
 
 }
 
-const LogicDisplay = ({ chainId, logicObject, creditContextLabel }: { chainId: number, logicObject: ILogicConfig | null, creditContextLabel: string }) => {
+export const LogicDisplay = ({ chainId, logicObject, creditContextLabel }: { chainId: number, logicObject: ILogicConfig | null, creditContextLabel: string }) => {
 
     return (
 
@@ -226,7 +231,7 @@ const LogicDisplay = ({ chainId, logicObject, creditContextLabel }: { chainId: n
                     </ExpandSection> */}
             </div>
         ) : (
-            <p className="text-t2 p-2 text-sm">Anyone can submit!</p>
+            <p className="text-t2 p-2 text-sm">Anyone can {creditContextLabel === "entries" ? "submit!" : "vote!"}</p>
         )
 
     );
@@ -344,21 +349,26 @@ const ContestDetailsV2 = ({
 
     const { chainId, contractAddress } = splitContractID(contractId);
     const { channelState, stateRemainingTime } = useFiniteTransportLayerState(contractId);
+    const { settle, status, txHash, error } = useSettleFiniteChannel();
+    const isSettling = status === "pendingApproval" || status === "txInProgress";
+    const { mutateSwrChannel } = useChannel(contractId);
+    useTransmissionsErrorHandler(error);
 
-    // const contestData = await fetchContest(contestId).then(async (res) => {
-    //     const promptData = await fetch(res.promptUrl).then((res) => res.json());
-    //     return { ...res, promptData };
-    // });
-    // const {
-    //     chainId,
-    //     deadlines,
-    //     space,
-    //     submitterRewards,
-    //     voterRewards,
-    //     votingPolicy,
-    //     submitterRestrictions,
-    //     promptData,
-    // } = contestData;
+    useEffect(() => {
+        console.log(error)
+    }, [error])
+
+    useEffect(() => {
+        if (status === "complete") {
+            mutateSwrChannel();
+            toast.success("Channel settled successfully");
+        }
+    }, [status])
+
+
+    const handleSettle = async () => {
+        await settle({ channelAddress: contractAddress });
+    }
 
     return (
         <div className="w-full flex flex-col gap-4 p-4">
@@ -390,12 +400,51 @@ const ContestDetailsV2 = ({
                 prompt={promptData}
             /> */}
 
-            <RenderStatefulChildAndRemainingTime contractId={contractId} childStateWindow={"submitting"} >
+            {/* <RenderStatefulChildAndRemainingTime contractId={contractId} childStateWindow={"submitting"}>
                 <Link href={`${contractId}/studio`} passHref>
                     <Button>Submit</Button>
                 </Link>
             </RenderStatefulChildAndRemainingTime>
 
+            <RenderStatefulChildAndRemainingTime contractId={contractId} childStateWindow={"complete"}>
+                <Button disabled={isSettling} onClick={handleSettle}>
+                    {isSettling ? (
+                        <div className="flex gap-2 items-center">
+                            <p>Settling</p>
+                            <TbLoader2 className="w-4 h-4 animate-spin" />
+                        </div>
+                    ) : "Settle"}
+                </Button>
+            </RenderStatefulChildAndRemainingTime> */}
+
+            <RenderTransportLayerState contractId={contractId}>
+                {({ isLoading, channelState, stateRemainingTime }) => {
+                    if (isLoading) return (
+                        <div className="w-full h-5 rounded-lg shimmer bg-base-100" />
+                    )
+
+                    if (channelState === "submitting") return (
+                        <div className="grid grid-cols-[25%_75%] items-center justify-between rounded-lg gap-2 h-fit w-full">
+                            <div className="bg-base-200 h-full rounded-xl p-2 flex items-center justify-center">
+                                <p className="text-center text-t1 ">
+                                    {channelState ? stateRemainingTime : <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />}
+                                </p>
+                            </div>
+                            <Link className="w-full" href={`${contractId}/studio`} passHref>
+                                <Button className="w-full">Submit</Button>
+                            </Link>
+                        </div>
+
+                    )
+                    else return (
+                        <div className="flex gap-2 items-center">
+                            <RemainingTimeLabel channelState={channelState} remainingTime={stateRemainingTime} />
+                            <ChannelStateLabel channelState={channelState} />
+                        </div>
+                    )
+                    return null;
+                }}
+            </RenderTransportLayerState>
         </div>
     );
 };

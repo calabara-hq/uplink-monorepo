@@ -1,5 +1,4 @@
 "use client";
-
 import {
     motion,
     useMotionTemplate,
@@ -24,10 +23,9 @@ import { ImageWrapper } from "@/ui/Submission/MediaWrapper"
 import { useInView } from "react-intersection-observer";
 import { Boundary } from "@/ui/Boundary/Boundary";
 import uplinkLogo from "@/../public/uplink-logo.svg";
-import contestImg from "@/../public/testing.png";
 import Image from "next/image";
 
-import { CategoryLabel, StatusLabel } from "@/ui/ContestLabels/ContestLabels";
+import { CategoryLabel } from "@/ui/ContestLabels/ContestLabels";
 import CardSubmission from "@/ui/Submission/CardSubmission";
 
 

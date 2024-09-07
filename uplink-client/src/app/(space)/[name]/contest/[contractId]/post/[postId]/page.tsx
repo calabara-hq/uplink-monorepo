@@ -1,19 +1,34 @@
 import fetchChannel from "@/lib/fetch/fetchChannel";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-import { fetchTokensV2 } from "@/lib/fetch/fetchTokensV2";
-import { parseIpfsUrl } from "@/lib/ipfs";
+import { fetchSingleTokenV2 } from "@/lib/fetch/fetchTokensV2";
 import UplinkImage from "@/lib/UplinkImage";
-import SwrProvider from "@/providers/SwrProvider";
 import { ContractID } from "@/types/channel";
-import { VoteCart } from "@/ui/ChannelSidebar/VoteCart";
+import { Button } from "@/ui/DesignKit/Button";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
 import Link from "next/link";
 import { Suspense } from "react";
-import { HiArrowNarrowLeft, HiArrowNarrowRight } from "react-icons/hi";
-
+import { HiArrowNarrowLeft } from "react-icons/hi";
 
 const ExpandedPostSkeleton = () => {
-    return <p>loading</p>
+    return (
+        <div className="flex flex-col gap-2 m-auto mt-0 w-full max-w-[65ch]">
+            <div className="w-24 h-3 shimmer rounded-lg bg-base-100 pl-0 ml-0" />
+            <div className="flex flex-col gap-4 w-full mt-4">
+                <div className="flex flex-col gap-2">
+                    <div className="w-36 h-5 shimmer rounded-lg bg-base-100" />
+                    <div className="flex flex-row gap-2 items-center">
+                        <div className="w-24 h-6 shimmer rounded-lg bg-base-100" />
+                        <div className="ml-auto h-8 w-16 shimmer rounded-lg bg-base-100" />
+                        <div className="h-8 w-16 shimmer rounded-lg bg-base-100" />
+                    </div>
+                    <div className="flex flex-col gap-2 prose mt-6">
+                        <div className="w-full h-[325px] shimmer bg-base-100 rounded-lg m-auto" />
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 }
 
 
@@ -21,23 +36,31 @@ const Post = async ({ spaceName, contractId, postId, searchParams }: { spaceName
 
     const [
         channel,
-        tokens
+        token
     ] = await Promise.all([
         fetchChannel(contractId),
-        //fetchSingleTokenV2(contractId, postId)
-        fetchTokensV2(contractId, 100, 0) // +1 because order is reversed
+        fetchSingleTokenV2(contractId, postId)
     ])
 
-    // return <pre>{JSON.stringify(tokens, null, 2)}</pre>
 
-    return <MintTokenSwitch
-        referral={searchParams.referral}
-        contractAddress={channel.id}
-        channel={channel}
-        token={tokens.data.find(token => token.tokenId === postId)}
-        display="contest-expanded"
-        backwardsNavUrl={``}
-    />
+    return (
+        <div className="flex flex-col gap-2 m-auto mt-0 w-full">
+            <Link href={`/${spaceName}/contest/${contractId}`} passHref>
+                <Button variant="link" className="flex gap-2 items-center pl-0 ml-0">
+                    <HiArrowNarrowLeft className="w-6 h-6" />
+                    <p>Back</p>
+                </Button>
+            </Link>
+            <MintTokenSwitch
+                referral={searchParams.referral}
+                contractAddress={channel.id}
+                channel={channel}
+                token={token}
+                display="contest-expanded"
+                backwardsNavUrl={``}
+            />
+        </div>
+    )
 }
 
 const ChannelDetails = async ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
@@ -65,7 +88,7 @@ const ChannelDetails = async ({ spaceName, contractId }: { spaceName: string, co
                     />
                 </Link>
                 <Link
-                    className="card-title text-sm text-t2 hover:underline hover:text-t1"
+                    className="text-sm text-t2 hover:underline hover:text-t1"
                     href={`/${space.name}`}
                     draggable={false}
                 >
@@ -78,83 +101,14 @@ const ChannelDetails = async ({ spaceName, contractId }: { spaceName: string, co
 }
 
 
-const Sidebar = async ({ spaceName, contractId, postId, searchParams }: { spaceName: string, contractId: ContractID, postId: string, searchParams: { [key: string]: string | undefined } }) => {
-
-    const [
-        channel,
-        tokens
-    ] = await Promise.all([
-        fetchChannel(contractId),
-        //fetchSingleTokenV2(contractId, postId)
-        fetchTokensV2(contractId, 100, 0) // +1 because order is reversed 
-    ])
-
-    const fallback = {
-        [`/swrChannel/${contractId}`]: channel,
-    }
-
-    const prevToken = tokens.data.find(token => Number(token.tokenId) === Number(postId) - 1)
-    const nextToken = tokens.data.find(token => Number(token.tokenId) === Number(postId) + 1)
-
-    return (
-        <div className="flex flex-col gap-2 border border-border bg-base-100 rounded-lg w-full p-4">
-            <div className="flex flex-row w-full gap-2">
-                {prevToken && (
-                    <Link href={`/${spaceName}/contest/${contractId}/post/${prevToken.tokenId}`} className="bg-base-200 rounded-lg p-2 flex flex-col gap-2 items-left w-full max-w-[50%]">
-                        <div className="flex flex-row gap-2 items-center text-t2">
-                            <HiArrowNarrowLeft className="w-6 h-6" />
-                            <p>Previous post</p>
-                        </div>
-                        <p className="font-bold line-clamp-1">{prevToken.metadata.name} {prevToken.metadata.name} {prevToken.metadata.name} {prevToken.metadata.name} {prevToken.metadata.name}</p>
-                    </Link>
-                )}
-                {nextToken && (
-                    <Link href={`/${spaceName}/contest/${contractId}/post/${nextToken.tokenId}`} className="bg-base-200 rounded-lg p-2 flex flex-col gap-2 items-center ml-auto w-full max-w-[50%]">
-                        <div className="flex flex-row gap-2 text-t2 mr-auto items-center">
-                            <p>Next post</p>
-                            <HiArrowNarrowRight className="w-6 h-6" />
-                        </div>
-                        <p className="font-bold line-clamp-1">{nextToken.metadata.name} {nextToken.metadata.name} {nextToken.metadata.name} {nextToken.metadata.name} {nextToken.metadata.name}</p>
-                    </Link>
-                )}
-            </div>
-            <div className="h-0.5 bg-base-200 w-full" />
-
-            <SwrProvider fallback={fallback} >
-                <VoteCart contractId={contractId} />
-            </SwrProvider>
-
-        </div>
-    )
-}
-
 export default function Page({ params, searchParams }: { params: { name: string, contractId: ContractID, postId: string }, searchParams: { [key: string]: string | undefined } }) {
 
     return (
-
-        <div className="flex gap-6 m-auto w-full lg:w-[90vw] ">
-            <div className="flex flex-col w-5/12 ml-auto gap-4 transition-all duration-200 ease-in-out">
-                <Suspense fallback={<ExpandedPostSkeleton />}>
-                    {/* <ChannelDetails spaceName={params.name} contractId={params.contractId} /> */}
-                    <Post spaceName={params.name} contractId={params.contractId} postId={params.postId} searchParams={searchParams} />
-                </Suspense>
-            </div>
-            <div className="hidden lg:block sticky top-3 right-0 w-full max-w-[450px] flex-grow h-full">
-                <Suspense fallback={<ExpandedPostSkeleton />}>
-                    <Sidebar spaceName={params.name} contractId={params.contractId} postId={params.postId} searchParams={searchParams} />
-                </Suspense>
-            </div>
-        </div>
-    )
-
-    return (
-        <div className="grid grid-cols-[70%_30%] gap-6 w-9/12 m-auto h-full mt-4 p-4">
+        <div className="flex flex-row w-10/12 m-auto mt-4 lg:w-5/12 lg:m-0 lg:ml-auto lg:mt-0">
+            {/* <ExpandedPostSkeleton /> */}
             <Suspense fallback={<ExpandedPostSkeleton />}>
                 <Post spaceName={params.name} contractId={params.contractId} postId={params.postId} searchParams={searchParams} />
             </Suspense>
-            <Suspense fallback={<ExpandedPostSkeleton />}>
-                <Sidebar spaceName={params.name} contractId={params.contractId} postId={params.postId} searchParams={searchParams} />
-            </Suspense>
         </div>
-    );
+    )
 }

@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/ui/DesignKit/Button";
 import { useRouter } from "next/navigation";
 
 export default function Error({
@@ -23,15 +24,8 @@ export default function Error({
         </a>
       </p>
       <div className="flex gap-8">
-        <button
-          className="btn btn-outline btn-primary normal-case"
-          onClick={() => router.back()}
-        >
-          Go back
-        </button>
-        <button className="btn btn-primary normal-case" onClick={reset}>
-          Try again
-        </button>
+        <Button variant="outline" onClick={() => router.back()}>Go back</Button>
+        <Button variant="default" onClick={reset}>Try again</Button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { z } from "zod";
 import { FieldError, SectionWrapper } from "./Utils";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
@@ -15,8 +15,6 @@ import { TokenContractApi } from "@/lib/contract";
 import { parseUnits } from "viem";
 import { validateFiniteTransportLayer } from "@tx-kit/sdk/utils";
 import { MdOutlineDelete } from "react-icons/md";
-import { Card } from "../DesignKit/Card";
-import { CardContent, CardDescription, CardTitle } from "../Card/Card";
 import { Info } from "../DesignKit/Info";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 
@@ -122,6 +120,7 @@ const RewardsReducer = (state: RewardsState, action: { type: string; payload: an
 }
 
 export const useRewardsSettings = (initialState?: RewardsInput) => {
+
     const [rewards, dispatch] = useReducer(RewardsReducer, {
         chainId: 8453,
         rewardToken: NATIVE_TOKEN,

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { TbLoader2 } from "react-icons/tb";
 import { maxUint256 } from "viem"
 import toast from "react-hot-toast";
-import { ContractID, splitContractID } from "@/types/channel";
+import { Channel, concatContractID, ContractID, isInfiniteChannel, splitContractID } from "@/types/channel";
 import { useSession } from "@/providers/SessionProvider";
 import { useAccount, useConnect } from "wagmi";
 import { HiCheckBadge } from "react-icons/hi2";
@@ -18,14 +18,21 @@ import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 import { Option } from "@/ui/MenuSelect/MenuSelect";
 import { useMonitorChannelUpgrades } from "@/hooks/useMonitorChannelUpgrades";
-import { asPositiveInt, BasicInput, MarkdownEditor, OptionOrCustom, TextArea, Toggle } from "./StudioTools";
+import { asPositiveInt, BasicInput, MarkdownEditor, OptionOrCustom, TextArea } from "./StudioTools";
+import Toggle from "@/ui/DesignKit/Toggle";
+import { Button } from "../DesignKit/Button";
+import { useChannel } from "@/hooks/useChannel";
+import { DetailSectionWrapper, LogicDisplay } from "../ChannelSidebar/ContestDetailsV2";
+import { useInteractionPower } from "@/hooks/useInteractionPower";
 
-export const CreateToken = ({ contractId, spaceSystemName }: { contractId: ContractID, spaceSystemName: string }) => {
+export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }: { contractId: ContractID, spaceSystemName: string, allowIntents?: boolean }) => {
     const [areIntentsEnabled, setAreIntentsEnabled] = useState(false);
     const { upgradePath, isLoading: isUpgradePathLoading, mutate } = useMonitorChannelUpgrades(contractId);
-
+    const { channel } = useChannel(contractId);
     const { contractAddress, chainId } = splitContractID(contractId);
     const { connectors } = useConnect();
+
+    const channelType = isInfiniteChannel(channel) ? "mintboard" : "contest";
 
     const {
         state,
@@ -58,26 +65,12 @@ export const CreateToken = ({ contractId, spaceSystemName }: { contractId: Contr
             (connector) => connector.id === 'coinbaseWalletSDK'
         );
 
-        const areIntentsDisabled = coinbaseWalletConnector &&
+        const isIntentCompatible = coinbaseWalletConnector &&
             chainId === 84532 ? (upgradePath?.upgradeImpl === "0xF16aE8A8c0F4c578451EBC61c74d45A4b851bc7a") : (upgradePath?.baseImpl === "0x30bEE66d8D87F49D75751dDDAd72b007c379E946")
 
-        setAreIntentsEnabled(!areIntentsDisabled)
+        setAreIntentsEnabled(!isIntentCompatible && allowIntents);
 
     }, [connectors, upgradePath])
-
-
-
-    const { trigger, data: swrData, error: swrError, isMutating: isSwrMutating, reset: resetSwr } = useSWRMutation(
-        `/api/insertIntent/${contractId}`,
-        insertIntent,
-        {
-            onError: (err) => {
-                console.log(err);
-                resetSwr();
-            },
-        }
-    );
-
 
     useEffect(() => {
         if (txStatus === "txInProgress") {
@@ -90,6 +83,16 @@ export const CreateToken = ({ contractId, spaceSystemName }: { contractId: Contr
         }
     }, [txStatus, setIsModalOpen, isIntent]);
 
+    const { trigger, data: swrData, error: swrError, isMutating: isSwrMutating, reset: resetSwr } = useSWRMutation(
+        `/api/insertIntent/${contractId}`,
+        insertIntent,
+        {
+            onError: (err) => {
+                console.log(err);
+                resetSwr();
+            },
+        }
+    );
 
     const uploadStatusCallback = (status: boolean) => {
         setIsUploading(status)
@@ -144,88 +147,61 @@ export const CreateToken = ({ contractId, spaceSystemName }: { contractId: Contr
     }
     return (
         <div className="grid grid-cols-1 lg:grid-cols-[60%_30%] w-full m-auto justify-end gap-2">
-            <div className="flex flex-col gap-8 w-full ml-auto md:max-w-[800px]">
-                <Boundary>
-                    <div className="flex flex-col gap-6 w-full">
-                        <div className="flex flex-col gap-2">
-                            <h1 className="text-3xl font-bold text-t1">Create Post</h1>
-                        </div>
-
-                        <div className="flex flex-col max-w-xs">
-                            <MediaUpload
-                                acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
-                                uploadStatusCallback={uploadStatusCallback}
-                                ipfsImageCallback={ipfsImageCallback}
-                                ipfsAnimationCallback={ipfsAnimationCallback}
-                                mimeTypeCallback={mimeTypeCallback}
-                                maxVideoDuration={210}
-                            />
-                            {state.errors?.imageURI?._errors && (
-                                <label className="label">
-                                    <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{state.errors.imageURI._errors.join(",")}</span>
-                                </label>
-                            )}
-                        </div>
-                        <BasicInput inputType="text" label="Title" value={state.title} placeholder={"My awesome creation"} onChange={(e) => setField("title", e.target.value)} error={state.errors?.title?._errors} />
-
-                        <MarkdownEditor ref={editorRef} label={"Body (optional)"} error={state.errors?.description?._errors} markdown="" />
-
-                        <div className="flex flex-col gap-2 w-full">
-
-                            {!isMoreOpen && (<button className="self-start" onClick={() => { setIsMoreOpen(true) }}>+ More</button>)}
-                            {isMoreOpen && (
-                                <>
-                                    <OptionOrCustom
-                                        value={state.maxSupply.toString()}
-                                        label={"Token Supply"}
-                                        options={[{ value: "1", label: "1" }, { value: "100", label: "100" }, { value: maxUint256.toString(), label: "unlimited" }]}
-                                        onOptionSelect={(option: Option) => setField("maxSupply", option.value)}
-                                        customLabel={"custom"}
-                                        customChild={
-                                            <BasicInput
-                                                inputType="number"
-                                                value={state.maxSupply} // default to 100 on switchover
-                                                label={"Custom Supply"}
-                                                placeholder={"100"}
-                                                onChange={(e) => setField("maxSupply", asPositiveInt(e.target.value))}
-                                                error={state.errors?.maxSupply?._errors} />
-                                        } />
-                                </>
-                            )}
-                        </div>
+            <div className="flex flex-col gap-8 w-full lg:ml-auto md:max-w-[800px] bg-base-100 rounded-lg p-4">
+                <div className="flex flex-col gap-6 w-full">
+                    <div className="flex flex-col gap-2">
+                        <h1 className="text-3xl font-bold text-t1">Create Post</h1>
                     </div>
-                </Boundary >
 
+                    <div className="flex flex-col max-w-xs">
+                        <MediaUpload
+                            acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
+                            uploadStatusCallback={uploadStatusCallback}
+                            ipfsImageCallback={ipfsImageCallback}
+                            ipfsAnimationCallback={ipfsAnimationCallback}
+                            mimeTypeCallback={mimeTypeCallback}
+                            maxVideoDuration={210}
+                        />
+                        {state.errors?.imageURI?._errors && (
+                            <label className="label">
+                                <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{state.errors.imageURI._errors.join(",")}</span>
+                            </label>
+                        )}
+                    </div>
+                    <BasicInput inputType="text" label="Title" value={state.title} placeholder={"My awesome creation"} onChange={(e) => setField("title", e.target.value)} error={state.errors?.title?._errors} />
+                    <MarkdownEditor ref={editorRef} label={"Body (optional)"} error={state.errors?.description?._errors} markdown="" />
+                    <div className="flex flex-col gap-2 w-full">
+                        {!isMoreOpen && (<Button variant="ghost" className="self-start" onClick={() => { setIsMoreOpen(true) }}>+ More</Button>)}
+                        {isMoreOpen && (
+                            <OptionOrCustom
+                                value={state.maxSupply.toString()}
+                                label={"Token Supply"}
+                                options={[{ value: "1", label: "1" }, { value: "100", label: "100" }, { value: maxUint256.toString(), label: "unlimited" }]}
+                                onOptionSelect={(option: Option) => setField("maxSupply", option.value)}
+                                customLabel={"custom"}
+                                customChild={
+                                    <BasicInput
+                                        inputType="number"
+                                        value={state.maxSupply} // default to 100 on switchover
+                                        label={"Custom Supply"}
+                                        placeholder={"100"}
+                                        onChange={(e) => setField("maxSupply", asPositiveInt(e.target.value))}
+                                        error={state.errors?.maxSupply?._errors} />
+                                } />
+                        )}
+                    </div>
+                </div>
             </div>
 
 
-            <div className="flex flex-col gap-2 p-4 bg-base-100 rounded-lg self-start">
-                {areIntentsEnabled &&
-                    <>
-                        <div className="flex flex-row gap-2 items-start justify-between">
-                            <p>Sponsor post onchain</p>
-                            <Toggle defaultState={false} onSelectCallback={(isSelected) => { setIsIntent(!isSelected) }} />
-                        </div>
-                        <div className="h-2 w-full" />
-                        <Boundary size={"small"}>
-                            <p className="text-t2">
-                                Leaving this toggle off will allow you to post for free.
-                                <br />
-                                <br />
-                                Alternatively, you can sponsor the post for a small gas fee and collect an onchain sponsorship reward each time someone mints.
-                            </p>
-                        </Boundary>
-                        <div className="bg-base-100 h-0.5 w-full" />
-                    </>
-                }
-
+            <StudioSidebar channel={channel} areIntentsEnabled={areIntentsEnabled} isIntent={isIntent} setIsIntent={setIsIntent}>
                 <OnchainButton
                     chainId={chainId}
                     title={"Post"}
                     onClick={handleSubmit}
                     isLoading={txStatus === 'pendingApproval' || txStatus === 'txInProgress' || isUploading}
                     loadingChild={
-                        <button className="btn btn-disabled normal-case w-auto">
+                        <Button disabled>
                             <div className="flex gap-2 items-center">
                                 <p className="text-sm">{
                                     isUploading ? <span>Uploading</span> :
@@ -237,10 +213,10 @@ export const CreateToken = ({ contractId, spaceSystemName }: { contractId: Contr
                                 </p>
                                 <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
                             </div>
-                        </button>
+                        </Button>
                     }
                 />
-            </div>
+            </StudioSidebar>
 
 
             <CreatePostModal
@@ -263,13 +239,63 @@ export const CreateToken = ({ contractId, spaceSystemName }: { contractId: Contr
                         <h2 className="font-bold text-t1 text-xl">Successfully created your post.</h2>
                         <div className="flex gap-2 items-center">
                             {!isIntent && <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>}
-                            <Link className="btn normal-case btn-primary" href={`/${spaceSystemName}/mintboard/${contractId}${isIntent ? '?intent=true' : ''}`}>Go to MintBoard</Link>
+                            <Link className="btn normal-case btn-primary" href={`/${spaceSystemName}/${channelType}/${contractId}${isIntent ? '?intent=true' : ''}`}>Go to {channelType}</Link>
                         </div>
                     </div>
 
                 )}
 
             </CreatePostModal>
+        </div>
+    )
+}
+
+const StudioSidebar = ({ channel, areIntentsEnabled, isIntent, setIsIntent, children }) => {
+    // todo some submitter requirements / user status
+    return (
+        <div className="flex flex-col gap-2 p-4 bg-base-100 rounded-lg self-start md:max-w-[800px]">
+
+            <SubmissionRequirements channel={channel} />
+
+
+            {areIntentsEnabled &&
+                <>
+                    <div className="flex flex-row gap-2 items-center justify-between">
+                        <p><b>Sponsor post onchain</b></p>
+                        <Toggle checked={!isIntent} onCheckedChange={(isChecked) => setIsIntent(!isChecked)} />
+
+                    </div>
+                    <div className="h-2 w-full" />
+                    <div className="bg-base-200 p-2 rounded-lg">
+                        <p className="text-t2">
+                            Leaving this toggle off will allow you to post for free.
+                            <br />
+                            <br />
+                            Alternatively, you can sponsor the post for a small gas fee and collect an onchain sponsorship reward each time someone mints.
+                        </p>
+                    </div>
+                    <div className="bg-base-100 h-0.5 w-full" />
+                </>
+            }
+
+            {children}
+        </div>
+    )
+}
+
+
+const SubmissionRequirements = ({ channel }: { channel: Channel }) => {
+
+    const contractId = concatContractID({ chainId: channel.chainId, contractAddress: channel.id })
+
+    return (
+        <div className="flex flex-col gap-2">
+            <DetailSectionWrapper
+                title="Entry Requirements"
+                tooltipContent={<p className="font-normal">{`Users satisfying at least one requirement are elgible to submit.`}</p>}
+            >
+                <LogicDisplay logicObject={channel.creatorLogic} chainId={channel.chainId} creditContextLabel="entries" />
+            </DetailSectionWrapper>
         </div>
     )
 }

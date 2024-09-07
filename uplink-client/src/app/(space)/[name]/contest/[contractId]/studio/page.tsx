@@ -1,7 +1,12 @@
+"use client"
 import { CreateToken } from "@/ui/Studio/TokenStudio";
 import { Suspense } from "react";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { ContractID } from "@/types/channel";
+import { useChannel } from "@/hooks/useChannel";
+import { IFiniteTransportConfig } from "@tx-kit/sdk/subgraph";
+import { Button } from "@/ui/DesignKit/Button";
+import Link from "next/link";
 
 const LoadingDialog = () => {
     return (
@@ -18,21 +23,40 @@ const LoadingDialog = () => {
 };
 
 
-const PageContent = async ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
-    const space = await fetchSingleSpace(spaceName);
+const PageContent = ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
+
+    const { channel, isLoading } = useChannel(contractId)
+
+    if (isLoading) return <LoadingDialog />
+
+    if (channel) {
+
+        const timestampInSeconds = Math.floor(Date.now() / 1000)
+        const transportConfig = channel.transportLayer.transportConfig as IFiniteTransportConfig
+
+        if (timestampInSeconds < Number(transportConfig.createStart) || timestampInSeconds > Number(transportConfig.mintStart)) {
+            return (
+                <div className="flex flex-col gap-2 items-center justify-center h-[60vh]">
+                    <p>Contest is not accepting submissions</p>
+                    <Link href={`/${spaceName}/contest/${contractId}`} passHref>
+                        <Button variant="outline">Back to contest</Button>
+                    </Link>
+                </div>
+            )
+        }
+    }
+
 
     return (
-        <CreateToken contractId={contractId} spaceSystemName={spaceName} />
+        <CreateToken contractId={contractId} spaceSystemName={spaceName} allowIntents={false} />
     )
 }
 
 
-export default async function Page({ params }: { params: { name: string, contractId: ContractID } }) {
+export default function Page({ params }: { params: { name: string, contractId: ContractID } }) {
     return (
         <div className=" flex flex-col gap-6 w-full md:w-11/12 m-auto mt-4 mb-16 p-2 ">
-            <Suspense fallback={<LoadingDialog />}>
-                <PageContent spaceName={params.name} contractId={params.contractId} />
-            </Suspense>
+            <PageContent spaceName={params.name} contractId={params.contractId} />
         </div >
     )
 }

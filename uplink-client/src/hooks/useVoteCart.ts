@@ -1,8 +1,8 @@
 "use client";
 import { Channel, ChannelTokenWithUserBalance, ContractID, splitContractID } from "@/types/channel";
-import { useWalletClient } from "wagmi";
+import { useReadContract, useWalletClient } from "wagmi";
 import { ChannelToken } from "@/types/channel";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 import useSWR from "swr";
 import { Address, maxUint256, zeroAddress } from "viem";
@@ -11,6 +11,8 @@ import { useMintTokenBatchWithETH } from "@tx-kit/hooks";
 import { useChannel } from "./useChannel";
 import toast from "react-hot-toast";
 import { useTransmissionsErrorHandler } from "./useTransmissionsErrorHandler";
+import { dynamicLogicAbi } from "@tx-kit/sdk/abi";
+import { useInteractionPower } from "./useInteractionPower";
 /**
  * requirements
  * cast votes are displayed
@@ -47,6 +49,7 @@ const fetchUserChannelTokenHoldings = async (userAddress: Address, contractId: C
 }
 
 const useUserChannelTokenHoldings = (userAddress: Address | undefined, contractId: ContractID, refreshInterval?: number) => {
+
     const swrKey = userAddress
         ? [`/swrUserChannelTokenHoldings/${contractId}`, userAddress]
         : null;
@@ -58,44 +61,26 @@ const useUserChannelTokenHoldings = (userAddress: Address | undefined, contractI
         mutate,
     }: { data: FetchUserChannelTokenHoldingsResponse; isLoading: boolean; error: any; mutate: any } = useSWR(
         swrKey,
-        () => fetchUserChannelTokenHoldings(userAddress, contractId, 50, 0),
+        () => fetchUserChannelTokenHoldings(userAddress, contractId, 50, 0), // limited to 1 page of data for now
         { refreshInterval: refreshInterval ?? 0 }
     );
+
+
+    const mutateData = (newData: Array<ChannelTokenWithUserBalance>) => {
+        mutate((currentHoldings: FetchUserChannelTokenHoldingsResponse) => {
+            return {
+                ...currentHoldings,
+                data: [...currentHoldings.data, ...newData]
+            }
+        }, { revalidate: false })
+    }
+
 
     return {
         currentHoldings: currentHoldings?.data ?? [],
         isLoading,
         error,
-        mutate
-    }
-}
-
-export const useVotingPower = (contractId: ContractID) => {
-    // const { data: walletClient } = useWalletClient();
-
-    const { channel } = useChannel(contractId);
-
-    if (!channel) {
-        return {
-            votingPower: maxUint256,
-            votesCast: maxUint256,
-            votesRemaining: maxUint256
-        }
-    }
-
-    if (!channel.minterLogic || channel.minterLogic.logicContract === zeroAddress) {
-        return {
-            votingPower: maxUint256,
-            votesCast: BigInt(1),
-            votesRemaining: maxUint256
-        }
-    }
-
-
-    return {
-        votingPower: BigInt(1),
-        votesCast: BigInt(1),
-        votesRemaining: BigInt(1)
+        mutate: mutateData
     }
 }
 
@@ -107,27 +92,35 @@ export const useVoteCart = (contractId: ContractID) => {
     const { mintTokenBatchWithETH, status: ethTxStatus, txHash: ethTxHash, error: ethTxError } = useMintTokenBatchWithETH()
     const { contractAddress, chainId } = splitContractID(contractId);
     const { channel } = useChannel(contractId);
-    const { votingPower, votesCast, votesRemaining } = useVotingPower(contractId);
+    const { interactionPower: votingPower } = useInteractionPower(contractId, 'minter');
+
+    const votesCast = currentHoldings.reduce((acc, token) => acc + BigInt(token.balance), BigInt(0))
+    const votesRemaining = votingPower - votesCast;
 
     useTransmissionsErrorHandler(ethTxError);
 
     useEffect(() => {
-        console.log(ethTxError)
+        if (ethTxError) {
+            if (ethTxError.toString().includes("Invalid amount")) {
+                toast.error("1 or more of your selections are missing a vote amount")
+            }
+        }
     }, [ethTxError])
 
     useEffect(() => {
         if (ethTxStatus === "complete") {
+            mutateCurrentHoldings(proposedVotes);
             setProposedVotes([])
-            mutateCurrentHoldings()
             toast.success("Votes cast successfully")
         }
     }, [ethTxStatus])
 
     const addProposedVote = useCallback((token: ChannelToken) => {
         const proposedVote = { ...token, balance: '' };
-        if (proposedVotes.some((proposedVote) => proposedVote.tokenId === token.tokenId)) return; // prevent duplicates
+        if (proposedVotes.some((proposedVote) => proposedVote.tokenId === token.tokenId)) return toast.error(`This post is already selected`); // prevent duplicates
+        if (currentHoldings.some((currentHolding) => currentHolding.tokenId === token.tokenId)) return toast.error(`You've already voted on this post`); // prevent voting on tokens you already have
         setProposedVotes([...proposedVotes, proposedVote]);
-    }, [proposedVotes, setProposedVotes]);
+    }, [proposedVotes, setProposedVotes, currentHoldings]);
 
 
     const removeProposedVote = useCallback((toRemoveTokenId: string) => {

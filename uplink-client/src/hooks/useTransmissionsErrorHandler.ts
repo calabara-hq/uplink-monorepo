@@ -32,6 +32,10 @@ export const useTransmissionsErrorHandler = (error: any) => {
                 toast.error("Invalid amount sent")
             }
 
+            if (err.includes("AlreadySettled()")) {
+                toast.error("This contest has already been settled")
+            }
+
         }
     }, [error])
 

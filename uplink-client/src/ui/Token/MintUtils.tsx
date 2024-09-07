@@ -21,6 +21,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import toast from "react-hot-toast";
 import { DisplayMode } from "./MintableTokenDisplay";
+import { Button } from "../DesignKit/Button";
+import { Input } from "../DesignKit/Input";
 
 
 export type FeeStructure = {
@@ -355,15 +357,16 @@ export const ManageModalContent = ({ token, contractId, handleClose }: { token: 
                 <p>Once deleted, this post will be gone forever. Type <b>delete</b> if you understand</p>
             </Boundary>
             <div className="flex flex-row items-center">
-                <input
-                    className="input input-bordered w-1/3"
+                <Input
+                    variant="outline"
+                    className="w-1/3"
                     type="text"
                     autoComplete="off"
                     spellCheck="false"
                     value={confirmationText}
                     onChange={(e) => { setConfirmationText(e.target.value) }}
                 />
-                <button onClick={handleDelete} disabled={!isConfirmed} className="ml-auto btn btn-active w-fit hover:bg-error bg-opacity-30 hover:bg-opacity-30 text-error border-none normal-case">delete post</button>
+                <Button onClick={handleDelete} disabled={!isConfirmed} className="ml-auto" variant="destructive">delete post</Button>
             </div>
         </div>
     )
