@@ -1,15 +1,13 @@
 "use client";
-import { parseIpfsUrl, pinJSONToIpfs } from '@/lib/ipfs';
+import { parseIpfsUrl, pinJSONToIpfs, replaceGatewayLinksInString } from '@/lib/ipfs';
 import { z } from 'zod';
 import { CreateTokenConfig } from "@tx-kit/sdk";
-import { validateCreateTokenInputs } from '@tx-kit/sdk/utils';
+import { validateCreateTokenInputs } from "@tx-kit/sdk/utils";
 import { Address, http, maxUint256 } from 'viem';
 import { useEffect, useReducer, useState } from 'react';
 import { useCreateToken, useCreateTokenIntent } from "@tx-kit/hooks"
 import { UploadToIpfsTokenMetadata } from '@/types/channel';
 import { useConnect, useConnectors, useWalletClient } from 'wagmi';
-
-
 
 const constructTokenMetadata = (input: CreateTokenInputs): UploadToIpfsTokenMetadata => {
 
@@ -17,7 +15,7 @@ const constructTokenMetadata = (input: CreateTokenInputs): UploadToIpfsTokenMeta
 
     const metadata: UploadToIpfsTokenMetadata = {
         name: input.title,
-        description: input.description,
+        description: replaceGatewayLinksInString(input.description),
         image: imageUri,
         type: input.type,
         content: {
@@ -110,13 +108,11 @@ export const stateReducer = (state: CreateTokenInputs & { errors?: ZodSafeParseE
 }
 
 export const useCreateTokenReducer = (channelAddress: string) => {
-    const { connectors } = useConnect();
-    const { data: walletClient } = useWalletClient();
 
     const { status: createIntentStatus, createTokenIntent, signedIntent, error: createIntentError } = useCreateTokenIntent()
     const { status: createTokenStatus, createToken, tokenId, txHash: createTokenHash, error: createTokenError } = useCreateToken()
 
-    const [isIntent, setIsIntent] = useState<boolean>(true)
+    const [isIntent, setIsIntent] = useState<boolean>(false)
     const [state, dispatch] = useReducer(stateReducer, {
         ...baseConfig,
         channelAddress
@@ -132,8 +128,14 @@ export const useCreateTokenReducer = (channelAddress: string) => {
         })
     }
 
-    const validate = async () => {
-        const { errors, ...rest } = state;
+
+    const validate = async (markdown: string) => {
+
+        // markdown is scraped from the editor when the user clicks submit.
+        // we need to inject it into the state so that we can validate it
+
+        const { errors, ...rest } = { ...state, description: markdown };
+
         const result = await CreateTokenSchema.safeParseAsync(rest);
 
         if (!result.success) {

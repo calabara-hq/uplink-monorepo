@@ -2,6 +2,8 @@
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useState, useEffect } from "react";
 import { DetailsSkeleton } from "@/ui/ContestDetails/ContestDetails";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../DesignKit/Tabs";
+
 const ContestSidebar = ({ detailsChild, voteChild }: { detailsChild: React.ReactNode, voteChild: React.ReactNode }) => {
 
     const { contestState } = useContestState();
@@ -27,18 +29,24 @@ const ContestSidebar = ({ detailsChild, voteChild }: { detailsChild: React.React
         </div>
     )
     return (
-        <div className="flex flex-col gap-2 border border-border rounded-lg w-full">
-            {isVoting &&
-                <div className="flex flex-col gap-2 p-2">
-                    <div className="w-full grid grid-cols-2 gap-2">
-                        <button className={`btn normal-case btn-ghost ${tab === 0 && 'btn-active'}`} onClick={() => setTab(0)}>Details</button>
-                        <button className={`btn normal-case btn-ghost ${tab === 1 && 'btn-active'}`} onClick={() => setTab(1)}>Vote</button>
+        <div className="flex flex-col gap-2 w-full border border-border bg-base-100 rounded-lg">
+            {isVoting ?
+                <Tabs defaultValue="vote">
+                    <TabsList className="w-full h-12 flex gap-0.5">
+                        <TabsTrigger value="details" className="w-11/12 h-10">Details</TabsTrigger>
+                        <TabsTrigger value="vote" className="w-11/12 h-10">Vote</TabsTrigger>
+                    </TabsList>
+                    <div>
+                        <TabsContent value="details">{detailsChild}</TabsContent>
+                        <TabsContent value="vote">{voteChild}</TabsContent>
                     </div>
-                    <div className="bg-base-200 w-full h-0.5 rounded-lg" />
-                </div>
-            }
-            {tab === 0 && detailsChild}
-            {tab === 1 && voteChild}
+                </Tabs>
+                : (
+                    <div>
+                        {detailsChild}
+                    </div>
+                )}
+
         </div>
     )
 }

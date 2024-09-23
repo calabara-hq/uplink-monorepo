@@ -1,11 +1,11 @@
 import { formatUnits, parseUnits } from "viem";
-import { TokenContractApi } from "./contract";
+import { getTokenInfo } from "./tokenInfo";
+import { ChainId } from "@/types/chains";
 
-export const parseErc20MintPrice = async (erc20Contract: string, erc20Price: string | bigint, chainId: number): Promise<{ humanReadable: string, contractReadable: bigint }> => {
+export const parseErc20MintPrice = async (erc20Contract: string, erc20Price: string | bigint, chainId: ChainId): Promise<{ humanReadable: string, contractReadable: bigint }> => {
     if (erc20Price === "0") return { humanReadable: '0', contractReadable: BigInt(0) };
 
-    const tokenApi = new TokenContractApi(chainId);
-    const token = await tokenApi.tokenGetSymbolAndDecimal({ contractAddress: erc20Contract, tokenStandard: 'ERC20' });
+    const token = await getTokenInfo({ contractAddress: erc20Contract, chainId });
 
     if (!token) {
         throw new Error("Invalid erc20 contract")

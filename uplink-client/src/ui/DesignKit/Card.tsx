@@ -2,6 +2,7 @@ import * as React from "react"
 
 import { cn } from "../../lib/shadcn"
 
+
 const Card = React.forwardRef<
     HTMLDivElement,
     React.HTMLAttributes<HTMLDivElement>
@@ -9,7 +10,7 @@ const Card = React.forwardRef<
     <div
         ref={ref}
         className={cn(
-            "rounded-xl border border-border bg-base1 text-card-foreground shadow",
+            "rounded-xl border border-border bg-base1 shadow",
             className
         )}
         {...props}
@@ -47,7 +48,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <p
         ref={ref}
-        className={cn("text-sm text-muted-foreground", className)}
+        className={cn("text-sm", className)}
         {...props}
     />
 ))
@@ -74,5 +75,6 @@ const CardFooter = React.forwardRef<
 CardFooter.displayName = "CardFooter"
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+
 
 

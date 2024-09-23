@@ -1,7 +1,7 @@
 import { Address, Hex } from "viem";
 import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk"
-import { IChannel, IUpgradePath } from "@tx-kit/sdk/subgraph"
-
+import { IChannel, IUpgradePath } from "@tx-kit/sdk/subgraph";
+import { ChainId } from "./chains";
 
 export type ContractID = `0x${string}-${number}`;
 
@@ -11,13 +11,13 @@ export const concatContractID = ({ chainId, contractAddress }: { chainId: number
 
 export const splitContractID = (contractID: string) => {
     const [contractAddress, chainId] = contractID.split("-");
-    return { chainId: parseInt(chainId), contractAddress };
+    return { chainId: parseInt(chainId) as ChainId, contractAddress };
 }
 
 export type ChannelUpgradePath = IUpgradePath
 
 export type Channel = IChannel & {
-    chainId: number;
+    chainId: ChainId;
 };
 
 // internal type to match metadata standards onchain
@@ -45,7 +45,7 @@ export type TokenMetadata = {
 
 export type ChannelTokenV1 = {
     id: string;
-    chainId: number;
+    chainId: ChainId;
     contractAddress: Address;
     channelAddress: Address;
     maxSupply: string;
@@ -94,6 +94,10 @@ export type ChannelTokenIntent = {
 } & DeferredTokenIntentWithSignature;
 
 
+export type ChannelTokenWithUserBalance = ChannelToken & {
+    balance: string;
+}
+
 export const isTokenIntent = (arg: ChannelToken | ChannelTokenIntent | ChannelTokenV1): arg is ChannelTokenIntent => {
     return (arg as ChannelTokenIntent).tokenIntent !== undefined;
 }
@@ -116,4 +120,8 @@ export const doesChannelHaveFees = (channel: Channel) => {
 
 export const isInfiniteChannel = (channel: Channel) => {
     return channel.transportLayer.type === "infinite";
+}
+
+export const isFiniteChannel = (channel: Channel) => {
+    return channel.transportLayer.type === "finite";
 }

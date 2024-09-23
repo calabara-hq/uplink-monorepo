@@ -1,31 +1,40 @@
+import { redDark, mauveDark, crimsonDark } from '@radix-ui/colors'
 
 const colors = {
 
-  // Base Colors
-  base1: '#1c1f26',
-  base2: '#2b303b',
-  base3: '#202020',
+  //Main Color
+  base: mauveDark.mauve1,
 
-  // Neutral Colors
-  neutral1: '#5D6783',
-  neutral2: '#7B85A1',
-  neurtral3: '#99A3BF',
+  // Base Color (gray)
+  base1: mauveDark.mauve3,
+  base2: mauveDark.mauve4,
+  base3: mauveDark.mauve5,
 
-  // Accent Colors
-  primary: '#57BAD7',
-  secondary: '#CC0595',
-  accent: '#FF0080',
+  // Text Colors (white)
+  text1: mauveDark.mauve12,
+  text2: mauveDark.mauve11,
+  text3: mauveDark.mauve10,
 
-  // Text Colors
-  text1: '#FFFFFF',
-  text2: '#EBEBEB',
-  text3: '#A1A1AA',
+  // Colors
+  primary: crimsonDark.crimson8,
 
-  // Additional Colors
-  success: '#36d399',
+  primary1: crimsonDark.crimson1,
+  primary2: crimsonDark.crimson2,
+  primary3: crimsonDark.crimson3,
+  primary4: crimsonDark.crimson4,
+  primary5: crimsonDark.crimson5,
+  primary6: crimsonDark.crimson6,
+  primary7: crimsonDark.crimson7,
+  primary8: crimsonDark.crimson8,
+  primary9: crimsonDark.crimson9,
+  primary10: crimsonDark.crimson10,
+  primary11: crimsonDark.crimson11,
+  primary12: crimsonDark.crimson12,
+
+  accent: '#3a3a3a',
+  error: redDark.red8,
   warning: '#FFB84D',
-  error: '#f87272',
-  info: '#5D9CEC',
+  success: '#30A46C',
 }
 
 module.exports = {
@@ -38,9 +47,7 @@ module.exports = {
 
   theme: {
     extend: {
-      backgroundColor: {
-        "base": "#121212",
-      },
+
       backgroundImage: {
         'landing': "url('/landing-bg.svg')",
         'gradient-vertical': 'linear-gradient(to bottom, rgb(32, 39, 56) 0%, rgb(7, 8, 22) 100%)',
@@ -51,14 +58,35 @@ module.exports = {
       fontFamily: {
       },
       colors: {
-        'twitter': '#00acee',
-        //Box Border 
-        'border': '#98a1c03d',
-        //Background Color
-        'start': '#202738',
-        'end': '#070816',
-        't1': '#c8cede',
-        't2': '#6b7280',
+
+        base: colors.base,
+        'base-100': colors.base1,
+        'base-200': colors.base2,
+        'base-300': colors.base3,
+        accent: colors.accent,
+
+        t1: colors.text1,
+        t2: colors.text2,
+        t3: colors.text3,
+        border: colors.accent,
+
+        primary: colors.primary,
+        primary1: colors.primary1,
+        primary2: colors.primary2,
+        primary3: colors.primary3,
+        primary4: colors.primary4,
+        primary5: colors.primary5,
+        primary6: colors.primary6,
+        primary7: colors.primary7,
+        primary8: colors.primary8,
+        primary9: colors.primary9,
+        primary10: colors.primary10,
+        primary11: colors.primary11,
+        primary12: colors.primary12,
+
+        error: colors.error,
+        warning: colors.warning,
+        success: colors.success
 
       },
       boxShadow: {
@@ -68,7 +96,9 @@ module.exports = {
         'springUp': 'springUp 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
         'scrollInX': 'scrollInX 350ms ',
         'fadeIn': 'fadeIn 150ms ease-in-out',
+        'fadeOut': 'fadeOut 150ms ease-in-out',
         'ping': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        'spin': 'spin 1s linear infinite',
       }
     },
     keyframes: ({ theme }) => ({
@@ -105,38 +135,30 @@ module.exports = {
           opacity: '1'
         }
       },
+      fadeOut: {
+        '0%': {
+          opacity: '1'
+        },
+        '100%': {
+          opacity: '0'
+        }
+      },
       ping: {
         "75%, 100%": {
           transform: "scale(2)",
           opacity: "0",
         }
       },
+      spin: {
+        "100%": {
+          transform: "rotate(360deg)",
+        },
+      },
     })
   },
 
-  daisyui: {
-    themes: [
-
-      {
-        uplinkDark: {
-          primary: colors.primary,
-          secondary: colors.secondary,
-          accent: colors.accent,
-          'base-100': colors.base1,
-          'base-200': colors.base2,
-          'base-300': colors.base3,
-          neutral: colors.neutral1,
-          info: colors.info,
-          success: colors.success,
-          warning: colors.warning,
-          error: colors.error,
-        }
-      }
-    ]
-  },
-
   plugins: [
-    require("daisyui"),
+    require('@tailwindcss/typography'),
   ],
 }
 

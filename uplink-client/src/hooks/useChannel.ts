@@ -19,8 +19,8 @@ const fetchChannel = async (contractId: ContractID): Promise<Channel> => {
 export const useChannel = (contractId: ContractID, refreshInterval?: number) => {
     const {
         data: channel,
-        isLoading: isBoardLoading,
-        error: isBoardError,
+        isLoading,
+        error,
         mutate: mutateSwrChannel,
     }: { data: Channel; isLoading: boolean; error: any; mutate: any } = useSWR(
         `/swrChannel/${contractId}`,
@@ -30,8 +30,8 @@ export const useChannel = (contractId: ContractID, refreshInterval?: number) => 
 
     return {
         channel,
-        isBoardLoading,
-        isBoardError,
+        isLoading,
+        error,
         mutateSwrChannel
     }
 }

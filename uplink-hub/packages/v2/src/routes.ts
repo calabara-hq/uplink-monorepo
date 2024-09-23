@@ -31,6 +31,7 @@ const sessionMiddleware = async (req: Request, res: Response, next: NextFunction
 
 
 const handleApiErrors = (err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.log(err)
     if (err instanceof AuthorizationError) {
         return res.status(401).json({ message: err.message });
     } else if (err instanceof InvalidArgumentError) {
@@ -59,6 +60,7 @@ v2.get('/channel_tokensV1', tokenController.getChannelTokensV1)
 v2.get('/channel_tokensV2', tokenController.getChannelTokensV2)
 v2.get('/channel_tokenIntents', tokenController.getChannelTokenIntents)
 v2.get('/channel_popularTokens', tokenController.getChannelPopularTokens)
+v2.get('/channel_finiteTokensV2', tokenController.getFiniteChannelTokensV2)
 
 v2.get('/singleTokenV1', tokenController.getSingleTokenV1)
 v2.get('/singleTokenV2', tokenController.getSingleTokenV2)
@@ -67,6 +69,7 @@ v2.get('/explore_trending', channelController.getTrendingChannels)
 v2.get('/featured_mints', tokenController.getFeaturedMints)
 
 v2.get('/userOwnedTokens', userController.getUserOwnedTokens)
+v2.get('/userManagedSpaces', userController.getUserManagedSpaces)
 
 /* -------------------------------------------------------------------------- */
 /*                                   POST                                     */

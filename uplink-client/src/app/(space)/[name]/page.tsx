@@ -1,41 +1,28 @@
 import Link from "next/link";
-import { BiLink, BiPencil, BiWorld } from "react-icons/bi";
-import { FaRegClock, FaTwitter } from "react-icons/fa";
+import { BiLink } from "react-icons/bi";
+import { FaTwitter } from "react-icons/fa";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-import fetchSpaceContests, { FetchSpaceContestResponse, SpaceContest } from "@/lib/fetch/fetchSpaceContests";
+import fetchSpaceContests, { SpaceContest } from "@/lib/fetch/fetchSpaceContests";
 import { Suspense } from "react";
-import { calculateContestStatus } from "@/utils/staticContestState";
 import { HiSparkles } from "react-icons/hi2";
 import UplinkImage from "@/lib/UplinkImage"
-import {
-  CategoryLabel,
-  StatusLabel,
-} from "@/ui/ContestLabels/ContestLabels";
 import { Boundary } from "@/ui/Boundary/Boundary";
 import { AdminWrapper } from "@/lib/AdminWrapper";
-import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
-import { TransmissionsClient } from "@tx-kit/sdk";
 
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 const round_formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 2 })
 
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/ui/Card/Card"
-import { Button } from "@/ui/Button/Button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/ui/Card/Card";
+import { Button } from "@/ui/DesignKit/Button";
 import fetchSpaceStats from "@/lib/fetch/fetchSpaceStats";
-import { fetchPaginatedMintBoardPosts } from "@/lib/fetch/fetchMintBoardPosts";
 import fetchSpaceChannels from "@/lib/fetch/fetchSpaceChannels";
-import { Channel, concatContractID, isInfiniteChannel } from "@/types/channel";
-import { fetchPopularTokens, fetchTokensV2 } from "@/lib/fetch/fetchTokensV2";
+import { Channel, concatContractID, ContractID, isFiniteChannel, isInfiniteChannel } from "@/types/channel";
+import { fetchPopularTokens } from "@/lib/fetch/fetchTokensV2";
+import { IFiniteTransportConfig, ITokenMetadata } from "@tx-kit/sdk/subgraph";
+import { ContestStatusLabel } from "./client";
 
 const SpaceContestsSkeleton = () => {
   return (
@@ -107,7 +94,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <Card className="bg-base border-border items-center w-full">
+      <Card className="bg-base-100 border-border border items-center w-full">
         <div className="flex flex-row lg:flex-col items-center">
           <div className="p-6 pb-0">
             <div className="w-24 rounded-xl lg:rounded-full ">
@@ -121,55 +108,63 @@ const SpaceInfo = async ({ name }: { name: string }) => {
               </ImageWrapper>
             </div>
           </div>
-          <div className="flex flex-col gap-0.5 justify-end pt-4">
+          <div className="flex flex-col gap-0.5 justify-end items-start lg:items-center pt-4">
             <CardHeader className="p-0 pt-2 lg:pt-2 text-left lg:text-center">
               <CardTitle>{displayName}</CardTitle>
             </CardHeader>
-            <CardContent className="p-1 lg:p-2">
+            <CardContent className="p-0 pt-2 flex-col gap-2">
+
               {website && (
-                <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit lg:m-auto">
-                  <BiLink className="w-5 h-5 text-t2" />
-                  <a
-                    href={
-                      /^(http:\/\/|https:\/\/)/.test(website)
-                        ? website
-                        : `//${website}`
-                    }
-                    rel="noopener noreferrer"
-                    draggable={false}
-                    target="_blank"
-                    className="text-blue-500 hover:underline"
-                  >
+                <Link href={
+                  /^(http:\/\/|https:\/\/)/.test(website)
+                    ? website
+                    : `//${website}`
+                }
+                  rel="noopener noreferrer"
+                  draggable={false}
+                  target="_blank"
+                  passHref
+                  prefetch={false}
+                >
+                  <Button variant="link" className="flex gap-2 items-center p-0 h-fit">
+                    <BiLink className="w-5 h-5" />
                     {website.includes("http") ? website.split("//")[1] : website}
-                  </a>
-                </div>
+                  </Button>
+                </Link>
               )}
+
               {twitter && (
-                <div className="flex flex-row gap-2 items-center hover:text-blue-500 w-fit lg:m-auto">
-                  <FaTwitter className="w-4 h-4 text-t2" />
-                  <Link
-                    href={`https://twitter.com/${twitter}`}
-                    rel="noopener noreferrer"
-                    draggable={false}
-                    target="_blank"
-                    className="text-blue-500 hover:underline"
-                    prefetch={false}
-                  >
+                <Link
+                  href={`https://twitter.com/${twitter}`}
+                  rel="noopener noreferrer"
+                  draggable={false}
+                  target="_blank"
+                  passHref
+                  prefetch={false}
+                >
+                  <Button variant="link" className="flex gap-2 items-center p-0 h-fit">
+                    <FaTwitter className="w-4 h-4" />
                     {twitter}
-                  </Link>
-                </div>
+                  </Button>
+                </Link>
               )}
             </CardContent>
           </div>
         </div>
         <CardFooter className="p-6 pt-2">
+          <Link href={`/spacebuilder/edit/${name}`} className="w-full" passHref>
+            <Button className="w-full" variant="outline">
+              Edit
+            </Button>
+          </Link>
+          {/*           
           <Button asChild className="w-full" variant="outline">
             <Link href={`/spacebuilder/edit/${name}`}>Edit</Link>
-          </Button>
+          </Button> */}
         </CardFooter>
       </Card >
     </div >
-  )
+  );
 }
 
 const SpaceStatsSkeleton = () => {
@@ -235,148 +230,49 @@ const SpaceStats = async ({ name }: { name: string }) => {
 }
 
 
-const ContestCard = ({
-  contest,
-  spaceLogo,
-}: {
-  contest: SpaceContest;
-  spaceLogo: string;
-}) => {
-  const { id, metadata, promptData, deadlines, tweetId } = contest;
-  const contestId = id;
-  const contestTitle = promptData.title;
-  const category = metadata.category;
-  const { contestState, stateRemainingTime } = calculateContestStatus(
-    deadlines,
-    metadata.type,
-    tweetId
-  );
-
-  return (
-    <Link
-      href={`/contest/${contestId}`} draggable={false} className="cursor-pointer rounded-lg "
-    >
-      <div className="bg-base-100 relative flex flex-col gap-2 rounded-lg w-full p-2 h-full">
-        <h3 className="text-t1 text-lg font-bold line-clamp-2">{promptData.title}</h3>
-        <div className="mt-auto" />
-        <ImageWrapper>
-          <UplinkImage
-            src={promptData?.coverUrl ?? spaceLogo}
-            draggable={false}
-            alt="contest image"
-            fill
-            sizes="30vw"
-            className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
-          />
-        </ImageWrapper>
-        <div className="grid grid-cols-[auto_1fr_auto] w-full items-center">
-          <div className="w-[60px]">
-            <CategoryLabel category={category} />
-          </div>
-          <div className="m-auto">
-            <StatusLabel status={contestState} />
-          </div>
-          <div className="ml-auto w-[80px]">
-            {stateRemainingTime ? (
-              <div className="flex flex-row gap-2 items-center bg-t2 bg-opacity-5 text-t2 p-2 rounded-lg ">
-                <FaRegClock className="w-4 h-4 text-t2" />
-                <p className="text-sm">{stateRemainingTime}</p>
-              </div>
-            ) : (
-              <span />
-            )}
-          </div>
-        </div>
-      </div >
-    </Link >
-  );
-};
-
 const AdminButtons = async ({ spaceName }: { spaceName: string }) => {
   const space = await fetchSingleSpace(spaceName);
   return (
     <AdminWrapper admins={space.admins}>
-      <Boundary labels={["Admin"]}>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-row gap-2 items-end">
-            <div className="flex flex-col gap-1">
-              <p className="text-lg font-bold text-t1">Mintboard</p>
-              {/* <p className="text-t2">Earn protocol rewards with your users by allowing them to mint under a template config.</p> */}
-            </div>
-            <Link
-              href={`${spaceName}/mintboard/new`}
-              className="btn btn-ghost btn-active btn-sm text-t1 normal-case ml-auto hover:text-primary"
-            >
-              <span>New</span>
-              <HiSparkles className="h-5 w-5 pl-0.5" />
-            </Link>
-          </div>
-          <div className="flex flex-row gap-2 items-end">
-            <div className="flex flex-col gap-1">
-              <p className="text-lg font-bold text-t1">Contest</p>
-              {/* <p className="text-t2">Create a contest</p> */}
-            </div>
-            <Link
-              href={`${spaceName}/create-contest`}
-              className="btn btn-ghost btn-active btn-sm text-t1 normal-case ml-auto hover:text-secondary"
-            >
-              <span>New</span>
-              <HiSparkles className="h-5 w-5 pl-0.5" />
-            </Link>
-          </div>
-        </div>
-      </Boundary>
-    </AdminWrapper>
-  )
-}
-
-
-
-const MintboardHeatMap = async ({ spaceName }: { spaceName: string }) => {
-  const [firstPagePosts, mintBoard] = await Promise.all([
-    fetchPaginatedMintBoardPosts(spaceName, null, 50),
-    fetchMintBoard(spaceName)
-  ])
-
-  if (!mintBoard || !mintBoard.enabled) return null;
-  return (
-    <Boundary size="small">
-      <div className="flex flex-col p-2 gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-xl font-bold text-t1">Mintboard</p>
-
-          <div className="flex flex-row items-center gap-4">
-            <p className="text-t2 mr-2">Earn ETH by posting and sharing posts on the {mintBoard.space.displayName} mintboard.</p>
-            <Link
-              href={`${spaceName}/mintboard`}
-              className="btn btn-sm normal-case ml-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black hover:rounded-xl rounded-3xl transition-all duration-300"
-            >
-              <span>Enter</span>
-            </Link>
-          </div>
-        </div>
-        <div className="flex flex-row flex-wrap gap-2 ">
-          {firstPagePosts.posts.map((post, idx) => {
-            return (
-              <div className="w-[40px]" key={idx}> {/* Adjust this class as needed for sizing */}
-                <ImageWrapper>
-                  <UplinkImage
-                    src={parseIpfsUrl(post.edition.imageURI).gateway}
-                    fill
-                    alt="post"
-                    sizes="10vw"
-                    className="rounded-xl object-cover cursor-pointer aspect-square"
-                  />
-                </ImageWrapper>
+      <div>
+        <Boundary labels={["Admin"]} size="small">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row gap-2 items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <p className="text-lg font-bold text-t1">Mintboard</p>
               </div>
-            )
-          })}
-        </div>
+              <Link
+                href={`${spaceName}/mintboard/new`}
+                passHref
+              >
+                <Button variant="secondary" size="sm" className="flex items-center gap-2" >
+                  <span>New</span>
+                  <HiSparkles className="h-5 w-5 pl-0.5" />
+                </Button>
+              </Link>
+            </div>
+            <div className="flex flex-row gap-2 items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <p className="text-lg font-bold text-t1">Contest</p>
+              </div>
+              <Link
+                href={`${spaceName}/create-contest`}
+                passHref
+              >
+                <Button variant="secondary" size="sm" className="flex items-center gap-2">
+                  <span>New</span>
+                  <HiSparkles className="h-5 w-5 pl-0.5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Boundary>
       </div>
-    </Boundary>
+    </AdminWrapper >
   )
-
 }
+
+
 
 const MintboardPostsPreview = async ({ channel }: { channel: Channel }) => {
   const contractID = concatContractID({ contractAddress: channel.id, chainId: channel.chainId });
@@ -417,12 +313,12 @@ const MintboardDisplay = async ({ spaceName }: { spaceName: string }) => {
           Mintboards
         </h2>
 
-        <div className="w-9/12 sm:w-full flex flex-row gap-2 flex-wrap">
-          {channels.map(channel => {
+        <div className="w-9/12 sm:w-full m-auto grid gap-4 contest-columns auto-rows-fr">
+          {mintboards.map(channel => {
             return (
               <Link
                 key={channel.id}
-                className="flex flex-col gap-2 w-[350px] overflow-hidden bg-transparent border-base-100 border-2 rounded-lg p-2 hover:bg-base-200"
+                className="flex flex-col gap-2  overflow-hidden bg-base-100 border border-border rounded-lg p-2 hover:bg-base-200"
                 href={`${spaceName}/mintboard/${concatContractID({ contractAddress: channel.id, chainId: channel.chainId })}`}
               >
                 <h2 className="text-lg text-t1 font-bold">{channel.name}</h2>
@@ -438,9 +334,52 @@ const MintboardDisplay = async ({ spaceName }: { spaceName: string }) => {
   }
 }
 
-const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceContestResponse['contests'], spaceName: string, spaceLogo: string }) => {
 
-  if (contests.length < 1) {
+const ContestCard = async ({
+  linkTo,
+  coverImg,
+  title,
+  createStart,
+  mintStart,
+  mintEnd
+}: {
+
+  linkTo: string
+  coverImg: string,
+  title: string,
+  contractId?: ContractID,
+  createStart?: string,
+  mintStart?: string,
+  mintEnd?: string
+}) => {
+
+  return (
+    <Link
+      href={linkTo} draggable={false} className="cursor-pointer rounded-lg "
+    >
+      <div className="bg-base-100 hover:bg-base-200 no-select relative flex flex-col gap-2 rounded-lg w-full p-2 h-full border-border border">
+        <h3 className="text-t1 text-lg font-bold line-clamp-2">{title}</h3>
+        <ContestStatusLabel createStart={createStart} mintStart={mintStart} mintEnd={mintEnd} />
+        <div className="mt-auto" />
+        <ImageWrapper>
+          <UplinkImage
+            src={coverImg}
+            draggable={false}
+            alt="contest image"
+            fill
+            sizes="30vw"
+            className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-lg"
+          />
+        </ImageWrapper>
+      </div >
+    </Link >
+  );
+}
+
+
+const Contests = ({ contestsV1, contestsV2, spaceName, spaceLogo }: { contestsV1: Array<SpaceContest>, contestsV2: Array<Channel & { metadata: ITokenMetadata }>, spaceName: string, spaceLogo: string }) => {
+
+  if (contestsV1.length + contestsV2.length === 0) {
     return (
       <div className="w-9/12 sm:w-full m-auto flex flex-col gap-2">
         <div className="flex flex-col gap-2 items-center m-auto mt-10">
@@ -455,8 +394,35 @@ const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceCont
 
   else return (
     <div className="w-9/12 sm:w-full m-auto grid gap-4 contest-columns auto-rows-fr">
-      {contests.map((contest) => {
-        return <ContestCard key={contest.id} contest={contest} spaceLogo={spaceLogo} />;
+      {contestsV2.map((contest, idx) => {
+        const contractId = concatContractID({ contractAddress: contest.id, chainId: contest.chainId });
+        const coverImg = contest.metadata?.image ? parseIpfsUrl(contest.metadata.image).gateway : spaceLogo;
+        const transportConfig = contest.transportLayer.transportConfig as IFiniteTransportConfig;
+        return (
+          <ContestCard
+            contractId={contractId}
+            key={contest.id}
+            linkTo={`${spaceName}/contest/${contractId}`}
+            coverImg={coverImg}
+            title={contest.metadata.name}
+            createStart={transportConfig.createStart}
+            mintStart={transportConfig.mintStart}
+            mintEnd={transportConfig.mintEnd}
+          />
+        );
+      })}
+      {contestsV1.map((contest, idx) => {
+        return (
+          <ContestCard
+            key={contest.id}
+            linkTo={`/contest/${contest.id}`}
+            coverImg={contest.promptData?.coverUrl ?? spaceLogo}
+            title={contest.promptData.title}
+            createStart={Math.floor(new Date(contest.deadlines.startTime).getTime() / 1000).toString()}
+            mintStart={Math.floor(new Date(contest.deadlines.voteTime).getTime() / 1000).toString()}
+            mintEnd={Math.floor(new Date(contest.deadlines.endTime).getTime() / 1000).toString()}
+          />
+        );
       })}
     </div>
   )
@@ -465,7 +431,27 @@ const Contests = ({ contests, spaceName, spaceLogo }: { contests: FetchSpaceCont
 
 
 const ContestDisplay = async ({ spaceName }: { spaceName: string }) => {
-  const spaceWithContests = await fetchSpaceContests(spaceName);
+
+  const [spaceWithContests, contestsV2] = await Promise.all([
+    fetchSpaceContests(spaceName),
+    fetchSpaceChannels(spaceName)
+      .then(channels =>
+        channels
+          .filter(isFiniteChannel)
+          .sort((a, b) =>
+            Number((b.transportLayer.transportConfig as IFiniteTransportConfig).mintEnd) -
+            Number((a.transportLayer.transportConfig as IFiniteTransportConfig).mintEnd)
+          )
+      )
+      .then(sortedChannels =>
+        Promise.all(sortedChannels.map(async channel => {
+          const metadata: ITokenMetadata = await fetch(parseIpfsUrl(channel.uri).gateway).then(res => res.json());
+          return { ...channel, metadata };
+        }))
+      )
+  ]);
+
+
   return (
     <div className="flex flex-col gap-2 w-full ">
       <div className="flex flex-row gap-2 items-center">
@@ -474,7 +460,7 @@ const ContestDisplay = async ({ spaceName }: { spaceName: string }) => {
         </h2>
       </div>
       <div className="w-full h-1 bg-base-100 rounded-lg" />
-      <Contests contests={spaceWithContests.contests} spaceName={spaceName} spaceLogo={spaceWithContests.logoUrl} />
+      <Contests contestsV1={spaceWithContests.contests} contestsV2={contestsV2} spaceName={spaceName} spaceLogo={spaceWithContests.logoUrl} />
     </div>
   )
 }

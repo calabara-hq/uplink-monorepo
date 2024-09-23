@@ -35,7 +35,8 @@
   },
   "packageManager": "yarn@3.5.0",
   "dependencies": {
-    "@tx-kit/sdk": "^0.4.11-alpha.0",
+    "@tx-kit/hooks": "^0.6.4-alpha.0",
+    "@tx-kit/sdk": "^0.5.3-alpha.0",
     "cross-env": "^7.0.3",
     "dotenv-cli": "^7.2.1"
   },

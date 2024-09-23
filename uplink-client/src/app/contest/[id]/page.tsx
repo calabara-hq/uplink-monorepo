@@ -7,7 +7,6 @@ import ContestHeading, {
 } from "@/ui/ContestHeading/ContestHeading";
 import ContestDetails, { DetailsSkeleton } from "@/ui/ContestDetails/ContestDetails";
 import { VoteTab } from "@/ui/Vote/Vote";
-import MobileContestActions from "@/ui/MobileContestActions/MobileContestActions";
 import { Suspense } from "react";
 import fetchSubmissions from "@/lib/fetch/fetchSubmissions";
 import SwrProvider from "@/providers/SwrProvider";
@@ -47,13 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                 <Suspense fallback={<ContestHeadingSkeleton />}>
                     <ContestHeading contestId={contestId} />
                 </Suspense>
-                <MobileContestActions
-                    contestId={contestId}
-                    detailChildren={
-                        <ContestDetails contestId={contestId}
-                        />
-                    }
-                />
+
                 <Suspense fallback={<SubmissionDisplaySkeleton />}>
                     <SubmissionDisplayWrapper contestId={contestId}>
                         <LiveSubmissionDisplay contestId={contestId} />

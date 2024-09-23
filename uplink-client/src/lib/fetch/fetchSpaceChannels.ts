@@ -8,7 +8,9 @@ const fetchSpaceChannels = async (spaceName: string): Promise<Array<Channel>> =>
             "X-API-TOKEN": process.env.API_SECRET!,
         },
         next: { revalidate: 60, tags: [`spaceChannels/${spaceName}`] },
-    }).then(res => res.json())
+    })
+
+        .then(res => res.json())
 
     return data;
 }

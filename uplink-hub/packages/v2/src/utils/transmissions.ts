@@ -9,8 +9,7 @@ dotenv.config()
 const { downlinkClient: baseSepoliaDownlinkClient, uplinkClient: baseSepoliaUplinkClient } = new TransmissionsClient({
     chainId: 84532,
     apiConfig: {
-        serverUrl: 'https://api.goldsky.com/api/public/project_clx10qkniqc3w01ypaz560vm1/subgraphs/transmissions-baseSepolia/0.0.8/gn'
-        //serverUrl: getSubgraphUrl(84532) // TODO update sdk to new version and swap back
+        serverUrl: getSubgraphUrl(84532)
     },
     publicClient: createWeb3Client(84532),
     walletClient: createWalletClient({
@@ -22,8 +21,7 @@ const { downlinkClient: baseSepoliaDownlinkClient, uplinkClient: baseSepoliaUpli
 const { downlinkClient: baseDownlinkClient, uplinkClient: baseUplinkClient } = new TransmissionsClient({
     chainId: 8453,
     apiConfig: {
-        //serverUrl: getSubgraphUrl(8453) // TODO update sdk to new version and swap back
-        serverUrl: 'https://api.goldsky.com/api/public/project_clx10qkniqc3w01ypaz560vm1/subgraphs/transmissions-baseMainnet/0.0.3/gn'
+        serverUrl: getSubgraphUrl(8453)
     },
     publicClient: createWeb3Client(8453),
     walletClient: createWalletClient({

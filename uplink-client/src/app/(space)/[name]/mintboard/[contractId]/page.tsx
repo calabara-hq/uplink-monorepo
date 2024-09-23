@@ -1,4 +1,4 @@
-import fetchChannel, { fetchChannelUpgradePath } from '@/lib/fetch/fetchChannel'
+import fetchChannel from '@/lib/fetch/fetchChannel';
 import fetchSingleSpace from '@/lib/fetch/fetchSingleSpace';
 import { fetchPopularTokens, fetchTokenIntents, fetchTokensV1, fetchTokensV2 } from '@/lib/fetch/fetchTokensV2';
 import { parseIpfsUrl } from '@/lib/ipfs';
@@ -11,8 +11,9 @@ import { unstable_serialize } from 'swr';
 import { ChannelUpgrades, PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents, WhatsNew } from './client';
 import { ContractID, splitContractID } from '@/types/channel';
 import { notFound } from 'next/navigation';
-import { MdNewReleases, MdOutlineSettings } from 'react-icons/md';
+import { MdNewReleases } from 'react-icons/md';
 import { AdminWrapper } from '@/lib/AdminWrapper';
+import { Button } from '@/ui/DesignKit/Button';
 
 
 const BoardInfoSkeleton = () => {
@@ -60,7 +61,7 @@ const BoardInfo = async ({ spaceName, contractId }: { spaceName: string, contrac
                         />
                     </Link>
                     <Link
-                        className="card-title text-sm text-t2 hover:underline hover:text-t1"
+                        className="text-sm text-t2 hover:underline hover:text-t1"
                         href={`/${spaceName}`}
                         draggable={false}
                     >
@@ -86,8 +87,10 @@ const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, 
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-row justify-between items-center text-t1">
                             Manage settings
-                            <Link href={`/${spaceName}/mintboard/${contractId}/edit`} className="btn btn-ghost btn-active btn-sm normal-case">
-                                Edit
+                            <Link href={`/${spaceName}/mintboard/${contractId}/edit`} passHref>
+                                <Button variant="outline">
+                                    Edit
+                                </Button>
                             </Link>
                         </div>
                         <ChannelUpgrades contractId={contractId} />
@@ -96,9 +99,12 @@ const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, 
             </AdminWrapper>
             <Link
                 href={`/${spaceName}/mintboard/${contractId}/studio`}
-                className="btn btn-primary normal-case w-full ml-auto"
+                className="w-full ml-auto"
+                passHref
             >
-                Post
+                <Button className="ml-auto w-full">
+                    Post
+                </Button>
             </Link>
         </div>
     );
@@ -239,7 +245,7 @@ export default async function Page({
     if (!contractAddress || !chainId) return notFound();
 
     return (
-        <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4">
+        <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4 md:p-0">
             <div className="grid grid-cols-1 md:grid-cols-[auto_35%] gap-8 w-full">
                 <div className="flex flex-col gap-2">
                     <Suspense fallback={<BoardInfoSkeleton />}>

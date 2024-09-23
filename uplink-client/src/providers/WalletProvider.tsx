@@ -1,12 +1,11 @@
-"use client";
+"use client";;
 import "@rainbow-me/rainbowkit/styles.css";
 import { SessionProvider } from "./SessionProvider";
 import { AuthenticationProvider } from "./AuthenticationProvider";
 import { Session } from "./SessionProvider";
-import { TransmissionsProvider } from "@tx-kit/hooks";
 
 import "@rainbow-me/rainbowkit/styles.css";
-import { createConfig, http, WagmiProvider } from "wagmi";
+import { http, WagmiProvider } from "wagmi";
 import {
   darkTheme,
   getDefaultConfig,

@@ -13,7 +13,7 @@ const Label = ({
     return (
         <div
             className={clsx('rounded-full px-1.5 shadow-[0_0_1px_3px_bg-base]', {
-                'bg-gray-800 text-gray-300': color === 'default',
+                'bg-base-100 text-gray-300': color === 'default',
                 'bg-pink-700 text-white': color === 'pink',
                 'bg-blue-700 text-white': color === 'blue',
                 'bg-cyan-700 text-white': color === 'cyan',
@@ -44,7 +44,7 @@ export const Boundary = ({
             className={clsx('relative rounded-lg border border-dashed', {
                 'p-3 lg:p-5': size === 'small',
                 'p-4 lg:p-9': size === 'default',
-                'border-gray-700': color === 'default',
+                'border-base-200': color === 'default',
                 'border-pink-700': color === 'pink',
                 'border-blue-700': color === 'blue',
                 'border-cyan-700': color === 'cyan',

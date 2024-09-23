@@ -101,6 +101,10 @@ export type V2TokenPage = {
     data: Array<V2TokenWithMetadata>
 } & PageInfo
 
+export type FiniteTokenPage = {
+    data: Array<V2TokenWithMetadata & { isWinner: boolean }>
+} & PageInfo
+
 export type IntentTokenPage = {
     data: Array<TokenIntentWithMetadata>
 } & PageInfo

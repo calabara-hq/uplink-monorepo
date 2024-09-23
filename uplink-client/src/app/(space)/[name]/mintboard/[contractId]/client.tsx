@@ -1,29 +1,33 @@
-"use client"
-import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ChannelUpgradePath, ContractID, isTokenV1Onchain, splitContractID } from "@/types/channel";
+"use client";
+import {
+    Channel,
+    ChannelToken,
+    ChannelTokenIntent,
+    ChannelTokenV1,
+    ContractID,
+    isTokenV1Onchain,
+    splitContractID,
+} from "@/types/channel";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts, usePaginatedMintBoardPostsV1, usePaginatedPopularTokens } from "@/hooks/useTokens";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardFooter } from "@/ui/Token/Card";
-import SubmissionModal from "@/ui/Submission/SubmissionModal";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
 import { useInView } from "react-intersection-observer";
-import { ManageModalContent, ShareModalContent } from "@/ui/Token/MintUtils";
+import { ManageModalContent } from "@/ui/Token/MintUtils";
 import { useChannel } from "@/hooks/useChannel";
-
 import RenderIfVisible from "@/ui/Virtualization/RenderIfVisible";
-import { Admin } from "@/types/space";
-import Modal from "@/ui/Modal/Modal";
-import Image from "next/image";
+import { Modal } from "@/ui/Modal/Modal";
 import OnchainButton from "@/ui/OnchainButton/OnchainButton";
 import { TbLoader2 } from "react-icons/tb";
 import { useUpgradeChannel } from "@tx-kit/hooks";
 import toast from "react-hot-toast";
-import useSWR from "swr";
 import { Address } from "viem";
 import { HiCheckBadge } from "react-icons/hi2";
-import { handleV2Error } from "@/lib/fetch/handleV2Errors";
 import { useMonitorChannelUpgrades } from "@/hooks/useMonitorChannelUpgrades";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { parseIpfsUrl } from "@/lib/ipfs";
+import { Button } from "@/ui/DesignKit/Button";
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/ui/DesignKit/Dialog";
 
 
 export const PostSkeleton = () => {
@@ -40,9 +44,6 @@ export const PostSkeleton = () => {
         </div>
     );
 }
-
-
-
 
 export const ChannelUpgrades = ({ contractId }: { contractId: ContractID }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -70,7 +71,6 @@ export const ChannelUpgrades = ({ contractId }: { contractId: ContractID }) => {
 
     }
 
-
     const UpgradeStatus = ({ isLoading, upgradePath }) => {
 
         if (isLoading) return (
@@ -90,14 +90,12 @@ export const ChannelUpgrades = ({ contractId }: { contractId: ContractID }) => {
         else if (upgradePath && !isLoading) return (
             <div className="flex justify-between items-center">
                 <p className="text-t1">An upgrade is available!</p>
-                <button className="btn btn-primary btn-sm normal-case" onClick={() => setIsModalOpen(true)}>Upgrade</button>
+                <Button size="sm" onClick={() => setIsModalOpen(true)}>Upgrade</Button>
             </div>
         )
 
         return null;
     }
-
-
 
     return (
         <div className="">
@@ -106,55 +104,55 @@ export const ChannelUpgrades = ({ contractId }: { contractId: ContractID }) => {
                 <Modal
                     isModalOpen={true}
                     onClose={() => { setIsModalOpen(false) }}
-                    title={"What's New"}
-                    disableClickOutside={false}
+                    className="w-full max-w-[450px]"
                 >
+                    <DialogHeader>
+                        <DialogTitle>
+                            {`What's new?`}
+                        </DialogTitle>
+                    </DialogHeader>
 
                     <div className="flex flex-col gap-4">
                         <h2 className="text-3xl text-t1 font-bold">
                             {"What's new?"}
                         </h2>
-                        <div className="flex flex-col bg-base gap-2 rounded-md p-2">
+                        <div className="flex flex-col bg-base-200 gap-2 rounded-md p-2">
                             <p className="">An upgrade is available for improved coinbase smart wallet support.</p>
                             <p className="">Upgrading will make it easier and cheaper for your users to interact with the mintboard.</p>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <button className="btn btn-ghost btn-active normal-case w-fit" onClick={() => setIsModalOpen(false)}>Ignore</button>
-                            {/* <button className="btn btn-primary normal-case w-fit ml-auto" onClick={() => setIsModalOpen(false)}>Upgrade</button> */}
-
-
-                            <div className="ml-auto">
-                                <OnchainButton
-                                    chainId={chainId}
-                                    title={"Upgrade"}
-                                    onClick={handleSubmit}
-                                    isLoading={status === 'pendingApproval' || status === 'txInProgress'}
-                                    loadingChild={
-                                        <button className="btn btn-disabled normal-case w-auto">
-                                            <div className="flex gap-2 items-center">
-                                                <p className="text-sm">{
-                                                    status === 'pendingApproval' ?
-                                                        <span>Awaiting Signature</span>
-                                                        :
-                                                        <span>Processing</span>
-                                                }
-                                                </p>
-                                                <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
-                                            </div>
-                                        </button>
-                                    }
-                                />
+                        <DialogFooter>
+                            <div className="flex justify-between items-center">
+                                <Button variant="ghost" className="w-fit" onClick={() => setIsModalOpen(false)}>Ignore</Button>
+                                <div className="ml-auto">
+                                    <OnchainButton
+                                        chainId={chainId}
+                                        title={"Upgrade"}
+                                        onClick={handleSubmit}
+                                        isLoading={status === 'pendingApproval' || status === 'txInProgress'}
+                                        loadingChild={
+                                            <Button disabled>
+                                                <div className="flex gap-2 items-center">
+                                                    <p className="text-sm">{
+                                                        status === 'pendingApproval' ?
+                                                            <span>Awaiting Signature</span>
+                                                            :
+                                                            <span>Processing</span>
+                                                    }
+                                                    </p>
+                                                    <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                                </div>
+                                            </Button>
+                                        }
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        </DialogFooter>
                     </div>
                 </Modal >
             )}
         </div>
     )
-
-
 }
-
 
 const MapTokens = React.memo(({
     tokens,
@@ -162,7 +160,6 @@ const MapTokens = React.memo(({
     spaceName,
     contractId,
     handleMint,
-    //handleShare,
     handleManage
 }: {
     tokens: Array<ChannelToken | ChannelTokenV1 | ChannelTokenIntent>,
@@ -170,7 +167,6 @@ const MapTokens = React.memo(({
     spaceName: string,
     contractId: ContractID,
     handleMint: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
-    // handleShare: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void,
     handleManage: (event: any, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent) => void
 }) => {
 
@@ -195,10 +191,6 @@ const MapTokens = React.memo(({
                                 <CardFooter
                                     token={token}
                                     channel={channel}
-                                    spaceName={spaceName}
-                                    contractId={contractId}
-                                    handleMint={handleMint}
-                                    //handleShare={handleShare}
                                     handleManage={handleManage}
                                 />
                             }
@@ -281,26 +273,27 @@ export const WhatsNew = () => {
     }, [])
 
 
-
     if (isModalOpen) return (
-        <Modal
-            isModalOpen={true}
-            onClose={() => { setIsModalOpen(false) }}
-            title={"What's New"}
-            disableClickOutside={false}
-        >
+        <Modal isModalOpen={true} onClose={() => { setIsModalOpen(false) }} className="w-full max-w-[450px]">
+            <DialogHeader>
+                <DialogTitle>
+                    {`What's new?`}
+                </DialogTitle>
+                <DialogDescription>
+                    Intents
+                </DialogDescription>
+            </DialogHeader>
 
             <div className="flex flex-col gap-4">
-                <h2 className="text-3xl text-t1 font-bold">
-                    Intents
-                </h2>
-                <div className="flex flex-col bg-base gap-2 rounded-md p-2">
+                <div className="flex flex-col bg-base-200 gap-2 rounded-md p-2">
                     <p className="text-lg">Intents are posts awaiting onchain sponsorship.</p>
                     <p className="text-lg">Be the first to mint any of these posts to bring them onchain.</p>
                     <p className="text-lg">{"In exchange, you'll receive a small reward on every future mint."}</p>
                 </div>
-                <button className="btn btn-primary normal-case ml-auto w-fit" onClick={() => setIsModalOpen(false)}>Got it</button>
             </div>
+            <DialogFooter>
+                <Button className="ml-auto w-fit" onClick={() => setIsModalOpen(false)}>Got it</Button>
+            </DialogFooter>
         </Modal >
     )
 }
@@ -548,7 +541,6 @@ export const RenderPopularTokens = ({ spaceName, contractId }: { spaceName: stri
 }
 
 
-
 export const TokenModal = ({
     spaceName,
     contractId,
@@ -580,7 +572,7 @@ export const TokenModal = ({
     const { contractAddress, chainId } = useMemo(() => splitContractID(contractId), [contractId]);
 
     return (
-        <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isManageModalOpen ? "manage" : "share"} handleClose={handleModalClose} >
+        <Modal isModalOpen={isMintModalOpen || isShareModalOpen || isManageModalOpen} onClose={handleModalClose} className={`w-full overflow-y-auto ${isMintModalOpen ? 'max-w-[800px]' : 'max-w-[400px]'}`}>
             {isMintModalOpen && focusedToken && (
                 <MintTokenSwitch
                     contractAddress={contractAddress}
@@ -591,9 +583,6 @@ export const TokenModal = ({
                     display="modal"
                 />
             )}
-            {/* {isShareModalOpen && focusedToken && (
-                <ShareModalContent spaceName={spaceName} contractId={contractId} token={focusedToken} handleClose={handleModalClose} />
-            )} */}
 
             {isManageModalOpen && focusedToken && !isTokenV1Onchain(focusedToken) && (
                 <ManageModalContent
@@ -602,7 +591,7 @@ export const TokenModal = ({
                     handleClose={handleModalClose}
                 />
             )}
-        </SubmissionModal>
+        </Modal>
     )
 }
 

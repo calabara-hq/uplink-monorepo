@@ -9,7 +9,6 @@ import { parseV2Metadata, splitContractID } from "../utils/utils.js";
 import { Request, Response, NextFunction } from 'express'
 import { ContexedRequest } from "../types.js";
 import { gql } from '@urql/core'
-import { timeStamp } from "console";
 import { formatGqlTokens, TOKEN_FRAGMENT } from "@tx-kit/sdk/subgraph";
 
 const authorizationController = new AuthorizationController(process.env.REDIS_URL!);
@@ -21,6 +20,8 @@ export const getSpaceChannels = async (req: Request, res: Response, next: NextFu
     try {
 
         const dbChannelsResponse = await dbGetChannelsBySpaceName(spaceName)
+
+
 
         const channelsByChainId = getSupportedChains().map(chainId => {
             const channelIds = dbChannelsResponse.filter(channel => channel.chainId === chainId).map(channel => channel.channelAddress.toLowerCase())
@@ -38,9 +39,11 @@ export const getSpaceChannels = async (req: Request, res: Response, next: NextFu
             if (!downlinkClient) return []
 
             let chainChannels = await downlinkClient.getAllChannels({ filters: { where: { id_in: channelIds } } })
+
             return chainChannels.map(channel => { return { ...channel, chainId } })
 
         })).then(data => data.flat())
+
 
         res.send(channels).status(200)
 
@@ -80,7 +83,7 @@ export const getChannel = async (req: Request, res: Response, next: NextFunction
             downlinkClient.getOptimalUpgradePath({ address: contractAddress })
         ])
 
-        //if (!dbChannel) throw new NotFoundError('Channel not found') TODO add this back in
+        if (!dbChannel) throw new NotFoundError('Channel not found')
 
         const response = {
             ...txChannel,
@@ -138,14 +141,9 @@ export const getTrendingChannels = async (req: Request, res: Response, next: Nex
 
         res.send(response.filter(data => data.space != undefined && data.tokens.length > 3)).status(200)
     } catch (err) {
-        console.log(err)
         next(err)
     }
 }
-
-
-
-
 
 /// insert new channel into db
 export const insertSpaceChannel = async (req: ContexedRequest, res: Response, next: NextFunction) => {

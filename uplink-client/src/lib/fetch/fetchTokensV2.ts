@@ -1,4 +1,4 @@
-import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID } from "@/types/channel";
+import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, splitContractID } from "@/types/channel";
 import { Space } from "@/types/space";
 
 export type PageInfo = {
@@ -18,6 +18,11 @@ export type FetchTokensV1Response = {
 
 export type FetchTokensV2Response = {
     data: Array<ChannelToken>
+    pageInfo: PageInfo
+}
+
+export type FetchFiniteChannelTokensV2Response = {
+    data: Array<ChannelToken & { isWinner: boolean }>
     pageInfo: PageInfo
 }
 
@@ -60,6 +65,19 @@ export const fetchTokensV2 = async (contractId: ContractID, pageSize: number, sk
 
 }
 
+export const fetchFiniteChannelTokensV2 = async (contractId: ContractID, pageSize: number, skip: number): Promise<FetchFiniteChannelTokensV2Response> => {
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/channel_finiteTokensV2?contractId=${contractId}&pageSize=${pageSize}&skip=${skip}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "X-API-TOKEN": process.env.API_SECRET!,
+        },
+
+        next: { revalidate: 60, tags: [`finiteTokensV2/${contractId}`] },
+
+    }).then(res => res.json())
+
+}
 
 export const fetchTokenIntents = async (contractId: ContractID, pageSize: number, skip: number): Promise<FetchTokenIntentsResponse> => {
     return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/channel_tokenIntents?contractId=${contractId}&pageSize=${pageSize}&skip=${skip}`, {

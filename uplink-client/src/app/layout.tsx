@@ -40,11 +40,10 @@ export const metadata: Metadata = {
 const Footer = () => {
 
   return (
-    <div className="flex flex-col w-[90vw] max-w-full m-auto mt-16 mb-10 h-fit bg-base justify-center text-white gap-2">
+    <div className="flex flex-col w-11/12 md:w-10/12 max-w-full m-auto mt-16 mb-10 h-fit bg-base justify-center text-white gap-2">
 
       <div className="flex flex-row gap-2">
-        <a className="text-t1" href="https://docs.uplink.wtf" target="_blank">Documentation</a>
-        <a className="text-t1" href="https://discord.gg/yG5w2YT4BD" target="_blank">Support</a>
+        <a className="text-t2 font-bold" href="https://discord.gg/yG5w2YT4BD" target="_blank">Support</a>
       </div>
       <div className="bg-base-100 w-full h-0.5" />
 
@@ -134,7 +133,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-theme="uplinkDark" className="bg-base stars small">
+    <html lang="en" className="bg-base">
       <head />
       <body>
         <WalletProvider refetchInterval={60} session={undefined}>

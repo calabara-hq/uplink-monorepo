@@ -1,125 +1,63 @@
-"use client";
+"use client";;
 import { useVote } from "@/hooks/useVote";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { HiMenu } from "react-icons/hi";
+import { Button } from "../DesignKit/Button";
+import { FaVoteYea } from "react-icons/fa";
 
-// This is essentially the mobile version of the ContestSidebar
-
-// if we want stuff to stick to the screen on scroll
-const StickyContainer = ({ children }: { children: React.ReactNode }) => {
-  const [elementStyle, setElementStyle] = useState("relative");
-
-  useScrollPosition(
-    ({ prevPos, currPos }) => {
-      const shouldStick = false //currPos.y < -350;
-      const shouldBeStyle = shouldStick
-        ? "fixed top-0 left-0 bg-gradient-to-b from-[#121212] items h-32 md:pl-[64px]"
-        : "relative";
-
-      if (shouldBeStyle === elementStyle) return;
-
-      setElementStyle(shouldBeStyle);
-    },
-    [elementStyle]
-  );
+const Skeleton = () => {
   return (
-    <div className={`${elementStyle} w-full flex flex-col z-10 m-auto`}>
-      {children}
+    <div className="flex flex-col gap-4 w-full">
+      <div className="shimmer h-16 w-full bg-base-200 rounded-lg" />
     </div>
-  );
-};
+  )
+}
 
-const InfoDrawer = ({
-  isDrawerOpen,
-  handleClose,
-  children,
-}: {
-  isDrawerOpen: boolean;
-  handleClose: () => void;
-  children: React.ReactNode;
-}) => {
-  const drawerRef = useRef(null);
-  const [scrollY, setScrollY] = useState(0);
+const StickyContainer = ({ children }: { children: React.ReactNode }) => {
+  const [isSticky, setIsSticky] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [elementTop, setElementTop] = useState<number | null>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        drawerRef.current &&
-        !drawerRef.current.contains(event.target as Node)
-      ) {
-        document.body.style.overflow = "visible";
-        handleClose();
+    // Set the initial position of the element relative to the page when the component mounts
+    if (elementRef.current) {
+      const rect = elementRef.current.getBoundingClientRect();
+      setElementTop(rect.top + window.scrollY);
+    }
+  }, []);
+
+  useScrollPosition(
+    ({ currPos }) => {
+      if (elementTop !== null) {
+        // Check if we have scrolled past the element's top position
+        if (currPos.y < -elementTop + 4) {
+          setIsSticky(true);
+        } else {
+          setIsSticky(false);
+        }
       }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [drawerRef]);
-  if (isDrawerOpen) {
-    document.body.style.overflow = "hidden";
-    return (
-      <div className="drawer drawer-open fixed top-0 left-0 bottom-0 md:left-[62px] z-10 w-[calc(80vw - 62px)] h-screen bg-[#00000080] overflow-hidden ">
-        <div className="drawer-side">
-          <ul
-            ref={drawerRef}
-            className="menu flex flex-col gap-4 p-4 w-80 min-h-full bg-base-100 text-base-content shadow-black shadow-sm animate-scrollInX"
-          >
-            <h1 className="text-xl font-bold">Details</h1>
-            {children}
-          </ul>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
-export const DetailsMenuDrawer = ({
-  detailChildren,
-  ui,
-}: {
-  detailChildren: React.ReactNode;
-  ui?: { classNames: string; label: React.ReactNode };
-}) => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    },
+    [elementTop]
+  );
 
   return (
-    <div>
-      {ui ? (
-        <button className={ui.classNames} onClick={() => setIsDrawerOpen(true)}>
-          {ui.label}
-        </button>
-      ) : (
-        <button
-          className="btn btn-ghost rounded-full"
-          onClick={() => setIsDrawerOpen(true)}
-        >
-          <HiMenu className="w-8 h-8 font-bold text-t2" />
-        </button>
-      )}
-      <InfoDrawer
-        isDrawerOpen={isDrawerOpen}
-        handleClose={() => {
-          setIsDrawerOpen(false);
-        }}
-      >
-        {detailChildren}
-      </InfoDrawer>
+    <div
+      ref={elementRef}
+      className={`${isSticky ? "fixed top-0 left-0 bg-gradient-to-b from-[#121212] h-32 sm:pl-[80px] p-4 z-10" : "relative"} w-full flex flex-col m-auto`}
+    >
+      {children}
     </div>
   );
 };
 
 const MobileContestActions = ({
   contestId,
-  detailChildren,
+
 }: {
   contestId: string;
-  detailChildren: React.ReactNode;
+
 }) => {
   const { contestState, stateRemainingTime } = useContestState();
   const { proposedVotes } = useVote(contestId);
@@ -128,56 +66,40 @@ const MobileContestActions = ({
 
   if (contestState === "submitting") {
     return (
-      <div className="flex lg:hidden">
+      <div className="flex flex-col gap-2">
+        <div className="bg-base-100 rounded-lg p-2 flex-col text-t2">
+          <p>This contest is accepting submissions for the next <b>{stateRemainingTime}</b>.</p>
+        </div>
         <StickyContainer>
-          <div className="flex flex-row items-center gap-8 w-full">
-            <DetailsMenuDrawer detailChildren={detailChildren} />
-            <div className="flex p-2 w-full">
-              <Link
-                href={`/contest/${contestId}/studio`}
-                className="btn btn-primary flex flex-1 normal-case rounded-r-none"
-                draggable={false}
-              >
-                Submit
-              </Link>
-              <div className="flex items-center justify-center bg-base-100 rounded-r-xl">
-                <p className="px-4 text-t2">{stateRemainingTime}</p>
-              </div>
-            </div>
-          </div>
+          <Link href={`/contest/${contestId}/studio`} passHref>
+            <Button variant="default" className="w-full" size="lg"><b>Submit</b></Button>
+          </Link>
         </StickyContainer>
       </div>
-      // <div className="flex flex-col w-full bg-blue-200"></div>
-    );
+    )
+
+
   } else if (contestState === "voting") {
     return (
-      <div className="flex lg:hidden">
+      <div className="flex flex-col gap-2">
+        <div className="bg-base-100 rounded-lg p-2 flex-col text-t2">
+          <p>This contest is in the voting phase for the next <b>{stateRemainingTime}</b>.</p>
+        </div>
         <StickyContainer>
-          <div className="flex flex-row items-center gap-8 w-full">
-            <DetailsMenuDrawer detailChildren={detailChildren} />
-
-            <div className="flex p-2 w-full">
-              {" "}
-              <Link
-                href={`/contest/${contestId}/vote`}
-                className="btn btn-warning flex flex-1 normal-case rounded-r-none indicator"
-                draggable={false}
-              >
-                Vote
-                {proposedVotes.length > 0 && (
-                  <span className="indicator-item badge badge-warning rounded-full">
-                    <p>{proposedVotes.length}</p>
-                  </span>
-                )}
-              </Link>
-              <div className="flex items-center justify-center bg-base-100 rounded-r-xl">
-                <p className="px-4 text-t2">{stateRemainingTime}</p>
-              </div>
+          <div className="grid grid-cols-[24.5%_1%_74.5%]">
+            <div className="rounded-lg flex items-center justify-center gap-2 bg-base-200 text-primary11 font-bold">
+              <FaVoteYea className="w-5 h-5" />
+              <div>{proposedVotes.length}</div>
             </div>
+            <div />
+            <Link href={`/contest/${contestId}/vote`} passHref>
+              <Button variant="default" disabled={proposedVotes.length === 0} className="w-full" size="lg"><b>Cast votes</b></Button>
+            </Link>
           </div>
         </StickyContainer>
       </div>
-    );
+    )
+
   }
 };
 

@@ -1,15 +1,18 @@
-"use client"
+"use client";
 import useMe from "@/hooks/useMe";
 import { handleMutationError } from "@/lib/handleMutationError";
 import { useSession } from "@/providers/SessionProvider";
-import { User } from "@/types/user";
 import { useRouter } from "next/navigation";
-import { useReducer, useRef, useState } from "react";
+import { useReducer, useState } from "react";
 import toast from "react-hot-toast";
 import { TbLoader2 } from "react-icons/tb";
 import useSWRMutation from "swr/mutation";
 import { z } from "zod";
 import { AvatarUpload } from "@/ui/MediaUpload/AvatarUpload";
+import { Label } from "@/ui/DesignKit/Label";
+import { Input } from "@/ui/DesignKit/Input";
+import { Button } from "@/ui/DesignKit/Button";
+import Toggle from "@/ui/DesignKit/Toggle";
 
 const configurableUserSettings = z.object({
     profileAvatarUrl: z.string().min(1, { message: "profile picture is required" }),
@@ -27,10 +30,11 @@ type ConfigurableUserSettings = z.infer<typeof configurableUserSettings>;
 const BasicInput = ({ value, label, placeholder, onChange, error, inputType }) => {
     return (
         <div>
-            <label className="label">
-                <span className="label-text">{label}</span>
-            </label>
-            <input
+            <Label>
+                {label}
+            </Label>
+            <Input
+                variant={error ? "error" : "outline"}
                 type={inputType}
                 autoComplete="off"
                 maxLength={20}
@@ -39,13 +43,12 @@ const BasicInput = ({ value, label, placeholder, onChange, error, inputType }) =
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className={`input w-full max-w-xs ${error ? "input-error" : "input"
-                    }`}
+                className="w-full max-w-xs"
             />
             {error && (
-                <label className="label">
-                    <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{error.join(",")}</span>
-                </label>
+                <Label>
+                    <p className="text-error max-w-sm break-words">{error.join(",")}</p>
+                </Label>
             )}
         </div>
     )
@@ -69,26 +72,6 @@ const reducer = (
     }
 }
 
-const Toggle = ({
-    defaultState,
-    onSelectCallback,
-}: {
-    defaultState: boolean;
-    onSelectCallback: (isSelected: boolean) => void;
-}) => {
-    const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onSelectCallback(e.target.checked);
-    };
-    return (
-        <input
-            type="checkbox"
-            className="toggle toggle-success border-2"
-            defaultChecked={defaultState}
-            onChange={handleToggle}
-        />
-    );
-};
-
 const TwitterDisplayToggle = ({
     state,
     dispatch,
@@ -107,9 +90,9 @@ const TwitterDisplayToggle = ({
             </div>
             <div className="ml-auto mt-auto mb-auto ">
                 <Toggle
-                    defaultState={state.visibleTwitter}
-                    onSelectCallback={(isSelected) =>
-                        dispatch({ type: "setDisplayTwitter", payload: isSelected })
+                    checked={state.visibleTwitter}
+                    onCheckedChange={(isSelected) =>
+                        dispatch({ type: "setDisplayTwitter", payload: !isSelected })
                     }
                 />
             </div>
@@ -258,7 +241,7 @@ const Settings = ({ accountAddress }: { accountAddress: string }) => {
                             acceptedFormats={['image/png', 'image/jpeg', 'image/jpg']}
                             uploadStatusCallback={(status) => setIsUploading(status)}
                             ipfsImageCallback={(url) => {
-                                if(url){
+                                if (url) {
                                     dispatch({
                                         type: "SET_FIELD",
                                         payload: { field: "profileAvatarUrl", value: url },
@@ -278,7 +261,7 @@ const Settings = ({ accountAddress }: { accountAddress: string }) => {
                         <TwitterDisplayToggle state={state} dispatch={dispatch} />
                     </div>
                     <div className="h-0.5 w-full bg-base-100" />
-                    <button onClick={onSubmit} disabled={isMutating || isUploading} className="btn btn-primary normal-case w-fit ml-auto">
+                    <Button onClick={onSubmit} disabled={isMutating || isUploading} className="w-fit ml-auto">
                         {isMutating ?
                             <div className="flex gap-2 items-center">
                                 <p className="text-sm">Saving</p>
@@ -291,7 +274,7 @@ const Settings = ({ accountAddress }: { accountAddress: string }) => {
                                 </div>
                             ) : "Save"
                         }
-                    </button>
+                    </Button>
                 </div>
             )
         }

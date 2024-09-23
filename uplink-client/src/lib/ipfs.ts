@@ -1,5 +1,16 @@
 
 
+export const replaceGatewayLinksInString = (str: string) => {
+    return str.replace(/https:\/\/uplink.mypinata.cloud\/ipfs\//g, 'ipfs://');
+}
+
+export const replaceIpfsLinkWithGateway = (str: string) => {
+    return str.replace(/ipfs:\/\/[^ ]+/g, (match) => {
+        return `https://uplink.mypinata.cloud/ipfs/${match.split('ipfs://')[1]}`;
+    });
+}
+
+
 // given an ipfs url, return both the "raw" ipfs protocol url and the gateway url (uplink.mypinata.cloud)
 export const parseIpfsUrl = (url: string) => {
     if (url.startsWith('ipfs://')) {

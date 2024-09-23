@@ -1,9 +1,10 @@
-'use client';
+'use client';;
 import { useRef, useEffect } from 'react';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
-import Image from "next/image";
-import { HiUser } from 'react-icons/hi2';
+import { HiPhoto } from 'react-icons/hi2';
 import UplinkImage from "@/lib/UplinkImage"
+import { Input } from '../DesignKit/Input';
+import { Label } from '../DesignKit/Label';
 
 export const AvatarUpload = ({
     fieldLabel,
@@ -38,7 +39,7 @@ export const AvatarUpload = ({
 
     return (
         <div className="w-full h-full">
-            <input
+            <Input
                 placeholder="asset"
                 type="file"
                 accept={acceptedFormats.join(",")}
@@ -48,29 +49,29 @@ export const AvatarUpload = ({
                 }
                 ref={imageUploader}
             />
-            <label className="label">
-                <span className="label-text">{fieldLabel}</span>
-            </label>
-            <div className="avatar">
-                <div
-                    className="relative w-28 h-28 rounded-full cursor-pointer flex justify-center items-center bg-base-100 hover:bg-base-200 transition-all"
-                    onClick={() => imageUploader.current?.click()}
-                >
-                    {imageObjectURL || initialData ? (
-                        <UplinkImage src={imageObjectURL || initialData} alt="space avatar" fill />
-                    ) : (
-                        <div className="flex justify-center items-center w-full h-full">
-                            <HiUser className="w-8 h-8" />
-                        </div>
-                    )}
-                </div>
+            <Label>
+                {fieldLabel}
+            </Label>
+            {/* <div className="absolute"> */}
+            <div
+                className="relative w-28 h-28 rounded-lg cursor-pointer flex justify-center items-center bg-base-200 hover:bg-base-300 overflow-hidden"
+                onClick={() => imageUploader.current?.click()}
+            >
+                {imageObjectURL || initialData ? (
+                    <UplinkImage src={imageObjectURL || initialData} alt="space avatar" fill className="object-contain rounded-lg" />
+                ) : (
+                    <div className="flex justify-center items-center w-full h-full">
+                        <HiPhoto className="w-8 h-8" />
+                    </div>
+                )}
             </div>
+            {/* </div> */}
             {error && (
-                <label className="label">
-                    <span className="label-text-alt text-error">
+                <Label>
+                    <p className="text-error">
                         {error}
-                    </span>
-                </label>
+                    </p>
+                </Label>
             )}
         </div>
     );

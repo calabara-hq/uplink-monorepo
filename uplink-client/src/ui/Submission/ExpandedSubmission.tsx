@@ -25,7 +25,7 @@ import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 const RenderSubmissionBody = ({ submission }: { submission: Submission }) => {
   return (
     <div>
-      <section className="break-word">
+      <section className="break-words">
         {submission.type === "twitter" ? (
           <ParseThread thread={submission.data.thread} />
         ) : (

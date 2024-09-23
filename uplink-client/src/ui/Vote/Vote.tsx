@@ -17,6 +17,9 @@ import { UserVote } from "@/hooks/useContestInteractionAPI";
 import { useVote } from "@/hooks/useVote";
 import { VotableSubmission } from "@/hooks/useVote";
 import UplinkImage from "@/lib/UplinkImage"
+import { Input } from "../DesignKit/Input";
+import { Button } from "../DesignKit/Button";
+
 const SubmissionVoteInput = ({
   submission,
   mode,
@@ -27,16 +30,16 @@ const SubmissionVoteInput = ({
   updateVoteAmount: (submissionId: string, votes: string, mode: "current" | "proposed") => void;
 }) => {
   return (
-    <input
+    <Input
       type="number"
       placeholder="votes"
-      className="input input-bordered focus:ring-transparent text-center w-full py-1 text-sm bg-base-200 "
+      className="h-full rounded-none rounded-br-lg text-center"
+      variant="outline"
       value={submission.votes}
       onWheel={(e: React.WheelEvent<HTMLElement>) => {
         (e.target as HTMLElement).blur();
       }}
-      onChange={(e) =>
-        updateVoteAmount(submission.id, e.target.value, mode)
+      onChange={(e) => { updateVoteAmount(submission.id, e.target.value, mode) }
       }
     />
   );
@@ -56,29 +59,44 @@ const SubmissionCardVote = ({
 
 
   return (
-    <div className="grid grid-cols-[70%_30%] w-full h-24 max-h-24 bg-base-100 rounded-xl">
-      {submission.data.type === "text" && (
+    <div className="flex flex-row w-full h-24 max-h-24 bg-base-300 rounded-xl">
+      {/* {submission.data.type === "text" && (
         <div className="flex flex-col justify-center w-full p-2">
           <p className="text-base line-clamp-4 text-t1">
             {submission.data.title}
           </p>
         </div>
-      )}
-      {submission.data.type !== "text" && (
+      )} */}
+
+      {/* {submission.data.type !== "text" && (
         <div className="grid grid-cols-2 w-full p-2">
           <CartMediaSubmission submission={submission} />
         </div>
-      )}
-      <div className="grid grid-rows-2 ">
-        <div className="flex">
-          <button
-            className="btn btn-ghost btn-sm ml-auto text-error"
-            onClick={() => removeSingleVote(submission.id, mode)}
-          >
-            <HiTrash className="w-4 h-4" />
-          </button>
+      )} */}
+
+      <div className="flex gap-2 w-[70%] h-24">
+        <div className="flex flex-col justify-center w-full p-2">
+          <p className="text-base line-clamp-3 text-t2 font-bold">
+            {submission.data.title}
+          </p>
         </div>
-        <div className="rounded-br-xl">
+        <div className="w-full">
+          <div className="w-10/12 h-full">
+            <CartMediaSubmission submission={submission} />
+          </div>
+        </div>
+      </div>
+
+
+      <div className="flex flex-col w-[30%]">
+        <Button
+          variant="destructive"
+          className="rounded-none rounded-tr-lg h-[50%]"
+          onClick={() => { removeSingleVote(submission.id, mode) }}
+        >
+          <HiTrash className="w-4 h-4" />
+        </Button>
+        <div className="rounded-br-xl h-[50%]">
           <SubmissionVoteInput submission={submission} mode={mode} updateVoteAmount={updateVoteAmount} />
         </div>
       </div>
@@ -90,7 +108,7 @@ const LockedCardVote = ({ submission }: { submission: VotableSubmission }) => {
   const displayableVotes = formatDecimal(submission.votes);
 
   return (
-    <div className="grid grid-cols-[70%_30%] gap-2 h-20 min-h-20 bg-base-100 rounded-xl">
+    <div className="grid grid-cols-[70%_30%] gap-2 h-20 bg-base-100 rounded-xl">
       {submission.data.type === "text" && (
         <div className="flex flex-col justify-center w-full p-2">
           <p className="text-base line-clamp-4 text-t1">
@@ -155,18 +173,19 @@ export const VoteButton = ({
   };
 
   return (
-    <div className="w-full p-2">
-      <WalletConnectButton styleOverride="w-full rounded-lg btn btn-primary">
-        <div className="flex flex-row items-center justify-between bg-base-100 rounded-lg gap-2 h-fit w-9/10 m-2">
-          <button
-            className="btn btn-warning flex flex-1 normal-case"
-            onClick={handleSubmit}
-            disabled={!isVoteButtonEnabled}
-          >
-            Cast Votes
-          </button>
-          <p className="mx-2 p-2 text-center text-t2">{stateRemainingTime}</p>
-        </div>
+    <div className="grid grid-cols-[14.5%_1%_84.5%] p-2">
+      <div className="bg-base-200 rounded-lg flex items-center justify-center text-t2 w-full h-full">
+        {stateRemainingTime}
+      </div>
+      <div />
+      <WalletConnectButton>
+        <Button
+          className=""
+          onClick={handleSubmit}
+          disabled={!isVoteButtonEnabled}
+        >
+          Cast Votes
+        </Button>
       </WalletConnectButton>
     </div>
   );
@@ -181,22 +200,22 @@ const EditButton = ({
 }) => {
   if (isEditMode) {
     return (
-      <button
-        className="btn btn-sm btn-ghost"
+      <Button
+        variant="ghost"
         onClick={() => setIsEditMode(false)}
       >
         <HiLockOpen className="w-4 h-4" />
-      </button>
+      </Button>
     );
   } else {
     return (
-      <button
-        className="btn btn-sm btn-ghost normal-case"
+      <Button
+        variant="ghost"
         onClick={() => setIsEditMode(true)}
       >
         <HiLockClosed className="w-4 h-4 mr-2" />
         Edit
-      </button>
+      </Button>
     );
   }
 };
@@ -241,12 +260,12 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
     >
       {[...proposedVotes, ...currentVotes].length > 0 && (
         <div className="flex flex-row w-full justify-end items-center p-2">
-          <button
-            className="btn btn-sm btn-ghost normal-case"
+          <Button
+            variant="destructive"
             onClick={removeAllVotes}
           >
             Remove All
-          </button>
+          </Button>
         </div>
       )}
       {currentVotes.length > 0 && (
@@ -349,24 +368,15 @@ export const VoteTab = ({ contestId }: { contestId: string }) => {
 
       <motion.div className="flex flex-col gap-2 p-2" variants={itemVariants}>
         <div className="grid grid-cols-3 justify-items-center justify-evenly gap-2 font-bold text-center">
-          <div
-            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded text-t2"
-            data-tip={displayableTotalVotingPower.long}
-          >
-            <p className="text-sm">Credits</p>
+          <div className="flex flex-col items-center p-2 bg-base-200 w-full rounded text-t2">
+            <p className="text-sm text-gray-500">Credits</p>
             <p>{displayableTotalVotingPower.short}</p>
           </div>
-          <div
-            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded text-t2"
-            data-tip={displayableVotesSpent.long}
-          >
+          <div className="flex flex-col items-center p-2 bg-base-200 w-full rounded text-t2">
             <p className="text-sm text-gray-500">Spent</p>
             <p className="mt-auto">{displayableVotesSpent.short}</p>
           </div>
-          <div
-            className="tooltip tooltip-bottom flex flex-col items-center p-2 bg-base-100 w-full rounded text-t2"
-            data-tip={displayableVotesRemaining.long}
-          >
+          <div className="flex flex-col items-center p-2 bg-base-200 w-full rounded text-t2">
             <p className="text-sm text-gray-500">Remaining</p>
             <p className="mt-auto">{displayableVotesRemaining.short}</p>
           </div>
@@ -394,11 +404,6 @@ const SidebarVote = ({ contestId }: { contestId: string }) => {
         <div className="sticky top-3 right-0 flex flex-col justify-center gap-4 w-full rounded-xl mt-2">
           <div className="flex flex-row items-center gap-2">
             <h2 className="text-t1 text-lg font-semibold">My Selections </h2>
-            {voteActions.proposedVotes.length > 0 && (
-              <span className="badge badge-sm text-sm badge-warning font-bold">
-                {voteActions.proposedVotes.length}
-              </span>
-            )}
           </div>
           <div className="flex flex-col bg-transparent border-2 border-border rounded-lg w-full h-full ">
             <VoteTab contestId={contestId} />

@@ -1,8 +1,6 @@
 import { BiTime } from "react-icons/bi";
 import { ContestCategory, ContestState } from "@/types/contest";
 import { BaseChainLogo } from "@/lib/chains/basechain"
-import { OpChainLogo } from "@/lib/chains/opchain";
-import { ZoraChainLogo } from "@/lib/chains/zorachain";
 // return color for contest category
 const contestCategoryColor = (contestCategory: ContestCategory) => {
   switch (contestCategory) {
@@ -52,7 +50,7 @@ const contestCategoryColor = (contestCategory: ContestCategory) => {
 export const CategoryLabel = ({ category }: { category: ContestCategory }) => {
   const { text, bg } = contestCategoryColor(category);
   return (
-    <p className={`badge border-none badge-md ${bg} ${text} bg-opacity-30`}>
+    <p className={`rounded-xl pl-2 pr-2 text-xs ${bg} ${text} bg-opacity-30`}>
       {category}
     </p>
   );
@@ -87,33 +85,16 @@ const contestStatusColor = (contestState: ContestState) => {
 export const StatusLabel = ({ status }: { status: ContestState }) => {
   const { text, bg } = contestStatusColor(status);
   return (
-    <p className={`badge border-none badge-md ${bg} ${text} bg-opacity-30`}>
+    <p className={`rounded-xl pl-2 pr-2 text-xs ${bg} ${text} bg-opacity-30`}>
       {status}
     </p>
   );
 };
 
 export const ChainLabel = ({ chainId, px }: { chainId: number, px: number }) => {
-  if (chainId === 8453) {
+  if (chainId === 8453 || chainId === 84532) {
     return (
-      <div
-        className="tooltip tooltip-top cursor-pointer"
-        data-tip="Base"
-      >
-        <BaseChainLogo px={px} />
-
-      </div>
-    )
-  }
-
-  if (chainId === 84532) {
-    return (
-      <div
-        className="flex items-center gap-2 tooltip tooltip-top cursor-pointer"
-        data-tip="Base Sepolia"
-      >
-        <BaseChainLogo px={px} />
-      </div>
+      <BaseChainLogo px={px} />
     )
   }
 

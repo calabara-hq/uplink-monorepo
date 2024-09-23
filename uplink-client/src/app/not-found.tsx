@@ -3,7 +3,8 @@ import { useRouter } from "next/navigation";
 import loadingNoggles from "../../public/loading-noggles.svg";
 import Link from "next/link";
 import UplinkImage from "@/lib/UplinkImage";
-export default function NotFound() {  
+import { Button } from "@/ui/DesignKit/Button";
+export default function NotFound() {
   const router = useRouter();
   return (
     <div className="w-full h-[80vh] flex flex-col items-center justify-center gap-6">
@@ -17,17 +18,17 @@ export default function NotFound() {
             target="_blank"
             draggable={false}
             prefetch={false}
-            className="btn btn-primary btn-outline normal-case"
+            passHref
           >
-            Contact Us
+            <Button variant="outline">Contact Us</Button>
           </Link>
 
-          <button
+          <Button
+            variant="default"
             onClick={() => router.back()}
-            className="btn btn-primary normal-case"
           >
             Go Back
-          </button>
+          </Button>
         </div>
       </div>
     </div>

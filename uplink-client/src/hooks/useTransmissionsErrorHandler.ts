@@ -16,6 +16,26 @@ export const useTransmissionsErrorHandler = (error: any) => {
                 toast.error("Insufficient funds")
             }
 
+            if (err.includes("NotAcceptingMints()")) {
+                toast.error("This channel is not accepting mints")
+            }
+
+            if (err.includes("NotAcceptingCreations()")) {
+                toast.error("This channel is not accepting new posts")
+            }
+
+            if (err.includes("InvalidRewards()")) {
+                toast.error("Invalid rewards")
+            }
+
+            if (err.includes("InvalidAmountSent()")) {
+                toast.error("Invalid amount sent")
+            }
+
+            if (err.includes("AlreadySettled()")) {
+                toast.error("This contest has already been settled")
+            }
+
         }
     }, [error])
 
