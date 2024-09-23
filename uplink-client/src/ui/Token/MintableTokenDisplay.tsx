@@ -1,7 +1,6 @@
-"use client";
+"use client";;
 import { useDebounce } from "@/hooks/useDebounce";
 import React, { useEffect, useState } from "react";
-import { MdOutlineCancelPresentation } from "react-icons/md";
 import { ChainLabel } from "../ContestLabels/ContestLabels";
 import { HiCheckBadge } from "react-icons/hi2";
 import { useAccount } from "wagmi";
@@ -14,7 +13,7 @@ import { CounterInput, FeeStructure, getETHMintPrice, RenderFees, RenderMaxSuppl
 import { Boundary } from "../Boundary/Boundary";
 import { AddressOrEns, Avatar } from "../AddressDisplay/AddressDisplay";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
-import { useErc20TokenInfo } from "@/hooks/useTokenInfo";
+import { useTokenInfo } from "@/hooks/useTokenInfo";
 import { useEthBalance, useErc20Balance } from "@/hooks/useTokenBalance";
 import { HiArrowNarrowLeft } from "react-icons/hi";
 import Link from "next/link";
@@ -25,12 +24,14 @@ import { useVoteCart } from "@/hooks/useVoteCart";
 import { Button } from "../DesignKit/Button";
 import { RenderMarkdown } from "../Markdown/RenderMarkdown";
 import { VoteOrOpenDrawer } from "../ChannelSidebar/VoteCart";
+import { ChainId } from "@/types/chains";
+import { Modal } from "../Modal/Modal";
 
 export type DisplayMode = "modal" | "expanded" | "contest-modal" | "contest-expanded"
 
 export type DisplayProps = {
     token: ChannelTokenV1 | ChannelToken | ChannelTokenIntent,
-    chainId: number,
+    chainId: ChainId,
     creator: string,
     metadata: any, // todo type this
     fees: FeeStructure | null,
@@ -90,35 +91,37 @@ export const MintContestDisplay = ({ token,
     handleShare
 }: DisplayProps) => {
 
-    return (
-        <React.Fragment>
-            <div className="flex flex-col gap-2 relative">
-                <div className="grid grid-cols-[85%_15%] items-start">
-                    <p className="line-clamp-3 font-bold text-lg break-word ">{metadata.name}</p>
-                    <button className="btn btn-ghost btn-sm ml-auto" onClick={() => setIsModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
-                </div>
-                <div className="flex flex-col gap-4 bg-black ">
-                    <div className="flex gap-2 items-center">
-                        <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
-                            <Avatar address={creator} size={28} />
-                            <AddressOrEns address={creator} />
-                        </div>
-                        <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Share</button>
-                        <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Vote</button>
-                    </div>
-                    <div className="flex items-center justify-center rounded-lg p-1 relative w-full  m-auto">
-                        <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
-                    </div>
+    return null;
 
-                    <div className="prose">
-                        <RenderMarkdown content={metadata.description} />
-                    </div>
-                </div>
-            </div>
+    // return (
+    //     <React.Fragment>
+    //         <div className="flex flex-col gap-2 relative">
+    //             <div className="grid grid-cols-[85%_15%] items-start">
+    //                 <p className="line-clamp-3 font-bold text-lg break-words ">{metadata.name}</p>
+    //                 <Button variant="ghost" className="ml-auto" onClick={() => setIsModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></Button>
+    //             </div>
+    //             <div className="flex flex-col gap-4 bg-black ">
+    //                 <div className="flex gap-2 items-center">
+    //                     <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
+    //                         <Avatar address={creator} size={28} />
+    //                         <AddressOrEns address={creator} />
+    //                     </div>
+    //                     <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Share</button>
+    //                     <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Vote</button>
+    //                 </div>
+    //                 <div className="flex items-center justify-center rounded-lg p-1 relative w-full  m-auto">
+    //                     <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
+    //                 </div>
 
-            {/* <div className="absolute w-[400px] h-[400px] right-0 top-0 bg-green-200">hey</div> */}
-        </React.Fragment>
-    )
+    //                 <div className="prose">
+    //                     <RenderMarkdown content={metadata.description} />
+    //                 </div>
+    //             </div>
+    //         </div>
+
+    //         {/* <div className="absolute w-[400px] h-[400px] right-0 top-0 bg-green-200">hey</div> */}
+    //     </React.Fragment>
+    // )
 }
 
 
@@ -155,7 +158,7 @@ export const ContestExpandedDisplay = ({
         <div className="flex flex-col gap-4 w-full max-w-[65ch]">
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col w-full gap-2">
-                    <p className="font-bold text-4xl break-word">{metadata.name}</p>
+                    <p className="font-bold text-4xl break-words">{metadata.name}</p>
                     <div className="flex gap-2 items-center">
                         <div className="flex gap-2 items-center text-sm text-t2 bg-base-100 rounded-lg p-1 w-fit">
                             <Avatar address={creator} size={28} />
@@ -224,20 +227,16 @@ export const MintModalDisplay = ({
         <React.Fragment>
             {!isMintFlowModalOpen && (
                 <div className="flex flex-col gap-2 relative">
-                    <div className="flex">
-                        <h2 className="text-t1 text-xl font-bold">Post</h2>
-                        <button className="btn btn-ghost btn-sm  ml-auto" onClick={() => setIsModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
-                    </div>
                     <div className="p-2" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-black ">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="flex items-center justify-center rounded-lg p-1 ">
                             <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
                         </div>
-                        <div className="bg-black-200 items-start flex flex-col gap-8 relative">
+                        <div className="items-start flex flex-col gap-8 relative">
                             <div className="flex flex-col gap-2">
-                                <p className="line-clamp-3 font-bold text-lg break-all">{metadata.name}</p>
+                                <p className="line-clamp-3 font-bold text-lg break-words">{metadata.name}</p>
                                 <div className="flex gap-2 items-center">
-                                    <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
+                                    <div className="flex gap-2 items-center text-sm text-t2 bg-base-200 rounded-lg p-1 w-fit">
                                         <Avatar address={creator} size={28} />
                                         <AddressOrEns address={creator} />
                                     </div>
@@ -277,7 +276,7 @@ export const MintModalDisplay = ({
 
                                 {!areEditionsSoldOut && !isMintPeriodOver &&
                                     <div className="flex flex-col gap-2">
-                                        <div className="grid grid-cols-1  w-full  ml-auto gap-2">
+                                        <div className="flex flex-col w-full ml-auto gap-2">
                                             <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
                                             <OnchainButton
                                                 chainId={chainId}
@@ -350,8 +349,6 @@ export const MintExpandedDisplay = ({
     const areEditionsSoldOut = availableEditions <= 0;
     const [isMintFlowModalOpen, setIsMintFlowModalOpen] = useState(false);
 
-    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-
     const handleButtonClick = () => {
         if ((fees?.erc20Contract ?? zeroAddress) === zeroAddress) {
             handleSubmit(parseInt(debouncedMintQuantity), mintToken)
@@ -364,120 +361,104 @@ export const MintExpandedDisplay = ({
 
     return (
         <React.Fragment>
-            {!isMintFlowModalOpen && (
-                <React.Fragment>
-                    <Link href={backwardsNavUrl} className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0"
-                    >
-                        <HiArrowNarrowLeft className="w-6 h-6" />
-                        <p>Back</p>
-                    </Link>
-                    <Boundary>
-                        <div className="grid grid-cols-1 lg:grid-cols-[45%_50%] gap-2 md:gap-12 w-full">
-                            <div className="flex flex-col gap-4 items-center justify-center flex-grow-0">
-                                <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} styleOverrides="shadow-lg shadow-black" />
-                            </div>
-                            <div className="flex flex-col gap-8 justify-start ">
-                                <div className="flex flex-col gap-4 w-full">
-                                    <div className="flex flex-col gap-2">
-                                        <p className="line-clamp-3 font-bold text-xl break-all">{metadata.name}</p>
-                                        <div className="flex gap-2 items-center">
-                                            <div className="flex gap-2 items-center text-sm text-t2 bg-base-100 rounded-lg p-1 w-fit">
-                                                <Avatar address={creator} size={32} />
-                                                <AddressOrEns address={creator} />
-                                            </div>
-                                            <ShareButton displayMode="expanded" token={token} onClick={handleShare} className="bg-base-100" />
-                                        </div>
+            <div className="flex flex-col gap-2 p-4 sm:p-0">
+                <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.5fr] gap-6 w-full ">
+                    <div className="flex flex-col gap-4 items-center justify-center flex-grow-0 m-auto w-full">
+                        <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} styleOverrides="shadow-lg shadow-black" />
+                    </div>
+                    <div className="flex flex-col gap-8 justify-start bg-base-100 p-2 rounded-lg h-fit">
+                        <div className="flex flex-col gap-4 w-full">
+                            <div className="flex flex-col gap-2">
+                                <p className="line-clamp-3 font-bold text-xl break-words">{metadata.name}</p>
+                                <div className="flex gap-2 items-center">
+                                    <div className="flex gap-2 items-center text-sm text-t2 bg-base-100 rounded-lg p-1 w-fit">
+                                        <Avatar address={creator} size={32} />
+                                        <AddressOrEns address={creator} />
                                     </div>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="flex flex-col justify-start">
-                                            <p className="text-t2">Network</p>
-                                            <div className="flex gap-2 items-center">
-                                                <p className="text-t1 font-bold">{getChainName(chainId)}</p>
-                                                <ChainLabel chainId={chainId} px={16} />
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <p className="text-t2">{isMintPeriodOver ? "Ended" : "Until"}</p>
-                                            <p className="font-bold text-t1">{saleEnd == Number(maxUint40) ? "Forever" : format(new Date(Number(saleEnd) * 1000), "MMM d, h:mm aa")}</p>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <p className="text-t2">Price</p>
-                                            <p className="font-bold text-t1">{getETHMintPrice(fees ? fees.ethMintPrice : null)}</p>
-                                        </div>
-                                        <div className="flex flex-col justify-start">
-                                            <p className="text-t2">Collected</p>
-                                            <div className="flex gap-1">
-                                                <RenderTotalMints totalMinted={totalMinted} />
-                                                <p className="text-t1">/</p>
-                                                <RenderMaxSupply maxSupply={maxSupply} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {!areEditionsSoldOut && !isMintPeriodOver && <div className="flex flex-col gap-2 w-full">
-                                        <div className="p-1" />
-                                        <div className="w-full bg-base-100 h-[1px]" />
-                                        <div className="grid grid-cols-1 xl:grid-cols-[50%_50%] gap-2 xl:gap-4 w-full">
-                                            <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
-                                            <OnchainButton
-                                                chainId={chainId}
-                                                disabled={parseInt(mintQuantity) <= 0 || mintQuantity === "" || parseInt(mintQuantity) > availableEditions}
-                                                title={"Mint"}
-                                                onClick={handleButtonClick}
-                                                isLoading={isTxPending}
-                                                loadingChild={
-                                                    <button className="btn btn-disabled normal-case w-auto">
-                                                        <div className="flex gap-2 items-center">
-                                                            <p className="text-sm">{
-                                                                txStatus === 'pendingApproval' ?
-                                                                    <span>Awaiting Signature</span>
-                                                                    :
-                                                                    <span>Processing</span>
-                                                            }
-                                                            </p>
-                                                            <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
-                                                        </div>
-                                                    </button>
-                                                }
-                                            />
-                                        </div>
-                                        <RenderFees fees={fees} quantity={debouncedMintQuantity} />
-                                    </div>
-                                    }
+                                    <ShareButton displayMode="expanded" token={token} onClick={handleShare} className="bg-base-100" />
                                 </div>
                             </div>
-                        </div >
-                    </Boundary>
-                </React.Fragment>
-            )}
-
-            {isMintFlowModalOpen && <div className="modal modal-open bg-black  transition-colors duration-500 ease-in-out w-[100vw]">
-                <div
-                    className="modal-box bg-black border border-border animate-springUp w-11/12 md:w-3/4 lg:w-1/2 max-w-full  overflow-y-scroll"
-                >
-                    <MintFlowModal
-                        isModalOpen={isMintFlowModalOpen}
-                        handleClose={() => setIsMintFlowModalOpen(false)}
-                        handleExitMint={() => router.push(backwardsNavUrl)}
-                        flowProps={
-                            {
-                                fees: fees,
-                                mintToken,
-                                setMintToken,
-                                erc20Contract: fees?.erc20Contract ?? zeroAddress,
-                                debouncedMintQuantity,
-                                handleSubmit,
-                                chainId,
-                                isTxPending,
-                                isTxSuccessful,
-                                txStatus,
-                                txHash
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="flex flex-col justify-start">
+                                    <p className="text-t2">Network</p>
+                                    <div className="flex gap-2 items-center">
+                                        <p className="text-t1 font-bold">{getChainName(chainId)}</p>
+                                        <ChainLabel chainId={chainId} px={16} />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <p className="text-t2">{isMintPeriodOver ? "Ended" : "Until"}</p>
+                                    <p className="font-bold text-t1">{saleEnd == Number(maxUint40) ? "Forever" : format(new Date(Number(saleEnd) * 1000), "MMM d, h:mm aa")}</p>
+                                </div>
+                                <div className="flex flex-col">
+                                    <p className="text-t2">Price</p>
+                                    <p className="font-bold text-t1">{getETHMintPrice(fees ? fees.ethMintPrice : null)}</p>
+                                </div>
+                                <div className="flex flex-col justify-start">
+                                    <p className="text-t2">Collected</p>
+                                    <div className="flex gap-1">
+                                        <RenderTotalMints totalMinted={totalMinted} />
+                                        <p className="text-t1">/</p>
+                                        <RenderMaxSupply maxSupply={maxSupply} />
+                                    </div>
+                                </div>
+                            </div>
+                            {!areEditionsSoldOut && !isMintPeriodOver &&
+                                <div className="flex flex-col gap-2 w-full">
+                                    <div className="p-1" />
+                                    <div className="w-full bg-base-100 h-[1px]" />
+                                    <div className="grid grid-cols-1 gap-2 w-full justify-between">
+                                        <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
+                                        <OnchainButton
+                                            chainId={chainId}
+                                            disabled={parseInt(mintQuantity) <= 0 || mintQuantity === "" || parseInt(mintQuantity) > availableEditions}
+                                            title={"Mint"}
+                                            onClick={handleButtonClick}
+                                            isLoading={isTxPending}
+                                            loadingChild={
+                                                <Button disabled className="w-auto">
+                                                    <div className="flex gap-2 items-center">
+                                                        <p className="text-sm">{
+                                                            txStatus === 'pendingApproval' ?
+                                                                <span>Awaiting Signature</span>
+                                                                :
+                                                                <span>Processing</span>
+                                                        }
+                                                        </p>
+                                                        <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                                    </div>
+                                                </Button>
+                                            }
+                                        />
+                                    </div>
+                                    <RenderFees fees={fees} quantity={debouncedMintQuantity} />
+                                </div>
                             }
-                        }
-                    />
-
-                </div>
+                        </div>
+                    </div>
+                </div >
             </div>
-            }
+
+            <MintFlowModal
+                isModalOpen={isMintFlowModalOpen}
+                handleClose={() => setIsMintFlowModalOpen(false)}
+                handleExitMint={() => router.push(backwardsNavUrl)}
+                flowProps={
+                    {
+                        fees,
+                        mintToken,
+                        setMintToken,
+                        erc20Contract: fees?.erc20Contract ?? zeroAddress,
+                        debouncedMintQuantity,
+                        handleSubmit,
+                        chainId,
+                        isTxPending,
+                        isTxSuccessful,
+                        txStatus,
+                        txHash
+                    }
+                }
+            />
         </React.Fragment >
     )
 }
@@ -490,7 +471,7 @@ type FlowModalProps = {
     erc20Contract: Address
     debouncedMintQuantity: string
     handleSubmit: (quantity: number, mintToken: Address) => void
-    chainId: number
+    chainId: ChainId
     isTxPending: boolean
     isTxSuccessful: boolean
     txStatus: string
@@ -524,22 +505,21 @@ const MintCurrencyOptions = ({ props, handleClose }: { props: CurrencyOptionProp
 
 
     return (
-        <div className="animate-springUp flex flex-col gap-6 relative">
-            <button className="btn btn-ghost btn-sm flex gap-2 normal-case mr-auto" onClick={handleClose}><HiArrowNarrowLeft className="w-6 h-6 text-t2" />Go Back</button>
+        <div className="animate-fadeIn flex flex-col gap-6 relative">
+            <Button variant="ghost" className="flex gap-2 normal-case mr-auto" onClick={handleClose}><HiArrowNarrowLeft className="w-6 h-6 text-t2" />Go Back</Button>
 
             <div className="flex flex-col w-full sm:w-3/4 m-auto gap-8 h-[50vh] justify-center">
-                <div className="flex flex-col sm:flex-row">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <div
-                        className={`text-lg relative btn btn-ghost border-2 border-border ${props.mintToken === NATIVE_TOKEN && "border-purple-600 hover:border-purple-600"} normal-case rounded-box grid h-36 flex-grow place-items-center`}
+                        className={`text-lg text-center relative bg-base-100 border-2 hover:bg-base-200 cursor-pointer border-border ${props.mintToken === NATIVE_TOKEN && "border-purple-600 hover:border-purple-600"} normal-case rounded-lg grid h-24 md:h-36 flex-grow place-items-center`}
                         onClick={() => props.setMintToken(NATIVE_TOKEN)}
                     >
                         Mint with <br />{formatEther(ethAmountRequired)} ETH
                         <HiCheckBadge className={` absolute -top-3 -right-3 h-10 w-10 text-purple-600 ${props.mintToken === NATIVE_TOKEN ? "visible" : "invisible"}`} />
 
                     </div>
-                    <div className="divider divider-vertical sm:divider-horizontal">OR</div>
                     <div
-                        className={`text-lg relative btn btn-ghost border-2 border-border ${props.mintToken !== NATIVE_TOKEN && "border-primary hover:border-primary"} normal-case rounded-box grid h-36 flex-grow place-items-center`}
+                        className={`text-lg text-center relative bg-base-100 border-2 hover:bg-base-200 cursor-pointer border-border ${props.mintToken !== NATIVE_TOKEN && "border-primary hover:border-primary"} normal-case rounded-lg grid h-24 md:h-36 flex-grow place-items-center`}
                         onClick={() => props.setMintToken(props.erc20Contract)}
                     >
                         Mint with <br /> {formatUnits(erc20AmountRequired, props.erc20Decimals)} {props.erc20Symbol}
@@ -568,7 +548,7 @@ const MintFlowModal = ({
 }: { isModalOpen: boolean, handleClose: () => void, handleExitMint: () => void, flowProps: FlowModalProps }) => {
 
     const { chain } = useAccount();
-    const { symbol, decimals } = useErc20TokenInfo(flowProps.erc20Contract, flowProps.chainId);
+    const { symbol, decimals } = useTokenInfo(flowProps.erc20Contract, flowProps.chainId);
 
 
     useEffect(() => {
@@ -579,11 +559,11 @@ const MintFlowModal = ({
         }
     }, [flowProps.txStatus])
 
-    if (isModalOpen) return (
-        <div className="animate-springUp flex flex-col gap-2 relative">
+    return (
+        <Modal isModalOpen={isModalOpen} onClose={handleClose}>
             {!flowProps.isTxPending && !flowProps.isTxSuccessful && <MintCurrencyOptions props={{ ...flowProps, erc20Decimals: decimals, erc20Symbol: symbol }} handleClose={handleClose} />}
             {flowProps.isTxPending && (
-                <div className="animate-springUp flex flex-col gap-2 w-full h-[50vh] items-center justify-center">
+                <div className="animate-fadeIn flex flex-col gap-2 w-full h-[50vh] items-center justify-center">
                     <p className="text-lg text-t1 font-semibold text-center">
                         {flowProps.txStatus === "erc20ApprovalInProgress" ? `Approving use of ${symbol}` : "Minting your NFT"}
                     </p>
@@ -593,15 +573,24 @@ const MintFlowModal = ({
                 </div>
             )}
             {flowProps.isTxSuccessful && (
-                <div className="animate-springUp flex flex-col gap-3 w-full h-[50vh] items-center justify-center">
+                <div className="animate-fadeIn flex flex-col gap-3 w-full h-[50vh] items-center justify-center">
                     <HiCheckBadge className="h-48 w-48 text-success" />
                     <h2 className="font-bold text-t1 text-xl">Got it.</h2>
                     <div className="flex gap-2 items-center">
-                        <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${flowProps.txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>
-                        <button className="btn normal-case btn-primary" onClick={handleExitMint}>Close</button>
+                        <Link
+                            href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${flowProps.txHash}`}
+                            target="_blank"
+                            rel="noopener norefferer"
+                            passHref
+                        >
+                            <Button variant="ghost">
+                                View Tx
+                            </Button>
+                        </Link>
+                        <Button onClick={handleExitMint}>Close</Button>
                     </div>
                 </div>
             )}
-        </div>
+        </Modal>
     )
 }

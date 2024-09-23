@@ -15,6 +15,7 @@ import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hook
 import { handleV2MutationError } from "@/lib/fetch/handleV2MutationError";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 import { useCapabilities } from "wagmi/experimental";
+import { Modal } from "../Modal/Modal";
 
 
 
@@ -94,7 +95,9 @@ export const MintV1Onchain = ({
                 handleShare={() => setIsShareModalOpen(true)}
                 backwardsNavUrl={backwardsNavUrl}
             />
-            <ShareModal displayMode={display} token={_token} isShareModalOpen={isShareModalOpen} setIsShareModalOpen={setIsShareModalOpen} />
+            <Modal isModalOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} className="w-fit">
+                <ShareModalContent displayMode={display} token={_token} handleClose={() => setIsShareModalOpen(false)} />
+            </Modal>
         </>
     )
 }
@@ -202,7 +205,9 @@ export const MintV2Onchain = ({
                 handleShare={() => setIsShareModalOpen(true)}
                 backwardsNavUrl={backwardsNavUrl}
             />
-            <ShareModal displayMode={display} token={_token} isShareModalOpen={isShareModalOpen} setIsShareModalOpen={setIsShareModalOpen} />
+            <Modal isModalOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} className="w-fit">
+                <ShareModalContent displayMode={display} token={_token} handleClose={() => setIsShareModalOpen(false)} />
+            </Modal>
         </>
     )
 }
@@ -355,27 +360,13 @@ export const MintV2Intent = ({
                 handleShare={() => setIsShareModalOpen(true)}
                 backwardsNavUrl={backwardsNavUrl}
             />
-            <ShareModal displayMode={display} token={_token} isShareModalOpen={isShareModalOpen} setIsShareModalOpen={setIsShareModalOpen} />
+            <Modal isModalOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} className="w-fit">
+                <ShareModalContent displayMode={display} token={_token} handleClose={() => setIsShareModalOpen(false)} />
+            </Modal>
         </>
     )
 }
 
-
-
-export const ShareModal = ({ displayMode, token, isShareModalOpen, setIsShareModalOpen }: { displayMode: DisplayMode, token: ChannelTokenV1 | ChannelToken | ChannelTokenIntent, isShareModalOpen: boolean, setIsShareModalOpen: (val: boolean) => void }) => {
-
-    if (isShareModalOpen) {
-        return (
-            <div className="modal modal-open flex-col lg:flex-row-reverse gap-4 bg-black bg-opacity-80 transition-colors duration-300 ease-in-out">
-                <div
-                    className="modal-box bg-[#1A1B1F] bg-gradient-to-r from-[#e0e8ff0a] to-[#e0e8ff0a] border border-[#ffffff14] max-w-xl animate-springUp"
-                >
-                    <ShareModalContent displayMode={displayMode} token={token} handleClose={() => setIsShareModalOpen(false)} />
-                </div>
-            </div>
-        );
-    }
-}
 
 
 export const MintTokenSwitch = ({

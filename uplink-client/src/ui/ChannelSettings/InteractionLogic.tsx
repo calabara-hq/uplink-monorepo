@@ -1,5 +1,4 @@
-"use client";
-
+"use client";;
 import { useReducer, useState } from "react";
 import { z } from "zod";
 import { FieldError, SectionWrapper } from "./Utils";
@@ -7,18 +6,26 @@ import { Label } from "../DesignKit/Label";
 import { UniformInteractionPower, validateSetupActions, WeightedInteractionPower } from "@tx-kit/sdk/utils";
 import { DynamicLogicInputs, getDynamicLogicAddress, NATIVE_TOKEN } from "@tx-kit/sdk";
 import { Button } from "../DesignKit/Button";
-import Modal, { ModalActions } from "../Modal/Modal";
 import { useTokenInfo } from "@/hooks/useTokenInfo";
 import { HiPencil } from "react-icons/hi2";
 import { encodeAbiParameters, parseUnits, zeroAddress } from "viem";
-import { IERCToken } from "@/types/token";
-import { TokenManager } from "../TokenModal/TokenModal";
 import { Input } from "../DesignKit/Input";
 import { asPositiveFloat } from "@/ui/MintboardSettings/MintboardSettings";
 import { asPositiveInt } from "../Studio/StudioTools";
-import { TokenContractApi } from "@/lib/contract";
 import { Info } from "../DesignKit/Info";
 import { IoMdInformationCircleOutline } from "react-icons/io";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "../DesignKit/Dialog";
+import { useManagedTokenEditor } from "@/hooks/useTokenManager";
+import { AddToken } from "../ManageTokenModal/ManageTokenModal";
+import { ChainId } from "@/types/chains";
+import { getTokenInfo } from "@/lib/tokenInfo";
 
 const singleLogicRuleSchema = z.object({
     chainId: z.union([z.literal(8453), z.literal(84532)]),
@@ -33,11 +40,7 @@ const singleLogicRuleSchema = z.object({
 }).transform(async (input, ctx) => {
     const fetchTokenDecimals = async (token: string) => {
         if (token === NATIVE_TOKEN) return 18;
-        const tokenApi = new TokenContractApi(input.chainId);
-        const { decimals } = await tokenApi.tokenGetSymbolAndDecimal({ contractAddress: token, tokenStandard: 'ERC20' }).catch(() => {
-            // TODO, can't always assume erc1155 is 0 decimals.
-            return { decimals: 0 }
-        })
+        const { decimals } = await getTokenInfo({ contractAddress: token, chainId: input.chainId })
         return decimals;
     }
 
@@ -120,7 +123,7 @@ const DeadlineReducer = (state: InteractionLogicState, action: { type: string; p
     }
 }
 
-export const useInteractionLogicSettings = (initialState?: InteractionLogicInput) => {
+export const useInteractionLogicSettings = (initialState?: InteractionLogicInput, required?: boolean) => {
     const [interactionLogic, dispatch] = useReducer(DeadlineReducer, {
         chainId: 8453,
         logic: [],
@@ -138,6 +141,14 @@ export const useInteractionLogicSettings = (initialState?: InteractionLogicInput
     const validateInteractionLogic = async () => {
         const { errors, ...rest } = interactionLogic;
         const result = await interactionLogicSchema.safeParseAsync(rest);
+
+        if (required && result.data.logic.length === 0) {
+            dispatch({
+                type: "SET_ERRORS",
+                payload: { logic: { _errors: ["At least one rule is required"] } },
+            });
+            throw new Error("At least one rule is required");
+        }
 
         if (!result.success) {
             const formattedErrors = (result as z.SafeParseError<typeof interactionLogicSchema>).error.format();
@@ -159,7 +170,7 @@ export const useInteractionLogicSettings = (initialState?: InteractionLogicInput
 }
 
 
-const DisplayTokenRule = ({ mode, rule, chainId, onEdit, onRemove }: { mode: 'submit' | 'vote', rule: SingleLogicRuleInput, chainId: number, onEdit: () => void, onRemove: () => void }) => {
+const DisplayTokenRule = ({ mode, rule, chainId, onEdit, onRemove }: { mode: 'submit' | 'vote', rule: SingleLogicRuleInput, chainId: ChainId, onEdit: () => void, onRemove: () => void }) => {
     const { symbol, decimals, isLoading } = useTokenInfo(rule.target, chainId)
     return (
         <div className="flex flex-col gap-1 bg-base-100 border border-border rounded-lg p-2">
@@ -197,26 +208,7 @@ const TokenInteractionLogic = ({
     const [interactionPowerError, setInteractionPowerError] = useState<string | null>(null)
     const [literalOperandError, setLiteralOperandError] = useState<string | null>(null)
     const { symbol, decimals, isLoading } = useTokenInfo(logicRule?.target ?? "", interactionLogic.chainId)
-
-    const handleAddToken = (token: IERCToken) => {
-
-        const { signature, data } = token.type === "ERC1155" ?
-            { signature: "0x00fdd58e", data: encodeAbiParameters([{ type: "address", name: "address" }, { type: "uint256", name: "id" }], [zeroAddress, BigInt(token.tokenId)]) }
-            : { signature: "0x70a08231", data: encodeAbiParameters([{ type: "address", name: "address" }], [zeroAddress]) }
-
-        setLogicRule({
-            chainId: interactionLogic.chainId,
-            target: token.address,
-            targetType: 'balanceOf',
-            signature,
-            operator: 'gt',
-            interactionPowerType: 'uniform',
-            literalOperand: '',
-            interactionPower: '1',
-            data
-        })
-        setProgress(1)
-    }
+    const { managedToken, setManagedToken, validateManagedToken } = useManagedTokenEditor({ chainId: interactionLogic.chainId });
 
     const handleCloseAndReset = () => {
         setIsModalOpen(false)
@@ -253,72 +245,109 @@ const TokenInteractionLogic = ({
 
     }
 
+
+    const handleTokenConfirm = () => {
+        try {
+            const result = validateManagedToken();
+            const { signature, data } = result.data.type === "ERC1155" ?
+                { signature: "0x00fdd58e", data: encodeAbiParameters([{ type: "address", name: "address" }, { type: "uint256", name: "id" }], [zeroAddress, BigInt(result.data.tokenId)]) }
+                : { signature: "0x70a08231", data: encodeAbiParameters([{ type: "address", name: "address" }], [zeroAddress]) }
+
+            setLogicRule({
+                chainId: interactionLogic.chainId,
+                target: result.data.address,
+                targetType: 'balanceOf',
+                signature,
+                operator: 'gt',
+                interactionPowerType: 'uniform',
+                literalOperand: '',
+                interactionPower: '1',
+                data
+            })
+            setProgress(1)
+        } catch (e) {
+            console.log(e)
+        }
+
+    }
+
     if (progress === 0) return (
-        <TokenManager
-            chainId={interactionLogic.chainId}
-            setIsModalOpen={setIsModalOpen}
-            saveCallback={handleAddToken}
-            existingTokens={[]}
-            quickAddTokens={[]}
-            uniqueStandard={false}
-            continuous={true}
-        />
+        <>
+            <AddToken
+                state={managedToken}
+                setManagedToken={setManagedToken}
+            />
+            <DialogFooter>
+                <div className="flex w-full justify-between">
+                    <Button variant="outline" onClick={handleCloseAndReset}>Cancel</Button>
+                    <Button disabled={!managedToken.address} onClick={handleTokenConfirm}>Confirm</Button>
+                </div>
+            </DialogFooter >
+        </>
     )
 
 
     if (progress === 1) return (
         /// eligibility criteria - hold less than, more than, exactly x tokens
-
-        <div className="flex flex-col w-full p-2 gap-4">
-            <h2 className="text-2xl text-t1">{mode === 'submit' ? 'Submitter eligibility' : 'Voter eligibility'}</h2>
-
-            <div className="flex flex-row gap-2">
-                <div className="flex flex-col gap-2">
-                    <Label>
-                        {symbol} Threshold
-                    </Label>
-                    <Input type="number" variant="outline" className="bg-transparent rounded-lg max-w-[200px]" onWheel={(e) => { e.currentTarget.blur() }} value={logicRule.literalOperand} onChange={(e) => {
-                        setLiteralOperandError(null)
-                        setLogicRule(prev => {
-                            return {
-                                ...prev,
-                                literalOperand: asPositiveFloat(e.target.value, 2)
-                            }
-                        })
-                    }} />
-                    {literalOperandError && <FieldError error={literalOperandError} />}
+        <>
+            <DialogHeader>
+                <DialogTitle>
+                    {mode === 'submit' ? 'Submitter eligibility' : 'Voter eligibility'}
+                </DialogTitle>
+                <DialogDescription>
+                    Set the eligibility criteria for {mode === 'submit' ? 'submitters' : 'voters'}. Users holding more than [threshold] tokens will be eligible to {mode === 'submit' ? 'submit' : 'vote'}.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col w-full p-2 gap-4">
+                <div className="flex flex-row gap-2">
+                    <div className="flex flex-col gap-2">
+                        <Label>
+                            {symbol} Threshold
+                        </Label>
+                        <Input type="number" variant="outline" className="bg-transparent rounded-lg max-w-[200px]" onWheel={(e) => { e.currentTarget.blur() }} value={logicRule.literalOperand} onChange={(e) => {
+                            setLiteralOperandError(null)
+                            setLogicRule(prev => {
+                                return {
+                                    ...prev,
+                                    literalOperand: asPositiveFloat(e.target.value, 2)
+                                }
+                            })
+                        }} />
+                        {literalOperandError && <FieldError error={literalOperandError} />}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Label>
+                            {mode === 'submit' ? 'Entries' : 'Votes'}
+                        </Label>
+                        <Input type="number" variant="outline" className="bg-transparent rounded-lg max-w-[200px]" onWheel={(e) => { e.currentTarget.blur() }} value={logicRule.interactionPower} onChange={(e) => {
+                            setInteractionPowerError(null)
+                            setLogicRule(prev => {
+                                return {
+                                    ...prev,
+                                    interactionPower: asPositiveInt(e.target.value)
+                                }
+                            })
+                        }} />
+                        {interactionPowerError && <FieldError error={interactionPowerError} />}
+                    </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                    <Label>
-                        {mode === 'submit' ? 'Entries' : 'Votes'}
-                    </Label>
-                    <Input type="number" variant="outline" className="bg-transparent rounded-lg max-w-[200px]" onWheel={(e) => { e.currentTarget.blur() }} value={logicRule.interactionPower} onChange={(e) => {
-                        setInteractionPowerError(null)
-                        setLogicRule(prev => {
-                            return {
-                                ...prev,
-                                interactionPower: asPositiveInt(e.target.value)
-                            }
-                        })
-                    }} />
-                    {interactionPowerError && <FieldError error={interactionPowerError} />}
+
+                {logicRule.literalOperand && <div className="flex flex-row gap-2 items-center text-sm text-t2">
+                    <p>Users holding more than</p>
+                    <p className="font-bold">{logicRule.literalOperand}</p>
+                    <p><b>{symbol}</b> receive {logicRule.interactionPower} {mode === 'submit' ? 'entries' : 'votes'}.</p>
                 </div>
-            </div>
+                }
 
-            <div className="flex flex-row gap-2 items-center">
-                <p>Users holding more than</p>
-                <p className="font-bold">{logicRule.literalOperand}</p>
-                <p><b>{symbol}</b> receive {logicRule.interactionPower} {mode === 'submit' ? 'entries' : 'votes'}.</p>
-            </div>
+                <DialogFooter>
+                    <div className="flex w-full justify-between">
+                        <Button variant="outline" onClick={handleCloseAndReset}>Cancel</Button>
+                        <Button onClick={handleRuleSubmit}>Confirm</Button>
+                    </div>
+                </DialogFooter>
 
-            <ModalActions
-                onCancel={handleCloseAndReset}
-                onConfirm={handleRuleSubmit}
-                confirmDisabled={false}
-                confirmLabel="Confirm"
-                cancelLabel="Cancel"
-            />
-        </div>
+            </div>
+        </>
     )
 }
 
@@ -352,24 +381,24 @@ export const InteractionLogic = ({ interactionLogic, setInteractionLogic, mode }
                     <IoMdInformationCircleOutline className="w-5 h-5 font-normal text-primary11" />
 
                     {mode === "submit" ?
-                        `Who can submit, and how many entries can they submit? Leaving this empty means anyone can submit an unlimited number of entries.`
+                        `Who can submit, and how many entries can they submit? Leaving this empty means anyone can submit an unlimited number of times.`
                         :
-                        `Who can vote, and how many votes can they cast? Leaving this empty means anyone can vote an unlimited number of times.`
+                        `Who can vote, and how many votes can they cast?`
                     }
                 </div>
             </Info>
             <Button onClick={() => setIsModalOpen(true)} variant="outline" className="w-fit m-auto">+ Token balance rule</Button>
+            <FieldError error={interactionLogic.errors?.logic?._errors?.join(",")} />
+            <Dialog open={isModalOpen} onOpenChange={val => setIsModalOpen(val)}>
+                <DialogContent>
+                    <TokenInteractionLogic mode={mode} editIndex={editIndex} interactionLogic={interactionLogic} setInteractionLogic={setInteractionLogic} isModalOpen={isModalOpen} setIsModalOpen={() => { setIsModalOpen(false); setEditIndex(undefined) }} />
+                </DialogContent>
+            </Dialog>
             <div className="grid grid-cols-3 gap-2">
                 {interactionLogic.logic.map((rule, index) => (
                     <DisplayTokenRule mode={mode} key={index} rule={rule} chainId={interactionLogic.chainId} onEdit={() => handleEditRule(index)} onRemove={() => handleRemoveRule(index)} />
                 ))}
             </div>
-            <Modal
-                isModalOpen={isModalOpen}
-                onClose={() => { setIsModalOpen(false); setEditIndex(undefined) }}
-            >
-                <TokenInteractionLogic mode={mode} editIndex={editIndex} interactionLogic={interactionLogic} setInteractionLogic={setInteractionLogic} isModalOpen={isModalOpen} setIsModalOpen={() => { setIsModalOpen(false); setEditIndex(undefined) }} />
-            </Modal>
         </SectionWrapper>
     )
 }

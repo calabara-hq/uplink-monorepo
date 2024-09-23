@@ -3,7 +3,6 @@ import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, 
 import { usePaginatedFinitePosts } from "@/hooks/useTokens";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardFooter } from "@/ui/Token/Card";
-import SubmissionModal from "@/ui/Submission/SubmissionModal";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
 import { useInView } from "react-intersection-observer";
 import { ManageModalContent } from "@/ui/Token/MintUtils";
@@ -266,25 +265,26 @@ export const TokenModal = ({
 
     const { contractAddress, chainId } = useMemo(() => splitContractID(contractId), [contractId]);
 
-    return (
-        <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isManageModalOpen ? "manage" : "share"} handleClose={handleModalClose} >
-            {isMintModalOpen && focusedToken && (
-                <MintTokenSwitch
-                    contractAddress={contractAddress}
-                    channel={channel}
-                    token={focusedToken}
-                    setIsModalOpen={setIsMintModalOpen}
-                    referral=""
-                    display="contest-modal"
-                />
-            )}
-            {isManageModalOpen && focusedToken && !isTokenV1Onchain(focusedToken) && (
-                <ManageModalContent
-                    token={focusedToken as ChannelToken | ChannelTokenIntent}
-                    contractId={contractId}
-                    handleClose={handleModalClose}
-                />
-            )}
-        </SubmissionModal>
-    )
+    return null
+    // (
+    //     <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isManageModalOpen ? "manage" : "share"} handleClose={handleModalClose} >
+    //         {isMintModalOpen && focusedToken && (
+    //             <MintTokenSwitch
+    //                 contractAddress={contractAddress}
+    //                 channel={channel}
+    //                 token={focusedToken}
+    //                 setIsModalOpen={setIsMintModalOpen}
+    //                 referral=""
+    //                 display="contest-modal"
+    //             />
+    //         )}
+    //         {isManageModalOpen && focusedToken && !isTokenV1Onchain(focusedToken) && (
+    //             <ManageModalContent
+    //                 token={focusedToken as ChannelToken | ChannelTokenIntent}
+    //                 contractId={contractId}
+    //                 handleClose={handleModalClose}
+    //             />
+    //         )}
+    //     </SubmissionModal>
+    // )
 }

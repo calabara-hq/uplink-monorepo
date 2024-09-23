@@ -3893,18 +3893,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:^0.4.11-alpha.0":
-  version: 0.4.11-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.4.11-alpha.0"
+"@tx-kit/hooks@npm:^0.6.4-alpha.0":
+  version: 0.6.4-alpha.0
+  resolution: "@tx-kit/hooks@npm:0.6.4-alpha.0"
+  dependencies:
+    "@tx-kit/sdk": 0.5.3-alpha.0
+  peerDependencies:
+    react: 17.x.x || 18.x.x
+    viem: ^1.0.0 || ^2.0.0
+  peerDependenciesMeta:
+    viem:
+      optional: true
+  checksum: 11535c25ee012072f9ce4793ecaef9663e759f9b7ca35ce548ef6db6e9056b00e1bd75049d843e92dfd830c566b897ea69da9491491eb851408cecd3f3e00185
+  languageName: node
+  linkType: hard
+
+"@tx-kit/sdk@npm:0.5.3-alpha.0, @tx-kit/sdk@npm:^0.5.3-alpha.0":
+  version: 0.5.3-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.5.3-alpha.0"
   dependencies:
     "@urql/core": ^4.3.0
     base-64: ^1.0.0
     graphql: ^16.8.1
-    lodash: ^4.17.21
+    nanoid: ^5.0.7
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: fe0e27a3b26dbb37cfd0e7c2c17ee157128c50a18b31a13b4e56b28beae65b355beb57ac5ec8e14b31a39266bb22d36e03aa1840c1b7bd914f8d01d6f03cef51
+  checksum: 852306fc8001cae4696a0bcf1dc6881bc855a308fc509b121551dcfc79f48d545206379cb91a4f1d5a8649972187c2a7150f0a452a8a3fa7cc29791e69030d72
   languageName: node
   linkType: hard
 
@@ -13389,7 +13404,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "uplink-hub@workspace:."
   dependencies:
-    "@tx-kit/sdk": ^0.4.11-alpha.0
+    "@tx-kit/hooks": ^0.6.4-alpha.0
+    "@tx-kit/sdk": ^0.5.3-alpha.0
     concurrently: ^8.2.0
     cross-env: ^7.0.3
     dotenv-cli: ^7.2.1

@@ -1,13 +1,76 @@
+import { calculateImageAspectRatio } from "@/lib/farcaster/utils";
 import fetchChannel from "@/lib/fetch/fetchChannel";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-import { fetchSingleTokenV2 } from "@/lib/fetch/fetchTokensV2";
+import { fetchSingleTokenIntent, fetchSingleTokenV2 } from "@/lib/fetch/fetchTokensV2";
+import { parseIpfsUrl } from "@/lib/ipfs";
 import UplinkImage from "@/lib/UplinkImage";
 import { ContractID } from "@/types/channel";
 import { Button } from "@/ui/DesignKit/Button";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
+import { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { HiArrowNarrowLeft } from "react-icons/hi";
+
+export async function generateMetadata({
+    params,
+    searchParams
+}: {
+    params: { name: string, contractId: ContractID, postId: string };
+    searchParams: { [key: string]: string | undefined }
+}): Promise<Metadata> {
+
+    const { name: spaceName, contractId, postId } = params
+
+    const isIntent = searchParams?.intent ? true : false
+    const referral = searchParams?.referrer ?? ""
+
+    const channel = await fetchChannel(contractId);
+    const token = isIntent ? await fetchSingleTokenIntent(contractId, postId) : await fetchSingleTokenV2(contractId, postId)
+
+    const author = token.author
+
+    const aspect = await calculateImageAspectRatio(parseIpfsUrl(token.metadata.image).gateway)
+
+    // const fcMetadata: Record<string, string> = {
+    //     "fc:frame": "vNext",
+    //     "fc:frame:image": parseIpfsUrl(token.metadata.image).gateway,
+    //     "fc:frame:image:aspect_ratio": aspect, // todo is this necc???
+    // };
+
+    // const mintableMetadata: Record<string, string> = {
+    //     "fc:frame:button:1": "Mint",
+    //     "fc:frame:button:1:action": "tx",
+    //     "fc:frame:button:1:target": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/frames/${contractId}/v2/mint?postId=${postId}&intent=${isIntent ? 'true' : 'false'}&referrer=${referral}`,
+    //     "fc:frame:button:1:post_url": `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/frames/${contractId}/v2/after-mint?spaceName=${spaceName}&postId=${postId}&intent=${isIntent ? 'true' : 'false'}`,
+    // }
+
+    return {
+        title: `${author}`,
+        description: `${token.metadata.name}`,
+        openGraph: {
+            title: `${author}`,
+            description: `${token.metadata.name}`,
+            images: [
+                {
+                    url: parseIpfsUrl(token.metadata.image).gateway,
+                    width: 600,
+                    height: 600,
+                    alt: `${params.postId} media`,
+                },
+            ],
+            locale: "en_US",
+            type: "website",
+        },
+        // other: {
+        //     ...fcMetadata,
+        //     ...mintableMetadata
+        // },
+    };
+}
+
+
+
 
 const ExpandedPostSkeleton = () => {
     return (

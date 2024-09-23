@@ -6,7 +6,7 @@ import UplinkImage from "@/lib/UplinkImage"
 const Nav = async () => {
   return (
     <nav className="h-20 w-full hidden sm:flex">
-      <div className="flex w-11/12 ml-auto mr-auto items-center">
+      <div className="flex w-10/12 ml-auto mr-auto items-center">
         <div className="flex items-center justify-center mr-auto gap-2">
           <UplinkImage
             src={uplinkLogo}

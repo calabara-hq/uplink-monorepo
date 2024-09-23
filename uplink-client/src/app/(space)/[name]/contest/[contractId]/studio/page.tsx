@@ -1,7 +1,5 @@
-"use client"
+"use client";
 import { CreateToken } from "@/ui/Studio/TokenStudio";
-import { Suspense } from "react";
-import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { ContractID } from "@/types/channel";
 import { useChannel } from "@/hooks/useChannel";
 import { IFiniteTransportConfig } from "@tx-kit/sdk/subgraph";

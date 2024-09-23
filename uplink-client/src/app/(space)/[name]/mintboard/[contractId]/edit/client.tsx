@@ -1,21 +1,20 @@
-"use client";
+"use client";;
 import { useMintBoardSettings, MintBoardSettingsInput } from "@/hooks/useMintboardSettings";
-import { useSession } from "@/providers/SessionProvider";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { TbLoader2 } from "react-icons/tb";
-import { TransmissionsContext, useMulticall, useTransmissionsClient } from "@tx-kit/hooks";
-import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
+import { useMulticall } from "@tx-kit/hooks";
+import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import OnchainButton from "@/ui/OnchainButton/OnchainButton";
 import { Space } from "@/types/space";
 import { MintboardSettings } from "@/ui/MintboardSettings/MintboardSettings";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 import { mutateChannel } from "@/app/mutate";
 import { ContractID, splitContractID } from "@/types/channel";
-import { useSWRConfig } from "swr";
 import { useChannel } from "@/hooks/useChannel";
 import { UplinkClient } from "@tx-kit/sdk";
+import { Button } from "@/ui/DesignKit/Button";
 
 const WaitForEditChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
     const { mutateSwrChannel } = useChannel(contractId)
@@ -57,8 +56,6 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
     const { contractAddress, chainId } = splitContractID(contractId)
 
     const calldataClient = new UplinkClient({ chainId, publicClient, walletClient });
-
-
 
     useTransmissionsErrorHandler(txError);
 
@@ -102,7 +99,7 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
                 onClick={handleSubmit}
                 isLoading={txStatus === 'pendingApproval' || txStatus === 'txInProgress'}
                 loadingChild={
-                    <button className="btn btn-disabled normal-case w-auto">
+                    <Button disabled className="w-auto">
                         <div className="flex gap-2 items-center">
                             <p className="text-sm">{
                                 txStatus === 'pendingApproval' ?
@@ -113,7 +110,7 @@ const BoardForm = ({ spaceData, priorState, contractId }: { spaceId: string, pri
                             </p>
                             <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
                         </div>
-                    </button>
+                    </Button>
                 }
             />
         </MintboardSettings>

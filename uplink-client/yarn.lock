@@ -5062,6 +5062,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-progress@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@radix-ui/react-progress@npm:1.1.0"
+  dependencies:
+    "@radix-ui/react-context": "npm:1.1.0"
+    "@radix-ui/react-primitive": "npm:2.0.0"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/36b722fe274f843162cea186993bc8254ab034341becc88d031e44e1fd3a31dd3c3e7b8fb64e19a02d04da842e3f3b5a7638ed4924cf70f50925889d4439e3ed
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-radio-group@npm:^1.2.0":
   version: 1.2.0
   resolution: "@radix-ui/react-radio-group@npm:1.2.0"
@@ -7192,24 +7212,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tx-kit/hooks@npm:^0.6.3-alpha.0":
-  version: 0.6.3-alpha.0
-  resolution: "@tx-kit/hooks@npm:0.6.3-alpha.0"
+"@tx-kit/hooks@npm:^0.6.4-alpha.0":
+  version: 0.6.4-alpha.0
+  resolution: "@tx-kit/hooks@npm:0.6.4-alpha.0"
   dependencies:
-    "@tx-kit/sdk": "npm:0.5.2-alpha.0"
+    "@tx-kit/sdk": "npm:0.5.3-alpha.0"
   peerDependencies:
     react: 17.x.x || 18.x.x
     viem: ^1.0.0 || ^2.0.0
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/4b321e2ca6304d8c1d96d7c04c788d5853d8f79301b1f597ea5ff5fca89c1927cdf5cbd79a6f4ece19e30ca14f803322aa91784d3f24597d99b035450fb51169
+  checksum: 10c0/c00c099ed78ddc5e58efc85e0d232f84c38c6ed2f0adf8bedf6e39e297fcb41a9d9f47996fdc7a7d5adca61fd5d8b1965fe290be2cc89f9b89e1f2273292ec2b
   languageName: node
   linkType: hard
 
-"@tx-kit/sdk@npm:0.5.2-alpha.0, @tx-kit/sdk@npm:^0.5.2-alpha.0":
-  version: 0.5.2-alpha.0
-  resolution: "@tx-kit/sdk@npm:0.5.2-alpha.0"
+"@tx-kit/sdk@npm:0.5.3-alpha.0, @tx-kit/sdk@npm:^0.5.3-alpha.0":
+  version: 0.5.3-alpha.0
+  resolution: "@tx-kit/sdk@npm:0.5.3-alpha.0"
   dependencies:
     "@urql/core": "npm:^4.3.0"
     base-64: "npm:^1.0.0"
@@ -7218,7 +7238,7 @@ __metadata:
   peerDependenciesMeta:
     viem:
       optional: true
-  checksum: 10c0/03c01bac323f53fa7fe5a9b36efb6cc0374d4ccf4e7fd38173159f98fc12b290b9940dc335c2065126ddf34b054e28397d75c2a42c04174e5b6e30517e596744
+  checksum: 10c0/bc4db74309eb9e1b48d4fab6c04a23488ca66cb8a3d88ccf0d95f6249e3cb493b61748ab803681e97b8fdd0fb20f31d9b5591a255acf452f81066402d431845d
   languageName: node
   linkType: hard
 
@@ -12235,6 +12255,43 @@ __metadata:
     minimalistic-assert: "npm:^1.0.1"
     minimalistic-crypto-utils: "npm:^1.0.1"
   checksum: 10c0/799959b6c54ea3564e8961f35abdf8c77e37617f3051614b05ab1fb6a04ddb65bd1caa75ed1bae375b15dda312a0f79fed26ebe76ecf05c5a7af244152a601b8
+  languageName: node
+  linkType: hard
+
+"embla-carousel-autoplay@npm:^8.3.0":
+  version: 8.3.0
+  resolution: "embla-carousel-autoplay@npm:8.3.0"
+  peerDependencies:
+    embla-carousel: 8.3.0
+  checksum: 10c0/e372669a1a51e100602f9d60377b5e86a678b1ffe37034a7d2856b4cf58d4208f07b91445478b82b5bf2589c730cd7cf692b05bbd8311780dc07bb88ac7819a9
+  languageName: node
+  linkType: hard
+
+"embla-carousel-react@npm:^8.3.0":
+  version: 8.3.0
+  resolution: "embla-carousel-react@npm:8.3.0"
+  dependencies:
+    embla-carousel: "npm:8.3.0"
+    embla-carousel-reactive-utils: "npm:8.3.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.1 || ^18.0.0
+  checksum: 10c0/ee3492dfbc900391c8137cca2f55c403307e3dd121a77ea3bbacca33afb82715647eaae5a6d6cc25590284892e45c75e70ab5bb033ebc20016a1972333104dc6
+  languageName: node
+  linkType: hard
+
+"embla-carousel-reactive-utils@npm:8.3.0":
+  version: 8.3.0
+  resolution: "embla-carousel-reactive-utils@npm:8.3.0"
+  peerDependencies:
+    embla-carousel: 8.3.0
+  checksum: 10c0/64769d7b5d0169f7cda810d909b446ccd47b28afbcb205196c0e1799c51ebbefaa71465cabd6bc5ab92bad78da99fdf2808dc8e1a3f3f18a7e428ae2e0136a0e
+  languageName: node
+  linkType: hard
+
+"embla-carousel@npm:8.3.0":
+  version: 8.3.0
+  resolution: "embla-carousel@npm:8.3.0"
+  checksum: 10c0/0240156d6a736603d82ddfe93b03ce296e385e9c18ed2cca9465634c8adb7560bfc2fbef6368a4da2a54926c4ba6de1012ebb33d2fc92c052030ea2288e4cc92
   languageName: node
   linkType: hard
 
@@ -23984,6 +24041,7 @@ __metadata:
     "@popmotion/popcorn": "npm:^0.4.4"
     "@radix-ui/react-label": "npm:^2.1.0"
     "@radix-ui/react-popover": "npm:^1.1.1"
+    "@radix-ui/react-progress": "npm:^1.1.0"
     "@radix-ui/react-radio-group": "npm:^1.2.0"
     "@radix-ui/react-slot": "npm:^1.1.0"
     "@radix-ui/react-switch": "npm:^1.1.0"
@@ -24001,8 +24059,8 @@ __metadata:
     "@storybook/testing-library": "npm:^0.2.1"
     "@tailwindcss/typography": "npm:^0.5.14"
     "@tanstack/react-query": "npm:^5.48.0"
-    "@tx-kit/hooks": "npm:^0.6.3-alpha.0"
-    "@tx-kit/sdk": "npm:^0.5.2-alpha.0"
+    "@tx-kit/hooks": "npm:^0.6.4-alpha.0"
+    "@tx-kit/sdk": "npm:^0.5.3-alpha.0"
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
@@ -24023,6 +24081,8 @@ __metadata:
     dotenv: "npm:^16.0.3"
     dotenv-cli: "npm:^7.2.1"
     editorjs-react-renderer: "npm:^3.5.1"
+    embla-carousel-autoplay: "npm:^8.3.0"
+    embla-carousel-react: "npm:^8.3.0"
     encoding: "npm:^0.1.13"
     eslint: "npm:8.33.0"
     eslint-config-next: "npm:^13.4.4"

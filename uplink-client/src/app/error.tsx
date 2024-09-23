@@ -11,7 +11,7 @@ export default function Error({
 }) {
   const router = useRouter();
   return (
-    <div className="w-full h-[60vh] bg-base flex flex-col gap-4 items-center justify-center">
+    <div className="w-full h-[60vh] bg-base flex flex-col gap-4 items-center justify-center text-center">
       <p className="text-t1 text-3xl">There was a problem</p>
       <p className="text-t2 text-xl">
         Please try again later or send us a DM on{" "}

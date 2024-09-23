@@ -154,9 +154,9 @@ export const Metadata = ({ metadata, setMetadata }: { metadata: MetadataState, s
                     maxVideoDuration={210}
                 />
                 {metadata.errors?.imageURI?._errors && (
-                    <label className="label">
-                        <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{metadata.errors.imageURI._errors.join(",")}</span>
-                    </label>
+                    <Label>
+                        <p className="text-error max-w-sm break-words">{metadata.errors.imageURI._errors.join(",")}</p>
+                    </Label>
                 )}
             </div>
 

@@ -7,30 +7,31 @@ import { NATIVE_TOKEN } from "@tx-kit/sdk";
 import { HiCheckBadge } from "react-icons/hi2";
 import { IERCToken } from "@/types/token";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/ui/DesignKit/Table";
-import { useErc20TokenInfo } from "@/hooks/useTokenInfo";
 import { Input } from "../DesignKit/Input";
 import { Button } from "../DesignKit/Button";
-import TokenModal from "../TokenModal/TokenModal";
-import { TokenContractApi } from "@/lib/contract";
 import { parseUnits } from "viem";
 import { validateFiniteTransportLayer } from "@tx-kit/sdk/utils";
 import { MdOutlineDelete } from "react-icons/md";
 import { Info } from "../DesignKit/Info";
 import { IoMdInformationCircleOutline } from "react-icons/io";
+import { useTokenInfo } from "@/hooks/useTokenInfo";
+import { getTokenInfo } from "@/lib/tokenInfo";
+import { Dialog, DialogContent, DialogFooter } from "../DesignKit/Dialog";
+import { AddToken } from "../ManageTokenModal/ManageTokenModal";
+import { useManagedTokenEditor } from "@/hooks/useTokenManager";
 
 
 const rewardsSchema = z.object({
-    chainId: z.number(),
+    chainId: z.union([z.literal(8453), z.literal(84532)]),
     rewardToken: z.string().min(1, { message: "Reward token is required" }),
     rewardRanks: z.array(z.number()),
     rewardAllocations: z.array(z.string()),
 }).transform(async (data, ctx) => {
 
-
     const fetchTokenDecimals = async (token: string) => {
         if (token === NATIVE_TOKEN) return 18;
-        const tokenApi = new TokenContractApi(data.chainId);
-        const { decimals } = await tokenApi.tokenGetSymbolAndDecimal({ contractAddress: token, tokenStandard: 'ERC20' }).catch(() => {
+
+        const { decimals } = await getTokenInfo({ contractAddress: token, chainId: data.chainId }).catch(() => {
             return { decimals: 0 }
         })
         return decimals;
@@ -161,7 +162,7 @@ export const useRewardsSettings = (initialState?: RewardsInput) => {
 
 const SubmitterRewardMatrix = ({ rewards, setRewards }: { rewards: RewardsState, setRewards: (field: string, value: any) => void }) => {
 
-    const { symbol: erc20Symbol, decimals: erc20Decimals } = useErc20TokenInfo(rewards.rewardToken, rewards.chainId)
+    const { symbol: erc20Symbol, decimals: erc20Decimals } = useTokenInfo(rewards.rewardToken, rewards.chainId)
     const symbol = rewards.rewardToken === NATIVE_TOKEN ? "ETH" : erc20Symbol
 
     const updateRank = (index: number, value: number) => {
@@ -239,6 +240,8 @@ const SubmitterRewardMatrix = ({ rewards, setRewards }: { rewards: RewardsState,
 
 export const Rewards = ({ rewards, setRewards }: { rewards: RewardsState, setRewards: (field: string, value: any) => void }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const { managedToken, setManagedToken, validateManagedToken } = useManagedTokenEditor({ chainId: rewards.chainId });
+
 
     const handleAddToken = (address: string) => {
         setRewards("rewardToken", address)
@@ -249,6 +252,19 @@ export const Rewards = ({ rewards, setRewards }: { rewards: RewardsState, setRew
             setRewards("rewardAllocations", [""])
         }
     }
+
+    const handleModalConfirm = () => {
+        try {
+            const result = validateManagedToken();
+            handleAddToken(result.data.address)
+            setIsModalOpen(false)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+
+
     const handleRemoveToken = (val: any) => { }
 
     const onSubmit = () => { }
@@ -262,8 +278,8 @@ export const Rewards = ({ rewards, setRewards }: { rewards: RewardsState, setRew
                 </div>
             </Info>
 
-            <div className="grid grid-rows-[50%_50%] md:grid-cols-[50%_50%] gap-4 w-full">
-                <div className="flex flex-col gap-2 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-[50%_50%] gap-4 w-full ">
+                <div className="flex flex-col gap-2 w-full h-fit">
                     <p className="text-t2">1. Pick a reward token</p>
                     <div className="w-full flex flex-row gap-2">
                         <Button
@@ -308,17 +324,20 @@ export const Rewards = ({ rewards, setRewards }: { rewards: RewardsState, setRew
 
             </div>
 
-            <TokenModal
-                chainId={rewards.chainId}
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen}
-                saveCallback={(token) => handleAddToken((token as IERCToken).address)}
-                existingTokens={[]}
-                quickAddTokens={[]}
-                strictTypes={['ERC20']}
-                uniqueStandard={true}
-                continuous={false}
-            />
+            <Dialog open={isModalOpen} onOpenChange={val => setIsModalOpen(val)}>
+                <DialogContent>
+                    <AddToken
+                        state={managedToken}
+                        setManagedToken={setManagedToken}
+                    />
+                    <DialogFooter>
+                        <div className="flex w-full justify-between">
+                            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                            <Button disabled={!managedToken.address} onClick={handleModalConfirm}>Confirm</Button>
+                        </div>
+                    </DialogFooter >
+                </DialogContent>
+            </Dialog>
         </SectionWrapper>
     )
 }

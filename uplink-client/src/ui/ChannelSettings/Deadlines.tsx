@@ -125,7 +125,7 @@ export const Deadlines = ({ deadlines, setDeadlines }: { deadlines: DeadlineStat
 
     return (
         <SectionWrapper title="Deadlines">
-            <div className="flex flex-col lg:flex-row gap-4 justify-between">
+            <div className="flex flex-col xl:flex-row gap-4 justify-between">
                 <div className="flex flex-col gap-2">
                     <Label>
                         Submit start

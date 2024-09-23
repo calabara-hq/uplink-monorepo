@@ -54,11 +54,12 @@ const CardRenderer = ({ cardProps }: { cardProps: CardProps }) => {
 
 export const MintButton = ({ onClick, styleOverride }: { onClick: (event?) => void, styleOverride?: string }) => {
     return (
-        <button
-            className={styleOverride ?? "btn btn-md normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black hover:rounded-xl rounded-3xl transition-all duration-300"}
+        <Button
+            variant="secondary"
+            className={styleOverride}
             onClick={onClick}>
             Mint
-        </button>
+        </Button>
     )
 }
 
@@ -90,11 +91,9 @@ export const CardFooter = ({
                 </div>
 
                 <AdminWrapper admins={channel.managers.map(manager => { return { address: manager } })}>
-                    {/* <button onClick={(event) => handleManage(event, token)} className="btn btn-sm btn-ghost text-t2 w-fit ml-auto" > */}
                     <Button variant="ghost" size="sm" className="text-t2" onClick={(event) => handleManage(event, token)}>
                         <MdOutlineSettings className="h-6 w-6" />
                     </Button>
-                    {/* </button> */}
                 </AdminWrapper>
 
 

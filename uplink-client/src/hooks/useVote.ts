@@ -1,13 +1,13 @@
-"use client";
-import { createContext, useContext, useEffect, useState } from "react";
+"use client";;
+import { useEffect } from "react";
 
 import { toast } from "react-hot-toast";
 import { handleMutationError } from "@/lib/handleMutationError";
 import { Decimal } from "decimal.js";
 import { useSession } from "@/providers/SessionProvider";
-import { Submission, TwitterSubmission } from "@/types/submission";
-import { useSessionStorage } from "@/hooks/useSessionStorage";
+import { Submission } from "@/types/submission";
 import { useContestInteractionApi, UserVote, UserVotingParams } from "./useContestInteractionAPI";
+import { useLocalStorage } from "./useLocalStorage";
 
 // inherit voting params from contest interaction provider
 // provide an API for managing user votes
@@ -164,8 +164,8 @@ export interface VoteActionProps {
 export const useVote = (contestId: string) => {
     // userVoteParams will be undefined if not in the voting window TODO: verify this
     const { userVoteParams, areUserVotingParamsLoading, mutateUserVotingParams } = useContestInteractionApi(contestId);
-    const [proposedVotes, setProposedVotes] = useSessionStorage<Array<VotableSubmission>>(`proposedVotes-${contestId}`, []);
-    const [areCurrentVotesDirty, setAreCurrentVotesDirty] = useSessionStorage(`areVotesDirty-${contestId}`, false);
+    const [proposedVotes, setProposedVotes] = useLocalStorage<Array<VotableSubmission>>(`proposedVotes-${contestId}`, []);
+    const [areCurrentVotesDirty, setAreCurrentVotesDirty] = useLocalStorage(`areVotesDirty-${contestId}`, false);
     const { data: session, status } = useSession();
 
     // handle cases where the user was signed out, added proposed votes, then signed in

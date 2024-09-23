@@ -1,12 +1,10 @@
 import UplinkImage from "@/lib/UplinkImage"
 import Image from "next/image";
 import Link from "next/link";
-import {
-  HiOutlineRectangleGroup,
-  HiPlus,
-} from "react-icons/hi2";
+
 import uplinkLogo from "../../../public/uplink-logo.svg";
 import { IoFlameOutline } from "react-icons/io5";
+import { NewButton } from "./SidebarClient";
 
 export default function Sidebar() {
   return (
@@ -25,11 +23,12 @@ export default function Sidebar() {
         text="Explore"
         path={"/explore"}
       />
-      <SideBarIcon
+      {/* <SideBarIcon
         icon={<HiPlus className="h-6 w-6" />}
-        text="Create a space"
+        text="New"
         path={"/spacebuilder/create"}
-      />
+      /> */}
+      <NewButton />
     </div>
   );
 }

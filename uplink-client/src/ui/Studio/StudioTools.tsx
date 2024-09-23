@@ -1,7 +1,7 @@
 "use client";;
 import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import { useRef, useState } from "react";
-import { Option } from "../MenuSelect/MenuSelect";
+import { Option } from "../OptionSelect/OptionSelect";
 import { forwardRef } from 'react';
 import {
     type MDXEditorMethods,
@@ -37,9 +37,9 @@ export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
                 <Label>{label}</Label>
                 <Editor {...editorProps} editorRef={ref} placeholder="Start typing here ..." />
                 {error && (
-                    <label className="label">
-                        <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{error.join(",")}</span>
-                    </label>
+                    <Label>
+                        <p className="text-error max-w-sm break-words">{error.join(",")}</p>
+                    </Label>
                 )}
             </div>
         );
@@ -70,9 +70,9 @@ export const TextArea = ({
                     className={`rounded-lg p-2.5 w-full outline-none resize-none leading-normal bg-transparent border ${error ? "border-error" : "border-border"}`}
                 />
                 {error && (
-                    <label className="label">
-                        <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{error.join(",")}</span>
-                    </label>
+                    <Label>
+                        <p className="text-error max-w-sm break-words">{error.join(",")}</p>
+                    </Label>
                 )}
             </div>
         </div>
@@ -84,7 +84,7 @@ export const BasicInput = ({ value, label, placeholder, onChange, error, inputTy
         <div>
             <Label>{label}</Label>
             <Input
-                variant={error ? "error" : "default"}
+                variant={error ? "error" : "outline"}
                 type={inputType}
                 autoComplete="off"
                 onWheel={(e) => e.currentTarget.blur()}
@@ -94,9 +94,9 @@ export const BasicInput = ({ value, label, placeholder, onChange, error, inputTy
                 placeholder={placeholder}
             />
             {error && (
-                <label className="label">
-                    <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{error.join(",")}</span>
-                </label>
+                <Label>
+                    <p className="text-error max-w-sm break-words">{error.join(",")}</p>
+                </Label>
             )}
         </div>
     )
@@ -123,7 +123,7 @@ export const OptionOrCustom = ({ value, label, options, onOptionSelect, customLa
             <Label>{label}</Label>
             <div className="flex flex-row gap-2">
                 {options.map((option, idx) => (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2" key={idx}>
                         <Button
                             variant={option.value === value && !isCustom ? "secondary" : "ghost"}
                             size="sm"

@@ -1,5 +1,4 @@
-"use client";
-
+"use client";;
 import { useCreateFiniteChannel } from "@tx-kit/hooks";
 import { CreateFiniteChannelConfig } from "@tx-kit/sdk";
 import { useWalletClient } from "wagmi";
@@ -22,8 +21,11 @@ import { useRouter } from "next/navigation";
 import { mutateChannel } from "@/app/mutate";
 import { Button } from "@/ui/DesignKit/Button";
 import { DevModeOnly } from "@/utils/DevModeOnly";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/ui/DesignKit/Select";
 import { ChainSelect } from "@/ui/ChannelSettings/ChainSelect";
+import { isNativeToken } from "@/types/token";
+import { ChainId } from "@/types/chains";
+import { Info } from "@/ui/DesignKit/Info";
+import { SectionWrapper } from "@/ui/ChannelSettings/Utils";
 
 
 const WaitForNewChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
@@ -53,19 +55,17 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
     const { createFiniteChannel, status, txHash, error, channelAddress } = useCreateFiniteChannel();
     const { data: walletClient } = useWalletClient();
     const { data: session } = useSession();
-    const [chainId, setChainId] = useState<8453 | 84532>(8453);
+    const [chainId, setChainId] = useState<ChainId>(8453);
     const { metadata, setMetadata, validateMetadata } = useMetadataSettings();
     const { rewards, setRewards, validateRewards } = useRewardsSettings({ chainId });
     const { deadlines, setDeadlines, validateDeadlines } = useDeadlineSettings();
     const { interactionLogic: submitterRules, setInteractionLogic: setSubmitterRules, validateInteractionLogic: validateSubmitterRules } = useInteractionLogicSettings({ chainId })
-    const { interactionLogic: voterRules, setInteractionLogic: setVoterRules, validateInteractionLogic: validateVoterRules } = useInteractionLogicSettings({ chainId })
-
+    const { interactionLogic: voterRules, setInteractionLogic: setVoterRules, validateInteractionLogic: validateVoterRules } = useInteractionLogicSettings({ chainId }, true)
     const [waitForNewChannel, setWaitForNewChannel] = useState(false);
-
-
+    const [hasReviewed, setHasReviewed] = useState(false);
+    const contractId = concatContractID({ chainId: chainId, contractAddress: channelAddress })
     useTransmissionsErrorHandler(error);
 
-    const contractId = concatContractID({ chainId: chainId, contractAddress: channelAddress })
 
     const { trigger, data: swrData, error: swrError, isMutating: isSwrMutating, reset: resetSwr } = useSWRMutation(
         `/api/insertChannel/${contractId}`,
@@ -106,6 +106,7 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
     }, [status]);
 
 
+
     const handleSubmit = async () => {
 
         try {
@@ -118,13 +119,11 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
 
             const { data: deadlinesOutput } = validateDeadlines()
 
-            // write to the blockchain TODO: just eth rewards for now
-
             const data: CreateFiniteChannelConfig = {
                 uri: metadataOutput.uri,
                 name: metadata.title,
                 defaultAdmin: walletClient.account.address,
-                managers: [], // todo space admins
+                managers: space.admins.map((admin) => admin.address),
                 setupActions: submitterLogicOutput.logicContract || voterLogicOutput.logicContract ?
                     [{
                         logicContract: submitterLogicOutput.logicContract || voterLogicOutput.logicContract,
@@ -141,11 +140,11 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
                     }
                 },
                 transactionOverrides: {
-                    value: rewardsOutput.totalAllocation
+                    value: isNativeToken(rewardsOutput.token) ? rewardsOutput.totalAllocation : BigInt(0)
                 }
             }
 
-            await createFiniteChannel(data)
+            await createFiniteChannel(data);
 
         } catch (e) {
             toast.error("Please fill out all required fields")
@@ -159,38 +158,60 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
 
     return (
         <React.Fragment>
-            <div className="flex flex-col gap-4 transition-all duration-200 ease-in-out w-full max-w-[850px] m-auto">
-                <div className="flex flex-col gap-6 w-full">
-
+            <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-6 m-auto w-full max-w-[1200px] p-6">
+                <div className="flex flex-col gap-6 w-full h-auto">
                     <DevModeOnly>
-                        <ChainSelect chainId={chainId} setChainId={setChainId} />
+                        <SectionWrapper title="Network">
+                            <ChainSelect chainId={chainId} setChainId={setChainId} />
+                        </SectionWrapper>
                     </DevModeOnly>
                     <Metadata metadata={metadata} setMetadata={setMetadata} />
                     <Rewards rewards={{ ...rewards, chainId }} setRewards={setRewards} />
                     <Deadlines deadlines={deadlines} setDeadlines={setDeadlines} />
                     <InteractionLogic mode="submit" interactionLogic={{ ...submitterRules, chainId }} setInteractionLogic={setSubmitterRules} />
                     <InteractionLogic mode="vote" interactionLogic={{ ...voterRules, chainId }} setInteractionLogic={setVoterRules} />
-
-                    <OnchainButton
-                        chainId={chainId}
-                        title={"Save"}
-                        onClick={handleSubmit}
-                        isLoading={status === 'pendingApproval' || status === 'txInProgress'}
-                        loadingChild={
-                            <Button disabled>
-                                <div className="flex gap-2 items-center">
-                                    <p className="text-sm">{
-                                        status === 'pendingApproval' ?
-                                            <span>Awaiting Signature</span>
-                                            :
-                                            <span>processing</span>
-                                    }
-                                    </p>
-                                    <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                </div>
+                <div className="flex flex-col gap-6 rounded-lg p-2 border border-border bg-base-100 h-fit w-full">
+                    <div className="flex flex-col gap-6">
+                        <Info className="bg-base-200 text-t2">
+                            <div className="flex flex-col gap-2">
+                                <p>
+                                    After the voting period, the contest can be settled. Settling will distribute the rewards. <b>Anyone</b> can settle the contest after voting ends.</p>
+                                <p>If you need to rescue the funds, you must do so before the voting period ends.</p>
+                            </div>
+                        </Info>
+                        <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-2">
+                                    <input type="checkbox" checked={hasReviewed} onChange={(e) => setHasReviewed(e.target.checked)} />
+                                    <p>I understand</p>
                                 </div>
-                            </Button>
-                        }
-                    />
+                            </div>
+                        </div>
+                        <OnchainButton
+                            chainId={chainId}
+                            disabled={!hasReviewed}
+                            title={"Save"}
+                            onClick={handleSubmit}
+                            isLoading={status === 'pendingApproval' || status === 'txInProgress' || status === 'erc20ApprovalInProgress'}
+                            loadingChild={
+                                <Button disabled>
+                                    <div className="flex gap-2 items-center">
+                                        <p className="text-sm">{
+                                            status === 'pendingApproval' ?
+                                                <span>Awaiting Signature</span>
+                                                : status === 'erc20ApprovalInProgress' ?
+                                                    <span>Requesting Approval</span>
+                                                    :
+                                                    <span>Processing</span>
+                                        }
+                                        </p>
+                                        <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
+                                    </div>
+                                </Button>
+                            }
+                        />
+                    </div>
                 </div>
             </div>
         </React.Fragment>

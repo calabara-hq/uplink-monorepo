@@ -1,6 +1,6 @@
-"use client";
-import { useRef, useState } from "react";
-import { HiTrash, HiUser } from "react-icons/hi2";
+"use client";;
+import { useState } from "react";
+import { HiTrash } from "react-icons/hi2";
 import { useReducer, useEffect } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import {
@@ -16,16 +16,21 @@ import WalletConnectButton from "../../ui/ConnectButton/WalletConnectButton";
 import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
 import { mutateSpaces } from "../mutate";
-import UplinkImage from "@/lib/UplinkImage"
 import { AvatarUpload } from "@/ui/MediaUpload/AvatarUpload";
+import { Label } from "@/ui/DesignKit/Label";
+import { Input } from "@/ui/DesignKit/Input";
+import { Button } from "@/ui/DesignKit/Button";
+import { Info } from "@/ui/DesignKit/Info";
 
 export default function SpaceForm({
   initialState,
   isNewSpace,
+  referral,
   spaceId,
 }: {
   initialState: SpaceBuilderProps;
   isNewSpace: boolean;
+  referral?: string;
   spaceId?: string;
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -107,15 +112,22 @@ export default function SpaceForm({
 
   return (
     <div className="flex flex-col w-full px-2 pt-2 pb-6 rounded-lg justify-center items-center">
-      <div className="flex flex-col gap-2  w-full border-2 border-border p-6 rounded-xl shadow-box">
-        <h2 className="text-3xl font-bold text-center">Space Builder</h2>
+      <div className="flex flex-col gap-4  w-full border-2 border-border bg-base-100 p-6 rounded-xl">
+        <h2 className="text-3xl font-bold">Space Builder</h2>
+        {referral === 'home' && (
+          <Info className="text-sm">
+            Spaces are like profiles for your organization, project, community, or yourself! After creating a space, you can create contests and mintboards inside of it.
+          </Info>
+        )}
+
+
         <AvatarUpload
-          fieldLabel={"logo"}
+          fieldLabel={"Logo"}
           initialData={state.logoBlob || ""}
-          acceptedFormats={['image/png', 'image/jpeg', 'image/jpg']}
+          acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/webp']}
           uploadStatusCallback={(status) => setIsUploading(status)}
           ipfsImageCallback={(url) => {
-            if(url){
+            if (url) {
               dispatch({
                 type: "setLogoUrl",
                 payload: url,
@@ -133,9 +145,8 @@ export default function SpaceForm({
           isNewSpace={isNewSpace}
         />
         <div className="p-2" />
-        <WalletConnectButton styleOverride="w-full btn-primary">
-          <button
-            className="btn btn-primary normal-case"
+        <WalletConnectButton>
+          <Button
             onClick={onFormSubmit}
             disabled={isMutating || isUploading}
           >
@@ -148,7 +159,7 @@ export default function SpaceForm({
                 />
               )}
             </div>
-          </button>
+          </Button>
         </WalletConnectButton>
       </div>
     </div>
@@ -163,11 +174,10 @@ const SpaceName = ({
   dispatch: any;
 }) => {
   return (
-    <div>
-      <label className="label">
-        <span className="label-text">Space Name</span>
-      </label>
-      <input
+    <div className="flex flex-col gap-2">
+      <Label>Space Name</Label>
+      <Input
+        variant={state.errors?.name ? "error" : "outline"}
         type="text"
         autoComplete="off"
         spellCheck="false"
@@ -179,13 +189,12 @@ const SpaceName = ({
           });
         }}
         placeholder="Nouns"
-        className={`input w-full max-w-xs ${state.errors?.name ? "input-error" : "input"
-          }`}
+        className="max-w-xs"
       />
       {state.errors?.name && (
-        <label className="label">
-          <span className="label-text-alt text-error">{state.errors.name}</span>
-        </label>
+        <Label>
+          <p className="text-error">{state.errors.name}</p>
+        </Label>
       )}
     </div>
   );
@@ -199,12 +208,13 @@ const SpaceWebsite = ({
   dispatch: any;
 }) => {
   return (
-    <div>
-      <label className="label">
-        <span className="label-text">Website</span>
-      </label>
-      <input
+    <div className="flex flex-col gap-2">
+      <Label>
+        Website
+      </Label>
+      <Input
         type="text"
+        variant={state.errors?.website ? "error" : "outline"}
         autoComplete="off"
         spellCheck="false"
         value={state.website || ""}
@@ -215,15 +225,14 @@ const SpaceWebsite = ({
           });
         }}
         placeholder="nouns.wtf"
-        className={`input w-full max-w-xs ${state.errors?.website ? "input-error" : "input"
-          }`}
+        className="max-w-xs"
       />
       {state.errors?.website && (
-        <label className="label">
-          <span className="label-text-alt text-error">
+        <Label>
+          <p className="text-error">
             {state.errors.website}
-          </span>
-        </label>
+          </p>
+        </Label>
       )}
     </div>
   );
@@ -237,12 +246,13 @@ const SpaceTwitter = ({
   dispatch: any;
 }) => {
   return (
-    <div>
-      <label className="label">
-        <span className="label-text">Twitter</span>
-      </label>
-      <input
+    <div className="flex flex-col gap-2">
+      <Label>
+        Twitter
+      </Label>
+      <Input
         type="text"
+        variant={state.errors?.twitter ? "error" : "outline"}
         autoComplete="off"
         spellCheck="false"
         value={state.twitter || ""}
@@ -253,15 +263,14 @@ const SpaceTwitter = ({
           });
         }}
         placeholder="@nounsdao"
-        className={`input w-full max-w-xs ${state.errors?.twitter ? "input-error" : "input"
-          }`}
+        className="max-w-xs"
       />
       {state.errors?.twitter && (
-        <label className="label">
-          <span className="label-text-alt text-error">
+        <Label>
+          <p className="text-error">
             {state.errors.twitter}
-          </span>
-        </label>
+          </p>
+        </Label>
       )}
     </div>
   );
@@ -277,11 +286,11 @@ const SpaceAdmins = ({
   isNewSpace: boolean;
 }) => {
   return (
-    <div className="">
-      <label className="label">
-        <span className="label-text">Admins</span>
-      </label>
-      <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
+      <Label>
+        Admins
+      </Label>
+      <div className="flex flex-col gap-2">
         {state.admins.map((admin: string, index: number) => {
           return (
             <AdminRow
@@ -292,16 +301,17 @@ const SpaceAdmins = ({
             />
           );
         })}
-        <button
-          className="btn btn-ghost underline w-fit normal-case"
+        <Button
+          variant="ghost"
+          className="w-fit"
           onClick={() => {
             dispatch({
               type: "addAdmin",
             });
           }}
         >
-          Add
-        </button>
+          + Add
+        </Button>
       </div>
     </div>
   );
@@ -351,12 +361,11 @@ const AdminRow = ({
   return (
     <div>
       <div className="flex gap-2">
-        <input
+        <Input
           type="text"
+          variant={error ? "error" : "outline"}
           placeholder="vitalik.eth"
           spellCheck="false"
-          className={`input w-full
-        ${error ? "input-error" : "input"}`}
           disabled={isLocked}
           value={admin}
           onChange={(e) =>
@@ -367,20 +376,21 @@ const AdminRow = ({
           }
         />
         {!isLocked && (
-          <button
+          <Button
+            variant="destructive"
             onClick={() => {
               dispatch({ type: "removeAdmin", payload: index });
             }}
-            className="btn btn-square btn-ghost"
+
           >
             <HiTrash className="w-6" />
-          </button>
+          </Button>
         )}
       </div>
       {error && (
-        <label className="label">
-          <span className="label-text-alt text-error">invalid address</span>
-        </label>
+        <Label>
+          <span className="text-error">invalid address</span>
+        </Label>
       )}
     </div>
   );

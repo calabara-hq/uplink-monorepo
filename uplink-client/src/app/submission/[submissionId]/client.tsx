@@ -1,12 +1,10 @@
-"use client"
+"use client";
 import { VoteActionProps } from "@/hooks/useVote";
 import { AdminWrapper } from "@/lib/AdminWrapper";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { useSession } from "@/providers/SessionProvider";
 import { Submission, isNftSubmission } from "@/types/submission"
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
-import SubmissionModal from "@/ui/Submission/SubmissionModal";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BiLayerPlus } from "react-icons/bi";
@@ -14,6 +12,11 @@ import { HiArrowNarrowLeft } from "react-icons/hi";
 import { HiCheckBadge } from "react-icons/hi2";
 import { MdOutlineCancelPresentation, MdOutlineSettings } from "react-icons/md";
 import { Boundary } from "@/ui/Boundary/Boundary"
+import { Button } from "@/ui/DesignKit/Button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/DesignKit/Tooltip";
+import { Info } from "@/ui/DesignKit/Info";
+import { Input } from "@/ui/DesignKit/Input";
+import { Modal } from "@/ui/Modal/Modal";
 
 
 export const AddToCartButton = ({ submission, voteActions }: { submission: Submission, voteActions: VoteActionProps }) => {
@@ -38,26 +41,29 @@ export const AddToCartButton = ({ submission, voteActions }: { submission: Submi
 
     if (contestState === "voting") {
 
-        if (isSelected) {
-            return (
-                <span
-                    className="tooltip tooltip-top pr-2.5"
-                    data-tip={"Selected"}
-                >
-                    <HiCheckBadge className="h-7 w-7 text-warning" />
-                </span>
-            );
-        } else
-            return (
-                <span className="tooltip tooltip-top " data-tip={"Add to cart"}>
-                    <button
-                        className="btn btn-ghost btn-sm text-t2 w-fit hover:bg-warning hover:bg-opacity-30 hover:text-warning"
-                        onClick={handleSelect}
-                    >
-                        <BiLayerPlus className="h-6 w-6 " />
-                    </button>
-                </span>
-            );
+
+        return (
+            <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                    <TooltipTrigger>
+                        {isSelected ?
+                            <HiCheckBadge className="h-7 w-7 text-warning" />
+                            :
+                            <Button
+                                variant="ghost"
+                                className="w-fit hover:bg-warning hover:bg-opacity-30 hover:text-warning"
+                                onClick={handleSelect}
+                            >
+                                <BiLayerPlus className="h-6 w-6 " />
+                            </Button>
+                        }
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[250px]">
+                        <Info className="bg-base-200 border border-border text-t2 text-sm font-normal">{isSelected ? 'selected' : 'vote'}</Info>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        )
     }
 
     return null;
@@ -83,15 +89,16 @@ export const ManageModalContent = ({ onDelete }: { onDelete: () => void }) => {
                 <p>Once deleted, this post will be gone forever. Type <b>delete</b> if you understand</p>
             </Boundary>
             <div className="flex flex-row items-center">
-                <input
-                    className="input input-bordered w-1/3"
+                <Input
+                    variant="outline"
+                    className="w-1/3"
                     type="text"
                     autoComplete="off"
                     spellCheck="false"
                     value={confirmationText}
                     onChange={(e) => { setConfirmationText(e.target.value) }}
                 />
-                <button onClick={onDelete} disabled={!isConfirmed} className="ml-auto btn btn-active text-error w-fit hover:bg-error bg-opacity-30 hover:bg-opacity-30 text-error border-none normal-case">delete post</button>
+                <Button variant="destructive" onClick={onDelete} disabled={!isConfirmed} className="ml-auto">delete post</Button>
             </div>
         </div>
     )
@@ -103,9 +110,9 @@ export const AdminButton = ({ contestId, submission, onClick }: { contestId: str
 
     return (
         <AdminWrapper admins={contestAdmins.map(admin => { return { address: admin } })}>
-            <button onClick={onClick} className="btn btn-ghost text-t2 w-fit" >
+            <Button onClick={onClick} variant="ghost" >
                 <MdOutlineSettings className="h-6 w-6" />
-            </button>
+            </Button>
         </AdminWrapper>
     )
 }
@@ -163,12 +170,12 @@ export const HeaderButtons = ({ submission, referrer, context }: { submission: S
         <div className="flex gap-2 ml-auto items-center">
             <ShareButton submission={submission} onClick={() => setIsShareModalOpen(true)} context={context} />
             <MintButton submission={submission} onClick={() => setIsMintModalOpen(true)} />
-            <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleClose} >
+            <Modal isModalOpen={isMintModalOpen || isShareModalOpen} onClose={handleClose} >
                 {isShareModalOpen && (
                     <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
                 )}
 
-            </SubmissionModal>
+            </Modal>
         </div>
     )
 }
@@ -176,11 +183,11 @@ export const HeaderButtons = ({ submission, referrer, context }: { submission: S
 export const MintButton = ({ submission, onClick, styleOverride }: { submission: Submission, onClick: (event?) => void, styleOverride?: string }) => {
     if (!isNftSubmission(submission)) return null;
     return (
-        <button
-            className={styleOverride ?? "btn btn-md normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black hover:rounded-xl rounded-3xl transition-all duration-300"}
+        <Button
+            variant="secondary"
             onClick={onClick}>
             Mint
-        </button>
+        </Button>
     )
 }
 
@@ -208,7 +215,7 @@ export const ShareModalContent = ({ submission, handleClose, context }: { submis
         <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
             <div className="flex justify-between">
                 <h2 className="text-t1 text-xl font-bold">Share</h2>
-                <button className="btn btn-ghost btn-sm  ml-auto" onClick={handleClose}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
+                <Button variant="ghost" className="ml-auto" onClick={handleClose}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></Button>
             </div>
             {status !== 'authenticated' && <p className="text-t2">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
             <WalletConnectButton>
@@ -224,7 +231,7 @@ export const ShareModalContent = ({ submission, handleClose, context }: { submis
                     <div className="w-full h-0.5 bg-base-200" />
                     <div className="flex flex-col gap-2">
                         <p className="text-t2">Or just copy link</p>
-                        <button className="secondary-btn btn-sm" onClick={handleShare}>Copy Link</button>
+                        <Button variant="secondary" onClick={handleShare}>Copy Link</Button>
                     </div>
                 </>
             }
@@ -259,6 +266,6 @@ export const ShareButton = ({ submission, onClick, context }: { submission: Subm
         }
     }
 
-    return <button className="btn normal-case btn-ghost" onClick={handleShareClick}>{shareText}</button>
+    return <Button variant="ghost" onClick={handleShareClick}>{shareText}</Button>
 
 }

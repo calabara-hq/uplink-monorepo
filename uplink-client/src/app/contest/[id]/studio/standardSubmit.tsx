@@ -1,22 +1,14 @@
-"use client";
-import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("@/ui/Editor/Editor"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full bg-base-100 h-[264px] shimmer rounded-xl" />
-  ),
-});
+"use client";;
 import type { OutputData } from "@editorjs/editorjs";
 import useSWRMutation from "swr/mutation";
 import {
   HiCheckBadge,
   HiXCircle,
-  HiSparkles,
 } from "react-icons/hi2";
 import { useEffect, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import { BiInfoCircle } from "react-icons/bi";
-import Modal from "@/ui/Modal/Modal";
+import { Modal } from "@/ui/Modal/Modal";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import { Decimal } from "decimal.js";
 import { UserSubmissionParams, useContestInteractionApi } from "@/hooks/useContestInteractionAPI";
@@ -32,7 +24,16 @@ import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import LoadingDialog from "./loadingDialog";
 import { useContestState } from "@/providers/ContestStateProvider";
 import { MediaUpload } from "@/ui/MediaUpload/MediaUpload";
-import { Boundary } from "@/ui/Boundary/Boundary";
+import { Label } from "@/ui/DesignKit/Label";
+import { Button } from "@/ui/DesignKit/Button";
+import dynamic from "next/dynamic";
+import { Input } from "@/ui/DesignKit/Input";
+const Editor = dynamic(() => import("@/ui/Editor/Editor"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full bg-base-100 h-[264px] shimmer rounded-xl" />
+  ),
+});
 
 async function postSubmission(
   url,
@@ -87,9 +88,9 @@ async function postSubmission(
 const ErrorLabel = ({ error }: { error?: string }) => {
   if (error)
     return (
-      <label className="label">
-        <span className="label-text-alt text-error">{error}</span>
-      </label>
+      <Label>
+        <p className="text-error">{error}</p>
+      </Label>
     );
   return null;
 };
@@ -113,25 +114,21 @@ const SubmissionTitle = ({
   };
 
   return (
-    <div>
-      <div className="flex items-center">
-        <label className="label">
-          <span className="label-text text-t2">Title</span>
-        </label>
-        <p className="text-gray-500 text-sm text-right ml-auto">
-          {`${title.length}/100`}
-        </p>
-      </div>
+    <div className="flex flex-col gap-2">
+      <Label>
+        <div className="flex gap-2 items-center">
+          <p>Title </p>
+          <p className="text-t2">
+            {`${title.length}/100`}
+          </p>
+        </div>
+      </Label>
 
-      <textarea
-        rows={1}
-        placeholder="What's happening?"
-        className={`p-2 textarea textarea-lg resize-none w-full overflow-y-hidden ${errors?.title ? "textarea-error" : "textarea textarea-lg"
-          }`}
-        style={{ height: "auto" }}
+      <Input
+        variant={`${errors?.title ? "error" : "outline"}`}
         value={title}
         onChange={handleTitleChange}
-        onInput={handleTextareaResize}
+        maxLength={100}
       />
 
       <ErrorLabel error={errors?.title} />
@@ -226,12 +223,9 @@ const StudioSidebar = ({
   } else {
     return (
       <div className="flex flex-col items-start w-full ml-auto">
-        <label className="label">
-          <span className="label-text text-t2">Eligibility</span>
-        </label>
-        <div className="flex flex-col bg-base-100 rounded-lg gap-4 w-full p-2">
+        <div className="flex flex-col gap-4 w-full">
           {userSubmitParams && (
-            <div className="flex flex-col gap-2 items-start justify-center w-full p-2">
+            <div className="bg-base-100 rounded-lg flex flex-col gap-2 items-start justify-center w-full p-2">
               <div className="flex flex-row gap-2 w-full">
                 <p>entries remaining</p>
                 <p className="ml-auto">{userSubmitParams.remainingSubPower}</p>
@@ -265,11 +259,11 @@ const StudioSidebar = ({
               </div>
             </div>
           )}
-          <WalletConnectButton styleOverride="w-full btn-primary">
+          <WalletConnectButton>
             <div className="flex flex-row items-center justify-between bg-base-200 rounded-lg gap-2 h-fit w-full">
-              <button
+              <Button
                 onClick={handleSubmit}
-                className="btn btn-primary flex flex-1 normal-case"
+                className="flex flex-1 h-full"
                 disabled={
                   !userSubmitParams ||
                   parseInt(userSubmitParams.remainingSubPower) <= 0 ||
@@ -296,7 +290,7 @@ const StudioSidebar = ({
                 ) : (
                   "Submit"
                 )}
-              </button>
+              </Button>
               <p className="mx-2 p-2 text-center">{stateRemainingTime}</p>
             </div>
           </WalletConnectButton>
@@ -306,36 +300,36 @@ const StudioSidebar = ({
           handleClose={() => setIsRestrictionModalOpen(false)}
           userSubmitParams={userSubmitParams}
         />
-        {isSuccessModalOpen && data && data.success && (
-          <SuccessModal contestId={contestId} submissionId={data.submissionId} isDroppable={Boolean(state.previewAsset)} />
+        {data && data.success && (
+          <SuccessModal isModalOpen={isSuccessModalOpen} contestId={contestId} submissionId={data.submissionId} isDroppable={Boolean(state.previewAsset)} />
         )}
       </div>
     );
   }
 };
 
-const SuccessModal = ({ submissionId, isDroppable, contestId }) => {
+const SuccessModal = ({ isModalOpen, submissionId, isDroppable, contestId }) => {
+
   return (
-    <div className="modal modal-open bg-black transition-colors duration-500 ease-in-out">
-      <div
-        className="modal-box bg-black border border-[#ffffff14] animate-springUp max-w-xl"
-      >
-        <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 m-auto rounded-xl">
-          <HiBadgeCheck className="w-32 h-32 text-success" />
-          <p className="text-2xl text-t1 text-center">{`Ok creatoooooooor - you're all set`}</p>
-          <div className="flex gap-4 items-center justify-center">
-            <Link
-              href={`/contest/${contestId}`}
-              draggable={false}
-              className="btn btn-ghost text-t2 normal-case"
-            >
+    <Modal isModalOpen={isModalOpen} onClose={() => { }} className="w-full max-w-[500px]">
+      <div className="flex flex-col items-center justify-center gap-6 p-2 w-10/12 m-auto rounded-xl">
+        <HiBadgeCheck className="w-32 h-32 text-success" />
+        <p className="text-2xl text-t1 text-center">{`You're all set`}</p>
+        <div className="flex gap-4 items-center justify-center">
+          <Link
+            href={`/contest/${contestId}`}
+            draggable={false}
+            passHref
+          >
+            <Button variant="ghost">
               Go to contest
-            </Link>
-          </div>
+            </Button>
+          </Link>
         </div>
       </div>
-    </div>
-  );
+    </Modal>
+  )
+
 }
 
 const RestrictionModal = ({
@@ -348,7 +342,7 @@ const RestrictionModal = ({
   userSubmitParams: UserSubmissionParams;
 }) => {
   return (
-    <Modal isModalOpen={isModalOpen} onClose={handleClose}>
+    <Modal isModalOpen={isModalOpen} onClose={handleClose} className="w-full max-w-[500px]">
       <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center bg-base rounded-xl p-2">
           <BiInfoCircle className="w-6 h-6 text-gray-500" />
@@ -424,7 +418,7 @@ const StandardSubmit = ({
   } else {
     // contest in submit window
     return (
-      <div className="flex flex-col xl:flex-row-reverse w-11/12 lg:w-9/12 gap-4">
+      <div className="flex flex-col xl:flex-row-reverse w-11/12 lg:w-9/12 max-w-[600px] xl:max-w-full gap-4">
         <div className="max-w-none xl:max-w-[400px] w-full">
           <StudioSidebar
             state={submission}
@@ -433,15 +427,15 @@ const StandardSubmit = ({
             isUploading={isUploading}
           />
         </div>
-        <div className="w-full">
-          <Boundary size="small">
-            <div className="w-11/12 xl:w-9/12 m-auto flex flex-col gap-4">
-              <h1 className="text-3xl font-bold text-t1">Create Submission</h1>
-              <SubmissionTitle
-                title={title}
-                errors={errors}
-                setSubmissionTitle={setSubmissionTitle}
-              />
+        <div className="w-full max-w-[750px] border-border border rounded-lg p-4">
+          <div className="w-11/12 xl:w-9/12 m-auto flex flex-col gap-4">
+            <h1 className="text-3xl font-bold text-t1">Create Submission</h1>
+            <SubmissionTitle
+              title={title}
+              errors={errors}
+              setSubmissionTitle={setSubmissionTitle}
+            />
+            <div className="w-full h-full max-w-[300px]">
               <MediaUpload
                 acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
                 uploadStatusCallback={(status) => { setIsUploading(status) }}
@@ -449,15 +443,15 @@ const StandardSubmit = ({
                 ipfsAnimationCallback={(url) => setVideoAsset(url)}
                 maxVideoDuration={140}
               />
-              <SubmissionBody
-                submissionBody={submissionBody}
-                errors={errors}
-                setSubmissionBody={setSubmissionBody}
-              />
             </div>
-          </Boundary>
+            <SubmissionBody
+              submissionBody={submissionBody}
+              errors={errors}
+              setSubmissionBody={setSubmissionBody}
+            />
+          </div>
         </div>
-      </div>
+      </div >
     );
   }
 };

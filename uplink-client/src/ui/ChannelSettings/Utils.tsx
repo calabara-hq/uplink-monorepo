@@ -10,6 +10,6 @@ export const SectionWrapper = ({ title, children }: { title: string, children: R
 
 export const FieldError = ({ error }: { error: string }) => {
     return (
-        <span className="text-error text-md overflow-wrap break-word">{error}</span>
+        <span className="text-error text-sm break-words">{error}</span>
     )
 }

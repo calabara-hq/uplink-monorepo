@@ -1,6 +1,7 @@
 import SpaceForm from "@/app/spacebuilder/SpaceForm";
 
-export default function Page() {
+export default function Page({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
+
   const initialState = {
     name: "",
     logoBlob: "",
@@ -13,5 +14,5 @@ export default function Page() {
     },
   };
 
-  return <SpaceForm initialState={initialState} isNewSpace={true} />;
+  return <SpaceForm initialState={initialState} isNewSpace={true} referral={searchParams.referral} />;
 }

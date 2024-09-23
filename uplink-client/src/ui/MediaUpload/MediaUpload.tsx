@@ -64,12 +64,13 @@ export const MediaUpload = ({
         return (
             <div className="relative w-full m-auto">
                 <Label>{label}</Label>
-                <button
-                    className="absolute top-5 -right-3 btn btn-error btn-sm btn-circle z-10 shadow-lg"
+                <Button
+                    variant="destructive"
+                    className="absolute top-5 -right-3 rounded-full z-10 shadow-lg"
                     onClick={removeMedia}
                 >
                     <HiOutlineTrash className="w-5 h-5" />
-                </button>
+                </Button>
                 <RenderStandardVideoWithLoader
                     videoUrl={animationObjectURL || ""}
                     posterUrl={

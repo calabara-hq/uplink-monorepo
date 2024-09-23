@@ -1,7 +1,8 @@
 import { CreateToken } from "@/ui/Studio/TokenStudio";
 import { Suspense } from "react";
-import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { ContractID } from "@/types/channel";
+import fetchChannel from "@/lib/fetch/fetchChannel";
+import SwrProvider from "@/providers/SwrProvider";
 
 const LoadingDialog = () => {
     return (
@@ -17,14 +18,18 @@ const LoadingDialog = () => {
     );
 };
 
-
 const PageContent = async ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
-    const space = await fetchSingleSpace(spaceName);
+    const channel = await fetchChannel(contractId);
+    const fallback = {
+        [`/swrChannel/${contractId}`]: channel,
+    }
+
     return (
-        <CreateToken contractId={contractId} spaceSystemName={spaceName} />
+        <SwrProvider fallback={fallback}>
+            <CreateToken contractId={contractId} spaceSystemName={spaceName} />
+        </SwrProvider>
     )
 }
-
 
 export default async function Page({ params }: { params: { name: string, contractId: ContractID } }) {
     return (

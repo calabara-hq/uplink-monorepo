@@ -1,9 +1,8 @@
-"use client";
+"use client";;
 import { ChannelState, StateRemainingTime, useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
 import { cn } from "@/lib/shadcn";
 import { ContractID } from "@/types/channel";
-import React, { useEffect } from "react";
-import { TbLoader2 } from "react-icons/tb";
+import React from "react";
 
 
 const getColorsFromState = (state: ChannelState) => {
@@ -68,3 +67,5 @@ export const RenderTransportLayerState = React.memo(({
 
     return null;
 });
+
+RenderTransportLayerState.displayName = "RenderTransportLayerState";

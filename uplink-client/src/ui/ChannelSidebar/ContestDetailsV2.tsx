@@ -13,7 +13,7 @@ import {
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
 import { ContractID, splitContractID } from "@/types/channel";
 import { IFiniteTransportConfig, ILogicConfig } from "@tx-kit/sdk/subgraph";
-import { useErc20TokenInfo, useTokenInfo } from "@/hooks/useTokenInfo";
+import { useTokenInfo } from "@/hooks/useTokenInfo";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
 import { Address, decodeAbiParameters, formatUnits, Hex, parseEther, parseUnits } from "viem";
 import { useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
@@ -26,6 +26,7 @@ import { useChannel } from "@/hooks/useChannel";
 import { TbLoader2 } from "react-icons/tb";
 import toast from "react-hot-toast";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
+import { ChainId } from "@/types/chains";
 
 const normalizeSubmitterRewards = (
     subRewards: FetchSingleContestResponse["submitterRewards"]
@@ -69,9 +70,9 @@ export const SectionSkeleton = () => {
     return (
         <div className="flex flex-col justify-between bg-base-100  rounded-lg w-full">
             <div className="space-y-2 p-4">
-                <div className={"h-6 w-1/3 mb-4 rounded-lg bg-neutral shimmer"} />
-                <div className={"h-4 w-1/2 rounded-lg bg-neutral shimmer"} />
-                <div className={"h-4 w-1/2 rounded-lg bg-neutral shimmer"} />
+                <div className={"h-6 w-1/3 mb-4 rounded-lg bg-base-200 shimmer"} />
+                <div className={"h-4 w-1/2 rounded-lg bg-base-200 shimmer"} />
+                <div className={"h-4 w-1/2 rounded-lg bg-base-200 shimmer"} />
             </div>
         </div>
     );
@@ -243,13 +244,13 @@ const RewardsSection = ({
     chainId,
     transportConfig,
 }: {
-    chainId: number;
+    chainId: ChainId;
     transportConfig: IFiniteTransportConfig
 }) => {
 
     const isNativeToken = transportConfig.token === NATIVE_TOKEN;
 
-    const { symbol: erc20Symbol, decimals: erc20Decimals } = useErc20TokenInfo(transportConfig.token, chainId);
+    const { symbol: erc20Symbol, decimals: erc20Decimals } = useTokenInfo(transportConfig.token, chainId);
 
     const symbol = isNativeToken ? "ETH" : erc20Symbol;
     const decimals = isNativeToken ? 18 : erc20Decimals;
@@ -436,6 +437,18 @@ const ContestDetailsV2 = ({
                         </div>
 
                     )
+
+                    if (channelState === "complete") return (
+                        <Button disabled={isSettling} onClick={handleSettle}>
+                            {isSettling ? (
+                                <div className="flex gap-2 items-center">
+                                    <p>Settling</p>
+                                    <TbLoader2 className="w-4 h-4 animate-spin" />
+                                </div>
+                            ) : "Settle"}
+                        </Button>
+                    )
+
                     else return (
                         <div className="flex gap-2 items-center">
                             <RemainingTimeLabel channelState={channelState} remainingTime={stateRemainingTime} />

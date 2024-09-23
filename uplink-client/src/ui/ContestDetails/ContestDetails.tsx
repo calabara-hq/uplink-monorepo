@@ -3,16 +3,7 @@ import formatDecimal from "@/lib/formatDecimal";
 import { ExpandSection, RenderStateSpecificDialog } from "./client";
 import { Fragment } from "react";
 import formatOrdinals from "@/lib/formatOrdinals";
-import Link from "next/link";
-import { ChainLabel, StatusLabel } from "../ContestLabels/ContestLabels";
-import {
-    HiInformationCircle,
-    HiOutlineLockClosed,
-    HiPlusCircle,
-} from "react-icons/hi2";
-import { BiTime } from "react-icons/bi";
-import type { OutputData } from "@editorjs/editorjs";
-import { IoWarningOutline } from "react-icons/io5";
+import { ChainLabel } from "../ContestLabels/ContestLabels";
 import {
     FungibleReward,
     NonFungibleReward,
@@ -26,6 +17,9 @@ import {
 import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
 import { getChainName } from "@/lib/chains/supportedChains";
 import fetchContest from "@/lib/fetch/fetchContest";
+import { TooltipContent, Tooltip, TooltipProvider, TooltipTrigger } from "../DesignKit/Tooltip";
+
+import { Info } from "../DesignKit/Info";
 
 
 
@@ -69,17 +63,17 @@ export const DetailsSkeleton = () => {
 
 export const SectionSkeleton = () => {
     return (
-        <div className="flex flex-col justify-between bg-base-100  rounded-lg w-full">
+        <div className="flex flex-col justify-between bg-base-100 rounded-lg w-full">
             <div className="space-y-2 p-4">
-                <div className={"h-6 w-1/3 mb-4 rounded-lg bg-neutral shimmer"} />
-                <div className={"h-4 w-1/2 rounded-lg bg-neutral shimmer"} />
-                <div className={"h-4 w-1/2 rounded-lg bg-neutral shimmer"} />
+                <div className={"h-6 w-1/3 mb-4 rounded-lg bg-base-200 shimmer"} />
+                <div className={"h-4 w-1/2 rounded-lg bg-base-200 shimmer"} />
+                <div className={"h-4 w-1/2 rounded-lg bg-base-200 shimmer"} />
             </div>
         </div>
     );
 };
 
-const DetailSectionWrapper = ({
+export const DetailSectionWrapper = ({
     title,
     children,
     tooltipContent,
@@ -93,23 +87,22 @@ const DetailSectionWrapper = ({
             <div className="flex gap-2 items-center">
                 <h2 className="font-semibold text-t1 text-[16px]">{title}</h2>
                 {tooltipContent && (
-                    <div className="dropdown dropdown-left dropdown-hover">
-                        <label tabIndex={0} className="cursor-pointer">
-                            <FaRegCircleQuestion className="w-4 h-4 text-t2" />
-                        </label>
-                        <div
-                            tabIndex={0}
-                            className="dropdown-content z-[1] card card-compact w-64 p-2 bg-primary text-primary-content shadow-black shadow-lg"
-                        >
-                            <div className="card-body">{tooltipContent}</div>
-                        </div>
-                    </div>
+                    <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <FaRegCircleQuestion className="w-4 h-4 text-t2" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[250px]">
+                                <Info className="bg-base-200 border border-border text-t2 text-sm font-normal">{tooltipContent}</Info>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 )}
             </div>
             <div className="flex flex-col gap-1 w-full text-t2 text-sm">
                 {children}
             </div>
-            <div className="bg-base-100 h-0.5 w-full" />
+            <div className="bg-base-200 h-0.5 w-full" />
         </div>
     );
 };

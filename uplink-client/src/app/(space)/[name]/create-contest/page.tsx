@@ -1,18 +1,6 @@
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-import ContestForm from "@/ui/ContestForm/Entrypoint";
 import { Suspense } from "react";
-import { TempCreateContestV2 } from "./temp-client";
-
-const PageContent = async ({ params }: { params: { name: string } }) => {
-  const { id, spaceTokens } = await fetchSingleSpace(params.name);
-  return (
-    <ContestForm
-      spaceName={params.name}
-      spaceId={id}
-      spaceTokens={spaceTokens.map((t) => t.token)}
-    />
-  );
-}
+import { TempCreateContestV2 } from "./client";
 
 const Skeleton = () => {
   return (
@@ -32,7 +20,9 @@ export default async function Page({ params }: { params: { name: string } }) {
 
   return (
     <div className="flex gap-6 m-auto w-full lg:w-[90vw]">
-      <TempCreateContestV2 space={space} />
+      <Suspense fallback={<Skeleton />} >
+        <TempCreateContestV2 space={space} />
+      </Suspense>
     </div>
   )
 

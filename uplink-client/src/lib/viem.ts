@@ -1,5 +1,5 @@
-import { Chain, createPublicClient, createWalletClient, http } from 'viem'
-import { mainnet, base, zora, optimism, baseSepolia, zoraTestnet, optimismGoerli } from 'viem/chains'
+import { Chain, createPublicClient, http } from 'viem';
+import { mainnet, base, baseSepolia } from 'viem/chains';
 
 
 export const createWeb3Client = (chainId?: number) => {
@@ -27,12 +27,5 @@ export const createWeb3Client = (chainId?: number) => {
         }
     });
 
-    else if (chainId === 420) return createPublicClient({
-        chain: optimismGoerli as Chain,
-        transport: http(`https://opt-goerli.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
-        batch: {
-            multicall: true
-        }
-    });
 }
 

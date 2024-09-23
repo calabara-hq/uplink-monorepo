@@ -1,17 +1,16 @@
-"use client";
-import { Channel, ChannelTokenWithUserBalance, ContractID, splitContractID } from "@/types/channel";
-import { useReadContract, useWalletClient } from "wagmi";
+"use client";;
+import { ChannelTokenWithUserBalance, ContractID, splitContractID } from "@/types/channel";
+import { useWalletClient } from "wagmi";
 import { ChannelToken } from "@/types/channel";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 import useSWR from "swr";
-import { Address, maxUint256, zeroAddress } from "viem";
+import { Address } from "viem";
 import { handleV2Error } from "@/lib/fetch/handleV2Errors";
 import { useMintTokenBatchWithETH } from "@tx-kit/hooks";
 import { useChannel } from "./useChannel";
 import toast from "react-hot-toast";
 import { useTransmissionsErrorHandler } from "./useTransmissionsErrorHandler";
-import { dynamicLogicAbi } from "@tx-kit/sdk/abi";
 import { useInteractionPower } from "./useInteractionPower";
 /**
  * requirements

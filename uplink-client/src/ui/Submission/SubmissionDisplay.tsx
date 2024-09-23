@@ -1,22 +1,19 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
+"use client";;
+import { useEffect, useState } from "react";
 import CardSubmission from "./CardSubmission";
 import useLiveSubmissions from "@/hooks/useLiveSubmissions";
-import SubmissionModal from "./SubmissionModal";
 import { Submission } from "@/types/submission";
-import Swiper from "../Swiper/Swiper";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
 import useMe from "@/hooks/useMe";
-import { useVote, VoteActionProps } from "@/hooks/useVote";
+import { useVote } from "@/hooks/useVote";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import { MdOutlineCancelPresentation } from "react-icons/md";
-import { MintButton, ShareButton, ShareModalContent, AddToCartButton, AdminButton, ManageModalContent } from "@/app/submission/[submissionId]/client";
+import { MintButton, ShareButton, ShareModalContent, AddToCartButton } from "@/app/submission/[submissionId]/client";
 import { useSession } from "@/providers/SessionProvider";
 import ExpandedSubmission from "./ExpandedSubmission";
-import { HiArrowNarrowLeft } from "react-icons/hi";
-import { AdminWrapper } from "@/lib/AdminWrapper";
-import { useDeleteContestSubmission } from "@/hooks/useDeleteContestSubmission";
+import { Button } from "../DesignKit/Button";
+import { Modal } from "../Modal/Modal";
 
 export const SubmissionDisplaySkeleton = () => {
   return (
@@ -49,99 +46,6 @@ export const SubmissionDisplaySkeleton = () => {
   );
 };
 
-
-export const RenderPopularSubmissions = ({ submissions }) => {
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
-  const [submission, setSubmission] = useState<Submission | null>(null);
-
-  useEffect(() => {
-    if (window) window.sessionStorage.setItem('nav', 'true')
-  }, [])
-
-
-  const router = useRouter();
-  const { status } = useSession();
-
-  const openMintModal = (submission: Submission) => {
-    setIsMintModalOpen(true)
-    setSubmission(submission)
-  }
-
-  const openShareModal = (submission: Submission) => {
-    setIsShareModalOpen(true)
-    setSubmission(submission)
-  }
-
-  const handleMint = (event, submission) => {
-    event.stopPropagation();
-    event.preventDefault();
-    openMintModal(submission);
-  }
-
-  const handleShare = (event, submission) => {
-    event.stopPropagation();
-    event.preventDefault();
-    openShareModal(submission);
-  }
-
-
-  const handleClose = () => {
-    setIsMintModalOpen(false)
-    setIsMintModalOpen(false)
-    setSubmission(null);
-  }
-
-  // base64 the homepage context
-  const context = Buffer.from(encodeURIComponent('/')).toString('base64')
-
-  return (
-    <div className="w-full">
-
-      <Swiper listSize={submissions.length - 1}>
-        {submissions.map((submission: Submission, index: number) => (
-          <div className="snap-start snap-always w-full min-w-[250px] min-h-[300px] sm:min-w-[320px] sm:h-[500px]" key={index}>
-            <CardSubmission
-              key={index}
-              interactive={true}
-              submission={submission}
-              handleCardClick={(submission) => router.push(`/submission/${submission.id}?context=${context}`)}
-
-              footerChildren={
-                <div className="flex flex-col w-full">
-                  <div className="p-2 w-full" />
-                  <div className="grid grid-cols-3 w-full items-center">
-                    <ShareButton submission={submission} onClick={(event) => handleShare(event, submission)} context={context} />
-                    <MintButton
-                      styleOverride="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
-                        hover:rounded-xl rounded-3xl transition-all duration-300"
-                      submission={submission}
-                      onClick={(event) => handleMint(event, submission)}
-                    />
-                  </div>
-                </div>
-              }
-            />
-          </div>
-        ))}
-      </Swiper>
-      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleClose} >
-        {isShareModalOpen && submission && (
-          <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
-            <div className="flex justify-between">
-              <h2 className="text-t1 text-xl font-bold">Share</h2>
-              <button className="btn btn-ghost btn-sm  ml-auto" onClick={() => setIsShareModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
-            </div>
-            {status !== 'authenticated' && <p className="text-t1 text-lg">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
-            <WalletConnectButton>
-              <ShareButton submission={submission} onClick={() => { }} context={context} />
-            </WalletConnectButton>
-          </div>
-        )}
-      </SubmissionModal>
-    </div>
-  )
-}
 
 export const UserSubmissionDisplay = ({ user }: { user: User }) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -222,8 +126,6 @@ export const UserSubmissionDisplay = ({ user }: { user: User }) => {
                     <div className="grid grid-cols-3 w-full items-center">
                       <ShareButton submission={submission} onClick={(event) => handleShare(event, submission)} context={calcNavContext(submission)} />
                       <MintButton
-                        styleOverride="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
-                        hover:rounded-xl rounded-3xl transition-all duration-300"
                         submission={submission}
                         onClick={(event) => handleMint(event, submission)}
                       />
@@ -235,12 +137,12 @@ export const UserSubmissionDisplay = ({ user }: { user: User }) => {
           })}
         </div>
       </div>
-      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleClose} >
+      <Modal isModalOpen={isMintModalOpen || isShareModalOpen} onClose={handleClose} >
         {isShareModalOpen && submission && (
           <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
             <div className="flex justify-between">
               <h2 className="text-t1 text-xl font-bold">Share</h2>
-              <button className="btn btn-ghost btn-sm  ml-auto" onClick={() => setIsShareModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
+              <Button variant="ghost" className="ml-auto" onClick={() => setIsShareModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></Button>
             </div>
             {status !== 'authenticated' && <p className="text-t1 text-lg">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
             <WalletConnectButton>
@@ -249,7 +151,7 @@ export const UserSubmissionDisplay = ({ user }: { user: User }) => {
           </div>
         )}
 
-      </SubmissionModal>
+      </Modal>
     </div >
   );
 }
@@ -270,12 +172,12 @@ const HeaderButtons = ({ submission, referrer, context }: { submission: Submissi
       <ShareButton submission={submission} onClick={() => setIsShareModalOpen(true)} context={context} />
       <MintButton submission={submission} onClick={() => setIsMintModalOpen(true)} />
       <AddToCartButton submission={submission} voteActions={voteActions} />
-      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen} mode={isMintModalOpen ? "mint" : "share"} handleClose={handleClose} >
+      <Modal isModalOpen={isMintModalOpen || isShareModalOpen} onClose={handleClose} >
         {isShareModalOpen && (
           <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
         )}
 
-      </SubmissionModal>
+      </Modal>
     </div>
   )
 }
@@ -294,7 +196,6 @@ export const LiveSubmissionDisplay = ({
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const [isExpandModalOpen, setIsExpandModalOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-  const { handleDeleteContestSubmission } = useDeleteContestSubmission(contestId);
 
   const [submission, setSubmission] = useState<Submission | null>(null);
 
@@ -313,11 +214,6 @@ export const LiveSubmissionDisplay = ({
     setSubmission(submission)
   }
 
-  const openManageModal = (submission: Submission) => {
-    setIsManageModalOpen(true);
-    setSubmission(submission);
-  }
-
   const handleMint = (event, submission) => {
     event.stopPropagation();
     event.preventDefault();
@@ -328,12 +224,6 @@ export const LiveSubmissionDisplay = ({
     event.stopPropagation();
     event.preventDefault();
     openShareModal(submission);
-  }
-
-  const handleManage = (event, submission) => {
-    event.stopPropagation();
-    event.preventDefault();
-    openManageModal(submission);
   }
 
   const handleClose = () => {
@@ -368,17 +258,11 @@ export const LiveSubmissionDisplay = ({
                   <div className="flex flex-col w-full">
                     <div className="p-2 w-full" />
                     <div className="flex gap-2 w-full items-center">
-
-                      <AdminButton contestId={contestId} submission={submission} onClick={(event) => handleManage(event, submission)} />
-
-
                       <div>
                         <ShareButton submission={submission} onClick={(event) => handleShare(event, submission)} context={context} />
                       </div>
                       <div className="ml-auto flex items-center gap-2">
                         <MintButton
-                          styleOverride="btn btn-sm normal-case m-auto btn-ghost w-fit hover:bg-primary bg-gray-800 text-primary hover:text-black 
-                          hover:rounded-xl rounded-3xl transition-all duration-300"
                           submission={submission}
                           onClick={(event) => handleMint(event, submission)}
                         />
@@ -394,29 +278,19 @@ export const LiveSubmissionDisplay = ({
           })}
         </div>
       </div>
-      <SubmissionModal isModalOpen={isMintModalOpen || isShareModalOpen || isExpandModalOpen || isManageModalOpen} mode={isMintModalOpen ? "mint" : isExpandModalOpen ? "expand" : isManageModalOpen ? "manage" : "share"} handleClose={handleClose} >
+      <Modal className="w-full max-w-[800px] h-full max-h-[700px] overflow-y-scroll" isModalOpen={isMintModalOpen || isShareModalOpen || isExpandModalOpen || isManageModalOpen} onClose={handleClose} >
         {isShareModalOpen && submission && (
           <ShareModalContent submission={submission} handleClose={handleClose} context={context} />
         )}
 
         {isExpandModalOpen && submission && (
-          <div className="flex flex-col w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full mt-4 p-4">
-            <button className="flex gap-2 w-fit text-t2 hover:text-t1 cursor-pointer p-2 pl-0 "
-              onClick={handleClose}
-            >
-              <HiArrowNarrowLeft className="w-6 h-6" />
-              <p>{"Back"}</p>
-            </button>
-            <ExpandedSubmission submission={submission} headerChildren={
-              <HeaderButtons submission={submission} referrer={null} context={context} />
-            } />
-          </div>
+          // <div className="flex flex-col w-full gap-6 sm:w-10/12 md:w-9/12 lg:w-7/12 xl:w-5/12 m-auto h-full mt-4 p-4">
+          <ExpandedSubmission submission={submission} headerChildren={
+            <HeaderButtons submission={submission} referrer={null} context={context} />
+          } />
+          // </div>
         )}
-        {isManageModalOpen && submission && (
-          <ManageModalContent onDelete={() => handleDeleteContestSubmission(submission.id, () => handleClose())} />
-        )}
-
-      </SubmissionModal>
+      </Modal>
     </div >
   );
 };

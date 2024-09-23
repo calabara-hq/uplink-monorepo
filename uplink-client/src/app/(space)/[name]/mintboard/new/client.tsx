@@ -16,6 +16,7 @@ import { MintboardSettings } from "@/ui/MintboardSettings/MintboardSettings";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 import { concatContractID, ContractID } from "@/types/channel";
 import { useChannel } from "@/hooks/useChannel";
+import { Button } from "@/ui/DesignKit/Button";
 
 
 
@@ -118,7 +119,7 @@ const BoardForm = ({ spaceData, priorState }: { spaceId: string, priorState: Min
                 onClick={handleSubmit}
                 isLoading={txStatus === 'pendingApproval' || txStatus === 'txInProgress'}
                 loadingChild={
-                    <button className="btn btn-disabled normal-case w-auto">
+                    <Button disabled className="w-auto">
                         <div className="flex gap-2 items-center">
                             <p className="text-sm">{
                                 txStatus === 'pendingApproval' ?
@@ -129,7 +130,7 @@ const BoardForm = ({ spaceData, priorState }: { spaceId: string, priorState: Min
                             </p>
                             <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />
                         </div>
-                    </button>
+                    </Button>
                 }
             />
         </MintboardSettings>

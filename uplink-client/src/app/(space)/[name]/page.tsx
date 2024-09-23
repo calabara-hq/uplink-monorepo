@@ -108,7 +108,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
               </ImageWrapper>
             </div>
           </div>
-          <div className="flex flex-col gap-0.5 justify-end pt-4">
+          <div className="flex flex-col gap-0.5 justify-end items-start lg:items-center pt-4">
             <CardHeader className="p-0 pt-2 lg:pt-2 text-left lg:text-center">
               <CardTitle>{displayName}</CardTitle>
             </CardHeader>
@@ -368,7 +368,7 @@ const ContestCard = async ({
             alt="contest image"
             fill
             sizes="30vw"
-            className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-xl"
+            className="object-cover w-full h-full transition-transform duration-300 ease-in-out rounded-lg"
           />
         </ImageWrapper>
       </div >
@@ -378,12 +378,6 @@ const ContestCard = async ({
 
 
 const Contests = ({ contestsV1, contestsV2, spaceName, spaceLogo }: { contestsV1: Array<SpaceContest>, contestsV2: Array<Channel & { metadata: ITokenMetadata }>, spaceName: string, spaceLogo: string }) => {
-
-  // const v2Metadata = await Promise.all(contestsV2.map(async (contest) => {
-  //   const metadata = await fetch(parseIpfsUrl(contest.uri).gateway).then(res => res.json());
-  //   return metadata;
-  // }));
-
 
   if (contestsV1.length + contestsV2.length === 0) {
     return (
@@ -424,9 +418,9 @@ const Contests = ({ contestsV1, contestsV2, spaceName, spaceLogo }: { contestsV1
             linkTo={`/contest/${contest.id}`}
             coverImg={contest.promptData?.coverUrl ?? spaceLogo}
             title={contest.promptData.title}
-            createStart={contest.deadlines.startTime}
-            mintStart={contest.deadlines.voteTime}
-            mintEnd={contest.deadlines.endTime}
+            createStart={Math.floor(new Date(contest.deadlines.startTime).getTime() / 1000).toString()}
+            mintStart={Math.floor(new Date(contest.deadlines.voteTime).getTime() / 1000).toString()}
+            mintEnd={Math.floor(new Date(contest.deadlines.endTime).getTime() / 1000).toString()}
           />
         );
       })}

@@ -4,8 +4,6 @@ import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
 import UplinkImage from "@/lib/UplinkImage"
 import { ActiveContest } from "@/lib/fetch/fetchActiveContests";
-import { calculateContestStatus } from "@/utils/staticContestState";
-import { CategoryLabel, RemainingTimeLabel, StatusLabel } from "@/ui/ContestLabels/ContestLabels";
 import { SearchSpaces } from "./client";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { CardFooter } from "@/ui/DesignKit/Card";
@@ -156,7 +154,7 @@ const TrendingChannels = async () => {
                                 src={parseIpfsUrl(token.metadata.image).gateway}
                                 fill
                                 alt="spaceLogo"
-                                className="object-cover mask mask-circle"
+                                className="object-cover rounded-full"
                                 sizes={"10vw"}
                               />
                             </div>
@@ -196,7 +194,7 @@ const ExploreHeaderSkeleton = () => {
       <div className="hidden sm:flex w-8/12 md:w-6/12 ">
         <div className="rounded-lg shimmer w-full h-[48px]"></div>
       </div>
-      <div className="w-28 h[48px] rounded-3xl shimmer"></div>
+      <div className="w-28 h-[48px] rounded-3xl shimmer"></div>
     </div>
   )
 }

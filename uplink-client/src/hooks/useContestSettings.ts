@@ -1,10 +1,14 @@
 "use client";
 import { useReducer } from "react";
 import { z } from "zod";
-import { encodeAbiParameters, formatUnits, parseEther, parseUnits, zeroAddress } from "viem";
-import { CreateInfiniteChannelConfig, ChannelFeeArguments, LogicOperators, DynamicLogicInputs, LogicInteractionPowerTypes, CreateFiniteChannelConfig } from '@tx-kit/sdk';
-import { UniformInteractionPower, validateFiniteChannelInputs, validateInfiniteChannelInputs, validateInfiniteTransportLayer, validateSetFeeInputs, WeightedInteractionPower } from '@tx-kit/sdk/utils';
-import { getCustomFeesAddress, getDynamicLogicAddress, NATIVE_TOKEN } from '@tx-kit/sdk/constants';
+import { parseUnits, zeroAddress } from "viem";
+import { DynamicLogicInputs, CreateFiniteChannelConfig } from '@tx-kit/sdk';
+import {
+    UniformInteractionPower,
+    validateFiniteChannelInputs,
+    WeightedInteractionPower,
+} from '@tx-kit/sdk/utils';
+import { getDynamicLogicAddress, NATIVE_TOKEN } from '@tx-kit/sdk/constants';
 import { createWeb3Client } from "@/lib/viem";
 import { Address, maxUint40 } from "viem";
 import { normalize } from "viem/ens"
@@ -13,7 +17,7 @@ import { useSession } from "@/providers/SessionProvider";
 import { Space } from "@/types/space";
 import { CreateTokenInputs } from "./useCreateTokenReducer";
 import { UploadToIpfsTokenMetadata } from "@/types/channel";
-import { TokenContractApi } from "@/lib/contract";
+import { getTokenInfo } from "@/lib/tokenInfo";
 
 const mainnetClient = createWeb3Client(1);
 
@@ -72,11 +76,7 @@ export const InteractionLogicSchema = z.object({
 
     const fetchTokenDecimals = async (token: string) => {
         if (token === NATIVE_TOKEN) return 18;
-        const tokenApi = new TokenContractApi(input.chainId);
-        const { decimals } = await tokenApi.tokenGetSymbolAndDecimal({ contractAddress: token, tokenStandard: 'ERC20' }).catch(() => {
-            // TODO, can't always assume erc1155 is 0 decimals.
-            return { decimals: 0 }
-        })
+        const { decimals } = await getTokenInfo({ contractAddress: token, chainId: input.chainId });
         return decimals;
     }
 
@@ -144,14 +144,10 @@ export const ContestSettingsSchema = z.object({
 }).transform(async (data, ctx) => {
     const ipfsData = constructTokenMetadata(data);
 
-    const tokenApi = new TokenContractApi(data.chainId);
 
     const fetchTokenDecimals = async (token: string) => {
         if (token === NATIVE_TOKEN) return 18;
-        const tokenApi = new TokenContractApi(data.chainId);
-        const { decimals } = await tokenApi.tokenGetSymbolAndDecimal({ contractAddress: token, tokenStandard: 'ERC20' }).catch(() => {
-            return { decimals: 0 }
-        })
+        const { decimals } = await getTokenInfo({ contractAddress: token, chainId: data.chainId });
         return decimals;
     }
 

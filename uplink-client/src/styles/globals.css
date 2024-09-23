@@ -54,6 +54,10 @@
   }
 } */
 
+[aria-labelledby="rk_connect_title"] {
+  @apply pointer-events-auto;
+}
+
 .btm-nav {
   position: fixed;
   bottom: 0px;
@@ -67,46 +71,6 @@
   padding-bottom: env(safe-area-inset-bottom);
   height: 4rem;
 }
-
-.modal {
-  /* @apply pointer-events-none invisible fixed inset-0 flex justify-center opacity-0; */
-  @apply pointer-events-none fixed inset-0 m-0 grid h-full max-h-none w-full max-w-none justify-items-center p-0 opacity-0;
-  overscroll-behavior: contain;
-  z-index: 999;
-}
-.modal-scroll {
-  overscroll-behavior: auto;
-}
-:where(.modal) {
-  @apply items-center;
-}
-.modal-box {
-  max-height: calc(100vh - 5em);
-
-  @apply p-4 rounded-lg w-full max-w-[500px];
-}
-.modal-open,
-.modal:target,
-.modal-toggle:checked + .modal,
-.modal[open] {
-  @apply pointer-events-auto visible opacity-100;
-}
-.modal-action {
-  @apply flex;
-}
-.modal-toggle {
-  @apply fixed h-0 w-0 appearance-none opacity-0;
-}
-:root:has(:is(.modal-open, .modal:target, .modal-toggle:checked + .modal, .modal[open])) {
-  @apply overflow-hidden;
-  scrollbar-gutter: stable;
-}
-
-
-/* ol {
-  list-style-type: decimal;
-  margin-left: 2rem !important;
-} */
 
 .no-scrollbar {
   scrollbar-width: none;
@@ -259,8 +223,8 @@
   @apply pointer-events-none absolute select-none rounded-xl opacity-0 transition-opacity duration-300 hover:opacity-100;
   background: radial-gradient(
     750px circle at var(--x) var(--y),
-    #3aecf8 0,
-    #5295dc 25%,
+    #e93d82 0,
+    #b0436e 25%,
     rgba(255, 255, 255, 0) 50%,
     transparent 80%
   );

@@ -71,7 +71,6 @@ module.exports = {
         border: colors.accent,
 
         primary: colors.primary,
-        primary: colors.primary,
         primary1: colors.primary1,
         primary2: colors.primary2,
         primary3: colors.primary3,
@@ -97,6 +96,7 @@ module.exports = {
         'springUp': 'springUp 350ms cubic-bezier(.15, 1.15, 0.6, 1.00)',
         'scrollInX': 'scrollInX 350ms ',
         'fadeIn': 'fadeIn 150ms ease-in-out',
+        'fadeOut': 'fadeOut 150ms ease-in-out',
         'ping': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
         'spin': 'spin 1s linear infinite',
       }
@@ -135,6 +135,14 @@ module.exports = {
           opacity: '1'
         }
       },
+      fadeOut: {
+        '0%': {
+          opacity: '1'
+        },
+        '100%': {
+          opacity: '0'
+        }
+      },
       ping: {
         "75%, 100%": {
           transform: "scale(2)",
@@ -149,29 +157,7 @@ module.exports = {
     })
   },
 
-  // daisyui: {
-  //   themes: [
-
-  //     {
-  //       uplinkDark: {
-  //         primary: colors.primary,
-  //         secondary: colors.secondary,
-  //         accent: colors.accent,
-  //         'base-100': colors.base1,
-  //         'base-200': colors.base2,
-  //         'base-300': colors.base3,
-  //         neutral: colors.neutral1,
-  //         info: colors.info,
-  //         success: colors.success,
-  //         warning: colors.warning,
-  //         error: colors.error,
-  //       }
-  //     }
-  //   ]
-  // },
-
   plugins: [
-    //require("daisyui"),
     require('@tailwindcss/typography'),
   ],
 }

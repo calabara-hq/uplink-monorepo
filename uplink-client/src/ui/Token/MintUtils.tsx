@@ -1,12 +1,9 @@
-"use client"
-
+"use client";;
 import { useSession } from "@/providers/SessionProvider";
-import React, { useEffect, useMemo, useState } from "react";
-import { MdOutlineCancelPresentation } from "react-icons/md";
+import { useEffect, useState } from "react";
 import { HiCheckBadge } from "react-icons/hi2";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { RenderStandardVideoWithLoader } from "../VideoPlayer";
-import { ImageWrapper } from "../Submission/MediaWrapper";
 import UplinkImage from "@/lib/UplinkImage";
 import { LuMinusSquare, LuPlusSquare } from "react-icons/lu";
 import { Address, formatEther, maxUint40 } from "viem";
@@ -17,12 +14,12 @@ import { Boundary } from "../Boundary/Boundary";
 import { useBanToken } from "@/hooks/useBanToken";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
 import { IInfiniteTransportConfig } from "@tx-kit/sdk/subgraph";
-import { usePathname, useRouter } from "next/navigation";
-import { HiArrowNarrowLeft } from "react-icons/hi";
+import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import { DisplayMode } from "./MintableTokenDisplay";
 import { Button } from "../DesignKit/Button";
 import { Input } from "../DesignKit/Input";
+import { DialogHeader, DialogTitle } from "../DesignKit/Dialog";
 
 
 export type FeeStructure = {
@@ -82,14 +79,6 @@ const constructTokenUrl = ({ displayMode, pathname, referral, token }: { display
         else if (isTokenIntent(token)) return `${process.env.NEXT_PUBLIC_CLIENT_URL}${pathname}?intent=true${referral ? `&${referral}` : ''}`
     }
 
-
-    // if ((isTokenV1Onchain(token))) {
-    //     return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${token.id}/v1${referral ? `?${referral}` : ''}`
-    // } else if (isTokenV2Onchain(token)) {
-    //     return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${(token as ChannelToken).tokenId}/v2${referral ? `?${referral}` : ''}`
-    // } else if (isTokenIntent(token)) {
-    //     return `${process.env.NEXT_PUBLIC_CLIENT_URL}/${spaceName}/mintboard/${contractId}/post/${token.id}/v2?intent=true&${referral}`
-    // }
 }
 
 export const calculateSaleEnd = (channel: Channel, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent): number => {
@@ -132,7 +121,7 @@ export const RenderMintMedia = ({ imageURI, animationURI, styleOverrides }: { im
                 src={gatewayImageURI}
                 alt="Picture of the author"
                 sizes="30vw"
-                className="w-full h-auto rounded-lg "
+                className="w-full h-auto max-w-full max-h-96 object-contain rounded-lg "
                 width={500}
                 height={300}
             />
@@ -163,19 +152,20 @@ export const CounterInput = ({ count, setCount, max }: { count: string, setCount
     }
 
     return (
-        <div className="flex items-center w-full">
-            <button className="btn bg-base disabled:bg-base disabled:border-base-100 rounded-r-none border-base-100 normal-case m-auto text-t1" disabled={count === '1' || count === ''} onClick={() => setCount((Number(count) - 1).toString())}><LuMinusSquare className="w-4 h-4" /></button>
+        <div className="flex items-center w-full gap-1">
+            <Button variant="outline" className="m-auto text-t1" disabled={count === '1' || count === ''} onClick={() => setCount((Number(count) - 1).toString())}><LuMinusSquare className="w-4 h-4" /></Button>
             <div className="w-full">
-                <input
+                <Input
                     type="number"
+                    className="text-center w-full max-w-full"
+                    variant="outline"
                     onWheel={(e) => e.currentTarget.blur()}
                     value={count}
                     onChange={handleInputChange}
-                    className="input w-[1px] min-w-full rounded-none focus:ring-0 focus:border-none focus:outline-none text-center"
                 />
             </div>
-            <button className="btn rounded-l-none bg-base border-base-100 normal-case ml-auto text-t1" disabled={max ? Number(count) >= Number(max) : false} onClick={() => setCount((Number(count) + 1).toString())}><LuPlusSquare className="w-4 h-4" /></button>
-        </div>
+            <Button variant="outline" className="text-t1" disabled={max ? Number(count) >= Number(max) : false} onClick={() => setCount((Number(count) + 1).toString())}><LuPlusSquare className="w-4 h-4" /></Button>
+        </div >
     )
 }
 
@@ -186,13 +176,13 @@ export const RenderFees = ({ fees, quantity }: { fees: FeeStructure | null, quan
     if (!fees) return null;
 
     return (
-        < div className="relative w-full" >
-            <button className="flex items-center w-full"
+        <div className="relative w-full" >
+            <Button variant="ghost" className="flex items-center w-full"
                 onClick={() => setIsFeeInfoOpen(!isFeeInfoOpen)}
             >
                 <p className="text-t2">{`Price: ${getETHMintPrice(fees.ethMintPrice * BigInt(quantity))}`}</p>
                 <span className="ml-auto">{isFeeInfoOpen ? <LuMinusSquare className="w-4 h-4" /> : <LuPlusSquare className="w-4 h-4" />}</span>
-            </button>
+            </Button>
             <div
                 className={`w-full flex flex-col gap-2 ${isFeeInfoOpen ? "h-[200px]" : "h-0"} overflow-hidden transition-all duration-300 ease-in-out`}
             >
@@ -259,11 +249,10 @@ export const ShareModalContent = ({ displayMode, token, handleClose }: { display
 
 
     return (
-        <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
-            <div className="flex justify-between">
-                <h2 className="text-t1 text-xl font-bold">Share</h2>
-                <button className="btn btn-ghost btn-sm  ml-auto" onClick={handleClose}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></button>
-            </div>
+        <div className="flex flex-col w-full gap-1 lg:gap-4 p-0 max-w-[350px]">
+            <DialogHeader>
+                <DialogTitle>Share Post</DialogTitle>
+            </DialogHeader>
             {status !== 'authenticated' && <p className="text-t2">Connect your wallet to earn referral rewards whenever someone mints with your link.</p>}
             <WalletConnectButton>
                 {success && (
@@ -278,7 +267,7 @@ export const ShareModalContent = ({ displayMode, token, handleClose }: { display
                     <div className="w-full h-0.5 bg-base-200" />
                     <div className="flex flex-col gap-2">
                         <p className="text-t2">Or just copy link</p>
-                        <button className="secondary-btn btn-sm" onClick={handleShare}>Copy Link</button>
+                        <Button variant="secondary" onClick={handleShare}>Copy Link</Button>
                     </div>
                 </>
             }
@@ -289,16 +278,16 @@ export const ShareModalContent = ({ displayMode, token, handleClose }: { display
 
 export const ShareButton = ({ displayMode, token, onClick, className }: { displayMode: DisplayMode, token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, onClick: (event?) => void, className?: string }) => {
     const { data: session, status } = useSession();
-    const [shareText, setShareText] = useState("Share");
+    const [shareText, setShareText] = useState("Share Post");
     const pathname = usePathname();
 
     const handleShare = (event, link) => {
         event.stopPropagation();
         event.preventDefault();
-        setShareText("Copied");
+        setShareText("Link Copied");
         navigator.clipboard.writeText(link);
         setTimeout(() => {
-            setShareText("Share");
+            setShareText("Share Post");
         }, 2000);
     };
     const handleShareClick = (event) => {
@@ -313,12 +302,13 @@ export const ShareButton = ({ displayMode, token, onClick, className }: { displa
     }
 
     return (
-        <button
-            className={`btn bg-base btn-active normal-case h-full  border-none btn-sm font-normal  text-t2 hover:text-t1 ${className}`}
+        <Button
+            variant="outline"
+            className={`${className}`}
             onClick={handleShareClick}
         >
             {shareText}
-        </button>
+        </Button>
     )
 }
 
@@ -351,7 +341,7 @@ export const ManageModalContent = ({ token, contractId, handleClose }: { token: 
 
 
     return (
-        <div className="flex flex-col w-full gap-1 lg:gap-4 p-0">
+        <div className="flex flex-col w-full gap-1 lg:gap-4 p-0 max-w-[350px]">
             <h2 className="text-t1 text-xl font-bold">Manage Post</h2>
             <Boundary size="small">
                 <p>Once deleted, this post will be gone forever. Type <b>delete</b> if you understand</p>

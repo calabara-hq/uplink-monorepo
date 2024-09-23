@@ -1,6 +1,5 @@
-"use client";
+"use client";;
 import { useCreateTokenReducer } from "@/hooks/useCreateTokenReducer"
-import { Boundary } from "@/ui/Boundary/Boundary";
 import { MediaUpload } from "@/ui/MediaUpload/MediaUpload";
 import OnchainButton from "@/ui/OnchainButton/OnchainButton";
 import { useEffect, useRef, useState } from "react";
@@ -16,14 +15,15 @@ import useSWRMutation from "swr/mutation";
 import { insertIntent } from "@/lib/fetch/insertIntent";
 import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
-import { Option } from "@/ui/MenuSelect/MenuSelect";
+import { Option } from "@/ui/OptionSelect/OptionSelect";
 import { useMonitorChannelUpgrades } from "@/hooks/useMonitorChannelUpgrades";
-import { asPositiveInt, BasicInput, MarkdownEditor, OptionOrCustom, TextArea } from "./StudioTools";
+import { asPositiveInt, BasicInput, MarkdownEditor, OptionOrCustom } from "./StudioTools";
 import Toggle from "@/ui/DesignKit/Toggle";
 import { Button } from "../DesignKit/Button";
 import { useChannel } from "@/hooks/useChannel";
 import { DetailSectionWrapper, LogicDisplay } from "../ChannelSidebar/ContestDetailsV2";
-import { useInteractionPower } from "@/hooks/useInteractionPower";
+import { Label } from "../DesignKit/Label";
+import { Modal } from "../Modal/Modal";
 
 export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }: { contractId: ContractID, spaceSystemName: string, allowIntents?: boolean }) => {
     const [areIntentsEnabled, setAreIntentsEnabled] = useState(false);
@@ -163,9 +163,9 @@ export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }
                             maxVideoDuration={210}
                         />
                         {state.errors?.imageURI?._errors && (
-                            <label className="label">
-                                <span className="label-text-alt text-error max-w-sm overflow-wrap break-word">{state.errors.imageURI._errors.join(",")}</span>
-                            </label>
+                            <Label>
+                                <p className="text-error max-w-sm break-words">{state.errors.imageURI._errors.join(",")}</p>
+                            </Label>
                         )}
                     </div>
                     <BasicInput inputType="text" label="Title" value={state.title} placeholder={"My awesome creation"} onChange={(e) => setField("title", e.target.value)} error={state.errors?.title?._errors} />
@@ -219,10 +219,10 @@ export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }
             </StudioSidebar>
 
 
-            <CreatePostModal
+            <Modal
                 isModalOpen={isModalOpen}
                 onClose={() => { }}
-                disableClickOutside={true}
+                className="w-full max-w-[500px]"
             >
                 {txStatus === 'txInProgress' && (
                     <div className="animate-springUp flex flex-col gap-2 w-full h-[50vh] items-center justify-center">
@@ -238,14 +238,31 @@ export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }
                         <HiCheckBadge className="h-48 w-48 text-success" />
                         <h2 className="font-bold text-t1 text-xl">Successfully created your post.</h2>
                         <div className="flex gap-2 items-center">
-                            {!isIntent && <a className="btn btn-ghost normal-case text-t2" href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${txHash}`} target="_blank" rel="noopener norefferer">View Tx</a>}
-                            <Link className="btn normal-case btn-primary" href={`/${spaceSystemName}/${channelType}/${contractId}${isIntent ? '?intent=true' : ''}`}>Go to {channelType}</Link>
+                            {!isIntent && <Link
+                                href={`${chain?.blockExplorers?.default?.url ?? ''}/tx/${txHash}`}
+                                target="_blank"
+                                rel="noopener norefferer"
+                                passHref
+                            >
+                                <Button variant="ghost" className="w-auto">
+                                    View Tx
+                                </Button>
+                            </Link>
+                            }
+
+                            <Link
+                                href={`/${spaceSystemName}/${channelType}/${contractId}${isIntent ? '?intent=true' : ''}`}
+                            >
+                                <Button>
+                                    Go to {channelType}
+                                </Button>
+                            </Link>
                         </div>
                     </div>
 
                 )}
 
-            </CreatePostModal>
+            </Modal>
         </div>
     )
 }
@@ -253,11 +270,8 @@ export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }
 const StudioSidebar = ({ channel, areIntentsEnabled, isIntent, setIsIntent, children }) => {
     // todo some submitter requirements / user status
     return (
-        <div className="flex flex-col gap-2 p-4 bg-base-100 rounded-lg self-start md:max-w-[800px]">
-
+        <div className="flex flex-col gap-2 p-4 bg-base-100 rounded-lg self-start md:max-w-[800px] min-w-[300px]">
             <SubmissionRequirements channel={channel} />
-
-
             {areIntentsEnabled &&
                 <>
                     <div className="flex flex-row gap-2 items-center justify-between">
@@ -267,7 +281,7 @@ const StudioSidebar = ({ channel, areIntentsEnabled, isIntent, setIsIntent, chil
                     </div>
                     <div className="h-2 w-full" />
                     <div className="bg-base-200 p-2 rounded-lg">
-                        <p className="text-t2">
+                        <p className="text-t2 text-sm">
                             Leaving this toggle off will allow you to post for free.
                             <br />
                             <br />
@@ -300,46 +314,3 @@ const SubmissionRequirements = ({ channel }: { channel: Channel }) => {
     )
 }
 
-const CreatePostModal = ({
-    isModalOpen,
-    children,
-    onClose,
-    disableClickOutside,
-}: {
-    isModalOpen: boolean;
-    children: React.ReactNode;
-    onClose: () => void;
-    disableClickOutside?: boolean;
-}) => {
-    const modalRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                modalRef.current &&
-                !modalRef.current.contains(event.target as Node)
-            ) {
-                disableClickOutside ? null : onClose();
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [modalRef, disableClickOutside]);
-
-    if (isModalOpen) {
-        return (
-            <div className="modal modal-open bg-black transition-colors duration-500 ease-in-out">
-                <div
-                    ref={modalRef}
-                    className="modal-box bg-black border border-[#ffffff14] animate-springUp max-w-4xl"
-                >
-                    {children}
-                </div>
-            </div>
-        );
-    }
-    return null;
-};

@@ -9,7 +9,7 @@ export const sqlOps = databaseController.sqlOps;
 
 
 /* -------------------------------------------------------------------------- */
-/*                                   MISC                                     */
+/*                                   USER                                     */
 /* -------------------------------------------------------------------------- */
 
 const prepared_dbUserSpaceAdmin = db.query.admins.findFirst({
@@ -19,6 +19,17 @@ const prepared_dbUserSpaceAdmin = db.query.admins.findFirst({
     )
 
 }).prepare();
+
+export const dbIsUserSpaceAdmin = async (user: any, spaceId: number) => {
+    const isAdmin = await prepared_dbUserSpaceAdmin.execute({ address: user.address, spaceId: spaceId })
+    return isAdmin
+}
+
+export const dbGetUserManagedSpaces = async (userAddress: string): Promise<Array<schema.dbSpaceType>> => {
+    return db.execute(sqlOps.sql`
+            SELECT spaces.* from admins LEFT JOIN spaces ON spaces.id = admins.spaceId WHERE LOWER(admins.address) = LOWER(${userAddress})
+        `).then(data => data.rows)
+}
 
 /* -------------------------------------------------------------------------- */
 /*                                   CHANNEL                                  */
@@ -48,10 +59,6 @@ export const dbGetSpaceByChannelAddress = async (channelAddress: string): Promis
     `).then(data => data.rows[0])
 }
 
-export const dbIsUserSpaceAdmin = async (user: any, spaceId: number) => {
-    const isAdmin = await prepared_dbUserSpaceAdmin.execute({ address: user.address, spaceId: spaceId })
-    return isAdmin
-}
 
 export const dbInsertChannel = async (spaceId: string, contractAddress: string, chainId: number, channelType: string) => {
 

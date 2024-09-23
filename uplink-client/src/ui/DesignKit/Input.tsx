@@ -3,14 +3,14 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/shadcn"
 
 const inputVariants = cva(
-    "flex h-9 w-full bg-base-100 rounded-lg border border-border px-3 py-1 text-sm shadow-sm transition-colors max-w-sm items-center gap-1.5 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+    "flex h-9 w-full bg-base-100 rounded-lg border border-border px-3 py-1 text-sm shadow-sm transition-colors max-w-sm items-center gap-1.5 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40",
     {
         variants: {
             variant: {
-                default: "bg-accent focus-visible:ring-none border-none ",
+                default: "bg-base-100 border-none ",
                 outline: "bg-base-100 focus-visible:ring-accent focus-visible:ring-1",
-                error: 'focus-visible:ring-error focus-visible:ring-1',
-                success: 'focus-visible:ring-success focus-visible:ring-1',
+                error: "ring-error ring-1",
+                success: "focus-visible:ring-success focus-visible:ring-1",
             }
 
         },

@@ -1,19 +1,15 @@
-"use client"
+"use client";
 import { useVoteCart } from "@/hooks/useVoteCart";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import UplinkImage from "@/lib/UplinkImage";
 import { ContractID, ChannelTokenWithUserBalance } from "@/types/channel";
-import { HiPhoto, HiPlus, HiSparkles, HiTrash } from "react-icons/hi2";
+import { HiSparkles, HiTrash } from "react-icons/hi2";
 import { Input } from "../DesignKit/Input";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
-import { useEffect, useMemo } from "react";
 import { TbLoader2 } from "react-icons/tb";
-import { useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
-import { useChannel } from "@/hooks/useChannel";
 import { RenderTransportLayerState } from "./SidebarUtils";
 import { Button } from "../DesignKit/Button";
 import { maxUint64 } from "viem";
-import { PiInfinity, PiInfinityBold } from "react-icons/pi";
 import { BiInfinite, BiSolidChevronsRight } from "react-icons/bi";
 import { Drawer } from "vaul";
 
@@ -76,7 +72,6 @@ const ProposedVoteCard = ({ proposedVote, updateProposedVote, removeProposedVote
             </div>
             <div className="flex flex-col bg-base-100 w-[30%]">
                 <Button
-                    //className="btn btn-ghost btn-active w-full ml-auto text-error rounded-none rounded-tr-lg"
                     variant="destructive"
                     className="rounded-none rounded-tr-lg h-[50%]"
                     onClick={() => { removeProposedVote(proposedVote.tokenId) }}
@@ -206,7 +201,7 @@ const LockedVotes = ({ currentHoldings, isLoading }: { currentHoldings: Array<Ch
 const ProposedVotes = ({ proposedVotes, updateProposedVote, removeProposedVote }) => {
     if (proposedVotes.length > 0) return (
         <div className="flex flex-col">
-            <h2 className="font-lg font-bold p-2">In progress</h2>
+            <h2 className="font-bold p-2">In progress</h2>
             <div className="flex flex-col gap-2 p-2 max-h-[30vh] overflow-y-auto">
                 {proposedVotes.map((proposedVote: ChannelTokenWithUserBalance, idx: number) => (
                     <ProposedVoteCard

@@ -1,12 +1,12 @@
 {
   "extends": [
-    "next/core-web-vitals",
+    "next/core-web-vitals"
     //"eslint:recommended",
-    "plugin:tailwindcss/recommended"
+    //"plugin:tailwindcss/recommended"
   ],
   "plugins": [
     //"unused-imports", 
-    "tailwindcss"
+    //"tailwindcss"
   ],
   "rules": {
     // "unused-imports/no-unused-imports": "error",
@@ -19,6 +19,6 @@
     //     "argsIgnorePattern": "^_"
     //   }
     // ],
-    "tailwindcss/no-custom-classname": "error"
+    //"tailwindcss/no-custom-classname": "error"
   }
 }

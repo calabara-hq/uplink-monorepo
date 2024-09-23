@@ -4,6 +4,21 @@ import { clientByChainId } from '../utils/transmissions.js'
 import { formatGqlTokens, TOKEN_FRAGMENT } from '@tx-kit/sdk/subgraph'
 import { gql } from '@urql/core'
 import { V2TokenPage } from '../types.js'
+import { dbGetUserManagedSpaces } from '../utils/database.js'
+
+
+
+export const getUserManagedSpaces = async (req: Request, res: Response, next: NextFunction) => {
+    const userAddress = req.query.userAddress as string
+
+    try {
+        const response = await dbGetUserManagedSpaces(userAddress)
+        console.log(response)
+        res.send(response).status(200)
+    } catch (err) {
+        next(err)
+    }
+}
 
 export const getUserOwnedTokens = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -15,40 +30,6 @@ export const getUserOwnedTokens = async (req: Request, res: Response, next: Next
 
     try {
         const { downlinkClient } = clientByChainId(chainId)
-
-        // const where = {
-        //     holders_: { user_contains: userAddress.toLowerCase() },
-        //     ... (contractAddress ? { channel_: { id: contractAddress.toLowerCase() } } : {})
-        // }
-
-        // const data = await downlinkClient.customQuery(
-        //     gql`
-        //         query($pageSize: Int!, $skip: Int!, $where: Token_filter!) {
-        //             tokens (
-        //                 first: $pageSize,
-        //                 skip: $skip,
-        //                 where: $where
-        //             ) {
-        //                 ...TokenFragment
-        //             }
-        //         }
-        //         ${TOKEN_FRAGMENT}
-        //     `,
-        //     { pageSize: pageSize + 1, skip, where }
-        // )
-        //     .then(result => formatGqlTokens(result.tokens))
-
-        // const pageData = data.slice(0, pageSize)
-        // const resolvedTokens = pageData //await Promise.all(pageData.map(parseV2Metadata))
-
-
-        // const response: V2TokenPage = {
-        //     data: resolvedTokens,
-        //     pageInfo: {
-        //         endCursor: pageData.length,
-        //         hasNextPage: data.length > pageSize
-        //     }
-        // }
 
         const where = {
             ... (contractAddress ? { token_: { channel_contains: contractAddress.toLowerCase() } } : {})
@@ -98,7 +79,6 @@ export const getUserOwnedTokens = async (req: Request, res: Response, next: Next
         res.send(response).status(200)
 
     } catch (err) {
-        console.log(err)
         next(err)
     }
 }
