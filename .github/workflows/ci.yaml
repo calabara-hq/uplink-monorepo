@@ -47,7 +47,7 @@ jobs:
           run: echo "${{ steps.bump_tag.outputs.new_tag }}" > version.txt
           
         - name: Upload version artifact
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v4
           with:
             name: version
             path: version.txt
@@ -97,7 +97,7 @@ jobs:
           location: ${{ env.GKE_ZONE }}
           
       - name: Download version artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: version
 
@@ -120,7 +120,7 @@ jobs:
           -f ./uplink-charts/values.staging.yaml --set image_version_tag=${{ steps.read_version.outputs.version }}
           
       - name: Upload chart artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: chart
           path: uplink-hub/helm/uplink-charts-0.1.0.tgz
@@ -165,7 +165,7 @@ jobs:
           location: ${{ env.GKE_ZONE }}
 
       - name: Download version artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: version
 
@@ -174,7 +174,7 @@ jobs:
         run: echo "::set-output name=version::$(cat version.txt)"
         
       - name: Download chart artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: chart 
           path: uplink-hub/helm
