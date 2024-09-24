@@ -66,7 +66,6 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
     const contractId = concatContractID({ chainId: chainId, contractAddress: channelAddress })
     useTransmissionsErrorHandler(error);
 
-
     const { trigger, data: swrData, error: swrError, isMutating: isSwrMutating, reset: resetSwr } = useSWRMutation(
         `/api/insertChannel/${contractId}`,
         insertChannel,
@@ -172,9 +171,9 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
                     <InteractionLogic mode="vote" interactionLogic={{ ...voterRules, chainId }} setInteractionLogic={setVoterRules} />
                 </div>
                 <div className="flex flex-col gap-6 rounded-lg p-2 border border-border bg-base-100 h-fit w-full">
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4">
                         <Info className="bg-base-200 text-t2">
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 text-sm">
                                 <p>
                                     After the voting period, the contest can be settled. Settling will distribute the rewards. <b>Anyone</b> can settle the contest after voting ends.</p>
                                 <p>If you need to rescue the funds, you must do so before the voting period ends.</p>
