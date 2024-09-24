@@ -39,7 +39,7 @@ const BannerSection = () => {
             </p> */}
             {/* Buttons */}
             {/* <p className="text-t2 text-2xl">Multiplayer tools for a more fun and fair internet</p> */}
-            <Link href="/spacebuilder/create?referral=home" passHref>
+            <Link href="/spacebuilder/create?referral=home" passHref className="w-fit">
               <Button variant="secondary" className="w-fit" size={"lg"}>Add your organization</Button>
             </Link>
 
@@ -146,21 +146,6 @@ const BannerSection = () => {
                       Vinnie Hager x Nouns contest
                     </div>
                   </div>
-                  {/* <div className="w-full h-0.5 bg-border"></div>
-                  <div className="flex items-center justify-start w-full">
-                    <HiPhoto className="w-5 h-5 opacity-50" />
-                    <BiPlusCircle className="w-5 h-5 opacity-50 ml-auto mr-2" />
-                    <button
-                      className="btn btn-xs btn-primary normal-case"
-                      disabled
-                    >
-                      Submitting
-                      <div
-                        className="text-xs ml-1 inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                        role="status"
-                      />
-                    </button>
-                  </div> */}
                 </div>
               </div>
             </div>
@@ -215,7 +200,7 @@ export default async function Page() {
                     <div className="items-center justify-center">
                       <RenderMintMedia imageURI="https://uplink.mypinata.cloud/ipfs/QmTzwdiWEbgo2AmRMtn1AsHQed4XyJvieYsaNwYEDY8ivP" animationURI="" />
                     </div>
-                    <div className="bg-black items-start flex flex-col gap-8 relative">
+                    <div className="items-start flex flex-col gap-8 relative">
                       <div className="flex flex-col gap-2">
                         <p className="line-clamp-3 font-bold text-lg break-all">Based Management</p>
                         <div className="flex items-center text-sm text-t2 bg-base rounded-lg p-1 pr-2 w-fit">

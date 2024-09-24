@@ -54,9 +54,6 @@ export default async function Page({
             <ContestHeadingV2 space={space} contractId={params.contractId} contestMetadata={{ ...channel.tokens[0].metadata, type: 'uplink-v2' }} />
             <Suspense fallback={<PostSkeleton />}>
                 <Posts spaceName={params.name} contractId={params.contractId} />
-                <div className="h-screen bg-blue-800" />
-                <div className="h-screen bg-blue-800" />
-                <div className="h-screen bg-blue-800" />
             </Suspense>
         </div>
     );

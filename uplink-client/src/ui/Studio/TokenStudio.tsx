@@ -54,6 +54,8 @@ export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }
     const { chain } = useAccount();
     const editorRef = useRef(null);
 
+    useEffect(() => { console.log(txError) }, [txError])
+
     useTransmissionsErrorHandler(txError);
 
     useEffect(() => {

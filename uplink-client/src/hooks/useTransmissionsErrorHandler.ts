@@ -36,6 +36,10 @@ export const useTransmissionsErrorHandler = (error: any) => {
                 toast.error("This contest has already been settled")
             }
 
+            if (err.includes("InsufficientInteractionPower()")) {
+                toast.error("Insufficient interaction credits")
+            }
+
         }
     }, [error])
 
