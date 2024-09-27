@@ -527,9 +527,7 @@ export const getSingleTokenIntent = async (req: Request, res: Response, next: Ne
     }
 }
 
-
-export const insertChannelTokenIntent = async (req: ContexedRequest, res: Response, next: NextFunction) => {
-
+export const insertChannelTokenIntent = async (req: Request, res: Response, next: NextFunction) => {
     const contractId = req.body.contractId as string
     const tokenIntent = req.body.tokenIntent
 
@@ -537,28 +535,60 @@ export const insertChannelTokenIntent = async (req: ContexedRequest, res: Respon
 
         const { chainId, contractAddress } = splitContractID(contractId)
 
-        const user = await authorizationController.getUser(req.context)
-        if (!user) throw new AuthorizationError('UNAUTHORIZED')
+        // const user = await authorizationController.getUser(req.context)
+        // if (!user) throw new AuthorizationError('UNAUTHORIZED')
 
         const channel = await dbGetChannel(contractAddress, chainId)
         if (!channel) throw new NotFoundError('Channel not found')
 
-        await dbInsertTokenIntent({
+        const intentId = await dbInsertTokenIntent({
             spaceId: channel.spaceId,
-            author: user.address,
+            author: tokenIntent.author,
             channelId: channel.id,
             chainId: channel.chainId,
             channelAddress: channel.channelAddress,
             tokenIntent: JSON.stringify(tokenIntent),
             deadline: tokenIntent.intent.message.deadline
         })
-        res.send({ success: true }).status(200)
+        res.send({ success: true, id: intentId }).status(200)
     } catch (err) {
         console.log(err)
         next(err)
     }
-
 }
+
+
+// export const insertChannelTokenIntent = async (req: ContexedRequest, res: Response, next: NextFunction) => {
+
+//     const contractId = req.body.contractId as string
+//     const tokenIntent = req.body.tokenIntent
+
+//     try {
+
+//         const { chainId, contractAddress } = splitContractID(contractId)
+
+//         const user = await authorizationController.getUser(req.context)
+//         if (!user) throw new AuthorizationError('UNAUTHORIZED')
+
+//         const channel = await dbGetChannel(contractAddress, chainId)
+//         if (!channel) throw new NotFoundError('Channel not found')
+
+//         await dbInsertTokenIntent({
+//             spaceId: channel.spaceId,
+//             author: user.address,
+//             channelId: channel.id,
+//             chainId: channel.chainId,
+//             channelAddress: channel.channelAddress,
+//             tokenIntent: JSON.stringify(tokenIntent),
+//             deadline: tokenIntent.intent.message.deadline
+//         })
+//         res.send({ success: true }).status(200)
+//     } catch (err) {
+//         console.log(err)
+//         next(err)
+//     }
+
+// }
 
 
 export const fulfillChannelTokenIntent = async (req: ContexedRequest, res: Response, next: NextFunction) => {

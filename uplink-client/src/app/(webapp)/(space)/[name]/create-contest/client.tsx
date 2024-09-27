@@ -26,6 +26,8 @@ import { isNativeToken } from "@/types/token";
 import { ChainId } from "@/types/chains";
 import { Info } from "@/ui/DesignKit/Info";
 import { SectionWrapper } from "@/ui/ChannelSettings/Utils";
+import { getChainName } from "@/lib/chains/supportedChains";
+import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
 
 
 const WaitForNewChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
@@ -164,6 +166,12 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
                             <ChainSelect chainId={chainId} setChainId={setChainId} />
                         </SectionWrapper>
                     </DevModeOnly>
+                    <SectionWrapper title="Network">
+                        <div className="flex flex-row items-center gap-2">
+                            <p className="font-bold">{getChainName(chainId)}</p>
+                            <ChainLabel chainId={chainId} px={20} />
+                        </div>
+                    </SectionWrapper>
                     <Metadata metadata={metadata} setMetadata={setMetadata} />
                     <Rewards rewards={{ ...rewards, chainId }} setRewards={setRewards} />
                     <Deadlines deadlines={deadlines} setDeadlines={setDeadlines} />

@@ -343,9 +343,9 @@ export const ManageModalContent = ({ token, contractId, handleClose }: { token: 
     return (
         <div className="flex flex-col w-full gap-1 lg:gap-4 p-0 max-w-[350px]">
             <h2 className="text-t1 text-xl font-bold">Manage Post</h2>
-            <Boundary size="small">
+            <div className="bg-base-200 rounded-lg p-2">
                 <p>Once deleted, this post will be gone forever. Type <b>delete</b> if you understand</p>
-            </Boundary>
+            </div>
             <div className="flex flex-row items-center">
                 <Input
                     variant="outline"

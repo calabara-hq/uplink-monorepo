@@ -9,7 +9,7 @@ export const insertIntent = async (url,
     }: {
         url: string
         arg: {
-            csrfToken: string
+            //csrfToken: string
             contractId: ContractID
             tokenIntent: DeferredTokenIntentWithSignature
         }
@@ -19,7 +19,7 @@ export const insertIntent = async (url,
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRF-TOKEN": arg.csrfToken,
+            //"X-CSRF-TOKEN": arg.csrfToken,
         },
         credentials: "include",
         body: JSON.stringify({

@@ -1,5 +1,5 @@
 import { startTransition } from "react";
-import { revalidateDataCache } from "./actions";
+import { revalidateDataCache } from "./(webapp)/actions";
 import { ContractID } from "@/types/channel";
 
 export const mutateSpaceContests = (spaceName: string) => {

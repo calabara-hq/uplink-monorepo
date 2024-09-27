@@ -25,6 +25,9 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@/webapp/*": [
+        "./src/app/(webapp)/*"
+      ],
       "@/*": [
         "./src/*"
       ]

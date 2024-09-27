@@ -32,12 +32,6 @@ export const erc1967ProxyImplementationSlot =
 const willSponsor = async ({ chainId, entrypoint, userOp }: { chainId: number, entrypoint: string, userOp: UserOperation<"v0.6"> }) => {
     // check chain id
 
-    console.log(chainId)
-    console.log(typeof chainId)
-
-    console.log(chainId === base.id);
-    console.log(chainId === baseSepolia.id);
-
     if (chainId !== baseSepolia.id && chainId !== base.id) return false;
 
     // check entrypoint
@@ -56,8 +50,7 @@ const willSponsor = async ({ chainId, entrypoint, userOp }: { chainId: number, e
             // no code at address, check that the initCode is deploying a Coinbase Smart Wallet
             // factory address is first 20 bytes of initCode after '0x'
             const factoryAddress = userOp.initCode.slice(0, 42);
-            console.log(factoryAddress.toLowerCase())
-            console.log(coinbaseSmartWalletFactoryAddress.toLowerCase())
+
             if (factoryAddress.toLowerCase() !== coinbaseSmartWalletFactoryAddress.toLowerCase())
                 return false;
         } else {

@@ -9,7 +9,7 @@ import useMe from "@/hooks/useMe";
 import { useVote } from "@/hooks/useVote";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
 import { MdOutlineCancelPresentation } from "react-icons/md";
-import { MintButton, ShareButton, ShareModalContent, AddToCartButton } from "@/app/submission/[submissionId]/client";
+import { MintButton, ShareButton, ShareModalContent, AddToCartButton } from "@/webapp/submission/[submissionId]/client";
 import { useSession } from "@/providers/SessionProvider";
 import ExpandedSubmission from "./ExpandedSubmission";
 import { Button } from "../DesignKit/Button";

@@ -128,6 +128,12 @@ export const useCreateTokenReducer = (channelAddress: string) => {
         })
     }
 
+    const setErrors = (formattedErrors) => {
+        dispatch({
+            type: "SET_ERRORS",
+            payload: formattedErrors
+        })
+    }
 
     const validate = async (markdown: string) => {
 
@@ -140,11 +146,7 @@ export const useCreateTokenReducer = (channelAddress: string) => {
 
         if (!result.success) {
             const formattedErrors = (result as z.SafeParseError<typeof CreateTokenSchema>).error.format();
-            console.log(formattedErrors)
-            dispatch({
-                type: "SET_ERRORS",
-                payload: formattedErrors
-            })
+            setErrors(formattedErrors);
         }
 
         return result;
@@ -154,6 +156,7 @@ export const useCreateTokenReducer = (channelAddress: string) => {
     return {
         state,
         setField,
+        setErrors,
         validate,
         isIntent,
         setIsIntent,

@@ -130,7 +130,7 @@ export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }
 
         try {
             await trigger({
-                csrfToken: session.csrfToken,
+                //csrfToken: session.csrfToken,
                 contractId: contractId,
                 tokenIntent: txResponse as DeferredTokenIntentWithSignature
             }).then(response => {

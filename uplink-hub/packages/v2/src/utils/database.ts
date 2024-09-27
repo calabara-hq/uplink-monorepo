@@ -252,7 +252,8 @@ export const dbInsertTokenIntent = async ({
         banned: 0
     }
 
-    await db.insert(schema.tokenIntents).values(newTokenIntent)
+    const result = await db.insert(schema.tokenIntents).values(newTokenIntent)
+    return result.insertId
 }
 
 export const dbBanTokenIntent = async ({ channelAddress, chainId, tokenIntentId }: { channelAddress: string, chainId: number, tokenIntentId: string }) => {

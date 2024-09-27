@@ -1,4 +1,4 @@
-import SpaceForm from "@/app/spacebuilder/SpaceForm";
+import SpaceForm from "@/webapp/spacebuilder/SpaceForm";
 
 export default function Page({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
 

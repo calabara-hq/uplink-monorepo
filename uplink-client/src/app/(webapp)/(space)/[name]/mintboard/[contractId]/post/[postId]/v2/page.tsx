@@ -43,10 +43,10 @@ export async function generateMetadata({
     }
 
     return {
-        title: `${author}`,
+        title: `Mint ${token.metadata.name} on uplink`,
         description: `Mint ${token.metadata.name} on uplink`,
         openGraph: {
-            title: `${author}`,
+            title: `Mint ${token.metadata.name} on uplink`,
             description: `Mint ${token.metadata.name} on uplink`,
             images: [
                 {

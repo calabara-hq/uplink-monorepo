@@ -110,7 +110,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
           </div>
           <div className="flex flex-col gap-0.5 justify-end items-start lg:items-center pt-4">
             <CardHeader className="p-0 pt-2 lg:pt-2 text-left lg:text-center">
-              <CardTitle>{displayName}</CardTitle>
+              <CardTitle className="p-0 lg:p-2">{displayName}</CardTitle>
             </CardHeader>
             <CardContent className="p-0 pt-2 flex-col gap-2">
 
@@ -128,7 +128,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
                 >
                   <Button variant="link" className="flex gap-2 items-center p-0 h-fit">
                     <BiLink className="w-5 h-5" />
-                    {website.includes("http") ? website.split("//")[1] : website}
+                    {website.includes("http") ? website.split("//")[1].split('/')[0] : website.split('/')[0]}
                   </Button>
                 </Link>
               )}

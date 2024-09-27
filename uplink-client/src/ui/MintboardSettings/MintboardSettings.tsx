@@ -352,6 +352,13 @@ export const MintboardSettings = ({
                     <ChainSelect chainId={state.chainId} setChainId={(val) => setField("chainId", val)} />
                 </div>
             </DevModeOnly>
+            <div className="flex flex-col gap-2 bg-base-200 w-full p-6 rounded-lg border border-border">
+                <h1 className="text-xl font-bold text-t1">Network</h1>
+                <div className="flex flex-row items-center gap-2">
+                    <p className="font-bold">{getChainName(state.chainId)}</p>
+                    <ChainLabel chainId={state.chainId} px={20} />
+                </div>
+            </div>
             {/*<-- metadata -->*/}
             <div className="flex flex-col gap-2 bg-base-200 w-full p-6 rounded-lg border border-border">
                 <h1 className="text-xl font-bold text-t1">Details</h1>

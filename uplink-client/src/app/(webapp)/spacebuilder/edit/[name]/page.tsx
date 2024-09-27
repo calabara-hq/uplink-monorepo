@@ -1,4 +1,4 @@
-import SpaceForm from "@/app/spacebuilder/SpaceForm";
+import SpaceForm from "@/webapp/spacebuilder/SpaceForm";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { Admin } from "@/types/space";
 

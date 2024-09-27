@@ -9,13 +9,13 @@ import {
   validateSpaceBuilderProps,
   createSpace,
   editSpace,
-} from "@/app/spacebuilder/spaceHandler";
+} from "@/webapp/spacebuilder/spaceHandler";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import WalletConnectButton from "../../ui/ConnectButton/WalletConnectButton";
+import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
 import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
-import { mutateSpaces } from "../mutate";
+import { mutateSpaces } from "../../mutate";
 import { AvatarUpload } from "@/ui/MediaUpload/AvatarUpload";
 import { Label } from "@/ui/DesignKit/Label";
 import { Input } from "@/ui/DesignKit/Input";

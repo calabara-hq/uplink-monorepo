@@ -48,11 +48,30 @@ const config = getDefaultConfig({
   ],
 })
 
-export default function WalletProvider({
+
+export const SimpleWalletProvider = ({ children }) => {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider
+          theme={darkTheme()}
+          modalSize="compact"
+        // avatar={(user) => <UserAvatar user={user} size={160} styleOverride="flex items-center rounded-full overflow-hidden p-2.5" />}
+        >
+          <TxProvider>
+            {children}
+          </TxProvider>
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+}
+
+const WalletProvider = ({
   children,
   session,
   refetchInterval,
-}: any) {
+}: IWalletProviderProps) => {
 
   return (
     <WagmiProvider config={config}>
@@ -78,3 +97,5 @@ export default function WalletProvider({
     </WagmiProvider>
   );
 }
+
+export default WalletProvider;
