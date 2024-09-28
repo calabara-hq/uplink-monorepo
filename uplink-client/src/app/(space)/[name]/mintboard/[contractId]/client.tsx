@@ -93,7 +93,7 @@ export const MintFeeDonut = ({ channelFees, chainId, spaceName }: { channelFees:
 
                 <div className="flex items-center gap-2 w-[500px] max-w-full">
                     {chartData.map((el, idx) => (
-                        <TooltipProvider delayDuration={200}>
+                        <TooltipProvider delayDuration={200} key={idx}>
                             <div
                                 className="h-6 md:h-12"
                                 style={{
