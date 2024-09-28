@@ -63,7 +63,7 @@ export const MintButton = ({ onClick, styleOverride }: { onClick: (event?) => vo
     )
 }
 
-export const CardFooter = ({
+export const TokenCardFooter = ({
     token,
     channel,
     handleManage,
@@ -103,7 +103,7 @@ export const CardFooter = ({
 }
 
 
-export const Card = ({ token, footer, showTotalMints = true }: { token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, footer: React.ReactNode, showTotalMints?: boolean }) => {
+export const TokenCard = ({ token, footer, showTotalMints = true }: { token: ChannelToken | ChannelTokenV1 | ChannelTokenIntent, footer: React.ReactNode, showTotalMints?: boolean }) => {
     const [isActive, setIsActive] = useState(false);
     const isMobileDevice = isMobile();
 

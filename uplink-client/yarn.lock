@@ -21007,7 +21007,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recharts@npm:^2.11.0":
+"recharts@npm:^2.12.7":
   version: 2.12.7
   resolution: "recharts@npm:2.12.7"
   dependencies:
@@ -24117,7 +24117,7 @@ __metadata:
     react-markdown: "npm:^9.0.1"
     react-virtualized: "npm:^9.22.5"
     react-virtualized-auto-sizer: "npm:^1.0.24"
-    recharts: "npm:^2.11.0"
+    recharts: "npm:^2.12.7"
     sanitize-html: "npm:^2.11.0"
     sharp: "npm:^0.33.4"
     storybook: "npm:^7.4.5"
