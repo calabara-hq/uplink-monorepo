@@ -14,7 +14,7 @@ import { parseIpfsUrl } from "@/lib/ipfs";
 import { Space } from "@/types/space";
 import { fetchFeaturedTokens } from "@/lib/fetch/fetchTokensV2";
 import { AddressOrEns, Avatar } from "@/ui/AddressDisplay/AddressDisplay";
-import { Card as TokenCard } from "@/ui/Token/Card";
+import { TokenCard } from "@/ui/Token/Card";
 import { Button } from "@/ui/DesignKit/Button";
 
 export const metadata: Metadata = {

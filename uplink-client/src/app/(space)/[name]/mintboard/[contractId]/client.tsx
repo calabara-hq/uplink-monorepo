@@ -10,7 +10,7 @@ import {
 } from "@/types/channel";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts, usePaginatedMintBoardPostsV1, usePaginatedPopularTokens } from "@/hooks/useTokens";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Card, CardFooter } from "@/ui/Token/Card";
+import { TokenCard, TokenCardFooter } from "@/ui/Token/Card";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
 import { useInView } from "react-intersection-observer";
 import { ManageModalContent } from "@/ui/Token/MintUtils";
@@ -21,14 +21,25 @@ import OnchainButton from "@/ui/OnchainButton/OnchainButton";
 import { TbLoader2 } from "react-icons/tb";
 import { useUpgradeChannel } from "@tx-kit/hooks";
 import toast from "react-hot-toast";
-import { Address } from "viem";
+import { Address, formatEther, formatUnits } from "viem";
 import { HiCheckBadge } from "react-icons/hi2";
 import { useMonitorChannelUpgrades } from "@/hooks/useMonitorChannelUpgrades";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { Button } from "@/ui/DesignKit/Button";
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/ui/DesignKit/Dialog";
+import { Bar, BarChart, CartesianGrid, Cell, Label, Pie, PieChart, PolarRadiusAxis, XAxis, YAxis } from "recharts"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/ui/DesignKit/Chart';
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts"
+import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/ui/DesignKit/Card";
+import { CardHeader } from "@/ui/DesignKit/Card";
+import { crimsonDark } from '@radix-ui/colors'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/DesignKit/Tooltip";
+import { useTokenInfo } from "@/hooks/useTokenInfo";
+import { ChainId } from "@/types/chains";
+import formatOrdinals from "@/lib/formatOrdinals";
 
+const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
 export const PostSkeleton = () => {
     return (
@@ -44,6 +55,200 @@ export const PostSkeleton = () => {
         </div>
     );
 }
+
+
+export const MintFeeDonut = ({ channelFees, chainId, spaceName }: { channelFees: Channel["fees"], chainId: ChainId, spaceName: string }) => {
+
+    const normalizeRecipient = (recipient: string) => {
+        return recipient
+            .toLowerCase()
+            .replace(/\s+/g, ''); // Lowercase and remove spaces to match keys in chartConfig
+    };
+
+    const { symbol, decimals } = useTokenInfo(channelFees.fees.erc20Contract, chainId)
+
+    const chartData = [
+        { recipient: "Creator", percentage: channelFees.fees.creatorPercentage, fill: crimsonDark.crimson12 },
+        { recipient: "Referral", percentage: channelFees.fees.mintReferralPercentage, fill: crimsonDark.crimson11 },
+        { recipient: "Sponsor", percentage: channelFees.fees.sponsorPercentage, fill: crimsonDark.crimson10 },
+        { recipient: "Protocol", percentage: channelFees.fees.uplinkPercentage, fill: crimsonDark.crimson9 },
+        { recipient: spaceName, percentage: channelFees.fees.channelPercentage, fill: crimsonDark.crimson8 },
+    ];
+
+    const formatErc20Amount = (amount: bigint) => {
+        return formatUnits(amount, decimals)
+    }
+
+
+    return (
+        <Card className="bg-base-100 p-2 lg:p-4">
+            <CardHeader className="p-2">
+                <CardTitle>Mint fee splits</CardTitle>
+                <CardDescription className="text-t2">
+                    {formatEther(channelFees.fees.ethMintPrice)} ETH
+                    {symbol ? ` / ${formatErc20Amount(channelFees.fees.erc20MintPrice)} ${symbol}` : null}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="p-2">
+
+                <div className="flex items-center gap-2 w-[500px] max-w-full">
+                    {chartData.map((el, idx) => (
+                        <TooltipProvider delayDuration={200}>
+                            <div
+                                className="h-6 md:h-12"
+                                style={{
+                                    width: `${el.percentage * 3}%`,  // Dynamically set width based on percentage
+                                    backgroundColor: el.fill,  // Use the fill color from your data
+                                }}
+                            >
+                                <Tooltip key={idx}>
+                                    <TooltipTrigger className="w-full h-full">
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <div className="bg-base-300 border border-border rounded-lg p-4 font-bold">
+                                            <p>{el.recipient}: {el.percentage}%</p>
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </div>
+
+
+                        </TooltipProvider>
+                    ))}
+                </div>
+
+            </CardContent>
+            <CardFooter className="p-2">
+
+                <div className="flex items-center flex-wrap gap-2">
+                    {chartData.map((el, idx) => {
+                        return (
+                            <div key={idx} className="flex items-center gap-1">
+                                <div
+                                    className="h-3 w-3"
+                                    style={{ backgroundColor: el.fill }}
+                                />
+                                <p className="text-xs">{el.recipient}</p>
+                            </div>
+                        );
+                    })}
+                </div>
+            </CardFooter>
+        </Card>
+    );
+    // const chartConfig = {
+    //     percentage: {
+    //         label: "Percentage",
+    //     },
+    //     creator: {
+    //         label: "Creator",
+    //         color: crimsonDark.crimson12,
+    //     },
+    //     referral: {
+    //         label: "Referral",
+    //         color: crimsonDark.crimson11,
+    //     },
+    //     sponsor: {
+    //         label: "Sponsor",
+    //         color: crimsonDark.crimson10,
+    //     },
+    //     protocol: {
+    //         label: "Protocol",
+    //         color: crimsonDark.crimson9,
+    //     },
+    //     space: {
+    //         label: "Space",
+    //         color: crimsonDark.crimson8,
+    //     },
+    // } satisfies ChartConfig;
+
+    // return (
+    //     <Card className="rounded-md p-2">
+    //         <CardHeader className="items-center pb-4">
+    //             <CardTitle>Mint fee splits</CardTitle>
+    //         </CardHeader>
+    //         <CardContent className="pb-2 bg-green-400">
+    //             <ChartContainer config={chartConfig} className="bg-green-500 w-full margin-0 p-0">
+    //                 <BarChart
+    //                     accessibilityLayer
+    //                     data={chartData}
+    //                     layout="vertical"
+    //                     className="w-full"
+    //                 // margin={{
+    //                 //     left: 0,
+    //                 // }}
+    //                 >
+    //                     <YAxis
+    //                         dataKey="recipient"
+    //                         type="category"
+    //                         tickLine={false}
+    //                         tickMargin={0}
+    //                         axisLine={false}
+    //                         tickFormatter={(value) => {
+    //                             const normalizedValue = normalizeRecipient(value);
+    //                             return chartConfig[normalizedValue as keyof typeof chartConfig]?.label;
+    //                         }}
+    //                     />
+    //                     <XAxis dataKey="percentage" type="number" hide />
+    //                     <ChartTooltip
+    //                         cursor={false}
+    //                         content={<ChartTooltipContent hideLabel />}
+    //                     />
+    //                     <Bar dataKey="percentage" layout="vertical" radius={2} />
+    //                 </BarChart>
+    //             </ChartContainer>
+    //         </CardContent>
+    //     </Card>
+    // );
+
+    // return (
+    //     <Card>
+    //         <CardHeader>
+    //             <CardTitle>Bar Chart - Mixed</CardTitle>
+    //             <CardDescription>January - June 2024</CardDescription>
+    //         </CardHeader>
+    //         <CardContent>
+    //             <ChartContainer config={chartConfig}>
+    //                 <BarChart
+    //                     accessibilityLayer
+    //                     data={chartData}
+    //                     layout="vertical"
+    //                 // margin={{
+    //                 //     left: 0,
+    //                 // }}
+    //                 >
+    //                     <YAxis
+    //                         dataKey="recipient"
+    //                         type="category"
+    //                         fontSize={16}
+    //                         tickLine={false}
+    //                         tickMargin={1}
+    //                         axisLine={false}
+    //                         tickFormatter={(value) =>
+    //                             chartConfig[value as keyof typeof chartConfig]?.label
+    //                         }
+    //                     />
+    //                     <XAxis dataKey="percentage" type="number" hide />
+    //                     <ChartTooltip
+    //                         cursor={false}
+    //                         content={<ChartTooltipContent hideLabel />}
+    //                     />
+    //                     <Bar dataKey="percentage" layout="vertical" radius={5} />
+    //                 </BarChart>
+    //             </ChartContainer>
+    //         </CardContent>
+    //         <CardFooter className="flex-col items-start gap-2 text-sm">
+    //             <div className="flex gap-2 font-medium leading-none">
+    //                 {/* Trending up by 5.2% this month <TrendingUp className="h-4 w-4" /> */}
+    //             </div>
+    //             <div className="leading-none text-muted-foreground">
+    //                 Showing total visitors for the last 6 months
+    //             </div>
+    //         </CardFooter>
+    //     </Card>
+    // )
+
+};
 
 export const ChannelUpgrades = ({ contractId }: { contractId: ContractID }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -184,11 +389,11 @@ const MapTokens = React.memo(({
                     onClick={(event) => handleMint(event, token)}
                 >
                     <ColorCards imageUrl={parseIpfsUrl(token.metadata.image).gateway}>
-                        <Card
+                        <TokenCard
                             key={index}
                             token={token}
                             footer={
-                                <CardFooter
+                                <TokenCardFooter
                                     token={token}
                                     channel={channel}
                                     handleManage={handleManage}

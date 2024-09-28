@@ -8,13 +8,12 @@ import { Boundary } from '@/ui/Boundary/Boundary';
 import Link from 'next/link';
 import React, { Suspense } from 'react';
 import { unstable_serialize } from 'swr';
-import { ChannelUpgrades, PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents, WhatsNew } from './client';
-import { ContractID, splitContractID } from '@/types/channel';
+import { ChannelUpgrades, MintFeeDonut, PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents, WhatsNew } from './client';
+import { Channel, ContractID, doesChannelHaveFees, splitContractID } from '@/types/channel';
 import { notFound } from 'next/navigation';
 import { MdNewReleases } from 'react-icons/md';
 import { AdminWrapper } from '@/lib/AdminWrapper';
 import { Button } from '@/ui/DesignKit/Button';
-
 
 const BoardInfoSkeleton = () => {
     return (
@@ -36,7 +35,6 @@ const BoardInfo = async ({ spaceName, contractId }: { spaceName: string, contrac
     const space_promise = fetchSingleSpace(spaceName)
 
     const [channel, space] = await Promise.all([channel_promise, space_promise])
-
     const ipfsData = await fetch(parseIpfsUrl(channel.uri).gateway).then(res => res.json())
 
     const fallback = {
@@ -44,37 +42,72 @@ const BoardInfo = async ({ spaceName, contractId }: { spaceName: string, contrac
     };
 
     return (
-        <SwrProvider fallback={fallback}>
-            <div className="flex flex-col gap-2 ">
-                <h1 className="font-bold text-3xl text-t1">{channel.name}</h1>
-                <div className="flex flex-row gap-2 items-center">
-                    <Link
-                        className="relative w-8 h-8 flex flex-col"
-                        href={`/${spaceName}`}
-                        draggable={false}
-                    >
-                        <UplinkImage
-                            src={space.logoUrl}
-                            alt="Org Avatar"
-                            fill
-                            className="rounded-full object-cover"
-                        />
-                    </Link>
-                    <Link
-                        className="text-sm text-t2 hover:underline hover:text-t1"
-                        href={`/${spaceName}`}
-                        draggable={false}
-                    >
-                        {space.displayName}
-                    </Link>
+        <div className="grid grid-cols-1 md:grid-cols-[auto_40%] gap-6 w-full">
+            <SwrProvider fallback={fallback}>
+                <div className="flex flex-col gap-2 ">
+                    <h1 className="font-bold text-3xl text-t1">{channel.name}</h1>
+                    <div className="flex flex-row gap-2 items-center">
+                        <Link
+                            className="relative w-8 h-8 flex flex-col"
+                            href={`/${spaceName}`}
+                            draggable={false}
+                        >
+                            <UplinkImage
+                                src={space.logoUrl}
+                                alt="Org Avatar"
+                                fill
+                                className="rounded-full object-cover"
+                            />
+                        </Link>
+                        <Link
+                            className="text-sm text-t2 hover:underline hover:text-t1"
+                            href={`/${spaceName}`}
+                            draggable={false}
+                        >
+                            {space.displayName}
+                        </Link>
+                    </div>
+                    <p className="text-t2 whitespace-pre-line">
+                        {ipfsData.description}
+                    </p>
                 </div>
-                <p className="text-t2 whitespace-pre-line">
-                    {ipfsData.description}
-                </p>
+            </SwrProvider>
+            <div className="flex flex-col gap-4 h-full w-full md:max-w-[320px] ml-auto">
+                <AdminWrapper admins={space.admins}>
+                    <Boundary size="small" labels={["Admin"]}>
+                        <div className="flex flex-col gap-4">
+                            <div className="flex flex-row justify-between items-center text-t1">
+                                Manage settings
+                                <Link href={`/${spaceName}/mintboard/${contractId}/edit`} passHref>
+                                    <Button variant="outline">
+                                        Edit
+                                    </Button>
+                                </Link>
+                            </div>
+                            <ChannelUpgrades contractId={contractId} />
+                        </div>
+                    </Boundary>
+                </AdminWrapper>
+                {doesChannelHaveFees(channel) && (
+
+                    <MintFeeDonut channelFees={channel.fees} chainId={channel.chainId} spaceName={space.displayName} />
+
+                )}
+                <Link
+                    href={`/${spaceName}/mintboard/${contractId}/studio`}
+                    className="w-full ml-auto"
+                    passHref
+                >
+                    <Button className="ml-auto w-full">
+                        Post
+                    </Button>
+                </Link>
             </div>
-        </SwrProvider>
+        </div>
     );
 };
+
+
 
 const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
 
@@ -246,18 +279,15 @@ export default async function Page({
 
     return (
         <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4 md:p-0">
-            <div className="grid grid-cols-1 md:grid-cols-[auto_35%] gap-8 w-full">
-                <div className="flex flex-col gap-2">
-                    <Suspense fallback={<BoardInfoSkeleton />}>
-                        <BoardInfo spaceName={spaceName} contractId={contractId} />
-                    </Suspense>
-                </div>
-                <div className="flex flex-col gap-4">
+
+            <Suspense fallback={<BoardInfoSkeleton />}>
+                <BoardInfo spaceName={spaceName} contractId={contractId} />
+            </Suspense>
+            {/* <div className="flex flex-col gap-4">
                     <Suspense fallback={<CreatePostSkeleton />}>
                         <CreatePostButton spaceName={spaceName} contractId={contractId} />
                     </Suspense>
-                </div>
-            </div>
+                </div> */}
             <div className="flex flex-col gap-1">
                 <PageFilter
                     spaceName={spaceName}
