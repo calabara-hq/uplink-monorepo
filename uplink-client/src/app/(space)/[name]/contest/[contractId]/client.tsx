@@ -2,7 +2,7 @@
 import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, isTokenV1Onchain, splitContractID } from "@/types/channel";
 import { usePaginatedFinitePosts } from "@/hooks/useTokens";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Card, CardFooter } from "@/ui/Token/Card";
+import { TokenCard, TokenCardFooter } from "@/ui/Token/Card";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
 import { useInView } from "react-intersection-observer";
 import { ManageModalContent } from "@/ui/Token/MintUtils";
@@ -76,11 +76,11 @@ const MapTokens = React.memo(({
                 >
                     <ColorCards imageUrl={parseIpfsUrl(token.metadata.image).gateway}>
                         <WinnerWrapper token={token}>
-                            <Card
+                            <TokenCard
                                 key={index}
                                 token={token}
                                 footer={
-                                    <CardFooter
+                                    <TokenCardFooter
                                         token={token}
                                         channel={{ ...channel, managers: [...channel.managers, channel.admin] }}
                                         mintLabel="votes"
