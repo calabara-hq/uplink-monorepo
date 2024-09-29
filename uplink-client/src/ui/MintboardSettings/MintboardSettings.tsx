@@ -1,7 +1,7 @@
 "use client";;
 import MenuSelect, { Option } from "@/ui/OptionSelect/OptionSelect";
 import toast from "react-hot-toast";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import { SettingsStateType } from "@/hooks/useMintboardSettings";
 import { ChainLabel } from "../ContestLabels/ContestLabels";
@@ -40,7 +40,7 @@ export const Options = ({ label, options, selected, onSelect }: { label: string,
 
 }
 
-export const OptionOrCustom = ({ value, label, options, onOptionSelect, customLabel, customChild }: { value: string, label: string, options: Option[], onOptionSelect: (option: Option) => void; customLabel: string; customChild: React.ReactNode }) => {
+export const OptionOrCustom = ({ value, label, options, onOptionSelect, onCustomSelect, customLabel, customChild }: { value: string, label: string, options: Option[], onCustomSelect: () => void; onOptionSelect: (option: Option) => void; customLabel: string; customChild: React.ReactNode }) => {
     const [isCustom, setIsCustom] = useState(value ? value !== "0" : false);
 
     const handleChange = (value: string) => {
@@ -52,7 +52,7 @@ export const OptionOrCustom = ({ value, label, options, onOptionSelect, customLa
     };
 
     const handleCustomChange = () => {
-        onOptionSelect({ value: "100", label: "custom" });
+        onCustomSelect();
         setIsCustom(true);
     };
 
@@ -268,7 +268,7 @@ export const ERC20MintPriceInput = ({ state, setField }) => {
     return (
         <div className="flex flex-col w-full gap-2">
             <Label>
-                {`Mint Price (${symbol})`}
+                {`Mint Price (${symbol ?? "ERC20"})`}
             </Label>
             {state.erc20Contract === zeroAddress ?
                 <Button variant="secondary" onClick={() => setIsModalOpen(true)} className="w-fit">Enable</Button>
@@ -366,12 +366,12 @@ export const MintboardSettings = ({
                     label={"Mint Price"}
                     options={[{ value: "0", label: "Free" }]}
                     onOptionSelect={(option: Option) => {
-                        if (option.label === "Free") {
-                            setField("feeContract", zeroAddress)
-                            setField("ethMintPrice", option.value)
-                        } else {
-
-                        }
+                        setField("feeContract", zeroAddress)
+                        setField("ethMintPrice", option.value)
+                    }}
+                    onCustomSelect={() => {
+                        setField("feeContract", "CUSTOM_FEES_ADDRESS")
+                        setField("ethMintPrice", "0.000111")
                     }}
                     customLabel={"Custom"}
                     customChild={

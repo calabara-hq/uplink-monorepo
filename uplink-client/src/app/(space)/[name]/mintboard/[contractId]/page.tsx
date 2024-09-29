@@ -108,41 +108,6 @@ const BoardInfo = async ({ spaceName, contractId }: { spaceName: string, contrac
 };
 
 
-
-const CreatePostButton = async ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
-
-    const space = await fetchSingleSpace(spaceName);
-
-    return (
-        <div className="flex flex-col gap-4 h-full w-full md:max-w-[320px] ml-auto">
-            <AdminWrapper admins={space.admins}>
-                <Boundary size="small" labels={["Admin"]}>
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-row justify-between items-center text-t1">
-                            Manage settings
-                            <Link href={`/${spaceName}/mintboard/${contractId}/edit`} passHref>
-                                <Button variant="outline">
-                                    Edit
-                                </Button>
-                            </Link>
-                        </div>
-                        <ChannelUpgrades contractId={contractId} />
-                    </div>
-                </Boundary>
-            </AdminWrapper>
-            <Link
-                href={`/${spaceName}/mintboard/${contractId}/studio`}
-                className="w-full ml-auto"
-                passHref
-            >
-                <Button className="ml-auto w-full">
-                    Post
-                </Button>
-            </Link>
-        </div>
-    );
-};
-
 const CreatePostSkeleton = () => {
     return (
         <Boundary size="small">
@@ -278,16 +243,11 @@ export default async function Page({
     if (!contractAddress || !chainId) return notFound();
 
     return (
-        <div className=" flex flex-col gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4 md:p-0">
+        <div className="grid grid-cols-1 gap-6 w-full md:w-10/12 xl:w-9/12 m-auto mt-4 mb-16 p-4 md:p-0">
 
             <Suspense fallback={<BoardInfoSkeleton />}>
                 <BoardInfo spaceName={spaceName} contractId={contractId} />
             </Suspense>
-            {/* <div className="flex flex-col gap-4">
-                    <Suspense fallback={<CreatePostSkeleton />}>
-                        <CreatePostButton spaceName={spaceName} contractId={contractId} />
-                    </Suspense>
-                </div> */}
             <div className="flex flex-col gap-1">
                 <PageFilter
                     spaceName={spaceName}
