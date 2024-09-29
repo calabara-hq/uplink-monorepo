@@ -93,30 +93,29 @@ export const MintFeeDonut = ({ channelFees, chainId, spaceName }: { channelFees:
 
                 <div className="flex items-center gap-2 w-[500px] max-w-full">
                     {chartData.map((el, idx) => (
-                        <TooltipProvider delayDuration={200} key={idx}>
-                            <div
-                                className="h-6 md:h-12"
-                                style={{
-                                    width: `${el.percentage * 3}%`,  // Dynamically set width based on percentage
-                                    backgroundColor: el.fill,  // Use the fill color from your data
-                                }}
-                            >
-                                <Tooltip key={idx}>
-                                    <TooltipTrigger className="w-full h-full">
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <div className="bg-base-300 border border-border rounded-lg p-4 font-bold">
-                                            <p>{el.recipient}: {el.percentage}%</p>
-                                        </div>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </div>
-
-
-                        </TooltipProvider>
+                        el.percentage > 0 && (
+                            <TooltipProvider delayDuration={200} key={idx}>
+                                <div
+                                    className="h-6 md:h-12"
+                                    style={{
+                                        width: `${el.percentage * 5}px`,  // Dynamically set width based on percentage
+                                        backgroundColor: el.fill,  // Use the fill color from your data
+                                    }}
+                                >
+                                    <Tooltip key={idx}>
+                                        <TooltipTrigger className="w-full h-full">
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <div className="bg-base-300 border border-border rounded-lg p-4 font-bold">
+                                                <p>{el.recipient}: {el.percentage}%</p>
+                                            </div>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
+                            </TooltipProvider>
+                        )
                     ))}
                 </div>
-
             </CardContent>
             <CardFooter className="p-2">
 
@@ -136,117 +135,6 @@ export const MintFeeDonut = ({ channelFees, chainId, spaceName }: { channelFees:
             </CardFooter>
         </Card>
     );
-    // const chartConfig = {
-    //     percentage: {
-    //         label: "Percentage",
-    //     },
-    //     creator: {
-    //         label: "Creator",
-    //         color: crimsonDark.crimson12,
-    //     },
-    //     referral: {
-    //         label: "Referral",
-    //         color: crimsonDark.crimson11,
-    //     },
-    //     sponsor: {
-    //         label: "Sponsor",
-    //         color: crimsonDark.crimson10,
-    //     },
-    //     protocol: {
-    //         label: "Protocol",
-    //         color: crimsonDark.crimson9,
-    //     },
-    //     space: {
-    //         label: "Space",
-    //         color: crimsonDark.crimson8,
-    //     },
-    // } satisfies ChartConfig;
-
-    // return (
-    //     <Card className="rounded-md p-2">
-    //         <CardHeader className="items-center pb-4">
-    //             <CardTitle>Mint fee splits</CardTitle>
-    //         </CardHeader>
-    //         <CardContent className="pb-2 bg-green-400">
-    //             <ChartContainer config={chartConfig} className="bg-green-500 w-full margin-0 p-0">
-    //                 <BarChart
-    //                     accessibilityLayer
-    //                     data={chartData}
-    //                     layout="vertical"
-    //                     className="w-full"
-    //                 // margin={{
-    //                 //     left: 0,
-    //                 // }}
-    //                 >
-    //                     <YAxis
-    //                         dataKey="recipient"
-    //                         type="category"
-    //                         tickLine={false}
-    //                         tickMargin={0}
-    //                         axisLine={false}
-    //                         tickFormatter={(value) => {
-    //                             const normalizedValue = normalizeRecipient(value);
-    //                             return chartConfig[normalizedValue as keyof typeof chartConfig]?.label;
-    //                         }}
-    //                     />
-    //                     <XAxis dataKey="percentage" type="number" hide />
-    //                     <ChartTooltip
-    //                         cursor={false}
-    //                         content={<ChartTooltipContent hideLabel />}
-    //                     />
-    //                     <Bar dataKey="percentage" layout="vertical" radius={2} />
-    //                 </BarChart>
-    //             </ChartContainer>
-    //         </CardContent>
-    //     </Card>
-    // );
-
-    // return (
-    //     <Card>
-    //         <CardHeader>
-    //             <CardTitle>Bar Chart - Mixed</CardTitle>
-    //             <CardDescription>January - June 2024</CardDescription>
-    //         </CardHeader>
-    //         <CardContent>
-    //             <ChartContainer config={chartConfig}>
-    //                 <BarChart
-    //                     accessibilityLayer
-    //                     data={chartData}
-    //                     layout="vertical"
-    //                 // margin={{
-    //                 //     left: 0,
-    //                 // }}
-    //                 >
-    //                     <YAxis
-    //                         dataKey="recipient"
-    //                         type="category"
-    //                         fontSize={16}
-    //                         tickLine={false}
-    //                         tickMargin={1}
-    //                         axisLine={false}
-    //                         tickFormatter={(value) =>
-    //                             chartConfig[value as keyof typeof chartConfig]?.label
-    //                         }
-    //                     />
-    //                     <XAxis dataKey="percentage" type="number" hide />
-    //                     <ChartTooltip
-    //                         cursor={false}
-    //                         content={<ChartTooltipContent hideLabel />}
-    //                     />
-    //                     <Bar dataKey="percentage" layout="vertical" radius={5} />
-    //                 </BarChart>
-    //             </ChartContainer>
-    //         </CardContent>
-    //         <CardFooter className="flex-col items-start gap-2 text-sm">
-    //             <div className="flex gap-2 font-medium leading-none">
-    //                 {/* Trending up by 5.2% this month <TrendingUp className="h-4 w-4" /> */}
-    //             </div>
-    //             <div className="leading-none text-muted-foreground">
-    //                 Showing total visitors for the last 6 months
-    //             </div>
-    //         </CardFooter>
-    //     </Card>
-    // )
 
 };
 
