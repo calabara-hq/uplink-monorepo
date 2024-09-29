@@ -66,15 +66,6 @@ user:
     maxReplicas: 1
     targetCpuPercentage: 80
 
-tweet:
-  image:
-    repository: nickdodson/tweet-service
-  replicaCount: 1
-  hpa:
-    minReplicas: 1
-    maxReplicas: 1
-    targetCpuPercentage: 80
-  
 v2:
   image:
     repository: nickdodson/v2-service

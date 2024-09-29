@@ -23,6 +23,13 @@
   color-scheme: dark;
 }
 
+/* deal with input zoom on mobile browsers */
+@media screen and (max-width: 767px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
 .no-select p,
 .no-select h1,
 .no-select h2,
@@ -46,13 +53,6 @@
                                   supported by Chrome and Opera */
 }
 
-/* .btm-nav {
-  @apply fixed bottom-0 left-0 right-0 flex w-full flex-row items-center justify-around;
-  padding-bottom: env(safe-area-inset-bottom);
-  & > * {
-    @apply relative flex h-full basis-full cursor-pointer flex-col items-center justify-center gap-1;
-  }
-} */
 
 [aria-labelledby="rk_connect_title"] {
   @apply pointer-events-auto;

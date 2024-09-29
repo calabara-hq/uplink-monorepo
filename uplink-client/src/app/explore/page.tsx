@@ -6,8 +6,8 @@ import UplinkImage from "@/lib/UplinkImage"
 import { ActiveContest } from "@/lib/fetch/fetchActiveContests";
 import { SearchSpaces } from "./client";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
-import { CardFooter } from "@/ui/DesignKit/Card";
-import { CardTitle } from "@/ui/Card/Card";
+import { Card, CardContent, CardFooter } from "@/ui/DesignKit/Card";
+import { CardHeader, CardTitle } from "@/ui/Card/Card";
 import { fetchTrendingChannels } from "@/lib/fetch/fetchChannel";
 import { Channel, concatContractID } from "@/types/channel";
 import { parseIpfsUrl } from "@/lib/ipfs";
@@ -16,6 +16,7 @@ import { fetchFeaturedTokens } from "@/lib/fetch/fetchTokensV2";
 import { AddressOrEns, Avatar } from "@/ui/AddressDisplay/AddressDisplay";
 import { TokenCard } from "@/ui/Token/Card";
 import { Button } from "@/ui/DesignKit/Button";
+import { HiTrendingUp } from "react-icons/hi";
 
 export const metadata: Metadata = {
   openGraph: {
@@ -121,7 +122,10 @@ const TrendingChannels = async () => {
   if (trendingChannels.length > 0)
     return (
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold">Trending Channels</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">Trending</h1>
+          <HiTrendingUp className="w-6 h-6 text-success" />
+        </div>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
           {trendingChannels.map(async (channel: Channel & { space: Space }, index: number) => {
 
@@ -204,17 +208,17 @@ const ExploreHeader = async () => {
   const allSpaces = await fetchSpaces();
 
   return (
-    <div className="flex flex-row gap-12 items-center justify-end sm:justify-normal w-full">
-      <div className="hidden sm:flex w-8/12 md:w-6/12 ">
+    <div className="flex flex-row gap-6 items-start w-full lg:w-6/12 m-auto ">
+      <div className="w-full">
         <SearchSpaces allSpaces={allSpaces} />
       </div>
       <Link
         passHref
-        className="ml-auto"
+        className="w-fit"
         href="/spacebuilder/create"
         draggable={false}
       >
-        <Button>
+        <Button className="h-10 rounded-lg">
           New Space
         </Button>
       </Link>
@@ -263,7 +267,42 @@ const FeaturedMints = async () => {
       </div>
     </div>
   )
+}
 
+const AllSpaces = async () => {
+  const allSpaces = await fetchSpaces();
+
+  return (
+    <div className="flex flex-col gap-2">
+      <h1 className="text-2xl font-bold">Spaces</h1>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 w-full ">
+        {allSpaces.map((space, index) => {
+          return (
+            <Link key={index} href={`/${space.name}`} passHref>
+              <Card
+                className="h-full bg-base-100"
+              >
+                <CardHeader>
+                  <CardTitle className="text-t1 text-lg">{space.displayName}</CardTitle>
+                </CardHeader>
+                <CardContent >
+                  <div className="w-[120px] h-[120px] relative m-auto">
+                    <UplinkImage
+                      src={space.logoUrl}
+                      fill
+                      alt="spaceLogo"
+                      className="object-cover rounded-xl"
+                      sizes={"10vw"}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 
@@ -279,7 +318,8 @@ export default async function Page() {
           <TrendingChannels />
         </Suspense>
         <Suspense fallback={<SpaceListSkeleton />}>
-          <FeaturedMints />
+          {/* <FeaturedMints /> */}
+          <AllSpaces />
         </Suspense>
       </div>
     </div>

@@ -44,7 +44,7 @@ export const SearchSpaces = ({ allSpaces }: { allSpaces: Array<Space> }) => {
             // );
 
             const results = allSpaces.filter((space) =>
-                isFuzzyMatch(normalizeString(space.name), normalizeString(value))
+                isFuzzyMatch(normalizeString(space.displayName), normalizeString(value))
             );
 
             setFilteredSpaces(results.slice(0, 10));
@@ -94,10 +94,11 @@ export const SearchSpaces = ({ allSpaces }: { allSpaces: Array<Space> }) => {
 
             <Input
                 type="text"
-                variant="outline"
+                variant="default"
                 onChange={handleInput}
                 placeholder="Search"
                 value={searchTerm}
+                className="h-10 max-w-full"
             />
             <div className="relative z-20 mt-2">
                 {isPopoverOpen && filteredSpaces.length > 0 && (
@@ -118,7 +119,7 @@ export const SearchSpaces = ({ allSpaces }: { allSpaces: Array<Space> }) => {
                                         />
                                     </div>
                                     <p className="text-t1">
-                                        {space.name}
+                                        {space.displayName}
                                     </p>
                                 </Link>
                             ))}
