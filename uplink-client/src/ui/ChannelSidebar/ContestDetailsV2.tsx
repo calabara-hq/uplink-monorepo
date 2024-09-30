@@ -118,14 +118,20 @@ const TokenLogicRule = ({
     target,
     operator,
     literalOperand,
+    data,
 }: {
     chainId,
     target: Address,
     operator: string,
     literalOperand: string,
+    data: string
 }) => {
 
+
+    console.log(target, operator, literalOperand)
     const { symbol, decimals, isLoading } = useTokenInfo(target, chainId)
+
+
 
     const formattedLiteralOperand = useMemo(() => {
         const decoded = decodeAbiParameters([{ name: 'x', type: 'uint256' }], literalOperand as Hex)[0]
@@ -164,7 +170,7 @@ const DisplayLogicRule = ({
     literalOperand: string,
 }) => {
 
-    if (signature === '0x70a08231' || signature === '0x00fdd58e') return <TokenLogicRule chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
+    if (signature === '0x70a08231' || signature === '0x00fdd58e') return <TokenLogicRule chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} data={data} />
     else return null
 }
 
@@ -173,7 +179,7 @@ const DisplayCredits = ({ interactionPower, interactionPowerType, creditContextL
     const readableInteractionPowerType = interactionPowerType === "0" ? "Uniform" : "Weighted"
     const readableInteractionPower = readableInteractionPowerType === "Weighted" ? `Weighted ${creditContextLabel}` : `${interactionPower} ${creditContextLabel}`
 
-    return <div className="rounded-xl pl-2 pr-2 bg-success font-normal text-center bg-opacity-10 text-success text-sm">{readableInteractionPower}</div>;
+    return <div className="rounded-xl pl-2 pr-2 bg-success font-normal text-center bg-opacity-10 text-success text-sm h-fit min-w-[75px]">{readableInteractionPower}</div>;
 
 }
 
@@ -184,7 +190,8 @@ export const LogicDisplay = ({ chainId, logicObject, creditContextLabel }: { cha
         logicObject && logicObject.logic.targets.length > 0 ? (
             <div className="flex flex-col gap-1 p-2 text-t2 text-sm">
                 {logicObject.logic.targets
-                    .slice(0, 3)
+                    // TODO update slice back to 0
+                    .slice(0, 1)
                     .map((_, idx: number) => {
                         const target = logicObject.logic.targets[idx]
                         const signature = logicObject.logic.signatures[idx]

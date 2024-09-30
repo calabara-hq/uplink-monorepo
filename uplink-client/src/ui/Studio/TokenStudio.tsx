@@ -172,26 +172,28 @@ export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }
                     </div>
                     <BasicInput inputType="text" label="Title" value={state.title} placeholder={"My awesome creation"} onChange={(e) => setField("title", e.target.value)} error={state.errors?.title?._errors} />
                     <MarkdownEditor ref={editorRef} label={"Body (optional)"} error={state.errors?.description?._errors} markdown="" />
-                    <div className="flex flex-col gap-2 w-full">
-                        {!isMoreOpen && (<Button variant="ghost" className="self-start" onClick={() => { setIsMoreOpen(true) }}>+ More</Button>)}
-                        {isMoreOpen && (
-                            <OptionOrCustom
-                                value={state.maxSupply.toString()}
-                                label={"Token Supply"}
-                                options={[{ value: "1", label: "1" }, { value: "100", label: "100" }, { value: maxUint256.toString(), label: "unlimited" }]}
-                                onOptionSelect={(option: Option) => setField("maxSupply", option.value)}
-                                customLabel={"custom"}
-                                customChild={
-                                    <BasicInput
-                                        inputType="number"
-                                        value={state.maxSupply} // default to 100 on switchover
-                                        label={"Custom Supply"}
-                                        placeholder={"100"}
-                                        onChange={(e) => setField("maxSupply", asPositiveInt(e.target.value))}
-                                        error={state.errors?.maxSupply?._errors} />
-                                } />
-                        )}
-                    </div>
+                    {channel && isInfiniteChannel(channel) && (
+                        <div className="flex flex-col gap-2 w-full">
+                            {!isMoreOpen && (<Button variant="ghost" className="self-start" onClick={() => { setIsMoreOpen(true) }}>+ More</Button>)}
+                            {isMoreOpen && (
+                                <OptionOrCustom
+                                    value={state.maxSupply.toString()}
+                                    label={"Token Supply"}
+                                    options={[{ value: "1", label: "1" }, { value: "100", label: "100" }, { value: maxUint256.toString(), label: "unlimited" }]}
+                                    onOptionSelect={(option: Option) => setField("maxSupply", option.value)}
+                                    customLabel={"custom"}
+                                    customChild={
+                                        <BasicInput
+                                            inputType="number"
+                                            value={state.maxSupply} // default to 100 on switchover
+                                            label={"Custom Supply"}
+                                            placeholder={"100"}
+                                            onChange={(e) => setField("maxSupply", asPositiveInt(e.target.value))}
+                                            error={state.errors?.maxSupply?._errors} />
+                                    } />
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
