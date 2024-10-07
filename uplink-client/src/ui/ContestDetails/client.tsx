@@ -58,7 +58,7 @@ export const ExpandSection = ({
                     {label}
                 </a>
             )}
-            <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+            <Modal isModalOpen={isModalOpen} onClose={() => setIsModalOpen(false)} className="w-full max-w-[500px]">
                 {children}
             </Modal>
         </div>

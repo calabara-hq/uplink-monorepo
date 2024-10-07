@@ -138,7 +138,7 @@ export const usePaginatedMintBoardPosts = (contractId: ContractID) => {
 
     const { data, error, size, setSize, mutate } = useSWRInfinite(
         getKey,
-        ([, contractId, , limit, lastCursor]) => fetchFiniteTokensV2_client(contractId, limit, lastCursor)
+        ([, contractId, , limit, lastCursor]) => fetchTokensV2_client(contractId, limit, lastCursor)
     );
 
     const locatePageOfPost = (pages: Array<FetchTokensV2Response>, tokenId: string) => {

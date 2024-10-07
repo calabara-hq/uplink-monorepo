@@ -9,7 +9,7 @@ import { Metadata, useMetadataSettings } from "@/ui/ChannelSettings/Metadata";
 import { Rewards, useRewardsSettings } from "@/ui/ChannelSettings/Rewards";
 import { Deadlines, useDeadlineSettings } from "@/ui/ChannelSettings/Deadlines";
 import { InteractionLogic, useInteractionLogicSettings } from "@/ui/ChannelSettings/InteractionLogic";
-import { concatContractID, ContractID } from "@/types/channel";
+import { concatContractID, ContractID, isNativeToken } from "@/types/channel";
 import useSWRMutation from "swr/mutation";
 import { insertChannel } from "@/lib/fetch/insertChannel";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
@@ -22,10 +22,11 @@ import { mutateChannel } from "@/app/mutate";
 import { Button } from "@/ui/DesignKit/Button";
 import { DevModeOnly } from "@/utils/DevModeOnly";
 import { ChainSelect } from "@/ui/ChannelSettings/ChainSelect";
-import { isNativeToken } from "@/types/token";
+
 import { ChainId } from "@/types/chains";
 import { Info } from "@/ui/DesignKit/Info";
 import { SectionWrapper } from "@/ui/ChannelSettings/Utils";
+import { Address } from "viem";
 
 
 const WaitForNewChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
@@ -139,7 +140,7 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
                     }
                 },
                 transactionOverrides: {
-                    value: isNativeToken(rewardsOutput.token) ? rewardsOutput.totalAllocation : BigInt(0)
+                    value: isNativeToken(rewardsOutput.token as Address) ? rewardsOutput.totalAllocation : BigInt(0)
                 }
             }
 

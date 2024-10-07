@@ -22,6 +22,7 @@ import {
 import '@mdxeditor/editor/style.css'
 import { IpfsUpload } from '@/hooks/useMediaUpload'
 import toast from 'react-hot-toast'
+import React from 'react'
 
 
 const supportedImageFormats = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'image/webp']
@@ -46,13 +47,13 @@ export default function InitializedMDXEditor({
                 // Example Plugin Usage
                 toolbarPlugin({
                     toolbarContents: () => (
-                        <>
+                        <React.Fragment>
                             <BoldItalicUnderlineToggles />
                             <InsertImage />
                             <CreateLink />
                             <BlockTypeSelect />
                             <ListsToggle options={['bullet', 'number']} />
-                        </>
+                        </React.Fragment>
                     )
                 }),
                 imagePlugin({

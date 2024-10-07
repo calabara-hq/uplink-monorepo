@@ -1,7 +1,7 @@
 "use client";;
 import { useSession } from "@/providers/SessionProvider";
-import { useEffect, useState } from "react";
-import { HiCheckBadge } from "react-icons/hi2";
+import React, { useEffect, useState } from "react";
+import { HiCheckBadge, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { RenderStandardVideoWithLoader } from "../VideoPlayer";
 import UplinkImage from "@/lib/UplinkImage";
@@ -10,7 +10,6 @@ import { Address, formatEther, maxUint40 } from "viem";
 import { PiInfinity } from "react-icons/pi";
 import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, ContractID, isTokenIntent, isTokenV1Onchain, isTokenV2Onchain } from "@/types/channel";
 import WalletConnectButton from "../ConnectButton/WalletConnectButton";
-import { Boundary } from "../Boundary/Boundary";
 import { useBanToken } from "@/hooks/useBanToken";
 import { usePaginatedMintBoardIntents, usePaginatedMintBoardPosts } from "@/hooks/useTokens";
 import { IInfiniteTransportConfig } from "@tx-kit/sdk/subgraph";
@@ -19,7 +18,7 @@ import toast from "react-hot-toast";
 import { DisplayMode } from "./MintableTokenDisplay";
 import { Button } from "../DesignKit/Button";
 import { Input } from "../DesignKit/Input";
-import { DialogHeader, DialogTitle } from "../DesignKit/Dialog";
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../DesignKit/Dialog";
 
 
 export type FeeStructure = {
@@ -105,7 +104,7 @@ export const isMintPeriodOver = (saleEnd: number) => {
     return saleEnd <= Math.floor(Date.now() / 1000);
 }
 
-export const RenderMintMedia = ({ imageURI, animationURI, styleOverrides }: { imageURI: string; animationURI: string, styleOverrides?: string }) => {
+export const RenderMintMedia = ({ imageURI, animationURI, size = "sm" }: { imageURI: string; animationURI: string, size?: string }) => {
     const gatewayImageURI = parseIpfsUrl(imageURI).gateway
     const gatewayAnimationURI = parseIpfsUrl(animationURI).gateway
 
@@ -120,17 +119,12 @@ export const RenderMintMedia = ({ imageURI, animationURI, styleOverrides }: { im
             <UplinkImage
                 src={gatewayImageURI}
                 alt="Picture of the author"
-                sizes="30vw"
-                className="w-full h-auto max-w-full max-h-96 object-contain rounded-lg "
+                sizes={size === "sm" ? "30vw" : "50vw"}
+                className={`w-full h-auto max-w-full ${size === "sm" ? "max-h-96" : "max-h-[700px]"} object-contain rounded-lg `}
                 width={500}
                 height={300}
             />
         )
-        // return (
-        //     <ImageWrapper>
-        //         <UplinkImage src={gatewayImageURI} fill sizes={"30vw"} alt="media" className={`w-full rounded-lg object-contain ${styleOverrides}`} />
-        //     </ImageWrapper>
-        // )
     }
 }
 
@@ -153,18 +147,18 @@ export const CounterInput = ({ count, setCount, max }: { count: string, setCount
 
     return (
         <div className="flex items-center w-full gap-1">
-            <Button variant="outline" className="m-auto text-t1" disabled={count === '1' || count === ''} onClick={() => setCount((Number(count) - 1).toString())}><LuMinusSquare className="w-4 h-4" /></Button>
+            <Button variant="ghost" className="m-auto text-t1" disabled={count === '1' || count === ''} onClick={() => setCount((Number(count) - 1).toString())}><LuMinusSquare className="w-4 h-4" /></Button>
             <div className="w-full">
                 <Input
                     type="number"
-                    className="text-center w-full max-w-full"
-                    variant="outline"
+                    className="text-center w-full max-w-full bg-transparent"
+                    variant="default"
                     onWheel={(e) => e.currentTarget.blur()}
                     value={count}
                     onChange={handleInputChange}
                 />
             </div>
-            <Button variant="outline" className="text-t1" disabled={max ? Number(count) >= Number(max) : false} onClick={() => setCount((Number(count) + 1).toString())}><LuPlusSquare className="w-4 h-4" /></Button>
+            <Button variant="ghost" className="text-t1" disabled={max ? Number(count) >= Number(max) : false} onClick={() => setCount((Number(count) + 1).toString())}><LuPlusSquare className="w-4 h-4" /></Button>
         </div >
     )
 }
@@ -176,12 +170,12 @@ export const RenderFees = ({ fees, quantity }: { fees: FeeStructure | null, quan
     if (!fees) return null;
 
     return (
-        <div className="relative w-full" >
-            <Button variant="ghost" className="flex items-center w-full"
+        <div className="relative w-fit ml-auto" >
+            <Button variant="ghost" className="flex items-center w-full gap-2 justify-end"
                 onClick={() => setIsFeeInfoOpen(!isFeeInfoOpen)}
             >
                 <p className="text-t2">{`Price: ${getETHMintPrice(fees.ethMintPrice * BigInt(quantity))}`}</p>
-                <span className="ml-auto">{isFeeInfoOpen ? <LuMinusSquare className="w-4 h-4" /> : <LuPlusSquare className="w-4 h-4" />}</span>
+                <span className="">{isFeeInfoOpen ? <HiChevronUp className="w-4 h-4" /> : <HiChevronDown className="w-4 h-4" />}</span>
             </Button>
             <div
                 className={`w-full flex flex-col gap-2 ${isFeeInfoOpen ? "h-[200px]" : "h-0"} overflow-hidden transition-all duration-300 ease-in-out`}
@@ -207,18 +201,9 @@ export const RenderFees = ({ fees, quantity }: { fees: FeeStructure | null, quan
 
 
 export const RenderTotalMints = ({ totalMinted }: { totalMinted: string }) => {
-    // if (isTotalSupplyLoading) {
-    //     return (
-    //         <div className="inline-block h-3 w-3 animate-spin text-t2 rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-    //             role="status"
-    //         />
-    //     )
-    // }
-    // else {
     return (
         <p className="text-t1 font-bold">{totalMinted}</p>
     )
-    //}
 }
 export const RenderMaxSupply = ({ maxSupply }: { maxSupply: string }) => {
     if (parseInt(maxSupply) >= Number(maxUint40)) {
@@ -263,13 +248,13 @@ export const ShareModalContent = ({ displayMode, token, handleClose }: { display
                 )}
             </WalletConnectButton>
             {status !== 'authenticated' &&
-                <>
+                <React.Fragment>
                     <div className="w-full h-0.5 bg-base-200" />
                     <div className="flex flex-col gap-2">
                         <p className="text-t2">Or just copy link</p>
                         <Button variant="secondary" onClick={handleShare}>Copy Link</Button>
                     </div>
-                </>
+                </React.Fragment>
             }
         </div>
     )
@@ -340,12 +325,13 @@ export const ManageModalContent = ({ token, contractId, handleClose }: { token: 
     }
 
 
+
     return (
-        <div className="flex flex-col w-full gap-1 lg:gap-4 p-0 max-w-[350px]">
-            <h2 className="text-t1 text-xl font-bold">Manage Post</h2>
-            <Boundary size="small">
-                <p>Once deleted, this post will be gone forever. Type <b>delete</b> if you understand</p>
-            </Boundary>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Manage Post</DialogTitle>
+                <DialogDescription>Once deleted, this post will be gone forever. Type <b>delete</b> if you understand</DialogDescription>
+            </DialogHeader>
             <div className="flex flex-row items-center">
                 <Input
                     variant="outline"
@@ -358,6 +344,7 @@ export const ManageModalContent = ({ token, contractId, handleClose }: { token: 
                 />
                 <Button onClick={handleDelete} disabled={!isConfirmed} className="ml-auto" variant="destructive">delete post</Button>
             </div>
-        </div>
+        </DialogContent>
     )
+
 }

@@ -76,7 +76,7 @@ export const InteractionLogicSchema = z.object({
 
     const fetchTokenDecimals = async (token: string) => {
         if (token === NATIVE_TOKEN) return 18;
-        const { decimals } = await getTokenInfo({ contractAddress: token, chainId: input.chainId });
+        const { decimals } = await getTokenInfo({ contractAddress: token as Address, chainId: input.chainId });
         return decimals;
     }
 
@@ -147,7 +147,7 @@ export const ContestSettingsSchema = z.object({
 
     const fetchTokenDecimals = async (token: string) => {
         if (token === NATIVE_TOKEN) return 18;
-        const { decimals } = await getTokenInfo({ contractAddress: token, chainId: data.chainId });
+        const { decimals } = await getTokenInfo({ contractAddress: token as Address, chainId: data.chainId });
         return decimals;
     }
 

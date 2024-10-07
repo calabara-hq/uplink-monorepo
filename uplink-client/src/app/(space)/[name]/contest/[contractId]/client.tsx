@@ -13,6 +13,7 @@ import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import Link from "next/link";
 import { FaCrown } from "react-icons/fa";
+import { Modal } from "@/ui/Modal/Modal";
 
 
 export const PostSkeleton = () => {
@@ -206,7 +207,18 @@ export const RenderV2Tokens = ({ spaceName, contractId }: { spaceName: string, c
                 />
 
             </div>
-            <TokenModal
+
+            <Modal isModalOpen={isManageModalOpen && focusedToken} onClose={handleModalClose} className={`w-full overflow-y-auto max-w-[400px]`}>
+
+                <ManageModalContent
+                    token={focusedToken as ChannelToken | ChannelTokenIntent}
+                    contractId={contractId}
+                    handleClose={handleModalClose}
+                />
+
+            </Modal>
+
+            {/* <TokenModal
                 spaceName={spaceName}
                 contractId={contractId}
                 channel={channel}
@@ -219,7 +231,7 @@ export const RenderV2Tokens = ({ spaceName, contractId }: { spaceName: string, c
                 setIsManageModalOpen={setIsManageModalOpen}
                 setFocusedToken={setFocusedToken}
                 handleModalClose={handleModalClose}
-            />
+            /> */}
             <div ref={loadMoreRef} className="m-auto" >
                 {hasNextPage && (
                     <div

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     siteName: "Uplink",
     images: [
       {
-        url: "/opengraph.png",
+        url: "/ogimage.png",
         width: 1200,
         height: 600,
         alt: "Uplink",

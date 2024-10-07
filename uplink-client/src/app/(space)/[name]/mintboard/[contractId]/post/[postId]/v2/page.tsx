@@ -7,6 +7,7 @@ import { calculateImageAspectRatio } from "@/lib/farcaster/utils";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { Metadata } from "next";
 import { Boundary } from "@/ui/Boundary/Boundary";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/ui/DesignKit/Breadcrumb";
 
 
 export async function generateMetadata({
@@ -22,11 +23,7 @@ export async function generateMetadata({
     const isIntent = searchParams?.intent ? true : false
     const referral = searchParams?.referrer ?? ""
 
-    const channel = await fetchChannel(contractId);
     const token = isIntent ? await fetchSingleTokenIntent(contractId, postId) : await fetchSingleTokenV2(contractId, postId)
-
-    const author = token.author
-
     const aspect = await calculateImageAspectRatio(parseIpfsUrl(token.metadata.image).gateway)
 
     const fcMetadata: Record<string, string> = {
@@ -43,10 +40,10 @@ export async function generateMetadata({
     }
 
     return {
-        title: `${author}`,
+        title: `${token.metadata.name}`,
         description: `Mint ${token.metadata.name} on uplink`,
         openGraph: {
-            title: `${author}`,
+            title: `${token.metadata.name}`,
             description: `Mint ${token.metadata.name} on uplink`,
             images: [
                 {
@@ -111,14 +108,34 @@ const PageContent = async ({ spaceName, contractId, postId, searchParams }: { sp
     ])
 
 
-    return <MintTokenSwitch
-        referral={searchParams.referral}
-        contractAddress={channel.id}
-        channel={channel}
-        token={token}
-        display="expanded"
-        backwardsNavUrl={`/${spaceName}/mintboard/${contractId}`}
-    />
+    return (
+        <div className="flex flex-col gap-6">
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                        <BreadcrumbLink href={`/${spaceName}`}>{spaceName}</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbLink href={`/${spaceName}/mintboard/${contractId}`}>{channel.name}</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>post</BreadcrumbPage>
+                    </BreadcrumbItem>
+
+                </BreadcrumbList>
+            </Breadcrumb>
+            <MintTokenSwitch
+                referral={searchParams.referral}
+                contractAddress={channel.id}
+                channel={channel}
+                token={token}
+                display="expanded"
+                backwardsNavUrl={`/${spaceName}/mintboard/${contractId}`}
+            />
+        </div>
+    )
 }
 
 

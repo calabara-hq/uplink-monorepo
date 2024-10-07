@@ -1,21 +1,13 @@
-"use client";
-
+"use client";;
 import { FaRegCircleQuestion } from "react-icons/fa6";
-import { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import formatOrdinals from "@/lib/formatOrdinals";
 import Link from "next/link";
-import {
-    FungibleReward,
-    NonFungibleReward,
-    SubmitterTokenRewardOption,
-    isSubmitterTokenReward,
-} from "@/types/contest";
-import type { FetchSingleContestResponse } from "@/lib/fetch/fetchContest";
-import { ContractID, splitContractID } from "@/types/channel";
+import { ContractID, isNativeToken, splitContractID } from "@/types/channel";
 import { IFiniteTransportConfig, ILogicConfig } from "@tx-kit/sdk/subgraph";
 import { useTokenInfo } from "@/hooks/useTokenInfo";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
-import { Address, decodeAbiParameters, formatUnits, Hex, parseEther, parseUnits } from "viem";
+import { Address, decodeAbiParameters, formatUnits, Hex } from "viem";
 import { useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
 import { ChannelStateLabel, RemainingTimeLabel, RenderTransportLayerState } from "./SidebarUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../DesignKit/Tooltip";
@@ -27,33 +19,7 @@ import { TbLoader2 } from "react-icons/tb";
 import toast from "react-hot-toast";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 import { ChainId } from "@/types/chains";
-
-const normalizeSubmitterRewards = (
-    subRewards: FetchSingleContestResponse["submitterRewards"]
-) => {
-    if (subRewards.length === 0) return [];
-    let rewardsObj: {
-        [rank: number]: SubmitterTokenRewardOption[];
-    } = {};
-
-    const pushOrAssign = (
-        rank: number,
-        reward: FungibleReward | NonFungibleReward
-    ) => {
-        if (rewardsObj[rank]) rewardsObj[rank].push(reward);
-        else rewardsObj[rank] = [reward];
-    };
-
-    subRewards.forEach((el, idx: number) => {
-        const { rank, reward } = el;
-        if (isSubmitterTokenReward(reward)) {
-            if (rewardsObj[rank]) rewardsObj[rank].push(reward.tokenReward);
-            else rewardsObj[rank] = [reward.tokenReward];
-        }
-    });
-
-    return rewardsObj;
-};
+import { ExpandSection } from "../ContestDetails/client";
 
 
 export const DetailsSkeleton = () => {
@@ -113,16 +79,21 @@ export const DetailSectionWrapper = ({
 };
 
 
+
 const TokenLogicRule = ({
     chainId,
     target,
     operator,
     literalOperand,
+    signature,
+    data,
 }: {
-    chainId,
+    chainId: ChainId,
     target: Address,
     operator: string,
     literalOperand: string,
+    signature: string,
+    data: string
 }) => {
 
     const { symbol, decimals, isLoading } = useTokenInfo(target, chainId)
@@ -142,8 +113,25 @@ const TokenLogicRule = ({
 
     }, [operator, decimals])
 
+
+    const tokenId = useMemo(() => {
+        if (signature === '0x00fdd58e') {
+            const decoded = decodeAbiParameters([{ name: 'x', type: 'address' }, { name: 'y', type: 'uint256' }], data as Hex)[1]
+            return decoded
+        }
+        return null
+    }, [signature, data])
+
+
     if (isLoading) return <p>Loading...</p>
-    return <p>{`${operatorSpecificText} ${formattedLiteralOperand} ${symbol}`}</p>
+    return <p>{
+        `
+            ${operatorSpecificText} 
+            ${formattedLiteralOperand} 
+            ${symbol}
+            ${tokenId ? `#${tokenId}` : ""}
+        
+        `}</p>
 
 }
 
@@ -156,7 +144,7 @@ const DisplayLogicRule = ({
     operator,
     literalOperand,
 }: {
-    chainId,
+    chainId: ChainId,
     target: Address,
     signature: string,
     data: string,
@@ -164,7 +152,7 @@ const DisplayLogicRule = ({
     literalOperand: string,
 }) => {
 
-    if (signature === '0x70a08231' || signature === '0x00fdd58e') return <TokenLogicRule chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
+    if (signature === '0x70a08231' || signature === '0x00fdd58e') return <TokenLogicRule chainId={chainId} target={target} signature={signature} operator={operator} literalOperand={literalOperand} data={data} />
     else return null
 }
 
@@ -173,17 +161,26 @@ const DisplayCredits = ({ interactionPower, interactionPowerType, creditContextL
     const readableInteractionPowerType = interactionPowerType === "0" ? "Uniform" : "Weighted"
     const readableInteractionPower = readableInteractionPowerType === "Weighted" ? `Weighted ${creditContextLabel}` : `${interactionPower} ${creditContextLabel}`
 
-    return <div className="rounded-xl pl-2 pr-2 bg-success font-normal text-center bg-opacity-10 text-success text-sm">{readableInteractionPower}</div>;
+    return <div className="rounded-xl pl-2 pr-2 bg-success font-normal text-center bg-opacity-10 text-success text-sm h-fit min-w-[75px]">{readableInteractionPower}</div>;
 
 }
 
-export const LogicDisplay = ({ chainId, logicObject, creditContextLabel }: { chainId: number, logicObject: ILogicConfig | null, creditContextLabel: string }) => {
+// const normalizeLogic = (logicObject: ILogicConfig) => {
+//     // group by hash(target, signature, operator, literalOperand)
+//     // if erc1155, split tokenId from data
+// }
+
+export const LogicDisplay = React.memo(({ chainId, logicObject, creditContextLabel }: { chainId: ChainId, logicObject: ILogicConfig | null, creditContextLabel: string }) => {
+
+    //const normalizedLogic = normalizeLogic(logicObject)
+
 
     return (
 
         logicObject && logicObject.logic.targets.length > 0 ? (
             <div className="flex flex-col gap-1 p-2 text-t2 text-sm">
                 {logicObject.logic.targets
+                    // TODO update slice back to 0
                     .slice(0, 3)
                     .map((_, idx: number) => {
                         const target = logicObject.logic.targets[idx]
@@ -200,43 +197,47 @@ export const LogicDisplay = ({ chainId, logicObject, creditContextLabel }: { cha
                                 <DisplayCredits interactionPowerType={interactionPowerType} interactionPower={interactionPower} creditContextLabel={creditContextLabel} />
                             </div>
                         )
-
-                        // if (logicObject.logic.signatures[idx] === '0x00fdd58e') return null
-                        // else if (logicObject.logic.signatures[idx] === '0x70a08231') return <TokenLogicRule key={idx} chainId={chainId} target={target} operator={operator} literalOperand={literalOperand} />
-                        // else return null
                     })}
                 {/* modal content */}
-                {/* <ExpandSection
-                        data={submitterRestrictions}
-                        label={`+ ${submitterRestrictions.length - 3} requirements`}
-                    >
-                        <div className="w-full flex flex-col gap-4 text-t1">
-                            <h1 className="text-lg font-bold">Entry Requirements</h1>
+                <ExpandSection
+                    data={logicObject.logic.targets}
+                    label={`+ ${logicObject.logic.targets.length - 3} requirements`}
+                >
+                    <div className="w-full flex flex-col gap-4 text-t1">
+                        <h1 className="text-lg font-bold">Entry Requirements</h1>
 
-                            <div className="flex flex-col gap-1 p-2 ">
-                                {submitterRestrictions.map((restriction: any, idx: number) => {
-                                    return (
-                                        <Fragment key={idx}>
-                                            <p>
-                                                {`Hold ${formatDecimal(restriction.tokenRestriction.threshold)
-                                                    .short
-                                                    } or more ${restriction.tokenRestriction.token.symbol
-                                                    } `}{" "}
-                                            </p>
-                                            <div className="w-full h-0.5 bg-base-200" />
-                                        </Fragment>
-                                    );
-                                })}
-                            </div>
+                        <div className="flex flex-col gap-1 p-2 ">
+                            {logicObject.logic.targets.map((_, idx: number) => {
+                                const target = logicObject.logic.targets[idx]
+                                const signature = logicObject.logic.signatures[idx]
+                                const data = logicObject.logic.datas[idx]
+                                const operator = logicObject.logic.operators[idx]
+                                const literalOperand = logicObject.logic.literalOperands[idx]
+                                const interactionPowerType = logicObject.logic.interactionPowerTypes[idx]
+                                const interactionPower = logicObject.logic.interactionPowers[idx]
+
+                                return (
+                                    <>
+                                        <div key={idx} className="flex gap-2 items-center text-sm">
+                                            <DisplayLogicRule chainId={chainId} target={target} signature={signature} data={data} operator={operator} literalOperand={literalOperand} />
+                                            <DisplayCredits interactionPowerType={interactionPowerType} interactionPower={interactionPower} creditContextLabel={creditContextLabel} />
+                                        </div>
+                                        <div className="w-full h-0.5 bg-base-200" />
+                                    </>
+                                )
+                            })}
                         </div>
-                    </ExpandSection> */}
+                    </div>
+                </ExpandSection>
             </div>
         ) : (
             <p className="text-t2 p-2 text-sm">Anyone can {creditContextLabel === "entries" ? "submit!" : "vote!"}</p>
         )
 
     );
-};
+});
+
+LogicDisplay.displayName = "LogicDisplay";
 
 
 
@@ -248,12 +249,12 @@ const RewardsSection = ({
     transportConfig: IFiniteTransportConfig
 }) => {
 
-    const isNativeToken = transportConfig.token === NATIVE_TOKEN;
+    const isNative = isNativeToken(transportConfig.token);
 
     const { symbol: erc20Symbol, decimals: erc20Decimals } = useTokenInfo(transportConfig.token, chainId);
 
-    const symbol = isNativeToken ? "ETH" : erc20Symbol;
-    const decimals = isNativeToken ? 18 : erc20Decimals;
+    const symbol = isNative ? "ETH" : erc20Symbol;
+    const decimals = isNative ? 18 : erc20Decimals;
 
     return (
         <DetailSectionWrapper
@@ -285,33 +286,25 @@ const RewardsSection = ({
                             );
                         })}
                     {/* modal content */}
-                    {/* <ExpandSection
-                        data={[]}
+                    <ExpandSection
+                        data={transportConfig.ranks}
                         label={`+ ${transportConfig.ranks.length - 3} rewards`}
                     >
                         <div className="w-full flex flex-col gap-4 text-t1">
                             <h1 className="text-lg font-bold">Submitter Rewards</h1>
-                            <div className="flex flex-col gap-2">
-                                {Object.entries(normalizedRewards).map(
-                                    ([rank, rewards], idx) => {
+                            <div className="flex flex-col gap-1">
+                                {transportConfig.ranks.map(
+                                    (rank, idx) => {
                                         return (
                                             <>
                                                 <div
                                                     key={idx}
-                                                    className="flex flex-row gap-2 items-center justify-start"
+                                                    className="flex flex-row gap-2 items-center justify-start text-sm"
                                                 >
-                                                    <p>{formatOrdinals(parseInt(rank))} place:</p>
+                                                    <p>{formatOrdinals(rank)}:</p>
                                                     <div className="flex flex-row ml-4 items-center gap-2">
-                                                        {rewards.map((reward, idx) => {
-                                                            return (
-                                                                <p key={idx}>
-                                                                    {isFungibleReward(reward)
-                                                                        ? formatDecimal(reward.amount).short
-                                                                        : 1}{" "}
-                                                                    {reward.token.symbol}
-                                                                </p>
-                                                            );
-                                                        })}
+                                                        <p>{formatUnits(transportConfig.allocations[idx], decimals)}</p>
+                                                        <p>{symbol}</p>
                                                     </div>
                                                 </div>
                                                 <div className="w-full h-0.5 bg-base-200" />
@@ -321,7 +314,7 @@ const RewardsSection = ({
                                 )}
                             </div>
                         </div>
-                    </ExpandSection> */}
+                    </ExpandSection>
                 </div>
             ) : (
                 <p className="text-t2 p-2 text-sm">None</p>

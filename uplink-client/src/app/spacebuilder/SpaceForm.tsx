@@ -138,7 +138,7 @@ export default function SpaceForm({
         />
         <SpaceName state={state} dispatch={dispatch} />
         <SpaceWebsite state={state} dispatch={dispatch} />
-        <SpaceTwitter state={state} dispatch={dispatch} />
+        {/* <SpaceTwitter state={state} dispatch={dispatch} /> */}
         <SpaceAdmins
           state={state}
           dispatch={dispatch}
@@ -210,7 +210,7 @@ const SpaceWebsite = ({
   return (
     <div className="flex flex-col gap-2">
       <Label>
-        Website
+        {`Website (optional)`}
       </Label>
       <Input
         type="text"

@@ -182,6 +182,7 @@ const WarpcastUserLink = ({ href, children }: { href: string, children: React.Re
 }
 
 
+
 export default async function Page() {
   return (
     <div className="flex flex-col w-full mb-16 gap-12">
@@ -265,9 +266,9 @@ export default async function Page() {
                     <MdGroups className="w-10 h-10" />
                   </Button>
                   <div className="flex flex-col gap-0.5">
-                    <p className="text-xl font-bold text-t1">Bring the groupchat to the blockchain</p>
+                    <p className="text-xl font-bold text-t1">Escape the server</p>
                     <p className="text-lg text-t2">
-                      Create a multiplayer gallery for the memes, art, and culture your community is already creating.
+                      Create multiplayer onchain galleries for the memes, art, and culture your community is already creating.
                     </p>
                   </div>
                 </div>
@@ -393,163 +394,7 @@ export default async function Page() {
 
           </div>
         </div>
-
-        {/* <AutoplayCarousel>
-          <CarouselContent>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map(el => {
-              return (
-                <>
-                  <CarouselItem className="basis-1/4">
-                    <div className="flex flex-col gap-2 bg-base-100 rounded-lg p-2">
-                      <UplinkImage
-                        src={`https://uplink.mypinata.cloud/ipfs/QmQFD6r2VzjAcYTJPsCJVRomhg1g8YQoL9P1DE99mwoZNB`}
-                        alt="spc"
-                        width={400}
-                        height={400}
-                        sizes="30vw"
-                        className="rounded-lg"
-                        blur={false}
-                      />
-                      <p className="text-t2 text-sm">shark pickle cone t-shirt design - <a className="underline font-bold" href="https://warpcast.com/pip" target="_blank">pipe</a></p>
-                    </div>
-                  </CarouselItem>
-                  <CarouselItem className="basis-1/4">
-                    <div className="flex flex-col gap-2 bg-base-100 rounded-lg p-2">
-                      <UplinkImage
-                        src={`https://uplink.mypinata.cloud/ipfs/QmSApHjPGCS14BPBATjEK8PYu3tQApvesFg9WH2e4cadES`}
-                        alt="spc"
-                        width={400}
-                        height={400}
-                        sizes="30vw"
-                        className="rounded-lg"
-                        blur={false}
-                      />
-                      <p className="text-t2 text-sm">Artist program round 5 - <a className="underline font-bold" href="https://warpcast.com/pip" target="_blank">Görkem Emir</a></p>
-                    </div>
-                  </CarouselItem>
-                  <CarouselItem className="basis-1/4">
-                    <div className="flex flex-col gap-2 bg-base-100 rounded-lg p-2">
-                      <UplinkImage
-                        src={ArtistSubmission}
-                        alt="spc"
-                        width={400}
-                        height={400}
-                        sizes="30vw"
-                        className="rounded-lg"
-                        blur={false}
-                      />
-                      <p className="text-t2 text-sm">Vinnie Hager noggles - <a className="underline font-bold" href="https://twitter.com/pumey_arts" target="_blank">Pumey</a></p>
-                    </div>
-                  </CarouselItem>
-                </>
-              )
-            })}
-          </CarouselContent>
-        </AutoplayCarousel> */}
-        {/* <div className="flex flex-col gap-6">
-          <h1 className="text-3xl font-bold text-t2 text-center">
-            <span className="text-t1">Contests</span> to reward contributors, onboard new creatives, and unlock superusers.
-          </h1>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-6">
-          <ContestSubCardA />
-
-          <div className="w-full h-full min-h-[450px] flex flex-col gap-4 p-4 bg-base-100">
-            <Carousel>
-              <CarouselContent>
-                <CarouselItem className="basis-1/3">
-                  <div className="flex flex-col gap-2 bg-base-200 rounded-lg p-2">
-                    <UplinkImage
-                      src={`https://uplink.mypinata.cloud/ipfs/QmQFD6r2VzjAcYTJPsCJVRomhg1g8YQoL9P1DE99mwoZNB`}
-                      alt="spc"
-                      width={400}
-                      height={400}
-                      sizes="30vw"
-                      className="rounded-lg"
-                      blur={false}
-                    />
-                    <p className="text-t2 text-sm">shark pickle cone t-shirt design by <a className="underline font-bold" href="https://warpcast.com/pip" target="_blank">pipe</a></p>
-                  </div>
-                </CarouselItem>
-                <CarouselItem className="basis-1/3">...</CarouselItem>
-                <CarouselItem className="basis-1/3">...</CarouselItem>
-              </CarouselContent>
-            </Carousel>
-          </div>
-        </div> */}
       </div>
-      {/*
-        <ContestFeatureCard />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ContestSubCardA />
-          <ContestSubCardB >
-            <div className="absolute -top-10 right-0 left-0 sm:-top-16 sm:left-auto sm:-right-12 md:-top-10 md:-right-24  m-auto w-full max-w-[275px] md:max-w-[360px] animate-springUp z-10">
-              <div className="mockup-window bg-base-100 border border-border">
-                <div className="grid grid-cols-[32px_auto] md:grid-cols-[40px_auto] bg-base-200 p-4">
-                  <UplinkImage
-                    src={ArtistPfp}
-                    alt="artist pfp"
-                    width={50}
-                    height={50}
-                    sizes="5vw"
-                    className="rounded-full"
-                    blur={false}
-                  />
-                  <div className="flex-grow flex flex-col gap-2 ml-4">
-                    <p className="text-t1">
-                      <span className="text-primary">@vinniehager</span> noggles!
-                    </p>
-                    <div className="flex-grow flex flex-col items-center">
-                      <div className="relative w-full">
-                        <UplinkImage
-                          src={ArtistSubmission}
-                          alt="twitter submission"
-                          className="rounded-lg object-contain"
-                          width={600}
-                          priority
-                          blur={false}
-                        />
-                      </div>
-                      <div className="text-sm text-t2 italic font-[500] self-start text-left">
-                        <Link
-                          href="https://twitter.com/pumey_arts"
-                          target="_blank"
-                          className="hover:underline"
-                          prefetch={false}
-                          draggable={false}
-                        >
-                          @pumey_arts -
-                        </Link>{" "}
-                        Vinnie Hager x Nouns contest
-                      </div>
-                    </div>
-                    <div className="w-full h-0.5 bg-border"></div>
-                    <div className="flex items-center justify-start w-full">
-                      <HiPhoto className="w-5 h-5 opacity-50" />
-                      <BiPlusCircle className="w-5 h-5 opacity-50 ml-auto mr-2" />
-                      <button
-                        className="btn btn-xs btn-primary normal-case"
-                        disabled
-                      >
-                        Submitting
-                        <div
-                          className="text-xs ml-1 inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                          role="status"
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ContestSubCardB>
-        </div>
-        <MintboardCard />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MintboardSubCardA />
-          <MintboardSubCardB />
-        </div>
-      </div> */}
     </div >
   );
 }

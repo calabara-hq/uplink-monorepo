@@ -1,10 +1,11 @@
 'use client';;
-import { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
 import { HiPhoto } from 'react-icons/hi2';
 import UplinkImage from "@/lib/UplinkImage"
 import { Input } from '../DesignKit/Input';
 import { Label } from '../DesignKit/Label';
+import { useDropzone } from 'react-dropzone';
 
 export const AvatarUpload = ({
     fieldLabel,
@@ -37,42 +38,72 @@ export const AvatarUpload = ({
         ipfsImageCallback(imageURI)
     }, [imageURI])
 
+
+    const onDrop = async (acceptedFiles: File[]) => {
+        await upload(acceptedFiles[0]);
+    };
+
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+    });
+
     return (
         <div className="w-full h-full">
-            <Input
-                placeholder="asset"
-                type="file"
-                accept={acceptedFormats.join(",")}
-                className="hidden"
-                onChange={async (event) =>
-                    await upload(event)
-                }
-                ref={imageUploader}
-            />
-            <Label>
-                {fieldLabel}
-            </Label>
-            {/* <div className="absolute"> */}
+            <Label>{fieldLabel}</Label>
             <div
-                className="relative w-28 h-28 rounded-lg cursor-pointer flex justify-center items-center bg-base-200 hover:bg-base-300 overflow-hidden"
-                onClick={() => imageUploader.current?.click()}
-            >
+                {...getRootProps({
+                    className:
+                        'relative w-28 h-28 rounded-lg cursor-pointer flex justify-center items-center bg-base-200 hover:bg-base-300 overflow-hidden',
+                })}>
                 {imageObjectURL || initialData ? (
                     <UplinkImage src={imageObjectURL || initialData} alt="space avatar" fill className="object-contain rounded-lg" />
                 ) : (
-                    <div className="flex justify-center items-center w-full h-full">
+                    <React.Fragment>
+                        <Input {...getInputProps()} />
                         <HiPhoto className="w-8 h-8" />
-                    </div>
+                    </React.Fragment>
                 )}
+
             </div>
-            {/* </div> */}
-            {error && (
-                <Label>
-                    <p className="text-error">
-                        {error}
-                    </p>
-                </Label>
-            )}
         </div>
-    );
+    )
+
+    // return (
+    //     <div className="w-full h-full">
+    //         <Input
+    //             placeholder="asset"
+    //             type="file"
+    //             accept={acceptedFormats.join(",")}
+    //             className="hidden"
+    //             onChange={async (event) =>
+    //                 await upload(event)
+    //             }
+    //             ref={imageUploader}
+    //         />
+    //         <Label>
+    //             {fieldLabel}
+    //         </Label>
+    //         {/* <div className="absolute"> */}
+    //         <div
+    //             className="relative w-28 h-28 rounded-lg cursor-pointer flex justify-center items-center bg-base-200 hover:bg-base-300 overflow-hidden"
+    //             onClick={() => imageUploader.current?.click()}
+    //         >
+    //             {imageObjectURL || initialData ? (
+    //                 <UplinkImage src={imageObjectURL || initialData} alt="space avatar" fill className="object-contain rounded-lg" />
+    //             ) : (
+    //                 <div className="flex justify-center items-center w-full h-full">
+    //                     <HiPhoto className="w-8 h-8" />
+    //                 </div>
+    //             )}
+    //         </div>
+    //         {/* </div> */}
+    //         {error && (
+    //             <Label>
+    //                 <p className="text-error">
+    //                     {error}
+    //                 </p>
+    //             </Label>
+    //         )}
+    //     </div>
+    // );
 }

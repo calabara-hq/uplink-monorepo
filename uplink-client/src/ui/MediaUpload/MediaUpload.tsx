@@ -1,12 +1,14 @@
 'use client';
-import { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
 import Image from "next/image";
-import { HiCamera, HiOutlineTrash, HiPhoto } from 'react-icons/hi2';
+import { HiOutlineTrash, HiPhoto } from 'react-icons/hi2';
 import { RenderStandardVideoWithLoader } from '@/ui/VideoPlayer';
 import { BiSolidCircle } from 'react-icons/bi';
 import { Label } from '../DesignKit/Label';
 import { Button } from '../DesignKit/Button';
+import { useDropzone } from 'react-dropzone';
+import { Input } from '../DesignKit/Input';
 
 
 export const MediaUpload = ({
@@ -26,7 +28,7 @@ export const MediaUpload = ({
     maxVideoDuration?: number
     label?: string
 }) => {
-    const imageUploader = useRef<HTMLInputElement>(null);
+
     const {
         upload,
         removeMedia,
@@ -41,6 +43,14 @@ export const MediaUpload = ({
         animationURI,
         mimeType,
     } = useMediaUpload(acceptedFormats, maxVideoDuration);
+
+    const onDrop = async (acceptedFiles: File[]) => {
+        await upload(acceptedFiles[0]);
+    };
+
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+    });
 
     useEffect(() => {
         uploadStatusCallback(isUploading)
@@ -80,7 +90,7 @@ export const MediaUpload = ({
                     }
                 />
                 {thumbnailOptions?.length > 0 && (
-                    <>
+                    <React.Fragment>
                         <Label>Thumbnail</Label>
 
                         <div className="flex flex-col sm:flex-row gap-2 items-center justify-center bg-base-100 border border-border p-2 w-full m-auto rounded">
@@ -110,7 +120,7 @@ export const MediaUpload = ({
                                 })}
                             </div>
                         </div>
-                    </>
+                    </React.Fragment>
                 )}
             </div>
         );
@@ -141,24 +151,14 @@ export const MediaUpload = ({
     } else {
         return (
             <div className="w-full h-full flex flex-col gap-2">
-                <input
-                    placeholder="asset"
-                    type="file"
-                    accept={acceptedFormats.join(",")}
-                    className="hidden"
-                    onChange={async (event) =>
-                        await upload(event)
-                    }
-                    ref={imageUploader}
-                />
                 <Label>{label}</Label>
                 <div
-                    className="w-full h-56 cursor-pointer flex justify-center items-center hover:bg-accent transition-all rounded-xl border-2 border-border border-dashed"
-                    onClick={() => imageUploader.current?.click()}
-                >
-                    <div className="flex justify-center items-center w-full h-full">
-                        <HiPhoto className="w-8 h-8" />
-                    </div>
+                    {...getRootProps({
+                        className:
+                            'w-full h-56 cursor-pointer flex justify-center items-center hover:bg-accent transition-all rounded-xl border-2 border-border border-dashed',
+                    })}>
+                    <Input {...getInputProps()} />
+                    <HiPhoto className="w-8 h-8" />
                 </div>
             </div>
         );

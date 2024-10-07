@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from "react";
 import { z } from "zod";
 import { getTokenInfo } from "@/lib/tokenInfo";
-import { isAddress } from "viem";
+import { Address, isAddress } from "viem";
 
 const managedTokenSchema = z.object({
     chainId: z.union([z.literal(8453), z.literal(84532)]),
@@ -64,7 +64,7 @@ export const useManagedTokenEditor = (initialState?: ManagedTokenInput) => {
 
     useEffect(() => {
         if (isAddress(managedToken.address)) {
-            getTokenInfo({ contractAddress: managedToken.address, chainId: managedToken.chainId }).then(res => {
+            getTokenInfo({ contractAddress: managedToken.address as Address, chainId: managedToken.chainId }).then(res => {
                 dispatch({
                     type: "SET_FIELD",
                     payload: { field: "symbol", value: res.symbol },

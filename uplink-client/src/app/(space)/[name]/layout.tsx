@@ -16,7 +16,7 @@ export async function generateMetadata({
       description: `Create with ${space.displayName} on Uplink`,
       images: [
         {
-          url: `api/space/${name}/space_metadata`,
+          url: `api/space?name=${name}`,
           width: 600,
           height: 600,
           alt: `${space.displayName} logo`,
