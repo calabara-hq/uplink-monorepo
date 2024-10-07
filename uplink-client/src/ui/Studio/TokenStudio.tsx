@@ -2,7 +2,7 @@
 import { useCreateTokenReducer } from "@/hooks/useCreateTokenReducer"
 import { MediaUpload } from "@/ui/MediaUpload/MediaUpload";
 import OnchainButton from "@/ui/OnchainButton/OnchainButton";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { TbLoader2 } from "react-icons/tb";
 import { maxUint256 } from "viem"
 import toast from "react-hot-toast";
@@ -155,7 +155,7 @@ export const CreateToken = ({ contractId, spaceSystemName, allowIntents = true }
                         <h1 className="text-3xl font-bold text-t1">Create Post</h1>
                     </div>
 
-                    <div className="flex flex-col max-w-xs">
+                    <div className="flex flex-col max-w-xs gap-2">
                         <MediaUpload
                             acceptedFormats={['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml', 'video/mp4']}
                             uploadStatusCallback={uploadStatusCallback}
@@ -277,7 +277,7 @@ const StudioSidebar = ({ channel, areIntentsEnabled, isIntent, setIsIntent, chil
         <div className="flex flex-col gap-2 p-4 bg-base-100 rounded-lg self-start md:max-w-[800px] min-w-[300px]">
             <SubmissionRequirements channel={channel} />
             {areIntentsEnabled &&
-                <>
+                <React.Fragment>
                     <div className="flex flex-row gap-2 items-center justify-between">
                         <p><b>Sponsor post onchain</b></p>
                         <Toggle checked={!isIntent} onCheckedChange={(isChecked) => setIsIntent(!isChecked)} />
@@ -293,7 +293,7 @@ const StudioSidebar = ({ channel, areIntentsEnabled, isIntent, setIsIntent, chil
                         </p>
                     </div>
                     <div className="bg-base-100 h-0.5 w-full" />
-                </>
+                </React.Fragment>
             }
 
             {children}

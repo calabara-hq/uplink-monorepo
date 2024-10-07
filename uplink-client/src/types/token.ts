@@ -30,10 +30,6 @@ export const filterTokenProperties = (tokens: IToken[]): IToken[] => {
     });
 }
 
-export const isNativeToken = (token: any): token is INativeToken => {
-    return (token.type === "ETH" && token.symbol === "ETH" && token.decimals === 18);
-}
-
 export const isERCToken = (token: any): token is IERCToken => {
     return token.type === "ERC20" || token.type === "ERC721" || token.type === "ERC1155";
 }

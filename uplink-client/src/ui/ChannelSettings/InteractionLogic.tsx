@@ -8,7 +8,7 @@ import { DynamicLogicInputs, getDynamicLogicAddress, NATIVE_TOKEN } from "@tx-ki
 import { Button } from "../DesignKit/Button";
 import { useTokenInfo } from "@/hooks/useTokenInfo";
 import { HiPencil } from "react-icons/hi2";
-import { encodeAbiParameters, parseUnits, zeroAddress } from "viem";
+import { Address, encodeAbiParameters, parseUnits, zeroAddress } from "viem";
 import { Input } from "../DesignKit/Input";
 import { asPositiveFloat } from "@/ui/MintboardSettings/MintboardSettings";
 import { asPositiveInt } from "../Studio/StudioTools";
@@ -40,7 +40,7 @@ const singleLogicRuleSchema = z.object({
 }).transform(async (input, ctx) => {
     const fetchTokenDecimals = async (token: string) => {
         if (token === NATIVE_TOKEN) return 18;
-        const { decimals } = await getTokenInfo({ contractAddress: token, chainId: input.chainId })
+        const { decimals } = await getTokenInfo({ contractAddress: token as Address, chainId: input.chainId })
         return decimals;
     }
 
@@ -89,7 +89,6 @@ const interactionLogicSchema = z.object({
         console.log(e)
     }
 
-    console.log(input)
     return input;
 
 });

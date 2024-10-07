@@ -10,7 +10,7 @@ const ERC721Interface = '0x80ac58cd';
 const ERC1155Interface = '0xd9b67a26';
 
 
-export const getTokenInfo = async ({ contractAddress, chainId }: { contractAddress: string, chainId: ChainId }) => {
+export const getTokenInfo = async ({ contractAddress, chainId }: { contractAddress: Address, chainId: ChainId }) => {
     let symbol: string = '';
     let decimals: number = 0;
     let type: string = 'ERC20';  // Default to ERC20
@@ -21,35 +21,35 @@ export const getTokenInfo = async ({ contractAddress, chainId }: { contractAddre
         contracts: [
             // @ts-ignore
             {
-                address: contractAddress as Address,
+                address: contractAddress,
                 abi: erc20Abi,
                 functionName: 'symbol',
                 args: [],
                 chainId
             },
             {
-                address: contractAddress as Address,
+                address: contractAddress,
                 abi: erc20Abi,
                 functionName: 'decimals',
                 args: [],
                 chainId
             },
             {
-                address: contractAddress as Address,
+                address: contractAddress,
                 abi: erc165Abi,
                 functionName: 'supportsInterface',
                 args: [ERC721Interface],  // Check for ERC721 support
                 chainId
             },
             {
-                address: contractAddress as Address,
+                address: contractAddress,
                 abi: erc165Abi,
                 functionName: 'supportsInterface',
                 args: [ERC1155Interface],  // Check for ERC1155 support
                 chainId
             },
             {
-                address: contractAddress as Address,
+                address: contractAddress,
                 abi: channelAbi,
                 functionName: 'name',
                 args: [],
@@ -61,7 +61,6 @@ export const getTokenInfo = async ({ contractAddress, chainId }: { contractAddre
         console.log(err);
     });
 
-    console.log(results);
     if (results) {
         symbol = results[0].error ? '' : results[0].result as string;
         decimals = results[1].error ? 0 : results[1].result as number;

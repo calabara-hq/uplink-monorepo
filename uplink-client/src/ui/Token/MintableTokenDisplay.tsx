@@ -361,24 +361,24 @@ export const MintExpandedDisplay = ({
 
     return (
         <React.Fragment>
-            <div className="flex flex-col gap-2 p-4 sm:p-0">
-                <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.5fr] gap-6 w-full ">
+            <div className="flex flex-col gap-2 p-4 sm:p-0 ">
+                <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-6 w-full items-end">
                     <div className="flex flex-col gap-4 items-center justify-center flex-grow-0 m-auto w-full">
-                        <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} styleOverrides="shadow-lg shadow-black" />
+                        <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} size="lg" />
                     </div>
-                    <div className="flex flex-col gap-8 justify-start bg-base-100 p-2 rounded-lg h-fit">
+                    <div className="flex flex-col gap-8 justify-start h-fit">
                         <div className="flex flex-col gap-4 w-full">
                             <div className="flex flex-col gap-2">
-                                <p className="line-clamp-3 font-bold text-xl break-words">{metadata.name}</p>
+                                <p className="font-bold text-2xl break-words">{metadata.name}</p>
                                 <div className="flex gap-2 items-center">
-                                    <div className="flex gap-2 items-center text-sm text-t2 bg-base-100 rounded-lg p-1 w-fit">
+                                    <div className="flex gap-2 items-center text-sm text-t2 rounded-lg p-1 w-fit">
                                         <Avatar address={creator} size={32} />
                                         <AddressOrEns address={creator} />
                                     </div>
-                                    <ShareButton displayMode="expanded" token={token} onClick={handleShare} className="bg-base-100" />
+                                    <ShareButton displayMode="expanded" token={token} onClick={handleShare} className="h-8 p-2 border-none" />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-3 gap-2">
+                            {/* <div className="grid grid-cols-3 gap-2">
                                 <div className="flex flex-col justify-start">
                                     <p className="text-t2">Network</p>
                                     <div className="flex gap-2 items-center">
@@ -402,11 +402,9 @@ export const MintExpandedDisplay = ({
                                         <RenderMaxSupply maxSupply={maxSupply} />
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                             {!areEditionsSoldOut && !isMintPeriodOver &&
                                 <div className="flex flex-col gap-2 w-full">
-                                    <div className="p-1" />
-                                    <div className="w-full bg-base-100 h-[1px]" />
                                     <div className="grid grid-cols-1 gap-2 w-full justify-between">
                                         <CounterInput count={mintQuantity} setCount={setMintQuantity} max={availableEditions.toString()} />
                                         <OnchainButton

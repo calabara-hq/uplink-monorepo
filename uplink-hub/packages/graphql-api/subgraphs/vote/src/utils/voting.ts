@@ -182,34 +182,26 @@ export const calculateTotalVotingPower = async (
 ) => {
     if (!user || !user.id) return new Decimal(0);
 
-    const cachedVotingPower = await getCacheTotalVotingPower(user, contestId);
-    if (cachedVotingPower !== null) return deadlineAdjustedVotingPower(cachedVotingPower, deadlines);
+    // not cached
+    const tokenController = new TokenController(process.env.ALCHEMY_KEY!, chainId);
+    const [arcadeVotingStrategy, weightedVotingStrategy] = await Promise.all([
+        fetchVotingPolicy(contestId, 'arcade'),
+        fetchVotingPolicy(contestId, 'weighted'),
+    ]);
+    if (!arcadeVotingStrategy && !weightedVotingStrategy) return new Decimal(0);
+    const blockNum = await tokenController.calculateBlockFromTimestamp(deadlines.snapshot);
+    const [arcadeVotingPowerUserValues, weightedVotingPowerUserValues] = await Promise.all([
+        computeArcadeVotingPowerUserValues(user, blockNum, arcadeVotingStrategy, tokenController),
+        computeWeightedVotingPowerUserValues(user, blockNum, weightedVotingStrategy, tokenController),
+    ]);
 
+    // total vp is the max(max arcade vp, max weighted vp)
 
+    const totalTheoreticalVotingPower = new Decimal(Decimal.max(...arcadeVotingPowerUserValues, ...weightedVotingPowerUserValues));
+    // cache the total theoretical vp for the user / contest
+    // return the deadline adjusted vp
 
-    else { // not cached
-        const tokenController = new TokenController(process.env.ALCHEMY_KEY!, chainId);
-        const [arcadeVotingStrategy, weightedVotingStrategy] = await Promise.all([
-            fetchVotingPolicy(contestId, 'arcade'),
-            fetchVotingPolicy(contestId, 'weighted'),
-        ]);
-        if (!arcadeVotingStrategy && !weightedVotingStrategy) return new Decimal(0);
-        const blockNum = await tokenController.calculateBlockFromTimestamp(deadlines.snapshot);
-        const [arcadeVotingPowerUserValues, weightedVotingPowerUserValues] = await Promise.all([
-            computeArcadeVotingPowerUserValues(user, blockNum, arcadeVotingStrategy, tokenController),
-            computeWeightedVotingPowerUserValues(user, blockNum, weightedVotingStrategy, tokenController),
-        ]);
-
-        // total vp is the max(max arcade vp, max weighted vp)
-
-        const totalTheoreticalVotingPower = new Decimal(Decimal.max(...arcadeVotingPowerUserValues, ...weightedVotingPowerUserValues));
-        // cache the total theoretical vp for the user / contest
-        // return the deadline adjusted vp
-
-        setCacheTotalVotingPower(user, contestId, totalTheoreticalVotingPower);
-        return deadlineAdjustedVotingPower(totalTheoreticalVotingPower, deadlines);
-
-    }
+    return deadlineAdjustedVotingPower(totalTheoreticalVotingPower, deadlines);
 
     // cache the total vp for the user / contest
 

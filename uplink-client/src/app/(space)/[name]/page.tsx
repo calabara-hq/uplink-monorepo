@@ -382,7 +382,7 @@ const Contests = ({ contestsV1, contestsV2, spaceName, spaceLogo }: { contestsV1
   if (contestsV1.length + contestsV2.length === 0) {
     return (
       <div className="w-9/12 sm:w-full m-auto flex flex-col gap-2">
-        <div className="flex flex-col gap-2 items-center m-auto mt-10">
+        <div className="flex flex-col gap-2 items-center m-auto mt-10 text-center">
           <p className="text-t1 text-lg font-bold">
             This space has not yet hosted any contests.
           </p>

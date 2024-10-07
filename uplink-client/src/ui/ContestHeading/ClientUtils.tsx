@@ -105,7 +105,7 @@ export const SmallScreenToolbar = ({ contractId }: { contractId: ContractID }) =
                         <div className="bg-base-100 rounded-lg p-2 flex-col text-t2">
                             <p>This contest is accepting submissions for the next <b>{stateRemainingTime}</b>.</p>
                             <div className="-ml-2">
-                                <LogicDisplay logicObject={channel.minterLogic} chainId={chainId} creditContextLabel="entries" />
+                                <LogicDisplay logicObject={channel.creatorLogic} chainId={chainId} creditContextLabel="entries" />
                             </div>
                         </div>
                         <StickyContainer>

@@ -82,10 +82,10 @@ export const useMediaUpload = (acceptedFormats: string[], maxDuration?: number) 
 
     }
 
-    const upload = async (event: any) => {
+    const upload = async (file: File) => {
         try {
             setIsUploading(true);
-            const file = event.target.files[0];
+
             if (!file) {
                 clearFields();
                 throw new MediaUploadError({ code: 1, message: 'No file selected' })

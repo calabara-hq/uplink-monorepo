@@ -1,5 +1,5 @@
 import { Address, Hex } from "viem";
-import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk"
+import { DeferredTokenIntentWithSignature, NATIVE_TOKEN } from "@tx-kit/sdk"
 import { IChannel, IUpgradePath } from "@tx-kit/sdk/subgraph";
 import { ChainId } from "./chains";
 
@@ -124,4 +124,8 @@ export const isInfiniteChannel = (channel: Channel) => {
 
 export const isFiniteChannel = (channel: Channel) => {
     return channel.transportLayer.type === "finite";
+}
+
+export const isNativeToken = (address: Address) => {
+    return address === NATIVE_TOKEN;
 }

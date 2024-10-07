@@ -9,7 +9,7 @@ import { IERCToken } from "@/types/token";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/ui/DesignKit/Table";
 import { Input } from "../DesignKit/Input";
 import { Button } from "../DesignKit/Button";
-import { parseUnits } from "viem";
+import { Address, parseUnits } from "viem";
 import { validateFiniteTransportLayer } from "@tx-kit/sdk/utils";
 import { MdOutlineDelete } from "react-icons/md";
 import { Info } from "../DesignKit/Info";
@@ -31,7 +31,7 @@ const rewardsSchema = z.object({
     const fetchTokenDecimals = async (token: string) => {
         if (token === NATIVE_TOKEN) return 18;
 
-        const { decimals } = await getTokenInfo({ contractAddress: token, chainId: data.chainId }).catch(() => {
+        const { decimals } = await getTokenInfo({ contractAddress: token as Address, chainId: data.chainId }).catch(() => {
             return { decimals: 0 }
         })
         return decimals;
@@ -50,7 +50,6 @@ const rewardsSchema = z.object({
     }
 
     for (let i = 0; i < allocations.length; i++) {
-        console.log(allocations[i])
         if (allocations[i] === BigInt(0)) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
@@ -73,7 +72,6 @@ const rewardsSchema = z.object({
 
 
     try {
-        console.log(rewards)
         validateFiniteTransportLayer({
             rewards,
             createStartInSeconds: 1, // don't care about timing validation here. use random values

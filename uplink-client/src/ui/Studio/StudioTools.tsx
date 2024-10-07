@@ -81,7 +81,7 @@ export const TextArea = ({
 
 export const BasicInput = ({ value, label, placeholder, onChange, error, inputType }) => {
     return (
-        <div>
+        <div className="flex flex-col gap-2">
             <Label>{label}</Label>
             <Input
                 variant={error ? "error" : "outline"}
