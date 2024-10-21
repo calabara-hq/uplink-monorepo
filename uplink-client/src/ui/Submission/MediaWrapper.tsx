@@ -7,16 +7,6 @@ export const ImageWrapper = ({ children }) => {
 };
 
 
-
-
-// export const RectVideoWrapper = ({ children }) => {
-//   return (
-//     <div className="w-full relative pt-[66%]">
-//       <figure className="absolute inset-0 overflow-hidden">{children}</figure>
-//     </div>
-//   );
-// };
-
 export const RectVideoWrapper = ({ children }) => {
   return (
     <div className="w-full relative">

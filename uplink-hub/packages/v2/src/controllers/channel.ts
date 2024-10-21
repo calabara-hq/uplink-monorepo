@@ -98,6 +98,7 @@ export const getChannel = async (req: Request, res: Response, next: NextFunction
 }
 
 
+
 export const getTrendingChannels = async (req: Request, res: Response, next: NextFunction) => {
     const chainId = req.query.chainId as string
 
@@ -144,6 +145,65 @@ export const getTrendingChannels = async (req: Request, res: Response, next: Nex
         next(err)
     }
 }
+
+export const getActiveContests = async (req: Request, res: Response, next: NextFunction) => {
+    const chainId = req.query.chainId as string
+
+    try {
+        const { downlinkClient } = clientByChainId(parseInt(chainId))
+
+        const activeIDsList = await downlinkClient.customQuery(
+            gql`
+                query($currentTimestamp: Int!) {
+                    finiteTransportConfigs(where: { mintEnd_gt: $currentTimestamp }) {
+                        id
+                    }
+                }`,
+            { currentTimestamp: Math.floor(Date.now() / 1000) }).then(data => data.finiteTransportConfigs.map(data => data.id))
+
+
+        const activeChannels = await downlinkClient.customQuery(
+            gql`
+                    query($activeIDsList: [String!]!) {
+                        channels(
+                            where: { id_in: $activeIDsList}
+                        )
+                         {
+                            id
+                            tokens(first: 1) {
+                                ...TokenFragment
+                            }
+                        }   
+                        ${TOKEN_FRAGMENT}
+                    }`,
+            { activeIDsList })
+
+
+        const response = await Promise.all(activeChannels.channels.map(async (channel: any) => {
+
+            const [tokens, space] = await Promise.all([
+                Promise.all(channel.tokens.map(async (token: any) => {
+                    return parseV2Metadata(formatGqlTokens([token])[0])
+                })),
+                dbGetSpaceByChannelAddress(channel.id)
+            ])
+
+            return {
+                ...channel,
+                space,
+                chainId,
+                tokens
+            }
+        }))
+
+        res.send(response.filter(data => data.space != undefined)).status(200)
+
+    } catch (err) {
+        next(err)
+    }
+}
+
+
 
 /// insert new channel into db
 export const insertSpaceChannel = async (req: ContexedRequest, res: Response, next: NextFunction) => {
