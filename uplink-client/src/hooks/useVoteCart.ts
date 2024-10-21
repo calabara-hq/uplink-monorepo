@@ -150,7 +150,7 @@ export const useVoteCart = (contractId: ContractID) => {
             channelAddress: contractAddress,
             to: walletClient.account.address,
             tokenIds: toMintTokenIds,
-            amounts: toMintTokenBalances,
+            amounts: toMintTokenBalances.map(amt => Number(amt)),
             mintReferral: chainId === 8453 ? "0x81c13C64B8742270b993b3E08eD8aFA9501180a2" : "0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C",
             data: "",
             ...(totalValueRequired ? { transactionOverrides: { value: totalValueRequired } } : {})

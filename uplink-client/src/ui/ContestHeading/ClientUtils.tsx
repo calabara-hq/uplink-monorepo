@@ -14,6 +14,7 @@ import { TbLoader2 } from "react-icons/tb";
 import { useSettleFiniteChannel } from "@tx-kit/hooks";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 import toast from "react-hot-toast";
+import { Address } from "viem";
 
 
 const Skeleton = () => {
@@ -82,7 +83,7 @@ export const SmallScreenToolbar = ({ contractId }: { contractId: ContractID }) =
     }, [status])
 
     const handleSettle = async () => {
-        await settle({ channelAddress: contractAddress });
+        await settle({ channelAddress: contractAddress as Address });
     }
 
 
