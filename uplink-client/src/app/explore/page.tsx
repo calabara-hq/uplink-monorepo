@@ -3,12 +3,11 @@ import { Metadata } from "next";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
 import UplinkImage from "@/lib/UplinkImage"
-import { ActiveContest } from "@/lib/fetch/fetchActiveContests";
 import { SearchSpaces } from "./client";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { Card, CardContent, CardFooter } from "@/ui/DesignKit/Card";
 import { CardHeader, CardTitle } from "@/ui/Card/Card";
-import { fetchTrendingChannels } from "@/lib/fetch/fetchChannel";
+import { fetchTrendingChannels, fetchActiveContests } from "@/lib/fetch/fetchChannel";
 import { Channel, concatContractID } from "@/types/channel";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { Space } from "@/types/space";
@@ -17,6 +16,7 @@ import { AddressOrEns, Avatar } from "@/ui/AddressDisplay/AddressDisplay";
 import { TokenCard } from "@/ui/Token/Card";
 import { Button } from "@/ui/DesignKit/Button";
 import { HiTrendingUp } from "react-icons/hi";
+import { MdAccessTime, MdAccessTimeFilled } from "react-icons/md";
 
 export const metadata: Metadata = {
   openGraph: {
@@ -37,13 +37,6 @@ export const metadata: Metadata = {
   },
 };
 
-const PromptSummary = async ({ contest }: { contest: ActiveContest }) => {
-  return (
-    <h2 className="line-clamp-1 text-center">
-      {contest.promptData.title}
-    </h2>
-  );
-};
 
 
 // const ContestCard = ({
@@ -123,7 +116,7 @@ const TrendingChannels = async () => {
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">Trending</h1>
+          <h1 className="text-2xl font-bold">Trending mintboards</h1>
           <HiTrendingUp className="w-6 h-6 text-success" />
         </div>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
@@ -133,6 +126,67 @@ const TrendingChannels = async () => {
 
             return (
               <Link key={index} href={`${channel.space.name}/mintboard/${concatContractID({ contractAddress: channel.id, chainId: channel.chainId })}`} draggable={false} className="w-full h-full">
+                <ColorCards imageUrl={logoUrl} key={index} className="p-4">
+
+                  <div className="flex flex-col gap-2 items-center justify-between h-full rounded-xl bg-black/[.25] p-4 overflow-hidden">
+                    <div className="w-[112px] h-[112px] flex items-center justify-center overflow-hidden rounded-xl">
+                      <div className="relative w-28 h-28">
+                        <UplinkImage
+                          src={logoUrl}
+                          fill
+                          alt="spaceLogo"
+                          className="object-cover rounded-xl"
+                          sizes={"10vw"}
+                        />
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg text-center">{channel.tokens[0].metadata.name}</CardTitle>
+
+                    <CardFooter className="flex flex-col gap-2 p-0">
+                      <div className='flex flex-row gap-2 items-center -space-x-4 w-full px-2 overflow-hidden'>
+                        {channel.tokens.slice(1, 10).map(token => {
+                          return (
+                            <div key={token.id} className='w-7 h-7 relative'>
+                              <UplinkImage
+                                src={parseIpfsUrl(token.metadata.image).gateway}
+                                fill
+                                alt="spaceLogo"
+                                className="object-cover rounded-full"
+                                sizes={"10vw"}
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </CardFooter>
+                  </div>
+                </ColorCards>
+              </Link>
+
+            );
+          })}
+        </div>
+      </div>
+    );
+};
+
+const ActiveContests = async () => {
+  let activeContests = await fetchActiveContests(8453)
+
+  if (activeContests.length > 0)
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">Active contests</h1>
+          <MdAccessTimeFilled className="w-6 h-6 text-t1" />
+        </div>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 auto-rows-fr w-full ">
+          {activeContests.map(async (channel: Channel & { space: Space }, index: number) => {
+
+            const logoUrl = parseIpfsUrl(channel.tokens[0].metadata.image).gateway
+
+            return (
+              <Link key={index} href={`${channel.space.name}/contest/${concatContractID({ contractAddress: channel.id, chainId: channel.chainId })}`} draggable={false} className="w-full h-full">
                 <ColorCards imageUrl={logoUrl} key={index} className="p-4">
 
                   <div className="flex flex-col gap-2 items-center justify-between h-full rounded-xl bg-black/[.25] p-4 overflow-hidden">
@@ -316,6 +370,9 @@ export default async function Page() {
         </Suspense>
         <Suspense fallback={<SpaceListSkeleton />}>
           <TrendingChannels />
+        </Suspense>
+        <Suspense fallback={<SpaceListSkeleton />}>
+          <ActiveContests />
         </Suspense>
         <Suspense fallback={<SpaceListSkeleton />}>
           {/* <FeaturedMints /> */}

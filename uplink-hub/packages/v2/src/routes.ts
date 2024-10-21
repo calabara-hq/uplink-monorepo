@@ -66,6 +66,7 @@ v2.get('/singleTokenV1', tokenController.getSingleTokenV1)
 v2.get('/singleTokenV2', tokenController.getSingleTokenV2)
 v2.get('/singleTokenIntent', tokenController.getSingleTokenIntent)
 v2.get('/explore_trending', channelController.getTrendingChannels)
+v2.get('/explore_activeContests', channelController.getActiveContests)
 v2.get('/featured_mints', tokenController.getFeaturedMints)
 
 v2.get('/userOwnedTokens', userController.getUserOwnedTokens)
