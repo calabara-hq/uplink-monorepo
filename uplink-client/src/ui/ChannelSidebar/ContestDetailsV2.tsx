@@ -361,7 +361,7 @@ const ContestDetailsV2 = ({
 
 
     const handleSettle = async () => {
-        await settle({ channelAddress: contractAddress });
+        await settle({ channelAddress: contractAddress as Address });
     }
 
     return (
