@@ -31,7 +31,7 @@ export default function Sidebar() {
       /> */}
       <NewButton />
       <div className="mt-auto" />
-      <SideBarIcon
+      {/* <SideBarIcon
         icon={<FaTwitter className="h-5 w-5" />}
         text="Twitter"
         path={"https://twitter.com/uplinkwtf"}
@@ -60,7 +60,7 @@ export default function Sidebar() {
         text="Github"
         path={"https://github.com/calabara-hq/uplink-monorepo"}
         external
-      />
+      /> */}
       <a className="ml-3" target="_blank" href="https://nouns.wtf">
         <div className="w-8 h-8">
           <svg
