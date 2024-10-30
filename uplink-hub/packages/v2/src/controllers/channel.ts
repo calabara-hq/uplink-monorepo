@@ -21,8 +21,6 @@ export const getSpaceChannels = async (req: Request, res: Response, next: NextFu
 
         const dbChannelsResponse = await dbGetChannelsBySpaceName(spaceName)
 
-
-
         const channelsByChainId = getSupportedChains().map(chainId => {
             const channelIds = dbChannelsResponse.filter(channel => channel.chainId === chainId).map(channel => channel.channelAddress.toLowerCase())
             return {

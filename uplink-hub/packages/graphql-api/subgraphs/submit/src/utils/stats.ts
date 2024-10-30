@@ -1,5 +1,4 @@
 
-import { StatEditions, ZoraEdition } from "../__generated__/resolvers-types";
 import { dbGetEditionsBySpaceName, dbUserByAddress } from "./database.js"
 // query total editions by space name
 
@@ -44,6 +43,5 @@ export const spaceStatistics = async (name: string) => {
         totalMints,
         topMintsUser: user_topMintsCreator,
         topAppearanceUser: user_topAppearanceCreator
-        
     };
 };

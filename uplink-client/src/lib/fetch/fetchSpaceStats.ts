@@ -1,52 +1,19 @@
 import { SpaceStats } from "@/types/spaceStats";
-import handleNotFound from "../handleNotFound";
+import { ChainId } from "@/types/chains";
 
-const fetchSpaceStats = async (spaceName: string): Promise<SpaceStats> => {
-    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/graphql`, {
-        method: "POST",
+
+
+const fetchSpaceStats = async (spaceName: string, chainId: ChainId): Promise<SpaceStats> => {
+    return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/space_stats?spaceName=${spaceName}&chainId=${chainId}`, {
+        method: "GET",
         headers: {
             "Content-Type": "application/json",
             "X-API-TOKEN": process.env.API_SECRET!,
         },
-        body: JSON.stringify({
-            query: `
-                query spaceStatistics($spaceName: String!){
-                    spaceStatistics(spaceName: $spaceName) {
-                        totalEditions
-                        totalMints
-                        topAppearanceUser {
-                            address
-                            userName
-                            displayName
-                            profileAvatar
-                        }
-                        topMintsUser {
-                            address
-                            userName
-                            displayName
-                            profileAvatar
-                        }
-                        editions {
-                            totalMints
-                            edition {
-                                id
-                                defaultAdmin
-                                saleConfig {
-                                    publicSaleStart
-                                }
-                            }
-                        }
-                    }
-                }`,
-            variables: {
-                spaceName,
-            },
-        }),
-        next: { tags: [`spaceStats/${spaceName}`], revalidate: 3600 },
-    })
-        .then((res) => res.json())
-        .then((res) => res.data.spaceStatistics)
-        .then(handleNotFound)
-};
+
+        next: { revalidate: 60, tags: [`stats/${spaceName}/${chainId}`] },
+
+    }).then(res => res.json())
+}
 
 export default fetchSpaceStats;
