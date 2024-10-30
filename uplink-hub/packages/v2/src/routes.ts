@@ -3,6 +3,7 @@ import * as channelController from './controllers/channel.js'
 import * as tokenController from './controllers/token.js'
 import * as utilitiesController from './controllers/utilities.js'
 import * as userController from './controllers/user.js'
+import * as spaceController from './controllers/space.js'
 
 const v2 = express();
 import cookie from 'cookie';
@@ -61,6 +62,7 @@ v2.get('/channel_tokensV2', tokenController.getChannelTokensV2)
 v2.get('/channel_tokenIntents', tokenController.getChannelTokenIntents)
 v2.get('/channel_popularTokens', tokenController.getChannelPopularTokens)
 v2.get('/channel_finiteTokensV2', tokenController.getFiniteChannelTokensV2)
+v2.get('/space_stats', spaceController.getSpaceStats)
 
 v2.get('/singleTokenV1', tokenController.getSingleTokenV1)
 v2.get('/singleTokenV2', tokenController.getSingleTokenV2)
