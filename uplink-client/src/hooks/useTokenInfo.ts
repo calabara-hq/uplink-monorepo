@@ -22,6 +22,13 @@ export const useTokenInfo = (tokenContract: string, chainId: ChainId) => {
                 setTokenType(res.type);
             })
         }
+
+        else if (checksummedAddress === NATIVE_TOKEN) {
+            setSymbol("ETH");
+            setDecimals(18);
+            setTokenType("native");
+        }
+
     }, [checksummedAddress, chainId])
 
     return {

@@ -22,7 +22,8 @@ import fetchSpaceChannels from "@/lib/fetch/fetchSpaceChannels";
 import { Channel, concatContractID, ContractID, isFiniteChannel, isInfiniteChannel } from "@/types/channel";
 import { fetchPopularTokens } from "@/lib/fetch/fetchTokensV2";
 import { IFiniteTransportConfig, ITokenMetadata } from "@tx-kit/sdk/subgraph";
-import { ContestStatusLabel } from "./client";
+import { ContestStatusLabel, FormatTokenStatistic } from "./client";
+import { isAddress } from "viem";
 
 const SpaceContestsSkeleton = () => {
   return (
@@ -196,7 +197,7 @@ const SpaceStatsSkeleton = () => {
 }
 
 const SpaceStats = async ({ name }: { name: string }) => {
-  const spaceStats = await fetchSpaceStats(name)
+  const spaceStats = await fetchSpaceStats(name, 8453)
 
   return (
     <Card className="bg-base border-border items-center w-full">
@@ -205,25 +206,25 @@ const SpaceStats = async ({ name }: { name: string }) => {
       </CardHeader>
       <CardContent className="">
         <div className="flex flex-row gap-2 items-center justify-between text-t2">
-          <p>Onchain Creations</p>
-          <p className="text-t1 font-bold">{compact_formatter.format(spaceStats.totalEditions)}</p>
+          <p>Total Mints</p>
+          <p className="text-t1 font-bold">{compact_formatter.format(spaceStats.totalMints)}</p>
         </div>
-        <div className="flex flex-row gap-2 items-center justify-between text-t2">
+
+        {Object.entries(spaceStats).map(([key, value]) => {
+          if (isAddress(key)) return (
+            <FormatTokenStatistic key={key} tokenAddress={key} amount={BigInt(value)} chainId={8453} />
+          )
+        })}
+
+        {/* <div className="flex flex-row gap-2 items-center justify-between text-t2">
           <p>Mints</p>
           <p className="text-t1 font-bold">{compact_formatter.format(spaceStats.totalMints)}</p>
         </div>
         <div className="flex flex-row gap-2 items-center justify-between text-t2">
           <p>Rewards</p>
           <p className="text-t1 font-bold">{round_formatter.format(spaceStats.totalMints * 0.000666)} ETH</p>
-        </div>
-        <div className="flex w-full justify-end pt-2">
-          <Link
-            href={`/${name}/stats`}
-            className="hover:underline text-blue-500 cursor-pointer"
-          >
-            + More
-          </Link>
-        </div>
+        </div> */}
+
       </CardContent>
     </Card>
   )
