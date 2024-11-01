@@ -1,49 +1,52 @@
 import { Request, Response, NextFunction } from 'express'
-import { db, dbGetChannelsBySpaceName, sqlOps } from '../utils/database.js'
+import { db, dbGetChannelsBySpaceName, dbSingleSpaceByName, sqlOps } from '../utils/database.js'
 
 import { TokenController } from "lib";
 import { clientByChainId } from '../utils/transmissions.js';
 import { gql } from '@urql/core';
 import { NATIVE_TOKEN } from '@tx-kit/sdk';
 import { checksumAddress, parseEther } from 'viem';
+import { getSpaceChannels } from './channel.js';
+import { getMultiV1ContestsBySpaceId } from './contest_v1.js';
+import { isFiniteChannel, isInfiniteChannel } from '../types.js';
 
-const baseTokenController = new TokenController(process.env.ALCHEMY_KEY!, 8453);
-const opTokenController = new TokenController(process.env.ALCHEMY_KEY!, 10);
-const zoraTokenController = new TokenController(process.env.ALCHEMY_KEY!, 7777777);
-const mainnetTokenController = new TokenController(process.env.ALCHEMY_KEY!, 1);
-const baseTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 84531);
-const opTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 420);
-const zoraTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 999);
+// const baseTokenController = new TokenController(process.env.ALCHEMY_KEY!, 8453);
+// const opTokenController = new TokenController(process.env.ALCHEMY_KEY!, 10);
+// const zoraTokenController = new TokenController(process.env.ALCHEMY_KEY!, 7777777);
+// const mainnetTokenController = new TokenController(process.env.ALCHEMY_KEY!, 1);
+// const baseTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 84531);
+// const opTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 420);
+// const zoraTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 999);
 
-const getController = (chainId: number) => {
-  switch (chainId) {
-    case 1:
-      return mainnetTokenController;
-    case 8453:
-      return baseTokenController;
-    case 10:
-      return opTokenController;
-    case 7777777:
-      return zoraTokenController;
-    case 84531:
-      return baseTokenController__testnet;
-    case 420:
-      return opTokenController__testnet;
-    case 999:
-      return zoraTokenController__testnet;
-    default:
-      return mainnetTokenController;
-  }
-}
+// const getController = (chainId: number) => {
+//   switch (chainId) {
+//     case 1:
+//       return mainnetTokenController;
+//     case 8453:
+//       return baseTokenController;
+//     case 10:
+//       return opTokenController;
+//     case 7777777:
+//       return zoraTokenController;
+//     case 84531:
+//       return baseTokenController__testnet;
+//     case 420:
+//       return opTokenController__testnet;
+//     case 999:
+//       return zoraTokenController__testnet;
+//     default:
+//       return mainnetTokenController;
+//   }
+// }
 
-export const calculateTotalMints = async (tokens: any) => {
-  const withTotalMints = await Promise.all(tokens.map(async (token: any) => {
-    const controller = getController(token.chainId)
-    const totalMints = await controller.zora721TotalSupply({ contractAddress: token.contractAddress })
-    return { ...token, totalMints: parseInt(totalMints) || 0 }
-  }))
-  return withTotalMints
-}
+// export const calculateTotalMints = async (tokens: any) => {
+//   const withTotalMints = await Promise.all(tokens.map(async (token: any) => {
+//     const controller = getController(token.chainId)
+//     const totalMints = await controller.zora721TotalSupply({ contractAddress: token.contractAddress })
+//     return { ...token, totalMints: parseInt(totalMints) || 0 }
+//   }))
+//   return withTotalMints
+// }
 
 
 export const dbGetV1TokenStatsBySpaceName = async (spaceName: string): Promise<Array<any>> => {
@@ -79,7 +82,7 @@ export const dbGetV1TokenStatsBySpaceName = async (spaceName: string): Promise<A
 
     `)
     .then((data: any) => data.rows)
-    .then(calculateTotalMints)
+  //.then(calculateTotalMints)
 }
 
 
@@ -220,3 +223,36 @@ export const getSpaceStats = async (req: Request, res: Response, next: NextFunct
     next(err)
   }
 }
+
+
+export const getChannelsBySpaceName = async (req: Request, res: Response, next: NextFunction) => {
+  const spaceName = req.query.spaceName as string
+  const chainId = req.query.chainId as string
+
+  try {
+
+    const [space, channels] = await Promise.all([
+      dbSingleSpaceByName(spaceName),
+      getSpaceChannels(spaceName)
+    ]);
+
+    if (!space) {
+      res.send([]).status(200);
+      return;
+    }
+
+    const contestsV1 = await getMultiV1ContestsBySpaceId(space.id);
+
+    return {
+      finiteChannels: channels.filter(channel => isFiniteChannel(channel)),
+      infiniteChannels: channels.filter(channel => isInfiniteChannel(channel)),
+      contestsV1: contestsV1
+    }
+
+
+  } catch (err) {
+    next(err)
+  }
+}
+
+

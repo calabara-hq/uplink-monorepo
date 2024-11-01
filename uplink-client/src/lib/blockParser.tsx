@@ -3,7 +3,8 @@ import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
 import type { OutputData } from "@editorjs/editorjs";
 import React, { useEffect } from "react";
 import Output, { LinkToolOutput, ListOutput, ParagraphOutput } from 'editorjs-react-renderer';
-import UplinkImage from "@/lib/UplinkImage"
+import OptimizedImage from "@/lib/OptmizedImage"
+
 const createLinks = (text: string): string => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const twitterRegex = /([^\S]|^)@(\w+)/gi;
@@ -22,7 +23,7 @@ const ImageRenderer = ({ data }: { data: any }) => {
   return (
     <div className="m-auto pt-4 pb-4">
       <ImageWrapper>
-        <UplinkImage
+        <OptimizedImage
           src={data.file.url}
           alt="content media"
           fill

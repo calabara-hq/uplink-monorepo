@@ -5,7 +5,7 @@ import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import fetchSpaceContests, { SpaceContest } from "@/lib/fetch/fetchSpaceContests";
 import { Suspense } from "react";
 import { HiSparkles } from "react-icons/hi2";
-import UplinkImage from "@/lib/UplinkImage"
+import OptimizedImage from "@/lib/OptmizedImage"
 import { Boundary } from "@/ui/Boundary/Boundary";
 import { AdminWrapper } from "@/lib/AdminWrapper";
 import { parseIpfsUrl } from "@/lib/ipfs";
@@ -100,7 +100,7 @@ const SpaceInfo = async ({ name }: { name: string }) => {
           <div className="p-6 pb-0">
             <div className="w-24 rounded-xl lg:rounded-full ">
               <ImageWrapper>
-                <UplinkImage
+                <OptimizedImage
                   src={logoUrl}
                   alt={"org avatar"}
                   fill
@@ -286,7 +286,7 @@ const MintboardPostsPreview = async ({ channel }: { channel: Channel }) => {
         return (
           <div key={token.id} className="w-[30px]">
             <ImageWrapper>
-              <UplinkImage
+              <OptimizedImage
                 src={parseIpfsUrl(token.metadata.image).gateway}
                 fill
                 alt="post"
@@ -363,7 +363,7 @@ const ContestCard = async ({
         <ContestStatusLabel createStart={createStart} mintStart={mintStart} mintEnd={mintEnd} />
         <div className="mt-auto" />
         <ImageWrapper>
-          <UplinkImage
+          <OptimizedImage
             src={coverImg}
             draggable={false}
             alt="contest image"

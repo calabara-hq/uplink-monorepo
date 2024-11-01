@@ -12,7 +12,7 @@ import { ParseThread } from "@/lib/threadParser";
 import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
 import { Decimal } from "decimal.js";
 import formatDecimal from "@/lib/formatDecimal";
-import UplinkImage from "@/lib/UplinkImage"
+import OptimizedImage from "@/lib/OptmizedImage"
 
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: false,
@@ -103,7 +103,7 @@ const RenderVideoSubmission = ({
 const RenderImageSubmission = ({ submission }) => {
   return (
     <ImageWrapper>
-      <UplinkImage
+      <OptimizedImage
         src={
           submission.type === "standard"
             ? submission.data.previewAsset

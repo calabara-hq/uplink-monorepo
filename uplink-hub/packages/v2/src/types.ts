@@ -1,37 +1,14 @@
 import { Context, schema } from "lib";
 import { Request } from "express";
-import { Address } from "viem";
 import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk";
-import { IToken } from "@tx-kit/sdk/subgraph";
+import { IChannel, IToken } from "@tx-kit/sdk/subgraph";
 
 export interface ContexedRequest<T = any> extends Request {
     context: Context;
     body: T;
 }
 
-
 export type ContractID = `0x${string}-${number}`;
-
-// export type TokenMetadata = {
-//     id: string;
-//     name: string;
-//     description: string;
-//     image: string;
-//     animation: string;
-//     type: "uplink-v1" | "uplink-v2";
-// }
-
-// export type V1TokenWithMetadata = schema.dbZoraTokenType & {
-//     metadata: TokenMetadata | null
-// }
-
-// export type V2TokenWithMetadata = IToken
-
-// export type TokenIntentWithMetadata = schema.dbTokenIntentType & DeferredTokenIntentWithSignature & {
-//     metadata: TokenMetadata | null
-//     uri: string;
-//     totalMinted: "0";
-// };
 
 export type TokenMetadata = {
     id: string;
@@ -62,21 +39,6 @@ export type V1TokenWithMetadata = {
     metadata: TokenMetadata;
 }
 
-// export type V2TokenWithMetadata = {
-//     id: string;
-//     channelAddress: Address;
-//     tokenId: string;
-//     uri: string;
-//     author: Address;
-//     sponsor: Address;
-//     totalMinted: string;
-//     maxSupply: string;
-//     createdAt: string;
-//     blockNumber: string;
-//     blockTimestamp: string;
-//     metadata: TokenMetadata;
-// }
-
 export type V2TokenWithMetadata = IToken
 
 export type TokenIntentWithMetadata = schema.dbTokenIntentType & DeferredTokenIntentWithSignature & {
@@ -84,7 +46,6 @@ export type TokenIntentWithMetadata = schema.dbTokenIntentType & DeferredTokenIn
     uri: string;
     totalMinted: "0";
 };
-
 
 type PageInfo = {
     pageInfo: {
@@ -108,3 +69,11 @@ export type FiniteTokenPage = {
 export type IntentTokenPage = {
     data: Array<TokenIntentWithMetadata>
 } & PageInfo
+
+export const isInfiniteChannel = (channel: IChannel) => {
+    return channel.transportLayer.type === "infinite";
+}
+
+export const isFiniteChannel = (channel: IChannel) => {
+    return channel.transportLayer.type === "finite";
+}

@@ -16,7 +16,7 @@ import useLiveSubmissions from "@/hooks/useLiveSubmissions";
 import { UserVote } from "@/hooks/useContestInteractionAPI";
 import { useVote } from "@/hooks/useVote";
 import { VotableSubmission } from "@/hooks/useVote";
-import UplinkImage from "@/lib/UplinkImage"
+import OptimizedImage from "@/lib/OptmizedImage"
 import { Input } from "../DesignKit/Input";
 import { Button } from "../DesignKit/Button";
 
@@ -133,7 +133,7 @@ const CartMediaSubmission = ({ submission }: { submission: VotableSubmission }) 
   return (
     <div className="relative w-full h-full">
       <figure className="absolute inset-0 overflow-hidden">
-        <UplinkImage
+        <OptimizedImage
           src={src}
           alt="submission image"
           fill

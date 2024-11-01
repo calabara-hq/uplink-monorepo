@@ -4,7 +4,7 @@ import { User } from "@/types/user";
 import Noggles from "../Noggles/Noggles";
 import useEnsName from "@/hooks/useEnsName";
 import { Session } from "@/providers/SessionProvider";
-import UplinkImage from "@/lib/UplinkImage";
+import OptimizedImage from "@/lib/OptmizedImage";
 import { ImageWrapper } from "@/ui/Submission/MediaWrapper"
 import { Address } from "viem";
 import { useWalletDisplayText } from "@/hooks/useWalletDisplay";
@@ -120,7 +120,7 @@ export const UserAvatar = ({
   if (user?.profileAvatar) return (
     <div style={{ width: `${size}px` }}>
       <ImageWrapper>
-        <UplinkImage src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} fill blur sizes="5vw" />
+        <OptimizedImage src={user.profileAvatar} alt="avatar" className={styleOverride ? styleOverride : "rounded-lg"} fill sizes="5vw" />
       </ImageWrapper>
     </div>
   )

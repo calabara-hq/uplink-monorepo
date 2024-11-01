@@ -9,6 +9,23 @@ export const sqlOps = databaseController.sqlOps;
 
 
 /* -------------------------------------------------------------------------- */
+/*                                   SPACE                                    */
+/* -------------------------------------------------------------------------- */
+
+const prepared_dbSingleSpaceByName = db.query.spaces.findFirst({
+    where: ((spaces: schema.dbSpaceType) => sqlOps.eq(spaces.name, sqlOps.placeholder('name'))),
+    with: {
+        admins: true,
+        mintBoard: true
+    }
+}).prepare();
+
+export const dbSingleSpaceByName = async (name: string): Promise<schema.dbSpaceType> => {
+    return prepared_dbSingleSpaceByName.execute({ name })
+}
+
+
+/* -------------------------------------------------------------------------- */
 /*                                   USER                                     */
 /* -------------------------------------------------------------------------- */
 

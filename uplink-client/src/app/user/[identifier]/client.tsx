@@ -18,7 +18,7 @@
 // import { HiPencil } from "react-icons/hi2";
 // import { FaTwitter } from "react-icons/fa";
 // import { MdOutlineCancelPresentation } from "react-icons/md";
-// import UplinkImage from "@/lib/UplinkImage"
+// import OptimizedImage from "@/lib/OptimizedImage"
 
 // export const ManageAccountButton = ({ }) => {
 
@@ -57,7 +57,7 @@
 //         <div className="flex flex-col md:flex-row md:justify-between md:items-center md:m-auto gap-4 w-full">
 //             <div className="relative w-fit pt-8 m-auto mt-0 md:mr-auto md:ml-0">
 //                 <div className="absolute top-0 left-0 right-0 ml-auto mr-auto md:-left-5 md:right-full w-32 h-32 z-10">
-//                     {user.profileAvatar ? (<UplinkImage
+//                     {user.profileAvatar ? (<OptimizedImage
 //                         src={user.profileAvatar}
 //                         alt="avatar"
 //                         fill

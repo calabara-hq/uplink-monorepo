@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { HiCheckBadge, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { RenderStandardVideoWithLoader } from "../VideoPlayer";
-import UplinkImage from "@/lib/UplinkImage";
+import OptimizedImage from "@/lib/OptmizedImage";
 import { LuMinusSquare, LuPlusSquare } from "react-icons/lu";
 import { Address, formatEther, maxUint40 } from "viem";
 import { PiInfinity } from "react-icons/pi";
@@ -116,9 +116,9 @@ export const RenderMintMedia = ({ imageURI, animationURI, size = "sm" }: { image
     }
     else if (gatewayImageURI) {
         return (
-            <UplinkImage
+            <OptimizedImage
                 src={gatewayImageURI}
-                alt="Picture of the author"
+                alt="post media"
                 sizes={size === "sm" ? "30vw" : "50vw"}
                 className={`w-full h-auto max-w-full ${size === "sm" ? "max-h-96" : "max-h-[700px]"} object-contain rounded-lg `}
                 width={500}

@@ -1,6 +1,6 @@
 import uplinkLogo from "../../../public/uplink-logo.svg";
 import WalletConnectButton from "@/ui/ConnectButton/WalletConnectButton";
-import UplinkImage from "@/lib/UplinkImage"
+import Image from "next/image";
 
 
 const Nav = async () => {
@@ -8,7 +8,7 @@ const Nav = async () => {
     <nav className="h-20 w-full hidden sm:flex">
       <div className="flex w-10/12 ml-auto mr-auto items-center">
         <div className="flex items-center justify-center mr-auto gap-2">
-          <UplinkImage
+          <Image
             src={uplinkLogo}
             alt="uplink logo"
             height={28}

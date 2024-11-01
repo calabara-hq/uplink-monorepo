@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import UplinkImage from "@/lib/UplinkImage"
+import OptimizedImage from "@/lib/OptmizedImage"
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: false,
   loading: () => (
@@ -54,7 +54,7 @@ const ContestHeading = async ({
                 href={`/${space.name}`}
                 draggable={false}
               >
-                <UplinkImage
+                <OptimizedImage
                   src={space.logoUrl}
                   alt="Org Avatar"
                   fill
@@ -93,7 +93,7 @@ const ContestHeading = async ({
           <div className="grid grid-cols-1 items-start w-full gap-2">
             {prompt.coverUrl && (
               <ImageWrapper>
-                <UplinkImage
+                <OptimizedImage
                   src={prompt.coverUrl}
                   alt="contest image"
                   sizes="20vw"
@@ -137,7 +137,7 @@ const ContestHeading = async ({
 //             href={`/${space.name}`}
 //             draggable={false}
 //           >
-//             <UplinkImage
+//             <OptimizedImage
 //               src={space.logoUrl}
 //               alt="Org Avatar"
 //               fill
@@ -163,7 +163,7 @@ const ContestHeading = async ({
 //           <div className="grid grid-cols-1 items-start order-1 sm:order-2 w-full gap-2">
 //             {contestMetadata.image && (
 //               <ImageWrapper>
-//                 <UplinkImage
+//                 <OptimizedImage
 //                   src={parseIpfsUrl(contestMetadata.image).gateway}
 //                   alt="contest image"
 //                   fill
@@ -206,7 +206,7 @@ export const ContestHeadingV2 = ({
               href={`/${space.name}`}
               draggable={false}
             >
-              <UplinkImage
+              <OptimizedImage
                 src={space.logoUrl}
                 alt="Org Avatar"
                 fill
@@ -235,7 +235,7 @@ export const ContestHeadingV2 = ({
         <div className="order-1 md:order-2">
           {contestMetadata.image && (
             <ImageWrapper>
-              <UplinkImage
+              <OptimizedImage
                 src={parseIpfsUrl(contestMetadata.image).gateway}
                 alt="contest image"
                 fill

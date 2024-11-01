@@ -3,7 +3,7 @@ import fetchChannel from "@/lib/fetch/fetchChannel";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { fetchSingleTokenIntent, fetchSingleTokenV2 } from "@/lib/fetch/fetchTokensV2";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import UplinkImage from "@/lib/UplinkImage";
+import OptimizedImage from "@/lib/OptmizedImage";
 import { ContractID } from "@/types/channel";
 import { Button } from "@/ui/DesignKit/Button";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
@@ -143,7 +143,7 @@ const ChannelDetails = async ({ spaceName, contractId }: { spaceName: string, co
                     href={`/${space.name}`}
                     draggable={false}
                 >
-                    <UplinkImage
+                    <OptimizedImage
                         src={space.logoUrl}
                         alt="Org Avatar"
                         fill

@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { RenderInteractiveVideoWithLoader } from "../VideoPlayer";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { ImageWrapper } from "../Submission/MediaWrapper";
-import UplinkImage from "@/lib/UplinkImage";
+import OptimizedImage from "@/lib/OptmizedImage";
 import { AddressOrEns, Avatar, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { calculateSaleEnd, isMintPeriodOver, ShareButton } from "./MintUtils";
 import { AdminWrapper } from "@/lib/AdminWrapper";
@@ -34,7 +34,7 @@ const CardRenderer = ({ cardProps }: { cardProps: CardProps }) => {
 
             ) : (
                 <ImageWrapper >
-                    <UplinkImage
+                    <OptimizedImage
                         src={parseIpfsUrl(cardProps.metadata.image).gateway}
                         draggable={false}
                         alt="submission image"
