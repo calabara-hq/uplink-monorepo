@@ -1,13 +1,8 @@
-
-"use client";
-
-import { parseIpfsUrl, replaceIpfsLinkWithGateway } from "@/lib/ipfs"
+import { replaceIpfsLinkWithGateway } from "@/lib/ipfs";
 import Image from "next/image"
-import Markdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import remarkBreaks from "remark-breaks"
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote/rsc'
-import { serialize } from 'next-mdx-remote/serialize'
+import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkSmartpants from 'remark-smartypants'
 import rehypePrettyCode from 'rehype-pretty-code'
 
@@ -32,24 +27,12 @@ export const UnderlineRenderer = (props: any) => {
     )
 }
 
-
-function convertMarkdownToMDX(markdown) {
-    // This is a very basic and naive conversion example.
-    // For more complex content, you should use a proper Markdown-to-MDX converter.
-    return markdown
-        .replace(/\*\*(.*?)\*\*/g, '**$1**') // Bold text
-        .replace(/\*(.*?)\*/g, '*$1*')       // Italic text
-        .replace(/__(.*?)__/g, '__$1__')     // Underlined text
-        .replace(/\n/g, '\n\n');             // Preserve newlines for paragraphs
-}
-
 // takes in the output of serialized markdown
 export const RenderMarkdown = ({ content }: { content: string }) => {
 
     //const data = replaceIpfsLinkWithGateway(content).replace(/\n\n/g, '\n')
 
-    const data = convertMarkdownToMDX(replaceIpfsLinkWithGateway(content))
-
+    const data = replaceIpfsLinkWithGateway(content)
     const components = {
         a: LinkRenderer,
         img: ImageRenderer,
