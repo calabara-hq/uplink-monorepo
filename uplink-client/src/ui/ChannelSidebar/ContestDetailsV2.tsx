@@ -21,6 +21,7 @@ import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandl
 import { ChainId } from "@/types/chains";
 import { ExpandSection } from "../ContestDetails/client";
 
+const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
 export const DetailsSkeleton = () => {
     return (
@@ -100,7 +101,7 @@ const TokenLogicRule = ({
 
     const formattedLiteralOperand = useMemo(() => {
         const decoded = decodeAbiParameters([{ name: 'x', type: 'uint256' }], literalOperand as Hex)[0]
-        return formatUnits(decoded, decimals)
+        return compact_formatter.format(Number(formatUnits(decoded, decimals)))
 
     }, [literalOperand, decimals])
 
@@ -279,7 +280,7 @@ const RewardsSection = ({
                                 >
                                     <p>{formatOrdinals(rank)}:</p>
                                     <div className="flex flex-row ml-4 items-center gap-2">
-                                        <p>{formatUnits(transportConfig.allocations[idx], decimals)}</p>
+                                        <p>{compact_formatter.format(Number(formatUnits(transportConfig.allocations[idx], decimals)))}</p>
                                         <p>{symbol}</p>
                                     </div>
                                 </div>
