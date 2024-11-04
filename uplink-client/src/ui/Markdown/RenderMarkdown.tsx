@@ -1,10 +1,11 @@
+"use client";;
 import { replaceIpfsLinkWithGateway } from "@/lib/ipfs";
 import Image from "next/image"
 import remarkGfm from "remark-gfm"
 import remarkBreaks from "remark-breaks"
-import { MDXRemote } from 'next-mdx-remote/rsc';
-import remarkSmartpants from 'remark-smartypants'
-import rehypePrettyCode from 'rehype-pretty-code'
+import { MDXRemote } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize'
+import { useEffect, useState } from "react";
 
 export const LinkRenderer = (props: any) => {
     return (
@@ -21,7 +22,6 @@ export const ImageRenderer = (props: any) => {
 }
 
 export const UnderlineRenderer = (props: any) => {
-    console.log('got here')
     return (
         <u className="text-primary12">{props.children}</u>
     )
@@ -30,41 +30,49 @@ export const UnderlineRenderer = (props: any) => {
 // takes in the output of serialized markdown
 export const RenderMarkdown = ({ content }: { content: string }) => {
 
-    //const data = replaceIpfsLinkWithGateway(content).replace(/\n\n/g, '\n')
+    const [mdxSource, setMdxSource] = useState<any>(null)
 
-    const data = replaceIpfsLinkWithGateway(content)
     const components = {
         a: LinkRenderer,
         img: ImageRenderer,
         u: UnderlineRenderer,
     };
 
-    return (
-        <MDXRemote
-            source={data}
-            components={components}
-            options={{
-                mdxOptions: {
-                    remarkPlugins: [remarkSmartpants, remarkGfm, remarkBreaks],
-                    rehypePlugins: [
-                        [
-                            rehypePrettyCode,
-                        ],
-                    ],
-                },
-            }}
-        />
+
+    const process = async () => {
+        const source = await serialize(replaceIpfsLinkWithGateway(content), {
+            // Optionally pass remark/rehype plugins
+            mdxOptions: {
+                remarkPlugins: [remarkGfm, remarkBreaks],
+                rehypePlugins: [],
+            },
+        });
+
+        return source
+    }
+
+    useEffect(() => {
+        process().then((source) => {
+            setMdxSource(source)
+        })
+    }, [])
+
+
+    if (!mdxSource) return (
+        <div className="flex flex-col gap-2 w-full">
+            <div className="shimmer h-4 w-64 bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+        </div>
     )
 
-    // return (
-    //     <Markdown
-    //         remarkPlugins={[remarkGfm, remarkBreaks]}
-    //         components={{
-    //             a: LinkRenderer,
-    //             img: ImageRenderer,
-    //             u: UnderlineRenderer
-    //         }}>
-    //         {content}
-    //     </Markdown>
-    // )
+
+    return (
+        <div className="mt-2 text-t2 prose prose-neutral prose-invert">
+            <MDXRemote {...mdxSource} components={components} />
+        </div>
+    )
 }
