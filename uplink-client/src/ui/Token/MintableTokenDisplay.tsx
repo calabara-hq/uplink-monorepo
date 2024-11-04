@@ -173,10 +173,7 @@ export const ContestExpandedDisplay = ({
                     <div className="flex items-center justify-center rounded-lg p-1 w-full m-auto">
                         <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
                     </div>
-
-                    <div className="text-t2 prose prose-neutral prose-invert">
-                        <RenderMarkdown content={metadata.description} />
-                    </div>
+                    <RenderMarkdown content={metadata.description} />
                 </div>
             </div>
 
