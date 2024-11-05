@@ -65,6 +65,7 @@ export default function WalletProvider({
             <RainbowKitProvider
               theme={darkTheme()}
               modalSize="compact"
+              initialChain={base}
             // avatar={(user) => <UserAvatar user={user} size={160} styleOverride="flex items-center rounded-full overflow-hidden p-2.5" />}
             >
               <TxProvider>
