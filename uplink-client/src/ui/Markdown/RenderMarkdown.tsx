@@ -1,6 +1,11 @@
-import { parseIpfsUrl, replaceIpfsLinkWithGateway } from "@/lib/ipfs"
+"use client";;
+import { replaceIpfsLinkWithGateway } from "@/lib/ipfs";
 import Image from "next/image"
-import Markdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import remarkBreaks from "remark-breaks"
+import { MDXRemote } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize'
+import { useEffect, useState } from "react";
 
 export const LinkRenderer = (props: any) => {
     return (
@@ -11,21 +16,63 @@ export const LinkRenderer = (props: any) => {
 }
 
 export const ImageRenderer = (props: any) => {
-    console.log(props)
     return (
         <Image src={props.src} alt={props.alt} className="rounded-lg m-auto" width={500} height={500} />
     )
 }
 
-export const RenderMarkdown = ({ content }: { content: string }) => {
+export const UnderlineRenderer = (props: any) => {
     return (
-        <Markdown
+        <u className="text-primary12">{props.children}</u>
+    )
+}
 
-            components={{
-                a: LinkRenderer,
-                img: ImageRenderer
-            }}>
-            {replaceIpfsLinkWithGateway(content)}
-        </Markdown>
+// takes in the output of serialized markdown
+export const RenderMarkdown = ({ content }: { content: string }) => {
+
+    const [mdxSource, setMdxSource] = useState<any>(null)
+
+    const components = {
+        a: LinkRenderer,
+        img: ImageRenderer,
+        u: UnderlineRenderer,
+    };
+
+
+    const process = async () => {
+        const source = await serialize(replaceIpfsLinkWithGateway(content), {
+            // Optionally pass remark/rehype plugins
+            mdxOptions: {
+                remarkPlugins: [remarkGfm, remarkBreaks],
+                rehypePlugins: [],
+            },
+        });
+
+        return source
+    }
+
+    useEffect(() => {
+        process().then((source) => {
+            setMdxSource(source)
+        })
+    }, [])
+
+
+    if (!mdxSource) return (
+        <div className="flex flex-col gap-2 w-full">
+            <div className="shimmer h-4 w-64 bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+            <div className="shimmer h-4 w-full bg-base-200 rounded-lg" />
+        </div>
+    )
+
+
+    return (
+        <div className="mt-2 text-t2 prose prose-neutral prose-invert">
+            <MDXRemote {...mdxSource} components={components} />
+        </div>
     )
 }
