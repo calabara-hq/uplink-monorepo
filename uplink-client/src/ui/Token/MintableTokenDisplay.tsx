@@ -1,7 +1,7 @@
 "use client";;
 import { useDebounce } from "@/hooks/useDebounce";
 import React, { useEffect, useState } from "react";
-import { ChainLabel } from "../ContestLabels/ContestLabels";
+import { ChainLabel } from "../ChainLabel/ChainLabel";
 import { HiCheckBadge } from "react-icons/hi2";
 import { useAccount } from "wagmi";
 import { getChainName } from "@/lib/chains/supportedChains";

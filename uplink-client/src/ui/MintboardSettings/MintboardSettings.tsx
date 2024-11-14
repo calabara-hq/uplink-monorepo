@@ -1,12 +1,12 @@
 "use client";;
 import MenuSelect, { Option } from "@/ui/OptionSelect/OptionSelect";
 import toast from "react-hot-toast";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import { SettingsStateType } from "@/hooks/useMintboardSettings";
-import { ChainLabel } from "../ContestLabels/ContestLabels";
+import { ChainLabel } from "../ChainLabel/ChainLabel";
 import { zeroAddress } from "viem";
-import { getChainName, supportedChains } from "@/lib/chains/supportedChains";
+import { getChainName } from "@/lib/chains/supportedChains";
 import { useTokenInfo } from "@/hooks/useTokenInfo";
 import { Label } from "../DesignKit/Label";
 import { Input } from "../DesignKit/Input";
@@ -16,6 +16,7 @@ import { AddToken } from "../ManageTokenModal/ManageTokenModal";
 import { useManagedTokenEditor } from "@/hooks/useTokenManager";
 import { ChainSelect } from "../ChannelSettings/ChainSelect";
 import { DevModeOnly } from "@/utils/DevModeOnly";
+import { FormInput } from "../DesignKit/Form";
 
 export const Options = ({ label, options, selected, onSelect }: { label: string, options: Option[], selected: string, onSelect: (option: Option) => void }) => {
     return (
@@ -121,49 +122,6 @@ const TextArea = ({
         </div>
     );
 };
-
-export const BasicInput = ({
-    value,
-    label,
-    placeholder,
-    onChange,
-    error,
-    inputType,
-    styleOverrides
-}: {
-    value: string,
-    label: string,
-    placeholder: string,
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-    error: string[],
-    inputType: string,
-    styleOverrides?: string
-}) => {
-    return (
-        <div className="w-full flex flex-col gap-2">
-            <Label>
-                {label}
-            </Label>
-            <Input
-                variant={error ? "error" : "outline"}
-                type={inputType}
-                autoComplete="off"
-                onWheel={(e) => e.currentTarget.blur()}
-                spellCheck="false"
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-                className={styleOverrides}
-            />
-            {error && (
-                <Label>
-                    <p className="text-error max-w-sm break-words">{error.join(",")}</p>
-                </Label>
-            )}
-        </div>
-    )
-}
-
 
 export const FeeRow = ({ value, label, placeholder, onChange, error }) => {
     return (
@@ -355,7 +313,7 @@ export const MintboardSettings = ({
             {/*<-- metadata -->*/}
             <div className="flex flex-col gap-2 bg-base-200 w-full p-6 rounded-lg border border-border">
                 <h1 className="text-xl font-bold text-t1">Details</h1>
-                <BasicInput inputType="text" label="Title" value={state.title} placeholder={"Based Management Interns"} onChange={(e) => setField("title", e.target.value)} error={state.errors?.title?._errors} />
+                <FormInput inputType="text" label="Title" value={state.title} placeholder={"Based Management Interns"} onChange={(e) => setField("title", e.target.value)} error={state.errors?.title?._errors} />
                 <TextArea value={state.description} label={"Description"} placeholder={"blah blah blah"} onChange={(e) => setField("description", e.target.value)} error={state.errors?.description?._errors} />
             </div>
 
@@ -378,8 +336,8 @@ export const MintboardSettings = ({
                         <>
                             <FeesTable>
 
-                                <BasicInput label="Space Treasury" styleOverrides={'max-w-sm'} inputType="text" value={state.channelTreasury} placeholder={"0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"} onChange={(e) => setField("channelTreasury", e.target.value)} error={state.errors?.channelTreasury?._errors} />
-                                <BasicInput label="Mint Price (ETH)" inputType="number" styleOverrides={'max-w-[10rem] text-center'} value={state.ethMintPrice} placeholder={"0.01"} onChange={(e) => setField("ethMintPrice", asPositiveFloat(e.target.value, 8))} error={state.errors?.ethMintPrice?._errors} />
+                                <FormInput label="Space Treasury" styleOverrides={'max-w-sm'} inputType="text" value={state.channelTreasury} placeholder={"0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"} onChange={(e) => setField("channelTreasury", e.target.value)} error={state.errors?.channelTreasury?._errors} />
+                                <FormInput label="Mint Price (ETH)" inputType="number" styleOverrides={'max-w-[10rem] text-center'} value={state.ethMintPrice} placeholder={"0.01"} onChange={(e) => setField("ethMintPrice", asPositiveFloat(e.target.value, 8))} error={state.errors?.ethMintPrice?._errors} />
                                 <ERC20MintPriceInput state={state} setField={setField} />
 
                                 <div className="w-full bg-base-200 h-0.5" />

@@ -2,20 +2,19 @@ import Link from "next/link";
 import { BiLink } from "react-icons/bi";
 import { FaTwitter } from "react-icons/fa";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
-import fetchSpaceContests, { SpaceContest } from "@/lib/fetch/fetchSpaceContests";
 import { Suspense } from "react";
 import { HiSparkles } from "react-icons/hi2";
 import OptimizedImage from "@/lib/OptmizedImage"
 import { Boundary } from "@/ui/Boundary/Boundary";
 import { AdminWrapper } from "@/lib/AdminWrapper";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 const round_formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 2 })
 
 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/ui/Card/Card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/ui/DesignKit/Card";
 import { Button } from "@/ui/DesignKit/Button";
 import fetchSpaceStats from "@/lib/fetch/fetchSpaceStats";
 import fetchSpaceChannels from "@/lib/fetch/fetchSpaceChannels";
@@ -24,6 +23,7 @@ import { fetchPopularTokens } from "@/lib/fetch/fetchTokensV2";
 import { IFiniteTransportConfig, ITokenMetadata } from "@tx-kit/sdk/subgraph";
 import { ContestStatusLabel, FormatTokenStatistic } from "./client";
 import { isAddress } from "viem";
+import { LegacyContest, LegacyContestWithPrompt } from "@/types/contest";
 
 const SpaceContestsSkeleton = () => {
   return (
@@ -302,9 +302,7 @@ const MintboardPostsPreview = async ({ channel }: { channel: Channel }) => {
 }
 
 const MintboardDisplay = async ({ spaceName }: { spaceName: string }) => {
-  const channels = await fetchSpaceChannels(spaceName);
-
-  const mintboards = channels.filter(channel => isInfiniteChannel(channel));
+  const mintboards = await fetchSpaceChannels(spaceName, 8453).then(data => data.infiniteChannels);
 
   if (mintboards.length > 0) {
 
@@ -378,7 +376,7 @@ const ContestCard = async ({
 }
 
 
-const Contests = ({ contestsV1, contestsV2, spaceName, spaceLogo }: { contestsV1: Array<SpaceContest>, contestsV2: Array<Channel & { metadata: ITokenMetadata }>, spaceName: string, spaceLogo: string }) => {
+const Contests = ({ contestsV1, contestsV2, spaceName, spaceLogo }: { contestsV1: Array<LegacyContestWithPrompt>, contestsV2: Array<Channel & { metadata: ITokenMetadata }>, spaceName: string, spaceLogo: string }) => {
 
   if (contestsV1.length + contestsV2.length === 0) {
     return (
@@ -433,25 +431,33 @@ const Contests = ({ contestsV1, contestsV2, spaceName, spaceLogo }: { contestsV1
 
 const ContestDisplay = async ({ spaceName }: { spaceName: string }) => {
 
-  const [spaceWithContests, contestsV2] = await Promise.all([
-    fetchSpaceContests(spaceName),
-    fetchSpaceChannels(spaceName)
-      .then(channels =>
-        channels
-          .filter(isFiniteChannel)
-          .sort((a, b) =>
-            Number((b.transportLayer.transportConfig as IFiniteTransportConfig).mintEnd) -
-            Number((a.transportLayer.transportConfig as IFiniteTransportConfig).mintEnd)
-          )
-      )
-      .then(sortedChannels =>
-        Promise.all(sortedChannels.map(async channel => {
+  const space_promise = fetchSingleSpace(spaceName);
+
+  const contests_promise = fetchSpaceChannels(spaceName, 8453) // TODO chainId
+    .then(data => {
+      return {
+        v1: data.legacyContests,
+        v2: data.finiteChannels.sort((a, b) =>
+          Number((b.transportLayer.transportConfig as IFiniteTransportConfig).mintEnd) -
+          Number((a.transportLayer.transportConfig as IFiniteTransportConfig).mintEnd)
+        )
+      }
+    })
+    .then(async data => {
+      return {
+        v1: await Promise.all(data.v1.map(async contest => {
+          const promptData = await fetch(contest.promptUrl).then(res => res.json());
+          return { ...contest, promptData };
+        })),
+        v2: await Promise.all(data.v2.map(async channel => {
           const metadata: ITokenMetadata = await fetch(parseIpfsUrl(channel.uri).gateway).then(res => res.json());
           return { ...channel, metadata };
         }))
-      )
-  ]);
+      }
+    }
+    )
 
+  const [space, contests] = await Promise.all([space_promise, contests_promise]);
 
   return (
     <div className="flex flex-col gap-2 w-full ">
@@ -461,7 +467,7 @@ const ContestDisplay = async ({ spaceName }: { spaceName: string }) => {
         </h2>
       </div>
       <div className="w-full h-1 bg-base-100 rounded-lg" />
-      <Contests contestsV1={spaceWithContests.contests} contestsV2={contestsV2} spaceName={spaceName} spaceLogo={spaceWithContests.logoUrl} />
+      <Contests contestsV1={contests.v1} contestsV2={contests.v2} spaceName={spaceName} spaceLogo={space.logoUrl} />
     </div>
   )
 }

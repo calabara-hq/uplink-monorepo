@@ -1,8 +1,7 @@
-"use client";
+"use client";;
 import useSWRInfinite from "swr/infinite";
 import { FetchFiniteChannelTokensV2Response, FetchPopularTokensResponse, FetchTokenIntentsResponse, FetchTokensV1Response, FetchTokensV2Response } from "@/lib/fetch/fetchTokensV2";
 import { ContractID } from "@/types/channel";
-import { useCallback } from "react";
 
 export const fetchTokensV1_client = async (contractId: ContractID, pageSize: number, skip: number): Promise<FetchTokensV1Response> => {
     return fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/channel_tokensV1?contractId=${contractId}&pageSize=${pageSize}&skip=${skip}`, {

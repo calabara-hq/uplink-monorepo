@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { RectVideoWrapper, SquareVideoWrapper } from "../Submission/MediaWrapper";
+import { RectVideoWrapper, SquareVideoWrapper } from "../../app/(legacy)/contest/components/MediaWrapper";
 
 export const transformVideoAsset = (url: string, mode: 'image' | 'video', width: number) => {
   const modifiers = `w_${width},c_fill`; // c_fill for Cloudinary fill mode

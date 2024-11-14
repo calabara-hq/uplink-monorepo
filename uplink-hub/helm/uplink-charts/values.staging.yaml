@@ -12,60 +12,6 @@ auth:
     maxReplicas: 1
     targetCpuPercentage: 80
 
-router:
-  image:
-    repository: nickdodson/router-service
-  replicaCount: 1
-  hpa:
-    minReplicas: 1
-    maxReplicas: 1
-    targetCpuPercentage: 80
-
-spaces:
-  image:
-    repository: nickdodson/spaces-service
-  replicaCount: 1
-  hpa:
-    minReplicas: 1
-    maxReplicas: 1
-    targetCpuPercentage: 80
-
-contests:
-  image:
-    repository: nickdodson/contests-service
-  replicaCount: 1
-  hpa:
-    minReplicas: 1
-    maxReplicas: 1
-    targetCpuPercentage: 80
-
-submit:
-  image:
-    repository: nickdodson/submit-service
-  replicaCount: 1
-  hpa:
-    minReplicas: 1
-    maxReplicas: 1
-    targetCpuPercentage: 80
-
-vote:
-  image:
-    repository: nickdodson/vote-service
-  replicaCount: 1
-  hpa:
-    minReplicas: 1
-    maxReplicas: 1
-    targetCpuPercentage: 80
-
-user:
-  image:
-    repository: nickdodson/user-service
-  replicaCount: 1
-  hpa:
-    minReplicas: 1
-    maxReplicas: 1
-    targetCpuPercentage: 80
-
 v2:
   image:
     repository: nickdodson/v2-service

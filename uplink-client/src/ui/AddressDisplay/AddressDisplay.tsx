@@ -1,12 +1,9 @@
-"use client";
-
+"use client";;
 import { User } from "@/types/user";
 import Noggles from "../Noggles/Noggles";
-import useEnsName from "@/hooks/useEnsName";
 import { Session } from "@/providers/SessionProvider";
 import OptimizedImage from "@/lib/OptmizedImage";
-import { ImageWrapper } from "@/ui/Submission/MediaWrapper"
-import { Address } from "viem";
+import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper"
 import { useWalletDisplayText } from "@/hooks/useWalletDisplay";
 import { useEffect } from "react";
 

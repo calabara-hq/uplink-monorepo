@@ -9,9 +9,9 @@ import { Button } from "@/ui/DesignKit/Button";
 import { FaCircle, FaPalette } from "react-icons/fa";
 import { LuCoins } from "react-icons/lu";
 import { PiInfinity } from "react-icons/pi";
-import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
+import { ChainLabel } from "@/ui/ChainLabel/ChainLabel";
 import { RenderMintMedia } from "@/ui/Token/MintUtils";
-import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 import { MdAccessibility, MdDashboardCustomize, MdGroups } from "react-icons/md";
 import OptimizedImage from "@/lib/OptmizedImage";
 

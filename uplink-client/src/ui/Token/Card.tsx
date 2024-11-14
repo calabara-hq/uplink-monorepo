@@ -4,7 +4,7 @@ import { ChannelToken, isTokenIntent, ChannelTokenIntent, TokenMetadata, Channel
 import React, { useEffect, useState } from "react";
 import { RenderInteractiveVideoWithLoader } from "../VideoPlayer";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import { ImageWrapper } from "../Submission/MediaWrapper";
+import { ImageWrapper } from "../../app/(legacy)/contest/components/MediaWrapper";
 import OptimizedImage from "@/lib/OptmizedImage";
 import { AddressOrEns, Avatar, UserAvatar } from "../AddressDisplay/AddressDisplay";
 import { calculateSaleEnd, isMintPeriodOver, ShareButton } from "./MintUtils";

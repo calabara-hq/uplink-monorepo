@@ -6,7 +6,7 @@ import OptimizedImage from "@/lib/OptmizedImage"
 import { SearchSpaces } from "./client";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { Card, CardContent, CardFooter } from "@/ui/DesignKit/Card";
-import { CardHeader, CardTitle } from "@/ui/Card/Card";
+import { CardHeader, CardTitle } from "@/ui/DesignKit/Card";
 import { fetchTrendingChannels, fetchActiveContests } from "@/lib/fetch/fetchChannel";
 import { Channel, concatContractID } from "@/types/channel";
 import { parseIpfsUrl } from "@/lib/ipfs";

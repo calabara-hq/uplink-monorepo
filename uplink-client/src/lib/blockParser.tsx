@@ -1,5 +1,5 @@
 "use client";
-import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 import type { OutputData } from "@editorjs/editorjs";
 import React, { useEffect } from "react";
 import Output, { LinkToolOutput, ListOutput, ParagraphOutput } from 'editorjs-react-renderer';

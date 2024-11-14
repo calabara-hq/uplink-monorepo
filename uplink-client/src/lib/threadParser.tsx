@@ -1,5 +1,5 @@
 import type { TwitterSubmission } from "@/types/submission";
-import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import Image from "next/image";
 import sanitizeHtml from "sanitize-html";

@@ -1,7 +1,7 @@
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
 import { useEffect, useState } from "react";
 import { Address, erc20Abi, zeroAddress } from "viem";
-import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
+import { usePublicClient, useWalletClient } from "wagmi";
 
 export const useErc20Balance = (tokenContract: Address, chainId: number) => {
     const [balance, setBalance] = useState<bigint>(BigInt(0));

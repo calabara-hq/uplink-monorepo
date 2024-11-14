@@ -2,8 +2,8 @@
 import { getTokenInfo } from "@/lib/tokenInfo";
 import { ChainId } from "@/types/chains";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
-import { useEffect, useState } from "react";
-import { Address, checksumAddress, getAddress, isAddress, zeroAddress } from "viem";
+import { useState } from "react";
+import { Address, checksumAddress, isAddress, zeroAddress } from "viem";
 import { useMemo } from "react";
 
 export const useTokenInfo = (tokenContract: string, chainId: ChainId) => {

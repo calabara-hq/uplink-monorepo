@@ -70,8 +70,6 @@ export const getSingleTokenV1 = async (req: Request, res: Response, next: NextFu
     const contractId = req.query.contractId as string
     const postId = req.query.postId as string
 
-    console.log("post ID", postId)
-
     try {
         const { chainId, contractAddress } = splitContractID(contractId)
 

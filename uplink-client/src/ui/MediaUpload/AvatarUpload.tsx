@@ -48,7 +48,7 @@ export const AvatarUpload = ({
     });
 
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-full flex flex-col gap-2">
             <Label>{fieldLabel}</Label>
             <div
                 {...getRootProps({
@@ -65,6 +65,11 @@ export const AvatarUpload = ({
                 )}
 
             </div>
+            {error && (
+                <Label>
+                    <p className="text-error">{error}</p>
+                </Label>
+            )}
         </div>
     )
 

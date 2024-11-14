@@ -1,52 +1,32 @@
 import { Request, Response, NextFunction } from 'express'
-import { db, dbGetChannelsBySpaceName, dbSingleSpaceByName, sqlOps } from '../utils/database.js'
+import { createDbSpace, updateDbSpace, db, dbGetChannelsBySpaceName, dbIsUserSpaceAdmin, dbSingleSpaceByName, sqlOps } from '../utils/database.js'
 
-import { TokenController } from "lib";
 import { clientByChainId } from '../utils/transmissions.js';
 import { gql } from '@urql/core';
 import { NATIVE_TOKEN } from '@tx-kit/sdk';
 import { checksumAddress, parseEther } from 'viem';
 import { getSpaceChannels } from './channel.js';
 import { getMultiV1ContestsBySpaceId } from './contest_v1.js';
-import { isFiniteChannel, isInfiniteChannel } from '../types.js';
+import { ContexedRequest, isFiniteChannel, isInfiniteChannel, MutateSpaceData } from '../types.js';
+import { validateSpaceAdmins, validateSpaceLogo, validateSpaceName, validateSpaceWebsite } from '../utils/validate.js';
+import { AuthorizationController } from 'lib';
+import { AuthorizationError } from '../errors.js';
 
-// const baseTokenController = new TokenController(process.env.ALCHEMY_KEY!, 8453);
-// const opTokenController = new TokenController(process.env.ALCHEMY_KEY!, 10);
-// const zoraTokenController = new TokenController(process.env.ALCHEMY_KEY!, 7777777);
-// const mainnetTokenController = new TokenController(process.env.ALCHEMY_KEY!, 1);
-// const baseTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 84531);
-// const opTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 420);
-// const zoraTokenController__testnet = new TokenController(process.env.ALCHEMY_KEY!, 999);
+const authorizationController = new AuthorizationController(process.env.REDIS_URL!);
 
-// const getController = (chainId: number) => {
-//   switch (chainId) {
-//     case 1:
-//       return mainnetTokenController;
-//     case 8453:
-//       return baseTokenController;
-//     case 10:
-//       return opTokenController;
-//     case 7777777:
-//       return zoraTokenController;
-//     case 84531:
-//       return baseTokenController__testnet;
-//     case 420:
-//       return opTokenController__testnet;
-//     case 999:
-//       return zoraTokenController__testnet;
-//     default:
-//       return mainnetTokenController;
-//   }
-// }
 
-// export const calculateTotalMints = async (tokens: any) => {
-//   const withTotalMints = await Promise.all(tokens.map(async (token: any) => {
-//     const controller = getController(token.chainId)
-//     const totalMints = await controller.zora721TotalSupply({ contractAddress: token.contractAddress })
-//     return { ...token, totalMints: parseInt(totalMints) || 0 }
-//   }))
-//   return withTotalMints
-// }
+const manySpaces = db.query.spaces.findMany({
+  with: {
+    admins: true,
+    spaceTokens: {
+      with: {
+        token: true
+      }
+    }
+  },
+  orderBy: (spaces) => [sqlOps.asc(spaces.name)],
+
+}).prepare();
 
 
 export const dbGetV1TokenStatsBySpaceName = async (spaceName: string): Promise<Array<any>> => {
@@ -224,7 +204,6 @@ export const getSpaceStats = async (req: Request, res: Response, next: NextFunct
   }
 }
 
-
 export const getChannelsBySpaceName = async (req: Request, res: Response, next: NextFunction) => {
   const spaceName = req.query.spaceName as string
   const chainId = req.query.chainId as string
@@ -237,17 +216,21 @@ export const getChannelsBySpaceName = async (req: Request, res: Response, next: 
     ]);
 
     if (!space) {
-      res.send([]).status(200);
-      return;
+      return res.send({
+        finiteChannels: [],
+        infiniteChannels: [],
+        legacyContests: []
+      }).status(200);
     }
 
     const contestsV1 = await getMultiV1ContestsBySpaceId(space.id);
+    const chainFilteredChannels = channels.filter(channel => channel.chainId === parseInt(chainId));
 
-    return {
-      finiteChannels: channels.filter(channel => isFiniteChannel(channel)),
-      infiniteChannels: channels.filter(channel => isInfiniteChannel(channel)),
-      contestsV1: contestsV1
-    }
+    res.send({
+      finiteChannels: chainFilteredChannels.filter(channel => isFiniteChannel(channel)),
+      infiniteChannels: chainFilteredChannels.filter(channel => isInfiniteChannel(channel)),
+      legacyContests: contestsV1.filter(contest => contest.chainId === parseInt(chainId))
+    })
 
 
   } catch (err) {
@@ -255,4 +238,84 @@ export const getChannelsBySpaceName = async (req: Request, res: Response, next: 
   }
 }
 
+export const getSpace = async (req: Request, res: Response, next: NextFunction) => {
+  const spaceName = req.query.spaceName as string
 
+  try {
+    const space = await dbSingleSpaceByName(spaceName);
+
+    res.send(space).status(200);
+
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const getSpaces = async (req: Request, res: Response, next: NextFunction) => {
+
+  try {
+    const spaces = await manySpaces.execute();
+
+    res.send(spaces).status(200);
+
+  } catch (err) {
+    next(err)
+  }
+}
+
+
+const processSpaceData = async (args: MutateSpaceData) => {
+
+  const { spaceId, name, logoUrl, website, admins } = args;
+
+  const nameResult = await validateSpaceName(name, spaceId);
+  const logoResult = validateSpaceLogo(logoUrl);
+  const websiteResult = validateSpaceWebsite(website);
+  const adminsResult = await validateSpaceAdmins(admins);
+
+  const cleanedSpaceData = {
+    ...args,
+    name: nameResult,
+    logoUrl: logoResult,
+    website: websiteResult,
+    admins: adminsResult,
+  };
+
+  return cleanedSpaceData;
+}
+
+export const createSpace = async (req: Request, res: Response, next: NextFunction) => {
+
+  try {
+    const args = req.body as MutateSpaceData;
+
+    await processSpaceData(args).then(createDbSpace);
+
+    res.send({ success: true }).status(200)
+
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+
+}
+
+export const editSpace = async (req: ContexedRequest, res: Response, next: NextFunction) => {
+
+  try {
+    const args = req.body as MutateSpaceData;
+
+    const user = await authorizationController.getUser(req.context)
+    if (!user) throw new AuthorizationError('UNAUTHORIZED')
+
+    const result = await processSpaceData(args);
+    await updateDbSpace(result, user);
+
+    res.send({ success: true }).status(200)
+
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+
+}

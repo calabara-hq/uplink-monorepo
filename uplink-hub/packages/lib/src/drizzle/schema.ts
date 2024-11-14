@@ -399,7 +399,11 @@ export const zoraEditionRelations = relations(zoraEditions, ({ one, many }) => (
     mints: many(editionMints),
 }));
 
-export const contestsRelations = relations(contests, ({ many }) => ({
+export const contestsRelations = relations(contests, ({ one, many }) => ({
+    space: one(spaces, {
+        fields: [contests.spaceId],
+        references: [spaces.id]
+    }),
     rewards: many(rewards),
     submitterRestrictions: many(submitterRestrictions),
     votingPolicy: many(votingPolicy),

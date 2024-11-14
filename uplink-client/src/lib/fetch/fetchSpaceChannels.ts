@@ -1,7 +1,16 @@
+import { ChainId } from "@/types/chains";
 import { Channel } from "@/types/channel";
+import { LegacyContest } from "@/types/contest";
 
-const fetchSpaceChannels = async (spaceName: string): Promise<Array<Channel>> => {
-    const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/space_channels?spaceName=${spaceName}`, {
+
+export type SpaceChannels = {
+    finiteChannels: Array<Channel>;
+    infiniteChannels: Array<Channel>;
+    legacyContests: Array<LegacyContest>;
+}
+
+const fetchSpaceChannels = async (spaceName: string, chainId: ChainId): Promise<SpaceChannels> => {
+    const data = await fetch(`${process.env.NEXT_PUBLIC_HUB_URL}/v2/space_channels?spaceName=${spaceName}&chainId=${chainId}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

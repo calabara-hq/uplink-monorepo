@@ -2,6 +2,15 @@ import { Context, schema } from "lib";
 import { Request } from "express";
 import { DeferredTokenIntentWithSignature } from "@tx-kit/sdk";
 import { IChannel, IToken } from "@tx-kit/sdk/subgraph";
+import { Address } from "viem";
+
+export type MutateSpaceData = {
+    spaceId?: string;
+    name: string;
+    logoUrl: string;
+    website: string;
+    admins: Array<Address>;
+}
 
 export interface ContexedRequest<T = any> extends Request {
     context: Context;

@@ -1,8 +1,7 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { createWeb3Client } from '@/lib/viem'; // adjust the import path as necessary
 import debounce from 'lodash/debounce';
 import { Address } from 'viem';
-import { normalize } from 'viem/ens';
 
 // Create a Web3 client instance
 const client = createWeb3Client(1);

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { DetailsSkeleton } from "@/ui/ContestDetails/ContestDetails";
+import { DetailsSkeleton } from "@/app/(legacy)/contest/components/ContestDetails";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../DesignKit/Tabs";
 import { useFiniteTransportLayerState } from "@/hooks/useFiniteTransportLayerState";
 import { ContractID } from "@/types/channel";

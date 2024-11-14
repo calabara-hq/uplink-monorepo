@@ -1,3 +1,5 @@
+import { Space } from "./space";
+import { Submission } from "./submission";
 import { IToken } from "./token";
 import type { OutputData } from "@editorjs/editorjs";
 
@@ -152,8 +154,6 @@ export const isWeightedVotingStrategy = (votingStrategy: VotingStrategy): voting
   return votingStrategy.strategyType === 'weighted';
 }
 
-//
-
 export type ContestState = "pending" | "submitting" | "voting" | "closed";
 
 export type ContestPromptData = {
@@ -162,7 +162,7 @@ export type ContestPromptData = {
   body: OutputData;
 }
 
-export type ReadableContest = {
+export type LegacyContest = {
   id: string;
   chainId: number;
   spaceId: string;
@@ -176,4 +176,8 @@ export type ReadableContest = {
   submitterRewards: Array<SubmitterReward>;
   voterRewards: Array<VoterReward>;
   votingPolicy: Array<VotingStrategy>;
+  submissions: Array<Submission>;
+  space: Space;
 };
+
+export type LegacyContestWithPrompt = LegacyContest & { promptData: ContestPromptData };

@@ -19,7 +19,7 @@ import { TbLoader2 } from "react-icons/tb";
 import toast from "react-hot-toast";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 import { ChainId } from "@/types/chains";
-import { ExpandSection } from "../ContestDetails/client";
+import { ExpandSection } from "../../app/(legacy)/contest/[id]/client";
 
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
