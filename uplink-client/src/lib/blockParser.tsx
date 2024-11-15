@@ -3,7 +3,7 @@ import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 import type { OutputData } from "@editorjs/editorjs";
 import React, { useEffect } from "react";
 import Output, { LinkToolOutput, ListOutput, ParagraphOutput } from 'editorjs-react-renderer';
-import OptimizedImage from "@/lib/OptmizedImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 
 const createLinks = (text: string): string => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;

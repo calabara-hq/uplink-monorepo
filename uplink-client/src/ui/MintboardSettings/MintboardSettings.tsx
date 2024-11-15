@@ -313,8 +313,8 @@ export const MintboardSettings = ({
             {/*<-- metadata -->*/}
             <div className="flex flex-col gap-2 bg-base-200 w-full p-6 rounded-lg border border-border">
                 <h1 className="text-xl font-bold text-t1">Details</h1>
-                <FormInput inputType="text" label="Title" value={state.title} placeholder={"Based Management Interns"} onChange={(e) => setField("title", e.target.value)} error={state.errors?.title?._errors} />
-                <TextArea value={state.description} label={"Description"} placeholder={"blah blah blah"} onChange={(e) => setField("description", e.target.value)} error={state.errors?.description?._errors} />
+                <FormInput inputType="text" label="Title" value={state.title} placeholder={"Based Management Interns"} onChange={(e) => setField("title", e.target.value)} error={state.errors?.title?._errors?.[0]} />
+                <TextArea value={state.description} label={"Description"} placeholder={"blah blah blah"} onChange={(e) => setField("description", e.target.value)} error={state.errors?.description?._errors?.[0]} />
             </div>
 
             <div className="flex flex-col gap-6 bg-base-200 w-full p-6 rounded-lg border border-border">
@@ -336,8 +336,8 @@ export const MintboardSettings = ({
                         <>
                             <FeesTable>
 
-                                <FormInput label="Space Treasury" styleOverrides={'max-w-sm'} inputType="text" value={state.channelTreasury} placeholder={"0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"} onChange={(e) => setField("channelTreasury", e.target.value)} error={state.errors?.channelTreasury?._errors} />
-                                <FormInput label="Mint Price (ETH)" inputType="number" styleOverrides={'max-w-[10rem] text-center'} value={state.ethMintPrice} placeholder={"0.01"} onChange={(e) => setField("ethMintPrice", asPositiveFloat(e.target.value, 8))} error={state.errors?.ethMintPrice?._errors} />
+                                <FormInput label="Space Treasury" styleOverrides={'max-w-sm'} inputType="text" value={state.channelTreasury} placeholder={"0xedcC867bc8B5FEBd0459af17a6f134F41f422f0C"} onChange={(e) => setField("channelTreasury", e.target.value)} error={state.errors?.channelTreasury?._errors?.[0]} />
+                                <FormInput label="Mint Price (ETH)" inputType="number" styleOverrides={'max-w-[10rem] text-center'} value={state.ethMintPrice} placeholder={"0.01"} onChange={(e) => setField("ethMintPrice", asPositiveFloat(e.target.value, 8))} error={state.errors?.ethMintPrice?._errors?.[0]} />
                                 <ERC20MintPriceInput state={state} setField={setField} />
 
                                 <div className="w-full bg-base-200 h-0.5" />
@@ -347,31 +347,31 @@ export const MintboardSettings = ({
                                     label={"Creator Percentage"}
                                     placeholder={"60%"}
                                     onChange={(e) => setField("creatorPercentage", asPositiveFloat(e.target.value, 2))}
-                                    error={state.errors?.creatorPercentage?._errors} />
+                                    error={state.errors?.creatorPercentage?._errors?.[0]} />
                                 <FeeRow
                                     value={state.channelPercentage}
                                     label={"Space Treasury Percentage"}
                                     placeholder={"10%"}
                                     onChange={(e) => setField("channelPercentage", asPositiveFloat(e.target.value, 2))}
-                                    error={state.errors?.channelPercentage?._errors} />
+                                    error={state.errors?.channelPercentage?._errors?.[0]} />
                                 <FeeRow
                                     value={state.mintReferralPercentage}
                                     label={"Mint Referral Percentage"}
                                     placeholder={"10%"}
                                     onChange={(e) => setField("mintReferralPercentage", asPositiveFloat(e.target.value, 2))}
-                                    error={state.errors?.mintReferralPercentage?._errors} />
+                                    error={state.errors?.mintReferralPercentage?._errors?.[0]} />
                                 <FeeRow
                                     value={state.sponsorPercentage}
                                     label={"Sponsor Percentage"}
                                     placeholder={"10%"}
                                     onChange={(e) => setField("sponsorPercentage", asPositiveFloat(e.target.value, 2))}
-                                    error={state.errors?.sponsorPercentage?._errors} />
+                                    error={state.errors?.sponsorPercentage?._errors?.[0]} />
                                 <FeeRow
                                     value={state.uplinkPercentage}
                                     label={"Protocol Percentage"}
                                     placeholder={"10%"}
                                     onChange={(e) => setField("uplinkPercentage", asPositiveFloat(e.target.value, 2))}
-                                    error={state.errors?.uplinkPercentage?._errors} />
+                                    error={state.errors?.uplinkPercentage?._errors?.[0]} />
                             </FeesTable>
                             {state.errors?.feePercentages?._errors && (
                                 <Label>

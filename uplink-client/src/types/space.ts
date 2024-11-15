@@ -1,4 +1,3 @@
-import { MintBoard } from "./mintBoard";
 import { IToken } from "./token";
 
 export type Admin = {

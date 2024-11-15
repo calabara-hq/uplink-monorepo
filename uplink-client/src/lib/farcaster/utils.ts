@@ -1,16 +1,24 @@
 import { FrameRequest, MockFrameRequest, FrameValidationResponse, FrameMetadataHtmlResponse } from "./types";
 import { neynarFrameValidation } from "./neynar";
+import probe from "probe-image-size";
 
-export const calculateImageAspectRatio = async (url: string) => {
+export const calculateImageAspectRatio = async (url: string): Promise<string> => {
     try {
-        const fileInfo = await fetch(`https://res.cloudinary.com/drrkx8iye/image/fetch/fl_getinfo/${url}`).then(res => res.json())
-        const { output } = fileInfo;
-        if (output.width / output.height > 1.45) return "1.91:1";
-        return "1:1"
+        const fileInfo = await probe(url);
+        const ratio = fileInfo.width / fileInfo.height;
+
+        if (ratio > 1.45) {
+            // Landscape: Width is greater than height
+            return "1.91:1";
+        }
+        // Square or portrait: Height is equal to or greater than width
+        return "1:1";
     } catch (e) {
-        return "1:1"
+        console.error("Error calculating aspect ratio:", e);
+        return "1:1";
     }
-}
+};
+
 
 type FrameMessageOptions =
     | {

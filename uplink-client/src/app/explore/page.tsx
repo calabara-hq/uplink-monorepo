@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
-import OptimizedImage from "@/lib/OptmizedImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 import { SearchSpaces } from "./client";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { Card, CardContent, CardFooter } from "@/ui/DesignKit/Card";

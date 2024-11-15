@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "env:test": "cp .env.test .env",
-    "env:dev": "cp .env.dev .env",
+    "env:dev": "cp .env.prod .env",
     "env:staging": "cp .env.staging .env",
     "env:prod": "cp .env.prod .env",
     "test:unit-lib": "yarn run env:test && cross-env ENV_PATH=./.env dotenv -- yarn workspace lib test",

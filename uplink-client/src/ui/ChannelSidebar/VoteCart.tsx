@@ -1,7 +1,7 @@
 "use client";
 import { useVoteCart } from "@/hooks/useVoteCart";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import OptimizedImage from "@/lib/OptmizedImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 import { ContractID, ChannelTokenWithUserBalance } from "@/types/channel";
 import { HiSparkles, HiTrash } from "react-icons/hi2";
 import { Input } from "../DesignKit/Input";

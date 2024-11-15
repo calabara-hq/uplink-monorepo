@@ -1,7 +1,7 @@
 "use client";;
 import { Space } from "@/types/space";
 import { useEffect, useRef, useState } from "react";
-import OptimizedImage from "@/lib/OptmizedImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 import Link from "next/link";
 import { Input } from "@/ui/DesignKit/Input";
 

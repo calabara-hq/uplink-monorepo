@@ -55,7 +55,7 @@ export type DisplayProps = {
 export const RenderDisplayWithProps = (props: DisplayProps & { displayMode: DisplayMode }) => {
     if (props.displayMode === "modal") return <MintModalDisplay {...props} />
     else if (props.displayMode === "expanded") return <MintExpandedDisplay {...props} />
-    else if (props.displayMode === "contest-modal") return <MintContestDisplay {...props} />
+    //else if (props.displayMode === "contest-modal") return <MintContestDisplay {...props} />
     else if (props.displayMode === "contest-expanded") return <ContestExpandedDisplay {...props} />
 
     return null
@@ -69,62 +69,6 @@ const LinkRenderer = (props: any) => {
         </a>
     )
 }
-
-
-export const MintContestDisplay = ({ token,
-    chainId,
-    creator,
-    metadata,
-    fees,
-    mintToken,
-    setMintToken,
-    isMintPeriodOver,
-    saleEnd,
-    totalMinted,
-    maxSupply,
-    handleSubmit,
-    isTxPending,
-    isTxSuccessful,
-    txHash,
-    txStatus,
-    setIsModalOpen,
-    handleShare
-}: DisplayProps) => {
-
-    return null;
-
-    // return (
-    //     <React.Fragment>
-    //         <div className="flex flex-col gap-2 relative">
-    //             <div className="grid grid-cols-[85%_15%] items-start">
-    //                 <p className="line-clamp-3 font-bold text-lg break-words ">{metadata.name}</p>
-    //                 <Button variant="ghost" className="ml-auto" onClick={() => setIsModalOpen(false)}><MdOutlineCancelPresentation className="w-6 h-6 text-t2" /></Button>
-    //             </div>
-    //             <div className="flex flex-col gap-4 bg-black ">
-    //                 <div className="flex gap-2 items-center">
-    //                     <div className="flex gap-2 items-center text-sm text-t2 bg-base rounded-lg p-1 w-fit">
-    //                         <Avatar address={creator} size={28} />
-    //                         <AddressOrEns address={creator} />
-    //                     </div>
-    //                     <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Share</button>
-    //                     <button className="btn btn-warning bg-opacity-40 text-warning btn-sm normal-case">Vote</button>
-    //                 </div>
-    //                 <div className="flex items-center justify-center rounded-lg p-1 relative w-full  m-auto">
-    //                     <RenderMintMedia imageURI={metadata.image || ""} animationURI={metadata.animation || ""} />
-    //                 </div>
-
-    //                 <div className="prose">
-    //                     <RenderMarkdown content={metadata.description} />
-    //                 </div>
-    //             </div>
-    //         </div>
-
-    //         {/* <div className="absolute w-[400px] h-[400px] right-0 top-0 bg-green-200">hey</div> */}
-    //     </React.Fragment>
-    // )
-}
-
-
 
 export const ContestExpandedDisplay = ({
     token,

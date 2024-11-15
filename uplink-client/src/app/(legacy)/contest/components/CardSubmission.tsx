@@ -12,7 +12,7 @@ import { ParseThread } from "@/lib/threadParser";
 import { RenderInteractiveVideoWithLoader } from "@/ui/VideoPlayer";
 import { Decimal } from "decimal.js";
 import formatDecimal from "@/lib/formatDecimal";
-import OptimizedImage from "@/lib/OptmizedImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: false,

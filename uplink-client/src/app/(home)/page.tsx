@@ -13,7 +13,7 @@ import { ChainLabel } from "@/ui/ChainLabel/ChainLabel";
 import { RenderMintMedia } from "@/ui/Token/MintUtils";
 import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 import { MdAccessibility, MdDashboardCustomize, MdGroups } from "react-icons/md";
-import OptimizedImage from "@/lib/OptmizedImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 
 export const dynamic = 'force-static';
 export const runtime = 'nodejs';

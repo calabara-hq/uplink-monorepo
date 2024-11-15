@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { HiCheckBadge, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { RenderStandardVideoWithLoader } from "../VideoPlayer";
-import OptimizedImage from "@/lib/OptmizedImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 import { LuMinusSquare, LuPlusSquare } from "react-icons/lu";
 import { Address, formatEther, maxUint40 } from "viem";
 import { PiInfinity } from "react-icons/pi";
@@ -108,6 +108,10 @@ export const RenderMintMedia = ({ imageURI, animationURI, size = "sm" }: { image
     const gatewayImageURI = parseIpfsUrl(imageURI).gateway
     const gatewayAnimationURI = parseIpfsUrl(animationURI).gateway
 
+    const width = size === "sm" ? 500 : 1000;
+    const height = size === "sm" ? 300 : 800;
+
+
     if (gatewayAnimationURI) {
         return (
             <RenderStandardVideoWithLoader videoUrl={gatewayAnimationURI} posterUrl={gatewayImageURI} />
@@ -121,8 +125,8 @@ export const RenderMintMedia = ({ imageURI, animationURI, size = "sm" }: { image
                 alt="post media"
                 sizes={size === "sm" ? "30vw" : "50vw"}
                 className={`w-full h-auto max-w-full ${size === "sm" ? "max-h-96" : "max-h-[700px]"} object-contain rounded-lg `}
-                width={500}
-                height={300}
+                width={width}
+                height={height}
             />
         )
     }

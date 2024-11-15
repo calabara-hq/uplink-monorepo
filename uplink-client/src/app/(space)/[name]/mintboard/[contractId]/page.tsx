@@ -2,7 +2,7 @@ import fetchChannel from '@/lib/fetch/fetchChannel';
 import fetchSingleSpace from '@/lib/fetch/fetchSingleSpace';
 import { fetchPopularTokens, fetchTokenIntents, fetchTokensV1, fetchTokensV2 } from '@/lib/fetch/fetchTokensV2';
 import { parseIpfsUrl } from '@/lib/ipfs';
-import OptimizedImage from '@/lib/OptmizedImage';
+import OptimizedImage from '@/lib/OptimizedImage';
 import SwrProvider from '@/providers/SwrProvider';
 import { Boundary } from '@/ui/Boundary/Boundary';
 import Link from 'next/link';

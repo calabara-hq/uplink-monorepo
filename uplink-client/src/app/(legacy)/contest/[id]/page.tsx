@@ -4,7 +4,7 @@ import {
 import { Suspense } from "react";
 import fetchLegacyContest from "@/lib/fetch/fetchLegacyContest";
 import Link from "next/link";
-import OptimizedImage from "@/lib/OptmizedImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 import { ChannelStateLabel } from "@/ui/ChannelSidebar/SidebarUtils";
 import ExpandableTextSection from "@/ui/ExpandableTextSection/ExpandableTextSection";
 import ParseBlocks from "@/lib/blockParser";

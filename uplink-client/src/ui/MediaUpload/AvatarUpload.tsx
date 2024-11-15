@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
 import { HiPhoto } from 'react-icons/hi2';
-import OptimizedImage from "@/lib/OptmizedImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 import { Input } from '../DesignKit/Input';
 import { Label } from '../DesignKit/Label';
 import { useDropzone } from 'react-dropzone';

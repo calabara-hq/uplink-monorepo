@@ -3,7 +3,7 @@ import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import Image from "next/image";
 import sanitizeHtml from "sanitize-html";
-import OptimizedImage from "@/lib/OptmizedImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 const createLinks = (text: string): string => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const twitterRegex = /([^\S]|^)@(\w+)/gi;

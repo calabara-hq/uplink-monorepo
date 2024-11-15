@@ -7768,6 +7768,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/needle@npm:*":
+  version: 3.3.0
+  resolution: "@types/needle@npm:3.3.0"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/bffc38fbc765b489e110650eb581495c912a18ad6592802712e4d45ec43875461818353aec18408e2317556dd3d8f13ba6c84f32be291c548025a1a3c7d6e0d4
+  languageName: node
+  linkType: hard
+
 "@types/nlcst@npm:^2.0.0":
   version: 2.0.3
   resolution: "@types/nlcst@npm:2.0.3"
@@ -7848,6 +7857,16 @@ __metadata:
   version: 1.0.3
   resolution: "@types/pretty-hrtime@npm:1.0.3"
   checksum: 10c0/e4c22475c588be982b398dee9ac0b05b21078bc26581819290a4901c5b269bcaa04cae0e61e012d412e811b0897c9dab316db064208914df2f0ed0960fc5306b
+  languageName: node
+  linkType: hard
+
+"@types/probe-image-size@npm:^7":
+  version: 7.2.5
+  resolution: "@types/probe-image-size@npm:7.2.5"
+  dependencies:
+    "@types/needle": "npm:*"
+    "@types/node": "npm:*"
+  checksum: 10c0/8ad79a362d354c6ad298f0de9add25c6e04cc574815b9090cd986643282bfc33a9f5e45f41d1c8d29061f313bc06b6643b36533a63b2750121635536bc6eeb1c
   languageName: node
   linkType: hard
 
@@ -11686,7 +11705,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:2.6.9, debug@npm:^2.6.9":
+"debug@npm:2, debug@npm:2.6.9, debug@npm:^2.6.9":
   version: 2.6.9
   resolution: "debug@npm:2.6.9"
   dependencies:
@@ -11716,7 +11735,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^3.2.7":
+"debug@npm:^3.2.6, debug@npm:^3.2.7":
   version: 3.2.7
   resolution: "debug@npm:3.2.7"
   dependencies:
@@ -15551,7 +15570,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:0.4.24":
+"iconv-lite@npm:0.4.24, iconv-lite@npm:^0.4.4":
   version: 0.4.24
   resolution: "iconv-lite@npm:0.4.24"
   dependencies:
@@ -18960,6 +18979,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"needle@npm:^2.5.2":
+  version: 2.9.1
+  resolution: "needle@npm:2.9.1"
+  dependencies:
+    debug: "npm:^3.2.6"
+    iconv-lite: "npm:^0.4.4"
+    sax: "npm:^1.2.4"
+  bin:
+    needle: ./bin/needle
+  checksum: 10c0/65a7eaeaf4ca3410de492957474592af9838e02875273d9232ff6cff331393c58a95e48c592bd9a05f575e5bb9b08543d6cfd19eb96595dbd3d7da2c5fe1accb
+  languageName: node
+  linkType: hard
+
 "negotiator@npm:0.6.3, negotiator@npm:^0.6.3":
   version: 0.6.3
   resolution: "negotiator@npm:0.6.3"
@@ -20626,6 +20658,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"probe-image-size@npm:^7.2.3":
+  version: 7.2.3
+  resolution: "probe-image-size@npm:7.2.3"
+  dependencies:
+    lodash.merge: "npm:^4.6.2"
+    needle: "npm:^2.5.2"
+    stream-parser: "npm:~0.3.1"
+  checksum: 10c0/bebe3b050889794565b66ea9749cb21fee4f3e99fea41a328e39f2929f2432ebb50ac974148c35c66dec5becc849b3185a7a6f39d3ff75247e8be0a2759c9627
+  languageName: node
+  linkType: hard
+
 "proc-log@npm:^4.1.0, proc-log@npm:^4.2.0":
   version: 4.2.0
   resolution: "proc-log@npm:4.2.0"
@@ -22231,6 +22274,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sax@npm:^1.2.4":
+  version: 1.4.1
+  resolution: "sax@npm:1.4.1"
+  checksum: 10c0/6bf86318a254c5d898ede6bd3ded15daf68ae08a5495a2739564eb265cd13bcc64a07ab466fb204f67ce472bb534eb8612dac587435515169593f4fffa11de7c
+  languageName: node
+  linkType: hard
+
 "saxes@npm:^6.0.0":
   version: 6.0.0
   resolution: "saxes@npm:6.0.0"
@@ -22973,6 +23023,15 @@ __metadata:
     readable-stream: "npm:^3.6.0"
     xtend: "npm:^4.0.2"
   checksum: 10c0/f128fb8076d60cd548f229554b6a1a70c08a04b7b2afd4dbe7811d20f27f7d4112562eb8bce86d72a8691df3b50573228afcf1271e55e81f981536c67498bc41
+  languageName: node
+  linkType: hard
+
+"stream-parser@npm:~0.3.1":
+  version: 0.3.1
+  resolution: "stream-parser@npm:0.3.1"
+  dependencies:
+    debug: "npm:2"
+  checksum: 10c0/585508801423bd6c53f6dda9d78e4b743a08ab72e8e2680431fa855ef950e59c849ec2838f2a00c59af655ff8463e90f660f9169a816e63a3ca159cf713bae5c
   languageName: node
   linkType: hard
 
@@ -24841,6 +24900,7 @@ __metadata:
     "@tx-kit/hooks": "npm:^0.6.4"
     "@tx-kit/sdk": "npm:^0.5.3"
     "@types/node": "npm:^20"
+    "@types/probe-image-size": "npm:^7"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
     "@types/react-lazyload": "npm:^3"
@@ -24885,6 +24945,7 @@ __metadata:
     popmotion: "npm:^11.0.5"
     postcss: "npm:^8"
     postcss-loader: "npm:^7.0.2"
+    probe-image-size: "npm:^7.2.3"
     react: "npm:^18"
     react-day-picker: "npm:^8.9.1"
     react-dom: "npm:^18"

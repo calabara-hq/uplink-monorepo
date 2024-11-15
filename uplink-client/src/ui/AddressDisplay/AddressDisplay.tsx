@@ -2,7 +2,7 @@
 import { User } from "@/types/user";
 import Noggles from "../Noggles/Noggles";
 import { Session } from "@/providers/SessionProvider";
-import OptimizedImage from "@/lib/OptmizedImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper"
 import { useWalletDisplayText } from "@/hooks/useWalletDisplay";
 import { useEffect } from "react";

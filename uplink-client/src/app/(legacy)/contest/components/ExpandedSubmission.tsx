@@ -1,6 +1,6 @@
 // Render the submission in a large format. This is used for modals and the submission page.
 import type { Submission } from "@/types/submission";
-import OptimizedImage from "@/lib/OptmizedImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 const ParseBlocks = dynamic(() => import("@/lib/blockParser"), {
   ssr: false,
   loading: () => (

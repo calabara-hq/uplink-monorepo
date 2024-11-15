@@ -1,13 +1,18 @@
 "use client"
 
 import { useSession } from "@/providers/SessionProvider";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Channel, ChannelToken, ChannelTokenIntent, ChannelTokenV1, concatContractID, doesChannelHaveFees, isTokenIntent, isTokenV2Onchain } from "@/types/channel";
-import { useAccount, useChainId, useWalletClient } from "wagmi";
+import { useChainId, useWalletClient } from "wagmi";
 import toast from "react-hot-toast";
-import { Address, Chain, erc20Abi, maxUint40, parseEther, zeroAddress } from "viem";
+import { Address, parseEther, zeroAddress } from "viem";
 import { NATIVE_TOKEN } from "@tx-kit/sdk";
-import { useSponsorTokenWithETH, useMintTokenBatchWithETH, useApproveERC20, useMintTokenBatchWithERC20, useSponsorTokenWithERC20 } from "@tx-kit/hooks";
+import {
+    useSponsorTokenWithETH,
+    useMintTokenBatchWithETH,
+    useMintTokenBatchWithERC20,
+    useSponsorTokenWithERC20,
+} from "@tx-kit/hooks";
 import { useMintTokenV1 } from "@/hooks/useMintTokenV1";
 import { calculateSaleEnd, FeeStructure, isMintPeriodOver, ShareModalContent } from "./MintUtils";
 import { DisplayMode, RenderDisplayWithProps } from "./MintableTokenDisplay";

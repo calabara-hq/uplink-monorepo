@@ -1,9 +1,8 @@
-import { calculateImageAspectRatio } from "@/lib/farcaster/utils";
 import fetchChannel from "@/lib/fetch/fetchChannel";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { fetchSingleTokenIntent, fetchSingleTokenV2 } from "@/lib/fetch/fetchTokensV2";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import OptimizedImage from "@/lib/OptmizedImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 import { ContractID } from "@/types/channel";
 import { Button } from "@/ui/DesignKit/Button";
 import { MintTokenSwitch } from "@/ui/Token/MintToken";
@@ -23,14 +22,9 @@ export async function generateMetadata({
     const { name: spaceName, contractId, postId } = params
 
     const isIntent = searchParams?.intent ? true : false
-    const referral = searchParams?.referrer ?? ""
-
-    const channel = await fetchChannel(contractId);
     const token = isIntent ? await fetchSingleTokenIntent(contractId, postId) : await fetchSingleTokenV2(contractId, postId)
 
     const author = token.author
-
-    const aspect = await calculateImageAspectRatio(parseIpfsUrl(token.metadata.image).gateway)
 
     // const fcMetadata: Record<string, string> = {
     //     "fc:frame": "vNext",
@@ -168,7 +162,6 @@ export default function Page({ params, searchParams }: { params: { name: string,
 
     return (
         <div className="flex flex-row w-10/12 m-auto mt-4 lg:w-5/12 lg:m-0 lg:ml-auto lg:mt-0">
-            {/* <ExpandedPostSkeleton /> */}
             <Suspense fallback={<ExpandedPostSkeleton />}>
                 <Post spaceName={params.name} contractId={params.contractId} postId={params.postId} searchParams={searchParams} />
             </Suspense>

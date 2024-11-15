@@ -4,7 +4,7 @@ import { FaTwitter } from "react-icons/fa";
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { Suspense } from "react";
 import { HiSparkles } from "react-icons/hi2";
-import OptimizedImage from "@/lib/OptmizedImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 import { Boundary } from "@/ui/Boundary/Boundary";
 import { AdminWrapper } from "@/lib/AdminWrapper";
 import { parseIpfsUrl } from "@/lib/ipfs";

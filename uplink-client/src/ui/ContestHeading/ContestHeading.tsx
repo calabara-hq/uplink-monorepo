@@ -1,4 +1,4 @@
-import OptimizedImage from "@/lib/OptmizedImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 
 import Link from "next/link";
 import { ImageWrapper } from "../../app/(legacy)/contest/components/MediaWrapper";
