@@ -269,14 +269,15 @@ const AllSpaces = async () => {
                   <CardTitle className="text-t1 text-lg">{space.displayName}</CardTitle>
                 </CardHeader>
                 <CardContent >
-                  <OptimizedImage
-                    src={space.logoUrl}
-                    width={120}
-                    height={120}
-                    alt="spaceLogo"
-                    className="object-contain rounded-xl m-auto"
-                    sizes={"10vw"}
-                  />
+                  <div className="relative h-[200px] w-[200px]">
+                    <OptimizedImage
+                      src={space.logoUrl}
+                      alt="spaceLogo"
+                      fill
+                      className="object-cover rounded-xl m-auto absolute"
+                      sizes={"10vw"}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </Link>
