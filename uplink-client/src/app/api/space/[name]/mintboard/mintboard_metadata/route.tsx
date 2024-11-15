@@ -1,24 +1,23 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og"
-import fetchMintBoard from "@/lib/fetch/fetchMintBoard";
-import { parseIpfsUrl } from "@/lib/ipfs"
+import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 
 export const runtime = 'edge'
 
 export async function GET(req: NextRequest) {
   const name = req.nextUrl.pathname.split("/")[3];
-  const mintboard = await fetchMintBoard(name);
-  const posts = { mintboard }
+
+  const space = await fetchSingleSpace(name);
 
   const ubuntuBold = fetch(
     new URL('@/styles/fonts/Ubuntu-Bold.ttf', import.meta.url)
   ).then((res) => res.arrayBuffer())
 
-    
-    // for each post, the optimized img can be constructed via parseIpfsUrl(post.edition.imageURI)
-    // this function will return an object with 2 keys
-    // { raw: ipfs://cid, gateway: https://uplink.mypinata.cloud/ipfs/cid }
-  
+
+  // for each post, the optimized img can be constructed via parseIpfsUrl(post.edition.imageURI)
+  // this function will return an object with 2 keys
+  // { raw: ipfs://cid, gateway: https://uplink.mypinata.cloud/ipfs/cid }
+
 
   return new ImageResponse(
     (
@@ -48,13 +47,13 @@ export async function GET(req: NextRequest) {
           }}
         >
           <img
-            src={mintboard.space.logoUrl}
+            src={space.logoUrl}
             alt="logo"
             width="100%"
             height="100%"
             style={{ objectFit: "cover" }}
           />
-          </div>
+        </div>
 
         <div
           style={{
@@ -71,7 +70,7 @@ export async function GET(req: NextRequest) {
             clipPath: "polygon(0% 0%, 75% 0%, 150% 100%, 0% 100%)",
           }}
         >
-          <h1 
+          <h1
             style={{
               width: "100%",
               maxWidth: "50%",
@@ -80,7 +79,7 @@ export async function GET(req: NextRequest) {
               fontSize: 36
             }}
           >
-            Create with {mintboard.space.displayName}
+            Create with {space.displayName}
           </h1>
         </div>
       </div>

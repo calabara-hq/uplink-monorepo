@@ -23,11 +23,7 @@ const server = http.createServer(app);
 
 app.all('*', (req, res) => {
 
-    if (req.url.startsWith('/api/graphql')) {
-        req.headers.host = `localhost:${process.env.SUPERGRAPH_SERVICE_PORT}`;
-        req.url = req.url.replace('/api/graphql', ''); // remove the '/api/graphql' from the path.
-        proxy.web(req, res, { target: `http://localhost:${process.env.SUPERGRAPH_SERVICE_PORT}/` });
-    } else if (req.url.startsWith('/api/auth')) {
+    if (req.url.startsWith('/api/auth')) {
         req.headers.host = `localhost:${process.env.AUTH_SERVICE_PORT}`;
         req.url = req.url.replace('/api/auth', ''); // remove the '/api/auth' from the path.
         proxy.web(req, res, { target: `http://localhost:${process.env.AUTH_SERVICE_PORT}/` });

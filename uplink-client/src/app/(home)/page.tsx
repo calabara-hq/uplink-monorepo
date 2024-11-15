@@ -4,21 +4,19 @@ import Link from "next/link";
 import ArtistPfp from "@/../public/pumey_pfp.jpg";
 import ArtistSubmission from "@/../public/vinnie_noggles.png";
 import landingBg from "@/../public/landing-bg.svg";
-import UplinkImage from "@/lib/UplinkImage";
 import { ContestSubCardA, FeatureCard } from "./feature";
 import { Button } from "@/ui/DesignKit/Button";
 import { FaCircle, FaPalette } from "react-icons/fa";
 import { LuCoins } from "react-icons/lu";
 import { PiInfinity } from "react-icons/pi";
-import { ChainLabel } from "@/ui/ContestLabels/ContestLabels";
+import { ChainLabel } from "@/ui/ChainLabel/ChainLabel";
 import { RenderMintMedia } from "@/ui/Token/MintUtils";
-import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 import { MdAccessibility, MdDashboardCustomize, MdGroups } from "react-icons/md";
+import OptimizedImage from "@/lib/OptimizedImage";
 
 export const dynamic = 'force-static';
 export const runtime = 'nodejs';
-
-
 
 const BannerSection = () => {
   return (
@@ -109,14 +107,13 @@ const BannerSection = () => {
                 <FaCircle className="text-green-500 w-4 h-4" />
               </div>
               <div className="grid grid-cols-[32px_auto] md:grid-cols-[64px_auto] p-4">
-                <UplinkImage
+                <Image
                   src={ArtistPfp}
                   alt="swim shady"
                   width={50}
                   height={50}
                   sizes="10vw"
                   className="rounded-full"
-                  blur={false}
                 />
                 <div className="flex-grow flex flex-col gap-2 ml-4">
                   <p className="text-t1">
@@ -124,13 +121,12 @@ const BannerSection = () => {
                   </p>
                   <div className="flex-grow flex flex-col items-center">
                     <div className="relative w-full">
-                      <UplinkImage
+                      <Image
                         src={ArtistSubmission}
                         alt="twitter submission"
                         className="rounded-lg object-contain"
                         width={600}
                         priority
-                        blur={false}
                       />
                     </div>
                     <div className="text-sm text-t2 italic font-[500] self-start text-left">
@@ -207,7 +203,7 @@ export default async function Page() {
                         <div className="flex items-center text-sm text-t2 bg-base rounded-lg p-1 pr-2 w-fit">
                           <div style={{ width: '28px' }}>
                             <ImageWrapper>
-                              <UplinkImage src="https://uplink.mypinata.cloud/ipfs/QmP4anosdNmt4PdGTF134UxUrxcJq9TCWbTSaMy98jubPP" alt="avatar" className="rounded-lg" fill blur sizes="5vw" />
+                              <OptimizedImage src="https://uplink.mypinata.cloud/ipfs/QmP4anosdNmt4PdGTF134UxUrxcJq9TCWbTSaMy98jubPP" alt="avatar" className="rounded-lg" fill sizes="5vw" />
                             </ImageWrapper>
                           </div>
                           <span className="font-bold italic">LGHT</span>
@@ -298,7 +294,7 @@ export default async function Page() {
 
             <div className="grid grid-cols-[10%_90%] gap-4 border border-border bg-base-100 rounded-lg p-4 shadow-base shadow-lg">
               <div className="w-8 h-8 relative">
-                <UplinkImage
+                <OptimizedImage
                   src="https://uplink.mypinata.cloud/ipfs/QmdGYCdb3kkYXkq9vyhy9GecqycU5FVJmbUvbUxmAv15dh"
                   alt="avatar"
                   fill
@@ -313,7 +309,7 @@ export default async function Page() {
 
             <div className="grid grid-cols-[10%_90%] gap-4 border border-border bg-base-100 rounded-lg p-4 shadow-base shadow-lg">
               <div className="w-8 h-8 relative">
-                <UplinkImage
+                <OptimizedImage
                   src="https://uplink.mypinata.cloud/ipfs/QmarNQN7VJCJjf92TMboiZc7PoNAfPiXd9C9XrDyo2NvjZ"
                   alt="avatar"
                   fill
@@ -334,7 +330,7 @@ export default async function Page() {
             </div>
             <div className="grid grid-cols-[10%_90%] gap-4 border border-border bg-base-100 rounded-lg p-4 shadow-base shadow-lg">
               <div className="w-8 h-8 relative">
-                <UplinkImage
+                <OptimizedImage
                   src="https://uplink.mypinata.cloud/ipfs/QmNg9H3quJXkJREVgnfUgLgdc767cCiwsb34uoP9XHGngE"
                   alt="avatar"
                   fill

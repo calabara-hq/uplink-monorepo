@@ -19,7 +19,7 @@ import { TbLoader2 } from "react-icons/tb";
 import toast from "react-hot-toast";
 import { useTransmissionsErrorHandler } from "@/hooks/useTransmissionsErrorHandler";
 import { ChainId } from "@/types/chains";
-import { ExpandSection } from "../ContestDetails/client";
+import { ExpandSection } from "../../app/(legacy)/contest/[id]/client";
 
 const compact_formatter = new Intl.NumberFormat('en', { notation: 'compact' })
 
@@ -331,11 +331,13 @@ const RewardsSection = ({
 // rewards (need types)
 
 const ContestDetailsV2 = ({
+    spaceName,
     contractId,
     transportConfig,
     creatorLogic,
     minterLogic
 }: {
+    spaceName: string;
     contractId: ContractID;
     transportConfig: IFiniteTransportConfig;
     creatorLogic: ILogicConfig | null;
@@ -343,7 +345,6 @@ const ContestDetailsV2 = ({
 }) => {
 
     const { chainId, contractAddress } = splitContractID(contractId);
-    const { channelState, stateRemainingTime } = useFiniteTransportLayerState(contractId);
     const { settle, status, txHash, error } = useSettleFiniteChannel();
     const isSettling = status === "pendingApproval" || status === "txInProgress";
     const { mutateSwrChannel } = useChannel(contractId);
@@ -388,29 +389,6 @@ const ContestDetailsV2 = ({
                     <LogicDisplay logicObject={minterLogic} chainId={chainId} creditContextLabel="votes" />
                 </DetailSectionWrapper>
             </div>
-            {/* <RenderStateSpecificDialog
-                contestId={contestId}
-                startTime={deadlines.startTime}
-                spaceId={space.id}
-                prompt={promptData}
-            /> */}
-
-            {/* <RenderStatefulChildAndRemainingTime contractId={contractId} childStateWindow={"submitting"}>
-                <Link href={`${contractId}/studio`} passHref>
-                    <Button>Submit</Button>
-                </Link>
-            </RenderStatefulChildAndRemainingTime>
-
-            <RenderStatefulChildAndRemainingTime contractId={contractId} childStateWindow={"complete"}>
-                <Button disabled={isSettling} onClick={handleSettle}>
-                    {isSettling ? (
-                        <div className="flex gap-2 items-center">
-                            <p>Settling</p>
-                            <TbLoader2 className="w-4 h-4 animate-spin" />
-                        </div>
-                    ) : "Settle"}
-                </Button>
-            </RenderStatefulChildAndRemainingTime> */}
 
             <RenderTransportLayerState contractId={contractId}>
                 {({ isLoading, channelState, stateRemainingTime }) => {
@@ -425,7 +403,7 @@ const ContestDetailsV2 = ({
                                     {channelState ? stateRemainingTime : <TbLoader2 className="w-4 h-4 text-t2 animate-spin" />}
                                 </p>
                             </div>
-                            <Link className="w-full" href={`${contractId}/studio`} passHref>
+                            <Link className="w-full" href={`/${spaceName}/contest/${contractId}/studio`} passHref>
                                 <Button className="w-full">Submit</Button>
                             </Link>
                         </div>
@@ -449,7 +427,6 @@ const ContestDetailsV2 = ({
                             <ChannelStateLabel channelState={channelState} />
                         </div>
                     )
-                    return null;
                 }}
             </RenderTransportLayerState>
         </div>

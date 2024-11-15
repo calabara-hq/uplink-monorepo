@@ -1,13 +1,12 @@
-"use client";
+"use client";;
 import { parseIpfsUrl, pinJSONToIpfs, replaceGatewayLinksInString } from '@/lib/ipfs';
 import { z } from 'zod';
 import { CreateTokenConfig } from "@tx-kit/sdk";
 import { validateCreateTokenInputs } from "@tx-kit/sdk/utils";
-import { Address, http, maxUint256 } from 'viem';
-import { useEffect, useReducer, useState } from 'react';
+import { maxUint256 } from 'viem';
+import { useReducer, useState } from 'react';
 import { useCreateToken, useCreateTokenIntent } from "@tx-kit/hooks"
 import { UploadToIpfsTokenMetadata } from '@/types/channel';
-import { useConnect, useConnectors, useWalletClient } from 'wagmi';
 
 const constructTokenMetadata = (input: CreateTokenInputs): UploadToIpfsTokenMetadata => {
 

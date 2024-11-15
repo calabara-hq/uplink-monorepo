@@ -14,41 +14,72 @@ import { formatGqlTokens, TOKEN_FRAGMENT } from "@tx-kit/sdk/subgraph";
 const authorizationController = new AuthorizationController(process.env.REDIS_URL!);
 
 /// query db for channels associated with space
-export const getSpaceChannels = async (req: Request, res: Response, next: NextFunction) => {
-    const spaceName = req.query.spaceName as string
+// export const getSpaceChannels = async (req: Request, res: Response, next: NextFunction) => {
+//     const spaceName = req.query.spaceName as string
 
-    try {
+//     try {
 
-        const dbChannelsResponse = await dbGetChannelsBySpaceName(spaceName)
+//         const dbChannelsResponse = await dbGetChannelsBySpaceName(spaceName)
 
-        const channelsByChainId = getSupportedChains().map(chainId => {
-            const channelIds = dbChannelsResponse.filter(channel => channel.chainId === chainId).map(channel => channel.channelAddress.toLowerCase())
-            return {
-                chainId,
-                channelIds
-            }
-        })
+//         const channelsByChainId = getSupportedChains().map(chainId => {
+//             const channelIds = dbChannelsResponse.filter(channel => channel.chainId === chainId).map(channel => channel.channelAddress.toLowerCase())
+//             return {
+//                 chainId,
+//                 channelIds
+//             }
+//         })
 
-        const channels = await Promise.all(channelsByChainId.map(async ({ chainId, channelIds }) => {
+//         const channels = await Promise.all(channelsByChainId.map(async ({ chainId, channelIds }) => {
 
-            if (channelIds.length === 0) return []
+//             if (channelIds.length === 0) return []
 
-            const { downlinkClient } = clientByChainId(chainId)
-            if (!downlinkClient) return []
+//             const { downlinkClient } = clientByChainId(chainId)
+//             if (!downlinkClient) return []
 
-            let chainChannels = await downlinkClient.getAllChannels({ filters: { where: { id_in: channelIds } } })
+//             let chainChannels = await downlinkClient.getAllChannels({ filters: { where: { id_in: channelIds } } })
 
-            return chainChannels.map(channel => { return { ...channel, chainId } })
+//             return chainChannels.map(channel => { return { ...channel, chainId } })
 
-        })).then(data => data.flat())
+//         })).then(data => data.flat())
 
 
-        res.send(channels).status(200)
+//         res.send(channels).status(200)
 
-    } catch (err) {
-        next(err)
-    }
+//     } catch (err) {
+//         next(err)
+//     }
+// }
+
+
+export const getSpaceChannels = async (spaceName: string) => {
+
+    const dbChannelsResponse = await dbGetChannelsBySpaceName(spaceName)
+
+    const channelsByChainId = getSupportedChains().map(chainId => {
+        const channelIds = dbChannelsResponse.filter(channel => channel.chainId === chainId).map(channel => channel.channelAddress.toLowerCase())
+        return {
+            chainId,
+            channelIds
+        }
+    })
+
+    const channels = await Promise.all(channelsByChainId.map(async ({ chainId, channelIds }) => {
+
+        if (channelIds.length === 0) return []
+
+        const { downlinkClient } = clientByChainId(chainId)
+        if (!downlinkClient) return []
+
+        let chainChannels = await downlinkClient.getAllChannels({ filters: { where: { id_in: channelIds } } })
+
+        return chainChannels.map(channel => { return { ...channel, chainId } })
+
+    })).then(data => data.flat())
+
+    return channels;
+
 }
+
 
 export const getChannelUpgradePath = async (req: Request, res: Response, next: NextFunction) => {
     const contractId = req.query.contractId as string

@@ -1,18 +1,8 @@
-"use client";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/ui/DesignKit/Dialog"
+"use client";;
+import { DialogHeader, DialogTitle } from "@/ui/DesignKit/Dialog";
 import { Label } from "../DesignKit/Label"
 import { Input } from "../DesignKit/Input"
 import { ManagedTokenState } from "@/hooks/useTokenManager"
-import { useState } from "react"
-import { isAddress } from "viem";
 
 export const AddToken = ({ state, setManagedToken }: { state: ManagedTokenState, setManagedToken: (field: string, value: any) => void }) => {
 

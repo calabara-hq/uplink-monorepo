@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       >
 
         <img
-          src={`https://res.cloudinary.com/drrkx8iye/image/fetch/w_1200,q_auto,c_limit,f_auto/${space.logoUrl}`}
+          src={space.logoUrl}
           alt="logo"
           width="100%"
           height="100%"

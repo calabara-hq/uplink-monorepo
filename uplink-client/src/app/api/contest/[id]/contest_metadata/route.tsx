@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og"
-import fetchContest from "@/lib/fetch/fetchContest";
+import fetchLegacyContest from "@/lib/fetch/fetchLegacyContest";
 
 export const runtime = 'edge'
 
 export async function GET(req: NextRequest) {
   const contestId = req.nextUrl.pathname.split("/")[3];
-  const contest = await fetchContest(contestId).then(async (res) => {
+  const contest = await fetchLegacyContest(contestId).then(async (res) => {
     const promptData = await fetch(res.promptUrl).then((res) => res.json());
     return { ...res, prompt: promptData };
   });
@@ -14,20 +14,20 @@ export async function GET(req: NextRequest) {
 
   const RenderPreview = () => {
     const preview_image = contest?.prompt?.coverUrl ?? null
-    if(preview_image){
+    if (preview_image) {
       return (
         <img
-            src={preview_image}
-            alt="logo"
-            width="100%"
-            height="100%"
-            style={{ objectFit: "cover" }}
-          />      
-        )
+          src={preview_image}
+          alt="logo"
+          width="100%"
+          height="100%"
+          style={{ objectFit: "cover" }}
+        />
+      )
     }
     return null;
   }
-  
+
   // const ubuntuBold = fetch(
   //   new URL('@/styles/fonts/Ubuntu-Bold.ttf', import.meta.url)
   // ).then((res) => res.arrayBuffer())
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
             background: "#121212"
           }}
         >
-          <RenderPreview/>
+          <RenderPreview />
         </div>
 
         <div
@@ -90,44 +90,12 @@ export async function GET(req: NextRequest) {
           >
             {contest.prompt.title}
           </h1>
-          
-          {/* <div 
-            style={{
-                display: "flex",
-                alignItems: "center",
-                gap: '10px'
-            }}
-          >
-            <img
-                src={contest.space.logoUrl}
-                alt="logo"
-                width="40px"
-                height="40px"
-                style={{ objectFit: "contain", borderRadius: "100%" }}
-            /> 
-            <p
-                style={{
-                    fontSize: 20,
-                    color: "gray"
-                }}
-            >
-                {contest.space.displayName}
-            </p>
-          </div> */}
         </div>
       </div>
     ),
     {
       width: 1200,
       height: 600,
-      // fonts: [
-      //   {
-      //     name: 'Ubuntu',
-      //     data: await ubuntuBold,
-      //     style: 'normal',
-      //     weight: 400
-      //   }
-      // ]
     }
   );
 }

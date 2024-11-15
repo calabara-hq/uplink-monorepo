@@ -15,7 +15,7 @@ const VoteCart = dynamic(
     }
 )
 
-const StateSpecificSidebar = async ({ contractId }: { contractId: ContractID }) => {
+const StateSpecificSidebar = async ({ spaceName, contractId }: { spaceName: string, contractId: ContractID }) => {
 
     const channel = await fetchChannel(contractId)
 
@@ -29,6 +29,7 @@ const StateSpecificSidebar = async ({ contractId }: { contractId: ContractID }) 
                 contractId={contractId}
                 detailsChild={
                     <ContestDetailsV2
+                        spaceName={spaceName}
                         contractId={contractId}
                         transportConfig={channel.transportLayer.transportConfig as IFiniteTransportConfig}
                         creatorLogic={channel.creatorLogic}
@@ -42,14 +43,14 @@ const StateSpecificSidebar = async ({ contractId }: { contractId: ContractID }) 
 }
 
 
-export default function Layout({ params, children }: { params: { contractId: ContractID }, children: React.ReactNode }) {
+export default function Layout({ params, children }: { params: { name: string, contractId: ContractID }, children: React.ReactNode }) {
 
     return (
         <div className="hidden lg:block sticky top-3 right-0 w-full max-w-[450px] flex-grow h-full">
             <div className="flex flex-col gap-2">
                 {children}
                 <Suspense fallback={<div className="flex flex-col gap-2 rounded-lg w-full"><DetailsSkeleton /></div>}>
-                    <StateSpecificSidebar contractId={params.contractId} />
+                    <StateSpecificSidebar spaceName={params.name} contractId={params.contractId} />
                 </Suspense>
             </div>
         </div>

@@ -2,7 +2,6 @@
 export type SubmissionType = "standard" | "twitter"
 export type SubmissionFormat = "image" | "video" | "text"
 import type { OutputData } from "@editorjs/editorjs";
-import { Edition } from "./edition";
 import { User } from "./user";
 
 export type BaseSubmission = {
@@ -15,7 +14,6 @@ export type BaseSubmission = {
     author: User | null;
     rank: string | null;
     totalVotes: string | null;
-    edition: Edition | null;
 };
 
 export type TwitterSubmission = BaseSubmission & {
@@ -52,8 +50,4 @@ export const isStandardSubmission = (submission: Submission): submission is Stan
 
 export const isTwitterSubmission = (submission: Submission): submission is TwitterSubmission => {
     return submission.type === 'twitter';
-}
-
-export const isNftSubmission = (submission: Submission): boolean => {
-    return Boolean(submission.edition);
 }

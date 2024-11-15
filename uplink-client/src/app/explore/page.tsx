@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Metadata } from "next";
 import fetchSpaces from "@/lib/fetch/fetchSpaces";
 import { Suspense } from "react";
-import UplinkImage from "@/lib/UplinkImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 import { SearchSpaces } from "./client";
 import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { Card, CardContent, CardFooter } from "@/ui/DesignKit/Card";
-import { CardHeader, CardTitle } from "@/ui/Card/Card";
+import { CardHeader, CardTitle } from "@/ui/DesignKit/Card";
 import { fetchTrendingChannels, fetchActiveContests } from "@/lib/fetch/fetchChannel";
 import { Channel, concatContractID } from "@/types/channel";
 import { parseIpfsUrl } from "@/lib/ipfs";
@@ -16,7 +16,7 @@ import { AddressOrEns, Avatar } from "@/ui/AddressDisplay/AddressDisplay";
 import { TokenCard } from "@/ui/Token/Card";
 import { Button } from "@/ui/DesignKit/Button";
 import { HiTrendingUp } from "react-icons/hi";
-import { MdAccessTime, MdAccessTimeFilled } from "react-icons/md";
+import { MdAccessTimeFilled } from "react-icons/md";
 
 export const metadata: Metadata = {
   openGraph: {
@@ -36,78 +36,6 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-
-
-
-// const ContestCard = ({
-//   linkTo,
-//   contest,
-// }: {
-//   contest: ActiveContest;
-//   linkTo: string;
-// }) => {
-//   const { contestState, stateRemainingTime } = calculateContestStatus(
-//     contest.deadlines,
-//     contest.metadata.type,
-//     contest.tweetId
-//   );
-//   return (
-//     <Link
-//       className="animate-scrollInX
-//     cursor-pointer border border-border rounded-2xl p-4 h-full overflow-hidden w-[275px] transform 
-//     transition-transform duration-300 hoverCard will-change-transform no-select"
-//       href={linkTo}
-//       draggable={false}
-//     >
-//       <div className="items-center p-0">
-//         <div className="flex flex-col gap-2 items-center">
-//           <div className="relative w-20 h-20 avatar online">
-//             <UplinkImage
-//               src={contest.space.logoUrl}
-//               alt="spaceLogo"
-//               fill
-//               className="rounded-xl object-cover"
-//               sizes="10vw"
-//             />
-//           </div>
-//           <h1 className="font-semibold text-xl line-clamp-1 overflow-ellipsis">
-//             {contest.space.displayName}
-//           </h1>
-//         </div>
-//         <PromptSummary contest={contest} />
-//         <div className="flex flex-row gap-2">
-//           <CategoryLabel category={contest.metadata.category} />
-//           <StatusLabel status={contestState} />
-//         </div>
-//         <RemainingTimeLabel remainingTime={stateRemainingTime} />
-//       </div>
-//     </Link>
-//   );
-// };
-
-// const ActiveContests = async () => {
-//   const activeContests = await fetchActiveContests();
-//   if (activeContests.length > 0) {
-//     return (
-//       <div className="w-full flex flex-col gap-4">
-//         <div className="flex flex-row gap-2 items-end">
-//           <h1 className="font-bold text-xl text-t1">Active Contests</h1>
-//         </div>
-//         <Swiper listSize={activeContests.length - 1}>
-//           {activeContests.map((contest, index) => (
-//             <div className="snap-start snap-always h-full" key={index}>
-//               <ContestCard
-//                 contest={contest}
-//                 linkTo={`/contest/${contest.id}`}
-//               />
-//             </div>
-//           ))}
-//         </Swiper>
-//       </div>
-//     );
-//   }
-//   return null;
-// };
 
 const TrendingChannels = async () => {
   let trendingChannels = await fetchTrendingChannels(8453)
@@ -130,35 +58,36 @@ const TrendingChannels = async () => {
 
                   <div className="flex flex-col gap-2 items-center justify-between h-full rounded-xl bg-black/[.25] p-4 overflow-hidden">
                     <div className="w-[112px] h-[112px] flex items-center justify-center overflow-hidden rounded-xl">
-                      <div className="relative w-28 h-28">
-                        <UplinkImage
-                          src={logoUrl}
-                          fill
-                          alt="spaceLogo"
-                          className="object-cover rounded-xl"
-                          sizes={"10vw"}
-                        />
-                      </div>
+
+                      <OptimizedImage
+                        src={logoUrl}
+                        width={100}
+                        height={100}
+                        alt="spaceLogo"
+                        className="object-cover rounded-xl"
+                        sizes={"10vw"}
+                      />
+
                     </div>
                     <CardTitle className="text-lg text-center">{channel.tokens[0].metadata.name}</CardTitle>
-
+                    {/* 
                     <CardFooter className="flex flex-col gap-2 p-0">
                       <div className='flex flex-row gap-2 items-center -space-x-4 w-full px-2 overflow-hidden'>
                         {channel.tokens.slice(1, 10).map(token => {
                           return (
-                            <div key={token.id} className='w-7 h-7 relative'>
-                              <UplinkImage
-                                src={parseIpfsUrl(token.metadata.image).gateway}
-                                fill
-                                alt="spaceLogo"
-                                className="object-cover rounded-full"
-                                sizes={"10vw"}
-                              />
-                            </div>
+                            <OptimizedImage
+                              key={token.id}
+                              width={28}
+                              height={28}
+                              src={parseIpfsUrl(token.metadata.image).gateway}
+                              alt="spaceLogo"
+                              className="object-cover rounded-full"
+                              sizes={"10vw"}
+                            />
                           )
                         })}
                       </div>
-                    </CardFooter>
+                    </CardFooter> */}
                   </div>
                 </ColorCards>
               </Link>
@@ -192,7 +121,7 @@ const ActiveContests = async () => {
                   <div className="flex flex-col gap-2 items-center justify-between h-full rounded-xl bg-black/[.25] p-4 overflow-hidden">
                     <div className="w-[112px] h-[112px] flex items-center justify-center overflow-hidden rounded-xl">
                       <div className="relative w-28 h-28">
-                        <UplinkImage
+                        <OptimizedImage
                           src={logoUrl}
                           fill
                           alt="spaceLogo"
@@ -208,7 +137,7 @@ const ActiveContests = async () => {
                         {channel.tokens.slice(1, 10).map(token => {
                           return (
                             <div key={token.id} className='w-7 h-7 relative'>
-                              <UplinkImage
+                              <OptimizedImage
                                 src={parseIpfsUrl(token.metadata.image).gateway}
                                 fill
                                 alt="spaceLogo"
@@ -340,12 +269,12 @@ const AllSpaces = async () => {
                   <CardTitle className="text-t1 text-lg">{space.displayName}</CardTitle>
                 </CardHeader>
                 <CardContent >
-                  <div className="w-[120px] h-[120px] relative m-auto">
-                    <UplinkImage
+                  <div className="relative h-[200px] w-[200px]">
+                    <OptimizedImage
                       src={space.logoUrl}
-                      fill
                       alt="spaceLogo"
-                      className="object-cover rounded-xl"
+                      fill
+                      className="object-cover rounded-xl m-auto absolute"
                       sizes={"10vw"}
                     />
                   </div>

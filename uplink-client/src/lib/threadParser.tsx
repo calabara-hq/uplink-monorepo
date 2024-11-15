@@ -1,9 +1,9 @@
 import type { TwitterSubmission } from "@/types/submission";
-import { ImageWrapper } from "@/ui/Submission/MediaWrapper";
+import { ImageWrapper } from "@/app/(legacy)/contest/components/MediaWrapper";
 import { RenderStandardVideoWithLoader } from "@/ui/VideoPlayer";
 import Image from "next/image";
 import sanitizeHtml from "sanitize-html";
-import UplinkImage from "@/lib/UplinkImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 const createLinks = (text: string): string => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const twitterRegex = /([^\S]|^)@(\w+)/gi;
@@ -43,7 +43,7 @@ export const ParseThread = ({
               ) : (
                 <div className="w-full m-auto pt-4 pb-4">
                   <ImageWrapper>
-                    <UplinkImage
+                    <OptimizedImage
                       key={index}
                       src={tweet.previewAsset}
                       alt="content media"

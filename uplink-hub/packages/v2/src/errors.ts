@@ -44,3 +44,12 @@ export class PaymasterError extends Error {
         Object.setPrototypeOf(this, PaymasterError.prototype);
     }
 }
+
+export class SpaceMutationError extends Error {
+    name = 'SpaceMutationError';
+
+    constructor(m?: string) {
+        super(m);
+        Object.setPrototypeOf(this, SpaceMutationError.prototype);
+    }
+}

@@ -2,14 +2,14 @@ import fetchChannel from '@/lib/fetch/fetchChannel';
 import fetchSingleSpace from '@/lib/fetch/fetchSingleSpace';
 import { fetchPopularTokens, fetchTokenIntents, fetchTokensV1, fetchTokensV2 } from '@/lib/fetch/fetchTokensV2';
 import { parseIpfsUrl } from '@/lib/ipfs';
-import UplinkImage from '@/lib/UplinkImage';
+import OptimizedImage from '@/lib/OptimizedImage';
 import SwrProvider from '@/providers/SwrProvider';
 import { Boundary } from '@/ui/Boundary/Boundary';
 import Link from 'next/link';
 import React, { Suspense } from 'react';
 import { unstable_serialize } from 'swr';
 import { ChannelUpgrades, MintFeeDonut, PostSkeleton, RenderDefaultTokens, RenderPopularTokens, RenderTokenIntents, WhatsNew } from './client';
-import { Channel, ContractID, doesChannelHaveFees, splitContractID } from '@/types/channel';
+import { ContractID, doesChannelHaveFees, splitContractID } from '@/types/channel';
 import { notFound } from 'next/navigation';
 import { MdNewReleases } from 'react-icons/md';
 import { AdminWrapper } from '@/lib/AdminWrapper';
@@ -52,7 +52,7 @@ const BoardInfo = async ({ spaceName, contractId }: { spaceName: string, contrac
                             href={`/${spaceName}`}
                             draggable={false}
                         >
-                            <UplinkImage
+                            <OptimizedImage
                                 src={space.logoUrl}
                                 alt="Org Avatar"
                                 fill

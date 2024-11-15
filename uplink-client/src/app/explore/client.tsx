@@ -1,7 +1,7 @@
 "use client";;
 import { Space } from "@/types/space";
 import { useEffect, useRef, useState } from "react";
-import UplinkImage from "@/lib/UplinkImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 import Link from "next/link";
 import { Input } from "@/ui/DesignKit/Input";
 
@@ -111,7 +111,7 @@ export const SearchSpaces = ({ allSpaces }: { allSpaces: Array<Space> }) => {
                                     className="flex flex-row items-center gap-2 p-2 hover:bg-base cursor-pointer rounded-lg"
                                 >
                                     <div className="relative w-8 h-8 ">
-                                        <UplinkImage
+                                        <OptimizedImage
                                             src={space.logoUrl}
                                             alt={space.name}
                                             className="w-full rounded-full"

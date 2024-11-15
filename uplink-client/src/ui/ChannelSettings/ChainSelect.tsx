@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/ui/DesignKit/Select";
 import { getChainName, supportedChains } from "@/lib/chains/supportedChains";
-import { ChainLabel } from "../ContestLabels/ContestLabels";
+import { ChainLabel } from "../ChainLabel/ChainLabel";
 
 export const ChainSelect = ({ chainId, setChainId }: { chainId: 8453 | 84532, setChainId: (val: 8453 | 84532) => void }) => {
 

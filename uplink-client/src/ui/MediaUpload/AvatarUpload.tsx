@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
 import { HiPhoto } from 'react-icons/hi2';
-import UplinkImage from "@/lib/UplinkImage"
+import OptimizedImage from "@/lib/OptimizedImage"
 import { Input } from '../DesignKit/Input';
 import { Label } from '../DesignKit/Label';
 import { useDropzone } from 'react-dropzone';
@@ -48,7 +48,7 @@ export const AvatarUpload = ({
     });
 
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-full flex flex-col gap-2">
             <Label>{fieldLabel}</Label>
             <div
                 {...getRootProps({
@@ -56,7 +56,7 @@ export const AvatarUpload = ({
                         'relative w-28 h-28 rounded-lg cursor-pointer flex justify-center items-center bg-base-200 hover:bg-base-300 overflow-hidden',
                 })}>
                 {imageObjectURL || initialData ? (
-                    <UplinkImage src={imageObjectURL || initialData} alt="space avatar" fill className="object-contain rounded-lg" />
+                    <OptimizedImage src={imageObjectURL || initialData} alt="space avatar" fill className="object-contain rounded-lg" />
                 ) : (
                     <React.Fragment>
                         <Input {...getInputProps()} />
@@ -65,6 +65,11 @@ export const AvatarUpload = ({
                 )}
 
             </div>
+            {error && (
+                <Label>
+                    <p className="text-error">{error}</p>
+                </Label>
+            )}
         </div>
     )
 
@@ -89,7 +94,7 @@ export const AvatarUpload = ({
     //             onClick={() => imageUploader.current?.click()}
     //         >
     //             {imageObjectURL || initialData ? (
-    //                 <UplinkImage src={imageObjectURL || initialData} alt="space avatar" fill className="object-contain rounded-lg" />
+    //                 <OptimizedImage src={imageObjectURL || initialData} alt="space avatar" fill className="object-contain rounded-lg" />
     //             ) : (
     //                 <div className="flex justify-center items-center w-full h-full">
     //                     <HiPhoto className="w-8 h-8" />

@@ -11,9 +11,8 @@ import { TbLoader2 } from "react-icons/tb";
 // redirect legacy mintboards to v2 mintboards
 
 const Redirect = async ({ spaceName }: { spaceName: string }) => {
-    const channels = await fetchSpaceChannels(spaceName);
-    const mintboards = channels.filter(channel => isInfiniteChannel(channel));
-    const mintboard = mintboards[0];
+    const channels = await fetchSpaceChannels(spaceName, 8453);
+    const mintboard = channels.infiniteChannels[0];
 
     if (!mintboard) notFound();
 

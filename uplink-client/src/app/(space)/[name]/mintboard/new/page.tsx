@@ -17,7 +17,6 @@ const LoadingDialog = () => {
 };
 
 const PageContent = async ({ spaceName }: { spaceName: string }) => {
-    //const mintBoard = await fetchMintBoard(spaceName).catch(() => { return null });
     const space = await fetchSingleSpace(spaceName).catch(() => { return null });
 
     return <BoardForm spaceId={space.id} priorState={null} spaceData={space} />

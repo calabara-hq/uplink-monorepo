@@ -1,7 +1,7 @@
 "use client";
 import { useVoteCart } from "@/hooks/useVoteCart";
 import { parseIpfsUrl } from "@/lib/ipfs";
-import UplinkImage from "@/lib/UplinkImage";
+import OptimizedImage from "@/lib/OptimizedImage";
 import { ContractID, ChannelTokenWithUserBalance } from "@/types/channel";
 import { HiSparkles, HiTrash } from "react-icons/hi2";
 import { Input } from "../DesignKit/Input";
@@ -17,7 +17,7 @@ const CartMedia = ({ token }: { token: ChannelTokenWithUserBalance }) => {
     return (
         <div className="relative w-full h-full m-auto p-2">
             <figure className="absolute inset-0 overflow-hidden ">
-                <UplinkImage
+                <OptimizedImage
                     src={parseIpfsUrl(token.metadata.image).gateway}
                     alt="token media"
                     fill

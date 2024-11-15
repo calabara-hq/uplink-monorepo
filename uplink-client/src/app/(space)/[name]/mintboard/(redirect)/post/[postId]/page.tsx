@@ -8,9 +8,8 @@ import { TbLoader2 } from "react-icons/tb";
 // redirect legacy mintboard posts to v2 mintboard posts
 
 const Redirect = async ({ spaceName, postId }: { spaceName: string, postId: string }) => {
-    const channels = await fetchSpaceChannels(spaceName);
-    const mintboards = channels.filter(channel => isInfiniteChannel(channel));
-    const mintboard = mintboards[0];
+    const channels = await fetchSpaceChannels(spaceName, 8453);
+    const mintboard = channels.infiniteChannels[0];
 
     if (!mintboard) notFound();
 

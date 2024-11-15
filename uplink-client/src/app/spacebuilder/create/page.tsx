@@ -1,18 +1,15 @@
-import SpaceForm from "@/app/spacebuilder/SpaceForm";
+import { SpaceForm } from "@/app/spacebuilder/SpaceForm";
+import { SpaceSettingsStateT } from "@/hooks/useSpaceReducer";
 
 export default function Page({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
 
-  const initialState = {
+  const initialState: SpaceSettingsStateT = {
     name: "",
-    logoBlob: "",
     logoUrl: "",
     website: "",
-    twitter: "",
     admins: ["you", ""],
-    errors: {
-      admins: [],
-    },
+    errors: {},
   };
 
-  return <SpaceForm initialState={initialState} isNewSpace={true} referral={searchParams.referral} />;
+  return <SpaceForm initialState={initialState} />;
 }

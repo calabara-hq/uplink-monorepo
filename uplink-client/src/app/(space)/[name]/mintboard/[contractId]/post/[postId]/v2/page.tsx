@@ -107,7 +107,6 @@ const PageContent = async ({ spaceName, contractId, postId, searchParams }: { sp
         isIntent ? fetchSingleTokenIntent(contractId, postId) : fetchSingleTokenV2(contractId, postId)
     ])
 
-
     return (
         <div className="flex flex-col gap-6">
             <Breadcrumb>

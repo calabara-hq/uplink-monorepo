@@ -1,11 +1,119 @@
-import { DatabaseController, schema } from "lib";
+import { DatabaseController, schema, UserSession } from "lib";
 import dotenv from 'dotenv';
+import { AuthorizationError, SpaceMutationError } from "../errors.js";
+import { MutateSpaceData } from "../types.js";
 
 dotenv.config();
 
 const databaseController = new DatabaseController(process.env.DATABASE_HOST, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD);
 export const db = databaseController.db;
 export const sqlOps = databaseController.sqlOps;
+
+
+/* -------------------------------------------------------------------------- */
+/*                                   SPACE                                    */
+/* -------------------------------------------------------------------------- */
+
+const prepared_dbSingleSpaceByName = db.query.spaces.findFirst({
+    where: ((spaces: schema.dbSpaceType) => sqlOps.eq(spaces.name, sqlOps.placeholder('name'))),
+    with: {
+        admins: true,
+        mintBoard: true
+    }
+}).prepare();
+
+export const dbSingleSpaceByName = async (name: string): Promise<schema.dbSpaceType> => {
+    return prepared_dbSingleSpaceByName.execute({ name })
+}
+
+
+export const createDbSpace = async (spaceData: MutateSpaceData) => {
+
+    const { name, logoUrl, website, admins } = spaceData;
+
+    const space: schema.dbNewSpaceType = {
+        name: name.replaceAll(' ', '').toLowerCase(),
+        created: new Date().toISOString(),
+        displayName: name,
+        logoUrl: logoUrl,
+        website: website,
+        members: 0,
+    }
+
+    try {
+
+        await db.transaction(async (tx) => {
+            const newSpace = await tx.insert(schema.spaces).values(space)
+            const spaceId = parseInt(newSpace.insertId);
+            await tx.insert(schema.admins).values(admins.map(admin => {
+                return {
+                    address: admin,
+                    spaceId: spaceId
+                }
+            }))
+        });
+
+        return;
+
+    } catch (e) {
+        console.log(e)
+        throw new SpaceMutationError('Unable to create space')
+    }
+
+}
+
+
+export const updateDbSpace = async (spaceData: MutateSpaceData, user: UserSession) => {
+    const { spaceId, name, logoUrl, website, admins } = spaceData;
+
+    const checkAdminStatus = (spaceAdmins) => {
+        const isAdmin = spaceAdmins.some((admin) => admin.address.toLowerCase() === user.address.toLowerCase());
+        if (!isAdmin) {
+            throw new AuthorizationError('Updater is not an admin')
+        }
+    }
+
+    const updatedSpace: Partial<schema.dbNewSpaceType> = {
+        name: name.replaceAll(' ', '').toLowerCase(),
+        displayName: name,
+        logoUrl: logoUrl,
+        website: website,
+        members: 0,
+    }
+
+    try {
+        await db.transaction(async (tx) => {
+            // 1. Get space with admins
+            const spaceAdmins = await tx.select({ address: schema.admins.address }).from(schema.admins).where(sqlOps.eq(schema.admins.spaceId, spaceId));
+            // 2. check that current user is an admin
+            checkAdminStatus(spaceAdmins);
+            // 3. Delete all existing admins
+            await Promise.all(
+                spaceAdmins.map((admin) =>
+                    tx.delete(schema.admins).where(sqlOps.eq(schema.admins.spaceId, spaceId))
+                )
+            );
+            // 4. update the space
+            return await tx.transaction(async (tx2) => {
+                await tx2.update(schema.spaces).set(updatedSpace).where(sqlOps.eq(schema.spaces.id, spaceId))
+                await tx2.insert(schema.admins).values(admins.map(admin => {
+                    return {
+                        address: admin,
+                        spaceId: spaceId
+                    }
+                }))
+            })
+        });
+
+        return;
+    } catch (e) {
+        if (e instanceof AuthorizationError) {
+            throw e
+        }
+        throw new SpaceMutationError('Unable to update space')
+    }
+
+}
 
 
 /* -------------------------------------------------------------------------- */
