@@ -8,7 +8,7 @@ import { ColorCards } from "@/ui/DesignKit/ColorCards";
 import { Card, CardContent, CardFooter } from "@/ui/DesignKit/Card";
 import { CardHeader, CardTitle } from "@/ui/DesignKit/Card";
 import { fetchTrendingChannels, fetchActiveContests } from "@/lib/fetch/fetchChannel";
-import { Channel, concatContractID } from "@/types/channel";
+import { Channel, concatContractID, isInfiniteChannel } from "@/types/channel";
 import { parseIpfsUrl } from "@/lib/ipfs";
 import { Space } from "@/types/space";
 import { fetchFeaturedTokens } from "@/lib/fetch/fetchTokensV2";
@@ -38,7 +38,8 @@ export const metadata: Metadata = {
 };
 
 const TrendingChannels = async () => {
-  let trendingChannels = await fetchTrendingChannels(8453)
+  let trendingChannels = await fetchTrendingChannels(8453).then(data => data.filter(isInfiniteChannel))
+  console.log(trendingChannels)
 
   if (trendingChannels.length > 0)
     return (

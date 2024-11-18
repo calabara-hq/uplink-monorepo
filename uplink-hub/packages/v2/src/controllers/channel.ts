@@ -9,7 +9,7 @@ import { parseV2Metadata, splitContractID } from "../utils/utils.js";
 import { Request, Response, NextFunction } from 'express'
 import { ContexedRequest } from "../types.js";
 import { gql } from '@urql/core'
-import { formatGqlTokens, TOKEN_FRAGMENT } from "@tx-kit/sdk/subgraph";
+import { CHANNEL_FRAGMENT, formatGqlTokens, TOKEN_FRAGMENT } from "@tx-kit/sdk/subgraph";
 
 const authorizationController = new AuthorizationController(process.env.REDIS_URL!);
 
@@ -141,12 +141,16 @@ export const getTrendingChannels = async (req: Request, res: Response, next: Nex
                         where: {tokens_: {blockTimestamp_gt: $timestamp}, id_not_in: ["0xa4bc695f857239a0f26c289fee4c936689a0ddad", "0x00c58936afb2b89d6dd8b918c5a44aa1b0a4fdf8"]}
                         limit: 10
                         ) {
-                        id
+                        ...ChannelFragment
+                        transportLayer {
+                            type
+                        }
                         tokens(first: 10) {
                             ...TokenFragment
                         }
                     }   
                     ${TOKEN_FRAGMENT}
+                    ${CHANNEL_FRAGMENT}
                 }`,
             { timestamp: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 7 }) // 1 week
 
