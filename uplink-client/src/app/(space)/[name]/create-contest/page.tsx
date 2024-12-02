@@ -1,6 +1,6 @@
 import fetchSingleSpace from "@/lib/fetch/fetchSingleSpace";
 import { Suspense } from "react";
-import { TempCreateContestV2 } from "./client";
+import { CreateContestV2 } from "./client";
 
 const Skeleton = () => {
   return (
@@ -21,7 +21,7 @@ export default async function Page({ params }: { params: { name: string } }) {
   return (
     <div className="flex gap-6 m-auto w-full lg:w-[90vw]">
       <Suspense fallback={<Skeleton />} >
-        <TempCreateContestV2 space={space} />
+        <CreateContestV2 space={space} />
       </Suspense>
     </div>
   )

@@ -26,7 +26,7 @@ import { ChainSelect } from "@/ui/ChannelSettings/ChainSelect";
 import { ChainId } from "@/types/chains";
 import { Info } from "@/ui/DesignKit/Info";
 import { SectionWrapper } from "@/ui/ChannelSettings/Utils";
-import { Address } from "viem";
+import { Address, zeroAddress } from "viem";
 
 
 const WaitForNewChannel = ({ spaceData, contractId }: { spaceData: Space, contractId: ContractID }) => {
@@ -52,7 +52,7 @@ const WaitForNewChannel = ({ spaceData, contractId }: { spaceData: Space, contra
 
 }
 
-export const TempCreateContestV2 = ({ space }: { space: Space }) => {
+export const CreateContestV2 = ({ space }: { space: Space }) => {
     const { createFiniteChannel, status, txHash, error, channelAddress } = useCreateFiniteChannel();
     const { data: walletClient } = useWalletClient();
     const { data: session } = useSession();
@@ -119,16 +119,20 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
 
             const { data: deadlinesOutput } = validateDeadlines()
 
+            const hasCreatorLogic = submitterLogicOutput.logicContract !== zeroAddress;
+            const hasMinterLogic = voterLogicOutput.logicContract !== zeroAddress;
+            const hasLogic = hasCreatorLogic || hasMinterLogic;
+
             const data: CreateFiniteChannelConfig = {
                 uri: metadataOutput.uri,
                 name: metadata.title,
                 defaultAdmin: walletClient.account.address,
                 managers: space.admins.map((admin) => admin.address),
-                setupActions: submitterLogicOutput.logicContract || voterLogicOutput.logicContract ?
+                setupActions: hasLogic ?
                     [{
-                        logicContract: submitterLogicOutput.logicContract || voterLogicOutput.logicContract,
-                        creatorLogic: submitterLogicOutput.logic,
-                        minterLogic: voterLogicOutput.logic
+                        logicContract: hasCreatorLogic ? submitterLogicOutput.logicContract : hasMinterLogic ? voterLogicOutput.logicContract : zeroAddress,
+                        creatorLogic: submitterLogicOutput?.logic ?? [],
+                        minterLogic: voterLogicOutput?.logic ?? []
                     }]
                     : [],
                 transportLayer: {
@@ -143,6 +147,8 @@ export const TempCreateContestV2 = ({ space }: { space: Space }) => {
                     value: isNativeToken(rewardsOutput.token as Address) ? rewardsOutput.totalAllocation : BigInt(0)
                 }
             }
+
+            console.log(data)
 
             await createFiniteChannel(data);
 
