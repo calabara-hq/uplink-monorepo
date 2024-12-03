@@ -39,7 +39,6 @@
     "@tx-kit/sdk": "^0.5.3",
     "@urql/core": "^5.0.4",
     "@vercel/analytics": "^1.1.1",
-    "@xmtp/frames-validator": "^0.6.2",
     "axios": "^1.6.7",
     "class-variance-authority": "^0.7.0",
     "daisyui": "^2.50.1",
